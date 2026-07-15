@@ -1,0 +1,10 @@
+```yaml
+location:
+date:
+time:
+budget:
+transport:
+group_type:
+weather:
+preferences:
+```

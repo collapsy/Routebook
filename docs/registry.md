@@ -11,6 +11,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-FND-001 | Visão do Produto      | Foundation | Draft  | 0.1.0  | [product-vision.md](./foundation/product-vision.md)         |
 | RB-FND-002 | Princípios do Produto | Foundation | Draft  | 0.1.0  | [product-principles.md](./foundation/product-principles.md) |
 | RB-FND-003 | Escopo do Produto | Foundation | Draft | 0.1.0 | [product-scope.md](./foundation/product-scope.md) |
+| RB-FND-004 | Glossário do Produto | Foundation | Draft | 0.1.0 | [product-glossary.md](./foundation/product-glossary.md) |
 
 ## Status possíveis
 

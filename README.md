@@ -1,2 +1,3 @@
-# Routebook
-Projeto para auxiliar viajantes
+# RouteBook
+
+AI-first travel companion platform.

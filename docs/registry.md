@@ -17,6 +17,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-PRD-003 | Personas | Product | Draft | 0.1.0 | [personas.md](./product/personas.md) |
 | RB-PRD-004 | Jornadas do Usuário | Product | Draft | 0.1.0 | [user-journeys.md](./product/user-journeys.md) |
 | RB-PRD-005 | Casos de Uso | Product | Draft | 0.1.0 | [use-cases.md](./product/use-cases.md) |
+| RB-PRD-006 | Requisitos Funcionais | Product | Draft | 0.1.0 | [functional-requirements.md](./product/functional-requirements.md) |
 
 ## Status possíveis
 

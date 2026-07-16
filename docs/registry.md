@@ -15,6 +15,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-PRD-001 | Visão Geral do Produto | Product | Draft | 0.1.0 | [product-overview.md](./product/product-overview.md) |
 | RB-PRD-002 | Definição do MVP | Product | Draft | 0.1.0 | [mvp-definition.md](./product/mvp-definition.md) |
 | RB-PRD-003 | Personas | Product | Draft | 0.1.0 | [personas.md](./product/personas.md) |
+| RB-PRD-004 | Jornadas do Usuário | Product | Draft | 0.1.0 | [user-journeys.md](./product/user-journeys.md) |
 
 ## Status possíveis
 

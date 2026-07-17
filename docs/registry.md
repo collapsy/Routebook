@@ -33,6 +33,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-DOM-001 | Modelo de Domínio | Domain | Draft | 0.1.0 | [domain-model.md](./domain/domain-model.md) |
 | RB-DOM-002 | Linguagem Ubíqua e Glossário de Domínio | Domain | Draft | 0.1.0 | [ubiquitous-language.md](./domain/ubiquitous-language.md) |
 | RB-DOM-003 | Regras de Negócio e Invariantes | Domain | Draft | 0.1.0 | [business-rules-and-invariants.md](./domain/business-rules-and-invariants.md) |
+| RB-DOM-004 | Eventos de Domínio e Ciclos de Vida | Domain | Draft | 0.1.0 | [domain-events-and-lifecycles.md](./domain/domain-events-and-lifecycles.md) |
+| RB-ARC-001 | Visão Geral da Arquitetura | Architecture | Draft | 0.1.0 | [architecture-overview.md](./architecture/architecture-overview.md) |
+| RB-ARC-002 | Arquitetura de Módulos e Contextos Delimitados | Architecture | Draft | 0.1.0 | [modules-and-bounded-contexts.md](./architecture/modules-and-bounded-contexts.md) |
 
 ## Status possíveis
 

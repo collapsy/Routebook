@@ -3,115 +3,126 @@
 id: RB-DOM-001
 
 title: Modelo de Domínio
-description: Define o modelo conceitual do domínio do RouteBook, incluindo entidades, objetos de valor, agregados, relacionamentos, estados, invariantes, eventos e limites de responsabilidade.
+description: Define o modelo conceitual do domínio do RouteBook, incluindo entidades, objetos de valor, agregados, relacionamentos, estados, invariantes, eventos, limites de consistência e representações diagramáticas oficiais.
 
 document_type: domain
 owner: Domain
 
 status: Draft
-version: "0.1.0"
+version: "0.2.0"
 
 created: "2026-07-17"
-last_updated: null
+last_updated: "2026-07-17"
 
 authors:
 
-- RouteBook Team
+* RouteBook Team
 
 tags:
 
-- domain
-- domain-model
-- ubiquitous-language
-- entities
-- value-objects
-- aggregates
-- invariants
-- ai-first
-- travel-planning
+* domain
+* domain-model
+* ubiquitous-language
+* entities
+* value-objects
+* aggregates
+* invariants
+* diagrams
+* uml
+* mermaid
+* ai-first
+* travel-planning
 
 related_documents:
 
-- RB-CORE-0001
-- RB-CORE-0002
-- RB-CORE-0003
-- RB-CORE-0004
-- RB-PRD-001
-- RB-PRD-002
-- RB-PRD-003
-- RB-PRD-004
-- RB-PRD-005
-- RB-PRD-006
-- RB-PRD-007
-- RB-PRD-008
-- RB-UX-001
-- RB-UX-002
-- RB-UX-003
-- RB-UX-004
-- RB-UX-005
-- RB-UX-006
-- RB-DS-001
-- RB-DS-002
-- RB-DS-003
-- RB-DS-004
+* RB-CORE-0001
+* RB-CORE-0002
+* RB-CORE-0003
+* RB-CORE-0004
+* RB-PRD-001
+* RB-PRD-002
+* RB-PRD-003
+* RB-PRD-004
+* RB-PRD-005
+* RB-PRD-006
+* RB-PRD-007
+* RB-PRD-008
+* RB-UX-001
+* RB-UX-002
+* RB-UX-003
+* RB-UX-004
+* RB-UX-005
+* RB-UX-006
+* RB-DS-001
+* RB-DS-002
+* RB-DS-003
+* RB-DS-004
+* RB-DOM-002
+* RB-DOM-003
+* RB-DOM-004
+* RB-ARC-001
+* RB-ARC-002
 
 prerequisites:
 
-- RB-CORE-0001
-- RB-CORE-0002
-- RB-CORE-0003
-- RB-CORE-0004
-- RB-PRD-001
-- RB-PRD-002
-- RB-PRD-003
-- RB-PRD-004
-- RB-PRD-005
-- RB-PRD-006
-- RB-PRD-007
-- RB-PRD-008
+* RB-CORE-0001
+* RB-CORE-0002
+* RB-CORE-0003
+* RB-CORE-0004
+* RB-PRD-001
+* RB-PRD-002
+* RB-PRD-003
+* RB-PRD-004
+* RB-PRD-005
+* RB-PRD-006
+* RB-PRD-007
+* RB-PRD-008
 
 next_documents:
 
-- RB-DOM-002
-- RB-DOM-003
-- RB-DOM-004
-- RB-ARC-001
-- RB-DATA-001
-- RB-QA-001
+* RB-DOM-002
+* RB-DOM-003
+* RB-DOM-004
+* RB-ARC-001
+* RB-DATA-001
+* RB-QA-001
 
 ai_context:
 priority: critical
 index: true
----
+-----------
 
 # RouteBook — Modelo de Domínio
 
 ## 1. Propósito deste documento
 
-Este documento define o modelo conceitual do domínio do RouteBook.
+Este documento define o modelo conceitual oficial do domínio do RouteBook.
 
-Seu objetivo é estabelecer uma representação comum e consistente dos conceitos permanentes do produto.
+Seu objetivo é estabelecer uma representação comum, consistente e rastreável dos conceitos permanentes utilizados pelo produto.
 
-O modelo deverá orientar:
+O Modelo de Domínio deverá orientar:
 
 * produto;
 * arquitetura;
 * desenvolvimento;
 * dados;
-* IA;
-* UX;
-* QA;
+* inteligência artificial;
+* experiência do usuário;
+* qualidade;
 * documentação;
 * integrações;
 * agentes autônomos;
-* regras de negócio.
+* regras de negócio;
+* contratos;
+* testes.
 
 Este documento define:
 
-* linguagem ubíqua;
+* linguagem de domínio;
 * entidades;
 * objetos de valor;
 * agregados;
+* raízes de agregado;
 * relacionamentos;
 * estados;
 * invariantes;
@@ -120,25 +131,25 @@ Este documento define:
 * limites de consistência;
 * conceitos derivados;
 * regras de identidade;
-* regras de ciclo de vida.
+* regras de ciclo de vida;
+* diagramas conceituais oficiais.
 
 Este documento não define:
 
-* banco de dados;
+* banco de dados físico;
 * tabelas;
 * endpoints;
-* contratos técnicos;
-* classes;
+* payloads;
+* classes de implementação;
 * frameworks;
-* implementação;
 * estratégia de persistência;
 * infraestrutura;
 * provedor de mapas;
-* modelo de IA específico.
+* modelo específico de inteligência artificial.
 
 ---
 
-## 2. Papel do modelo de domínio
+## 2. Papel do Modelo de Domínio
 
 O Modelo de Domínio deverá funcionar como ponte entre:
 
@@ -147,27 +158,73 @@ O Modelo de Domínio deverá funcionar como ponte entre:
 * linguagem da interface;
 * regras de negócio;
 * arquitetura;
-* implementação.
+* dados;
+* implementação;
+* testes;
+* automações;
+* agentes de IA.
 
 Ele deverá reduzir:
 
-* ambiguidade;
+* ambiguidades;
 * sinônimos inconsistentes;
-* duplicação conceitual;
+* duplicações conceituais;
 * regras contraditórias;
 * lógica espalhada;
-* interpretações incorretas por agentes de IA.
+* interpretações incorretas;
+* dependência de modelos externos;
+* acoplamento entre produto e tecnologia.
 
 ---
 
-## 3. Princípios do domínio
+## 3. Autoridade documental
+
+Este documento possui autoridade sobre a estrutura conceitual do domínio.
+
+A precedência documental deverá ser interpretada da seguinte forma:
+
+```mermaid
+flowchart TD
+    Bible["RB-CORE-0004<br/>RouteBook Bible"]
+    Product["Documentação de Produto"]
+    Domain["RB-DOM-001<br/>Modelo de Domínio"]
+    Language["RB-DOM-002<br/>Linguagem Ubíqua"]
+    Rules["RB-DOM-003<br/>Regras e Invariantes"]
+    Events["RB-DOM-004<br/>Eventos e Ciclos de Vida"]
+    Architecture["Documentação de Arquitetura"]
+    Implementation["Implementação"]
+
+    Bible --> Product
+    Bible --> Domain
+    Product --> Domain
+    Domain --> Language
+    Domain --> Rules
+    Domain --> Events
+    Language --> Architecture
+    Rules --> Architecture
+    Events --> Architecture
+    Architecture --> Implementation
+```
+
+### Interpretação
+
+* A RouteBook Bible estabelece os princípios constitucionais.
+* A documentação de Produto define o comportamento desejado.
+* O Modelo de Domínio transforma esse comportamento em conceitos estruturados.
+* Linguagem, regras e eventos detalham o modelo.
+* A Arquitetura define como o modelo será implementado.
+* A implementação não poderá redefinir silenciosamente o domínio.
+
+---
+
+## 4. Princípios do domínio
 
 O modelo deverá preservar os seguintes princípios:
 
 1. A Viagem é o principal contexto de decisão.
-2. O usuário permanece no controle.
+2. O Usuário permanece no controle.
 3. Recomendações não são decisões aplicadas.
-4. Salvar não significa planejar.
+4. Salvar não significa Planejar.
 5. Lugar não significa Atividade.
 6. Proposta não significa Roteiro atual.
 7. Informação estimada não significa informação confirmada.
@@ -177,25 +234,452 @@ O modelo deverá preservar os seguintes princípios:
 11. A Hospedagem é uma referência contextual, não uma obrigação.
 12. O Mapa é uma representação, não o domínio.
 13. Conflitos podem possuir diferentes severidades.
-14. Uma recomendação deve possuir contexto e justificativa.
+14. Uma Recomendação deve possuir contexto e Justificativa.
 15. Alterações estruturais podem invalidar dados derivados.
 16. Conceitos de domínio não devem depender da interface.
 17. Estados derivados não devem ser persistidos sem necessidade.
 18. Agentes de IA devem respeitar as mesmas invariantes.
+19. Objetos externos não definem a identidade interna.
+20. Dados probabilísticos não substituem regras determinísticas.
 
 ---
 
-# Parte I — Linguagem ubíqua
+# Parte I — Visão diagramática do domínio
 
-## 4. Definição
+## 5. Catálogo de diagramas deste documento
+
+| Identificador  | Diagrama                               | Tipo              |
+| -------------- | -------------------------------------- | ----------------- |
+| RB-DGM-DOM-001 | Mapa geral do domínio                  | Flowchart         |
+| RB-DGM-DOM-002 | Modelo conceitual principal            | UML Class Diagram |
+| RB-DGM-DOM-003 | Mapa dos agregados                     | Flowchart         |
+| RB-DGM-DOM-004 | Relação entre Lugar, Salvo e Atividade | Flowchart         |
+| RB-DGM-DOM-005 | Estrutura da Viagem                    | UML Class Diagram |
+| RB-DGM-DOM-006 | Estrutura do Roteiro                   | UML Class Diagram |
+| RB-DGM-DOM-007 | Recomendação e Contexto de Decisão     | UML Class Diagram |
+| RB-DGM-DOM-008 | Proposta e aplicação ao Roteiro        | Flowchart         |
+| RB-DGM-DOM-009 | Conflitos e evidências                 | UML Class Diagram |
+| RB-DGM-DOM-010 | Proveniência e qualidade dos dados     | UML Class Diagram |
+
+---
+
+## 6. RB-DGM-DOM-001 — Mapa geral do domínio
+
+### Objetivo
+
+Representar as principais áreas conceituais do RouteBook e a forma como elas colaboram.
+
+```mermaid
+flowchart LR
+    Identity["Identidade e Acesso"]
+    Trip["Viagem"]
+    Travelers["Viajantes e Preferências"]
+    Places["Lugares"]
+    Saved["Lugares Salvos"]
+    Itinerary["Roteiro"]
+    Mobility["Mobilidade"]
+    Recommendations["Recomendações"]
+    Proposals["Propostas"]
+    Conflicts["Conflitos"]
+    Provenance["Proveniência de Dados"]
+
+    Identity --> Trip
+    Trip --> Travelers
+    Trip --> Saved
+    Trip --> Itinerary
+
+    Places --> Saved
+    Places --> Itinerary
+    Places --> Mobility
+    Places --> Recommendations
+
+    Travelers --> Recommendations
+    Travelers --> Proposals
+    Travelers --> Conflicts
+
+    Itinerary --> Mobility
+    Itinerary --> Recommendations
+    Itinerary --> Proposals
+    Itinerary --> Conflicts
+
+    Mobility --> Recommendations
+    Mobility --> Proposals
+    Mobility --> Conflicts
+
+    Recommendations --> Proposals
+
+    Provenance --> Places
+    Provenance --> Mobility
+    Provenance --> Recommendations
+    Provenance --> Proposals
+    Provenance --> Conflicts
+```
+
+### Interpretação
+
+* A Viagem estabelece o contexto principal.
+* Lugares existem independentemente de uma Viagem específica.
+* Lugares Salvos representam uma relação entre Viagem e Lugar.
+* O Roteiro organiza Atividades dentro da Viagem.
+* Mobilidade produz informações derivadas para planejamento.
+* Recomendações analisam o contexto, mas não alteram o Roteiro.
+* Propostas representam organizações sugeridas.
+* Conflitos avaliam o planejamento atual ou proposto.
+* Proveniência acompanha informações externas, inferidas ou geradas por IA.
+
+### Limitações
+
+Este diagrama:
+
+* não representa cardinalidades;
+* não representa limites transacionais;
+* não representa dependências técnicas;
+* não substitui o Context Map arquitetural.
+
+---
+
+## 7. RB-DGM-DOM-002 — Modelo conceitual principal
+
+### Objetivo
+
+Representar as principais entidades e seus relacionamentos conceituais.
+
+```mermaid
+classDiagram
+    class Account {
+        +AccountId id
+        +AccountStatus status
+    }
+
+    class User {
+        +UserId id
+        +String name
+        +String email
+        +Locale locale
+        +TimeZone timeZone
+    }
+
+    class Trip {
+        +TripId id
+        +String name
+        +TripStatus status
+        +TripPeriod period
+        +Destination destination
+        +TripContextVersion contextVersion
+    }
+
+    class TripParticipant {
+        +TripRole role
+    }
+
+    class Traveler {
+        +TravelerId id
+        +AgeRange ageRange
+        +TravelerType type
+    }
+
+    class Accommodation {
+        +AccommodationId id
+        +AccommodationStatus status
+        +Location location
+    }
+
+    class SavedPlace {
+        +SavedPlaceId id
+        +Instant savedAt
+        +SavedPlaceOrigin origin
+    }
+
+    class Place {
+        +PlaceId id
+        +String name
+        +PlaceOperationalStatus status
+        +Location location
+    }
+
+    class Itinerary {
+        +ItineraryId id
+        +ItineraryVersion version
+    }
+
+    class TripDay {
+        +TripDayId id
+        +LocalDate date
+        +Int position
+    }
+
+    class Activity {
+        +ActivityId id
+        +String title
+        +ActivityStatus status
+        +ActivityFlexibility flexibility
+    }
+
+    class FreePeriod {
+        +FreePeriodId id
+        +FreePeriodMode mode
+    }
+
+    class Recommendation {
+        +RecommendationId id
+        +RecommendationStatus status
+    }
+
+    class ItineraryProposal {
+        +ItineraryProposalId id
+        +ProposalStatus status
+        +ItineraryVersion baseVersion
+    }
+
+    class Conflict {
+        +ConflictId id
+        +ConflictSeverity severity
+        +ConflictStatus status
+    }
+
+    Account "1" --> "1..*" User : possui
+    User "1" --> "0..*" TripParticipant : participa
+    Trip "1" --> "1..*" TripParticipant : autoriza
+
+    Trip "1" --> "1..*" Traveler : possui
+    Trip "1" --> "0..1" Accommodation : utiliza
+    Trip "1" --> "0..*" SavedPlace : mantém
+    Trip "1" --> "1" Itinerary : possui
+    Trip "1" --> "0..*" Recommendation : recebe
+    Trip "1" --> "0..*" ItineraryProposal : recebe
+
+    SavedPlace "*" --> "1" Place : referencia
+
+    Itinerary "1" --> "1..*" TripDay : organiza
+    TripDay "1" --> "0..*" Activity : contém
+    TripDay "1" --> "0..*" FreePeriod : contém
+
+    Activity "0..*" --> "0..1" Place : referencia
+    Itinerary "1" --> "0..*" Conflict : possui
+
+    Recommendation "*" --> "0..1" Place : pode sugerir
+    ItineraryProposal "1" --> "0..*" Conflict : pode possuir
+```
+
+### Interpretação
+
+O diagrama demonstra que:
+
+* Usuário e Viajante são conceitos diferentes.
+* Uma Viagem possui seu próprio conjunto de Viajantes.
+* A Hospedagem é opcional.
+* Um Lugar pode ser Salvo sem ser planejado.
+* Uma Atividade pode existir sem Lugar associado.
+* A Proposta não pertence ao Roteiro atual.
+* Conflitos podem estar relacionados ao Roteiro ou a uma Proposta.
+
+### Regras representadas
+
+* RB-BR-001 — Controle do Usuário.
+* RB-BR-013 — Requisitos mínimos da Viagem.
+* RB-BR-031 — Hospedagem opcional.
+* RB-BR-055 — Unicidade de Lugar Salvo.
+* RB-BR-056 — Salvar não cria Atividade.
+* RB-BR-061 — Um Roteiro atual por Viagem.
+* RB-BR-105 — Separação entre Proposta e Roteiro.
+
+### Limitações
+
+O diagrama é conceitual.
+
+Ele não deve ser utilizado diretamente para:
+
+* gerar banco de dados;
+* definir foreign keys;
+* criar classes de ORM;
+* inferir endpoints;
+* inferir limites de agregados sem consultar o diagrama específico.
+
+---
+
+## 8. RB-DGM-DOM-003 — Mapa dos agregados
+
+### Objetivo
+
+Representar os limites de consistência e as raízes dos principais agregados.
+
+```mermaid
+flowchart TB
+    subgraph TripAggregate["Agregado Trip"]
+        TripRoot["Trip<br/>Raiz do agregado"]
+        Destination["Destination<br/>Objeto de Valor"]
+        TripPeriod["TripPeriod<br/>Objeto de Valor"]
+        Accommodation["Accommodation<br/>Entidade"]
+        Traveler["Traveler<br/>Entidade"]
+        Preferences["Trip Preferences<br/>Objetos de Valor"]
+        SavedPlace["SavedPlace<br/>Entidade"]
+    end
+
+    subgraph ItineraryAggregate["Agregado Itinerary"]
+        ItineraryRoot["Itinerary<br/>Raiz do agregado"]
+        TripDay["TripDay<br/>Entidade"]
+        Activity["Activity<br/>Entidade"]
+        FreePeriod["FreePeriod<br/>Entidade"]
+    end
+
+    subgraph PlaceAggregate["Agregado Place"]
+        PlaceRoot["Place<br/>Raiz do agregado"]
+        PlaceCategory["PlaceCategory<br/>Objeto de Valor"]
+        OpeningHours["OpeningHours<br/>Objeto de Valor"]
+        PriceRange["PriceRange<br/>Objeto de Valor"]
+        PlaceData["Place Information<br/>Valores com Proveniência"]
+    end
+
+    subgraph ProposalAggregate["Agregado ItineraryProposal"]
+        ProposalRoot["ItineraryProposal<br/>Raiz do agregado"]
+        ProposedDay["ProposedDay"]
+        ProposedActivity["ProposedActivity"]
+        ProposalConflict["Proposal Conflict"]
+    end
+
+    TripRoot --> Destination
+    TripRoot --> TripPeriod
+    TripRoot --> Accommodation
+    TripRoot --> Traveler
+    TripRoot --> Preferences
+    TripRoot --> SavedPlace
+
+    ItineraryRoot --> TripDay
+    TripDay --> Activity
+    TripDay --> FreePeriod
+
+    PlaceRoot --> PlaceCategory
+    PlaceRoot --> OpeningHours
+    PlaceRoot --> PriceRange
+    PlaceRoot --> PlaceData
+
+    ProposalRoot --> ProposedDay
+    ProposedDay --> ProposedActivity
+    ProposalRoot --> ProposalConflict
+
+    TripRoot -. "ItineraryId" .-> ItineraryRoot
+    SavedPlace -. "PlaceId" .-> PlaceRoot
+    Activity -. "PlaceId opcional" .-> PlaceRoot
+    ProposalRoot -. "TripId e baseVersion" .-> TripRoot
+    ProposalRoot -. "baseItineraryVersion" .-> ItineraryRoot
+```
+
+### Interpretação
+
+Os agregados não compartilham suas estruturas internas.
+
+Eles se relacionam principalmente por:
+
+* identificadores;
+* comandos;
+* consultas;
+* eventos;
+* snapshots controlados.
+
+### Limites de consistência
+
+Operações normalmente consistentes dentro do agregado:
+
+* validar e alterar o Período da Viagem;
+* adicionar ou remover Viajante;
+* salvar Lugar;
+* adicionar ou mover Atividade;
+* proteger Período Livre;
+* aceitar ou rejeitar uma Proposta.
+
+Operações eventualmente consistentes entre agregados:
+
+* recalcular Distâncias;
+* invalidar Recomendações;
+* reavaliar Conflitos;
+* atualizar dados externos;
+* gerar Propostas.
+
+---
+
+## 9. RB-DGM-DOM-004 — Lugar, Salvo, Planejado e Atividade
+
+### Objetivo
+
+Eliminar a principal ambiguidade conceitual do produto.
+
+```mermaid
+flowchart LR
+    Place["Lugar"]
+    SavedPlace["Lugar Salvo"]
+    Activity["Atividade"]
+    Planned["Lugar Planejado<br/>Estado derivado"]
+    Itinerary["Roteiro"]
+    Trip["Viagem"]
+
+    Trip -->|mantém associação| SavedPlace
+    SavedPlace -->|referencia| Place
+
+    Itinerary -->|contém| Activity
+    Activity -->|pode referenciar| Place
+
+    Activity -->|existência de atividade ativa| Planned
+    Planned -->|classifica| Place
+
+    SaveAction["Salvar Lugar"] --> SavedPlace
+    PlanAction["Adicionar ao Roteiro"] --> Activity
+
+    SavedPlace -. "não cria" .-> Activity
+    Activity -. "não exige" .-> SavedPlace
+```
+
+### Interpretação
+
+Existem quatro conceitos diferentes:
+
+#### Lugar
+
+Ponto de interesse potencialmente relevante.
+
+#### Lugar Salvo
+
+Associação entre uma Viagem e um Lugar preservado para consulta futura.
+
+#### Atividade
+
+Compromisso planejado dentro de um Dia da Viagem.
+
+#### Lugar Planejado
+
+Estado derivado indicando que existe pelo menos uma Atividade ativa associada ao Lugar.
+
+### Estados possíveis
+
+| Salvo | Planejado | Situação                              |
+| ----- | --------- | ------------------------------------- |
+| Não   | Não       | Lugar apenas disponível no Catálogo   |
+| Sim   | Não       | Lugar preservado para avaliação       |
+| Não   | Sim       | Lugar incluído diretamente no Roteiro |
+| Sim   | Sim       | Lugar salvo e presente no Roteiro     |
+
+### Invariantes representadas
+
+* Salvar Lugar não cria Atividade.
+* Adicionar ao Roteiro não exige salvar.
+* Remover dos Salvos não remove Atividade.
+* Remover a última Atividade ativa elimina o estado derivado Planejado.
+* Um mesmo Lugar pode originar várias Atividades.
+
+---
+
+# Parte II — Linguagem ubíqua
+
+## 10. Definição
 
 A linguagem ubíqua é o vocabulário oficial utilizado por todas as áreas do RouteBook.
 
-Os mesmos termos deverão ser utilizados em:
+Os mesmos termos deverão ser empregados em:
 
 * documentação;
 * interface;
-* código conceitual;
+* arquitetura;
+* código de domínio;
+* contratos;
 * testes;
 * eventos;
 * analytics;
@@ -203,47 +687,71 @@ Os mesmos termos deverão ser utilizados em:
 * agentes;
 * suporte.
 
----
+O glossário completo encontra-se em:
 
-## 5. Termos centrais
-
-| Termo                 | Definição                                                |
-| --------------------- | -------------------------------------------------------- |
-| Conta                 | Identidade de acesso ao RouteBook                        |
-| Usuário               | Pessoa que utiliza o RouteBook                           |
-| Viagem                | Contexto principal de planejamento e decisão             |
-| Destino               | Região geográfica principal associada à Viagem           |
-| Hospedagem            | Referência de permanência durante a Viagem               |
-| Viajante              | Pessoa participante da Viagem                            |
-| Perfil do Grupo       | Características agregadas dos Viajantes                  |
-| Preferência           | Informação que influencia personalização                 |
-| Interesse             | Categoria de experiência desejada                        |
-| Restrição             | Condição que deve ser respeitada                         |
-| Ritmo                 | Intensidade desejada para o planejamento                 |
-| Orçamento             | Referência financeira da Viagem                          |
-| Lugar                 | Ponto de interesse potencialmente visitável              |
-| Lugar Salvo           | Lugar mantido para avaliação futura                      |
-| Atividade             | Compromisso planejado em um Dia da Viagem                |
-| Dia da Viagem         | Unidade temporal pertencente à Viagem                    |
-| Roteiro               | Organização atual dos Dias e Atividades                  |
-| Proposta de Roteiro   | Organização sugerida ainda não aplicada                  |
-| Período Livre         | Intervalo intencionalmente sem Atividade                 |
-| Deslocamento          | Movimento entre duas referências geográficas             |
-| Distância             | Medida entre dois pontos                                 |
-| Tempo de Deslocamento | Duração estimada de um Deslocamento                      |
-| Recomendação          | Sugestão contextual produzida pelo sistema               |
-| Justificativa         | Razão explicável para uma recomendação                   |
-| Conflito              | Condição que afeta ou pode afetar o planejamento         |
-| Alerta                | Comunicação de erro, risco ou sugestão                   |
-| Fonte de Dados        | Origem externa ou interna de uma informação              |
-| Evidência             | Dado utilizado para sustentar uma conclusão              |
-| Estimativa            | Valor aproximado sujeito a variação                      |
-| Confirmação           | Informação validada por fonte adequada                   |
-| Contexto de Decisão   | Conjunto de informações relevantes para uma recomendação |
+```text
+RB-DOM-002 — Linguagem Ubíqua e Glossário de Domínio
+```
 
 ---
 
-## 6. Termos que não são equivalentes
+## 11. Termos centrais
+
+| Termo                 | Definição                                        |
+| --------------------- | ------------------------------------------------ |
+| Conta                 | Contexto de propriedade, identidade e acesso     |
+| Usuário               | Pessoa identificada que utiliza o RouteBook      |
+| Viagem                | Contexto principal de planejamento e decisão     |
+| Destino               | Região geográfica principal da Viagem            |
+| Hospedagem            | Referência de permanência durante a Viagem       |
+| Viajante              | Pessoa participante da Viagem                    |
+| Perfil do Grupo       | Características agregadas dos Viajantes          |
+| Preferência           | Informação que influencia personalização         |
+| Interesse             | Categoria de experiência desejada                |
+| Restrição             | Condição que limita ou condiciona decisões       |
+| Ritmo                 | Intensidade desejada para o planejamento         |
+| Orçamento             | Referência financeira da Viagem                  |
+| Lugar                 | Ponto de interesse potencialmente visitável      |
+| Lugar Salvo           | Lugar preservado no contexto da Viagem           |
+| Atividade             | Compromisso planejado em um Dia                  |
+| Dia da Viagem         | Unidade temporal pertencente à Viagem            |
+| Roteiro               | Organização atual dos Dias e Atividades          |
+| Proposta de Roteiro   | Organização sugerida ainda não aplicada          |
+| Período Livre         | Intervalo intencionalmente sem Atividade         |
+| Deslocamento          | Movimento entre referências geográficas          |
+| Distância             | Medida espacial entre dois pontos                |
+| Tempo de Deslocamento | Duração estimada de um Deslocamento              |
+| Recomendação          | Sugestão contextual produzida pelo sistema       |
+| Justificativa         | Razão compreensível de uma Recomendação          |
+| Conflito              | Condição que afeta ou pode afetar o planejamento |
+| Fonte de Dados        | Origem interna ou externa de informação          |
+| Proveniência          | Metadados que explicam a origem do dado          |
+| Estimativa            | Valor aproximado sujeito a variação              |
+| Contexto de Decisão   | Informações utilizadas para uma Recomendação     |
+
+---
+
+## 12. Termos que não são equivalentes
+
+### Usuário e Viajante
+
+Um Usuário possui identidade de acesso.
+
+Um Viajante participa da Viagem.
+
+Um Usuário pode:
+
+* participar da edição sem viajar;
+* estar associado a um Viajante;
+* não estar associado a nenhum Viajante.
+
+Um Viajante pode:
+
+* não possuir Conta;
+* não possuir acesso ao RouteBook;
+* representar outra pessoa do grupo.
+
+---
 
 ### Lugar e Atividade
 
@@ -254,11 +762,11 @@ Uma Atividade é um compromisso planejado.
 Uma Atividade pode:
 
 * referenciar um Lugar;
-* não possuir Lugar;
-* representar refeição;
-* representar deslocamento futuro;
+* possuir Localização manual;
+* não possuir Localização;
 * representar descanso;
-* representar compromisso manual.
+* representar transporte;
+* representar compromisso personalizado.
 
 ---
 
@@ -266,14 +774,9 @@ Uma Atividade pode:
 
 Um Lugar Salvo foi preservado para avaliação.
 
-Um Lugar Planejado possui pelo menos uma Atividade associada ao Roteiro.
+Um Lugar Planejado possui pelo menos uma Atividade ativa associada ao Roteiro.
 
-Um Lugar pode estar:
-
-* não salvo e não planejado;
-* salvo e não planejado;
-* não salvo e planejado;
-* salvo e planejado.
+Esses estados são independentes.
 
 ---
 
@@ -281,9 +784,9 @@ Um Lugar pode estar:
 
 O Roteiro representa o planejamento atual.
 
-A Proposta de Roteiro representa uma alternativa ainda não aplicada.
+A Proposta representa uma alternativa ainda não aplicada.
 
-A proposta não deverá modificar o Roteiro sem aceitação explícita.
+A Proposta não poderá modificar o Roteiro sem aceitação explícita.
 
 ---
 
@@ -291,15 +794,13 @@ A proposta não deverá modificar o Roteiro sem aceitação explícita.
 
 Destino representa o contexto geográfico principal da Viagem.
 
-Região representa uma área geográfica utilizada para:
+Região representa uma área utilizada para:
 
 * busca;
 * agrupamento;
 * recomendação;
 * visualização;
 * cálculo.
-
-Uma Viagem poderá possuir um Destino e várias Regiões relevantes.
 
 ---
 
@@ -309,88 +810,22 @@ Distância mede separação espacial.
 
 Tempo de Deslocamento estima duração considerando:
 
-* meio de transporte;
+* Meio de Transporte;
 * rota;
-* tráfego;
 * condições;
-* fonte;
-* horário.
+* Fonte de Dados;
+* horário;
+* validade.
 
 ---
 
-# Parte II — Visão geral do domínio
+# Parte III — Identidade e acesso
 
-## 7. Mapa conceitual principal
-
-```text
-Conta
-└── possui Usuários
-
-Usuário
-├── cria Viagens
-├── participa de Viagens
-└── mantém Preferências pessoais
-
-Viagem
-├── possui Destino
-├── pode possuir Hospedagem
-├── possui Viajantes
-├── possui Preferências da Viagem
-├── possui Dias da Viagem
-├── possui Roteiro
-├── possui Lugares Salvos
-├── recebe Recomendações
-├── recebe Propostas de Roteiro
-└── possui Conflitos derivados
-
-Roteiro
-└── organiza Dias da Viagem
-
-Dia da Viagem
-├── possui Atividades
-├── possui Períodos Livres
-└── possui Deslocamentos derivados
-
-Atividade
-├── pode referenciar Lugar
-├── possui horário opcional
-├── possui duração opcional
-└── pode gerar Conflitos
-
-Lugar
-├── possui Localização
-├── possui Categoria
-├── possui Informações
-├── possui Fontes
-└── pode ser salvo ou planejado
-```
-
----
-
-## 8. Áreas conceituais
-
-O domínio inicial será dividido em:
-
-1. identidade;
-2. Viagem;
-3. participantes;
-4. Preferências;
-5. Lugares;
-6. planejamento;
-7. mobilidade;
-8. recomendações;
-9. conflitos;
-10. proveniência de dados.
-
----
-
-# Parte III — Identidade
-
-## 9. Entidade Conta
+## 13. Entidade Conta
 
 ### Definição
 
-Representa o contexto de acesso e propriedade de dados.
+Representa o contexto de propriedade, organização e acesso aos dados.
 
 ### Identidade
 
@@ -401,10 +836,9 @@ AccountId
 ### Responsabilidades
 
 * agrupar Usuários;
-* controlar acesso;
-* associar Viagens;
-* manter configurações globais;
-* suportar colaboração futura.
+* controlar o ciclo de vida da Conta;
+* associar configurações globais;
+* sustentar colaboração futura.
 
 ### Atributos conceituais
 
@@ -412,23 +846,23 @@ AccountId
 * status;
 * data de criação;
 * configurações;
-* plano futuro opcional.
+* responsáveis.
 
 ### Estados
 
-* active;
-* suspended;
-* closed.
+* `active`;
+* `suspended`;
+* `closed`.
 
 ### Invariantes
 
-* uma Conta deve possuir pelo menos um responsável;
-* Conta encerrada não aceita novas Viagens;
+* uma Conta ativa deve possuir pelo menos um responsável;
+* uma Conta encerrada não aceita novas Viagens;
 * encerramento não deve apagar histórico sem política definida.
 
 ---
 
-## 10. Entidade Usuário
+## 14. Entidade Usuário
 
 ### Definição
 
@@ -461,45 +895,48 @@ UserId
 
 ### Invariantes
 
-* e-mail deve possuir formato válido;
-* localidade deve ser suportada ou possuir fallback;
-* consentimentos devem ser rastreáveis.
+* identidade interna não depende apenas de provedor externo;
+* consentimentos relevantes devem ser rastreáveis;
+* localidade deve possuir fallback;
+* configurações de acessibilidade devem ser preservadas.
 
 ---
 
-## 11. Participação em Viagem
+## 15. Participação em Viagem
 
-A relação entre Usuário e Viagem deverá possuir papel.
+A relação entre Usuário e Viagem deverá possuir um papel explícito.
 
 ### Papéis iniciais
 
-* owner;
-* editor;
-* viewer.
-
-### Futuro
-
-* collaborator;
-* guest;
-* travel-agent.
+* `owner`;
+* `editor`;
+* `viewer`.
 
 ### Invariantes
 
-* toda Viagem possui pelo menos um owner;
+* toda Viagem possui pelo menos um `owner`;
+* o último `owner` não pode ser removido sem transferência;
 * somente papéis autorizados podem alterar o Roteiro;
-* permissões não devem ser inferidas apenas pela interface.
+* autorização não pode depender apenas da interface.
 
 ---
 
 # Parte IV — Agregado Viagem
 
-## 12. Entidade Viagem
+## 16. Entidade Viagem
 
 ### Definição
 
-A Viagem é o principal agregado do domínio.
+A Viagem é o principal contexto de decisão do RouteBook.
 
-Ela representa o contexto dentro do qual o RouteBook organiza informações, decisões, Lugares e planejamento.
+Ela reúne as informações necessárias para personalizar:
+
+* exploração;
+* planejamento;
+* Recomendações;
+* Propostas;
+* estimativas;
+* revisão de Conflitos.
 
 ### Identidade
 
@@ -515,21 +952,106 @@ Trip
 
 ### Responsabilidades
 
-* preservar identidade da Viagem;
+* preservar identidade;
 * manter Destino;
 * manter Período;
 * manter Hospedagem;
 * manter Viajantes;
 * manter Preferências;
-* coordenar Dias;
-* possuir Roteiro;
-* controlar Lugares Salvos;
-* registrar alterações estruturais;
-* controlar versões de planejamento.
+* coordenar alterações estruturais;
+* manter referência ao Roteiro atual;
+* controlar versão de contexto;
+* preservar ownership.
 
 ---
 
-## 13. Atributos conceituais da Viagem
+## 17. RB-DGM-DOM-005 — Estrutura do agregado Viagem
+
+```mermaid
+classDiagram
+    class Trip {
+        <<Aggregate Root>>
+        +TripId id
+        +String name
+        +TripStatus status
+        +TripContextVersion contextVersion
+        +changeDestination()
+        +changePeriod()
+        +changeAccommodation()
+        +addTraveler()
+        +removeTraveler()
+    }
+
+    class Destination {
+        <<Value Object>>
+        +String name
+        +DestinationType type
+        +CountryCode country
+        +GeoCoordinate referenceCoordinate
+        +TimeZone timeZone
+    }
+
+    class TripPeriod {
+        <<Value Object>>
+        +LocalDate startDate
+        +LocalDate endDate
+        +TimeZone timeZone
+        +durationInDays()
+        +containsDate()
+    }
+
+    class Accommodation {
+        <<Entity>>
+        +AccommodationId id
+        +String name
+        +AccommodationStatus status
+        +Location location
+    }
+
+    class Traveler {
+        <<Entity>>
+        +TravelerId id
+        +String name
+        +AgeRange ageRange
+        +TravelerType type
+    }
+
+    class TripPreferences {
+        <<Value Object Collection>>
+        +Interest[] interests
+        +Restriction[] restrictions
+        +Budget budget
+        +Pace pace
+        +TransportMode preferredTransport
+    }
+
+    class SavedPlace {
+        <<Entity>>
+        +SavedPlaceId id
+        +PlaceId placeId
+        +Instant savedAt
+        +SavedPlaceOrigin origin
+    }
+
+    Trip *-- Destination
+    Trip *-- TripPeriod
+    Trip o-- Accommodation
+    Trip *-- Traveler
+    Trip *-- TripPreferences
+    Trip *-- SavedPlace
+```
+
+### Interpretação
+
+* `Trip` é a única raiz do agregado.
+* `Destination` e `TripPeriod` são objetos de valor.
+* `Accommodation`, `Traveler` e `SavedPlace` possuem identidade contextual.
+* Outros módulos não devem alterar objetos internos diretamente.
+* Alterações devem ocorrer por operações da raiz ou casos de uso autorizados.
+
+---
+
+## 18. Atributos conceituais da Viagem
 
 * identificador;
 * nome;
@@ -543,102 +1065,63 @@ Trip
 * participantes;
 * data de criação;
 * última atualização;
-* versão de contexto.
+* versão de contexto;
+* referência ao Roteiro atual.
 
 ---
 
-## 14. Estados da Viagem
+## 19. Estados da Viagem
 
 ### Draft
 
-Criação iniciada, mas contexto mínimo ainda não foi concluído.
+Criação iniciada, mas o contexto mínimo ainda não foi concluído.
 
 ### Planned
 
-Viagem criada e disponível para planejamento.
+Viagem criada e disponível para planejamento antes do início.
 
 ### InProgress
 
-Data atual está dentro do Período da Viagem.
+A data atual encontra-se dentro do Período.
 
 ### Completed
 
-Período já terminou.
-
-### Archived
-
-Viagem preservada, mas removida da visão principal.
+O Período da Viagem já terminou.
 
 ### Cancelled
 
-Viagem cancelada explicitamente.
+A Viagem foi cancelada explicitamente.
+
+### Archived
+
+A Viagem foi preservada, mas removida das visualizações principais.
 
 ---
 
-## 15. Transições da Viagem
-
-```text
-Draft
-→ Planned
-→ InProgress
-→ Completed
-→ Archived
-```
-
-Transições alternativas:
-
-```text
-Draft → Cancelled
-Planned → Cancelled
-InProgress → Cancelled
-Completed → Archived
-```
-
----
-
-## 16. Invariantes da Viagem
+## 20. Invariantes da Viagem
 
 1. Deve possuir Destino válido antes de se tornar `Planned`.
 2. Deve possuir Período válido antes de se tornar `Planned`.
 3. A data final não pode ser anterior à data inicial.
 4. Deve possuir pelo menos um Viajante.
-5. Deve possuir pelo menos um owner.
+5. Deve possuir pelo menos um `owner`.
 6. Cada Dia da Viagem deve estar dentro do Período.
-7. Alterar Período deve recalcular os Dias.
-8. Alterar Destino deve invalidar dependências geográficas incompatíveis.
-9. Alterar Hospedagem deve invalidar Distâncias derivadas.
-10. Excluir Viagem não deve ser uma operação silenciosa.
-11. Propostas não devem alterar a Viagem automaticamente.
-12. Histórico relevante não deve ser perdido sem política explícita.
+7. Alterar o Período deve recalcular os Dias.
+8. Alterar o Destino deve reavaliar dependências geográficas.
+9. Alterar a Hospedagem deve invalidar Distâncias dependentes.
+10. Excluir a Viagem não pode ser operação silenciosa.
+11. Propostas não podem alterar a Viagem automaticamente.
+12. Alterações estruturais devem incrementar a versão de contexto.
+13. Dados incompatíveis não devem ser apagados sem revisão.
+14. Histórico relevante não deve ser perdido sem política explícita.
 
----
+# Parte V — Destino, Região e Localização
 
-## 17. Nome da Viagem
-
-O nome poderá:
-
-* ser informado;
-* ser derivado do Destino;
-* ser alterado;
-* não alterar a identidade.
-
-Exemplos:
-
-```text
-Pipa
-Férias em Pipa
-Viagem de agosto
-```
-
----
-
-# Parte V — Destino e geografia
-
-## 18. Objeto de valor Destino
+## 21. Objeto de valor Destino
 
 ### Definição
 
-Representa a região geográfica principal da Viagem.
+Representa a região geográfica principal associada à Viagem.
 
 ### Estrutura conceitual
 
@@ -653,23 +1136,72 @@ Representa a região geográfica principal da Viagem.
 
 ### Tipos possíveis
 
-* city;
-* district;
-* region;
-* island;
-* park;
-* custom-region.
+* `city`;
+* `district`;
+* `region`;
+* `island`;
+* `park`;
+* `custom-region`.
+
+### Responsabilidades
+
+* estabelecer o contexto geográfico principal;
+* orientar buscas;
+* apoiar resolução de fuso horário;
+* restringir resultados incompatíveis;
+* servir de referência para Recomendações;
+* ajudar na validação de Hospedagem e Lugares.
 
 ### Invariantes
 
-* deve possuir referência geográfica;
-* deve possuir localidade;
+* deve possuir referência geográfica suficiente;
+* deve possuir localidade reconhecível;
 * deve possuir fuso ou mecanismo de resolução;
-* identificadores externos não definem identidade interna.
+* identificadores externos não definem sua identidade conceitual;
+* mudança de Destino é uma alteração estrutural;
+* Destino não deve ser confundido com Lugar;
+* Destino não deve ser confundido com destino de um Deslocamento.
 
 ---
 
-## 19. Objeto de valor Localização
+## 22. Objeto de valor Região
+
+### Definição
+
+Representa uma área geográfica utilizada para agrupamento, busca, recomendação ou visualização.
+
+### Exemplos
+
+* Centro de Pipa;
+* Praia do Madeiro;
+* Tibau do Sul;
+* região próxima à Hospedagem;
+* área atualmente visível no Mapa.
+
+### Responsabilidades
+
+* agrupar Lugares;
+* limitar consultas;
+* apoiar filtros;
+* apoiar Recomendações;
+* fornecer contexto espacial;
+* representar áreas não necessariamente administrativas.
+
+### Invariantes
+
+* uma Região deve possuir critério geográfico;
+* pode ser oficial ou derivada;
+* não substitui o Destino;
+* pode existir apenas temporariamente;
+* deve permitir rastrear sua origem quando for inferida.
+
+---
+
+## 23. Objeto de valor Localização
+
+### Definição
+
+Representa a referência geográfica de um objeto.
 
 ### Estrutura
 
@@ -677,43 +1209,112 @@ Representa a região geográfica principal da Viagem.
 * longitude;
 * precisão opcional;
 * endereço opcional;
-* fonte;
-* data de atualização.
+* Fonte de Dados;
+* data de atualização;
+* nível de confiança.
 
 ### Invariantes
 
-* latitude entre -90 e 90;
-* longitude entre -180 e 180;
-* precisão deve ser identificada quando relevante;
-* endereço e coordenada podem divergir e devem ser tratados separadamente.
+* latitude deve estar entre `-90` e `90`;
+* longitude deve estar entre `-180` e `180`;
+* precisão deve ser conhecida quando relevante;
+* endereço e coordenada podem divergir;
+* Localização aproximada deve ser identificada;
+* ausência de endereço não invalida uma coordenada válida;
+* ausência de coordenada limita cálculos geográficos.
 
 ---
 
-## 20. Objeto de valor Região
+## 24. Objeto de valor Coordenada
 
-### Definição
+### Estrutura
 
-Área utilizada para agrupamento e busca.
+* latitude;
+* longitude.
 
-### Exemplos
+### Características
 
-* Centro de Pipa;
-* Praia do Madeiro;
-* Tibau do Sul;
-* região ao redor da Hospedagem.
+* imutável;
+* comparável por valor;
+* independente de provedor;
+* reutilizável em diferentes contextos.
 
-### Responsabilidades
+### Não representa
 
-* agrupar Lugares;
-* limitar busca;
-* apoiar Recomendações;
-* apoiar visualização.
+* endereço;
+* Região;
+* Lugar;
+* Destino;
+* rota.
 
 ---
 
-# Parte VI — Período e Dias
+## 25. Objeto de valor Endereço
 
-## 21. Objeto de valor Período da Viagem
+### Estrutura conceitual
+
+* logradouro;
+* número;
+* complemento;
+* bairro;
+* município;
+* divisão administrativa;
+* país;
+* código postal;
+* forma textual completa.
+
+### Invariantes
+
+* campos podem estar parcialmente ausentes;
+* forma textual não substitui coordenada;
+* endereço externo deve preservar Proveniência;
+* alterações não devem criar novo Lugar automaticamente.
+
+---
+
+## 26. Relação entre conceitos geográficos
+
+```mermaid id="bh75qk"
+flowchart TD
+    Trip["Viagem"]
+    Destination["Destino"]
+    Region["Região"]
+    Place["Lugar"]
+    Accommodation["Hospedagem"]
+    Location["Localização"]
+    Coordinate["Coordenada"]
+    Address["Endereço"]
+    Map["Mapa"]
+
+    Trip -->|possui| Destination
+    Destination -->|pode conter| Region
+    Region -->|pode agrupar| Place
+
+    Place -->|possui| Location
+    Accommodation -->|possui| Location
+    Destination -->|possui referência| Location
+
+    Location --> Coordinate
+    Location --> Address
+
+    Map -. "representa visualmente" .-> Region
+    Map -. "representa visualmente" .-> Place
+    Map -. "representa visualmente" .-> Accommodation
+```
+
+### Interpretação
+
+* A Localização é um conceito de domínio.
+* O Mapa é apenas uma superfície de representação.
+* Um Lugar e uma Hospedagem podem possuir a mesma estrutura de Localização sem serem o mesmo conceito.
+* Uma Região pode agrupar diversos Lugares.
+* O Destino estabelece o contexto principal da Viagem.
+
+---
+
+# Parte VI — Período e Dias da Viagem
+
+## 27. Objeto de valor Período da Viagem
 
 ### Estrutura
 
@@ -725,67 +1326,101 @@ Representa a região geográfica principal da Viagem.
 
 * quantidade de Dias;
 * estado temporal;
-* datas contidas.
+* datas contidas;
+* duração em dias;
+* inclusão de uma determinada data.
 
 ### Invariantes
 
-* início não pode ser posterior ao término;
-* todas as datas são interpretadas no fuso da Viagem;
-* duração é derivada, não informada manualmente.
+* a data inicial não pode ser posterior à data final;
+* as datas devem ser interpretadas no fuso da Viagem;
+* duração é derivada;
+* o intervalo é inclusivo;
+* todas as datas geradas devem possuir um Dia correspondente;
+* mudança do Período deve preservar conteúdo compatível.
 
 ---
 
-## 22. Entidade Dia da Viagem
+## 28. Entidade Dia da Viagem
 
 ### Identidade
 
-```text
+```text id="h8mxn0"
 TripDayId
 ```
 
 ### Identidade natural contextual
 
-```text
+```text id="g0gr7e"
 TripId + LocalDate
 ```
 
 ### Atributos
 
+* identificador;
 * data;
 * posição;
-* status;
-* observação;
+* observação opcional;
 * Atividades;
-* Períodos Livres.
+* Períodos Livres;
+* estado derivado;
+* versão contextual.
 
 ### Estados derivados
 
-* empty;
-* partially-planned;
-* planned;
-* current;
-* past;
-* future;
-* with-conflicts.
+* `empty`;
+* `partially-planned`;
+* `planned`;
+* `current`;
+* `past`;
+* `future`;
+* `with-conflicts`;
+* `free`.
 
 ### Invariantes
 
 * pertence a uma única Viagem;
-* data deve estar no Período;
+* data deve estar dentro do Período;
 * posição deve respeitar ordem cronológica;
-* não pode existir mais de um Dia para a mesma data na mesma Viagem.
+* não pode existir mais de um Dia para a mesma data;
+* um Dia pode estar vazio;
+* um Dia livre é uma decisão intencional;
+* Atividades e Períodos Livres devem pertencer ao mesmo Dia.
 
 ---
 
-## 23. Alteração do Período
+## 29. Geração dos Dias da Viagem
+
+Ao validar o Período, o RouteBook deverá criar um Dia para cada data incluída.
+
+Exemplo:
+
+```text id="sdct20"
+22 de agosto a 29 de agosto
+→ 8 Dias da Viagem
+```
+
+A geração deve ser:
+
+* determinística;
+* idempotente;
+* ordenada;
+* baseada em data local;
+* independente do fuso do servidor.
+
+---
+
+## 30. Alteração do Período
 
 ### Ampliação
 
 Deve:
 
-* criar Dias adicionais;
+* criar novos Dias;
 * preservar Dias existentes;
-* preservar Atividades existentes.
+* preservar Atividades;
+* preservar Períodos Livres;
+* recalcular posições.
 
 ### Redução
 
@@ -793,163 +1428,126 @@ Deve:
 
 * identificar Dias removidos;
 * identificar Atividades afetadas;
-* exigir decisão explícita;
-* evitar perda silenciosa.
+* identificar Períodos Livres afetados;
+* impedir perda silenciosa;
+* exigir revisão quando houver conteúdo.
+
+### Deslocamento integral
+
+Quando todo o Período for movido, o sistema não deve assumir automaticamente que todas as Atividades devam ser deslocadas na mesma proporção sem regra explícita.
 
 ---
 
-# Parte VII — Hospedagem
+## 31. Estado temporal da Viagem
 
-## 24. Entidade Hospedagem da Viagem
+```mermaid id="frzf87"
+flowchart LR
+    Before["Data atual anterior ao início"]
+    During["Data atual dentro do período"]
+    After["Data atual posterior ao término"]
 
-### Definição
+    Planned["Planned"]
+    InProgress["InProgress"]
+    Completed["Completed"]
 
-Representa a referência de permanência utilizada na Viagem.
-
-### Identidade
-
-```text
-AccommodationId
+    Before --> Planned
+    During --> InProgress
+    After --> Completed
 ```
 
-### Tipos
+### Regras
 
-* hotel;
-* pousada;
-* hostel;
-* rental;
-* residence;
-* approximate-reference;
-* multiple-accommodations futuramente.
-
-### Atributos
-
-* nome;
-* Localização;
-* endereço;
-* período aplicável;
-* status de confirmação;
-* fonte;
-* observações.
-
-### Estados
-
-* provisional;
-* confirmed;
-* outdated;
-* removed.
-
-### Invariantes
-
-* pode ser provisória;
-* deve possuir Localização para cálculos geográficos;
-* alteração deve invalidar Distâncias dependentes;
-* ausência não deve impedir planejamento básico.
+* `Cancelled` possui precedência sobre o estado temporal;
+* `Archived` altera a apresentação, mas não o período histórico;
+* o estado temporal pode ser derivado;
+* Eventos temporais somente são necessários quando houver efeitos relevantes.
 
 ---
 
-## 25. Hospedagem provisória
+# Parte VII — Viajantes e Preferências
 
-Uma Hospedagem provisória poderá ser:
-
-* centro do Destino;
-* bairro;
-* coordenada aproximada;
-* ponto escolhido pelo usuário.
-
-Deverá ser identificada como aproximação.
-
----
-
-# Parte VIII — Viajantes e grupo
-
-## 26. Entidade Viajante
+## 32. Entidade Viajante
 
 ### Identidade
 
-```text
+```text id="cuofid"
 TravelerId
 ```
 
 ### Definição
 
-Pessoa participante da Viagem, podendo ou não possuir conta no RouteBook.
+Representa uma pessoa participante da Viagem, possuindo ou não uma Conta no RouteBook.
 
-### Atributos
+### Atributos conceituais
 
 * nome opcional;
 * faixa etária;
-* papel;
-* necessidades;
+* tipo;
+* papel no grupo;
+* necessidades funcionais;
 * Preferências;
 * Restrições;
-* associação com Usuário opcional.
+* associação opcional com Usuário.
 
 ### Tipos iniciais
 
-* adult;
-* child;
-* senior;
-* unspecified.
+* `adult`;
+* `child`;
+* `senior`;
+* `unspecified`.
 
 ### Invariantes
 
-* todo Viajante pertence à Viagem;
-* dados sensíveis devem ser minimizados;
-* faixa etária não deve ser usada para inferências indevidas;
-* necessidades relevantes devem ser explícitas.
+* pertence a uma única Viagem;
+* não precisa possuir Conta;
+* pode estar associado a um Usuário;
+* dados pessoais devem ser minimizados;
+* necessidades funcionais devem ser preferidas a diagnósticos;
+* faixa etária deve ser usada apenas quando relevante.
 
 ---
 
-## 27. Objeto de valor Perfil do Grupo
+## 33. Objeto de valor Perfil do Grupo
 
 ### Definição
 
-Resumo derivado dos Viajantes.
+Representa um resumo derivado das características dos Viajantes.
 
 ### Exemplos
 
 * 3 adultos;
 * 5 adultos e 2 crianças;
-* grupo com mobilidade reduzida;
-* grupo familiar.
+* grupo familiar;
+* grupo com necessidade de acesso sem escadas;
+* grupo com Ritmo relaxado.
 
 ### Uso
 
 * Recomendações;
-* filtros;
+* estimativas de custo;
 * adequação de Lugares;
-* Ritmo;
-* custo estimado.
+* geração de Propostas;
+* avaliação de Ritmo;
+* detecção de Conflitos.
 
-### Regra
+### Invariantes
 
-Perfil do Grupo é derivado e não substitui os Viajantes individuais.
-
----
-
-# Parte IX — Preferências
-
-## 28. Agregado Preferências da Viagem
-
-### Definição
-
-Conjunto de informações utilizadas para personalizar decisões.
-
-### Categorias
-
-* Interesses;
-* Orçamento;
-* Ritmo;
-* transporte;
-* Restrições;
-* horários preferidos;
-* categorias evitadas;
-* prioridades.
+* é derivado dos Viajantes;
+* não substitui dados individuais;
+* deve ser recalculado após alterações;
+* não deve criar inferências sensíveis sem base explícita.
 
 ---
 
-## 29. Objeto de valor Interesse
+## 34. Objeto de valor Interesse
+
+### Estrutura
+
+* categoria;
+* intensidade ou peso opcional;
+* origem;
+* escopo;
+* data de atualização.
 
 ### Exemplos
 
@@ -958,82 +1556,29 @@ Conjunto de informações utilizadas para personalizar decisões.
 * vida noturna;
 * natureza;
 * cultura;
-* compras;
-* atividades infantis;
 * aventura;
-* descanso.
+* compras;
+* descanso;
+* experiências infantis.
 
-### Estrutura
-
-* categoria;
-* peso opcional;
-* origem;
-* escopo.
-
-### Escopo
+### Escopos
 
 * pessoal;
 * Viajante;
 * grupo;
 * Viagem.
 
----
-
-## 30. Objeto de valor Orçamento
-
-### Formas possíveis
-
-* faixa total;
-* faixa diária;
-* faixa por pessoa;
-* categoria qualitativa.
-
-### Categorias iniciais
-
-* economic;
-* moderate;
-* comfortable;
-* premium;
-* unspecified.
-
 ### Invariantes
 
-* moeda deve ser identificada;
-* estimativa não deve ser apresentada como limite rígido;
-* ausência deve ser suportada.
+* Interesse não é Restrição;
+* pode influenciar ranking;
+* pode ser contraditório com outro Interesse;
+* ausência não impede planejamento;
+* deve ser interpretado dentro do contexto da Viagem.
 
 ---
 
-## 31. Objeto de valor Ritmo
-
-### Valores iniciais
-
-* relaxed;
-* balanced;
-* intense;
-* custom.
-
-### Significado
-
-#### Relaxed
-
-Menos Atividades, mais intervalos e flexibilidade.
-
-#### Balanced
-
-Combinação moderada entre atividades e descanso.
-
-#### Intense
-
-Maior densidade de atividades.
-
-### Regra
-
-Ritmo influencia recomendação, mas não impõe decisão.
-
----
-
-## 32. Objeto de valor Restrição
+## 35. Objeto de valor Restrição
 
 ### Tipos
 
@@ -1042,161 +1587,279 @@ Ritmo influencia recomendação, mas não impõe decisão.
 * faixa etária;
 * horário;
 * transporte;
+* orçamento;
 * acessibilidade;
 * categoria evitada;
 * restrição manual.
 
-### Severidade
+### Severidades
 
-* preference;
-* important;
-* mandatory.
+* `preference`;
+* `important`;
+* `mandatory`.
 
 ### Invariantes
 
-* Restrições obrigatórias não podem ser ignoradas silenciosamente;
-* conflito com Restrição deve ser comunicado;
-* origem da Restrição deve ser identificável.
+* Restrição obrigatória não pode ser ignorada silenciosamente;
+* incompatibilidade deve produzir bloqueio ou Conflito;
+* origem deve ser identificável;
+* Restrição não deve ser inferida a partir de dado sensível sem base;
+* uma Restrição pode ser contextual à Viagem.
 
 ---
 
-# Parte X — Lugar
+## 36. Objeto de valor Orçamento
 
-## 33. Entidade Lugar
+### Formas possíveis
 
-### Definição
+* faixa total;
+* faixa diária;
+* valor por pessoa;
+* faixa por categoria;
+* classificação qualitativa.
 
-Representa ponto de interesse potencialmente relevante para uma Viagem.
+### Categorias iniciais
+
+* `economic`;
+* `moderate`;
+* `comfortable`;
+* `premium`;
+* `unspecified`.
+
+### Invariantes
+
+* valor monetário deve possuir moeda;
+* ausência não deve ser interpretada como zero;
+* estimativa não é limite confirmado;
+* Orçamento não é despesa real;
+* pode possuir tolerância contextual.
+
+---
+
+## 37. Objeto de valor Ritmo
+
+### Valores iniciais
+
+* `relaxed`;
+* `balanced`;
+* `intense`;
+* `custom`.
+
+### Significado
+
+#### Relaxed
+
+* menor densidade;
+* intervalos maiores;
+* mais flexibilidade;
+* menor quantidade de Atividades.
+
+#### Balanced
+
+* combinação moderada;
+* equilíbrio entre exploração e descanso;
+* intervalos regulares.
+
+#### Intense
+
+* maior densidade;
+* maior quantidade de Atividades;
+* menor tolerância a períodos ociosos.
+
+### Invariantes
+
+* Ritmo orienta, mas não obriga;
+* não define quantidade universal;
+* deve considerar deslocamentos;
+* deve considerar Perfil do Grupo;
+* deve respeitar Períodos Livres protegidos.
+
+---
+
+## 38. Relação entre Viajantes e Preferências
+
+```mermaid id="f5609g"
+classDiagram
+    class Trip {
+        +TripId id
+    }
+
+    class Traveler {
+        +TravelerId id
+        +TravelerType type
+        +AgeRange ageRange
+    }
+
+    class GroupProfile {
+        <<Derived Value>>
+        +Int travelerCount
+        +GroupComposition composition
+    }
+
+    class Interest {
+        <<Value Object>>
+        +String category
+        +PreferenceWeight weight
+        +PreferenceScope scope
+    }
+
+    class Restriction {
+        <<Value Object>>
+        +RestrictionType type
+        +RestrictionSeverity severity
+        +PreferenceScope scope
+    }
+
+    class Budget {
+        <<Value Object>>
+        +Money total
+        +Money daily
+        +BudgetCategory category
+    }
+
+    class Pace {
+        <<Value Object>>
+        +PaceType type
+    }
+
+    Trip "1" *-- "1..*" Traveler
+    Traveler "0..*" --> "0..*" Interest
+    Traveler "0..*" --> "0..*" Restriction
+    Trip --> GroupProfile : deriva
+    Trip --> Interest : possui preferências
+    Trip --> Restriction : possui restrições
+    Trip --> Budget
+    Trip --> Pace
+```
+
+### Interpretação
+
+* Preferências podem existir em diferentes escopos.
+* O Perfil do Grupo é derivado.
+* Restrições individuais devem influenciar o grupo quando aplicáveis.
+* A camada de Recomendação deve receber dados minimizados.
+
+---
+
+# Parte VIII — Lugar e Catálogo
+
+## 39. Entidade Lugar
 
 ### Identidade
 
-```text
+```text id="hqca7e"
 PlaceId
 ```
 
+### Definição
+
+Representa um ponto de interesse potencialmente relevante para uma Viagem.
+
 ### Atributos conceituais
 
+* identificador;
 * nome;
 * Localização;
-* categorias;
+* Categorias de Lugar;
 * descrição;
 * imagens;
-* horários;
-* preço;
+* Horário de Funcionamento;
+* Faixa de Preço;
 * avaliação;
 * contatos;
-* acessibilidade;
+* informações de acessibilidade;
 * público indicado;
-* status operacional;
-* fontes;
+* estado operacional;
+* identificadores externos;
+* informações com Proveniência;
 * última atualização.
 
 ---
 
-## 34. Identidade do Lugar
+## 40. Identidade do Lugar
 
-A identidade interna não deverá depender exclusivamente de provedor externo.
+A identidade interna deve:
 
-Um Lugar poderá possuir:
+* ser independente de provedor;
+* permitir múltiplos identificadores externos;
+* permitir aliases;
+* sobreviver a mudanças de Fonte;
+* permitir fusão de duplicidades;
+* preservar histórico.
 
-* identificador interno;
-* múltiplos identificadores externos;
-* aliases;
-* versões de dados.
+A identidade não deve ser determinada apenas por:
+
+* nome;
+* endereço;
+* coordenada;
+* ID externo;
+* categoria.
+
+A resolução poderá considerar a combinação desses sinais.
 
 ---
 
-## 35. Categorias de Lugar
+## 41. Categorias de Lugar
 
 Categorias iniciais:
 
-* beach;
-* restaurant;
-* bar;
-* nightclub;
-* attraction;
-* tour;
-* viewpoint;
-* shopping;
-* cafe;
-* park;
-* cultural-site;
-* transport-point;
-* accommodation;
-* custom.
-
-Um Lugar poderá possuir múltiplas categorias.
-
----
-
-## 36. Estado operacional do Lugar
-
-Estados possíveis:
-
-* open;
-* temporarily-closed;
-* permanently-closed;
-* seasonal;
-* unknown.
-
-### Regra
-
-Estado `unknown` não deve ser apresentado como aberto.
-
----
-
-## 37. Informações do Lugar
-
-Informações podem possuir diferentes níveis de confiança.
-
-Exemplos:
-
-* horário confirmado;
-* preço estimado;
-* acessibilidade não informada;
-* endereço divergente;
-* avaliação externa.
-
-Cada informação relevante poderá possuir:
-
-* valor;
-* fonte;
-* data;
-* nível de confiança;
-* status.
-
----
-
-## 38. Objeto de valor Faixa de Preço
-
-### Formas
-
-* gratuito;
-* faixa qualitativa;
-* faixa monetária;
-* por pessoa;
-* por grupo;
-* desconhecido.
+* `beach`;
+* `restaurant`;
+* `bar`;
+* `nightclub`;
+* `attraction`;
+* `tour`;
+* `viewpoint`;
+* `shopping`;
+* `cafe`;
+* `park`;
+* `cultural-site`;
+* `transport-point`;
+* `accommodation`;
+* `custom`.
 
 ### Invariantes
 
-* moeda deve ser informada quando monetária;
-* preço desatualizado deve ser identificado;
-* ausência não é zero.
+* um Lugar pode possuir múltiplas categorias;
+* categoria não determina disponibilidade;
+* categoria não define Atividade;
+* categoria externa deve ser traduzida para taxonomia interna;
+* novas categorias devem passar por governança.
 
 ---
 
-## 39. Objeto de valor Horário de Funcionamento
+## 42. Estado operacional do Lugar
+
+Estados:
+
+* `open`;
+* `temporarily-closed`;
+* `permanently-closed`;
+* `seasonal`;
+* `unknown`.
+
+### Invariantes
+
+* `unknown` não significa aberto;
+* estado deve possuir Proveniência;
+* mudança de estado pode invalidar Recomendações;
+* fechamento não remove Atividades automaticamente;
+* encerramento permanente deve gerar revisão.
+
+---
+
+## 43. Objeto de valor Horário de Funcionamento
 
 ### Estrutura
 
 * dia da semana;
 * intervalos;
 * exceções;
-* data de vigência;
+* período de vigência;
 * fuso;
-* fonte;
-* confiança.
+* Fonte;
+* confiança;
+* data de atualização.
 
 ### Estados derivados
 
@@ -1204,141 +1867,494 @@ Cada informação relevante poderá possuir:
 * provavelmente fechado;
 * informação insuficiente.
 
-O RouteBook não deverá afirmar disponibilidade absoluta sem fonte adequada.
+### Invariantes
+
+* horário não garante disponibilidade;
+* exceções devem possuir precedência;
+* feriados podem invalidar o padrão;
+* ausência não deve ser tratada como fechado;
+* horário desatualizado deve ser identificado.
 
 ---
 
-# Parte XI — Lugares Salvos
+## 44. Objeto de valor Faixa de Preço
 
-## 40. Entidade Lugar Salvo
+### Formas
 
-### Identidade
-
-```text
-SavedPlaceId
-```
-
-### Relação
-
-Associação entre Viagem e Lugar.
-
-### Atributos
-
-* Viagem;
-* Lugar;
-* data de salvamento;
-* origem;
-* observação;
-* tags;
-* prioridade opcional.
+* gratuito;
+* classificação qualitativa;
+* faixa monetária;
+* preço por pessoa;
+* preço por grupo;
+* desconhecido.
 
 ### Invariantes
 
-* um Lugar deve ser salvo no máximo uma vez por Viagem;
-* remover dos Salvos não remove Atividade;
-* salvar não cria Atividade;
-* um Lugar planejado pode não estar salvo.
+* preço desconhecido não é gratuito;
+* moeda é obrigatória quando monetário;
+* preço deve indicar unidade;
+* preço externo deve possuir data;
+* faixa qualitativa não deve ser convertida em valor exato sem regra.
 
 ---
 
-## 41. Origem do salvamento
+## 45. Avaliação de Lugar
 
-Possíveis origens:
+### Estrutura conceitual
+
+* valor;
+* escala;
+* quantidade de avaliações;
+* Fonte;
+* data de atualização.
+
+### Invariantes
+
+* avaliação sem escala é inválida;
+* ausência não é nota zero;
+* avaliação não é score de Recomendação;
+* fontes diferentes não devem ser combinadas silenciosamente;
+* quantidade de avaliações influencia interpretação, não identidade.
+
+---
+
+## 46. Informações de acessibilidade
+
+Podem incluir:
+
+* acesso sem degraus;
+* banheiro acessível;
+* estacionamento acessível;
+* superfície irregular;
+* acesso à praia;
+* necessidade de apoio;
+* informação desconhecida.
+
+### Regra
+
+Ausência de informação não significa ausência de acessibilidade.
+
+---
+
+# Parte IX — Proveniência e qualidade dos dados
+
+## 47. Entidade Fonte de Dados
+
+### Identidade
+
+```text id="lhqivn"
+DataSourceId
+```
+
+### Tipos
+
+* `internal`;
+* `user-provided`;
+* `provider`;
+* `public-dataset`;
+* `partner`;
+* `ai-generated`;
+* `inferred`.
+
+### Atributos
+
+* nome;
+* tipo;
+* confiabilidade;
+* política de atualização;
+* termos;
+* estado;
+* licença;
+* finalidade.
+
+---
+
+## 48. Objeto de valor Proveniência
+
+### Estrutura
+
+* Fonte de Dados;
+* identificador externo;
+* data de coleta;
+* data de atualização;
+* método;
+* confiança;
+* licença;
+* versão;
+* agente responsável.
+
+### Invariantes
+
+* dados externos relevantes devem possuir Proveniência;
+* dados inferidos devem ser marcados;
+* conteúdo de IA deve ser distinguido de fato;
+* alterações não devem destruir origem anterior;
+* divergências devem preservar fontes concorrentes.
+
+---
+
+## 49. Objeto de valor Nível de Confiança
+
+Valores:
+
+* `confirmed`;
+* `high`;
+* `medium`;
+* `low`;
+* `unknown`.
+
+### Regra
+
+Confiança representa qualidade da evidência.
+
+Não representa necessariamente:
+
+* probabilidade estatística;
+* certeza;
+* garantia;
+* qualidade do Lugar;
+* score de Recomendação.
+
+---
+
+## 50. Objeto de valor Atualidade dos Dados
+
+Estados:
+
+* `current`;
+* `stale`;
+* `unknown`;
+* `conflicting`;
+* `unavailable`.
+
+### Regras
+
+* atualidade depende do tipo do dado;
+* validade pode ser temporal ou contextual;
+* mudança de Hospedagem torna estimativas antigas desatualizadas;
+* mudança de versão pode invalidar Propostas;
+* dado desatualizado não precisa ser apagado.
+
+---
+
+## 51. RB-DGM-DOM-010 — Proveniência e qualidade dos dados
+
+```mermaid id="byiebl"
+classDiagram
+    class DataSource {
+        +DataSourceId id
+        +DataSourceType type
+        +String name
+        +DataSourceStatus status
+    }
+
+    class Provenance {
+        <<Value Object>>
+        +ExternalId externalId
+        +Instant collectedAt
+        +Instant updatedAt
+        +CollectionMethod method
+        +License license
+    }
+
+    class ConfidenceLevel {
+        <<Value Object>>
+        +Confidence value
+    }
+
+    class DataFreshness {
+        <<Value Object>>
+        +FreshnessStatus status
+        +Instant evaluatedAt
+    }
+
+    class PlaceInformation {
+        +InformationType type
+        +Any value
+    }
+
+    class TravelEstimate {
+        +Distance distance
+        +TravelTime duration
+    }
+
+    class Recommendation {
+        +RecommendationId id
+    }
+
+    DataSource "1" --> "0..*" Provenance
+    Provenance --> ConfidenceLevel
+    Provenance --> DataFreshness
+
+    PlaceInformation --> Provenance
+    TravelEstimate --> Provenance
+    Recommendation --> Provenance
+```
+
+### Interpretação
+
+A Proveniência acompanha a informação e não apenas a entidade.
+
+Isso permite que diferentes atributos de um mesmo Lugar possuam:
+
+* Fontes distintas;
+* datas distintas;
+* níveis de confiança distintos;
+* estados de atualização distintos.
+
+### Exemplo
+
+Um restaurante pode possuir:
+
+* endereço confirmado pelo Usuário;
+* horário obtido de provedor externo;
+* preço estimado por IA;
+* acessibilidade desconhecida.
+
+Essas informações não devem compartilhar automaticamente o mesmo nível de confiança.
+
+---
+
+# Parte X — Lugares Salvos
+
+## 52. Entidade Lugar Salvo
+
+### Identidade
+
+```text id="wz665j"
+SavedPlaceId
+```
+
+### Definição
+
+Representa a associação entre uma Viagem e um Lugar preservado para consulta futura.
+
+### Atributos
+
+* TripId;
+* PlaceId;
+* data do salvamento;
+* origem;
+* observação;
+* tags futuras;
+* prioridade opcional.
+
+### Origens
 
 * exploração;
 * Mapa;
-* recomendação;
-* proposta;
+* Recomendação;
+* Proposta;
 * busca;
-* ação manual.
+* ação manual;
+* importação futura.
+
+### Invariantes
+
+* um Lugar pode ser salvo no máximo uma vez por Viagem;
+* a operação deve ser idempotente;
+* salvar não cria Atividade;
+* remover dos Salvos não remove Atividade;
+* um Lugar Planejado pode não estar salvo;
+* um Lugar Salvo não é um favorito global.
 
 ---
 
-# Parte XII — Roteiro
+## 53. Estado derivado Lugar Planejado
 
-## 42. Agregado Roteiro
+Um Lugar é considerado Planejado quando existe ao menos uma Atividade ativa associada a ele.
+
+### Atividades consideradas ativas
+
+* `planned`;
+* `tentative`;
+* `needs-review`;
+* `unavailable`, enquanto ainda fizer parte do Roteiro.
+
+### Atividades normalmente não consideradas ativas
+
+* `removed`;
+* `cancelled`.
+
+A política sobre `completed` e `skipped` dependerá do contexto de leitura.
+
+---
+
+# Parte XI — Agregado Roteiro
+
+## 54. Entidade Roteiro
+
+### Identidade
+
+```text id="xruwhf"
+ItineraryId
+```
 
 ### Definição
 
 Representa o planejamento atual da Viagem.
 
-### Identidade
+### Raiz do agregado
 
-```text
-ItineraryId
+```text id="2k2nmq"
+Itinerary
 ```
-
-### Relação
-
-Uma Viagem possui um Roteiro atual.
 
 ### Responsabilidades
 
 * organizar Dias;
-* ordenar Atividades;
+* manter Atividades;
 * manter Períodos Livres;
-* registrar versão;
-* coordenar alterações;
-* preservar consistência;
-* permitir planejamento parcial.
+* controlar ordenação;
+* controlar versão;
+* aplicar alterações válidas;
+* preservar planejamento parcial;
+* impedir inconsistências internas;
+* fornecer snapshots de planejamento.
 
 ---
 
-## 43. Estados do Roteiro
+## 55. RB-DGM-DOM-006 — Estrutura do agregado Roteiro
 
-* empty;
-* partial;
-* planned;
-* with-conflicts;
-* under-review;
-* outdated.
+```mermaid id="a1vymu"
+classDiagram
+    class Itinerary {
+        <<Aggregate Root>>
+        +ItineraryId id
+        +TripId tripId
+        +ItineraryVersion version
+        +addActivity()
+        +moveActivity()
+        +removeActivity()
+        +addFreePeriod()
+        +applyProposalItems()
+    }
 
-### Outdated
+    class TripDay {
+        <<Entity>>
+        +TripDayId id
+        +LocalDate date
+        +Int position
+        +TripDayState state
+    }
 
-O Roteiro pode ficar desatualizado quando:
+    class Activity {
+        <<Entity>>
+        +ActivityId id
+        +String title
+        +ActivityType type
+        +ActivityStatus status
+        +ActivityFlexibility flexibility
+        +LocalTime startTime
+        +Duration duration
+        +Int order
+        +PlaceId placeId
+    }
 
-* Hospedagem muda;
-* transporte muda;
-* Destino muda;
-* Período muda;
-* dados externos relevantes mudam.
+    class FreePeriod {
+        <<Entity>>
+        +FreePeriodId id
+        +FreePeriodMode mode
+        +LocalTime startTime
+        +Duration duration
+        +Int order
+    }
+
+    class ItineraryVersion {
+        <<Value Object>>
+        +Long value
+    }
+
+    Itinerary *-- "1..*" TripDay
+    TripDay *-- "0..*" Activity
+    TripDay *-- "0..*" FreePeriod
+    Itinerary *-- ItineraryVersion
+```
+
+### Interpretação
+
+* O Roteiro controla sua própria versão.
+* O Dia não existe isoladamente da Viagem.
+* Atividades e Períodos Livres pertencem a um único Dia.
+* Lugar é referenciado por `PlaceId`.
+* Dados completos do Lugar não pertencem ao agregado.
+* Deslocamentos não aparecem como entidades internas porque são derivados.
 
 ---
 
-## 44. Versão do Roteiro
+## 56. Estados do Roteiro
 
-O Roteiro deverá possuir versão lógica para:
+Estados conceituais:
 
-* evitar sobrescrita concorrente;
-* comparar Propostas;
-* auditar alterações;
-* detectar dados desatualizados.
+* `empty`;
+* `partial`;
+* `planned`;
+* `with-conflicts`;
+* `under-review`;
+* `outdated`.
+
+Alguns estados podem representar dimensões diferentes.
+
+Exemplo:
+
+Um Roteiro pode estar simultaneamente:
+
+* parcialmente planejado;
+* com Conflitos;
+* desatualizado.
+
+A implementação não deve assumir que todos os estados são mutuamente exclusivos.
 
 ---
 
-## 45. Invariantes do Roteiro
+## 57. Versão do Roteiro
+
+A versão lógica deverá ser alterada após mudanças canônicas, como:
+
+* adicionar Atividade;
+* editar Atividade;
+* remover Atividade;
+* mover Atividade;
+* adicionar Período Livre;
+* editar Período Livre;
+* remover Período Livre;
+* aplicar itens de Proposta.
+
+### Uso
+
+* controle de concorrência;
+* validade de Proposta;
+* auditoria;
+* comparação;
+* invalidação;
+* sincronização.
+
+---
+
+## 58. Invariantes do Roteiro
 
 1. Pertence a uma única Viagem.
-2. Atividade pertence a um único Dia.
-3. Dia pertence à mesma Viagem.
-4. Ordem das Atividades deve ser determinística.
-5. Atividades sem horário são permitidas.
-6. Períodos Livres são permitidos.
-7. Conflitos não impedem necessariamente salvamento.
-8. Erros bloqueantes devem impedir operações específicas.
-9. Reordenação deve recalcular dados derivados.
-10. Proposta não altera o Roteiro sem aceitação.
-11. Alterações devem produzir nova versão lógica.
+2. Possui Dias pertencentes à mesma Viagem.
+3. Atividade pertence a um único Dia.
+4. Período Livre pertence a um único Dia.
+5. Ordem dos itens é determinística.
+6. Atividade sem horário é válida.
+7. Planejamento parcial é válido.
+8. Período Livre protegido não pode ser preenchido automaticamente.
+9. Alteração gera nova versão.
+10. Proposta não altera o Roteiro antes da aceitação.
+11. Concorrência não pode sobrescrever estado silenciosamente.
+12. Conflitos não impedem necessariamente a persistência.
 
 ---
 
-# Parte XIII — Atividade
+# Parte XII — Atividade
 
-## 46. Entidade Atividade
+## 59. Entidade Atividade
 
 ### Identidade
 
-```text
+```text id="i6o7be"
 ActivityId
 ```
 
@@ -1346,17 +2362,17 @@ ActivityId
 
 Representa um compromisso planejado em um Dia da Viagem.
 
-### Tipos
+### Tipos iniciais
 
-* place-visit;
-* meal;
-* tour;
-* transport;
-* rest;
-* custom;
-* check-in;
-* check-out;
-* free-form.
+* `place-visit`;
+* `meal`;
+* `tour`;
+* `transport`;
+* `rest`;
+* `custom`;
+* `check-in`;
+* `check-out`;
+* `free-form`.
 
 ### Atributos
 
@@ -1370,77 +2386,94 @@ Representa um compromisso planejado em um Dia da Viagem.
 * observação;
 * ordem;
 * origem;
-* status;
+* estado;
 * flexibilidade.
 
 ---
 
-## 47. Estados da Atividade
+## 60. Estados da Atividade
 
-* planned;
-* tentative;
-* completed;
-* skipped;
-* cancelled;
-* unavailable;
-* needs-review.
+* `planned`;
+* `tentative`;
+* `completed`;
+* `skipped`;
+* `cancelled`;
+* `unavailable`;
+* `needs-review`;
+* `removed`.
 
 ---
 
-## 48. Origem da Atividade
+## 61. Origem da Atividade
 
 * manual;
 * Lugar adicionado;
-* proposta aceita;
-* importação futura;
+* Proposta aceita;
+* Recomendação aceita;
 * duplicação;
-* recomendação.
+* importação futura.
+
+A origem deve ser preservada para:
+
+* auditoria;
+* explicação;
+* analytics;
+* revisão;
+* IA.
 
 ---
 
-## 49. Flexibilidade da Atividade
+## 62. Flexibilidade da Atividade
 
 ### Fixed
 
-Horário ou posição não deve ser alterado automaticamente.
+* horário ou posição protegidos;
+* não pode ser movida automaticamente;
+* pode ser alterada manualmente por Usuário autorizado.
 
 ### Flexible
 
-Pode ser reorganizada mediante confirmação.
+* pode participar de alternativas;
+* pode ser reorganizada em Proposta;
+* aplicação continua exigindo aceitação.
 
 ### Suggested
 
-Foi sugerida e ainda pode ser revisada.
+* possui origem sugerida;
+* ainda requer revisão;
+* pode ser descartada.
 
 ---
 
-## 50. Invariantes da Atividade
+## 63. Invariantes da Atividade
 
+* título não pode estar vazio;
 * deve pertencer a um Dia;
-* título não pode ser vazio;
-* horário deve usar fuso da Viagem;
-* duração não pode ser negativa;
+* duração deve ser positiva;
+* horário usa o fuso da Viagem;
 * Lugar associado deve existir;
-* Localização manual pode substituir ausência de Lugar;
-* ordem deve ser válida dentro do Dia;
-* remoção não deve apagar Lugar;
-* mudança de Dia deve atualizar relacionamentos.
+* Lugar é opcional;
+* Localização manual é permitida;
+* ordem deve ser válida;
+* remoção não exclui Lugar;
+* mudança de Dia preserva identidade;
+* Atividade fixa não pode ser movida automaticamente.
 
 ---
 
-# Parte XIV — Período Livre
+# Parte XIII — Período Livre
 
-## 51. Entidade Período Livre
+## 64. Entidade Período Livre
 
 ### Identidade
 
-```text
+```text id="2dmr3b"
 FreePeriodId
 ```
 
 ### Definição
 
-Representa intervalo intencionalmente não ocupado.
+Representa um intervalo intencionalmente não ocupado por Atividade.
 
 ### Atributos
 
@@ -1453,54 +2486,97 @@ Representa intervalo intencionalmente não ocupado.
 
 ### Modos
 
-* flexible;
-* protected.
+* `flexible`;
+* `protected`.
 
 ### Invariantes
 
-* período protegido não pode ser preenchido automaticamente;
-* período flexível pode receber sugestão somente com decisão do usuário;
+* não deve ser tratado como ausência acidental;
+* modo protegido impede preenchimento automático;
+* modo flexível permite sugestões;
+* substituição exige decisão;
 * ausência de horário é permitida;
-* não deve ser tratado como falha de planejamento.
+* remoção não cria Atividade.
 
 ---
 
-# Parte XV — Deslocamento
+## 65. Diferença entre Dia vazio e Dia livre
 
-## 52. Conceito Deslocamento
+```mermaid id="spmz0y"
+flowchart TD
+    Day["Dia da Viagem"]
+    HasActivity{"Possui Atividade?"}
+    HasFreePeriod{"Possui Período Livre?"}
+    ExplicitFree{"Foi marcado intencionalmente como livre?"}
+
+    Empty["Dia vazio"]
+    Planned["Dia com planejamento"]
+    Free["Dia livre"]
+    Partial["Dia parcialmente planejado"]
+
+    Day --> HasActivity
+
+    HasActivity -->|Sim| HasFreePeriod
+    HasActivity -->|Não| ExplicitFree
+
+    HasFreePeriod -->|Não| Planned
+    HasFreePeriod -->|Sim| Partial
+
+    ExplicitFree -->|Sim| Free
+    ExplicitFree -->|Não| Empty
+```
+
+### Interpretação
+
+* Dia vazio descreve ausência de conteúdo.
+* Dia livre descreve uma intenção explícita.
+* Um Dia pode combinar Atividades e Períodos Livres.
+* O sistema não deve preencher um Dia livre automaticamente.
+
+---
+
+# Parte XIV — Deslocamento e Mobilidade
+
+## 66. Conceito Deslocamento
 
 ### Definição
 
-Representa movimento entre duas referências.
+Representa movimento entre duas referências geográficas.
 
-### Origem e destino
-
-Podem ser:
+### Origem e destino possíveis
 
 * Hospedagem;
 * Atividade;
 * Lugar;
 * Localização atual;
-* endereço;
-* ponto manual.
+* endereço manual;
+* referência externa;
+* ponto personalizado.
 
 ---
 
-## 53. Objeto de valor Meio de Transporte
+## 67. Objeto de valor Meio de Transporte
 
 Valores iniciais:
 
-* walking;
-* driving;
-* public-transit;
-* ride-hailing;
-* cycling;
-* boat;
-* custom.
+* `walking`;
+* `driving`;
+* `public-transit`;
+* `ride-hailing`;
+* `cycling`;
+* `boat`;
+* `custom`.
+
+### Invariantes
+
+* deve acompanhar a Estimativa;
+* mudança invalida cálculo anterior;
+* preferência global não obriga uso em todo Deslocamento;
+* Meio de Transporte não é veículo específico.
 
 ---
 
-## 54. Objeto de valor Estimativa de Deslocamento
+## 68. Objeto de valor Estimativa de Deslocamento
 
 ### Estrutura
 
@@ -1508,52 +2584,73 @@ Valores iniciais:
 * destino;
 * Distância;
 * duração;
-* transporte;
+* Meio de Transporte;
 * rota opcional;
 * data de cálculo;
-* fonte;
+* Fonte;
 * confiança;
-* validade.
+* validade;
+* estado.
 
 ### Estados
 
-* calculating;
-* available;
-* estimated;
-* unavailable;
-* stale.
+* `requested`;
+* `calculating`;
+* `available`;
+* `estimated`;
+* `unavailable`;
+* `stale`;
+* `failed`.
 
 ### Invariantes
 
-* duração deve indicar que é estimada;
-* fonte deve ser rastreável;
-* mudança de origem invalida a estimativa;
-* mudança de transporte invalida a estimativa;
-* estimativa vencida não deve ser tratada como atual.
+* deve possuir origem e destino;
+* deve possuir Meio de Transporte;
+* deve indicar que é estimada;
+* deve preservar Proveniência;
+* mudança de contexto invalida o resultado;
+* falha não remove Atividade;
+* precisão deve ser proporcional à Fonte.
 
 ---
 
-## 55. Deslocamento derivado
+## 69. Deslocamentos derivados
 
 Deslocamentos entre Atividades são derivados da sequência do Roteiro.
 
-Eles não deverão possuir identidade independente quando puderem ser recalculados.
+Exemplo:
+
+```text id="k28od4"
+Hospedagem
+→ Atividade 1
+→ Atividade 2
+→ Atividade 3
+→ Hospedagem opcional
+```
+
+Eles podem ser recalculados quando:
+
+* Atividade é movida;
+* Localização muda;
+* Hospedagem muda;
+* Meio de Transporte muda;
+* validade expira.
 
 ---
 
-# Parte XVI — Recomendação
+# Parte XV — Recomendação
 
-## 56. Entidade Recomendação
+## 70. Entidade Recomendação
 
 ### Identidade
 
-```text
+```text id="fhnw2r"
 RecommendationId
 ```
 
 ### Definição
 
-Sugestão produzida com base no contexto da Viagem.
+Representa uma sugestão produzida com base no contexto da Viagem.
 
 ### Tipos
 
@@ -1569,31 +2666,32 @@ Sugestão produzida com base no contexto da Viagem.
 
 ### Atributos
 
-* objeto recomendado;
-* contexto;
-* justificativas;
+* alvo recomendado;
+* Contexto de Decisão;
+* Justificativas;
 * evidências;
 * score opcional;
 * limitações;
-* data;
 * validade;
 * origem;
-* status.
+* estado;
+* metadados de geração.
 
 ---
 
-## 57. Estados da Recomendação
+## 71. Estados da Recomendação
 
-* generated;
-* presented;
-* accepted;
-* rejected;
-* expired;
-* invalidated.
+* `generated`;
+* `presented`;
+* `accepted`;
+* `rejected`;
+* `expired`;
+* `invalidated`;
+* `superseded`.
 
 ---
 
-## 58. Objeto de valor Contexto de Decisão
+## 72. Objeto de valor Contexto de Decisão
 
 Pode incluir:
 
@@ -1602,19 +2700,24 @@ Pode incluir:
 * Hospedagem;
 * Dia;
 * horário;
+* Perfil do Grupo;
 * Preferências;
-* Viajantes;
-* orçamento;
-* Ritmo;
 * Restrições;
+* Orçamento;
+* Ritmo;
 * Lugares Salvos;
 * Roteiro;
 * Distâncias;
-* disponibilidade de dados.
+* disponibilidade;
+* atualidade dos dados.
+
+### Regra
+
+O contexto deve possuir uma versão ou referência temporal suficiente para permitir invalidação posterior.
 
 ---
 
-## 59. Objeto de valor Justificativa
+## 73. Objeto de valor Justificativa
 
 ### Estrutura
 
@@ -1622,523 +2725,637 @@ Pode incluir:
 * descrição;
 * evidência;
 * peso opcional;
-* limitação opcional.
+* limitação;
+* Fonte.
 
 ### Exemplos
 
 * proximidade da Hospedagem;
 * compatibilidade com Interesse;
-* mesma Região;
-* faixa de preço;
-* horário apropriado;
-* adequação para crianças.
+* dentro da Faixa de Preço;
+* adequado para crianças;
+* compatível com o Ritmo;
+* localizado na mesma Região do Dia.
 
 ---
 
-## 60. Invariantes da Recomendação
+## 74. RB-DGM-DOM-007 — Recomendação e Contexto de Decisão
 
-1. Deve possuir contexto.
-2. Deve possuir pelo menos uma justificativa quando apresentada como personalizada.
-3. Não deve ser aplicada automaticamente.
-4. Deve identificar limitações relevantes.
-5. Deve expirar quando o contexto muda.
-6. Não deve contradizer Restrição obrigatória.
-7. Score não deve ser apresentado como verdade absoluta.
-8. Rejeição não deve exigir justificativa do usuário.
+```mermaid id="g4u08j"
+classDiagram
+    class Recommendation {
+        +RecommendationId id
+        +RecommendationStatus status
+        +RecommendationScore score
+        +RecommendationValidity validity
+    }
+
+    class DecisionContext {
+        <<Value Object>>
+        +TripId tripId
+        +TripContextVersion tripVersion
+        +ItineraryVersion itineraryVersion
+        +LocalDateTime evaluatedAt
+    }
+
+    class RecommendationReason {
+        <<Value Object>>
+        +ReasonFactor factor
+        +String description
+        +ReasonWeight weight
+    }
+
+    class Evidence {
+        <<Value Object>>
+        +EvidenceType type
+        +Any value
+    }
+
+    class RecommendationLimitation {
+        <<Value Object>>
+        +String description
+    }
+
+    class Place {
+        +PlaceId id
+    }
+
+    class ActivitySuggestion {
+        +String title
+    }
+
+    Recommendation *-- DecisionContext
+    Recommendation *-- "1..*" RecommendationReason
+    RecommendationReason *-- "0..*" Evidence
+    Recommendation *-- "0..*" RecommendationLimitation
+    Recommendation --> "0..1" Place : pode recomendar
+    Recommendation --> "0..1" ActivitySuggestion : pode sugerir
+```
+
+### Invariantes
+
+1. Recomendação personalizada possui contexto.
+2. Deve possuir ao menos uma Justificativa.
+3. Não altera estado canônico.
+4. Restrição obrigatória possui precedência.
+5. Score não substitui explicação.
+6. Limitações relevantes devem ser comunicadas.
+7. Mudança material de contexto exige invalidação.
+8. Rejeição não exige motivo.
+9. Conteúdo de IA deve passar por validação.
 
 ---
 
-# Parte XVII — Proposta de Roteiro
+# Parte XVI — Proposta de Roteiro
 
-## 61. Agregado Proposta de Roteiro
+## 75. Agregado Proposta de Roteiro
 
 ### Identidade
 
-```text
+```text id="916odn"
 ItineraryProposalId
+```
+
+### Raiz
+
+```text id="y4h44l"
+ItineraryProposal
 ```
 
 ### Definição
 
-Representa uma alternativa de organização ainda não incorporada ao Roteiro.
+Representa uma alternativa de organização ainda não incorporada ao Roteiro atual.
 
 ### Atributos
 
 * Viagem;
 * versão base do Roteiro;
+* versão do contexto da Viagem;
 * Dias propostos;
 * Atividades propostas;
 * critérios;
-* justificativas;
-* conflitos;
-* status;
+* Justificativas;
+* Conflitos;
+* estado;
 * data de criação;
-* validade.
+* validade;
+* metadados de geração.
 
 ---
 
-## 62. Estados da Proposta
+## 76. Estados da Proposta
 
-* generating;
-* ready;
-* partially-accepted;
-* accepted;
-* rejected;
-* expired;
-* failed;
-* superseded.
+* `requested`;
+* `generating`;
+* `ready`;
+* `partially-accepted`;
+* `accepted`;
+* `rejected`;
+* `expired`;
+* `failed`;
+* `cancelled`;
+* `superseded`.
 
 ---
 
-## 63. Invariantes da Proposta
+## 77. Atividade Proposta
 
-1. Deve referenciar versão base do Roteiro.
-2. Não pode modificar o Roteiro enquanto `ready`.
+Uma Atividade Proposta:
+
+* pertence à Proposta;
+* não pertence ao Roteiro atual;
+* não possui identidade de Atividade canônica;
+* pode referenciar Lugar;
+* pode possuir justificativa;
+* torna-se Atividade apenas após aceitação.
+
+---
+
+## 78. RB-DGM-DOM-008 — Proposta e aplicação ao Roteiro
+
+```mermaid id="27cu0h"
+flowchart LR
+    Current["Roteiro atual<br/>versão N"]
+    Context["Contexto da Viagem<br/>versão M"]
+    Generate["Gerar Proposta"]
+    Proposal["Proposta pronta<br/>base N / contexto M"]
+    Review["Revisão do Usuário"]
+    Reject["Rejeitar"]
+    Partial["Aceitar parcialmente"]
+    Full["Aceitar integralmente"]
+    Validate["Validar versão e invariantes"]
+    Apply["Aplicar itens selecionados"]
+    Updated["Roteiro atualizado<br/>versão N+1"]
+    Expired["Proposta expirada"]
+
+    Current --> Generate
+    Context --> Generate
+    Generate --> Proposal
+    Proposal --> Review
+
+    Review --> Reject
+    Review --> Partial
+    Review --> Full
+
+    Partial --> Validate
+    Full --> Validate
+
+    Validate -->|Contexto válido| Apply
+    Validate -->|Versão incompatível| Expired
+    Apply --> Updated
+
+    Reject -. "não altera" .-> Current
+    Expired -. "não altera" .-> Current
+```
+
+### Invariantes
+
+1. Proposta referencia versão base.
+2. Não altera Roteiro enquanto não aceita.
 3. Aceitação deve ser explícita.
-4. Aceitação parcial deve aplicar apenas itens selecionados.
-5. Proposta vencida deve ser recalculada antes da aplicação.
-6. Conflitos conhecidos devem ser apresentados.
-7. Rejeição preserva Roteiro atual.
-8. Nova geração não deve apagar proposta anterior antes de concluir.
+4. Aceitação parcial aplica apenas itens selecionados.
+5. Proposta expirada não pode ser aplicada.
+6. Períodos protegidos devem ser respeitados.
+7. Atividades fixas não podem ser movidas automaticamente.
+8. Falha de geração preserva estado atual.
+9. A mesma Proposta não pode ser aplicada duas vezes.
 
 ---
 
-## 64. Atividade Proposta
+# Parte XVII — Conflito
 
-Uma Atividade Proposta não é uma Atividade do Roteiro.
-
-Ela somente se torna Atividade após aceitação.
-
----
-
-# Parte XVIII — Conflitos
-
-## 65. Entidade Conflito
+## 79. Entidade Conflito
 
 ### Identidade
 
-```text
+```text id="85rozj"
 ConflictId
 ```
 
 ### Definição
 
-Representa condição detectada que afeta ou pode afetar o planejamento.
+Representa uma condição identificada que afeta ou pode afetar o planejamento.
 
 ### Severidades
 
-* error;
-* risk;
-* suggestion.
+* `error`;
+* `risk`;
+* `suggestion`.
 
 ### Categorias
 
 * temporal;
-* geographic;
-* availability;
-* restriction;
-* budget;
-* intensity;
-* transport;
-* data-quality;
-* dependency;
-* structural.
+* geográfica;
+* disponibilidade;
+* Restrição;
+* Orçamento;
+* intensidade;
+* transporte;
+* qualidade de dados;
+* dependência;
+* estrutural.
 
 ---
 
-## 66. Estados do Conflito
+## 80. Estados do Conflito
 
-* open;
-* resolved;
-* ignored;
-* invalidated;
-* superseded.
+* `open`;
+* `resolved`;
+* `ignored`;
+* `invalidated`;
+* `superseded`.
 
----
+### Regras
 
-## 67. Exemplos
-
-### Erro
-
-Atividades incompatíveis que impedem determinada operação.
-
-### Risco
-
-Intervalo de deslocamento curto.
-
-### Sugestão
-
-Reorganização que pode reduzir Distância.
+* Erro bloqueante não pode ser ignorado;
+* Risco pode ser ignorado quando permitido;
+* resolução exige remoção da condição;
+* invalidação ocorre por mudança de contexto;
+* um novo Conflito pode substituir outro.
 
 ---
 
-## 68. Invariantes do Conflito
+## 81. Evidência do Conflito
 
-* deve possuir objeto afetado;
-* deve possuir severidade;
-* deve possuir descrição;
-* deve possuir evidência ou regra;
-* erro bloqueante não pode ser ignorado;
-* risco pode ser ignorado quando permitido;
-* resolução deve registrar causa;
-* mudança de contexto pode invalidá-lo.
+Pode incluir:
 
----
-
-## 69. Conflitos derivados
-
-Conflitos deverão preferencialmente ser derivados do estado atual.
-
-Não deverão ser tratados como verdade permanente.
+* horários;
+* duração;
+* Distância;
+* Tempo de Deslocamento;
+* estado do Lugar;
+* Restrição;
+* orçamento;
+* dados desatualizados;
+* versão de contexto;
+* regra aplicada.
 
 ---
 
-# Parte XIX — Proveniência e qualidade dos dados
+## 82. RB-DGM-DOM-009 — Conflitos e evidências
 
-## 70. Entidade Fonte de Dados
+```mermaid id="iirxcy"
+classDiagram
+    class Conflict {
+        +ConflictId id
+        +ConflictCategory category
+        +ConflictSeverity severity
+        +ConflictStatus status
+        +ContextVersion contextVersion
+    }
 
-### Identidade
+    class ConflictRule {
+        +RuleId id
+        +String name
+        +Boolean blocking
+    }
 
-```text
-DataSourceId
+    class ConflictEvidence {
+        +EvidenceType type
+        +Any value
+        +Instant evaluatedAt
+    }
+
+    class ConflictResolution {
+        +ResolutionType type
+        +String description
+        +UserId actorId
+        +Instant resolvedAt
+    }
+
+    class Itinerary {
+        +ItineraryId id
+    }
+
+    class Activity {
+        +ActivityId id
+    }
+
+    class ItineraryProposal {
+        +ItineraryProposalId id
+    }
+
+    Conflict --> ConflictRule
+    Conflict *-- "1..*" ConflictEvidence
+    Conflict o-- "0..1" ConflictResolution
+    Conflict --> "0..1" Itinerary
+    Conflict --> "0..*" Activity
+    Conflict --> "0..1" ItineraryProposal
 ```
 
-### Tipos
+### Invariantes
 
-* internal;
-* user-provided;
-* provider;
-* public-dataset;
-* partner;
-* ai-generated;
-* inferred.
-
-### Atributos
-
-* nome;
-* tipo;
-* confiabilidade;
-* política de atualização;
-* termos;
-* status.
+* todo Conflito possui regra;
+* todo Conflito possui evidência;
+* todo Conflito possui objeto afetado;
+* severidade é obrigatória;
+* estado deve ser rastreável;
+* resolução deve registrar causa;
+* mudança de versão pode invalidar o Conflito.
 
 ---
 
-## 71. Objeto de valor Proveniência
+# Parte XVIII — Objetos de valor
 
-### Estrutura
+## 83. Objetos de valor principais
 
-* fonte;
-* identificador externo;
-* data de coleta;
-* data de atualização;
-* método;
-* confiança;
-* licença opcional.
-
----
-
-## 72. Nível de confiança
-
-Valores conceituais:
-
-* confirmed;
-* high;
-* medium;
-* low;
-* unknown.
-
-### Regra
-
-Confiança representa qualidade da evidência, não certeza absoluta.
-
----
-
-## 73. Estado de atualização
-
-* current;
-* stale;
-* unknown;
-* conflicting;
-* unavailable.
+| Objeto               | Uso                         |
+| -------------------- | --------------------------- |
+| TripPeriod           | Período da Viagem           |
+| Destination          | Destino principal           |
+| Location             | Referência geográfica       |
+| GeoCoordinate        | Coordenadas                 |
+| Address              | Endereço                    |
+| Region               | Área geográfica             |
+| Budget               | Referência financeira       |
+| Pace                 | Ritmo                       |
+| Interest             | Interesse                   |
+| Restriction          | Restrição                   |
+| PriceRange           | Faixa de Preço              |
+| OpeningHours         | Horário de Funcionamento    |
+| TransportMode        | Meio de Transporte          |
+| TravelEstimate       | Estimativa de Deslocamento  |
+| DecisionContext      | Contexto da Recomendação    |
+| RecommendationReason | Justificativa               |
+| Provenance           | Origem do dado              |
+| ConfidenceLevel      | Confiança                   |
+| DataFreshness        | Atualidade                  |
+| ItineraryVersion     | Versão do Roteiro           |
+| TripContextVersion   | Versão estrutural da Viagem |
+| Money                | Valor monetário e moeda     |
+| Distance             | Valor e unidade             |
+| Duration             | Duração                     |
+| TimeZone             | Fuso horário                |
 
 ---
 
-## 74. Dados conflitantes
+## 84. Características dos objetos de valor
 
-Quando fontes divergirem:
+Objetos de valor devem:
 
-* não escolher silenciosamente sem regra;
-* preservar proveniência;
-* priorizar fonte adequada;
-* comunicar incerteza quando relevante;
-* permitir revisão futura.
-
----
-
-# Parte XX — Objetos de valor principais
-
-## 75. Lista inicial
-
-* TripPeriod;
-* Destination;
-* Location;
-* Region;
-* Budget;
-* Pace;
-* Interest;
-* Restriction;
-* PriceRange;
-* OpeningHours;
-* TransportMode;
-* TravelEstimate;
-* DecisionContext;
-* RecommendationReason;
-* Provenance;
-* ConfidenceLevel;
-* DateTimeRange;
-* CurrencyAmount;
-* Address;
-* DataFreshness.
-
----
-
-## 76. Características dos objetos de valor
-
-Objetos de valor deverão:
-
-* não possuir identidade própria;
 * ser definidos por seus atributos;
+* não possuir identidade própria;
 * ser imutáveis conceitualmente;
 * validar invariantes na criação;
 * permitir comparação por valor;
-* evitar uso de primitivas sem significado.
+* evitar primitivas sem significado;
+* preservar unidade e contexto;
+* impedir estados parcialmente inválidos.
 
 ---
 
-# Parte XXI — Agregados
+# Parte XIX — Agregados e limites de consistência
 
-## 77. Agregados iniciais
+## 85. Agregados iniciais
 
 ### Trip Aggregate
 
 Raiz:
 
-```text
+```text id="8c40de"
 Trip
 ```
 
-Contém ou coordena:
+Coordena:
 
-* Destino;
-* Período;
-* Hospedagem;
-* Viajantes;
-* Preferências;
-* Lugares Salvos;
-* referência ao Roteiro.
+* Destination;
+* TripPeriod;
+* Accommodation;
+* Traveler;
+* TripPreferences;
+* SavedPlace.
 
 ### Itinerary Aggregate
 
 Raiz:
 
-```text
+```text id="mxq15o"
 Itinerary
 ```
 
-Contém:
+Coordena:
 
-* Dias;
-* Atividades;
-* Períodos Livres;
-* versão.
-
-### Proposal Aggregate
-
-Raiz:
-
-```text
-ItineraryProposal
-```
-
-Contém:
-
-* Dias propostos;
-* Atividades propostas;
-* conflitos;
-* critérios.
+* TripDay;
+* Activity;
+* FreePeriod;
+* ItineraryVersion.
 
 ### Place Aggregate
 
 Raiz:
 
-```text
+```text id="ydq38n"
 Place
 ```
 
-Contém:
+Coordena:
 
-* dados do Lugar;
-* categorias;
+* Categorias;
 * informações;
-* proveniência.
+* identificadores externos;
+* estados operacionais;
+* Proveniência associada.
+
+### Proposal Aggregate
+
+Raiz:
+
+```text id="emhbkm"
+ItineraryProposal
+```
+
+Coordena:
+
+* ProposedDay;
+* ProposedActivity;
+* critérios;
+* validade;
+* seleção;
+* Conflitos da Proposta.
 
 ---
 
-## 78. Limites de consistência
+## 86. Consistência imediata
 
-Operações que exigem consistência imediata:
+Operações que normalmente exigem consistência imediata:
 
 * criar Viagem;
-* alterar Período;
+* validar Período;
+* remover último owner;
 * adicionar Atividade;
 * mover Atividade;
+* proteger Período Livre;
 * aceitar Proposta;
-* excluir Viagem;
-* alterar owner;
-* aplicar Restrição obrigatória.
+* aplicar Restrição obrigatória;
+* incrementar versão;
+* impedir duplicidade de Lugar Salvo.
 
-Operações que podem ser eventualmente consistentes:
+---
+
+## 87. Consistência eventual
+
+Operações que podem ocorrer posteriormente:
 
 * recalcular Distâncias;
 * atualizar Recomendações;
-* atualizar avaliação;
-* sincronizar dados externos;
 * reavaliar Conflitos;
-* gerar Proposta.
+* sincronizar dados externos;
+* atualizar avaliações;
+* expirar Propostas;
+* atualizar projeções;
+* recalcular Perfil do Grupo;
+* atualizar índice de busca.
 
 ---
 
-# Parte XXII — Serviços de domínio
+# Parte XX — Serviços de domínio
 
-## 79. TripPeriodService
+## 88. TripPeriodService
 
-Responsável por:
+Responsabilidades:
 
 * validar Período;
 * gerar Dias;
 * identificar impacto de redução;
-* calcular estado temporal.
+* calcular estado temporal;
+* preservar datas locais.
 
 ---
 
-## 80. TravelEstimationService
+## 89. PlaceResolutionService
 
-Responsável por:
+Responsabilidades:
 
-* calcular Distância;
-* estimar Tempo;
+* detectar duplicidades;
+* reconciliar identificadores externos;
+* consolidar informações;
+* preservar Proveniência;
+* gerar decisão de fusão.
+
+---
+
+## 90. TravelEstimationService
+
+Responsabilidades:
+
+* construir pedido de estimativa;
 * validar origem e destino;
-* indicar validade;
-* produzir proveniência.
+* validar Meio de Transporte;
+* calcular ou solicitar cálculo;
+* produzir validade;
+* preservar Proveniência.
 
 ---
 
-## 81. RecommendationService
+## 91. RecommendationService
 
-Responsável por:
+Responsabilidades:
 
 * construir Contexto de Decisão;
+* selecionar candidatos;
+* aplicar Restrições;
 * produzir Recomendações;
-* gerar justificativas;
-* respeitar Restrições;
-* invalidar sugestões obsoletas.
+* gerar Justificativas;
+* invalidar resultados obsoletos.
 
 ---
 
-## 82. ItineraryPlanningService
+## 92. ItineraryPlanningService
 
-Responsável por:
+Responsabilidades:
 
-* sugerir organização;
-* distribuir Atividades;
-* respeitar Períodos Livres;
+* sugerir distribuição;
+* respeitar Atividades fixas;
+* respeitar Períodos protegidos;
 * considerar Ritmo;
 * considerar Distâncias;
-* produzir Proposta.
+* produzir Proposta, não alterar Roteiro.
 
 ---
 
-## 83. ConflictDetectionService
+## 93. ConflictDetectionService
 
-Responsável por:
+Responsabilidades:
 
 * detectar sobreposição;
-* avaliar deslocamento;
+* avaliar Deslocamentos;
+* verificar Restrição;
 * avaliar intensidade;
-* verificar Restrições;
 * classificar severidade;
-* reavaliar após alterações.
+* produzir evidências;
+* invalidar Conflitos obsoletos.
 
 ---
 
-## 84. PlaceResolutionService
+# Parte XXI — Eventos de domínio
 
-Responsável por:
-
-* reconciliar identificadores externos;
-* detectar duplicações;
-* consolidar fontes;
-* preservar proveniência.
-
----
-
-# Parte XXIII — Eventos de domínio
-
-## 85. Eventos da Viagem
+## 94. Eventos da Viagem
 
 * TripCreated;
-* TripPlanningCompleted;
+* TripPlanningContextCompleted;
 * TripDestinationChanged;
 * TripPeriodChanged;
 * TripAccommodationChanged;
 * TripCancelled;
-* TripArchived.
+* TripArchived;
+* TripDeleted.
 
 ---
 
-## 86. Eventos de participantes e Preferências
+## 95. Eventos de Viajantes e Preferências
 
 * TravelerAdded;
 * TravelerRemoved;
-* TripPreferenceChanged;
-* RestrictionAdded;
-* RestrictionRemoved;
-* TransportModeChanged;
-* PaceChanged.
+* GroupProfileUpdated;
+* TripInterestAdded;
+* TripInterestRemoved;
+* TripBudgetChanged;
+* TripPaceChanged;
+* TripRestrictionAdded;
+* TripRestrictionRemoved;
+* TripTransportModeChanged.
 
 ---
 
-## 87. Eventos de Lugares
+## 96. Eventos de Lugares
 
+* PlaceCreated;
+* PlaceDataUpdated;
 * PlaceSaved;
 * PlaceUnsaved;
-* PlaceDataUpdated;
-* PlaceMarkedUnavailable;
-* PlacePlanned.
+* PlacePlanned;
+* PlaceNoLongerPlanned;
+* PlaceMarkedTemporarilyClosed;
+* PlaceMarkedPermanentlyClosed;
+* PlaceMerged.
 
 ---
 
-## 88. Eventos do Roteiro
+## 97. Eventos do Roteiro
 
+* ItineraryInitialized;
 * ActivityAdded;
 * ActivityUpdated;
 * ActivityRemoved;
-* ActivityMoved;
+* ActivityReordered;
 * ActivityMovedToAnotherDay;
 * FreePeriodAdded;
 * FreePeriodUpdated;
 * FreePeriodRemoved;
-* ItineraryReordered;
+* ItineraryVersionChanged;
 * ItineraryMarkedOutdated.
 
 ---
 
-## 89. Eventos de Proposta
+## 98. Eventos de Recomendações e Propostas
 
+* RecommendationRequested;
+* RecommendationGenerated;
+* RecommendationAccepted;
+* RecommendationRejected;
+* RecommendationInvalidated;
 * ItineraryProposalRequested;
 * ItineraryProposalGenerated;
-* ItineraryProposalFailed;
 * ItineraryProposalAccepted;
 * ItineraryProposalPartiallyAccepted;
 * ItineraryProposalRejected;
@@ -2146,35 +3363,23 @@ Responsável por:
 
 ---
 
-## 90. Eventos de Conflito
+## 99. Eventos de Conflito
 
 * ConflictDetected;
 * ConflictResolved;
 * ConflictIgnored;
-* ConflictInvalidated.
+* ConflictInvalidated;
+* ConflictSuperseded.
 
 ---
 
-## 91. Características dos eventos
+# Parte XXII — Comandos conceituais
 
-Eventos deverão:
-
-* representar fato ocorrido;
-* utilizar passado;
-* ser imutáveis;
-* possuir identificador;
-* possuir data;
-* possuir correlação;
-* indicar agregado;
-* evitar dados sensíveis desnecessários.
-
----
-
-# Parte XXIV — Comandos conceituais
-
-## 92. Comandos da Viagem
+## 100. Comandos da Viagem
 
 * CreateTrip;
+* CompleteTripDraft;
+* UpdateTripName;
 * UpdateTripDestination;
 * UpdateTripPeriod;
 * UpdateAccommodation;
@@ -2182,162 +3387,116 @@ Eventos deverão:
 * RemoveTraveler;
 * UpdateTripPreferences;
 * CancelTrip;
-* ArchiveTrip.
+* ArchiveTrip;
+* DeleteTrip.
 
 ---
 
-## 93. Comandos de Lugares
+## 101. Comandos de Lugares
 
+* CreateCustomPlace;
 * SavePlace;
 * UnsavePlace;
 * AddPlaceToItinerary;
-* OpenPlaceDetails.
+* MergePlaces;
+* MarkPlaceUnavailable.
 
 ---
 
-## 94. Comandos do Roteiro
+## 102. Comandos do Roteiro
 
 * AddActivity;
 * UpdateActivity;
 * RemoveActivity;
 * MoveActivity;
-* MoveActivityToDay;
+* MoveActivityToAnotherDay;
 * AddFreePeriod;
-* ReorderDay;
-* MarkDayFree.
+* UpdateFreePeriod;
+* RemoveFreePeriod;
+* MarkTripDayFree.
 
 ---
 
-## 95. Comandos de Proposta
+## 103. Comandos de Recomendações e Propostas
 
+* RequestRecommendation;
+* AcceptRecommendation;
+* RejectRecommendation;
 * RequestItineraryProposal;
-* AcceptProposal;
-* AcceptProposalPartially;
-* RejectProposal;
-* RegenerateProposal.
+* AcceptItineraryProposal;
+* AcceptItineraryProposalPartially;
+* RejectItineraryProposal;
+* RegenerateItineraryProposal.
 
 ---
 
-## 96. Comandos de Conflito
+## 104. Comandos de Conflito
 
-* ReviewConflicts;
+* ReviewItinerary;
 * ResolveConflict;
 * IgnoreRisk;
 * RestoreIgnoredRisk.
 
 ---
 
-# Parte XXV — Regras derivadas
+# Parte XXIII — Invariantes transversais
 
-## 97. Estado temporal da Viagem
+## 105. Controle do Usuário
 
-```text
-hoje < início
-→ Planned
+Nenhuma Recomendação ou Proposta pode:
 
-início ≤ hoje ≤ término
-→ InProgress
-
-hoje > término
-→ Completed
-```
-
-O status manual poderá coexistir com estado temporal em casos como cancelamento.
-
----
-
-## 98. Lugar Planejado
-
-Um Lugar está planejado quando existe pelo menos uma Atividade ativa associada a ele.
-
----
-
-## 99. Dia vazio
-
-Um Dia está vazio quando não possui:
-
-* Atividade;
-* Período Livre.
-
-Um Dia com Período Livre não é vazio.
-
----
-
-## 100. Roteiro parcial
-
-O Roteiro é parcial quando:
-
-* possui pelo menos uma Atividade;
-* nem todos os Dias possuem conteúdo planejado;
-* ou existem Atividades sem horário.
-
----
-
-## 101. Dados desatualizados
-
-Um dado poderá ser considerado desatualizado por:
-
-* tempo;
-* mudança de contexto;
-* mudança de fonte;
-* alteração estrutural;
-* erro de sincronização.
-
----
-
-# Parte XXVI — Invariantes transversais
-
-## 102. Controle do usuário
-
-Nenhuma Recomendação ou Proposta deverá:
-
-* alterar Roteiro;
+* alterar o Roteiro;
 * remover Atividade;
 * substituir Preferência;
+* alterar Hospedagem;
 * ignorar Restrição;
+* excluir Lugar Salvo;
 
-sem decisão explícita.
+sem decisão explícita e autorizada.
 
 ---
 
-## 103. Preservação
+## 106. Preservação
 
-Falhas externas não deverão apagar:
+Falhas externas não devem apagar:
 
 * Viagem;
 * Roteiro;
 * Preferências;
+* Lugares Salvos;
 * alterações locais;
-* Proposta anterior válida.
+* Proposta anterior válida;
+* histórico de decisões.
 
 ---
 
-## 104. Proveniência
+## 107. Proveniência
 
-Informações externas relevantes deverão possuir origem identificável.
+Informações externas relevantes devem possuir origem identificável.
 
 ---
 
-## 105. Estimativas
+## 108. Estimativas
 
-Estimativas deverão:
+Estimativas devem:
 
 * ser rotuladas;
 * possuir validade;
-* possuir fonte;
-* poder ficar desatualizadas.
+* possuir Fonte;
+* permitir estado desatualizado;
+* não ser tratadas como garantia.
 
 ---
 
-## 106. Identidade
+## 109. Identidade
 
-Entidades internas não deverão utilizar identificadores externos como única identidade.
+Entidades internas não devem utilizar identificador externo como única identidade.
 
 ---
 
-## 107. Exclusão
+## 110. Exclusão
 
-Exclusões deverão distinguir:
+Exclusões devem distinguir:
 
 * remoção lógica;
 * arquivamento;
@@ -2345,56 +3504,44 @@ Exclusões deverão distinguir:
 * anonimização;
 * exclusão definitiva.
 
-A política técnica será definida posteriormente.
+---
+
+## 111. Consistência temporal
+
+Datas e horários devem distinguir:
+
+* data local;
+* horário local;
+* instante;
+* fuso;
+* intervalo.
 
 ---
 
-# Parte XXVII — Consistência temporal
+## 112. IA como capacidade probabilística
 
-## 108. Fuso horário
+IA pode:
 
-A Viagem deverá possuir fuso horário principal.
+* sugerir;
+* organizar;
+* explicar;
+* classificar;
+* produzir rascunhos.
 
-Datas e horários de:
+IA não pode:
 
-* Dias;
-* Atividades;
-* horários de funcionamento;
-* eventos;
-
-deverão ser interpretados no fuso adequado.
-
----
-
-## 109. Datas sem horário
-
-Datas de Viagem deverão utilizar data local.
-
-Não deverão ser convertidas implicitamente para UTC como instante.
+* violar invariantes;
+* conceder autorização;
+* aplicar Proposta;
+* excluir;
+* persistir fato não validado;
+* tornar estimativa em confirmação.
 
 ---
 
-## 110. Horários externos
+# Parte XXIV — Privacidade e sensibilidade
 
-Horários de Lugares devem utilizar fuso da Localização do Lugar.
-
----
-
-## 111. Travessia de fusos
-
-O domínio deverá permitir futuramente:
-
-* Viagens com múltiplos Destinos;
-* mudança de fuso;
-* deslocamentos longos.
-
-O MVP poderá assumir um fuso principal por Viagem.
-
----
-
-# Parte XXVIII — Privacidade e sensibilidade
-
-## 112. Dados pessoais
+## 113. Dados pessoais
 
 Podem incluir:
 
@@ -2403,224 +3550,212 @@ Podem incluir:
 * Preferências;
 * necessidades;
 * Restrições;
-* Localização atual.
+* Localização atual;
+* associação entre Usuário e Viagem.
 
 ---
 
-## 113. Minimização
+## 114. Minimização
 
-O domínio deverá armazenar apenas dados necessários.
+O domínio deve:
 
-Exemplos:
-
-* utilizar faixa etária em vez de data de nascimento quando suficiente;
-* evitar diagnóstico médico;
-* registrar necessidade funcional quando apropriado;
-* evitar localização contínua sem necessidade.
+* coletar apenas o necessário;
+* preferir faixa etária a data de nascimento;
+* preferir necessidade funcional a diagnóstico;
+* evitar Localização contínua;
+* não expor dados em Eventos sem necessidade;
+* reduzir contexto enviado à IA.
 
 ---
 
-## 114. Localização atual
+## 115. Localização atual
 
-Deverá ser:
+Deve ser:
 
 * opcional;
 * autorizada;
+* contextual;
 * temporária quando possível;
-* não necessária para planejamento básico.
+* desnecessária para planejamento básico.
 
 ---
 
-# Parte XXIX — Extensibilidade
+# Parte XXV — Extensibilidade
 
-## 115. Múltiplos Destinos
+## 116. Múltiplos Destinos
 
-O modelo futuro poderá evoluir de:
+Evolução possível:
 
-```text
-Viagem
-→ um Destino
+```mermaid id="pkvvvl"
+flowchart LR
+    Current["Modelo atual"]
+    Trip["Viagem"]
+    Destination["Destino único"]
+
+    Future["Modelo futuro"]
+    TripFuture["Viagem"]
+    Stage["Etapa da Viagem"]
+    DestinationFuture["Destino"]
+    StagePeriod["Período da Etapa"]
+    AccommodationFuture["Hospedagem da Etapa"]
+
+    Current --> Trip
+    Trip --> Destination
+
+    Future --> TripFuture
+    TripFuture --> Stage
+    Stage --> DestinationFuture
+    Stage --> StagePeriod
+    Stage --> AccommodationFuture
 ```
 
-para:
+### Regra
 
-```text
-Viagem
-→ múltiplas Etapas
-→ cada Etapa possui Destino e Período
-```
-
-Essa evolução não deverá ser antecipada na implementação sem necessidade, mas o modelo não deverá impedir completamente sua adoção.
+O MVP não deve antecipar toda a complexidade, mas a evolução não deve ser bloqueada desnecessariamente.
 
 ---
 
-## 116. Múltiplas Hospedagens
+## 117. Múltiplas Hospedagens
 
-Poderão ser representadas futuramente por período.
+Poderão ser associadas futuramente a:
+
+* Etapa;
+* intervalo de datas;
+* Região;
+* Dia.
 
 ---
 
-## 117. Colaboração
+## 118. Colaboração
 
-O modelo de participação deverá permitir:
+O modelo poderá evoluir para:
 
 * múltiplos editores;
 * comentários;
-* decisões;
-* conflitos de edição;
-* aprovação.
+* decisões registradas;
+* convites;
+* aprovação;
+* conflitos de edição.
 
 ---
 
-## 118. Reservas
+## 119. Reservas
 
 Reservas futuras poderão associar:
 
 * Lugar;
 * Atividade;
-* confirmação;
 * fornecedor;
+* confirmação;
 * custo;
-* política.
+* política;
+* documento.
 
-Reserva não deverá ser incorporada prematuramente como atributo de Lugar.
-
----
-
-# Parte XXX — Anti-patterns de domínio
-
-## 119. Entidade Deus
-
-Não concentrar em `Trip` todas as regras e dados sem limites claros.
+Reserva não deve ser atributo direto e genérico de Lugar.
 
 ---
 
-## 120. Modelo anêmico
+# Parte XXVI — Anti-patterns
 
-Não deslocar todas as invariantes para serviços externos sem responsabilidade nos agregados.
+## 120. Entidade Deus
 
----
-
-## 121. Persistência orientando o domínio
-
-Não definir conceitos apenas com base em tabelas ou documentos externos.
+Não concentrar todos os conceitos dentro de `Trip`.
 
 ---
 
-## 122. Primitivas sem significado
+## 121. Modelo anêmico
 
-Evitar representar tudo como:
-
-* string;
-* number;
-* boolean;
-* array.
-
-Exemplos que exigem tipos próprios:
-
-* Distância;
-* moeda;
-* Período;
-* Localização;
-* confiança;
-* fuso;
-* Restrição.
+Não deslocar invariantes integralmente para serviços sem responsabilidade dos agregados.
 
 ---
 
-## 123. Status genérico
+## 122. Persistência orientando o domínio
 
-Evitar um único campo `status` com significados diferentes.
+Não criar conceitos apenas porque existem tabelas ou estruturas de provedor.
 
 ---
 
-## 124. Duplicação de conceitos
+## 123. Primitivas sem significado
+
+Evitar representar como valores simples:
+
+* Money;
+* Distance;
+* Duration;
+* TripPeriod;
+* Location;
+* ConfidenceLevel;
+* TimeZone;
+* Restriction.
+
+---
+
+## 124. Status genérico
+
+Evitar um único campo `status` compartilhado entre conceitos diferentes.
+
+---
+
+## 125. Duplicação conceitual
 
 Evitar entidades paralelas como:
 
-```text
+```text id="a94zhw"
 TouristSpot
-Place
 Attraction
+Place
 LocationItem
 ```
 
-sem distinção real.
+sem diferença real.
 
 ---
 
-## 125. IA como autoridade
+## 126. IA como autoridade
 
-Não modelar resposta de IA como estado definitivo do domínio.
-
----
-
-## 126. Dados derivados persistidos sem necessidade
-
-Evitar persistir permanentemente:
-
-* quantidade de Dias;
-* estado Planejado do Lugar;
-* duração total;
-* estado temporal;
-
-quando puderem ser derivados com segurança.
+Não modelar resposta de IA como decisão final ou estado canônico automático.
 
 ---
 
-# Parte XXXI — Matriz de entidades
+## 127. Diagrama como implementação
 
-## 127. Entidades principais
+Os diagramas deste documento não devem:
 
-| Entidade          | Identidade          | Agregado              |
-| ----------------- | ------------------- | --------------------- |
-| Account           | AccountId           | Account               |
-| User              | UserId              | Account               |
-| Trip              | TripId              | Trip                  |
-| Traveler          | TravelerId          | Trip                  |
-| Accommodation     | AccommodationId     | Trip                  |
-| TripDay           | TripDayId           | Itinerary             |
-| Itinerary         | ItineraryId         | Itinerary             |
-| Activity          | ActivityId          | Itinerary             |
-| FreePeriod        | FreePeriodId        | Itinerary             |
-| Place             | PlaceId             | Place                 |
-| SavedPlace        | SavedPlaceId        | Trip                  |
-| Recommendation    | RecommendationId    | Recommendation        |
-| ItineraryProposal | ItineraryProposalId | Proposal              |
-| Conflict          | ConflictId          | Itinerary ou Proposal |
-| DataSource        | DataSourceId        | Data                  |
+* definir banco;
+* definir framework;
+* definir ORM;
+* substituir contratos;
+* transformar associações conceituais em dependências técnicas automáticas.
 
 ---
 
-## 128. Objetos de valor principais
+# Parte XXVII — Matriz de entidades
 
-| Objeto               | Uso                        |
-| -------------------- | -------------------------- |
-| TripPeriod           | Período da Viagem          |
-| Destination          | Destino                    |
-| Location             | Coordenada e endereço      |
-| Region               | Área geográfica            |
-| Budget               | Referência financeira      |
-| Pace                 | Ritmo                      |
-| Interest             | Interesse                  |
-| Restriction          | Restrição                  |
-| PriceRange           | Faixa de preço             |
-| OpeningHours         | Horário de funcionamento   |
-| TransportMode        | Meio de transporte         |
-| TravelEstimate       | Estimativa de deslocamento |
-| DecisionContext      | Contexto de recomendação   |
-| RecommendationReason | Justificativa              |
-| Provenance           | Origem do dado             |
-| ConfidenceLevel      | Confiança                  |
-| DataFreshness        | Atualidade                 |
+## 128. Entidades principais
+
+| Entidade          | Identidade          | Agregado           |
+| ----------------- | ------------------- | ------------------ |
+| Account           | AccountId           | Account            |
+| User              | UserId              | Account            |
+| Trip              | TripId              | Trip               |
+| Traveler          | TravelerId          | Trip               |
+| Accommodation     | AccommodationId     | Trip               |
+| SavedPlace        | SavedPlaceId        | Trip               |
+| Itinerary         | ItineraryId         | Itinerary          |
+| TripDay           | TripDayId           | Itinerary          |
+| Activity          | ActivityId          | Itinerary          |
+| FreePeriod        | FreePeriodId        | Itinerary          |
+| Place             | PlaceId             | Place              |
+| Recommendation    | RecommendationId    | Recommendation     |
+| ItineraryProposal | ItineraryProposalId | Proposal           |
+| Conflict          | ConflictId          | Planning Assurance |
+| DataSource        | DataSourceId        | Data Governance    |
 
 ---
 
-# Parte XXXII — Rastreabilidade com o produto
+## 129. Relação com superfícies do produto
 
-## 129. Conceitos e áreas do produto
-
-| Conceito          | Área                               |
+| Conceito          | Superfície                         |
 | ----------------- | ---------------------------------- |
 | Trip              | Minhas Viagens e Visão Geral       |
 | Destination       | Criar Viagem e Configurações       |
@@ -2639,168 +3774,150 @@ quando puderem ser derivados com segurança.
 
 ---
 
-## 130. Conceitos e componentes
+# Parte XXVIII — Critérios de aceite
 
-| Conceito       | Componentes                             |
-| -------------- | --------------------------------------- |
-| Trip           | Trip Card, Trip Header, Trip Summary    |
-| Place          | Place Card, Place Summary, Place Status |
-| Activity       | Activity Card                           |
-| FreePeriod     | Free Period Card                        |
-| TravelEstimate | Travel Time                             |
-| Recommendation | Recommendation Reason                   |
-| Conflict       | Conflict Item, Conflict Summary         |
-| Proposal       | Proposal Day, Proposal Activity         |
-
----
-
-# Parte XXXIII — Critérios de aceite
-
-## 131. Linguagem
+## 130. Linguagem
 
 * conceitos possuem nomes únicos;
-* termos oficiais estão alinhados à Bible;
+* termos estão alinhados à Bible;
 * sinônimos conflitantes foram eliminados;
-* termos de interface possuem correspondência conceitual.
+* termos de interface possuem correspondência conceitual;
+* diagramas utilizam a linguagem oficial.
 
 ---
 
-## 132. Entidades
+## 131. Entidades
 
 * entidades possuem identidade;
 * ciclo de vida está definido;
 * responsabilidades estão claras;
-* estados estão documentados.
+* estados estão documentados;
+* ownership conceitual está definido.
 
 ---
 
-## 133. Objetos de valor
+## 132. Objetos de valor
 
-* valores importantes possuem tipos conceituais;
+* valores importantes possuem tipos próprios;
 * invariantes estão definidas;
 * primitivas ambíguas foram reduzidas;
 * imutabilidade conceitual está preservada.
 
 ---
 
-## 134. Agregados
+## 133. Agregados
 
-* raízes estão definidas;
+* raízes estão identificadas;
 * limites de consistência estão claros;
-* responsabilidades não estão excessivamente concentradas;
-* relações entre agregados utilizam identidade.
+* relações externas utilizam identificadores;
+* transações não atravessam limites sem coordenação.
 
 ---
 
-## 135. Recomendações e IA
+## 134. Recomendações e IA
 
-* recomendação não é decisão;
-* justificativa é obrigatória quando personalizada;
+* Recomendação não é decisão;
+* Justificativa é obrigatória;
 * limitações são preservadas;
 * Proposta não altera Roteiro automaticamente;
-* contexto e validade são definidos.
+* contexto e validade estão definidos.
 
 ---
 
-## 136. Dados
+## 135. Dados
 
-* proveniência está contemplada;
-* confiança está contemplada;
-* dados desatualizados são representados;
-* divergência de fontes é suportada.
-
----
-
-## 137. Planejamento
-
-* planejamento parcial é válido;
-* Atividade sem horário é válida;
-* Período Livre é válido;
-* Salvo e Planejado são independentes;
-* Conflitos possuem severidades.
+* Proveniência está contemplada;
+* Confiança está contemplada;
+* atualidade está contemplada;
+* divergência de fontes é suportada;
+* IA não produz fato canônico automaticamente.
 
 ---
 
-# Parte XXXIV — Governança do modelo
+## 136. Diagramas
 
-## 138. Inclusão de conceito
+* diagramas possuem identificador;
+* diagramas possuem objetivo;
+* diagramas possuem interpretação;
+* diagramas não contradizem o texto;
+* diagramas não definem implementação indevidamente;
+* diagramas utilizam Mermaid compatível com GitHub;
+* diagramas estão rastreados no catálogo.
 
-Um novo conceito deverá:
+---
 
-* resolver necessidade de domínio;
+# Parte XXIX — Governança
+
+## 137. Inclusão de conceito
+
+Um novo conceito deve:
+
+* resolver necessidade real;
 * possuir definição;
-* não duplicar conceito existente;
+* não duplicar conceito;
 * possuir responsabilidade;
 * possuir invariantes;
 * estar relacionado à linguagem ubíqua;
-* possuir rastreabilidade.
+* possuir rastreabilidade;
+* atualizar diagramas afetados.
 
 ---
 
-## 139. Alteração de conceito
+## 138. Alteração de conceito
 
-Uma alteração deverá revisar:
+Uma alteração deve revisar:
 
-* Bible;
+* RouteBook Bible;
 * PRD;
 * UX;
 * Design System;
+* Linguagem Ubíqua;
+* Regras de Negócio;
+* Eventos;
 * Arquitetura;
 * Dados;
 * testes;
 * prompts;
-* analytics.
+* analytics;
+* diagramas.
 
 ---
 
-## 140. Depreciação
+## 139. Alteração de diagrama
 
-Conceitos obsoletos deverão:
+Todo diagrama alterado deve revisar:
 
-* ser marcados;
-* possuir substituto;
-* possuir migração;
-* preservar histórico;
-* evitar remoção abrupta.
-
----
-
-## 141. Decisões de domínio
-
-Mudanças estruturais deverão possuir registro de decisão.
-
-Exemplos:
-
-* múltiplos Destinos;
-* múltiplas Hospedagens;
-* colaboração;
-* reservas;
-* identidade de Lugares;
-* proveniência.
+* identificador;
+* objetivo;
+* termos;
+* cardinalidades;
+* interpretação;
+* limitações;
+* documentos dependentes.
 
 ---
 
-## 142. Uso por agentes de IA
+## 140. Uso por agentes de IA
 
-Agentes deverão:
+Agentes devem:
 
-* consultar este modelo;
+* consultar este documento;
 * utilizar termos oficiais;
-* respeitar invariantes;
-* não criar entidades sem necessidade;
-* não confundir Recomendação com decisão;
-* não aplicar Proposta automaticamente;
-* preservar proveniência;
-* indicar lacunas;
+* respeitar agregados;
+* não converter diagramas em schema físico automaticamente;
+* não criar entidade sem necessidade;
+* preservar separação entre Recomendação, Proposta e Roteiro;
+* identificar lacunas;
+* atualizar diagramas afetados;
 * produzir saída rastreável.
 
 ---
 
-## 143. Checklist de revisão
+## 141. Checklist de revisão
 
 Antes de aprovar este documento, verificar:
 
-* linguagem ubíqua está definida;
+* linguagem ubíqua está representada;
 * entidades estão identificadas;
 * objetos de valor estão identificados;
 * agregados estão definidos;
@@ -2812,23 +3929,27 @@ Antes de aprovar este documento, verificar:
 * Recomendações estão modeladas;
 * Propostas estão modeladas;
 * Conflitos estão modelados;
-* proveniência está modelada;
+* Proveniência está modelada;
 * consistência temporal está definida;
 * privacidade está contemplada;
 * extensibilidade está contemplada;
 * anti-patterns estão definidos;
 * rastreabilidade está presente;
 * critérios de aceite estão definidos;
-* governança está definida.
+* governança está definida;
+* todos os diagramas estão válidos;
+* todos os diagramas possuem interpretação;
+* não existem contradições entre texto e diagramas.
 
 ---
 
-## 144. Declaração final
+## 142. Declaração final
 
 O Modelo de Domínio do RouteBook estabelece a representação conceitual oficial do produto.
 
 Ele define como o RouteBook compreende:
 
+* Contas;
 * Usuários;
 * Viagens;
 * Destinos;
@@ -2836,7 +3957,7 @@ Ele define como o RouteBook compreende:
 * Viajantes;
 * Preferências;
 * Lugares;
-* Salvos;
+* Lugares Salvos;
 * Dias;
 * Atividades;
 * Roteiros;
@@ -2845,10 +3966,26 @@ Ele define como o RouteBook compreende:
 * Recomendações;
 * Propostas;
 * Conflitos;
-* Fontes de Dados.
+* Fontes de Dados;
+* Proveniência.
 
-Esse modelo deverá garantir que produto, UX, arquitetura, dados, IA, desenvolvimento e QA utilizem os mesmos conceitos e preservem as mesmas regras.
+Os diagramas deste documento complementam a especificação textual e tornam explícitos:
+
+* relacionamentos;
+* cardinalidades;
+* limites de agregados;
+* estados derivados;
+* separação entre conceitos;
+* fluxos de aplicação;
+* dependências conceituais.
 
 O RouteBook deverá continuar sendo um sistema de apoio à decisão.
 
-Seu domínio não deverá transformar sugestões em ordens, estimativas em garantias ou automação em perda de controle do usuário.
+Seu domínio não deverá transformar:
+
+* sugestão em ordem;
+* estimativa em garantia;
+* Salvo em Planejado;
+* Proposta em Roteiro;
+* IA em autoridade;
+* diagrama conceitual em implementação automática.

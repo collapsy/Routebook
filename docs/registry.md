@@ -18,6 +18,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-PRD-004 | Jornadas do Usuário | Product | Draft | 0.1.0 | [user-journeys.md](./product/user-journeys.md) |
 | RB-PRD-005 | Casos de Uso | Product | Draft | 0.1.0 | [use-cases.md](./product/use-cases.md) |
 | RB-PRD-006 | Requisitos Funcionais | Product | Draft | 0.1.0 | [functional-requirements.md](./product/functional-requirements.md) |
+| RB-PRD-007 | Regras de Negócio | Product | Draft | 0.1.0 | [business-rules.md](./product/business-rules.md) |
+| RB-PRD-008 | Requisitos Não Funcionais | Product | Draft | 0.1.0 | [non-functional-requirements.md](./product/non-functional-requirements.md) |
 
 ## Status possíveis
 

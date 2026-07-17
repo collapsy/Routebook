@@ -20,6 +20,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-PRD-006 | Requisitos Funcionais | Product | Draft | 0.1.0 | [functional-requirements.md](./product/functional-requirements.md) |
 | RB-PRD-007 | Regras de Negócio | Product | Draft | 0.1.0 | [business-rules.md](./product/business-rules.md) |
 | RB-PRD-008 | Requisitos Não Funcionais | Product | Draft | 0.1.0 | [non-functional-requirements.md](./product/non-functional-requirements.md) |
+| RB-UX-001 | Arquitetura da Informação | Experience | Draft | 0.1.0 | [information-architecture.md](./ux/information-architecture.md) |
 
 ## Status possíveis
 

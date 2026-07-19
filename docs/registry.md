@@ -42,6 +42,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-DATA-001 | Modelo Lógico de Dados | Data | Draft | 0.1.0 | [logical-data-model.md](./data/logical-data-model.md) |
 | RB-DATA-002 | Modelo Físico de Dados e Estratégia de Migrations | Data | Draft | 0.1.0 | [physical-data-model-and-migrations.md](./data/physical-data-model-and-migrations.md) |
 | RB-API-001 | Diretrizes e Contratos de API | API | Draft | 0.1.0 | [api-guidelines-and-contracts.md](./api/api-guidelines-and-contracts.md) |
+| RB-SEC-001 | Arquitetura de Segurança e Privacidade | Security | Draft | 0.1.0 | [security-and-privacy-architecture.md](./security/security-and-privacy-architecture.md) |
 
 ## Status possíveis
 

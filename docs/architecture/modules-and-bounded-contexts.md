@@ -3,16 +3,16 @@
 id: RB-ARC-002
 
 title: Arquitetura de Módulos e Contextos Delimitados
-description: Define os módulos, contextos delimitados, responsabilidades, contratos, dependências, integrações, ownership e critérios de evolução arquitetural do RouteBook.
+description: Define os contextos delimitados, módulos, responsabilidades, ownership de dados, contratos internos, dependências, integrações, fluxos, limites arquiteturais e critérios de evolução modular do RouteBook.
 
 document_type: architecture
 owner: Architecture
 
 status: Draft
-version: "0.1.0"
+version: "0.2.0"
 
 created: "2026-07-17"
-last_updated: null
+last_updated: "2026-07-18"
 
 authors:
 
@@ -26,7 +26,11 @@ tags:
 - modular-monolith
 - domain-driven-design
 - context-map
-- integration
+- module-contracts
+- data-ownership
+- event-driven
+- diagrams
+- mermaid
 - ai-first
 
 related_documents:
@@ -43,6 +47,16 @@ related_documents:
 - RB-PRD-006
 - RB-PRD-007
 - RB-PRD-008
+- RB-UX-001
+- RB-UX-002
+- RB-UX-003
+- RB-UX-004
+- RB-UX-005
+- RB-UX-006
+- RB-DS-001
+- RB-DS-002
+- RB-DS-003
+- RB-DS-004
 - RB-DOM-001
 - RB-DOM-002
 - RB-DOM-003
@@ -51,9 +65,6 @@ related_documents:
 
 prerequisites:
 
-- RB-CORE-0001
-- RB-CORE-0002
-- RB-CORE-0003
 - RB-CORE-0004
 - RB-DOM-001
 - RB-DOM-002
@@ -78,20 +89,26 @@ index: true
 
 # RouteBook — Arquitetura de Módulos e Contextos Delimitados
 
-## 1. Propósito deste documento
+## Parte I — Fundamentos da modularização
 
-Este documento define a arquitetura modular e os contextos delimitados do RouteBook.
+### 1. Propósito deste documento
+
+Este documento define a arquitetura modular e os Contextos Delimitados oficiais do RouteBook.
 
 Seu objetivo é estabelecer:
 
 * quais capacidades pertencem ao sistema;
-* onde cada regra deve residir;
-* quais módulos possuem determinados dados;
-* como os módulos se comunicam;
+* onde cada conceito deve residir;
+* onde cada regra deve ser implementada;
+* qual módulo possui autoridade sobre cada dado;
+* como os módulos podem se comunicar;
 * quais dependências são permitidas;
+* quais dependências são proibidas;
 * quais contratos devem permanecer estáveis;
+* como fluxos compostos devem ser coordenados;
 * como evitar acoplamento indevido;
-* quando um módulo pode evoluir para serviço independente.
+* como o Monólito Modular poderá evoluir;
+* quando um módulo poderá ser extraído para um serviço independente.
 
 Este documento deverá orientar:
 
@@ -100,26 +117,29 @@ Este documento deverá orientar:
 * desenho de APIs internas;
 * persistência;
 * comunicação entre módulos;
-* eventos;
+* Eventos de Domínio;
+* eventos de integração;
 * testes de arquitetura;
 * observabilidade;
 * segurança;
+* privacidade;
 * evolução do Monólito Modular;
 * atuação de agentes de engenharia.
 
 Este documento não define:
 
-* endpoints completos;
-* schemas físicos;
-* tecnologias definitivas;
-* implementação de banco;
+* endpoints públicos completos;
+* schemas físicos definitivos;
+* tecnologias obrigatórias;
+* implementação física do banco;
 * estratégia final de mensageria;
+* infraestrutura de implantação;
 * contratos públicos detalhados;
-* infraestrutura de implantação.
+* estrutura final do repositório.
 
 ---
 
-## 2. Relação com a visão arquitetural
+### 2. Relação com a visão arquitetural
 
 O `RB-ARC-001 — Visão Geral da Arquitetura` estabelece o RouteBook como:
 
@@ -129,42 +149,80 @@ Monólito Modular
 + Arquitetura em Camadas
 + Ports and Adapters
 + Eventos internos
++ Processamento assíncrono seletivo
 ```
 
-Este documento detalha como esse modelo será dividido em módulos e contextos delimitados.
+Este documento detalha como esse modelo será dividido em Contextos Delimitados e módulos.
 
 ---
 
-## 3. Objetivos da modularização
+### 3. Autoridade documental
+
+A definição dos Contextos Delimitados deverá respeitar:
+
+```mermaid
+flowchart TD
+    Bible["RB-CORE-0004<br/>RouteBook Bible"]
+    Domain["RB-DOM-001<br/>Modelo de Domínio"]
+    Language["RB-DOM-002<br/>Linguagem Ubíqua"]
+    Rules["RB-DOM-003<br/>Regras e Invariantes"]
+    Events["RB-DOM-004<br/>Eventos e Ciclos de Vida"]
+    Overview["RB-ARC-001<br/>Visão Geral da Arquitetura"]
+    Modules["RB-ARC-002<br/>Módulos e Contextos"]
+    Implementation["Implementação"]
+
+    Bible --> Domain
+    Domain --> Language
+    Language --> Rules
+    Rules --> Events
+    Events --> Overview
+    Overview --> Modules
+    Modules --> Implementation
+```
+
+A divisão técnica não poderá redefinir silenciosamente:
+
+* conceitos;
+* agregados;
+* invariantes;
+* Eventos de Domínio;
+* ownership conceitual;
+* Linguagem Ubíqua.
+
+---
+
+### 4. Objetivos da modularização
 
 A modularização deverá:
 
 1. manter responsabilidades claras;
 2. proteger invariantes;
-3. reduzir dependências;
-4. evitar compartilhamento indiscriminado de dados;
-5. permitir testes isolados;
-6. facilitar manutenção;
-7. favorecer substituição de integrações;
-8. tornar ownership explícito;
-9. preparar extrações futuras;
-10. impedir que o Monólito Modular se torne um monólito acoplado;
-11. manter o domínio independente da infraestrutura;
-12. tornar relações entre módulos rastreáveis.
+3. tornar ownership explícito;
+4. reduzir acoplamento;
+5. controlar dependências;
+6. evitar compartilhamento indiscriminado de dados;
+7. permitir testes isolados;
+8. favorecer substituição de integrações;
+9. permitir observabilidade por capacidade;
+10. preparar extrações futuras;
+11. impedir que o Monólito Modular se torne um monólito acoplado;
+12. manter o domínio independente da infraestrutura;
+13. tornar relações entre módulos rastreáveis;
+14. permitir que agentes de engenharia identifiquem o destino correto de cada implementação.
 
 ---
 
-# Parte I — Conceitos arquiteturais
+## Parte II — Conceitos arquiteturais
 
-## 4. Contexto Delimitado
+### 5. Contexto Delimitado
 
-Um Contexto Delimitado representa uma fronteira na qual:
+Um Contexto Delimitado representa uma fronteira dentro da qual:
 
-* um modelo possui significado consistente;
-* termos possuem definições próprias;
-* regras possuem ownership;
-* dados possuem autoridade;
-* contratos externos são controlados.
+* o modelo possui significado consistente;
+* os termos possuem definições controladas;
+* as regras possuem ownership;
+* os dados possuem autoridade;
+* os contratos de entrada e saída são explícitos.
 
 Um Contexto Delimitado não precisa corresponder imediatamente a:
 
@@ -172,158 +230,294 @@ Um Contexto Delimitado não precisa corresponder imediatamente a:
 * processo;
 * repositório;
 * banco separado;
-* unidade de implantação.
+* aplicação separada;
+* unidade independente de implantação.
 
-No MVP, vários Contextos Delimitados poderão coexistir no mesmo Monólito Modular.
+No estágio inicial, vários Contextos Delimitados coexistirão no mesmo Monólito Modular.
 
 ---
 
-## 5. Módulo
+### 6. Módulo
 
-Um módulo é uma unidade técnica e funcional que implementa parte de um Contexto Delimitado.
+Um módulo é a unidade técnica que implementa uma capacidade pertencente a um Contexto Delimitado.
 
 Um módulo deverá possuir:
 
-* responsabilidade;
+* responsabilidade coesa;
 * owner;
-* API interna;
-* camada de domínio;
+* API interna pública;
+* elementos privados;
 * camada de aplicação;
+* camada de domínio quando aplicável;
 * infraestrutura própria;
 * testes;
+* observabilidade;
 * acesso controlado aos dados.
 
 ---
 
-## 6. Submódulo
+### 7. Submódulo
 
-Um submódulo representa uma capacidade interna relevante, mas que não justifica um Contexto Delimitado independente.
+Um submódulo representa uma capacidade interna relevante que ainda não justifica um Contexto Delimitado independente.
 
 Exemplo:
 
 ```text
-Trips
-├── Trip Management
-├── Accommodation
-└── Participation
+trip-management/
+├── trip-lifecycle/
+├── trip-period/
+├── accommodation/
+└── participation/
 ```
+
+Submódulos não devem ser criados apenas para espelhar entidades.
 
 ---
 
-## 7. Ownership
+### 8. Ownership
 
 Ownership define qual módulo possui autoridade para:
 
-* alterar um conceito;
-* persistir seu estado;
+* criar um conceito;
+* alterar seu estado;
 * validar suas invariantes;
-* publicar seus Eventos;
-* expor seus contratos.
+* persistir seu estado;
+* publicar seus Eventos de Domínio;
+* expor seus contratos;
+* controlar sua evolução.
 
-Ownership não significa que outros módulos não possam consultar o conceito.
+Ownership não impede consultas por outros módulos.
 
-Significa que eles não podem alterá-lo diretamente.
+Impede alterações diretas fora do módulo proprietário.
 
 ---
 
-## 8. Contrato interno
+### 9. Contrato interno
 
 Contrato interno é a forma autorizada de comunicação entre módulos.
 
-Pode ser:
+Pode assumir a forma de:
 
+* comando;
+* consulta;
 * caso de uso;
 * porta;
-* consulta;
 * DTO interno;
-* Evento;
+* Evento de Domínio;
+* evento de integração;
 * projeção;
+* snapshot;
 * interface de leitura.
 
 ---
 
-## 9. Modelo compartilhado
+### 10. API pública do módulo
 
-Modelos compartilhados deverão ser mínimos.
+A API pública de um módulo deverá expor apenas o necessário para seus consumidores.
 
-Somente conceitos realmente transversais poderão existir em um Shared Kernel.
+Ela poderá conter:
 
-Exemplos possíveis:
+```text
+public/
+├── commands/
+├── queries/
+├── events/
+├── contracts/
+└── ports/
+```
 
-* identificadores;
-* Money;
-* LocalDate;
-* GeoCoordinate;
-* CorrelationId;
-* Clock.
-
-Regras de negócio específicas não deverão permanecer no Shared Kernel.
+Entidades, repositórios e implementações não deverão fazer parte da API pública.
 
 ---
 
-# Parte II — Visão geral dos Contextos Delimitados
+### 11. Shared Kernel
 
-## 10. Contextos iniciais
+Modelos compartilhados deverão ser mínimos.
 
-O RouteBook deverá considerar os seguintes Contextos Delimitados:
+Exemplos aceitáveis:
+
+* identificadores genéricos de infraestrutura;
+* `Money`;
+* `LocalDate`;
+* `LocalTime`;
+* `TimeZone`;
+* `GeoCoordinate`;
+* `CorrelationId`;
+* `CausationId`;
+* `Clock`.
+
+Não deverão ser colocados no Shared Kernel:
+
+* agregados;
+* regras de Viagem;
+* regras de Recomendação;
+* regras de Proposta;
+* regras de Planning Conflict;
+* modelos de fornecedores.
+
+---
+
+### 12. Snapshot
+
+Snapshot representa uma cópia controlada e imutável de informações de outro Contexto para:
+
+* registrar Contexto;
+* preservar rastreabilidade;
+* validar aplicabilidade;
+* permitir explicação;
+* reduzir acoplamento temporal.
+
+Snapshot não transfere ownership.
+
+---
+
+### 13. Projeção
+
+Projeção é um modelo de leitura derivado.
+
+Ela:
+
+* pode combinar dados de vários módulos;
+* pode ser atualizada de forma assíncrona;
+* não possui autoridade para escrita;
+* não substitui o estado canônico;
+* pode ser reconstruída.
+
+---
+
+## Parte III — Contextos Delimitados oficiais
+
+### 14. Contextos iniciais
+
+O RouteBook deverá possuir os seguintes Contextos Delimitados:
 
 1. Identity and Access;
 2. Trip Management;
 3. Traveler Profile;
 4. Place Catalog;
-5. Trip Collections;
+5. Trip Collection;
 6. Itinerary Planning;
 7. Mobility;
 8. Decision Intelligence;
 9. Proposal Management;
 10. Planning Assurance;
 11. Data Governance;
-12. Platform Operations.
+12. Platform.
 
 ---
 
-## 11. Mapa de alto nível
+### 15. Classificação estratégica
 
-```text
-Identity and Access
-        │
-        ▼
-Trip Management
- ├───────────────┐
- ▼               ▼
-Traveler Profile Trip Collections
-        │               │
-        └──────┬────────┘
-               ▼
-        Itinerary Planning
-          │          │
-          ▼          ▼
-       Mobility   Planning Assurance
-          │          ▲
-          └────┬─────┘
-               ▼
-      Decision Intelligence
-               │
-               ▼
-      Proposal Management
+| Contexto              | Classificação                |
+| --------------------- | ---------------------------- |
+| Decision Intelligence | Core Domain                  |
+| Proposal Management   | Core Domain                  |
+| Planning Assurance    | Core Domain                  |
+| Trip Management       | Supporting Domain            |
+| Traveler Profile      | Supporting Domain            |
+| Itinerary Planning    | Supporting Domain            |
+| Trip Collection       | Supporting Domain            |
+| Mobility              | Supporting Domain            |
+| Place Catalog         | Supporting Domain            |
+| Data Governance       | Generic/Supporting Domain    |
+| Identity and Access   | Generic Domain               |
+| Platform              | Generic Technical Capability |
 
-Place Catalog
-   ├───────────────┬───────────────────┐
-   ▼               ▼                   ▼
-Trip Collections  Mobility   Decision Intelligence
+A classificação poderá evoluir por ADR, mas não altera o ownership atual.
 
-Data Governance
-→ transversal a Place Catalog, Mobility e Decision Intelligence
+---
 
-Platform Operations
-→ transversal a todos os contextos
+### 16. Mapa geral dos Contextos
+
+```mermaid
+flowchart TB
+    IAM["Identity and Access"]
+    Trip["Trip Management"]
+    Traveler["Traveler Profile"]
+    Place["Place Catalog"]
+    Collection["Trip Collection"]
+    Itinerary["Itinerary Planning"]
+    Mobility["Mobility"]
+    Decision["Decision Intelligence"]
+    Proposal["Proposal Management"]
+    Assurance["Planning Assurance"]
+    Governance["Data Governance"]
+    Platform["Platform"]
+
+    Trip --> IAM
+    Traveler --> Trip
+    Collection --> Trip
+    Collection --> Place
+    Itinerary --> Trip
+    Itinerary --> Place
+    Mobility --> Trip
+    Mobility --> Place
+    Mobility --> Itinerary
+
+    Decision --> Trip
+    Decision --> Traveler
+    Decision --> Place
+    Decision --> Collection
+    Decision --> Itinerary
+    Decision --> Mobility
+
+    Proposal --> Trip
+    Proposal --> Traveler
+    Proposal --> Place
+    Proposal --> Collection
+    Proposal --> Itinerary
+    Proposal --> Mobility
+    Proposal --> Decision
+    Proposal --> Assurance
+
+    Assurance --> Trip
+    Assurance --> Traveler
+    Assurance --> Place
+    Assurance --> Itinerary
+    Assurance --> Mobility
+
+    Place --> Governance
+    Mobility --> Governance
+    Decision --> Governance
+    Proposal --> Governance
+    Assurance --> Governance
+
+    IAM --> Platform
+    Trip --> Platform
+    Traveler --> Platform
+    Place --> Platform
+    Collection --> Platform
+    Itinerary --> Platform
+    Mobility --> Platform
+    Decision --> Platform
+    Proposal --> Platform
+    Assurance --> Platform
+    Governance --> Platform
 ```
 
+As setas representam dependências autorizadas de contrato.
+
+Não representam acesso direto à persistência.
+
 ---
 
-# Parte III — Identity and Access
+### 17. Regra de direção
 
-## 12. Nome oficial
+A dependência deverá apontar do consumidor para o fornecedor do contrato.
+
+Quando dois módulos precisarem reagir mutuamente:
+
+* evitar dependência bidirecional;
+* utilizar Eventos de Domínio;
+* utilizar projeções;
+* utilizar orquestração;
+* introduzir contrato intermediário quando necessário.
+
+---
+
+## Parte IV — Identity and Access
+
+### 18. Nome oficial
 
 ```text
 Identity and Access
@@ -337,108 +531,121 @@ IAM
 
 ---
 
-## 13. Responsabilidades
-
-* Conta;
-* Usuário;
-* autenticação;
-* sessão;
-* papéis;
-* permissões;
-* consentimentos;
-* identidade externa;
-* vínculo entre identidade externa e `UserId`.
-
----
-
-## 14. Entidades e conceitos
+### 19. Responsabilidades
 
 * Account;
 * User;
-* Session;
-* TripRole;
-* Permission;
-* Consent.
-
----
-
-## 15. Invariantes próprias
-
-* Conta ativa possui responsável;
-* Usuário possui identidade interna;
-* identidade externa não substitui `UserId`;
-* autorização não depende da interface;
-* o último owner de uma Viagem não pode ser removido sem transferência.
-
-A última regra poderá ser coordenada com Trip Management.
-
----
-
-## 16. Dados de propriedade
-
-Identity and Access possui autoridade sobre:
-
-* Conta;
-* Usuário;
+* autenticação;
 * sessão;
-* credenciais ou referência ao provedor;
+* identidades externas;
 * consentimentos;
-* identidade externa.
+* papéis globais;
+* permissões globais;
+* validação de identidade.
 
-Não possui autoridade sobre:
-
-* Viajante;
-* Viagem;
-* Roteiro;
-* Preferências da Viagem.
+A participação específica em uma Trip será coordenada com Trip Management.
 
 ---
 
-## 17. Contratos expostos
+### 20. Agregados e conceitos
 
-### Comandos
-
-* RegisterUser;
-* AuthenticateUser;
-* RevokeSession;
-* UpdateUserProfile;
-* RecordConsent.
-
-### Consultas
-
-* GetCurrentUser;
-* GetUserIdentity;
-* ValidateSession;
-* ListUserPermissions.
-
-### Eventos
-
-* UserRegistered;
-* UserProfileUpdated;
-* SessionRevoked;
-* ConsentRecorded.
+* Account;
+* User;
+* Consent;
+* ExternalIdentityReference;
+* Session, quando modelada internamente.
 
 ---
 
-## 18. Dependências
+### 21. Invariantes próprias
+
+* Account ativa possui responsável;
+* User possui identidade interna;
+* identidade externa não substitui `UserId`;
+* consentimento relevante é rastreável;
+* autorização não depende apenas da interface;
+* encerramento de Account respeita retenção e privacidade.
+
+---
+
+### 22. Dados de propriedade
+
+Possui:
+
+* Account;
+* User;
+* Consent;
+* identidade externa;
+* sessão ou referência de sessão;
+* credenciais ou referências controladas.
+
+Não possui:
+
+* Traveler;
+* Trip;
+* Trip Role específico;
+* Itinerary;
+* Preference de Viagem.
+
+---
+
+### 23. Contratos expostos
+
+#### Comandos
+
+```text
+RegisterUser
+UpdateUserProfile
+RecordConsent
+RevokeConsent
+RevokeSession
+DeactivateAccount
+```
+
+#### Consultas
+
+```text
+GetCurrentUser
+GetUserIdentity
+ValidateSession
+GetAccountStatus
+ListUserPermissions
+```
+
+#### Eventos
+
+```text
+AccountCreated
+UserAddedToAccount
+UserRemovedFromAccount
+ConsentRecorded
+SessionRevoked
+```
+
+---
+
+### 24. Dependências
 
 Pode depender de:
 
-* Platform Operations;
+* Platform;
 * provedor externo de identidade por adapter.
 
 Não deve depender de:
 
+* Trip Management;
+* Traveler Profile;
 * Itinerary Planning;
-* Place Catalog;
 * Mobility;
-* Decision Intelligence.
+* Decision Intelligence;
+* Proposal Management;
+* Planning Assurance.
 
 ---
 
-# Parte IV — Trip Management
+## Parte V — Trip Management
 
-## 19. Nome oficial
+### 25. Nome oficial
 
 ```text
 Trip Management
@@ -446,35 +653,26 @@ Trip Management
 
 ---
 
-## 20. Responsabilidades
+### 26. Responsabilidades
 
-* criação da Viagem;
+* criação da Trip;
 * nome;
-* Destino;
-* Período;
-* Hospedagem;
-* status;
-* participantes;
-* ownership da Viagem;
+* Destination;
+* Trip Period;
+* Accommodation;
+* Trip Status;
+* Trip Participants;
+* ownership;
+* papéis específicos da Trip;
 * alterações estruturais;
+* `TripContextVersion`;
 * cancelamento;
 * arquivamento;
 * exclusão.
 
 ---
 
-## 21. Entidades e objetos
-
-* Trip;
-* Destination;
-* TripPeriod;
-* Accommodation;
-* TripParticipant;
-* TripStatus.
-
----
-
-## 22. Agregado principal
+### 27. Agregado principal
 
 ```text
 Trip
@@ -482,97 +680,140 @@ Trip
 
 ---
 
-## 23. Invariantes próprias
+### 28. Conceitos principais
 
-* Viagem planejável possui Destino;
-* Período válido;
-* pelo menos um Viajante;
-* pelo menos um owner;
-* data final não precede data inicial;
-* alterações estruturais produzem impacto explícito;
-* arquivamento, cancelamento e exclusão são distintos.
+* Trip;
+* Destination;
+* TripPeriod;
+* Accommodation;
+* TripParticipant;
+* TripRole;
+* TripStatus;
+* TripContextVersion.
 
 ---
 
-## 24. Dados de propriedade
+### 29. Invariantes próprias
 
-Trip Management possui:
+* Trip possui owner;
+* último owner não pode ser removido sem transferência;
+* Trip Period possui intervalo válido;
+* Trip planejável possui Destination e Trip Period;
+* Accommodation é opcional;
+* alteração estrutural incrementa `TripContextVersion`;
+* cancelamento, arquivamento e exclusão são distintos;
+* User participante não implica Traveler.
 
-* estado canônico da Viagem;
-* Destino;
-* Período;
-* Hospedagem;
+A existência mínima de Travelers pertence ao Traveler Profile, não ao agregado Trip.
+
+---
+
+### 30. Dados de propriedade
+
+Possui:
+
+* estado canônico da Trip;
+* Destination;
+* Trip Period;
+* Accommodation;
 * participantes;
 * owner;
+* papéis;
 * status;
-* versão de contexto.
+* TripContextVersion.
 
 Não possui:
 
-* Atividades;
-* Lugares;
-* Recomendações;
-* Propostas;
-* Estimativas de Deslocamento.
+* Travelers;
+* Interests;
+* Restrictions;
+* Saved Places;
+* Activities;
+* Recommendations;
+* Decisions;
+* Proposals;
+* Travel Estimates;
+* Planning Conflicts.
 
 ---
 
-## 25. Contratos expostos
+### 31. Contratos expostos
 
-### Comandos
+#### Comandos
 
-* CreateTrip;
-* CompleteTripDraft;
-* UpdateTripName;
-* UpdateTripDestination;
-* UpdateTripPeriod;
-* UpdateAccommodation;
-* AssignTripOwner;
-* UpdateTripRole;
-* CancelTrip;
-* ArchiveTrip;
-* DeleteTrip.
+```text
+CreateTrip
+UpdateTripName
+UpdateTripDestination
+UpdateTripPeriod
+UpdateAccommodation
+AddTripParticipant
+ChangeTripParticipantRole
+RemoveTripParticipant
+TransferTripOwnership
+CancelTrip
+ArchiveTrip
+DeleteTrip
+```
 
-### Consultas
+#### Consultas
 
-* GetTrip;
-* ListTrips;
-* GetTripContext;
-* GetTripPermissions;
-* GetTripStructuralImpact.
+```text
+GetTrip
+ListTrips
+GetTripContext
+GetTripContextVersion
+GetTripParticipants
+GetTripPermissions
+EvaluateTripStructuralImpact
+```
 
-### Eventos
+#### Eventos
 
-* TripCreated;
-* TripDestinationChanged;
-* TripPeriodChanged;
-* TripAccommodationChanged;
-* TripCancelled;
-* TripArchived;
-* TripDeleted.
+```text
+TripCreated
+TripNameChanged
+TripDestinationChanged
+TripPeriodChanged
+TripAccommodationChanged
+TripParticipantAdded
+TripParticipantRoleChanged
+TripParticipantRemoved
+TripOwnershipTransferred
+TripBecamePlannable
+TripPlanningRequirementsLost
+TripCancelled
+TripArchived
+TripDeleted
+```
 
 ---
 
-## 26. Dependências
+### 32. Dependências
 
-Pode consultar:
+Depende sincronamente de:
 
 * Identity and Access;
-* Traveler Profile.
+* Platform.
 
 Publica Eventos consumidos por:
 
+* Traveler Profile;
 * Itinerary Planning;
 * Mobility;
 * Decision Intelligence;
 * Proposal Management;
 * Planning Assurance.
 
+Não deverá depender diretamente de Traveler Profile para preservar seu próprio agregado.
+
+Coordenações que exijam ambos devem ocorrer na camada de aplicação.
+
 ---
 
-# Parte V — Traveler Profile
+## Parte VI — Traveler Profile
 
-## 27. Nome oficial
+### 33. Nome oficial
 
 ```text
 Traveler Profile
@@ -580,121 +821,153 @@ Traveler Profile
 
 ---
 
-## 28. Responsabilidades
+### 34. Responsabilidades
 
-* Viajantes;
-* Perfil do Grupo;
-* Preferências da Viagem;
-* Interesses;
-* Ritmo;
-* Orçamento;
-* Restrições;
-* transporte predominante;
-* necessidades funcionais.
+* Traveler;
+* Traveler Profile;
+* Group Profile;
+* Interests;
+* Restrictions;
+* Budget;
+* Pace;
+* necessidades funcionais;
+* preferências contextuais;
+* preferência de Transport Mode.
 
 ---
 
-## 29. Conceitos principais
+### 35. Agregado principal
+
+```text
+TravelerProfile
+```
+
+---
+
+### 36. Conceitos principais
 
 * Traveler;
 * GroupProfile;
-* TripPreference;
 * Interest;
 * Restriction;
-* Pace;
 * Budget;
+* Pace;
 * TravelerNeed;
-* TransportMode preference.
+* PreferredTransportMode.
 
 ---
 
-## 30. Invariantes próprias
+### 37. Invariantes próprias
 
-* Viajante pertence a uma Viagem;
+* Traveler pertence a um Traveler Profile;
+* Traveler Profile pertence a uma Trip;
+* Trip planejável possui ao menos um Traveler;
+* associação com User é opcional;
+* o mesmo User não deve ser associado em duplicidade;
 * dados pessoais devem ser minimizados;
-* Restrição obrigatória não pode ser ignorada silenciosamente;
-* Perfil do Grupo é derivado;
-* Orçamento monetário possui moeda;
-* Ritmo é orientação, não regra absoluta.
+* Restriction `mandatory` não pode ser ignorada;
+* Group Profile é derivado;
+* Budget monetário preserva moeda;
+* Pace orienta densidade, mas não representa limite absoluto universal.
 
 ---
 
-## 31. Dados de propriedade
+### 38. Dados de propriedade
 
-Traveler Profile possui:
+Possui:
 
-* Viajantes;
-* Preferências;
-* Restrições;
-* Perfil do Grupo;
-* Ritmo;
-* Orçamento.
+* Travelers;
+* Group Profile;
+* Interests;
+* Restrictions;
+* Budget;
+* Pace;
+* necessidades funcionais;
+* preferências contextuais.
 
 Não possui:
 
-* Conta;
-* Usuário;
-* Lugar;
-* Atividade;
-* Recomendação.
+* Account;
+* User;
+* Trip;
+* Place;
+* Activity;
+* Recommendation;
+* Decision.
 
 ---
 
-## 32. Contratos expostos
+### 39. Contratos expostos
 
-### Comandos
+#### Comandos
 
-* AddTraveler;
-* RemoveTraveler;
-* UpdateTraveler;
-* AddTripInterest;
-* RemoveTripInterest;
-* UpdateTripBudget;
-* UpdateTripPace;
-* AddTripRestriction;
-* RemoveTripRestriction;
-* UpdatePreferredTransportMode.
+```text
+InitializeTravelerProfile
+AddTraveler
+UpdateTraveler
+RemoveTraveler
+AddTripInterest
+RemoveTripInterest
+AddTripRestriction
+RemoveTripRestriction
+UpdateTripBudget
+UpdateTripPace
+UpdatePreferredTransportMode
+```
 
-### Consultas
+#### Consultas
 
-* GetTravelers;
-* GetGroupProfile;
-* GetTripPreferences;
-* GetMandatoryRestrictions;
-* GetDecisionPreferences.
+```text
+GetTravelerProfile
+GetTravelers
+GetGroupProfile
+GetTripInterests
+GetTripRestrictions
+GetMandatoryRestrictions
+GetDecisionPreferences
+GetTripBudget
+GetTripPace
+```
 
-### Eventos
+#### Eventos
 
-* TravelerAdded;
-* TravelerRemoved;
-* GroupProfileUpdated;
-* TripInterestAdded;
-* TripBudgetChanged;
-* TripPaceChanged;
-* TripRestrictionAdded;
-* TripRestrictionRemoved.
+```text
+TravelerProfileInitialized
+TravelerAdded
+TravelerUpdated
+TravelerRemoved
+GroupProfileUpdated
+TripInterestAdded
+TripInterestRemoved
+TripRestrictionAdded
+TripRestrictionRemoved
+TripBudgetChanged
+TripPaceChanged
+```
 
 ---
 
-## 33. Dependências
+### 40. Dependências
 
 Depende de:
 
-* Trip Management para validar a Viagem;
-* Platform Operations.
+* Trip Management para validar a existência da Trip;
+* Platform.
 
 É consumido por:
 
 * Decision Intelligence;
 * Proposal Management;
 * Planning Assurance;
-* Itinerary Planning.
+* projeções de leitura.
+
+Itinerary Planning poderá receber Restrições relevantes por contrato de validação, mas não deverá possuir o Traveler Profile.
 
 ---
 
-# Parte VI — Place Catalog
+## Parte VII — Place Catalog
 
-## 34. Nome oficial
+### 41. Nome oficial
 
 ```text
 Place Catalog
@@ -702,38 +975,28 @@ Place Catalog
 
 ---
 
-## 35. Responsabilidades
+### 42. Responsabilidades
 
-* identidade interna de Lugar;
-* Catálogo de Lugares;
+* identidade interna de Place;
+* catálogo;
 * categorias;
-* Detalhes;
-* estado operacional;
-* horários;
-* preços;
-* imagens;
-* avaliações;
-* acessibilidade;
-* reconciliação de fontes;
-* criação de Lugar personalizado.
-
----
-
-## 36. Conceitos principais
-
-* Place;
-* PlaceCategory;
-* PlaceDetails;
-* OpeningHours;
-* PriceRange;
+* Location;
+* Opening Hours;
+* Operational Status;
+* Price Range;
 * Rating;
-* PlaceAccessibility;
-* ExternalId;
-* PlaceOperationalStatus.
+* acessibilidade;
+* detalhes;
+* aliases;
+* identificadores externos;
+* reconciliação;
+* deduplicação;
+* fusão;
+* Place personalizado.
 
 ---
 
-## 37. Agregado principal
+### 43. Agregado principal
 
 ```text
 Place
@@ -741,80 +1004,112 @@ Place
 
 ---
 
-## 38. Invariantes próprias
+### 44. Conceitos principais
 
-* identidade interna não depende apenas de provedor;
-* dado ausente não recebe valor enganoso;
-* ausência de preço não significa gratuidade;
-* ausência de avaliação não significa nota zero;
-* estado desconhecido não significa aberto;
-* consolidação preserva Proveniência.
+* Place;
+* PlaceCategory;
+* Location;
+* OpeningHours;
+* PriceRange;
+* Rating;
+* PlaceAccessibility;
+* ExternalPlaceReference;
+* PlaceOperationalStatus.
 
 ---
 
-## 39. Dados de propriedade
+### 45. Invariantes próprias
 
-Place Catalog possui:
+* Place possui `PlaceId` interno;
+* identidade interna não depende de fornecedor;
+* dado ausente não recebe valor enganoso;
+* preço desconhecido não significa gratuito;
+* Rating ausente não significa zero;
+* estado desconhecido não significa aberto;
+* fusão preserva referências;
+* consolidação preserva Provenance;
+* precisão não excede a Fonte.
 
-* Lugar;
-* identificação;
+---
+
+### 46. Dados de propriedade
+
+Possui:
+
+* Place;
+* localização;
 * categorias;
-* Detalhes;
-* status operacional;
-* identificadores externos;
-* metadados das informações.
+* detalhes;
+* estado operacional;
+* horários;
+* preços;
+* Ratings;
+* acessibilidade;
+* aliases;
+* referências externas.
 
 Não possui:
 
-* estado Salvo por Viagem;
-* estado Planejado;
-* Atividade;
-* score de Recomendação.
+* Saved Place;
+* Planned Place;
+* Activity;
+* Recommendation Score;
+* preferência específica da Trip.
 
 ---
 
-## 40. Contratos expostos
+### 47. Contratos expostos
 
-### Comandos
+#### Comandos
 
-* CreateCustomPlace;
-* UpdateCustomPlace;
-* ImportPlace;
-* ReconcilePlace;
-* MergePlaces;
-* MarkPlaceTemporarilyClosed;
-* MarkPlacePermanentlyClosed.
+```text
+CreateCustomPlace
+UpdateCustomPlace
+ImportPlace
+ReconcilePlace
+MergePlaces
+MarkPlaceTemporarilyClosed
+MarkPlacePermanentlyClosed
+MarkPlaceOperationalStatusUnknown
+```
 
-### Consultas
+#### Consultas
 
-* GetPlace;
-* SearchPlaces;
-* GetPlaceDetails;
-* ResolvePlaceIds;
-* CheckPlaceAvailability.
+```text
+GetPlace
+SearchPlaces
+GetPlaceDetails
+ResolvePlaceReferences
+CheckPlaceOperationalStatus
+GetPlaceLocation
+GetPlaceDataQuality
+```
 
-### Eventos
+#### Eventos
 
-* PlaceCreated;
-* PlaceDataUpdated;
-* PlaceMerged;
-* PlaceMarkedTemporarilyClosed;
-* PlaceMarkedPermanentlyClosed;
-* PlaceDataConflictDetected.
+```text
+PlaceCreated
+PlaceDataUpdated
+PlaceMerged
+PlaceMarkedTemporarilyClosed
+PlaceMarkedPermanentlyClosed
+PlaceOperationalStatusBecameUnknown
+PlaceDataFreshnessChanged
+```
 
 ---
 
-## 41. Dependências
+### 48. Dependências
 
 Pode depender de:
 
 * Data Governance;
-* provedores externos por adapters;
-* Platform Operations.
+* Platform;
+* provedores externos por Anti-Corruption Layer.
 
 É consumido por:
 
-* Trip Collections;
+* Trip Collection;
 * Itinerary Planning;
 * Mobility;
 * Decision Intelligence;
@@ -823,108 +1118,153 @@ Pode depender de:
 
 ---
 
-# Parte VII — Trip Collections
+### 49. Anti-Corruption Layer de Place
 
-## 42. Nome oficial
+```mermaid
+flowchart LR
+    External["Provedores externos"]
+    Adapter["Adapters"]
+    ACL["Place Catalog ACL"]
+    Validation["Validação e reconciliação"]
+    Place["Place canônico"]
+    Governance["Data Governance"]
+
+    External --> Adapter
+    Adapter --> ACL
+    ACL --> Validation
+    Validation --> Place
+    Validation --> Governance
+```
+
+Objetos de fornecedores não poderão ser usados como entidades internas.
+
+---
+
+## Parte VIII — Trip Collection
+
+### 50. Nome oficial
 
 ```text
-Trip Collections
+Trip Collection
+```
+
+O nome oficial é singular.
+
+O nome `Trip Collections` não deverá ser utilizado como nome do Contexto.
+
+---
+
+### 51. Responsabilidades
+
+* Trip Collection;
+* Saved Place;
+* notas contextuais;
+* origem do salvamento;
+* organização futura de itens salvos;
+* unicidade por Trip e Place.
+
+---
+
+### 52. Agregado principal
+
+```text
+TripCollection
 ```
 
 ---
 
-## 43. Responsabilidades
+### 53. Conceitos principais
 
-* Lugares Salvos;
-* observações sobre Lugares;
-* tags futuras;
-* origem do salvamento;
-* coleções contextuais da Viagem.
-
-No MVP, seu principal objeto será `SavedPlace`.
-
----
-
-## 44. Conceitos principais
-
+* TripCollection;
 * SavedPlace;
 * SavedPlaceNote;
-* SavedPlaceOrigin;
-* TripCollection.
+* SavedPlaceOrigin.
 
 ---
 
-## 45. Invariantes próprias
+### 54. Invariantes próprias
 
-* um Lugar é salvo no máximo uma vez por Viagem;
-* salvar é idempotente;
-* salvar não cria Atividade;
-* remover dos Salvos não remove Atividade;
-* Planejado é estado derivado externo ao módulo.
+* uma Trip possui uma Trip Collection;
+* `TripId + PlaceId` é único;
+* Save Place é idempotente;
+* salvar não cria Activity;
+* remover dos Salvos não remove Activity;
+* Planned Place é derivado do Itinerary;
+* Saved Place não altera o Place canônico.
 
 ---
 
-## 46. Dados de propriedade
+### 55. Dados de propriedade
 
-Trip Collections possui:
+Possui:
 
-* associação `TripId + PlaceId`;
-* data de salvamento;
+* associação entre Trip e Place;
+* data do salvamento;
 * origem;
-* observações;
-* metadados próprios da coleção.
+* notas;
+* metadados contextuais.
 
 Não possui:
 
-* Lugar;
-* Roteiro;
-* Atividade;
-* Recomendação.
+* Place;
+* Itinerary;
+* Activity;
+* Recommendation;
+* estado Planned canônico.
 
 ---
 
-## 47. Contratos expostos
+### 56. Contratos expostos
 
-### Comandos
+#### Comandos
 
-* SavePlace;
-* UnsavePlace;
-* UpdateSavedPlaceNote.
+```text
+InitializeTripCollection
+SavePlace
+UnsavePlace
+UpdateSavedPlaceNote
+```
 
-### Consultas
+#### Consultas
 
-* ListSavedPlaces;
-* IsPlaceSaved;
-* GetSavedPlace;
-* ListSavedPlaceIds.
+```text
+GetTripCollection
+ListSavedPlaces
+ListSavedPlaceIds
+IsPlaceSaved
+GetSavedPlace
+```
 
-### Eventos
+#### Eventos
 
-* PlaceSaved;
-* PlaceUnsaved;
-* SavedPlaceNoteUpdated.
+```text
+PlaceSaved
+PlaceUnsaved
+SavedPlaceNoteChanged
+```
 
 ---
 
-## 48. Dependências
+### 57. Dependências
 
 Depende de:
 
 * Trip Management;
-* Place Catalog.
+* Place Catalog;
+* Platform.
 
 É consumido por:
 
 * Decision Intelligence;
 * Proposal Management;
-* frontend de exploração;
-* projeções de Visão Geral.
+* projeções de exploração;
+* Trip Overview.
 
 ---
 
-# Parte VIII — Itinerary Planning
+## Parte IX — Itinerary Planning
 
-## 49. Nome oficial
+### 58. Nome oficial
 
 ```text
 Itinerary Planning
@@ -932,33 +1272,22 @@ Itinerary Planning
 
 ---
 
-## 50. Responsabilidades
+### 59. Responsabilidades
 
-* Roteiro atual;
-* Dias da Viagem;
-* Atividades;
-* Períodos Livres;
+* Itinerary atual;
+* Trip Days;
+* Activities;
+* Free Periods;
 * ordenação;
-* versões;
+* sincronização temporal;
 * planejamento parcial;
-* aplicação de itens aceitos de Proposta;
-* estado Planejado derivado.
+* estados multidimensionais do Itinerary;
+* `ItineraryVersion`;
+* aplicação de itens aceitos de Itinerary Proposal.
 
 ---
 
-## 51. Conceitos principais
-
-* Itinerary;
-* TripDay;
-* Activity;
-* FreePeriod;
-* ActivityOrder;
-* ItineraryVersion;
-* ActivityFlexibility.
-
----
-
-## 52. Agregado principal
+### 60. Agregado principal
 
 ```text
 Itinerary
@@ -966,104 +1295,163 @@ Itinerary
 
 ---
 
-## 53. Invariantes próprias
+### 61. Conceitos principais
 
-* uma Viagem possui no máximo um Roteiro atual;
-* Atividade pertence a um Dia da mesma Viagem;
-* título de Atividade é obrigatório;
-* duração, quando informada, é positiva;
-* ordem é determinística;
-* Atividade sem horário é válida;
-* Período Livre protegido não pode ser preenchido automaticamente;
-* alteração canônica gera nova versão.
+* Itinerary;
+* TripDay;
+* Activity;
+* FreePeriod;
+* ActivityOrder;
+* ActivityStatus;
+* ActivityFlexibility;
+* ItineraryVersion;
+* PlanningCompleteness;
+* ReviewState;
+* ConsistencyState;
+* ConflictSummary.
 
 ---
 
-## 54. Dados de propriedade
+### 62. Invariantes próprias
 
-Itinerary Planning possui:
+* uma Trip possui um Itinerary canônico atual;
+* existe no máximo um Trip Day ativo por data;
+* Activity pertence a um Trip Day;
+* Activity possui título;
+* Duration informada é positiva;
+* horário utiliza o fuso da Trip;
+* ordem é determinística;
+* Activity sem horário é válida;
+* Activity `fixed` não é movida automaticamente;
+* Free Period `protected` não é preenchido automaticamente;
+* mudança de Dia preserva `ActivityId`;
+* toda alteração canônica incrementa `ItineraryVersion`;
+* planejamento parcial é válido.
 
-* Roteiro;
-* Dias;
-* Atividades;
-* Períodos Livres;
-* versão;
-* ordem;
-* estado das Atividades.
+---
+
+### 63. Dados de propriedade
+
+Possui:
+
+* Itinerary;
+* Trip Days;
+* Activities;
+* Free Periods;
+* ordens;
+* estados;
+* ItineraryVersion.
 
 Não possui:
 
-* Detalhes completos do Lugar;
-* Estimativas;
-* Recomendações;
-* definição dos Conflitos;
-* Preferências.
+* Place completo;
+* Traveler Profile;
+* Recommendation;
+* Decision;
+* Itinerary Proposal;
+* Travel Estimate;
+* Planning Conflict.
+
+Mantém apenas referências autorizadas.
 
 ---
 
-## 55. Contratos expostos
+### 64. Contratos expostos
 
-### Comandos
+#### Comandos
 
-* InitializeItinerary;
-* AddActivity;
-* UpdateActivity;
-* RemoveActivity;
-* MoveActivity;
-* MoveActivityToAnotherDay;
-* CompleteActivity;
-* SkipActivity;
-* CancelActivity;
-* AddFreePeriod;
-* UpdateFreePeriod;
-* RemoveFreePeriod;
-* MarkTripDayFree;
-* ApplyProposalItems.
+```text
+InitializeItinerary
+SynchronizeTripDays
+AddActivity
+UpdateActivity
+MoveActivityToAnotherDay
+ReorderActivity
+RemoveActivity
+MarkActivityTentative
+CompleteActivity
+SkipActivity
+CancelActivity
+AddFreePeriod
+UpdateFreePeriod
+RemoveFreePeriod
+ProtectFreePeriod
+MakeFreePeriodFlexible
+MarkTripDayFree
+ApplyProposalItems
+MarkItineraryOutdated
+ReviewItineraryState
+```
 
-### Consultas
+#### Consultas
 
-* GetItinerary;
-* GetTripDay;
-* ListActivities;
-* GetItineraryVersion;
-* GetPlanningSnapshot;
-* IsPlacePlanned.
+```text
+GetItinerary
+GetTripDay
+ListActivities
+GetItineraryVersion
+GetPlanningSnapshot
+IsPlacePlanned
+GetItineraryState
+```
 
-### Eventos
+#### Eventos
 
-* ItineraryInitialized;
-* ActivityAdded;
-* ActivityUpdated;
-* ActivityMoved;
-* ActivityRemoved;
-* FreePeriodAdded;
-* FreePeriodProtected;
-* ItineraryVersionChanged;
-* ItineraryMarkedOutdated.
+```text
+ItineraryInitialized
+TripDaysSynchronized
+TripDayAdded
+TripDayRemoved
+TripDayMarkedFree
+ActivityAdded
+ActivityUpdated
+ActivityMovedToAnotherDay
+ActivityReordered
+ActivityMarkedTentative
+ActivityCompleted
+ActivitySkipped
+ActivityCancelled
+ActivityMarkedUnavailable
+ActivityMarkedForReview
+ActivityRemoved
+FreePeriodAdded
+FreePeriodUpdated
+FreePeriodRemoved
+FreePeriodProtected
+FreePeriodMadeFlexible
+ItineraryVersionChanged
+ItineraryMarkedOutdated
+ItineraryReviewed
+ItineraryReviewInvalidated
+```
 
 ---
 
-## 56. Dependências
+### 65. Dependências
 
 Depende de:
 
 * Trip Management;
-* Place Catalog por identidade;
-* Platform Operations.
+* Place Catalog apenas para validações de referência;
+* Platform.
 
 Publica Eventos consumidos por:
 
 * Mobility;
-* Planning Assurance;
 * Decision Intelligence;
 * Proposal Management;
-* Trip Collections para projeções derivadas.
+* Planning Assurance;
+* projeções.
+
+Itinerary Planning não deverá depender diretamente de Proposal Management.
+
+Proposal Management solicita aplicação por contrato público.
 
 ---
 
-# Parte IX — Mobility
+## Parte X — Mobility
 
-## 57. Nome oficial
+### 66. Nome oficial
 
 ```text
 Mobility
@@ -1071,117 +1459,130 @@ Mobility
 
 ---
 
-## 58. Responsabilidades
+### 67. Responsabilidades
 
-* Estimativas de Deslocamento;
-* Distância;
-* Tempo de Deslocamento;
-* Meio de Transporte;
+* Travel Estimate;
+* Distance;
+* Travel Time;
+* Transport Mode;
 * origem;
 * destino;
 * validade;
-* rotas;
+* rota normalizada;
 * integração com provedores geográficos;
-* fallback geográfico.
+* cache de estimativas;
+* fallback controlado.
 
 ---
 
-## 59. Conceitos principais
+### 68. Conceitos principais
 
-* TravelLeg;
 * TravelEstimate;
 * Distance;
 * TravelTime;
 * TransportMode;
 * TravelOrigin;
 * TravelDestination;
-* Route;
+* RouteSummary;
 * EstimateValidity.
 
 ---
 
-## 60. Invariantes próprias
+### 69. Invariantes próprias
 
-* Estimativa possui origem;
-* Estimativa possui destino;
-* Estimativa possui Meio de Transporte;
-* valor estimado deve ser identificado;
-* mudança de origem, destino ou transporte invalida Estimativa;
-* precisão não pode exceder a Fonte;
-* falha de rota não remove Atividade.
+* Travel Estimate possui origem;
+* possui destino;
+* possui Transport Mode;
+* Distance não é negativa;
+* Travel Time não é negativo;
+* estimativa é identificada como estimativa;
+* mudança relevante invalida o cálculo;
+* precisão não excede a Fonte;
+* falha de rota não assume valor zero;
+* falha de rota não remove Activity.
 
 ---
 
-## 61. Dados de propriedade
+### 70. Dados de propriedade
 
-Mobility possui:
+Possui:
 
-* Estimativas;
-* estado do cálculo;
-* Proveniência específica;
+* Travel Estimates;
+* estado de cálculo;
 * validade;
 * rota externa normalizada;
-* cache de cálculos, quando aplicável.
+* cache contextual;
+* Provenance específica.
 
 Não possui:
 
-* Atividade;
-* Lugar;
-* Hospedagem;
-* Preferência.
+* Activity;
+* Place;
+* Accommodation;
+* Itinerary;
+* Preference.
 
-Recebe somente referências necessárias.
-
----
-
-## 62. Contratos expostos
-
-### Comandos
-
-* RequestTravelEstimate;
-* RefreshTravelEstimate;
-* InvalidateTravelEstimates;
-* RecalculateItineraryTravel.
-
-### Consultas
-
-* GetTravelEstimate;
-* GetTravelEstimatesForDay;
-* GetDistanceFromAccommodation;
-* GetRouteSummary.
-
-### Eventos
-
-* TravelEstimateRequested;
-* TravelEstimateCalculated;
-* TravelEstimateMarkedStale;
-* TravelEstimateUnavailable;
-* TravelEstimateFailed.
+Recebe referências e snapshots necessários.
 
 ---
 
-## 63. Dependências
+### 71. Contratos expostos
+
+#### Comandos
+
+```text
+RequestTravelEstimate
+RefreshTravelEstimate
+InvalidateTravelEstimate
+InvalidateTravelEstimates
+RecalculateItineraryTravel
+```
+
+#### Consultas
+
+```text
+GetTravelEstimate
+GetTravelEstimatesForDay
+GetDistanceFromAccommodation
+GetRouteSummary
+GetTravelAvailability
+```
+
+#### Eventos
+
+```text
+TravelEstimateRequested
+TravelEstimateCalculated
+TravelEstimateFailed
+TravelEstimateInvalidated
+TravelEstimateBecameStale
+```
+
+---
+
+### 72. Dependências
 
 Depende de:
 
-* Place Catalog para Localização;
-* Trip Management para Hospedagem;
+* Trip Management para Accommodation;
+* Place Catalog para Location;
 * Itinerary Planning para sequência;
 * Data Governance;
+* Platform;
 * provedores externos por adapters.
 
 É consumido por:
 
-* Planning Assurance;
 * Decision Intelligence;
 * Proposal Management;
-* frontend de Mapa e Roteiro.
+* Planning Assurance;
+* projeções de mapa e Itinerary.
 
 ---
 
-# Parte X — Decision Intelligence
+## Parte XI — Decision Intelligence
 
-## 64. Nome oficial
+### 73. Nome oficial
 
 ```text
 Decision Intelligence
@@ -1189,118 +1590,210 @@ Decision Intelligence
 
 ---
 
-## 65. Responsabilidades
+### 74. Responsabilidades
 
-* construção do Contexto de Decisão;
-* geração de Recomendações;
-* Justificativas;
+* construção do Decision Context;
+* Recommendation;
+* Recommendation Reason;
+* Recommendation Confidence;
 * ranking;
 * diversidade;
+* Next Best Action;
+* Explainability;
+* Decision;
+* Decision Outcome;
+* Decision Quality;
 * validade;
-* aceitação e rejeição como sinais;
-* orquestração de IA para decisão;
+* invalidação;
+* coordenação de IA para apoio à decisão;
 * validação de saída probabilística.
 
 ---
 
-## 66. Conceitos principais
+### 75. Agregados principais
 
-* Recommendation;
-* DecisionContext;
-* RecommendationReason;
-* RecommendationScore;
-* RecommendationValidity;
-* RecommendationFeedback.
+```text
+Recommendation
+Decision
+```
+
+Recommendation e Decision são agregados distintos.
 
 ---
 
-## 67. Invariantes próprias
+### 76. Conceitos principais
 
-* Recomendação personalizada possui contexto;
-* Recomendação possui Justificativa;
-* Restrição obrigatória tem precedência;
-* score não substitui Justificativa;
-* Recomendação não altera estado canônico;
-* mudança material de contexto invalida Recomendação;
+* Recommendation;
+* RecommendationReason;
+* RecommendationConfidence;
+* RecommendationScore;
+* DecisionContextSnapshot;
+* Decision;
+* DecisionOutcome;
+* DecisionQuality;
+* NextBestAction.
+
+---
+
+### 77. Invariantes próprias
+
+* Recommendation personalizada possui Context Snapshot;
+* Recommendation possui Reason;
+* Recommendation Confidence não representa certeza;
+* Score não substitui Confidence;
+* Score não substitui Reason;
+* Restriction `mandatory` possui precedência;
+* Recommendation não altera estado canônico;
+* Decision possui ator;
+* Decision pode existir sem Recommendation;
+* Decision não implica execução concluída;
+* IA não registra Decision do Usuário;
+* mudança material de Contexto invalida Recommendation;
 * saída de IA passa por validação determinística.
 
 ---
 
-## 68. Dados de propriedade
+### 78. Dados de propriedade
 
-Decision Intelligence possui:
+Possui:
 
-* Recomendações;
-* Justificativas;
-* scores;
-* Contexto de Decisão registrado;
+* Recommendations;
+* Reasons;
+* Scores;
+* Confidence;
+* Context Snapshots;
+* Decisions;
+* Decision Outcomes;
+* avaliação de Decision Quality;
 * validade;
-* feedback de aceitação e rejeição;
 * metadados de geração.
 
 Não possui:
 
-* Viagem;
-* Roteiro;
-* Lugar;
-* Preferências;
-* Atividade.
+* Trip;
+* Traveler Profile;
+* Place;
+* Saved Place;
+* Itinerary;
+* Activity;
+* Itinerary Proposal.
 
 Mantém referências e snapshots controlados.
 
 ---
 
-## 69. Contratos expostos
+### 79. Contratos expostos
 
-### Comandos
+#### Comandos
 
-* RequestRecommendations;
-* AcceptRecommendation;
-* RejectRecommendation;
-* InvalidateRecommendations.
+```text
+RequestRecommendation
+PresentRecommendation
+AcceptRecommendation
+RejectRecommendation
+InvalidateRecommendation
+SupersedeRecommendation
+RecordDecision
+RequestDecisionExecution
+RecordDecisionOutcome
+EvaluateDecisionQuality
+```
 
-### Consultas
+#### Consultas
 
-* GetRecommendations;
-* GetRecommendation;
-* ExplainRecommendation;
-* GetRecommendationContext.
+```text
+GetRecommendation
+ListRecommendations
+ExplainRecommendation
+GetRecommendationContext
+GetRecommendationConfidence
+GetDecision
+ListDecisions
+GetDecisionOutcome
+```
 
-### Eventos
+#### Eventos
 
-* RecommendationRequested;
-* RecommendationGenerated;
-* RecommendationAccepted;
-* RecommendationRejected;
-* RecommendationExpired;
-* RecommendationInvalidated.
+```text
+RecommendationRequested
+RecommendationGenerated
+RecommendationPresented
+RecommendationAccepted
+RecommendationRejected
+RecommendationExpired
+RecommendationInvalidated
+RecommendationSuperseded
+DecisionRecorded
+DecisionExecutionRequested
+DecisionExecutionCompleted
+DecisionExecutionFailed
+DecisionOutcomeRecorded
+DecisionQualityEvaluated
+```
 
 ---
 
-## 70. Dependências
+### 80. Dependências
 
 Depende de:
 
 * Trip Management;
 * Traveler Profile;
 * Place Catalog;
-* Trip Collections;
+* Trip Collection;
 * Itinerary Planning;
 * Mobility;
 * Data Governance;
-* AI adapters.
+* Platform;
+* AI adapters por porta.
 
 É consumido por:
 
 * Proposal Management;
 * interfaces de exploração;
-* Visão Geral.
+* Trip Overview;
+* analytics autorizados.
 
 ---
 
-# Parte XI — Proposal Management
+### 81. Fluxo de Decision Intelligence
 
-## 71. Nome oficial
+```mermaid
+sequenceDiagram
+    participant C as Cliente
+    participant DI as Decision Intelligence
+    participant CTX as Context Providers
+    participant AI as AI Adapter
+    participant VAL as Domain Validation
+
+    C->>DI: RequestRecommendation
+    DI->>CTX: obter snapshots autorizados
+    CTX-->>DI: contexto versionado
+
+    opt IA necessária
+        DI->>AI: solicitar candidatos
+        AI-->>DI: saída probabilística
+    end
+
+    DI->>VAL: validar candidatos e regras
+    VAL-->>DI: candidatos válidos
+    DI-->>C: Recommendation
+
+    alt aceite
+        C->>DI: AcceptRecommendation
+        DI->>DI: registrar Decision
+        DI-->>C: RecommendationAccepted + DecisionRecorded
+    else rejeição
+        C->>DI: RejectRecommendation
+        DI-->>C: RecommendationRejected
+    end
+```
+
+---
+
+## Parte XII — Proposal Management
+
+### 82. Nome oficial
 
 ```text
 Proposal Management
@@ -1308,36 +1801,31 @@ Proposal Management
 
 ---
 
-## 72. Responsabilidades
+### 83. Responsabilidades
 
-* solicitação de Proposta;
+* solicitação de Itinerary Proposal;
 * geração;
 * armazenamento;
-* versão base;
+* ciclo de vida;
+* versão base do Itinerary;
+* versão base do Trip Context;
+* Proposed Activities;
 * critérios;
-* Dias propostos;
-* Atividades propostas;
-* aceitação integral;
-* aceitação parcial;
-* expiração;
+* justificativas;
+* limitações;
+* seleção;
+* aceite integral;
+* aceite parcial;
 * rejeição;
-* substituição;
-* integração com Itinerary Planning.
+* expiração;
+* cancelamento;
+* supersessão;
+* idempotência de aplicação;
+* coordenação com Itinerary Planning.
 
 ---
 
-## 73. Conceitos principais
-
-* ItineraryProposal;
-* ProposedDay;
-* ProposedActivity;
-* ProposalStatus;
-* ProposalSelection;
-* BaseItineraryVersion.
-
----
-
-## 74. Agregado principal
+### 84. Agregado principal
 
 ```text
 ItineraryProposal
@@ -1345,97 +1833,173 @@ ItineraryProposal
 
 ---
 
-## 75. Invariantes próprias
+### 85. Conceitos principais
 
-* Proposta referencia versão base;
-* Proposta não altera Roteiro enquanto não aceita;
-* aceitação é explícita;
-* aceitação parcial aplica apenas itens selecionados;
-* Proposta expirada não pode ser aplicada;
-* Período Livre protegido deve ser respeitado;
-* Atividade fixa não pode ser movida automaticamente;
-* falha preserva Roteiro e Proposta anterior válida.
+* ItineraryProposal;
+* ProposedActivity;
+* ProposalSelection;
+* ItineraryProposalStatus;
+* ItineraryVersion base;
+* TripContextVersion base;
+* ProposalValidity.
 
 ---
 
-## 76. Dados de propriedade
+### 86. Invariantes próprias
 
-Proposal Management possui:
+* Itinerary Proposal possui `ItineraryProposalId`;
+* referencia `ItineraryVersion`;
+* referencia `TripContextVersion`;
+* não altera o Itinerary enquanto não aceita;
+* Proposed Activity não é Activity canônica;
+* aceite é explícito;
+* aceite parcial aplica somente itens selecionados;
+* Proposta expirada não é aplicável;
+* Activity `fixed` deve ser preservada;
+* Free Period `protected` deve ser preservado;
+* aplicação é idempotente;
+* falha de aplicação preserva o Itinerary anterior.
 
-* Proposta;
+---
+
+### 87. Dados de propriedade
+
+Possui:
+
+* Itinerary Proposal;
 * status;
 * conteúdo proposto;
 * critérios;
-* conflitos da Proposta;
-* versão base;
+* Reasons;
+* limitações;
+* versões base;
 * seleção;
-* histórico da geração.
+* histórico de geração;
+* referência idempotente.
 
 Não possui:
 
-* Roteiro atual;
-* Atividade canônica;
-* regras de Lugar;
-* Preferências canônicas.
+* Itinerary atual;
+* Activity canônica;
+* Traveler Profile;
+* Place canônico;
+* Planning Conflict.
+
+Mantém referências e snapshots.
 
 ---
 
-## 77. Contratos expostos
+### 88. Contratos expostos
 
-### Comandos
+#### Comandos
 
-* RequestItineraryProposal;
-* CancelProposalGeneration;
-* AcceptItineraryProposal;
-* AcceptItineraryProposalPartially;
-* RejectItineraryProposal;
-* RegenerateItineraryProposal;
-* ExpireProposal.
+```text
+RequestItineraryProposal
+CancelItineraryProposalGeneration
+AcceptItineraryProposal
+AcceptItineraryProposalPartially
+RejectItineraryProposal
+RegenerateItineraryProposal
+ExpireItineraryProposal
+SupersedeItineraryProposal
+```
 
-### Consultas
+#### Consultas
 
-* GetItineraryProposal;
-* ListItineraryProposals;
-* GetCurrentProposal;
-* GetProposalImpact;
-* ValidateProposalApplicability.
+```text
+GetItineraryProposal
+ListItineraryProposals
+GetCurrentItineraryProposal
+GetItineraryProposalImpact
+ValidateItineraryProposalApplicability
+```
 
-### Eventos
+#### Eventos
 
-* ItineraryProposalRequested;
-* ItineraryProposalGenerated;
-* ItineraryProposalGenerationFailed;
-* ItineraryProposalAccepted;
-* ItineraryProposalPartiallyAccepted;
-* ItineraryProposalRejected;
-* ItineraryProposalExpired;
-* ItineraryProposalSuperseded.
+```text
+ItineraryProposalRequested
+ItineraryProposalGenerationStarted
+ItineraryProposalGenerated
+ItineraryProposalGenerationFailed
+ItineraryProposalAccepted
+ItineraryProposalPartiallyAccepted
+ItineraryProposalRejected
+ItineraryProposalExpired
+ItineraryProposalCancelled
+ItineraryProposalSuperseded
+```
 
 ---
 
-## 78. Dependências
+### 89. Dependências
 
 Depende de:
 
 * Trip Management;
 * Traveler Profile;
 * Place Catalog;
-* Trip Collections;
+* Trip Collection;
 * Itinerary Planning;
 * Mobility;
 * Decision Intelligence;
 * Planning Assurance;
-* Data Governance.
+* Data Governance;
+* Platform.
 
-A aplicação da Proposta deve ocorrer por contrato de Itinerary Planning.
+Proposal Management não deverá alterar o repositório de Itinerary Planning.
 
-Proposal Management não deve alterar tabelas do Roteiro diretamente.
+A aplicação deverá ocorrer por:
+
+```text
+ApplyProposalItems
+```
+
+ou contrato equivalente pertencente a Itinerary Planning.
 
 ---
 
-# Parte XII — Planning Assurance
+### 90. Fluxo de geração e aplicação
 
-## 79. Nome oficial
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant PM as Proposal Management
+    participant DI as Decision Intelligence
+    participant PA as Planning Assurance
+    participant IP as Itinerary Planning
+
+    U->>PM: RequestItineraryProposal
+    PM->>PM: capturar versões base
+    PM->>DI: obter candidatos e razões
+    DI-->>PM: Recommendations
+    PM->>PM: montar Proposed Activities
+    PM->>PA: ReviewProposal
+    PA-->>PM: resultado de validação
+    PM-->>U: ItineraryProposalGenerated
+
+    alt aceite integral
+        U->>PM: AcceptItineraryProposal
+        PM->>PM: validar versões e idempotência
+        PM->>IP: ApplyProposalItems
+        IP-->>PM: ItineraryVersion atualizada
+        PM-->>U: ItineraryProposalAccepted
+    else aceite parcial
+        U->>PM: AcceptItineraryProposalPartially
+        PM->>PM: validar seleção
+        PM->>IP: ApplyProposalItems selecionados
+        IP-->>PM: ItineraryVersion atualizada
+        PM-->>U: ItineraryProposalPartiallyAccepted
+    else rejeição
+        U->>PM: RejectItineraryProposal
+        PM-->>U: ItineraryProposalRejected
+    end
+```
+
+---
+
+## Parte XIII — Planning Assurance
+
+### 91. Nome oficial
 
 ```text
 Planning Assurance
@@ -1443,101 +2007,131 @@ Planning Assurance
 
 ---
 
-## 80. Responsabilidades
+### 92. Responsabilidades
 
-* detecção de Conflitos;
-* classificação;
+* avaliação de regras;
+* revisão do planejamento;
+* detecção de Planning Conflicts;
 * severidade;
 * evidências;
 * resolução;
-* ignorar Riscos;
+* aceite consciente de Planning Risk;
+* restauração de risco ignorado;
 * invalidação;
-* revisão do Roteiro;
-* validação de Propostas;
-* políticas de viabilidade.
+* supersessão;
+* revisão de Itinerary;
+* revisão de Itinerary Proposal;
+* resumo de consistência.
 
 ---
 
-## 81. Conceitos principais
+### 93. Agregado principal
 
-* Conflict;
-* PlanningError;
-* PlanningRisk;
-* PlanningSuggestion;
+```text
+PlanningConflict
+```
+
+---
+
+### 94. Conceitos principais
+
+* PlanningConflict;
+* PlanningConflictId;
+* ConflictCategory;
+* ConflictSeverity;
+* ConflictStatus;
 * ConflictEvidence;
 * ConflictRule;
 * ConflictResolution.
 
+Não utilizar `Conflict` como nome canônico do agregado.
+
 ---
 
-## 82. Invariantes próprias
+### 95. Invariantes próprias
 
-* Conflito possui objeto afetado;
+* Planning Conflict possui `PlanningConflictId`;
 * possui regra;
 * possui evidência;
+* possui objeto afetado;
 * possui severidade;
-* Erro bloqueante não pode ser ignorado;
-* Risco ignorado é auditável;
+* possui versões avaliadas;
+* severidade `error` não pode ser ignorada;
+* risco ignorado é auditável;
 * resolução exige remoção da condição;
-* invalidação difere de resolução.
+* ignored é diferente de resolved;
+* invalidated é diferente de resolved;
+* condições equivalentes não geram duplicidade ativa.
 
 ---
 
-## 83. Dados de propriedade
+### 96. Dados de propriedade
 
-Planning Assurance possui:
+Possui:
 
-* Conflitos;
-* estado;
+* Planning Conflicts;
+* status;
 * severidade;
 * evidências;
-* decisões de ignorar;
 * regras aplicadas;
-* versão do contexto analisado.
+* referência a Decision de risco;
+* versões do Contexto avaliado;
+* histórico de resolução e invalidação.
 
 Não possui:
 
-* Atividade;
-* Roteiro;
-* Estimativa;
-* Proposta.
+* Activity;
+* Itinerary;
+* Travel Estimate;
+* Itinerary Proposal;
+* Trip;
+* Traveler Profile.
 
-Mantém referências.
-
----
-
-## 84. Contratos expostos
-
-### Comandos
-
-* ReviewItinerary;
-* ReviewProposal;
-* DetectConflicts;
-* ResolveConflict;
-* IgnoreRisk;
-* RestoreIgnoredRisk;
-* InvalidateConflicts.
-
-### Consultas
-
-* ListConflicts;
-* GetConflict;
-* GetConflictSummary;
-* ValidatePlanningOperation;
-* GetBlockingConflicts.
-
-### Eventos
-
-* ConflictDetected;
-* ConflictResolved;
-* ConflictIgnored;
-* ConflictInvalidated;
-* ConflictSuperseded;
-* ItineraryReviewCompleted.
+Mantém referências e snapshots.
 
 ---
 
-## 85. Dependências
+### 97. Contratos expostos
+
+#### Comandos
+
+```text
+ReviewItinerary
+ReviewItineraryProposal
+DetectPlanningConflicts
+ResolvePlanningConflict
+IgnorePlanningRisk
+RestoreIgnoredPlanningRisk
+InvalidatePlanningConflicts
+SupersedePlanningConflict
+```
+
+#### Consultas
+
+```text
+ListPlanningConflicts
+GetPlanningConflict
+GetPlanningConflictSummary
+ValidatePlanningOperation
+GetBlockingPlanningConflicts
+GetActivePlanningRisks
+```
+
+#### Eventos
+
+```text
+PlanningConflictDetected
+PlanningConflictResolved
+PlanningConflictIgnored
+PlanningConflictInvalidated
+PlanningConflictSuperseded
+PlanningConflictReopened
+ItineraryReviewed
+```
+
+---
+
+### 98. Dependências
 
 Depende de:
 
@@ -1546,19 +2140,67 @@ Depende de:
 * Place Catalog;
 * Itinerary Planning;
 * Mobility;
-* Proposal Management somente por snapshots de revisão.
+* Data Governance;
+* Platform.
 
-É consumido por:
+Poderá revisar Itinerary Proposal por snapshot ou contrato público.
 
-* Itinerary Planning;
-* Proposal Management;
-* interfaces de revisão.
+Deve evitar dependência direta bidirecional com Proposal Management.
 
 ---
 
-# Parte XIII — Data Governance
+### 99. Relação com Proposal Management
 
-## 86. Nome oficial
+Proposal Management poderá solicitar:
+
+```text
+ReviewItineraryProposal
+```
+
+Planning Assurance retorna um resultado de revisão.
+
+Planning Assurance não deverá:
+
+* alterar Itinerary Proposal;
+* aplicar itens;
+* alterar Itinerary;
+* escolher por conta própria aceitar risco.
+
+---
+
+### 100. Fluxo de revisão
+
+```mermaid
+flowchart TD
+    Input["Snapshot de planejamento"]
+    Rules["Selecionar regras"]
+    Evidence["Coletar evidências"]
+    Evaluate["Avaliar condições"]
+    Result{"Resultado"}
+
+    Valid["Sem conflito conhecido"]
+    Error["PlanningConflict error"]
+    Risk["PlanningConflict risk"]
+    Suggestion["PlanningConflict suggestion"]
+    Unknown["Avaliação unknown"]
+
+    Input --> Rules
+    Rules --> Evidence
+    Evidence --> Evaluate
+    Evaluate --> Result
+
+    Result --> Valid
+    Result --> Error
+    Result --> Risk
+    Result --> Suggestion
+    Result --> Unknown
+```
+
+---
+
+## Parte XIV — Data Governance
+
+### 101. Nome oficial
 
 ```text
 Data Governance
@@ -1566,92 +2208,115 @@ Data Governance
 
 ---
 
-## 87. Responsabilidades
+### 102. Responsabilidades
 
-* Fontes de Dados;
-* Proveniência;
-* confiança;
-* Atualidade dos Dados;
+* Data Sources;
+* Provenance;
+* Confidence Level;
+* Data Freshness;
 * divergência;
-* políticas de precedência;
+* políticas de qualidade;
 * metadados de coleta;
 * licenças;
-* qualidade;
-* lineage.
+* lineage;
+* regras de precedência entre Fontes;
+* avaliação de qualidade.
 
 ---
 
-## 88. Conceitos principais
+### 103. Agregado principal
+
+```text
+DataSource
+```
+
+---
+
+### 104. Conceitos principais
 
 * DataSource;
 * Provenance;
 * ConfidenceLevel;
 * DataFreshness;
 * ConflictingData;
-* ExternalId;
+* ExternalReference;
 * DataQualityPolicy.
 
 ---
 
-## 89. Invariantes próprias
+### 105. Invariantes próprias
 
-* dado externo relevante possui origem;
-* dado desconhecido não recebe valor enganoso;
-* confiança não é certeza;
-* divergências preservam fontes;
-* dado gerado por IA não vira fato automaticamente;
-* atualização não apaga histórico crítico.
+* dado externo relevante possui Provenance;
+* dado desconhecido não recebe valor falso;
+* Confidence não significa certeza;
+* divergências preservam Fontes;
+* conteúdo de IA não se torna fato automaticamente;
+* precisão não excede a Fonte;
+* atualização não apaga histórico relevante;
+* identificador externo não substitui identidade interna.
 
 ---
 
-## 90. Dados de propriedade
+### 106. Dados de propriedade
 
-Data Governance possui:
+Possui:
 
 * cadastro de Fontes;
 * políticas;
-* registros de Proveniência;
-* metadados de qualidade;
-* estado de atualização.
+* metadados de Provenance;
+* registros de qualidade;
+* regras de Freshness;
+* estado das Fontes.
 
-Dados de negócio permanecem em seus contextos de origem.
-
----
-
-## 91. Contratos expostos
-
-### Comandos
-
-* RegisterDataSource;
-* RecordProvenance;
-* MarkDataStale;
-* RecordDataConflict;
-* ResolveDataConflict;
-* UpdateDataQualityPolicy.
-
-### Consultas
-
-* GetProvenance;
-* GetDataFreshness;
-* GetConfidenceLevel;
-* ListDataSources;
-* EvaluateDataQuality.
-
-### Eventos
-
-* DataSourceRegistered;
-* DataMarkedStale;
-* DataConflictDetected;
-* DataConflictResolved;
-* ConfidenceLevelChanged.
+Dados de negócio permanecem nos Contextos proprietários.
 
 ---
 
-## 92. Dependências
+### 107. Contratos expostos
+
+#### Comandos
+
+```text
+RegisterDataSource
+UpdateDataSource
+DisableDataSource
+RecordProvenance
+MarkDataStale
+RecordDataConflict
+ResolveDataConflict
+UpdateDataQualityPolicy
+```
+
+#### Consultas
+
+```text
+GetProvenance
+GetDataFreshness
+GetConfidenceLevel
+ListDataSources
+EvaluateDataQuality
+ResolveDataSourcePolicy
+```
+
+#### Eventos
+
+```text
+DataSourceRegistered
+DataSourceUpdated
+DataSourceDisabled
+DataMarkedStale
+DataConflictDetected
+DataConflictResolved
+ConfidenceLevelChanged
+```
+
+---
+
+### 108. Dependências
 
 Pode depender apenas de:
 
-* Platform Operations;
+* Platform;
 * integrações externas controladas.
 
 É consumido por:
@@ -1664,83 +2329,198 @@ Pode depender apenas de:
 
 ---
 
-# Parte XIV — Platform Operations
+## Parte XV — Platform
 
-## 93. Nome oficial
+### 109. Nome oficial
 
 ```text
-Platform Operations
+Platform
 ```
+
+O nome `Platform Operations` não será utilizado como nome canônico do Contexto.
 
 ---
 
-## 94. Responsabilidades
+### 110. Responsabilidades
 
-* IDs;
 * Clock;
+* geração de IDs;
 * transações;
-* publicação de Eventos;
+* Unit of Work;
+* publicação de eventos;
 * jobs;
+* filas internas;
+* cache;
+* configuração;
+* feature flags;
 * observabilidade;
 * logs;
 * métricas;
 * traces;
-* configuração;
-* cache;
-* feature flags;
-* segurança técnica;
+* secrets;
 * armazenamento;
-* filas internas;
-* resiliência.
+* resiliência técnica;
+* gateway de IA;
+* infraestrutura de notificações.
 
 ---
 
-## 95. Limite
+### 111. Limite
 
-Platform Operations não deverá possuir regras de negócio.
+Platform não deverá possuir regras de negócio.
 
 Não deverá decidir:
 
-* se uma Proposta pode ser aceita;
-* se uma Viagem é válida;
-* se um Risco pode ser ignorado;
-* se um Lugar deve ser recomendado.
+* se uma Trip é válida;
+* se uma Restriction pode ser ignorada;
+* se uma Recommendation é adequada;
+* se uma Itinerary Proposal pode ser aplicada;
+* se um Planning Risk pode ser ignorado;
+* se uma Activity deve ser movida.
 
 ---
 
-## 96. Contratos transversais
+### 112. Contratos transversais
 
-* EventBus;
-* UnitOfWork;
-* Clock;
-* IdGenerator;
-* JobScheduler;
-* Cache;
-* Logger;
-* Metrics;
-* Tracer;
-* FeatureFlagProvider;
-* SecretProvider.
+```text
+Clock
+IdGenerator
+UnitOfWork
+EventPublisher
+EventConsumer
+JobScheduler
+Cache
+Logger
+Metrics
+Tracer
+FeatureFlagProvider
+SecretProvider
+ObjectStorage
+AIModelPort
+NotificationPort
+```
 
 ---
 
-# Parte XV — Context Map
+### 113. Dependências
 
-## 97. Tipos de relação
+Platform não deverá depender de módulos de domínio.
 
-As relações entre Contextos poderão seguir padrões como:
+Os módulos dependem de abstrações da Platform.
+
+Implementações concretas são fornecidas por infraestrutura.
+
+---
+
+## Parte XVI — Ownership de agregados e dados
+
+### 114. Matriz de ownership
+
+| Contexto              | Agregado ou estado principal   |
+| --------------------- | ------------------------------ |
+| Identity and Access   | Account                        |
+| Trip Management       | Trip                           |
+| Traveler Profile      | TravelerProfile                |
+| Place Catalog         | Place                          |
+| Trip Collection       | TripCollection                 |
+| Itinerary Planning    | Itinerary                      |
+| Mobility              | TravelEstimate                 |
+| Decision Intelligence | Recommendation, Decision       |
+| Proposal Management   | ItineraryProposal              |
+| Planning Assurance    | PlanningConflict               |
+| Data Governance       | DataSource                     |
+| Platform              | Não possui agregado de negócio |
+
+---
+
+### 115. Regra de owner único
+
+Cada agregado deverá possuir um único módulo proprietário.
+
+Nenhum agregado deverá ser gravado por dois módulos.
+
+---
+
+### 116. Referências entre módulos
+
+Referências deverão utilizar identificadores canônicos:
+
+```text
+TripId
+TravelerId
+PlaceId
+ItineraryId
+ActivityId
+RecommendationId
+DecisionId
+ItineraryProposalId
+PlanningConflictId
+```
+
+Propriedades e parâmetros locais poderão utilizar formas contextuais abreviadas conforme o RB-DOM-002.
+
+---
+
+### 117. Navegação entre agregados
+
+Entidades de outro módulo não deverão ser carregadas como objetos navegáveis do ORM.
+
+Preferir:
+
+* identificador;
+* DTO;
+* snapshot;
+* consulta;
+* projeção.
+
+---
+
+### 118. Diagrama de ownership
+
+```mermaid
+flowchart LR
+    TripId["TripId"]
+    PlaceId["PlaceId"]
+    ItineraryId["ItineraryId"]
+    RecommendationId["RecommendationId"]
+    ProposalId["ItineraryProposalId"]
+    ConflictId["PlanningConflictId"]
+
+    Trip["Trip Management<br/>Trip"]
+    Place["Place Catalog<br/>Place"]
+    Itinerary["Itinerary Planning<br/>Itinerary"]
+    Decision["Decision Intelligence<br/>Recommendation"]
+    Proposal["Proposal Management<br/>ItineraryProposal"]
+    Assurance["Planning Assurance<br/>PlanningConflict"]
+
+    TripId --> Trip
+    PlaceId --> Place
+    ItineraryId --> Itinerary
+    RecommendationId --> Decision
+    ProposalId --> Proposal
+    ConflictId --> Assurance
+```
+
+---
+
+## Parte XVII — Context Map
+
+### 119. Tipos de relação
+
+As relações poderão utilizar padrões de DDD como:
 
 * Customer–Supplier;
-* Conformist;
-* Anti-Corruption Layer;
 * Open Host Service;
 * Published Language;
+* Anti-Corruption Layer;
 * Shared Kernel;
-* Separate Ways.
+* Separate Ways;
+* Partnership;
+* Conformist, somente quando justificado.
 
 ---
 
-## 98. Identity and Access → Trip Management
+### 120. Identity and Access → Trip Management
 
 Tipo:
 
@@ -1748,57 +2528,81 @@ Tipo:
 Customer–Supplier
 ```
 
-Trip Management consome identidade e autorização.
-
 Identity and Access fornece:
 
-* `UserId`;
-* sessão;
-* permissões;
-* identidade validada.
+* UserId;
+* identidade validada;
+* Account status;
+* permissões globais.
 
-Trip Management mantém papéis específicos da Viagem.
+Trip Management possui:
+
+* Trip Participant;
+* Trip Role;
+* ownership específico da Trip.
 
 ---
 
-## 99. Trip Management → Itinerary Planning
+### 121. Trip Management → demais Contextos
 
 Tipo:
 
 ```text
-Customer–Supplier
+Open Host Service + Published Language
 ```
 
 Trip Management fornece:
 
 * TripId;
-* Período;
-* versão de contexto;
-* status.
-
-Itinerary Planning reage a mudanças estruturais por Eventos.
+* Destination;
+* Trip Period;
+* Accommodation;
+* Trip Status;
+* TripContextVersion;
+* Eventos estruturais.
 
 ---
 
-## 100. Place Catalog → consumidores
+### 122. Traveler Profile → Decision Intelligence
 
 Tipo:
 
 ```text
-Open Host Service
-+ Published Language
+Customer–Supplier
 ```
 
-Place Catalog deverá expor contratos internos estáveis para:
+Decision Intelligence consome:
 
-* Itinerary Planning;
-* Trip Collections;
-* Mobility;
-* Decision Intelligence.
+* Group Profile;
+* Interests;
+* Restrictions;
+* Budget;
+* Pace.
+
+Não altera esses dados.
 
 ---
 
-## 101. Provedores externos → Place Catalog
+### 123. Place Catalog → consumidores
+
+Tipo:
+
+```text
+Open Host Service + Published Language
+```
+
+Consumidores principais:
+
+* Trip Collection;
+* Itinerary Planning;
+* Mobility;
+* Decision Intelligence;
+* Proposal Management;
+* Planning Assurance.
+
+---
+
+### 124. Provedores externos → Place Catalog e Mobility
 
 Tipo:
 
@@ -1806,11 +2610,11 @@ Tipo:
 Anti-Corruption Layer
 ```
 
-Place Catalog traduz modelos externos para o modelo interno.
+Modelos externos deverão ser traduzidos para contratos internos.
 
 ---
 
-## 102. Itinerary Planning → Mobility
+### 125. Itinerary Planning → Mobility
 
 Tipo:
 
@@ -1818,13 +2622,18 @@ Tipo:
 Customer–Supplier
 ```
 
-Itinerary Planning fornece sequência e referências.
+Itinerary Planning fornece:
 
-Mobility fornece Estimativas.
+* sequência;
+* Activity references;
+* Trip Day;
+* origem e destino contextuais.
+
+Mobility fornece Travel Estimates.
 
 ---
 
-## 103. Traveler Profile → Decision Intelligence
+### 126. Decision Intelligence → Proposal Management
 
 Tipo:
 
@@ -1832,23 +2641,18 @@ Tipo:
 Customer–Supplier
 ```
 
-Decision Intelligence depende de Preferências e Restrições, mas não altera seus dados.
+Proposal Management pode consumir:
+
+* Recommendations;
+* Reasons;
+* Confidence;
+* Decision Context.
+
+Não deve assumir que Recommendation já foi aceita.
 
 ---
 
-## 104. Decision Intelligence → Proposal Management
-
-Tipo:
-
-```text
-Customer–Supplier
-```
-
-Proposal Management poderá utilizar Recomendações, rankings e Justificativas.
-
----
-
-## 105. Proposal Management → Itinerary Planning
+### 127. Proposal Management → Itinerary Planning
 
 Tipo:
 
@@ -1858,13 +2662,11 @@ Application Contract
 
 Proposal Management solicita aplicação.
 
-Itinerary Planning valida e modifica o Roteiro.
-
-Não há acesso direto à persistência.
+Itinerary Planning valida e altera o Itinerary.
 
 ---
 
-## 106. Planning Assurance → Itinerary Planning
+### 128. Planning Assurance → consumidores
 
 Tipo:
 
@@ -1872,13 +2674,19 @@ Tipo:
 Policy Provider
 ```
 
-Planning Assurance identifica bloqueios e riscos.
+Planning Assurance fornece:
 
-Itinerary Planning continua responsável pela integridade do Roteiro.
+* resultado de revisão;
+* Planning Conflicts;
+* bloqueios;
+* riscos;
+* sugestões.
+
+Os módulos proprietários continuam responsáveis por seus agregados.
 
 ---
 
-## 107. Data Governance → Contextos de dados externos
+### 129. Data Governance → contextos consumidores
 
 Tipo:
 
@@ -1886,141 +2694,215 @@ Tipo:
 Shared Policy
 ```
 
-Data Governance fornece regras e metadados, sem possuir os dados de negócio.
+Data Governance fornece:
+
+* Provenance;
+* Freshness;
+* Confidence;
+* políticas de qualidade.
+
+Não possui os dados de negócio.
 
 ---
 
-# Parte XVI — Dependências permitidas
+### 130. Mapa de relações
 
-## 108. Matriz principal
+```mermaid
+flowchart LR
+    IAM["Identity and Access"]
+    Trip["Trip Management"]
+    Traveler["Traveler Profile"]
+    Place["Place Catalog"]
+    Collection["Trip Collection"]
+    Itinerary["Itinerary Planning"]
+    Mobility["Mobility"]
+    Decision["Decision Intelligence"]
+    Proposal["Proposal Management"]
+    Assurance["Planning Assurance"]
+    Governance["Data Governance"]
 
-| Origem                | Destino permitido                                                                                                                                            |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Identity and Access   | Platform Operations                                                                                                                                          |
-| Trip Management       | Identity and Access, Traveler Profile, Platform Operations                                                                                                   |
-| Traveler Profile      | Trip Management, Platform Operations                                                                                                                         |
-| Place Catalog         | Data Governance, Platform Operations                                                                                                                         |
-| Trip Collections      | Trip Management, Place Catalog, Platform Operations                                                                                                          |
-| Itinerary Planning    | Trip Management, Place Catalog, Platform Operations                                                                                                          |
-| Mobility              | Trip Management, Place Catalog, Itinerary Planning, Data Governance, Platform Operations                                                                     |
-| Decision Intelligence | Trip Management, Traveler Profile, Place Catalog, Trip Collections, Itinerary Planning, Mobility, Data Governance                                            |
-| Proposal Management   | Trip Management, Traveler Profile, Place Catalog, Trip Collections, Itinerary Planning, Mobility, Decision Intelligence, Planning Assurance, Data Governance |
-| Planning Assurance    | Trip Management, Traveler Profile, Place Catalog, Itinerary Planning, Mobility, Platform Operations                                                          |
-| Data Governance       | Platform Operations                                                                                                                                          |
+    IAM -->|Customer–Supplier| Trip
+    Trip -->|Open Host Service| Traveler
+    Trip -->|Open Host Service| Itinerary
+    Trip -->|Published Events| Mobility
+
+    Place -->|Open Host Service| Collection
+    Place -->|Open Host Service| Itinerary
+    Place -->|Open Host Service| Mobility
+
+    Traveler -->|Customer–Supplier| Decision
+    Itinerary -->|Customer–Supplier| Mobility
+    Mobility -->|Customer–Supplier| Decision
+
+    Decision -->|Customer–Supplier| Proposal
+    Proposal -->|Application Contract| Itinerary
+    Assurance -->|Policy Provider| Proposal
+    Assurance -->|Policy Provider| Itinerary
+
+    Governance -->|Shared Policy| Place
+    Governance -->|Shared Policy| Mobility
+    Governance -->|Shared Policy| Decision
+```
 
 ---
 
-## 109. Dependências proibidas
+## Parte XVIII — Dependências permitidas
+
+### 131. Matriz principal
+
+| Origem                | Destinos permitidos                                                                                                                                                   |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Identity and Access   | Platform                                                                                                                                                              |
+| Trip Management       | Identity and Access, Platform                                                                                                                                         |
+| Traveler Profile      | Trip Management, Platform                                                                                                                                             |
+| Place Catalog         | Data Governance, Platform                                                                                                                                             |
+| Trip Collection       | Trip Management, Place Catalog, Platform                                                                                                                              |
+| Itinerary Planning    | Trip Management, Place Catalog, Platform                                                                                                                              |
+| Mobility              | Trip Management, Place Catalog, Itinerary Planning, Data Governance, Platform                                                                                         |
+| Decision Intelligence | Trip Management, Traveler Profile, Place Catalog, Trip Collection, Itinerary Planning, Mobility, Data Governance, Platform                                            |
+| Proposal Management   | Trip Management, Traveler Profile, Place Catalog, Trip Collection, Itinerary Planning, Mobility, Decision Intelligence, Planning Assurance, Data Governance, Platform |
+| Planning Assurance    | Trip Management, Traveler Profile, Place Catalog, Itinerary Planning, Mobility, Data Governance, Platform                                                             |
+| Data Governance       | Platform                                                                                                                                                              |
+| Platform              | Nenhum módulo de domínio                                                                                                                                              |
+
+---
+
+### 132. Dependências proibidas
 
 Exemplos:
 
+* Identity and Access depender de Trip Management;
+* Platform depender de regras de domínio;
 * Place Catalog depender de Itinerary Planning;
-* Identity and Access depender de Viagem;
-* Platform Operations depender de regras de domínio;
-* Mobility alterar Atividade diretamente;
-* Decision Intelligence persistir Preferências;
-* Proposal Management alterar Roteiro diretamente;
+* Trip Management gravar Traveler Profile;
+* Mobility alterar Activity;
+* Decision Intelligence alterar Preference;
+* Proposal Management alterar repositório de Itinerary;
+* Planning Assurance alterar Itinerary;
 * frontend acessar persistência;
-* um módulo acessar repositório privado de outro módulo.
+* módulo importar repositório privado de outro;
+* módulo importar entidade interna de outro;
+* módulo depender diretamente de adapter concreto externo.
 
 ---
 
-## 110. Dependência bidirecional
+### 133. Dependência bidirecional
 
-Dependência bidirecional direta deverá ser proibida.
+Dependência bidirecional direta é proibida.
 
-Quando houver necessidade de reação mútua, utilizar:
+Quando houver reação mútua, utilizar:
 
 * Evento;
 * orquestração de aplicação;
-* contrato de leitura;
-* módulo coordenador;
-* projeção.
+* projection;
+* snapshot;
+* contrato intermediário;
+* Process Manager.
 
 ---
 
-# Parte XVII — Comunicação síncrona
+### 134. Validação automatizada
 
-## 111. Quando utilizar
+Fitness Functions deverão verificar:
+
+* ausência de ciclos;
+* imports permitidos;
+* Domain sem Infrastructure;
+* repositórios privados;
+* contratos públicos;
+* Platform independente;
+* ausência de acesso cruzado a ORM models.
+
+---
+
+## Parte XIX — Comunicação síncrona
+
+### 135. Quando utilizar
 
 Comunicação síncrona será adequada quando:
 
 * o resultado for necessário para concluir o caso de uso;
-* a validação fizer parte da operação;
-* o dado precisar estar atualizado;
-* a falha impedir legitimamente a ação.
+* uma invariante depender do resultado;
+* a autorização precisar ser confirmada;
+* a referência precisar estar válida;
+* a falha impedir legitimamente a operação.
 
 ---
 
-## 112. Exemplos
+### 136. Exemplos
 
 ```text
 AddActivity
-→ validar TripId
-→ validar TripDay
+→ validar Trip
+→ validar Trip Day
 → validar PlaceId opcional
 → persistir Activity
 ```
 
 ```text
-AcceptProposal
-→ validar versão base
+AcceptItineraryProposalPartially
+→ validar Proposal Status
+→ validar versões
+→ validar seleção
 → consultar bloqueios
 → aplicar itens
 ```
 
 ---
 
-## 113. Regras
+### 137. Regras
 
 * utilizar contratos explícitos;
-* evitar chamadas profundas;
-* evitar cadeia longa de módulos;
-* evitar exposição de entidades internas;
-* utilizar DTOs de aplicação;
-* propagar `correlationId`.
+* evitar cadeia profunda de chamadas;
+* não expor entidades internas;
+* utilizar DTOs ou snapshots;
+* preservar `correlationId`;
+* não chamar fornecedor externo dentro de transação longa;
+* definir timeout para integrações.
 
 ---
 
-## 114. Limite de profundidade
+### 138. Profundidade
 
-Fluxos síncronos com múltiplos saltos deverão ser revisados.
-
-Exemplo de risco:
+Fluxos como:
 
 ```text
-A → B → C → D → provedor externo
+A → B → C → D → fornecedor externo
 ```
+
+deverão ser revisados.
 
 Alternativas:
 
 * orquestração;
-* consulta agregada;
-* Evento;
 * projeção;
-* processamento assíncrono.
+* processamento assíncrono;
+* snapshot;
+* contrato agregado de leitura.
 
 ---
 
-# Parte XVIII — Comunicação assíncrona
+## Parte XX — Comunicação assíncrona
 
-## 115. Quando utilizar
+### 139. Quando utilizar
 
 Adequada para:
 
 * efeitos secundários;
 * recálculos;
 * invalidações;
-* geração de Proposta;
-* Recomendações;
+* geração de Recommendation;
+* geração de Itinerary Proposal;
 * atualização de busca;
+* ingestão;
 * analytics;
 * notificações;
-* ingestão de dados.
+* projeções;
+* sincronização externa.
 
 ---
 
-## 116. Eventos principais entre módulos
+### 140. Eventos principais entre módulos
 
 ```text
 TripCreated
@@ -2033,72 +2915,93 @@ PlaceSaved
 PlaceUnsaved
 PlaceMarkedPermanentlyClosed
 ActivityAdded
-ActivityMoved
+ActivityMovedToAnotherDay
 ActivityRemoved
 ItineraryVersionChanged
 TravelEstimateCalculated
 RecommendationGenerated
 ItineraryProposalAccepted
-ConflictDetected
+ItineraryProposalPartiallyAccepted
+PlanningConflictDetected
+PlanningConflictResolved
+PlanningConflictInvalidated
 ```
 
 ---
 
-## 117. Publicação confiável
+### 141. Publicação confiável
 
-Eventos dependentes de persistência deverão utilizar estratégia consistente, como:
+Eventos que dependam de persistência deverão utilizar estratégia consistente.
+
+Opções:
 
 * after-commit confiável;
 * transactional outbox;
-* fila persistida.
+* fila persistida;
+* log de eventos interno.
 
-A definição final ocorrerá em documento posterior.
+A decisão física deverá ser registrada por ADR.
 
 ---
 
-## 118. Consumidores idempotentes
+### 142. Consumidores idempotentes
 
 Todo consumidor deverá:
 
-* reconhecer `eventId`;
+* reconhecer `EventId`;
 * evitar efeito duplicado;
-* lidar com retry;
+* tratar retry;
 * registrar falha;
-* preservar ordem quando necessária.
+* preservar ordem quando necessária;
+* validar `aggregateVersion`;
+* preservar `correlationId` e `causationId`.
 
 ---
 
-## 119. Consistência eventual
+### 143. Consistência eventual aceitável
 
-Exemplos aceitáveis:
+Exemplos:
 
-* Distância aparece depois da Atividade;
-* Recomendação atualiza após mudança;
-* Conflito é reavaliado após movimento;
-* projeção da Visão Geral atualiza com pequeno atraso.
+* Travel Estimate aparece após Activity;
+* Recommendation é invalidada após alteração estrutural;
+* Planning Conflict é reavaliado após movimento;
+* projeção de Trip Overview atualiza com pequeno atraso.
 
-Invariantes essenciais não deverão depender de consistência eventual.
-
----
-
-# Parte XIX — APIs internas
-
-## 120. Princípio
-
-Cada módulo deverá expor uma API interna mínima.
-
-A API poderá conter:
-
-* comandos;
-* consultas;
-* tipos públicos;
-* Eventos publicados.
+Invariantes essenciais não deverão depender exclusivamente de consistência eventual.
 
 ---
 
-## 121. Interface pública do módulo
+### 144. Fluxo assíncrono de invalidação
 
-Estrutura conceitual:
+```mermaid
+sequenceDiagram
+    participant TM as Trip Management
+    participant EB as Event Publisher
+    participant DI as Decision Intelligence
+    participant PM as Proposal Management
+    participant MB as Mobility
+    participant PA as Planning Assurance
+    participant IP as Itinerary Planning
+
+    TM->>EB: TripAccommodationChanged
+    EB-->>MB: invalidar Travel Estimates
+    EB-->>DI: invalidar Recommendations
+    EB-->>PM: expirar Proposals incompatíveis
+    EB-->>PA: reavaliar Planning Conflicts
+    EB-->>IP: marcar Itinerary outdated
+```
+
+---
+
+## Parte XXI — APIs internas
+
+### 145. Princípio
+
+Cada módulo deverá expor uma API interna mínima e estável.
+
+---
+
+### 146. Estrutura conceitual
 
 ```text
 module/
@@ -2106,149 +3009,169 @@ module/
 │   ├── commands/
 │   ├── queries/
 │   ├── events/
-│   └── contracts/
+│   ├── contracts/
+│   └── ports/
 ├── domain/
 ├── application/
 ├── infrastructure/
+├── interfaces/
 └── internal/
 ```
 
 ---
 
-## 122. Elementos privados
+### 147. Elementos privados
 
 Não deverão ser importados externamente:
 
-* entidades;
+* entidades internas;
+* agregados concretos;
 * repositórios;
-* serviços internos;
 * ORM models;
 * mappers;
-* regras privadas;
-* adapters.
+* serviços internos;
+* adapters;
+* policies privadas;
+* handlers internos.
 
 ---
 
-## 123. DTOs internos
+### 148. DTOs internos
 
 DTOs deverão:
 
 * representar necessidade do consumidor;
-* possuir estabilidade;
+* utilizar Linguagem Ubíqua;
 * evitar estado completo;
-* evitar dependência de ORM;
-* utilizar termos canônicos;
-* ser versionados quando necessário.
+* não expor ORM;
+* ser imutáveis quando possível;
+* possuir versão quando necessário;
+* minimizar dados pessoais.
 
 ---
 
-## 124. Repositórios
+### 149. Repositórios
 
 Repositórios são privados ao módulo.
 
-Exemplo proibido:
+Proibido:
 
 ```text
-ProposalModule
+Proposal Management
 → ItineraryRepository.save(...)
 ```
 
-Correto:
+Permitido:
 
 ```text
-ProposalModule
-→ ApplyProposalItems command
-→ ItineraryModule
+Proposal Management
+→ ApplyProposalItems
+→ Itinerary Planning
 ```
 
 ---
 
-# Parte XX — Persistência modular
+## Parte XXII — Persistência modular
 
-## 125. Ownership de tabelas
+### 150. Ownership de tabelas
 
 Cada tabela ou coleção deverá possuir owner único.
 
-Outros módulos não deverão escrever diretamente.
+Outros módulos não poderão escrever diretamente.
 
 ---
 
-## 126. Leitura entre módulos
+### 151. Banco compartilhado
 
-Opções permitidas:
-
-1. consulta pela API interna;
-2. projeção;
-3. view controlada;
-4. réplica de leitura;
-5. Evento;
-6. snapshot.
-
----
-
-## 127. Banco compartilhado
-
-No Monólito Modular, um banco compartilhado é permitido.
+Um banco compartilhado é permitido no Monólito Modular.
 
 Isso não autoriza:
 
-* joins indiscriminados entre módulos;
-* foreign keys controladas por qualquer módulo;
 * escrita cruzada;
-* uso de ORM models externos.
+* joins indiscriminados;
+* imports de modelos ORM;
+* foreign keys controladas por qualquer módulo;
+* migrations de um módulo alterando tabelas de outro sem coordenação.
 
 ---
 
-## 128. Schemas lógicos
+### 152. Schemas lógicos
 
-Estrutura conceitual:
+Estrutura conceitual possível:
 
 ```text
 identity.*
 trips.*
 travelers.*
 places.*
-collections.*
+trip_collection.*
 itinerary.*
 mobility.*
-recommendations.*
+decision_intelligence.*
 proposals.*
-assurance.*
+planning_assurance.*
 data_governance.*
 platform.*
 ```
 
-A implementação real dependerá da tecnologia escolhida.
+A implementação física dependerá da tecnologia escolhida.
 
 ---
 
-## 129. Integridade referencial
+### 153. Leitura entre módulos
 
-Referências entre módulos poderão utilizar IDs sem navegação direta de objeto.
+Opções permitidas:
 
-A validação deverá ocorrer por contrato ou consistência controlada.
-
----
-
-## 130. Transações
-
-Transações deverão permanecer preferencialmente dentro de um módulo ou agregado.
-
-Fluxos entre módulos deverão ser coordenados por aplicação.
+1. consulta pela API interna;
+2. projeção;
+3. snapshot;
+4. view controlada;
+5. réplica de leitura;
+6. Evento;
+7. modelo de leitura composto.
 
 ---
 
-# Parte XXI — Projeções e modelos de leitura
+### 154. Integridade referencial
 
-## 131. Objetivo
+Referências entre módulos poderão utilizar IDs sem navegação de objeto.
 
-A interface não deverá precisar compor dezenas de chamadas para apresentar uma tela.
+A validação deverá ocorrer por:
 
-Poderão existir projeções específicas.
+* contrato;
+* Application Service;
+* projeção confiável;
+* consistência eventual controlada.
 
 ---
 
-## 132. Projeções iniciais
+### 155. Transações
+
+Transações deverão permanecer preferencialmente dentro de:
+
+* um agregado;
+* um módulo;
+* um caso de uso com ownership claro.
+
+Fluxos compostos deverão utilizar:
+
+* orquestração;
+* Eventos;
+* compensação;
+* Process Manager;
+* idempotência.
+
+---
+
+## Parte XXIII — Projeções e leitura composta
+
+### 156. Objetivo
+
+A interface não deverá precisar chamar todos os módulos individualmente para montar uma tela.
+
+---
+
+### 157. Projeções iniciais
 
 * Trip Overview;
 * Explore Results;
@@ -2256,279 +3179,263 @@ Poderão existir projeções específicas.
 * Map View;
 * Saved Places View;
 * Itinerary Day View;
-* Proposal Review View;
-* Conflict Review View.
+* Recommendation View;
+* Itinerary Proposal Review View;
+* Planning Conflict Review View.
 
 ---
 
-## 133. Ownership das projeções
+### 158. Ownership das projeções
 
 Uma projeção poderá:
 
 * pertencer ao módulo mais próximo;
-* ser mantida por camada de leitura;
+* ser mantida por uma camada de leitura;
 * consumir Eventos de vários módulos.
 
-Não deverá se tornar fonte de escrita.
+Não deverá se tornar fonte canônica de escrita.
 
 ---
 
-## 134. Atualização
+### 159. Atualização
 
-Pode ser:
+Poderá ser:
 
 * síncrona;
 * assíncrona;
 * sob demanda;
-* cacheada.
-
-A estratégia dependerá da necessidade de consistência.
+* cacheada;
+* reconstruída.
 
 ---
 
-## 135. Estado desatualizado
+### 160. Estado desatualizado
 
-Quando a projeção puder estar atrasada, o contrato deverá permitir informar:
+Quando uma projeção puder estar atrasada, deverá informar quando relevante:
 
 * versão;
 * momento da atualização;
 * estado de processamento;
-* possibilidade de refresh.
+* possibilidade de refresh;
+* limitação de consistência.
 
 ---
 
-# Parte XXII — Orquestração de casos de uso
+## Parte XXIV — Orquestração
 
-## 136. Casos simples
+### 161. Casos simples
 
-Podem ser tratados por um único módulo.
+Casos simples poderão ser executados por um único módulo.
 
 Exemplo:
 
 ```text
 SavePlace
-→ Trip Collections
+→ Trip Collection
 ```
 
 ---
 
-## 137. Casos compostos
+### 162. Casos compostos
 
-Devem ser orquestrados por serviço de aplicação.
+Casos compostos deverão ser coordenados por Application Service ou Process Manager.
 
 Exemplo:
 
 ```text
 AddPlaceToItinerary
-1. validar acesso à Viagem;
-2. validar Lugar;
-3. criar Atividade;
-4. publicar Evento;
-5. solicitar cálculo de Deslocamento;
-6. solicitar revisão de Conflitos.
+1. validar autorização;
+2. validar Trip;
+3. validar Place;
+4. adicionar Activity;
+5. publicar ActivityAdded;
+6. solicitar Travel Estimate;
+7. solicitar revisão do planejamento.
 ```
 
 ---
 
-## 138. Orquestrador
+### 163. Responsabilidade do orquestrador
 
 O orquestrador:
 
 * coordena;
-* não contém regras de domínio;
+* preserva correlação;
 * chama contratos;
-* controla transação quando possível;
-* publica Eventos;
 * trata falhas;
-* preserva correlação.
+* controla sequência;
+* registra estado do processo quando necessário.
+
+Não contém regras próprias de domínio.
 
 ---
 
-## 139. Saga ou Process Manager
+### 164. Process Manager
 
-Poderá ser introduzido em fluxos longos.
+Pode ser utilizado para:
 
-Candidatos:
-
-* geração de Proposta;
-* exclusão da Viagem;
-* ingestão de Lugar;
-* recálculo de Roteiro;
-* integração futura com Reserva.
+* geração de Itinerary Proposal;
+* aplicação de Itinerary Proposal;
+* sincronização após Trip Period;
+* ingestão de Place;
+* exclusão de Trip;
+* atualização ampla de dados;
+* integrações futuras com reservas.
 
 ---
 
-# Parte XXIII — Geração de Proposta como processo modular
+### 165. Diagrama de orquestração
 
-## 140. Fluxo
+```mermaid
+flowchart LR
+    Request["Caso de uso composto"]
+    Orchestrator["Application Orchestrator"]
+    A["Módulo A"]
+    B["Módulo B"]
+    Event["Eventos"]
+    C["Módulo C"]
+    Result["Resultado"]
 
-```text
-Proposal Management
-→ captura versão do Roteiro
-→ obtém contexto da Viagem
-→ obtém Perfil do Grupo
-→ obtém Salvos
-→ obtém Lugares
-→ obtém Estimativas
-→ solicita Recomendações
-→ chama IA
-→ valida saída
-→ solicita revisão de Conflitos
-→ persiste Proposta
+    Request --> Orchestrator
+    Orchestrator --> A
+    A --> Orchestrator
+    Orchestrator --> B
+    B --> Event
+    Event --> C
+    Orchestrator --> Result
 ```
 
 ---
 
-## 141. Ownership do fluxo
+## Parte XXV — IA entre módulos
 
-Proposal Management é responsável pelo processo.
+### 166. Ownership da capacidade de IA
 
-Não é responsável pelas regras internas dos demais módulos.
+A infraestrutura de acesso a modelos pertence à Platform.
 
----
+A semântica de uso pertence ao módulo solicitante.
 
-## 142. Snapshots
+Exemplos:
 
-A Proposta deverá registrar snapshots suficientes para:
-
-* explicar contexto;
-* validar expiração;
-* reproduzir decisões;
-* auditar geração.
+* Decision Intelligence define como IA apoia Recommendation;
+* Proposal Management define como IA apoia Proposed Activities;
+* Place Catalog define como IA pode auxiliar reconciliação;
+* Platform apenas executa a capacidade técnica.
 
 ---
 
-## 143. Aplicação
+### 167. AI Gateway
 
-Ao aceitar:
+O AI Gateway deverá controlar:
 
-```text
-Proposal Management
-→ ValidateProposalApplicability
-→ ApplyProposalItems em Itinerary Planning
-→ atualizar status da Proposta
-```
-
----
-
-## 144. Falha parcial
-
-Falhas em:
-
-* IA;
-* Mobilidade;
-* dados de Lugar;
-* revisão;
-
-deverão produzir resultado explícito.
-
-A arquitetura poderá permitir Proposta parcial somente se a política de produto autorizar e as limitações forem claras.
+* provedor;
+* modelo;
+* custo;
+* timeout;
+* retry;
+* redaction;
+* logging seguro;
+* schema;
+* fallback;
+* métricas.
 
 ---
 
-# Parte XXIV — Recomendação como capacidade modular
+### 168. Proibição de acesso direto
 
-## 145. Context Builder
+Agentes e modelos não deverão:
 
-Decision Intelligence deverá possuir componente responsável por construir `DecisionContext`.
-
-Esse componente consulta contratos, não bancos externos diretamente.
-
----
-
-## 146. Pipeline conceitual
-
-```text
-Coletar fatos
-→ validar Proveniência
-→ aplicar Restrições
-→ gerar candidatos
-→ calcular sinais
-→ chamar IA quando necessário
-→ validar saída
-→ gerar Justificativas
-→ persistir Recomendação
-```
+* consultar banco diretamente;
+* escrever em repositórios;
+* importar agregados internos;
+* aplicar comandos sem autorização;
+* produzir Evento de sucesso antes da confirmação;
+* registrar Decision do Usuário.
 
 ---
 
-## 147. Regras determinísticas antes da IA
+### 169. Minimização
 
-Devem ser aplicadas antes da apresentação:
-
-* autorização;
-* Restrição obrigatória;
-* estado operacional conhecido;
-* compatibilidade com Destino;
-* validade dos IDs;
-* disponibilidade mínima de dados.
+Módulos deverão construir Contexto mínimo antes de chamar o AI Gateway.
 
 ---
 
-## 148. Saída da IA
+### 170. Validação
 
-A IA não deverá retornar entidades completas.
+Saídas deverão passar por:
 
-Deverá retornar, quando possível:
-
-* IDs candidatos;
-* organização;
-* razões;
-* limitações;
-* classificação;
-* campos controlados.
-
----
-
-# Parte XXV — Segurança entre módulos
-
-## 149. Autorização contextual
-
-Módulos que alteram dados de Viagem deverão validar autorização ou receber contexto já validado por mecanismo confiável.
+* validação de schema;
+* validação de enumeração;
+* validação de ID;
+* validação de referência;
+* validação de regras;
+* validação de Provenance;
+* validação de autorização.
 
 ---
 
-## 150. Princípio de menor privilégio
+## Parte XXVI — Segurança entre módulos
+
+### 171. Autorização contextual
+
+Módulos que alterem dados de Trip deverão:
+
+* validar autorização; ou
+* receber contexto de autorização autenticado e verificável.
+
+A interface não é autoridade suficiente.
+
+---
+
+### 172. Menor privilégio
 
 Um módulo deverá acessar apenas:
 
 * contratos necessários;
 * dados necessários;
-* operações permitidas.
+* operações permitidas;
+* snapshots minimizados.
 
 ---
 
-## 151. Dados sensíveis
+### 173. Dados sensíveis
 
-Traveler Profile, Identity and Access e Trip Management poderão conter dados sensíveis.
+Identity and Access, Trip Management e Traveler Profile podem conter dados pessoais.
 
-Outros módulos deverão receber somente informações minimizadas.
+Outros módulos deverão receber formas minimizadas.
 
-Exemplo:
+Preferir:
 
 ```text
 requiresStepFreeAccess = true
 ```
 
-em vez de diagnóstico detalhado.
+em vez de diagnóstico médico.
 
 ---
 
-## 152. Logs
+### 174. IA e dados sensíveis
 
-Nenhum módulo deverá registrar dados sensíveis sem finalidade.
-
----
-
-## 153. IA
-
-Decision Intelligence e Proposal Management deverão aplicar política de minimização antes de enviar contexto ao provedor de IA.
+Decision Intelligence e Proposal Management deverão remover dados desnecessários antes do envio ao provedor.
 
 ---
 
-# Parte XXVI — Observabilidade modular
+### 175. Logs
 
-## 154. Identificação do módulo
+Nenhum módulo deverá registrar sem necessidade:
+
+* tokens;
+* prompts completos;
+* dados pessoais;
+* localização precisa;
+* conteúdo de menores;
+* payload integral de snapshots.
+
+---
+
+## Parte XXVII — Observabilidade modular
+
+### 176. Metadados mínimos
 
 Logs, métricas e traces deverão incluir:
 
@@ -2536,136 +3443,167 @@ Logs, métricas e traces deverão incluir:
 module
 operation
 correlationId
+causationId
+aggregateType
 aggregateId
 status
 duration
 ```
 
+Quando aplicável:
+
+```text
+TripContextVersion
+ItineraryVersion
+EventId
+```
+
 ---
 
-## 155. Métricas por módulo
+### 177. Métricas por módulo
 
-Exemplos:
+#### Trip Management
 
-### Trip Management
-
-* Viagens criadas;
+* Trips criadas;
 * alterações estruturais;
-* falhas de validação.
+* falhas de validação;
+* conflitos de concorrência.
 
-### Place Catalog
+#### Place Catalog
 
 * buscas;
 * cache hit;
+* reconciliações;
 * divergências;
-* falhas de provedor.
+* falhas de fornecedor.
 
-### Mobility
+#### Mobility
 
 * latência;
+* estimativas calculadas;
+* estimativas stale;
 * indisponibilidade;
-* Estimativas desatualizadas;
-* custo de provedor.
+* custo por provedor.
 
-### Decision Intelligence
+#### Decision Intelligence
 
-* Recomendações geradas;
-* rejeições;
-* custo de IA;
-* falhas de validação.
+* Recommendations geradas;
+* Recommendations invalidadas;
+* Decisions registradas;
+* falhas de validação de IA;
+* custo de IA.
 
-### Proposal Management
+#### Proposal Management
 
 * tempo de geração;
 * falhas;
-* taxa de aceitação;
+* aceite integral;
+* aceite parcial;
 * Propostas expiradas.
+
+#### Planning Assurance
+
+* Planning Conflicts por severidade;
+* riscos ignorados;
+* tempo até resolução;
+* conflitos invalidados.
 
 ---
 
-## 156. Tracing
+### 178. Tracing
 
-Fluxos compostos deverão permitir rastrear transições entre módulos.
-
-Exemplo:
+Fluxos compostos deverão permitir rastrear:
 
 ```text
 RequestItineraryProposal
 → Proposal Management
 → Decision Intelligence
 → Mobility
-→ AI Provider
+→ AI Gateway
 → Planning Assurance
+→ Itinerary Planning
 ```
 
 ---
 
-# Parte XXVII — Testes de arquitetura
+## Parte XXVIII — Testes de arquitetura
 
-## 157. Testes de dependência
+### 179. Testes de dependência
 
 Deverão validar:
 
-* dependências permitidas;
+* matriz de dependências;
 * ausência de ciclos;
-* domínio sem infraestrutura;
+* Domain sem Infrastructure;
+* Platform sem domínio;
 * repositórios privados;
-* APIs internas respeitadas.
+* imports públicos;
+* ausência de escrita cruzada.
 
 ---
 
-## 158. Testes de contrato
+### 180. Testes de contrato
 
 Cada módulo deverá possuir testes para:
 
 * comandos;
 * consultas;
 * Eventos;
-* integração interna;
-* compatibilidade.
+* DTOs;
+* portas;
+* compatibilidade;
+* versionamento.
 
 ---
 
-## 159. Testes de isolamento
+### 181. Testes de isolamento
 
 Um módulo deverá ser testável com:
 
-* banco isolado ou schema de teste;
+* persistência isolada;
 * adapters falsos;
 * Clock controlado;
-* EventBus de teste;
-* IDs determinísticos.
+* Event Publisher de teste;
+* IDs determinísticos;
+* snapshots conhecidos.
 
 ---
 
-## 160. Testes de integração modular
+### 182. Testes de integração modular
 
-Deverão cobrir:
+Cenários mínimos:
 
-* TripCreated inicializando Roteiro;
-* alteração da Hospedagem invalidando Estimativas;
-* ActivityMoved reavaliando Conflitos;
-* PlaceUnsaved preservando Atividade;
-* Proposta aceita aplicando itens uma única vez.
+* `TripCreated` inicializa dependências necessárias;
+* `TripPeriodChanged` sincroniza Trip Days;
+* `TripAccommodationChanged` invalida Travel Estimates;
+* `ActivityMovedToAnotherDay` inicia revisão;
+* `PlaceUnsaved` preserva Activity;
+* `RecommendationAccepted` registra Decision;
+* `AcceptItineraryProposalPartially` aplica itens uma vez;
+* `PlanningConflictIgnored` registra Decision;
+* reentrega de Evento não duplica efeitos.
 
 ---
 
-## 161. Fitness Functions
+### 183. Fitness Functions
 
 Exemplos:
 
 * módulo não importa infraestrutura de outro;
-* módulo não acessa repositório externo;
+* módulo não importa ORM model externo;
 * Domain não importa framework;
-* Eventos públicos seguem convenção;
-* contratos internos possuem owner;
-* ciclos de dependência falham o build.
+* contratos públicos possuem owner;
+* Eventos seguem convenção;
+* ciclos falham o build;
+* nomes canônicos são preservados;
+* `Conflict` não é usado como agregado canônico;
+* `Trip Collections` não é usado como nome oficial do Contexto.
 
 ---
 
-# Parte XXVIII — Estrutura conceitual de código
+## Parte XXIX — Estrutura conceitual de código
 
-## 162. Organização geral
+### 184. Organização geral
 
 ```text
 apps/api/src/modules/
@@ -2673,19 +3611,19 @@ apps/api/src/modules/
 ├── trip-management/
 ├── traveler-profile/
 ├── place-catalog/
-├── trip-collections/
+├── trip-collection/
 ├── itinerary-planning/
 ├── mobility/
 ├── decision-intelligence/
 ├── proposal-management/
 ├── planning-assurance/
 ├── data-governance/
-└── platform-operations/
+└── platform/
 ```
 
 ---
 
-## 163. Estrutura interna
+### 185. Estrutura interna
 
 ```text
 trip-management/
@@ -2714,173 +3652,202 @@ trip-management/
 
 ---
 
-## 164. Importações públicas
+### 186. Importações públicas
 
-Consumidores deverão importar apenas por ponto de entrada oficial.
-
-Exemplo:
+Permitido:
 
 ```text
 modules/trip-management/public
 ```
 
-Não deverão importar:
+Proibido:
 
 ```text
 modules/trip-management/domain/internal/*
+modules/trip-management/infrastructure/*
 ```
 
 ---
 
-# Parte XXIX — Estratégia de evolução
+### 187. Naming
 
-## 165. Módulo interno
+Nomes técnicos deverão seguir os nomes canônicos dos Contextos.
 
-Estado inicial de todas as capacidades.
+Evitar:
+
+```text
+trips/
+collections/
+recommendations/
+conflicts/
+platform-operations/
+```
+
+Preferir:
+
+```text
+trip-management/
+trip-collection/
+decision-intelligence/
+planning-assurance/
+platform/
+```
+
+---
+
+## Parte XXX — Estratégia de evolução
+
+### 188. Estado inicial
+
+Todos os Contextos iniciam como módulos do mesmo backend.
 
 Características:
 
 * mesmo processo;
 * mesma implantação;
-* contrato interno;
-* persistência logicamente isolada.
+* contratos internos;
+* persistência logicamente isolada;
+* eventos em processo ou mecanismo simples;
+* ownership explícito.
 
 ---
 
-## 166. Módulo com processamento assíncrono
+### 189. Worker próprio
 
-Uma capacidade poderá possuir worker próprio sem virar serviço independente.
+Um módulo poderá possuir worker sem se tornar serviço.
 
 Candidatos:
 
-* Proposal Management;
-* Mobility;
 * Place Catalog;
-* Decision Intelligence.
+* Mobility;
+* Decision Intelligence;
+* Proposal Management;
+* Planning Assurance.
 
 ---
 
-## 167. Serviço extraído
+### 190. Extração para serviço
 
 Um módulo poderá ser extraído quando houver evidência de:
 
 * escala independente;
-* carga elevada;
+* carga especializada;
 * isolamento de falha;
-* ciclo de implantação diferente;
-* equipe responsável própria;
+* ciclo de implantação distinto;
+* ownership de equipe;
 * requisito de segurança;
-* disponibilidade distinta;
+* disponibilidade diferente;
 * tecnologia especializada.
 
 ---
 
-## 168. Critérios de extração
+### 191. Critérios antes da extração
 
-Antes da extração, verificar:
-
-1. contrato já é explícito?
-2. dados possuem owner claro?
-3. Eventos estão definidos?
-4. acoplamento síncrono é controlado?
-5. existe necessidade operacional real?
-6. a consistência eventual é aceitável?
-7. o custo de rede é aceitável?
-8. a observabilidade está preparada?
+1. O contrato é explícito?
+2. O ownership dos dados está claro?
+3. Os Eventos estão definidos?
+4. O acoplamento síncrono é controlado?
+5. A consistência eventual é aceitável?
+6. A observabilidade está preparada?
+7. Existe necessidade operacional real?
+8. O custo de rede é aceitável?
+9. A migração possui estratégia?
+10. A extração reduz mais complexidade do que cria?
 
 ---
 
-## 169. Candidatos potenciais
+### 192. Candidatos potenciais
 
-### Place Catalog
+#### Place Catalog
 
 Pode exigir ingestão e busca em escala.
 
-### Mobility
+#### Mobility
 
-Pode ter alto volume e provedores específicos.
+Pode possuir volume elevado e provedores específicos.
 
-### Decision Intelligence
+#### Decision Intelligence
 
-Pode demandar escalabilidade e custos próprios de IA.
+Pode possuir custos e escala próprios de IA.
 
-### Proposal Management
+#### Proposal Management
 
-Pode possuir jobs demorados e independentes.
+Pode executar processos longos.
 
-### Platform Notifications futura
+#### Platform Notifications futura
 
 Pode possuir ciclo operacional próprio.
 
 ---
 
-## 170. Contextos que não devem ser extraídos cedo
+### 193. Contextos que não devem ser extraídos cedo
 
 * Trip Management;
 * Traveler Profile;
 * Itinerary Planning.
 
-Esses contextos possuem alta proximidade transacional no início.
+Esses Contextos possuem proximidade transacional relevante no estágio inicial.
 
 ---
 
-# Parte XXX — Anti-patterns
+## Parte XXXI — Anti-patterns
 
-## 171. Monólito distribuído
+### 194. Monólito distribuído
 
 Não extrair serviços mantendo:
 
 * banco compartilhado;
 * chamadas síncronas excessivas;
 * deploy coordenado;
-* dependências circulares;
-* ausência de autonomia.
+* ausência de autonomia;
+* dependências circulares.
 
 ---
 
-## 172. Banco como API
+### 195. Banco como API
 
-Não integrar módulos por leitura direta de tabelas.
+Não integrar módulos por leitura ou escrita direta em tabelas privadas.
 
 ---
 
-## 173. Shared Kernel excessivo
+### 196. Shared Kernel excessivo
 
 Não mover conceitos para `shared` apenas para evitar dependências.
 
 ---
 
-## 174. Módulo por entidade
+### 197. Módulo por entidade
 
-Não criar um módulo independente para cada entidade.
+Não criar um módulo para cada entidade.
 
 Exemplo inadequado:
 
 ```text
 TripService
+TripDayService
 ActivityService
-DayService
 FreePeriodService
 ```
 
-sem capacidade coesa.
+---
+
+### 198. Módulo técnico
+
+Não utilizar como módulos principais:
+
+```text
+Controllers
+Services
+Repositories
+Models
+Helpers
+```
+
+Esses elementos pertencem às camadas internas das capacidades.
 
 ---
 
-## 175. Módulo técnico
-
-Evitar módulos principais como:
-
-* Controllers;
-* Repositories;
-* Services;
-* Models.
-
-Camadas técnicas devem existir dentro das capacidades.
-
----
-
-## 176. Eventos genéricos
+### 199. Eventos genéricos
 
 Evitar:
 
@@ -2888,27 +3855,34 @@ Evitar:
 EntityUpdated
 DataChanged
 ItemProcessed
+ConflictDetected
+ActivityMoved
 ```
 
-quando houver fato de domínio específico.
+Preferir:
+
+```text
+TripPeriodChanged
+PlaceDataUpdated
+PlanningConflictDetected
+ActivityMovedToAnotherDay
+```
 
 ---
 
-## 177. Orquestrador com regras
+### 200. Orquestrador com regras
 
 O orquestrador não deverá decidir:
 
-* se uma Restrição é obrigatória;
+* se uma Restriction é mandatory;
 * se uma Proposta é válida;
-* se um Dia pertence à Viagem.
-
-Essas regras pertencem aos módulos de domínio.
+* se um Dia pertence à Trip;
+* se um risco pode ser ignorado;
+* se uma Recommendation é adequada.
 
 ---
 
-## 178. Dependência de fornecedor
-
-Não nomear módulo ou domínio com base em fornecedor externo.
+### 201. Dependência de fornecedor
 
 Evitar:
 
@@ -2928,133 +3902,214 @@ Mobility
 
 ---
 
-## 179. IA acessando banco diretamente
+### 202. IA acessando persistência
 
-Agentes e modelos não deverão consultar ou alterar persistência sem serviços de aplicação e contratos autorizados.
+Agentes e modelos não deverão consultar ou alterar persistência diretamente.
 
 ---
 
-# Parte XXXI — Rastreabilidade
+### 203. Estado duplicado
 
-## 180. Contextos e entidades
+Não manter o mesmo estado canônico em dois módulos.
 
-| Contexto              | Entidades principais                     |
+Exemplos proibidos:
+
+* Activity canônica dentro de Proposal Management;
+* Place canônico dentro de Trip Collection;
+* Restriction canônica dentro de Decision Intelligence;
+* Planning Conflict dentro de Itinerary Planning.
+
+---
+
+## Parte XXXII — Rastreabilidade
+
+### 204. Contextos e entidades
+
+| Contexto              | Entidades ou agregados principais        |
 | --------------------- | ---------------------------------------- |
-| Identity and Access   | Account, User, Session                   |
-| Trip Management       | Trip, Accommodation, TripParticipant     |
-| Traveler Profile      | Traveler                                 |
+| Identity and Access   | Account, User                            |
+| Trip Management       | Trip, TripParticipant                    |
+| Traveler Profile      | TravelerProfile, Traveler                |
 | Place Catalog         | Place                                    |
-| Trip Collections      | SavedPlace                               |
+| Trip Collection       | TripCollection, SavedPlace               |
 | Itinerary Planning    | Itinerary, TripDay, Activity, FreePeriod |
 | Mobility              | TravelEstimate                           |
-| Decision Intelligence | Recommendation                           |
+| Decision Intelligence | Recommendation, Decision                 |
 | Proposal Management   | ItineraryProposal                        |
-| Planning Assurance    | Conflict                                 |
+| Planning Assurance    | PlanningConflict                         |
 | Data Governance       | DataSource                               |
+| Platform              | Sem agregado de negócio                  |
 
 ---
 
-## 181. Contextos e superfícies
+### 205. Contextos e superfícies
 
-| Superfície        | Contextos principais                                   |
-| ----------------- | ------------------------------------------------------ |
-| Minhas Viagens    | Trip Management                                        |
-| Criar Viagem      | Trip Management, Traveler Profile                      |
-| Visão Geral       | Trip Management, Itinerary Planning, Trip Collections  |
-| Explorar          | Place Catalog, Trip Collections, Decision Intelligence |
-| Detalhes do Lugar | Place Catalog, Mobility                                |
-| Mapa              | Place Catalog, Mobility                                |
-| Salvos            | Trip Collections, Place Catalog                        |
-| Roteiro           | Itinerary Planning, Mobility, Planning Assurance       |
-| Proposta          | Proposal Management, Decision Intelligence             |
-| Revisão           | Planning Assurance                                     |
-| Configurações     | Trip Management, Traveler Profile                      |
-
----
-
-## 182. Contextos e Eventos
-
-| Evento                       | Produtor              | Consumidores principais                              |
-| ---------------------------- | --------------------- | ---------------------------------------------------- |
-| TripCreated                  | Trip Management       | Itinerary Planning, Traveler Profile                 |
-| TripAccommodationChanged     | Trip Management       | Mobility, Decision Intelligence, Proposal Management |
-| TravelerAdded                | Traveler Profile      | Decision Intelligence, Proposal Management           |
-| PlaceSaved                   | Trip Collections      | Decision Intelligence, projeções                     |
-| PlaceMarkedPermanentlyClosed | Place Catalog         | Itinerary Planning, Planning Assurance               |
-| ActivityAdded                | Itinerary Planning    | Mobility, Planning Assurance                         |
-| ActivityMoved                | Itinerary Planning    | Mobility, Planning Assurance                         |
-| TravelEstimateCalculated     | Mobility              | Planning Assurance, Decision Intelligence            |
-| RecommendationGenerated      | Decision Intelligence | Proposal Management                                  |
-| ItineraryProposalAccepted    | Proposal Management   | Itinerary Planning, projeções                        |
-| ConflictDetected             | Planning Assurance    | interfaces, Proposal Management                      |
+| Superfície        | Contextos principais                                           |
+| ----------------- | -------------------------------------------------------------- |
+| Minhas Viagens    | Trip Management                                                |
+| Criar Viagem      | Trip Management, Traveler Profile                              |
+| Visão Geral       | Trip Management, Itinerary Planning, Trip Collection           |
+| Explorar          | Place Catalog, Trip Collection, Decision Intelligence          |
+| Detalhes do Lugar | Place Catalog, Mobility                                        |
+| Mapa              | Place Catalog, Mobility                                        |
+| Salvos            | Trip Collection, Place Catalog                                 |
+| Roteiro           | Itinerary Planning, Mobility, Planning Assurance               |
+| Recomendação      | Decision Intelligence                                          |
+| Proposta          | Proposal Management, Decision Intelligence, Planning Assurance |
+| Revisão           | Planning Assurance                                             |
+| Configurações     | Trip Management, Traveler Profile, Identity and Access         |
 
 ---
 
-# Parte XXXII — Critérios de aceite
+### 206. Contextos e Eventos
 
-## 183. Contextos
+| Evento                             | Produtor              | Consumidores principais                                                            |
+| ---------------------------------- | --------------------- | ---------------------------------------------------------------------------------- |
+| TripCreated                        | Trip Management       | Traveler Profile, Itinerary Planning, Trip Collection                              |
+| TripPeriodChanged                  | Trip Management       | Itinerary Planning, Decision Intelligence, Proposal Management, Planning Assurance |
+| TripAccommodationChanged           | Trip Management       | Mobility, Decision Intelligence, Proposal Management                               |
+| TravelerAdded                      | Traveler Profile      | Decision Intelligence, Proposal Management, Planning Assurance                     |
+| TripRestrictionAdded               | Traveler Profile      | Decision Intelligence, Proposal Management, Planning Assurance                     |
+| PlaceSaved                         | Trip Collection       | Decision Intelligence, projeções                                                   |
+| PlaceMarkedPermanentlyClosed       | Place Catalog         | Itinerary Planning, Decision Intelligence, Planning Assurance                      |
+| ActivityAdded                      | Itinerary Planning    | Mobility, Decision Intelligence, Planning Assurance                                |
+| ActivityMovedToAnotherDay          | Itinerary Planning    | Mobility, Proposal Management, Planning Assurance                                  |
+| ItineraryVersionChanged            | Itinerary Planning    | Decision Intelligence, Proposal Management, Planning Assurance                     |
+| TravelEstimateCalculated           | Mobility              | Decision Intelligence, Proposal Management, Planning Assurance                     |
+| RecommendationGenerated            | Decision Intelligence | Proposal Management, interfaces                                                    |
+| DecisionRecorded                   | Decision Intelligence | analytics e execução autorizada                                                    |
+| ItineraryProposalAccepted          | Proposal Management   | projeções e auditoria                                                              |
+| ItineraryProposalPartiallyAccepted | Proposal Management   | projeções e auditoria                                                              |
+| PlanningConflictDetected           | Planning Assurance    | interfaces, Proposal Management                                                    |
+| PlanningConflictResolved           | Planning Assurance    | interfaces, Itinerary Planning                                                     |
+| PlanningConflictInvalidated        | Planning Assurance    | projeções                                                                          |
 
-* contextos possuem responsabilidades claras;
-* termos são consistentes;
+---
+
+## Parte XXXIII — Catálogo de diagramas
+
+### 207. Diagramas desta versão
+
+| ID conceitual  | Diagrama                        |
+| -------------- | ------------------------------- |
+| RB-DGM-ARC-015 | Autoridade documental           |
+| RB-DGM-ARC-016 | Mapa geral dos Contextos        |
+| RB-DGM-ARC-017 | Anti-Corruption Layer de Place  |
+| RB-DGM-ARC-018 | Fluxo de Decision Intelligence  |
+| RB-DGM-ARC-019 | Fluxo de Itinerary Proposal     |
+| RB-DGM-ARC-020 | Fluxo de Planning Assurance     |
+| RB-DGM-ARC-021 | Ownership de agregados          |
+| RB-DGM-ARC-022 | Context Map                     |
+| RB-DGM-ARC-023 | Invalidação assíncrona          |
+| RB-DGM-ARC-024 | Orquestração de casos compostos |
+
+---
+
+### 208. Critério de inclusão
+
+Diagramas foram utilizados onde o texto isolado não evidencia adequadamente:
+
+* fronteiras;
+* direção de dependências;
+* ownership;
+* integração;
+* fluxo causal;
+* comunicação assíncrona;
+* orquestração.
+
+Não foram criados diagramas individuais para todos os módulos porque isso repetiria as tabelas e responsabilidades sem acrescentar clareza.
+
+---
+
+## Parte XXXIV — Critérios de aceite
+
+### 209. Contextos
+
+* todos os Contextos possuem nome oficial;
+* responsabilidades estão claras;
 * ownership está definido;
+* agregados estão atribuídos;
 * dados possuem owner único;
-* fronteiras são coerentes com o domínio.
+* fronteiras são coerentes com o domínio;
+* `Trip Collection` está no singular;
+* `Platform` é o nome oficial;
+* `PlanningConflict` é o agregado de Planning Assurance;
+* Decision pertence a Decision Intelligence.
 
 ---
 
-## 184. Dependências
+### 210. Dependências
 
 * dependências permitidas estão documentadas;
 * dependências proibidas estão explícitas;
 * ciclos são proibidos;
 * acesso direto a repositórios externos é proibido;
-* comunicação utiliza contratos.
+* comunicação utiliza contratos;
+* Platform não depende de domínio;
+* dependências podem ser testadas automaticamente.
 
 ---
 
-## 185. Persistência
+### 211. Persistência
 
 * banco compartilhado não implica ownership compartilhado;
 * tabelas possuem owner;
 * escrita cruzada é proibida;
 * projeções não são fonte canônica;
-* transações respeitam agregados.
+* transações respeitam agregados;
+* snapshots não transferem ownership.
 
 ---
 
-## 186. IA
+### 212. Eventos
 
-* Decision Intelligence possui ownership das Recomendações;
-* Proposal Management possui ownership das Propostas;
-* IA não altera o Roteiro diretamente;
+* nomes seguem RB-DOM-004;
+* Eventos representam fatos;
+* `ActivityMovedToAnotherDay` substitui formas genéricas;
+* `PlanningConflictDetected` substitui `ConflictDetected`;
+* consumidores são idempotentes;
+* publicação confiável está prevista;
+* causalidade e correlação são preservadas.
+
+---
+
+### 213. IA
+
+* Decision Intelligence possui Recommendation e Decision;
+* Proposal Management possui Itinerary Proposal;
+* IA não altera Itinerary;
+* IA não registra Decision do Usuário;
+* contexto é minimizado;
 * saídas são validadas;
-* dados enviados são minimizados.
+* AI Gateway pertence à Platform.
 
 ---
 
-## 187. Evolução
+### 214. Evolução
 
-* critérios de extração estão definidos;
 * microservices não são obrigatórios;
+* critérios de extração estão definidos;
 * módulos podem possuir workers;
-* contratos preparam extração futura;
-* complexidade deve ser justificada.
+* contratos preparam extração;
+* complexidade exige justificativa;
+* extração deve ser registrada por ADR.
 
 ---
 
-## 188. Qualidade
+### 215. Diagramas
 
-* testes de arquitetura estão previstos;
-* contratos possuem testes;
-* observabilidade identifica módulos;
-* segurança respeita fronteiras;
-* Eventos são rastreáveis.
+* diagramas possuem função arquitetural;
+* Mermaid é compatível com GitHub;
+* diagramas utilizam termos oficiais;
+* diagramas não definem schema físico;
+* diagramas não contradizem as matrizes;
+* diagramas não incluem atributos extras nos blocos.
 
 ---
 
-# Parte XXXIII — Governança
+## Parte XXXV — Governança
 
-## 189. Owner
+### 216. Owner
 
 O owner deste documento é:
 
@@ -3075,7 +4130,7 @@ A manutenção deverá envolver:
 
 ---
 
-## 190. Inclusão de novo Contexto Delimitado
+### 217. Inclusão de novo Contexto Delimitado
 
 Uma proposta deverá conter:
 
@@ -3084,48 +4139,68 @@ Uma proposta deverá conter:
 * linguagem;
 * modelo;
 * owner;
+* agregados;
 * dados;
 * contratos;
 * dependências;
 * Eventos;
 * justificativa;
-* impacto;
-* alternativas.
+* alternativas;
+* impacto de migração.
 
 ---
 
-## 191. Inclusão de novo módulo
+### 218. Inclusão de novo módulo
 
 Um novo módulo deverá:
 
 * possuir responsabilidade coesa;
-* ter owner;
 * não duplicar capacidade;
+* possuir owner;
 * possuir API pública;
-* possuir dados próprios ou responsabilidade explícita;
+* possuir limites privados;
 * possuir testes;
+* possuir observabilidade;
 * respeitar dependências.
 
 ---
 
-## 192. Alteração de fronteira
+### 219. Alteração de fronteira
 
 Mudanças deverão revisar:
 
 * Modelo de Domínio;
-* Regras de Negócio;
+* Linguagem Ubíqua;
+* Regras;
 * Eventos;
 * APIs;
 * persistência;
 * ownership;
-* observabilidade;
 * segurança;
+* observabilidade;
 * testes;
-* documentação.
+* diagramas;
+* agentes de IA.
 
 ---
 
-## 193. Exceções
+### 220. ADR obrigatório
+
+Deverá ser criado ADR quando:
+
+* um Contexto for dividido;
+* Contextos forem fundidos;
+* ownership de agregado mudar;
+* módulo virar serviço;
+* banco for separado;
+* comunicação síncrona virar assíncrona;
+* Shared Kernel for criado;
+* dependência proibida receber exceção;
+* Platform receber nova capacidade transversal relevante.
+
+---
+
+### 221. Exceções
 
 Exceções deverão possuir:
 
@@ -3134,47 +4209,42 @@ Exceções deverão possuir:
 * prazo;
 * risco;
 * mitigação;
-* plano de convergência.
+* plano de convergência;
+* ADR ou registro equivalente.
 
 ---
 
-## 194. ADR obrigatório
+### 222. Uso por agentes de engenharia
 
-Deverá ser criado ADR quando:
+Agentes deverão:
 
-* um Contexto for dividido;
-* Contextos forem fundidos;
-* módulo virar serviço;
-* ownership de dados mudar;
-* comunicação síncrona virar assíncrona;
-* um Shared Kernel for criado;
-* banco for separado.
-
----
-
-## 195. Uso por agentes de IA
-
-Agentes de engenharia deverão:
-
-* identificar o Contexto responsável;
-* utilizar somente contratos públicos;
+* identificar o Contexto proprietário;
+* utilizar contratos públicos;
 * não importar elementos internos;
 * não criar dependência circular;
 * não acessar persistência externa;
 * não mover regra para Platform;
 * não criar módulo por conveniência;
-* registrar lacunas;
-* recomendar ADR quando necessário;
-* gerar testes de arquitetura.
+* preservar nomes canônicos;
+* sugerir ADR quando necessário;
+* gerar testes arquiteturais;
+* registrar lacunas em vez de inventar ownership.
 
 ---
 
-## 196. Checklist de revisão
+## Parte XXXVI — Checklist de revisão
 
-Antes de aprovar este documento, verificar:
+### 223. Checklist final
 
+Antes de aprovar:
+
+* frontmatter YAML é válido;
+* existe apenas um H1;
+* Partes utilizam H2;
+* seções numeradas utilizam H3;
 * conceitos arquiteturais estão definidos;
 * Contextos Delimitados estão identificados;
+* nomes estão alinhados ao RB-ARC-001;
 * responsabilidades estão claras;
 * ownership está definido;
 * dados de propriedade estão definidos;
@@ -3187,53 +4257,67 @@ Antes de aprovar este documento, verificar:
 * persistência modular está definida;
 * projeções estão definidas;
 * orquestração está definida;
-* Propostas estão contempladas;
-* Recomendações estão contempladas;
+* Recommendation está contemplada;
+* Decision está contemplada;
+* Itinerary Proposal está contemplada;
+* Planning Conflict está contemplado;
+* IA está contemplada;
 * segurança está contemplada;
 * observabilidade está contemplada;
 * testes estão contemplados;
 * evolução está definida;
 * anti-patterns estão definidos;
 * rastreabilidade está presente;
-* governança está definida.
+* diagramas são necessários e não decorativos;
+* Mermaid renderiza no GitHub;
+* não existem contradições com RB-DOM-001;
+* não existem contradições com RB-DOM-002;
+* não existem contradições com RB-DOM-003;
+* não existem contradições com RB-DOM-004;
+* não existem contradições com RB-ARC-001.
 
 ---
 
-## 197. Declaração final
+## Parte XXXVII — Declaração final
 
-A Arquitetura de Módulos e Contextos Delimitados estabelece as fronteiras internas oficiais do RouteBook.
+### 224. Declaração arquitetural
 
-Ela define:
+A arquitetura modular do RouteBook deverá preservar limites explícitos entre as capacidades do produto.
 
-* quem possui cada conceito;
-* onde cada regra deve existir;
-* quais dados pertencem a cada módulo;
-* como os módulos podem se comunicar;
-* quais dependências são permitidas;
-* quais acessos são proibidos;
-* como capacidades podem evoluir.
+Cada Contexto Delimitado deverá:
 
-O RouteBook deverá iniciar como um Monólito Modular, mas suas fronteiras deverão ser tratadas com a mesma disciplina exigida em uma arquitetura distribuída.
+* possuir linguagem coerente;
+* possuir responsabilidades;
+* possuir ownership;
+* possuir contratos;
+* controlar seus dados;
+* proteger suas invariantes;
+* publicar seus próprios Eventos;
+* depender apenas de contratos autorizados.
 
-Cada módulo deverá possuir:
+O Monólito Modular não autoriza:
 
-* responsabilidade coesa;
-* ownership;
-* contratos;
-* dados controlados;
-* Eventos;
-* testes;
-* observabilidade.
+* escrita cruzada;
+* acesso irrestrito ao banco;
+* imports de elementos internos;
+* ownership compartilhado;
+* dependências circulares;
+* regras dentro da Platform;
+* acesso direto de IA à persistência.
 
-Nenhum módulo deverá modificar diretamente o estado interno de outro módulo.
+A arquitetura deverá preservar especialmente:
 
-A colaboração deverá ocorrer por:
+* Trip Management como owner de Trip;
+* Traveler Profile como owner dos Travelers e das Preferences;
+* Place Catalog como owner de Place;
+* Trip Collection como owner de Saved Place;
+* Itinerary Planning como owner do Itinerary;
+* Decision Intelligence como owner de Recommendation e Decision;
+* Proposal Management como owner de Itinerary Proposal;
+* Planning Assurance como owner de Planning Conflict;
+* Data Governance como owner das políticas e metadados de qualidade;
+* Platform como capacidade técnica sem regras de negócio.
 
-* Comandos;
-* Consultas;
-* Eventos;
-* portas;
-* projeções;
-* contratos explícitos.
+Nenhum módulo, integração, interface ou agente de IA poderá alterar diretamente o estado pertencente a outro módulo.
 
-Essa disciplina permitirá que o RouteBook permaneça simples no início e preparado para evoluir sem perder integridade arquitetural.
+Toda evolução deverá manter ou fortalecer esses limites.

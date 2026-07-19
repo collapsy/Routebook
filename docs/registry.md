@@ -37,6 +37,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-ARC-001 | Visão Geral da Arquitetura | Architecture | Draft | 0.2.0 | [architecture-overview.md](./architecture/architecture-overview.md) |
 | RB-ARC-002 | Arquitetura de Módulos e Contextos Delimitados | Architecture | Draft | 0.2.0 | [modules-and-bounded-contexts.md](./architecture/modules-and-bounded-contexts.md) |
 | RB-ARC-003 | Arquitetura de Integrações e Portas | Architecture | Draft | 0.1.0 | [integrations-and-ports.md](./architecture/integrations-and-ports.md) |
+| RB-ARC-004 | Arquitetura de Dados e Persistência | Architecture | Draft | 0.1.0 | [data-and-persistence.md](./architecture/data-and-persistence.md) |
 
 ## Status possíveis
 

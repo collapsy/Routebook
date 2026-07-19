@@ -720,7 +720,7 @@ classDiagram
 
     class PlanningConflict {
         <<aggregateRoot>>
-        +ConflictId id
+        +PlanningConflictId id
         +ConflictSeverity severity
         +ConflictStatus status
     }
@@ -2383,10 +2383,12 @@ Um Conflito de Planejamento pode estar relacionado a:
 
 - TripId;
 - ItineraryId;
-- ActivityIds;
-- ProposalId;
+- um ou mais ActivityId;
+- ItineraryProposalId;
 - PlaceId;
 - TravelEstimateId.
+- TripContextVersion;
+- ItineraryVersion.
 
 O Roteiro não possui internamente os Conflitos de Planejamento.
 
@@ -2400,11 +2402,12 @@ O contexto `Planning Assurance` possui os Conflitos de Planejamento e avalia o R
 classDiagram
     class PlanningConflict {
         <<aggregateRoot>>
-        +ConflictId id
+        +PlanningConflictId id
         +ConflictCategory category
         +ConflictSeverity severity
         +ConflictStatus status
-        +ContextVersion contextVersion
+        +TripContextVersion tripContextVersion
+        +ItineraryVersion itineraryVersion
     }
 
     class ConflictRuleReference {
@@ -2669,7 +2672,7 @@ Não altera Roteiro diretamente.
 
 ---
 
-### 99. ConflictDetectionService
+### 99. PlanningConflictDetectionService
 
 Responsabilidades:
 
@@ -2764,11 +2767,11 @@ Responsabilidades:
 
 ### 106. Eventos de Conflito
 
-- ConflictDetected;
-- ConflictResolved;
-- ConflictIgnored;
-- ConflictInvalidated;
-- ConflictSuperseded.
+- PlanningConflictDetected
+- PlanningConflictResolved
+- PlanningConflictIgnored
+- PlanningConflictInvalidated
+- PlanningConflictSuperseded
 
 ---
 
@@ -2849,10 +2852,10 @@ Responsabilidades:
 
 ### 113. Comandos de Conflito
 
-- ReviewItinerary;
-- ResolveConflict;
-- IgnoreRisk;
-- RestoreIgnoredRisk.
+- ReviewItinerary
+- ResolvePlanningConflict
+- IgnorePlanningRisk
+- RestoreIgnoredPlanningRisk
 
 ---
 
@@ -2872,7 +2875,7 @@ Nenhuma Recomendação ou Proposta pode alterar estado canônico sem decisão ex
 - SavedPlace não é PlannedPlace.
 - ItineraryProposal não é Itinerary.
 - Estimate não é confirmação.
-- Alert não é Conflict.
+- Alert não é PlanningConflict.
 - ConfidenceLevel não é RecommendationConfidence.
 - RecommendationConfidence não é RecommendationScore.
 
@@ -3078,7 +3081,7 @@ Diagramas deste documento não devem ser utilizados diretamente para:
 | Recommendation    | RecommendationId    | Recommendation     |
 | Decision          | DecisionId          | Decision           |
 | ItineraryProposal | ItineraryProposalId | Proposal           |
-| PlanningConflict  | ConflictId          | Planning Assurance |
+| PlanningConflict  | PlanningConflictId  | Planning Assurance |
 | DataSource        | DataSourceId        | Data Governance    |
 
 ---

@@ -580,7 +580,7 @@ validate
 
 ### 14. Convenção para identificadores
 
-Identificadores devem utilizar o nome da entidade seguido de `Id`.
+Identificadores devem utilizar o nome canônico da entidade seguido de `Id`.
 
 Exemplos:
 
@@ -594,27 +594,13 @@ RecommendationId
 PlanningConflictId
 ```
 
-No modelo atual, `PlanningConflict` pode preservar `ConflictId` como tipo de identidade por compatibilidade conceitual.
-
-Antes da aprovação da arquitetura de dados, deverá ser tomada uma decisão única entre:
-
-```text
-ConflictId
-```
-
-e:
+O identificador oficial do agregado `PlanningConflict` é:
 
 ```text
 PlanningConflictId
 ```
 
-A recomendação desta documentação é utilizar:
-
-```text
-PlanningConflictId
-```
-
-para reduzir ambiguidade.
+O termo `ConflictId` não deve ser introduzido em novos documentos, contratos, eventos, modelos de dados ou implementações.
 
 ---
 
@@ -2271,7 +2257,7 @@ RecordDecisionOutcome
 ```text
 RequestItineraryProposal
 AcceptItineraryProposal
-PartiallyAcceptItineraryProposal
+AcceptItineraryProposalPartially
 RejectItineraryProposal
 RegenerateItineraryProposal
 ```

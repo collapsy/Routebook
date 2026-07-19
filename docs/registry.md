@@ -43,6 +43,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-DATA-002 | Modelo Físico de Dados e Estratégia de Migrations | Data | Draft | 0.1.0 | [physical-data-model-and-migrations.md](./data/physical-data-model-and-migrations.md) |
 | RB-API-001 | Diretrizes e Contratos de API | API | Draft | 0.1.0 | [api-guidelines-and-contracts.md](./api/api-guidelines-and-contracts.md) |
 | RB-SEC-001 | Arquitetura de Segurança e Privacidade | Security | Draft | 0.1.0 | [security-and-privacy-architecture.md](./security/security-and-privacy-architecture.md) |
+| RB-OBS-001 | Observabilidade e Operação | Observability | Draft | 0.1.0 | [observability-and-operations.md](./observability/observability-and-operations.md) |
 
 ## Status possíveis
 

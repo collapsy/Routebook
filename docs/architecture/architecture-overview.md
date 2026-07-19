@@ -3,16 +3,16 @@
 id: RB-ARC-001
 
 title: Visão Geral da Arquitetura
-description: Define a visão arquitetural de alto nível do RouteBook, incluindo princípios, estilos, contextos, camadas, componentes, fluxos, integrações, dados, IA, segurança, observabilidade e estratégia de evolução.
+description: Define a visão arquitetural de alto nível do RouteBook, incluindo princípios, estilos, contextos, módulos, camadas, componentes, fluxos, integrações, dados, inteligência artificial, segurança, observabilidade e estratégia de evolução.
 
 document_type: architecture
 owner: Architecture
 
 status: Draft
-version: "0.1.0"
+version: "0.2.0"
 
 created: "2026-07-17"
-last_updated: null
+last_updated: "2026-07-18"
 
 authors:
 
@@ -24,10 +24,13 @@ tags:
 - architecture-overview
 - software-architecture
 - modular-monolith
-- ai-first
 - domain-driven-design
+- ports-and-adapters
 - event-driven
+- ai-first
 - cloud-ready
+- diagrams
+- mermaid
 
 related_documents:
 
@@ -57,6 +60,7 @@ related_documents:
 - RB-DOM-002
 - RB-DOM-003
 - RB-DOM-004
+- RB-ARC-002
 
 prerequisites:
 
@@ -88,23 +92,36 @@ index: true
 
 # RouteBook — Visão Geral da Arquitetura
 
-## 1. Propósito deste documento
+## Parte I — Fundamentos arquiteturais
+
+### 1. Propósito deste documento
 
 Este documento define a visão arquitetural de alto nível do RouteBook.
 
-Seu objetivo é transformar os princípios de produto e domínio em uma estrutura técnica coerente, evolutiva e implementável.
+Seu objetivo é transformar os princípios de produto, experiência e domínio em uma estrutura técnica:
+
+* coerente;
+* implementável;
+* evolutiva;
+* testável;
+* observável;
+* segura;
+* economicamente sustentável;
+* preparada para IA;
+* controlada pelo Usuário.
 
 Esta visão deverá orientar:
 
 * decisões arquiteturais;
 * organização do código;
 * definição de módulos;
-* integração entre contextos;
+* comunicação entre módulos;
 * persistência;
 * APIs;
 * frontend;
 * backend;
 * uso de IA;
+* integrações;
 * segurança;
 * observabilidade;
 * testes;
@@ -114,15 +131,16 @@ Esta visão deverá orientar:
 
 Este documento define:
 
-* objetivos arquiteturais;
-* princípios;
-* drivers;
+* drivers arquiteturais;
 * restrições;
+* princípios;
 * estilo arquitetural;
-* contextos;
+* contexto do sistema;
+* containers;
 * módulos;
 * camadas;
 * responsabilidades;
+* dependências;
 * comunicação;
 * fluxos;
 * dados;
@@ -140,200 +158,238 @@ Este documento não define:
 
 * código;
 * endpoints completos;
-* schemas finais;
-* tabelas;
+* schemas físicos finais;
+* tabelas definitivas;
 * provedores definitivos;
 * framework obrigatório;
-* configuração de infraestrutura;
-* contratos detalhados;
+* configuração detalhada de infraestrutura;
+* contratos detalhados de API;
 * pipelines completos;
-* decisões de baixo nível.
+* decisões técnicas de baixo nível.
 
 ---
 
-## 2. Relação com as demais Epics
+### 2. Autoridade documental
 
-A Arquitetura deverá implementar e proteger decisões estabelecidas por:
+A Arquitetura deverá implementar e proteger as decisões estabelecidas pelas camadas documentais anteriores.
 
-```text
-Foundation
-→ define propósito, princípios e limites permanentes
+```mermaid
+flowchart TD
+    Foundation["Foundation<br/>propósito, princípios e limites"]
+    Product["Product<br/>comportamentos e requisitos"]
+    Experience["Experience<br/>fluxos e interações"]
+    Design["Design System<br/>linguagem visual"]
+    Domain["Domain<br/>conceitos, regras e eventos"]
+    Architecture["Architecture<br/>estrutura técnica"]
+    Implementation["Implementação"]
 
-Product
-→ define comportamento e requisitos
-
-Experience
-→ define superfícies, fluxos e interações
-
-Design System
-→ define linguagem visual e componentes
-
-Domain
-→ define conceitos, regras, invariantes e eventos
-
-Architecture
-→ define como o sistema será estruturado para cumprir tudo isso
+    Foundation --> Product
+    Product --> Experience
+    Experience --> Design
+    Foundation --> Domain
+    Product --> Domain
+    Domain --> Architecture
+    Experience --> Architecture
+    Design --> Architecture
+    Architecture --> Implementation
 ```
 
-A Arquitetura não deverá modificar conceitos do domínio para se adaptar a limitações locais de implementação.
+A Arquitetura não deverá alterar conceitos do domínio para se adaptar a limitações locais de implementação.
+
+Quando houver tensão entre conveniência técnica e integridade do domínio, a integridade do domínio deverá prevalecer.
 
 ---
 
-## 3. Visão arquitetural resumida
+### 3. Princípio arquitetural central
 
-O RouteBook deverá iniciar como uma aplicação web responsiva organizada como um **Monólito Modular**, com limites explícitos entre módulos de negócio.
+O RouteBook deverá ser estruturado como uma plataforma de apoio à decisão de viagem.
 
-A arquitetura deverá combinar:
+A arquitetura não deverá tratar o produto apenas como:
+
+* catálogo de Lugares;
+* agenda;
+* mapa;
+* gerador de roteiros;
+* chatbot;
+* agregador turístico.
+
+A estrutura técnica deverá proteger o fluxo:
+
+```text
+Contexto
+→ Recomendação
+→ Decisão
+→ Execução
+→ Resultado
+→ Aprendizado
+```
+
+Cada estágio possui significado próprio e não deve ser fundido aos demais.
+
+---
+
+### 4. Visão arquitetural resumida
+
+O RouteBook deverá iniciar como uma aplicação web responsiva, com backend organizado como **Monólito Modular** e limites explícitos entre módulos de negócio.
+
+A arquitetura combina:
 
 * Domain-Driven Design;
+* Monólito Modular;
 * arquitetura em camadas;
-* portas e adaptadores;
+* Ports and Adapters;
 * comunicação orientada a casos de uso;
 * eventos internos;
+* processamento assíncrono quando necessário;
 * integrações externas isoladas;
-* serviços assíncronos quando necessário;
 * IA como capacidade especializada;
 * contratos versionados;
 * observabilidade desde o início;
 * evolução incremental.
 
-Visão conceitual:
-
-```text
-Cliente Web
-    │
-    ▼
-Application Interface
-    │
-    ▼
-Módulos de Aplicação
-    │
-    ▼
-Domínio
-    │
-    ├── Persistência
-    ├── Provedores Geográficos
-    ├── Fontes de Lugares
-    ├── IA
-    ├── Identidade
-    └── Observabilidade
-```
-
 ---
 
-# Parte I — Drivers arquiteturais
+## Parte II — Drivers arquiteturais
 
-## 4. Driver de produto
+### 5. Driver de produto
 
-O RouteBook deverá ajudar o viajante a tomar decisões durante a viagem.
+O RouteBook deverá ajudar o viajante a tomar decisões antes e durante a Viagem.
 
 A arquitetura deverá suportar perguntas como:
 
 * O que fazer agora?
-* Onde ir?
-* Onde almoçar?
-* Qual opção faz mais sentido?
-* Quanto tempo vou gastar?
-* Quanto vou me deslocar?
-* Como organizar meu Dia?
+* Para onde devo ir?
+* Onde vale a pena comer?
+* Qual opção combina melhor com o grupo?
+* Quanto tempo será gasto?
+* Quanto será necessário deslocar?
+* O Roteiro é viável?
 * O que precisa ser revisto?
+* Qual é a próxima melhor ação?
 
 ---
 
-## 5. Driver de personalização
+### 6. Driver de personalização
 
-As respostas deverão considerar o contexto específico da Viagem:
+As respostas deverão considerar o Contexto específico da Viagem:
 
-* Destino;
-* Hospedagem;
-* Período;
-* Viajantes;
-* Preferências;
-* Restrições;
-* Ritmo;
-* Orçamento;
-* Roteiro;
+* Destination;
+* Accommodation;
+* Trip Period;
+* Travelers;
+* Group Profile;
+* Interests;
+* Restrictions;
+* Pace;
+* Budget;
+* Itinerary;
 * horário;
-* Localização;
-* dados disponíveis.
+* localização contextual;
+* Transport Mode;
+* dados disponíveis;
+* qualidade e atualidade dos dados.
+
+A arquitetura deverá permitir que o Contexto seja montado de forma explícita e versionada.
 
 ---
 
-## 6. Driver de confiabilidade
+### 7. Driver de confiabilidade
 
 O sistema deverá diferenciar:
 
-* fatos;
-* estimativas;
-* inferências;
-* Recomendações;
-* informações não confirmadas;
-* dados desatualizados.
+* fato confirmado;
+* dado externo;
+* estimativa;
+* inferência;
+* Recommendation;
+* Decision;
+* informação desconhecida;
+* informação desatualizada;
+* informação conflitante;
+* conteúdo gerado por IA.
+
+A ausência de dados não deverá ser convertida em informação falsa.
 
 ---
 
-## 7. Driver de controle do Usuário
+### 8. Driver de controle do Usuário
 
-IA e automações deverão:
+IA e automações poderão:
 
 * sugerir;
 * explicar;
 * preparar;
 * revisar;
-* simular.
+* comparar;
+* simular;
+* gerar Propostas.
 
-Não deverão aplicar alterações canônicas sem autorização.
+Não poderão, sem autorização válida:
+
+* registrar Decision em nome do Usuário;
+* aplicar Itinerary Proposal;
+* ignorar Planning Risk;
+* remover Activity;
+* alterar Restriction obrigatória;
+* excluir Trip;
+* transferir ownership.
 
 ---
 
-## 8. Driver de evolução
+### 9. Driver de evolução
 
 O projeto inicia como produto pessoal, mas deverá permitir evolução para:
 
 * múltiplos Usuários;
-* múltiplos Destinos;
 * colaboração;
+* múltiplos Destinos;
 * múltiplas fontes de dados;
 * aplicativos móveis;
-* integrações;
 * reservas;
 * notificações;
 * sincronização;
-* operação offline parcial.
+* operação offline parcial;
+* integrações;
+* novos agentes;
+* extração seletiva de serviços.
 
 ---
 
-## 9. Driver de custo
+### 10. Driver de custo
 
 A arquitetura inicial deverá priorizar:
 
-* simplicidade operacional;
-* baixo custo;
-* poucos serviços;
-* implantação previsível;
-* utilização controlada de IA;
-* possibilidade de escalar por demanda.
+* baixo custo operacional;
+* simplicidade de implantação;
+* poucos componentes físicos;
+* serviços gerenciados quando vantajosos;
+* consumo controlado de IA;
+* processamento assíncrono seletivo;
+* escalabilidade por evidência.
 
 ---
 
-## 10. Driver de qualidade
+### 11. Driver de qualidade
 
-A solução deverá permitir:
+A solução deverá favorecer:
 
 * testes automatizados;
+* modularidade;
 * contratos claros;
-* substituição de provedores;
+* substituição de fornecedores;
 * observabilidade;
 * tratamento de falhas;
+* idempotência;
 * rastreabilidade;
 * acessibilidade;
+* privacidade;
 * segurança.
 
 ---
 
-# Parte II — Restrições arquiteturais
+## Parte III — Restrições arquiteturais
 
-## 11. Aplicação web inicial
+### 12. Aplicação web inicial
 
 O primeiro cliente será uma aplicação web responsiva.
 
@@ -347,73 +403,106 @@ Deverá funcionar adequadamente em:
 
 ---
 
-## 12. GitHub como fonte canônica
+### 13. GitHub como fonte canônica
 
-A documentação, decisões e código deverão permanecer no repositório oficial.
+Documentação, decisões, contratos e código deverão permanecer no repositório oficial.
 
-Nenhuma ferramenta externa deverá ser a única fonte de verdade.
-
----
-
-## 13. Documentação-first
-
-Decisões estruturais importantes deverão ser documentadas antes ou junto da implementação.
+Nenhuma ferramenta externa deverá ser a única fonte de verdade do projeto.
 
 ---
 
-## 14. AI-First com controle
+### 14. Documentação-first
 
-A IA será uma capacidade de primeira classe, mas não será responsável direta pela integridade do domínio.
+Decisões estruturais relevantes deverão ser documentadas antes ou junto da implementação.
+
+Mudanças arquiteturais importantes deverão atualizar:
+
+* documentação;
+* diagramas;
+* ADRs;
+* contratos;
+* testes;
+* registro documental.
 
 ---
 
-## 15. Dependência de serviços externos
+### 15. AI-First com controle
 
-O RouteBook dependerá potencialmente de:
+A IA será uma capacidade de primeira classe.
 
+Ela não será responsável direta pela integridade do domínio.
+
+Toda saída de IA capaz de produzir efeito deverá passar por:
+
+* validação estrutural;
+* validação semântica;
+* validação de referências;
+* validação de autorização;
+* validação de invariantes;
+* registro de Provenance.
+
+---
+
+### 16. Dependências externas
+
+O RouteBook poderá depender de:
+
+* identidade;
 * mapas;
 * geocodificação;
 * rotas;
-* Lugares;
+* catálogo de Lugares;
 * imagens;
 * avaliações;
+* clima;
+* preços;
 * IA;
-* autenticação.
+* analytics;
+* notificações.
 
 Essas dependências deverão ser isoladas por contratos internos.
 
 ---
 
-## 16. MVP incremental
+### 17. MVP incremental
 
-O sistema deverá permitir implementação gradual.
+Capacidades futuras não deverão ser antecipadas por complexidade desnecessária.
 
-Uma capacidade futura não deverá ser antecipada por complexidade desnecessária.
+A arquitetura deverá permitir evolução sem exigir, desde o início:
+
+* microservices;
+* múltiplos bancos;
+* múltiplas filas;
+* Event Sourcing;
+* service mesh;
+* orquestração distribuída;
+* infraestrutura de alta complexidade.
 
 ---
 
-# Parte III — Princípios arquiteturais
+## Parte IV — Princípios arquiteturais
 
-## 17. Domínio no centro
+### 18. Domínio no centro
 
 Regras de negócio deverão permanecer independentes de:
 
 * framework;
 * banco de dados;
-* provedor;
+* provedor externo;
 * interface;
+* protocolo;
 * IA;
 * infraestrutura.
 
 ---
 
-## 18. Monólito Modular primeiro
+### 19. Monólito Modular primeiro
 
-O sistema deverá iniciar como Monólito Modular.
+O backend deverá iniciar como um Monólito Modular.
 
 Isso significa:
 
-* uma unidade principal de implantação;
+* unidade principal de implantação;
 * módulos com responsabilidades explícitas;
 * dependências controladas;
 * contratos internos;
@@ -423,26 +512,35 @@ Isso significa:
 Não significa:
 
 * código sem organização;
-* acesso irrestrito entre módulos;
 * banco compartilhado sem limites;
-* lógica centralizada em um único serviço.
+* acesso irrestrito entre módulos;
+* lógica centralizada;
+* acoplamento por tabelas.
 
 ---
 
-## 19. Separação por capacidade
+### 20. Separação por capacidade
 
-A organização principal deverá seguir capacidades do negócio, e não apenas camadas técnicas globais.
+A organização principal do código deverá seguir capacidades de negócio.
 
-Preferir:
+Estrutura conceitual:
 
 ```text
-trip/
-places/
-itinerary/
-recommendations/
+identity-access/
+trip-management/
+traveler-profile/
+place-catalog/
+trip-collection/
+itinerary-planning/
+mobility/
+decision-intelligence/
+proposal-management/
+planning-assurance/
+data-governance/
+platform/
 ```
 
-Evitar uma estrutura central baseada somente em:
+Uma estrutura global baseada apenas em:
 
 ```text
 controllers/
@@ -451,742 +549,1808 @@ repositories/
 models/
 ```
 
-sem separação por domínio.
+não deverá substituir a separação por domínio.
 
 ---
 
-## 20. Dependências direcionadas para dentro
+### 21. Dependências direcionadas para dentro
 
-Camadas externas poderão depender das internas.
+As dependências deverão apontar para conceitos mais estáveis.
 
-O domínio não deverá depender de infraestrutura.
+```mermaid
+flowchart TD
+    Interface["Interfaces<br/>Web, API, Jobs"]
+    Application["Application<br/>Use Cases"]
+    Domain["Domain<br/>Aggregates, Rules, Policies"]
+    Infrastructure["Infrastructure<br/>Persistence, Providers, Messaging"]
 
-```text
-Infrastructure
-→ Application
-→ Domain
+    Interface --> Application
+    Application --> Domain
+    Infrastructure --> Application
+    Infrastructure --> Domain
 ```
 
+O Domain não deverá depender de Infrastructure.
+
 ---
 
-## 21. Portas e adaptadores
+### 22. Ports and Adapters
 
 Integrações externas deverão ser acessadas por portas internas.
 
-Exemplo:
+Exemplo conceitual:
 
 ```text
 TravelEstimationPort
-    ├── GoogleMapsAdapter
-    ├── MapboxAdapter
-    └── MockTravelEstimationAdapter
+├── GoogleMapsAdapter
+├── MapboxAdapter
+└── InMemoryTravelEstimationAdapter
 ```
 
----
+O domínio deverá utilizar contratos próprios.
 
-## 22. Contratos internos estáveis
-
-O domínio deverá utilizar contratos próprios, mesmo quando um provedor possuir estruturas semelhantes.
-
-Objetos externos não deverão atravessar diretamente todo o sistema.
+Objetos de fornecedores não deverão atravessar diretamente todo o sistema.
 
 ---
 
-## 23. Eventos para efeitos secundários
+### 23. Contratos internos explícitos
 
-Eventos internos deverão ser utilizados para consequências que não precisam ocorrer na mesma transação.
+A comunicação entre módulos deverá utilizar:
+
+* casos de uso;
+* portas;
+* consultas;
+* comandos;
+* Eventos de Domínio;
+* eventos de integração;
+* DTOs internos versionáveis.
+
+Um módulo não deverá alterar diretamente o agregado pertencente a outro módulo.
+
+---
+
+### 24. Estado canônico e estado derivado
+
+A arquitetura deverá diferenciar estado canônico de estado derivado.
+
+#### Estado canônico
+
+Inclui principalmente:
+
+* Account;
+* Trip;
+* Traveler Profile;
+* Trip Collection;
+* Itinerary;
+* Activity;
+* Free Period;
+* Decision;
+* Place interno;
+* Data Source.
+
+#### Estado contextual ou derivado
+
+Inclui principalmente:
+
+* Recommendation;
+* Recommendation Confidence;
+* Itinerary Proposal;
+* Planning Conflict;
+* Travel Estimate;
+* projeções;
+* índices;
+* caches;
+* resumos;
+* resultados de revisão.
+
+Estado derivado poderá ser:
+
+* recalculado;
+* invalidado;
+* substituído;
+* expirado;
+* reconstruído.
+
+A invalidação de estado derivado não deverá apagar estado canônico.
+
+---
+
+### 25. Recommendation, Decision e execução
+
+A arquitetura deverá preservar:
+
+```text
+Recommendation ≠ Decision
+Decision ≠ execução
+```
+
+`Decision Intelligence` poderá produzir Recommendation.
+
+A Recommendation:
+
+* não altera estado canônico;
+* não representa escolha do Usuário;
+* não representa execução.
+
+Uma Decision:
+
+* registra escolha;
+* possui ator;
+* possui Context Snapshot;
+* pode ou não produzir execução.
+
+A execução deverá ocorrer por caso de uso específico.
+
+---
+
+### 26. Itinerary Proposal isolada
+
+Uma `ItineraryProposal` deverá possuir:
+
+* identidade própria;
+* armazenamento próprio;
+* ciclo de vida próprio;
+* versão base do Itinerary;
+* versão base do Trip Context;
+* validade;
+* itens propostos;
+* justificativas;
+* limitações.
+
+A Proposta não faz parte do Itinerary canônico.
+
+Somente itens aceitos poderão ser aplicados.
+
+---
+
+### 27. Planning Assurance separado de erros técnicos
+
+`Planning Assurance` será responsável por avaliar a consistência do planejamento.
+
+Ele não deverá ser utilizado como repositório genérico de:
+
+* exceções;
+* falhas HTTP;
+* timeouts;
+* erros de banco;
+* falhas de programação.
+
+`PlanningConflict` representa condição de domínio detectada no planejamento.
+
+---
+
+### 28. Sincronia somente quando necessária
+
+Comunicação síncrona deverá ser utilizada quando o resultado for necessário para concluir a operação.
+
+Comunicação assíncrona deverá ser considerada para:
+
+* geração de Itinerary Proposal;
+* geração de Recommendation;
+* atualização de dados externos;
+* cálculo de rotas;
+* revisão ampla do Itinerary;
+* invalidação de objetos derivados;
+* indexação;
+* notificações;
+* analytics;
+* projeções.
+
+---
+
+### 29. Eventos para efeitos secundários
+
+Eventos deverão ser utilizados quando uma mudança confirmada produzir consequências fora da transação principal.
 
 Exemplo:
 
 ```text
 TripAccommodationChanged
-→ marcar Estimativas como desatualizadas
-→ solicitar recálculo
-→ invalidar Recomendações
+→ invalidar Travel Estimates
+→ invalidar Recommendations
+→ expirar Itinerary Proposals incompatíveis
+→ reavaliar Planning Conflicts
+→ marcar Itinerary como outdated
 ```
 
 ---
 
-## 24. Sincronia somente quando necessária
+### 30. Consistência entre estado e eventos
 
-A comunicação síncrona deverá ser usada quando o resultado for necessário para concluir a operação.
+A Arquitetura deverá garantir que:
 
-A comunicação assíncrona deverá ser considerada para:
+* evento de sucesso só represente mudança confirmada;
+* mudança confirmada não fique sem evento obrigatório;
+* eventos sejam imutáveis;
+* consumidores sejam idempotentes;
+* reentrega não duplique efeitos;
+* falhas de publicação sejam recuperáveis.
 
-* cálculos demorados;
-* geração de Proposta;
-* atualização de dados;
-* indexação;
-* notificações;
-* analytics;
-* recálculo de Conflitos.
+Quando necessário, deverá ser considerada estratégia transacional como Outbox.
+
+A adoção física será definida em documento técnico ou ADR.
 
 ---
 
-## 25. Falha parcial
+### 31. Falha parcial
 
 Falhas externas deverão permanecer restritas à capacidade afetada.
 
----
+Exemplos:
 
-## 26. Observabilidade como requisito
-
-Operações críticas deverão ser rastreáveis desde o início.
-
----
-
-## 27. Segurança por padrão
-
-Autorização, validação e proteção de dados deverão existir além da interface.
+* falha de IA não altera Itinerary;
+* falha de rota não assume Travel Time zero;
+* falha de catálogo não remove Place;
+* falha de notificação não desfaz Decision;
+* falha de analytics não bloqueia planejamento.
 
 ---
 
-## 28. Evolução por evidência
+### 32. Evolução por evidência
 
-Novos serviços, bancos, filas ou mecanismos complexos somente deverão ser introduzidos por necessidade comprovada.
+Novos serviços, bancos, filas ou mecanismos complexos deverão ser introduzidos apenas quando houver necessidade comprovada.
 
 ---
 
-# Parte IV — Estilo arquitetural
+## Parte V — Estilo arquitetural
 
-## 29. Estilo principal
+### 33. Estilo principal
 
 O estilo inicial será:
 
 ```text
 Monólito Modular
++ Domain-Driven Design
 + Arquitetura em Camadas
 + Ports and Adapters
-+ Domain-Driven Design
 + Eventos internos
++ Processamento assíncrono seletivo
 ```
 
 ---
 
-## 30. Unidade de implantação
+### 34. Unidade de implantação
 
-A aplicação poderá iniciar com:
+A solução poderá iniciar com:
 
-* frontend web;
-* backend;
+* aplicação web;
+* backend modular;
 * banco relacional;
+* cache opcional;
 * armazenamento de assets;
+* worker opcional;
 * serviços externos.
 
-O frontend e o backend poderão ser implantados separadamente, embora o backend permaneça um Monólito Modular.
+Frontend e backend poderão ser implantados separadamente.
+
+O backend continuará sendo um Monólito Modular enquanto essa decisão atender aos drivers.
 
 ---
 
-## 31. Evolução futura
+### 35. Microservices não são objetivo inicial
 
-Módulos poderão ser extraídos quando existirem evidências de:
-
-* escala independente;
-* ciclo de implantação diferente;
-* isolamento de segurança;
-* alta carga;
-* ownership distinto;
-* disponibilidade específica;
-* dependência externa especializada.
-
----
-
-## 32. Microservices não são objetivo inicial
-
-Microservices não deverão ser utilizados apenas por:
+Microservices não deverão ser adotados apenas por:
 
 * tendência;
 * expectativa futura;
+* número de módulos;
 * preferência técnica;
-* número de módulos.
+* desejo de “escalar”.
 
-A extração deverá ocorrer somente quando o custo operacional for justificado.
+Extração deverá ocorrer somente quando o custo operacional for justificado.
 
 ---
 
-# Parte V — Contexto do sistema
+### 36. Critérios para extração futura
 
-## 33. Atores
+Um módulo poderá ser candidato a serviço independente quando houver evidência de:
 
-Atores iniciais:
+* escala independente;
+* ciclo de implantação distinto;
+* isolamento de segurança;
+* alta carga especializada;
+* ownership separado;
+* disponibilidade específica;
+* dependência externa intensiva;
+* necessidade de tecnologia diferente.
+
+Candidatos possíveis, sem compromisso antecipado:
+
+* Mobility;
+* Place Catalog;
+* Decision Intelligence;
+* Proposal Management;
+* notificações;
+* processamento de dados.
+
+---
+
+## Parte VI — Contexto do sistema
+
+### 37. Atores
+
+Atores conceituais:
 
 * Usuário autenticado;
-* visitante futuro;
+* Viajante sem Conta;
 * administrador futuro;
 * agente de IA;
-* scheduler;
+* Scheduled Process;
+* Integration;
 * serviços externos;
-* fontes de dados.
+* Fontes de Dados.
 
 ---
 
-## 34. Sistemas externos
+### 38. Sistemas externos
 
 Possíveis sistemas externos:
 
 * provedor de identidade;
-* serviço de mapas;
-* serviço de geocodificação;
-* serviço de rotas;
-* fonte de Lugares;
-* serviço de imagens;
+* mapas;
+* geocodificação;
+* rotas;
+* fontes de Lugares;
+* imagens;
+* avaliações;
+* clima;
 * provedor de IA;
 * analytics;
 * monitoramento;
-* notificações futuras.
+* notificações.
 
 ---
 
-## 35. Diagrama de contexto
+### 39. Diagrama de contexto
 
-```text
-                    ┌────────────────────┐
-                    │      Usuário       │
-                    └─────────┬──────────┘
-                              │
-                              ▼
-                    ┌────────────────────┐
-                    │     RouteBook      │
-                    └─┬────┬────┬────┬──┘
-                      │    │    │    │
-          ┌───────────┘    │    │    └────────────┐
-          ▼                ▼    ▼                 ▼
-┌─────────────────┐ ┌──────────┐ ┌───────────┐ ┌──────────────┐
-│ Identidade      │ │ Mapas e  │ │ Fontes de │ │ Provedor de  │
-│                 │ │ Rotas    │ │ Lugares   │ │ IA           │
-└─────────────────┘ └──────────┘ └───────────┘ └──────────────┘
+```mermaid
+flowchart LR
+    User["Usuário"]
+    Agent["Agente de IA autorizado"]
+    RouteBook["RouteBook"]
+
+    Identity["Provedor de identidade"]
+    Maps["Mapas, geocodificação e rotas"]
+    Places["Fontes de Lugares"]
+    AI["Provedores de IA"]
+    Data["Outras Fontes de Dados"]
+    Notify["Notificações"]
+    Observe["Monitoramento e analytics"]
+
+    User --> RouteBook
+    Agent --> RouteBook
+
+    RouteBook --> Identity
+    RouteBook --> Maps
+    RouteBook --> Places
+    RouteBook --> AI
+    RouteBook --> Data
+    RouteBook --> Notify
+    RouteBook --> Observe
+```
+
+O agente de IA não constitui canal privilegiado.
+
+Toda operação iniciada por agente deverá passar pelos mesmos controles de:
+
+* autenticação;
+* autorização;
+* validação;
+* regras;
+* auditoria.
+
+---
+
+## Parte VII — Containers
+
+### 40. Containers iniciais
+
+A arquitetura inicial deverá considerar:
+
+1. Web Application;
+2. Backend Application;
+3. Relational Database;
+4. Background Worker opcional;
+5. Cache opcional;
+6. Object Storage;
+7. External Providers;
+8. Observability Platform.
+
+---
+
+### 41. Diagrama de containers
+
+```mermaid
+flowchart TD
+    User["Usuário"]
+
+    Web["Web Application<br/>interface responsiva"]
+    API["Backend Application<br/>Monólito Modular"]
+    Worker["Background Worker<br/>processos assíncronos"]
+    DB[("Relational Database")]
+    Cache[("Cache opcional")]
+    Storage[("Object Storage")]
+
+    Identity["Identity Provider"]
+    Geo["Geo Providers"]
+    PlaceData["Place Data Providers"]
+    AI["AI Providers"]
+    Observability["Logs, Metrics and Traces"]
+
+    User --> Web
+    Web --> API
+
+    API --> DB
+    API --> Cache
+    API --> Storage
+    API --> Identity
+    API --> Geo
+    API --> PlaceData
+    API --> AI
+    API --> Observability
+
+    API --> Worker
+    Worker --> DB
+    Worker --> Geo
+    Worker --> PlaceData
+    Worker --> AI
+    Worker --> Observability
 ```
 
 ---
 
-# Parte VI — Módulos de domínio
+### 42. Web Application
 
-## 36. Módulos iniciais
+Responsabilidades:
+
+* apresentação;
+* navegação;
+* formulários;
+* visualização de mapas;
+* estados de carregamento;
+* estados offline ou degradados;
+* acessibilidade;
+* internacionalização futura;
+* captura explícita de decisões;
+* comunicação com Backend.
+
+Não deverá:
+
+* implementar regras canônicas;
+* confiar apenas em validações locais;
+* aplicar Propostas sem confirmação do Backend;
+* transformar unknown em valor assumido.
+
+---
+
+### 43. Backend Application
+
+Responsabilidades:
+
+* casos de uso;
+* domínio;
+* autorização;
+* persistência;
+* integração;
+* validação;
+* eventos;
+* observabilidade;
+* idempotência;
+* exposição de APIs.
+
+---
+
+### 44. Background Worker
+
+Poderá executar:
+
+* geração de Recommendation;
+* geração de Itinerary Proposal;
+* atualização de Places;
+* cálculo de Travel Estimate;
+* reavaliação de Planning Conflicts;
+* notificações;
+* projeções;
+* tarefas programadas.
+
+O Worker não deverá acessar tabelas internas de módulos sem contratos definidos.
+
+---
+
+### 45. Relational Database
+
+O banco relacional deverá ser a persistência principal inicial.
+
+A separação lógica entre módulos poderá utilizar:
+
+* schemas;
+* convenções de tabelas;
+* ownership explícito;
+* migrations por módulo;
+* repositórios isolados.
+
+Um módulo não deverá depender diretamente das tabelas privadas de outro módulo.
+
+---
+
+## Parte VIII — Módulos arquiteturais
+
+### 46. Módulos iniciais
 
 O backend deverá considerar os seguintes módulos lógicos:
 
 1. Identity and Access;
-2. Trips;
-3. Travelers and Preferences;
-4. Places;
-5. Saved Places;
-6. Itinerary;
+2. Trip Management;
+3. Traveler Profile;
+4. Place Catalog;
+5. Trip Collection;
+6. Itinerary Planning;
 7. Mobility;
-8. Recommendations;
-9. Itinerary Proposals;
-10. Conflicts;
-11. Data Provenance;
+8. Decision Intelligence;
+9. Proposal Management;
+10. Planning Assurance;
+11. Data Governance;
 12. Platform.
 
 ---
 
-## 37. Identity and Access
+### 47. Mapa dos módulos
+
+```mermaid
+flowchart TD
+    Identity["Identity and Access"]
+    Trip["Trip Management"]
+    Traveler["Traveler Profile"]
+    Place["Place Catalog"]
+    Collection["Trip Collection"]
+    Itinerary["Itinerary Planning"]
+    Mobility["Mobility"]
+    Decision["Decision Intelligence"]
+    Proposal["Proposal Management"]
+    Assurance["Planning Assurance"]
+    Governance["Data Governance"]
+    Platform["Platform"]
+
+    Trip --> Identity
+    Traveler --> Trip
+    Collection --> Trip
+    Collection --> Place
+    Itinerary --> Trip
+    Itinerary --> Place
+    Mobility --> Place
+    Mobility --> Itinerary
+    Decision --> Trip
+    Decision --> Traveler
+    Decision --> Place
+    Decision --> Itinerary
+    Decision --> Mobility
+    Proposal --> Trip
+    Proposal --> Traveler
+    Proposal --> Itinerary
+    Proposal --> Decision
+    Assurance --> Trip
+    Assurance --> Traveler
+    Assurance --> Place
+    Assurance --> Itinerary
+    Assurance --> Mobility
+    Assurance --> Proposal
+
+    Place --> Governance
+    Mobility --> Governance
+    Decision --> Governance
+    Proposal --> Governance
+
+    Identity --> Platform
+    Trip --> Platform
+    Traveler --> Platform
+    Place --> Platform
+    Collection --> Platform
+    Itinerary --> Platform
+    Mobility --> Platform
+    Decision --> Platform
+    Proposal --> Platform
+    Assurance --> Platform
+    Governance --> Platform
+```
+
+As setas representam dependências conceituais autorizadas, não acesso direto a dados internos.
+
+---
+
+### 48. Identity and Access
 
 Responsabilidades:
 
-* Conta;
-* Usuário;
+* Account;
+* User;
 * autenticação;
+* sessão;
 * papéis;
 * permissões;
-* sessão;
-* consentimentos.
+* consentimentos;
+* Trip Participants;
+* ownership.
 
 Não deverá conter regras de planejamento.
 
 ---
 
-## 38. Trips
+### 49. Trip Management
 
 Responsabilidades:
 
-* Viagem;
-* Destino;
-* Período;
-* Hospedagem;
-* status;
+* Trip;
+* Destination;
+* Trip Period;
+* Accommodation;
+* Trip Status;
 * participantes;
-* alterações estruturais.
+* alterações estruturais;
+* TripContextVersion.
+
+É proprietário do agregado Trip.
 
 ---
 
-## 39. Travelers and Preferences
+### 50. Traveler Profile
 
 Responsabilidades:
 
-* Viajantes;
-* Perfil do Grupo;
-* Interesses;
-* Orçamento;
-* Ritmo;
-* Restrições;
-* transporte predominante.
+* Traveler;
+* Traveler Profile;
+* Group Profile;
+* Interests;
+* Restrictions;
+* Budget;
+* Pace;
+* preferências de transporte;
+* necessidades funcionais.
+
+Não deverá produzir Recommendation diretamente.
 
 ---
 
-## 40. Places
+### 51. Place Catalog
 
 Responsabilidades:
 
-* Lugar;
-* identidade;
+* Place;
+* identidade interna;
 * categorias;
-* informações;
-* fontes;
+* Location;
+* Opening Hours;
+* Operational Status;
+* Price Range;
+* Rating;
 * reconciliação;
-* dados externos;
-* disponibilidade.
+* deduplicação;
+* referências externas.
+
+Não deverá armazenar preferências específicas da Trip como propriedade global do Place.
 
 ---
 
-## 41. Saved Places
+### 52. Trip Collection
 
 Responsabilidades:
 
-* associação Viagem–Lugar;
-* salvamento;
-* remoção;
-* observações;
-* tags futuras.
+* Trip Collection;
+* Saved Place;
+* notas contextuais;
+* favoritos da Viagem;
+* unicidade por TripId e PlaceId.
 
-Poderá permanecer dentro de Trips no MVP, desde que sua responsabilidade permaneça explícita.
+Salvar Place não cria Activity.
 
 ---
 
-## 42. Itinerary
+### 53. Itinerary Planning
 
 Responsabilidades:
 
-* Roteiro;
-* Dias;
-* Atividades;
-* Períodos Livres;
+* Itinerary;
+* Trip Day;
+* Activity;
+* Free Period;
 * ordenação;
-* versões;
-* planejamento parcial.
+* sincronização temporal;
+* ItineraryVersion;
+* aplicação autorizada de alterações.
+
+É proprietário do Itinerary canônico.
 
 ---
 
-## 43. Mobility
+### 54. Mobility
 
 Responsabilidades:
 
-* Deslocamentos;
-* Distâncias;
-* Tempo de Deslocamento;
-* transporte;
+* Travel Estimate;
+* Distance;
+* Travel Time;
+* Transport Mode;
 * estimativas;
 * validade;
 * integração com rotas.
 
+Mobility não deverá assumir que estimativa é confirmação.
+
 ---
 
-## 44. Recommendations
+### 55. Decision Intelligence
 
 Responsabilidades:
 
-* Contexto de Decisão;
-* Recomendações;
+* Recommendation;
+* Recommendation Reason;
+* Recommendation Confidence;
+* Decision Context Snapshot;
+* Decision;
+* Decision Outcome;
+* Decision Quality;
+* ranking;
+* Next Best Action;
+* explicabilidade.
+
+Decision Intelligence poderá recomendar.
+
+Não poderá aplicar alterações canônicas diretamente.
+
+---
+
+### 56. Proposal Management
+
+Responsabilidades:
+
+* Itinerary Proposal;
+* Proposed Activity;
+* critérios;
 * justificativas;
-* scores internos;
+* comparação;
 * validade;
-* aceitação;
-* rejeição.
-
----
-
-## 45. Itinerary Proposals
-
-Responsabilidades:
-
 * geração;
-* revisão;
-* Proposta;
-* aceitação integral;
-* aceitação parcial;
-* expiração;
-* substituição.
+* aceite integral;
+* aceite parcial;
+* rejeição;
+* supersessão;
+* idempotência de aplicação.
+
+O módulo deverá solicitar ao Itinerary Planning a aplicação dos itens aceitos.
 
 ---
 
-## 46. Conflicts
+### 57. Planning Assurance
 
 Responsabilidades:
 
-* detecção;
-* classificação;
+* revisão do planejamento;
+* avaliação de regras;
+* Planning Conflict;
+* severidade;
 * evidências;
 * resolução;
-* ignorar Riscos;
+* aceite de risco;
 * invalidação;
-* revisão.
+* supersessão;
+* resumo de consistência.
+
+Planning Assurance não é um módulo de exceções técnicas.
 
 ---
 
-## 47. Data Provenance
+### 58. Data Governance
 
 Responsabilidades:
 
-* Fontes de Dados;
-* Proveniência;
-* confiança;
-* atualização;
-* divergência;
-* reconciliação.
-
-Poderá funcionar como capacidade transversal.
+* Data Source;
+* Provenance;
+* Data Freshness;
+* Confidence Level;
+* divergência de Fontes;
+* licenças;
+* rastreabilidade externa;
+* políticas de qualidade;
+* identidade externa.
 
 ---
 
-## 48. Platform
+### 59. Platform
 
-Responsabilidades técnicas compartilhadas:
+Responsabilidades transversais:
 
-* eventos;
+* configuração;
+* relógio;
+* geração de IDs;
+* transações;
+* publicação de eventos;
 * jobs;
 * observabilidade;
-* configuração;
 * feature flags;
+* segurança técnica;
 * armazenamento;
-* cache;
-* clock;
-* IDs;
-* segurança técnica.
+* email;
+* notificações;
+* infraestrutura de IA.
 
-Platform não deverá absorver regras de negócio.
+Platform não deverá conter regras específicas de Viagem.
 
 ---
 
-# Parte VII — Limites e dependências
+## Parte IX — Camadas internas dos módulos
 
-## 49. Dependências permitidas
+### 60. Estrutura interna
 
-Visão inicial:
+Cada módulo deverá possuir, quando aplicável:
 
 ```text
-Trips
-├── Travelers and Preferences
-├── Itinerary
-├── Saved Places
-└── Data Provenance
-
-Itinerary
-├── Places por identidade
-├── Mobility
-└── Conflicts
-
-Recommendations
-├── Trips
-├── Travelers and Preferences
-├── Places
-├── Itinerary
-├── Mobility
-└── Data Provenance
-
-Itinerary Proposals
-├── Recommendations
-├── Itinerary
-├── Conflicts
-└── Mobility
-```
-
----
-
-## 50. Referência por identidade
-
-Módulos deverão preferir relacionamentos por identificador.
-
-Exemplo:
-
-```text
-Activity
-→ PlaceId
-```
-
-Evitar compartilhar toda a entidade `Place` dentro de `Itinerary`.
-
----
-
-## 51. Sem acesso direto irrestrito
-
-Um módulo não deverá acessar tabelas internas de outro módulo diretamente sem contrato definido.
-
----
-
-## 52. Integração interna
-
-Opções permitidas:
-
-* chamadas de casos de uso;
-* portas internas;
-* consultas específicas;
-* Eventos internos;
-* projeções.
-
----
-
-## 53. Dependências circulares
-
-Dependências circulares entre módulos deverão ser evitadas.
-
-Quando identificadas, considerar:
-
-* Evento;
-* serviço de aplicação;
-* contrato neutro;
-* divisão de responsabilidade;
-* módulo de orquestração.
-
----
-
-# Parte VIII — Camadas internas
-
-## 54. Camadas por módulo
-
-Cada módulo poderá possuir:
-
-```text
-domain/
+interface/
 application/
+domain/
 infrastructure/
-interfaces/
 ```
 
 ---
 
-## 55. Domain
+### 61. Interface
 
-Contém:
+Responsabilidades:
 
-* entidades;
-* objetos de valor;
-* agregados;
-* invariantes;
-* serviços de domínio;
-* Eventos de Domínio;
-* especificações;
-* políticas puras.
-
-Não contém:
-
-* ORM;
-* chamadas HTTP;
-* SDK de IA;
-* SDK de mapas;
-* logs específicos;
-* framework web.
+* endpoints;
+* controllers;
+* serializers;
+* validação de formato;
+* autenticação da requisição;
+* tradução de erros;
+* contratos externos.
 
 ---
 
-## 56. Application
+### 62. Application
 
-Contém:
+Responsabilidades:
 
 * casos de uso;
 * comandos;
-* consultas;
-* orquestração;
+* queries;
 * autorização contextual;
+* coordenação;
 * transações;
-* portas;
-* publicação de Eventos;
-* composição de respostas.
+* idempotência;
+* publicação de eventos;
+* composição de portas.
 
 ---
 
-## 57. Infrastructure
+### 63. Domain
 
-Contém:
+Responsabilidades:
+
+* agregados;
+* entidades;
+* Value Objects;
+* regras;
+* invariantes;
+* políticas;
+* serviços de domínio;
+* Eventos de Domínio.
+
+---
+
+### 64. Infrastructure
+
+Responsabilidades:
 
 * persistência;
 * adaptadores externos;
-* mensageria;
+* filas;
 * cache;
-* provedores;
-* configuração;
-* observabilidade técnica.
+* observabilidade;
+* implementação de portas;
+* integrações técnicas.
 
 ---
 
-## 58. Interfaces
+### 65. Regra de dependência
 
-Contém:
-
-* HTTP;
-* handlers;
-* controllers;
-* serialização;
-* validação de transporte;
-* webhooks futuros;
-* jobs;
-* consumers.
-
----
-
-## 59. Regra de dependência
-
-```text
-Interfaces
-→ Application
-→ Domain
-
-Infrastructure
-→ Application e Domain por contratos
+```mermaid
+flowchart LR
+    Interface --> Application
+    Infrastructure --> Application
+    Application --> Domain
+    Infrastructure --> Domain
 ```
 
-O Domain não depende das demais camadas.
+Não permitido:
+
+```text
+Domain → Infrastructure
+Domain → Interface
+Application → Controller concreto
+Módulo A → tabela privada do Módulo B
+```
 
 ---
 
-# Parte IX — Frontend
+## Parte X — Comunicação entre módulos
 
-## 60. Responsabilidade do frontend
+### 66. Comunicação síncrona
 
-O frontend será responsável por:
+Utilizar quando:
 
-* experiência;
-* navegação;
-* estado visual;
-* acessibilidade;
-* validações imediatas;
-* composição de componentes;
-* sincronização com APIs;
-* proteção de alterações não salvas;
-* cache de consulta;
-* tratamento de estados;
-* telemetria de interação.
+* o resultado é necessário para concluir a operação;
+* uma invariante precisa ser validada imediatamente;
+* o Usuário aguarda resposta direta;
+* a transação depende do resultado.
+
+Exemplos:
+
+* validar autorização;
+* carregar Trip Context;
+* aplicar itens aceitos;
+* consultar Place por identidade interna;
+* validar ItineraryVersion.
 
 ---
 
-## 61. Regras que não devem existir apenas no frontend
+### 67. Comunicação assíncrona
 
-O frontend não será fonte final de:
+Utilizar quando:
 
+* a reação pode ocorrer depois;
+* há integração lenta;
+* há processamento custoso;
+* o efeito pode ser reexecutado;
+* a falha não deve desfazer a ação principal.
+
+Exemplos:
+
+* gerar Recommendation;
+* gerar Itinerary Proposal;
+* recalcular Travel Estimate;
+* atualizar projeções;
+* notificar Usuário;
+* recalcular índice;
+* reavaliar objetos derivados.
+
+---
+
+### 68. Diagrama de comunicação
+
+```mermaid
+sequenceDiagram
+    participant UI as Web Application
+    participant APP as Application Use Case
+    participant DOM as Domain
+    participant DB as Persistence
+    participant EVT as Event Publisher
+    participant WRK as Background Worker
+    participant EXT as External Provider
+
+    UI->>APP: comando
+    APP->>DOM: executar comportamento
+    DOM-->>APP: estado e eventos
+    APP->>DB: persistir estado
+    APP->>EVT: registrar eventos
+    APP-->>UI: resultado confirmado
+
+    EVT-->>WRK: evento disponível
+    WRK->>EXT: executar integração
+    EXT-->>WRK: resultado
+    WRK->>DB: persistir estado derivado
+```
+
+---
+
+### 69. Comandos
+
+Comandos representam intenção.
+
+Devem:
+
+* utilizar verbo;
+* possuir alvo;
+* possuir ator;
+* poder ser rejeitados;
+* ser validados;
+* possuir idempotência quando necessário.
+
+---
+
+### 70. Eventos de Domínio
+
+Eventos representam fatos ocorridos.
+
+Devem:
+
+* utilizar passado;
+* ser imutáveis;
+* possuir EventId;
+* possuir causalidade;
+* possuir correlação;
+* possuir schemaVersion;
+* ser emitidos somente após sucesso.
+
+---
+
+### 71. Eventos de integração
+
+Eventos de integração deverão:
+
+* expor contrato estável;
+* minimizar dados;
+* evitar estruturas internas;
+* ser publicados após confirmação;
+* possuir versionamento;
+* permitir evolução de consumidores.
+
+---
+
+### 72. Mensagens de processo
+
+Mensagens de processo poderão coordenar:
+
+* geração;
+* revisão;
+* sincronização;
+* recálculo;
+* invalidação.
+
+Elas não deverão ser confundidas automaticamente com Eventos de Domínio.
+
+---
+
+## Parte XI — Fluxo de Recommendation e Decision
+
+### 73. Princípios do fluxo
+
+A geração de Recommendation deverá ser separada de:
+
+* apresentação;
+* aceitação;
+* Decision;
+* execução;
+* resultado.
+
+---
+
+### 74. Diagrama de Recommendation e Decision
+
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant DI as Decision Intelligence
+    participant C as Context Providers
+    participant AI as AI Provider
+    participant D as Decision Store
+    participant E as Execution Use Case
+
+    U->>DI: RequestRecommendation
+    DI->>C: obter Context Snapshot
+    C-->>DI: contexto versionado
+
+    opt IA necessária
+        DI->>AI: solicitar candidatos ou explicação
+        AI-->>DI: saída não confiável
+        DI->>DI: validar saída
+    end
+
+    DI->>DI: aplicar regras e ranking
+    DI-->>U: Recommendation + Reasons + Confidence
+
+    alt Usuário aceita
+        U->>DI: AcceptRecommendation
+        DI->>D: registrar Decision
+        D-->>DI: DecisionRecorded
+        opt execução solicitada
+            DI->>E: solicitar execução autorizada
+        end
+    else Usuário rejeita
+        U->>DI: RejectRecommendation
+    end
+```
+
+---
+
+### 75. Context Snapshot
+
+Toda Recommendation personalizada deverá registrar o Contexto utilizado.
+
+O snapshot deverá permitir identificar:
+
+* TripContextVersion;
+* ItineraryVersion;
+* instante;
+* localização contextual quando aplicável;
+* critérios;
+* restrições;
+* dados relevantes;
+* Provenance.
+
+---
+
+### 76. Validade da Recommendation
+
+Mudanças relevantes poderão invalidar Recommendation:
+
+* Trip Destination;
+* Trip Period;
+* Accommodation;
+* Traveler Profile;
+* Restriction;
+* Budget;
+* Pace;
+* ItineraryVersion;
+* Place Operational Status;
+* horário;
+* localização contextual.
+
+---
+
+## Parte XII — Fluxo de Itinerary Proposal
+
+### 77. Geração da Proposta
+
+A geração poderá ser assíncrona.
+
+Deverá:
+
+* capturar versão base;
+* carregar contexto;
+* gerar candidatos;
+* validar regras;
+* produzir itens revisáveis;
+* registrar limitações;
+* preservar isolamento do Itinerary.
+
+---
+
+### 78. Aplicação da Proposta
+
+Antes da aplicação, verificar:
+
+* Proposal Status;
 * autorização;
-* invariantes;
-* validação de domínio;
-* versão do Roteiro;
-* aceitação de Proposta;
-* restrições obrigatórias;
-* exclusão.
+* TripContextVersion;
+* ItineraryVersion;
+* validade;
+* Activities fixed;
+* Free Periods protected;
+* Restrictions mandatory;
+* Planning Conflicts;
+* idempotência.
 
 ---
 
-## 62. Organização do frontend
+### 79. Diagrama da Proposta
 
-Estrutura orientada por feature:
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant PM as Proposal Management
+    participant DI as Decision Intelligence
+    participant PA as Planning Assurance
+    participant IP as Itinerary Planning
+    participant DS as Decision Store
 
-```text
-features/
-├── trips/
-├── explore/
-├── places/
-├── map/
-├── saved-places/
-├── itinerary/
-├── proposals/
-├── conflicts/
-└── settings/
+    U->>PM: RequestItineraryProposal
+    PM->>DI: obter recomendações e critérios
+    DI-->>PM: candidatos explicáveis
+    PM->>PA: validar Proposta
+    PA-->>PM: resultado e conflitos
+    PM-->>U: ItineraryProposalGenerated
+
+    alt aceite integral
+        U->>PM: AcceptItineraryProposal
+        PM->>PM: validar versões e idempotência
+        PM->>IP: aplicar todos os itens válidos
+        IP-->>PM: Itinerary atualizado
+        PM->>DS: registrar Decision
+        PM-->>U: ItineraryProposalAccepted
+    else aceite parcial
+        U->>PM: AcceptItineraryProposalPartially
+        PM->>PM: validar seleção e versões
+        PM->>IP: aplicar somente itens aceitos
+        IP-->>PM: Itinerary atualizado
+        PM->>DS: registrar Decision
+        PM-->>U: ItineraryProposalPartiallyAccepted
+    else rejeição
+        U->>PM: RejectItineraryProposal
+        PM-->>U: ItineraryProposalRejected
+    end
 ```
 
-Componentes genéricos deverão permanecer no Design System.
+---
+
+### 80. Concorrência da Proposta
+
+Uma Proposta não deverá ser aplicada quando sua versão base for incompatível com o estado atual.
+
+A arquitetura poderá utilizar:
+
+* optimistic concurrency;
+* comparação de versões;
+* idempotency keys;
+* transação atômica;
+* retry controlado.
 
 ---
 
-## 63. Estado do servidor
+## Parte XIII — Fluxo de Planning Assurance
 
-Dados canônicos deverão ser tratados como estado do servidor.
+### 81. Avaliação
+
+Planning Assurance poderá avaliar:
+
+* Trip;
+* Trip Day;
+* Activity;
+* Itinerary;
+* Recommendation;
+* Itinerary Proposal;
+* Place;
+* Travel Estimate.
+
+---
+
+### 82. Severidades
+
+* `error`: bloqueia operação incompatível;
+* `risk`: permite continuidade consciente quando autorizado;
+* `suggestion`: orienta melhoria sem bloquear.
+
+---
+
+### 83. Diagrama de Planning Assurance
+
+```mermaid
+flowchart TD
+    Input["Objeto ou operação"]
+    Rules["Carregar regras aplicáveis"]
+    Evaluate["Avaliar evidências"]
+    Result{"Resultado"}
+
+    Valid["Válido"]
+    Error["PlanningConflict error"]
+    Risk["PlanningConflict risk"]
+    Suggestion["PlanningConflict suggestion"]
+    Unknown["Avaliação incompleta"]
+
+    Block["Bloquear operação"]
+    Decision["Solicitar Decision"]
+    Continue["Permitir continuidade"]
+    Explain["Comunicar limitação"]
+
+    Input --> Rules
+    Rules --> Evaluate
+    Evaluate --> Result
+
+    Result -->|sem conflito| Valid
+    Result -->|erro| Error
+    Result -->|risco| Risk
+    Result -->|sugestão| Suggestion
+    Result -->|dados insuficientes| Unknown
+
+    Error --> Block
+    Risk --> Decision
+    Suggestion --> Continue
+    Unknown --> Explain
+```
+
+---
+
+### 84. Resolução e aceite de risco
+
+`PlanningConflictResolved` exige remoção da condição.
+
+`PlanningConflictIgnored` representa:
+
+* risco conhecido;
+* decisão consciente;
+* condição ainda aceita;
+* rastreabilidade preservada.
+
+Ignorar não significa resolver.
+
+---
+
+## Parte XIV — Versionamento e invalidação
+
+### 85. Tipos de versão
+
+| Versão               | Responsabilidade                     |
+| -------------------- | ------------------------------------ |
+| `TripContextVersion` | Mudanças estruturais da Trip         |
+| `ItineraryVersion`   | Mudanças canônicas do Itinerary      |
+| `aggregateVersion`   | Concorrência e ordenação do agregado |
+| `schemaVersion`      | Evolução de contrato ou evento       |
+
+Essas versões não são intercambiáveis.
+
+---
+
+### 86. Mudanças de Trip Context
+
+Podem incrementar `TripContextVersion`:
+
+* Destination;
+* Trip Period;
+* Accommodation;
+* composição dos Travelers;
+* Restriction obrigatória;
+* mudança estrutural de Budget;
+* mudança estrutural de Pace.
+
+---
+
+### 87. Mudanças de Itinerary
+
+Podem incrementar `ItineraryVersion`:
+
+* adicionar Activity;
+* editar Activity;
+* remover Activity;
+* mover Activity;
+* reordenar Activity;
+* adicionar Free Period;
+* alterar Free Period;
+* aplicar itens de Itinerary Proposal;
+* sincronizar Trip Days com mudança canônica.
+
+---
+
+### 88. Matriz de invalidação
+
+| Mudança          | Objetos potencialmente afetados                        |
+| ---------------- | ------------------------------------------------------ |
+| Trip Destination | Recommendation, Proposal, Estimate, Conflict           |
+| Trip Period      | Trip Day, Activity, Recommendation, Proposal, Conflict |
+| Accommodation    | Estimate, Recommendation, Proposal                     |
+| Traveler Profile | Recommendation, Proposal, Conflict                     |
+| Restriction      | Recommendation, Proposal, Conflict                     |
+| ItineraryVersion | Recommendation, Proposal, Review                       |
+| Place Data       | Recommendation, Activity Review, Conflict              |
+| Travel Estimate  | Recommendation, Proposal, Conflict                     |
+
+---
+
+### 89. Diagrama de invalidação
+
+```mermaid
+flowchart LR
+    Change["Mudança confirmada"]
+    Version["Incrementar versão"]
+    Event["Publicar Evento de Domínio"]
+    Evaluate["Avaliar dependências"]
+
+    Recommendation["Invalidar Recommendation"]
+    Proposal["Expirar Itinerary Proposal"]
+    Estimate["Invalidar Travel Estimate"]
+    Conflict["Invalidar Planning Conflict"]
+    Itinerary["Marcar Itinerary outdated"]
+
+    Change --> Version
+    Version --> Event
+    Event --> Evaluate
+
+    Evaluate --> Recommendation
+    Evaluate --> Proposal
+    Evaluate --> Estimate
+    Evaluate --> Conflict
+    Evaluate --> Itinerary
+```
+
+---
+
+### 90. Invalidação não destrutiva
+
+Objetos invalidados deverão permanecer acessíveis para:
+
+* auditoria;
+* explicação;
+* histórico;
+* analytics;
+* investigação;
+* rastreabilidade.
+
+---
+
+## Parte XV — Persistência
+
+### 91. Banco relacional principal
+
+O banco relacional deverá ser a persistência principal inicial por oferecer:
+
+* transações;
+* integridade referencial;
+* consultas;
+* maturidade;
+* simplicidade operacional;
+* suporte a concorrência.
+
+---
+
+### 92. Ownership de dados
+
+Cada módulo deverá possuir seus dados.
+
+Outros módulos deverão interagir por:
+
+* API interna;
+* caso de uso;
+* query autorizada;
+* evento;
+* projeção.
+
+A leitura direta poderá ser permitida apenas por decisão arquitetural explícita e controlada.
+
+---
+
+### 93. Transações
+
+Uma transação deverá proteger as invariantes do agregado responsável.
+
+Transações distribuídas entre módulos deverão ser evitadas.
+
+Quando vários módulos participarem de um fluxo:
+
+* confirmar a mudança principal;
+* publicar evento;
+* executar reações idempotentes;
+* utilizar compensação quando necessário.
+
+---
+
+### 94. Projeções
+
+Projeções poderão ser utilizadas para:
+
+* dashboard;
+* visão consolidada da Trip;
+* resumo do Itinerary;
+* contagem de Planning Conflicts;
+* pesquisa;
+* sugestões rápidas;
+* analytics.
+
+Projeção não deverá ser tratada como proprietário do estado canônico.
+
+---
+
+### 95. Cache
+
+Cache poderá ser utilizado para:
+
+* catálogo;
+* rotas;
+* resultados externos;
+* queries frequentes;
+* dados de baixa volatilidade.
+
+Cache deverá possuir:
+
+* política de expiração;
+* chave contextual;
+* invalidação;
+* fallback;
+* observabilidade.
+
+---
+
+## Parte XVI — Integrações externas
+
+### 96. Isolamento por adaptadores
+
+Toda integração externa deverá possuir porta e adaptador.
 
 Exemplos:
 
-* Viagem;
-* Roteiro;
-* Lugares Salvos;
-* Propostas;
-* Conflitos.
+```text
+IdentityProviderPort
+GeocodingPort
+PlaceSearchPort
+TravelEstimationPort
+WeatherDataPort
+AIModelPort
+NotificationPort
+```
 
 ---
 
-## 64. Estado local
+### 97. Anti-Corruption Layer
 
-Exemplos:
+Dados externos deverão ser traduzidos para modelos internos.
 
-* modal aberto;
-* filtro ainda não aplicado;
-* texto digitado;
-* item selecionado;
-* posição de scroll;
-* edição ainda não salva.
+A aplicação não deverá utilizar diretamente:
 
----
-
-## 65. Cache no cliente
-
-Poderá ser utilizado para:
-
-* reduzir carregamento;
-* preservar contexto;
-* fornecer feedback imediato;
-* permitir atualização otimista segura.
-
-O cache não será a fonte canônica.
+* IDs externos como identidade canônica;
+* enums de fornecedores no domínio;
+* objetos de SDK;
+* respostas de API como entidades.
 
 ---
 
-## 66. Atualização otimista
+### 98. Resiliência
 
-Poderá ser utilizada em ações simples e reversíveis:
+Integrações deverão considerar:
 
-* Salvar Lugar;
-* remover dos Salvos;
-* reordenar, se houver restauração segura.
+* timeout;
+* retry controlado;
+* circuit breaker quando necessário;
+* rate limit;
+* fallback;
+* cache;
+* degradação;
+* observabilidade;
+* idempotência.
 
-Não deverá ser utilizada sem estratégia de reconciliação.
+Retry não deverá ser utilizado indiscriminadamente em operações não idempotentes.
 
 ---
 
-## 67. Renderização
+### 99. Provenance
 
-A estratégia de renderização deverá considerar:
+Dados externos relevantes deverão preservar:
 
-* SEO futuro para conteúdo público;
-* performance;
-* autenticação;
+* Data Source;
+* External Reference;
+* momento de coleta;
+* método;
+* Confidence Level;
+* Data Freshness;
+* licença quando aplicável.
+
+---
+
+## Parte XVII — Arquitetura de IA
+
+### 100. IA como capacidade especializada
+
+IA deverá ser tratada como adaptador ou capacidade especializada.
+
+O provedor de IA não deverá possuir acesso irrestrito ao domínio.
+
+---
+
+### 101. Responsabilidades permitidas
+
+IA poderá auxiliar em:
+
+* geração de candidatos;
+* resumo;
+* explicação;
+* classificação;
+* agrupamento;
+* comparação;
+* geração de Itinerary Proposal;
+* sugestão de Next Best Action;
+* enriquecimento assistido;
+* análise textual.
+
+---
+
+### 102. Responsabilidades proibidas
+
+IA não deverá:
+
+* decidir autorização;
+* validar invariantes sozinha;
+* persistir diretamente;
+* executar SQL;
+* aplicar Proposal;
+* ignorar Planning Risk;
+* criar fatos sem Provenance;
+* registrar Decision do Usuário;
+* expor raciocínio interno como justificativa.
+
+---
+
+### 103. Diagrama da integração com IA
+
+```mermaid
+sequenceDiagram
+    participant UC as Application Use Case
+    participant CTX as Context Builder
+    participant GW as AI Gateway
+    participant AI as AI Provider
+    participant VAL as Output Validator
+    participant DOM as Domain Rules
+
+    UC->>CTX: construir contexto mínimo
+    CTX-->>UC: contexto autorizado
+    UC->>GW: solicitar capacidade
+    GW->>AI: requisição minimizada
+    AI-->>GW: saída não confiável
+    GW->>VAL: validar schema e referências
+    VAL->>DOM: validar regras e invariantes
+
+    alt saída válida
+        DOM-->>UC: resultado candidato
+    else saída inválida
+        DOM-->>UC: rejeição segura
+    end
+```
+
+---
+
+### 104. AI Gateway
+
+O AI Gateway deverá centralizar:
+
+* seleção de provedor;
+* modelos;
+* políticas de timeout;
 * custo;
-* complexidade.
-
-A decisão entre SPA, SSR ou modelo híbrido será detalhada posteriormente.
-
----
-
-# Parte X — API e interface de aplicação
-
-## 68. API principal
-
-A primeira API poderá utilizar HTTP com contratos orientados a recursos e casos de uso.
+* limites;
+* observabilidade;
+* redaction;
+* templates;
+* schemas;
+* fallback;
+* versionamento de capacidades.
 
 ---
 
-## 69. Recursos conceituais
+### 105. Context minimization
 
-Exemplos:
+Somente dados necessários deverão ser enviados.
 
-```text
-/trips
-/trips/{tripId}
-/trips/{tripId}/travelers
-/trips/{tripId}/saved-places
-/trips/{tripId}/itinerary
-/trips/{tripId}/proposals
-/trips/{tripId}/conflicts
-/places
+Evitar:
+
+* dados pessoais completos;
+* histórico integral;
+* localização contínua;
+* dados de menores desnecessários;
+* credenciais;
+* IDs técnicos irrelevantes;
+* conteúdo de outros Usuários.
+
+---
+
+### 106. Saída não confiável
+
+Toda saída de IA deverá ser tratada como não confiável até ser validada.
+
+Validações deverão considerar:
+
+* schema;
+* enumerações;
+* referências;
+* tipos;
+* regras;
+* fatos;
+* Provenance;
+* permissões;
+* dados inventados.
+
+---
+
+### 107. Explicabilidade
+
+A explicação deverá ser construída com base em fatores compreensíveis:
+
+* distância;
+* duração;
+* Budget;
+* Pace;
+* Interests;
+* Restrictions;
+* horário;
+* Place Status;
+* qualidade dos dados.
+
+Não é necessário expor cadeia interna de raciocínio do modelo.
+
+---
+
+## Parte XVIII — Dados e qualidade
+
+### 108. Categorias de dados
+
+A arquitetura deverá distinguir:
+
+* dados canônicos internos;
+* dados externos;
+* dados derivados;
+* dados estimados;
+* dados inferidos;
+* dados gerados por IA;
+* dados de auditoria;
+* dados de observabilidade.
+
+---
+
+### 109. Diagrama de dados e Provenance
+
+```mermaid
+flowchart TD
+    Source["Data Source"]
+    Adapter["Adapter / Anti-Corruption Layer"]
+    Validation["Validação e normalização"]
+    Catalog["Modelo interno"]
+    Provenance["Provenance"]
+    Derived["Dados derivados"]
+    Consumer["Módulos consumidores"]
+
+    Source --> Adapter
+    Adapter --> Validation
+    Validation --> Catalog
+    Validation --> Provenance
+    Catalog --> Derived
+    Provenance --> Derived
+    Catalog --> Consumer
+    Derived --> Consumer
 ```
 
-Os contratos detalhados serão definidos em documento próprio.
+---
+
+### 110. Unknown
+
+O estado desconhecido deverá ser representável.
+
+Não assumir:
+
+* zero;
+* gratuito;
+* aberto;
+* fechado;
+* disponível;
+* incompatível;
+* sem conflito.
 
 ---
 
-## 70. Comandos explícitos
+### 111. Data Freshness
+
+Atualidade deverá depender do tipo de informação.
+
+Não deverá existir um único prazo universal para todos os dados.
+
+---
+
+### 112. Dados conflitantes
+
+Quando Fontes divergirem:
+
+* preservar ambas;
+* preservar Provenance;
+* marcar conflito;
+* aplicar política;
+* reduzir Confidence;
+* comunicar limitação.
+
+---
+
+## Parte XIX — APIs
+
+### 113. Estilo inicial
+
+A API externa inicial poderá utilizar HTTP com recursos e operações explícitas.
+
+A escolha final deverá ser detalhada no documento de API.
+
+---
+
+### 114. Recursos
+
+Possíveis recursos:
+
+* accounts;
+* users;
+* trips;
+* travelers;
+* places;
+* saved places;
+* itinerary;
+* activities;
+* free periods;
+* recommendations;
+* decisions;
+* itinerary proposals;
+* planning conflicts.
+
+---
+
+### 115. Comandos explícitos
 
 Ações que não representem CRUD simples poderão utilizar operações específicas.
 
@@ -1199,1916 +2363,789 @@ POST /trips/{tripId}/conflicts/{conflictId}/ignore
 POST /trips/{tripId}/activities/{activityId}/move
 ```
 
----
-
-## 71. Consultas especializadas
-
-Consultas poderão ser projetadas para necessidades da interface.
-
-Exemplo:
-
-```text
-GET /trips/{tripId}/overview
-GET /trips/{tripId}/explore
-GET /trips/{tripId}/map
-GET /trips/{tripId}/itinerary/days/{date}
-```
-
-Essas consultas podem utilizar projeções sem expor estrutura interna do domínio.
-
----
-
-## 72. Versionamento
-
-Contratos públicos deverão possuir estratégia de versionamento.
-
-A decisão técnica será detalhada em `RB-API-001`.
-
----
-
-## 73. Erros
-
-Erros deverão distinguir:
-
-* validação de transporte;
-* regra de domínio;
-* autorização;
-* concorrência;
-* dependência externa;
-* indisponibilidade;
-* falha interna.
-
----
-
-## 74. Concorrência
-
-Operações críticas deverão suportar versão esperada, ETag ou mecanismo equivalente.
-
----
-
-# Parte XI — Persistência
-
-## 75. Banco inicial
-
-O sistema deverá priorizar banco relacional no MVP.
-
-Motivos:
-
-* relacionamentos;
-* transações;
-* consistência;
-* consultas;
-* maturidade;
-* custo;
-* evolução.
-
----
-
-## 76. Separação lógica por módulo
-
-Mesmo em banco compartilhado, cada módulo deverá possuir:
-
-* ownership de dados;
-* tabelas ou schemas próprios;
-* acesso controlado;
-* contratos de leitura;
-* migrações organizadas.
-
----
-
-## 77. Agregados e transações
-
-Transações deverão respeitar limites de agregado.
-
-Operações entre agregados deverão preferir:
-
-* orquestração;
-* Eventos;
-* consistência eventual;
-* compensação quando necessário.
-
----
-
-## 78. Dados derivados
-
-Dados derivados poderão ser:
-
-* calculados na leitura;
-* armazenados como projeção;
-* armazenados em cache;
-* recalculados por evento.
-
-A escolha deverá considerar custo e consistência.
-
----
-
-## 79. Histórico
-
-O sistema deverá permitir rastrear alterações críticas.
-
-Não implica event sourcing completo.
-
-Poderão ser utilizados:
-
-* audit log;
-* versões;
-* Eventos persistidos;
-* histórico de alterações;
-* snapshots.
-
----
-
-## 80. Exclusão
-
-A persistência deverá diferenciar:
-
-* remoção lógica;
-* arquivamento;
-* cancelamento;
-* anonimização;
-* exclusão física.
-
----
-
-## 81. Migrações
-
-Migrações de dados deverão ser:
-
-* versionadas;
-* reproduzíveis;
-* revisáveis;
-* testadas;
-* reversíveis quando possível.
-
----
-
-# Parte XII — Eventos e processamento assíncrono
-
-## 82. Event bus interno
-
-O Monólito Modular poderá possuir um barramento interno para Eventos de Domínio.
-
----
-
-## 83. Publicação após transação
-
-Eventos que dependem de estado persistido deverão ser publicados de forma consistente com a transação.
-
-Estratégias possíveis:
-
-* after-commit;
-* transactional outbox;
-* fila interna persistida.
-
-A decisão será detalhada posteriormente.
-
----
-
-## 84. Jobs assíncronos
-
-Capacidades candidatas:
-
-* geração de Proposta;
-* recálculo de Distâncias;
-* sincronização de Lugares;
-* atualização de Proveniência;
-* reavaliação de Conflitos;
-* expiração de objetos;
-* processamento de imagens;
-* analytics.
-
----
-
-## 85. Idempotência
-
-Jobs e consumers deverão suportar:
-
-* identificador;
-* deduplicação;
-* repetição;
-* retry;
-* dead-letter futura;
-* rastreabilidade.
-
----
-
-## 86. Entrega
-
-A arquitetura não deverá assumir entrega exatamente uma vez.
-
-Consumidores deverão ser idempotentes.
-
----
-
-## 87. Falha
-
-Falhas assíncronas deverão:
-
-* ser observáveis;
-* possuir retry;
-* preservar estado válido;
-* permitir reprocessamento;
-* não ocultar falha crítica.
-
----
-
-# Parte XIII — Integrações externas
-
-## 88. Anti-Corruption Layer
-
-Cada integração deverá possuir adaptador que traduza o modelo externo para o modelo interno.
-
----
-
-## 89. Geocodificação
-
-Porta conceitual:
-
-```text
-GeocodingPort
-```
-
-Responsabilidades:
-
-* resolver endereço;
-* resolver coordenada;
-* indicar confiança;
-* preservar provedor;
-* tratar múltiplos resultados.
-
----
-
-## 90. Rotas e Distâncias
-
-Porta:
-
-```text
-TravelEstimationPort
-```
-
-Responsabilidades:
-
-* calcular Distância;
-* calcular Tempo;
-* considerar transporte;
-* retornar Proveniência;
-* indicar validade;
-* representar indisponibilidade.
-
----
-
-## 91. Lugares
-
-Porta:
-
-```text
-PlaceDataProviderPort
-```
-
-Responsabilidades:
-
-* pesquisar Lugares;
-* obter Detalhes;
-* resolver identificadores;
-* preservar fonte;
-* representar dados parciais;
-* indicar atualização.
-
----
-
-## 92. Imagens
-
-Porta:
-
-```text
-PlaceImageProviderPort
-```
-
-A ausência de imagens não deverá impedir o uso do Lugar.
-
----
-
-## 93. IA
-
-Portas possíveis:
-
-```text
-RecommendationGenerationPort
-ItineraryProposalGenerationPort
-ContentGenerationPort
-```
-
-O domínio não deverá depender de SDK ou fornecedor específico.
-
----
-
-## 94. Autenticação
-
-Porta:
-
-```text
-IdentityProviderPort
-```
-
-A identidade externa deverá ser mapeada para `UserId` interno.
-
----
-
-## 95. Timeout
-
-Toda chamada externa deverá possuir timeout explícito.
-
----
-
-## 96. Retry
-
-Retry somente deverá ocorrer em falhas transitórias e operações seguras.
+Parâmetros de rota podem utilizar referências contextuais abreviadas quando o recurso estiver inequivocamente identificado:
 
----
-
-## 97. Circuit breaker
-
-Poderá ser introduzido quando uma integração instável ameaçar o sistema.
-
----
-
-## 98. Cache de integração
-
-Poderá ser utilizado respeitando:
-
-* validade;
-* termos;
-* Proveniência;
-* atualização;
-* privacidade.
-
----
-
-## 99. Fallback
-
-Fallbacks possíveis:
-
-* lista sem Mapa;
-* Distância em linha reta;
-* conteúdo parcial;
-* dados em cache;
-* edição manual;
-* provedor alternativo.
-
----
-
-# Parte XIV — Arquitetura de IA
-
-## 100. Princípio central
-
-A IA deverá ser tratada como uma capacidade probabilística externa ao núcleo determinístico do domínio.
-
----
-
-## 101. Responsabilidades da IA
-
-A IA poderá:
-
-* resumir contexto;
-* gerar Recomendações;
-* gerar Propostas;
-* explicar alternativas;
-* sugerir reorganização;
-* identificar possíveis Conflitos;
-* produzir rascunhos;
-* classificar conteúdo.
-
----
-
-## 102. Responsabilidades que permanecem determinísticas
-
-A IA não será responsável final por:
-
-* autorização;
-* persistência canônica;
-* invariantes;
-* identidade;
-* transações;
-* exclusão;
-* aplicação de Proposta;
-* validação de Restrição obrigatória;
-* versão do Roteiro.
-
----
-
-## 103. Orquestração
-
-Fluxo conceitual:
-
-```text
-Application Service
-→ constrói Contexto de Decisão
-→ aplica regras determinísticas
-→ chama AI Port
-→ valida saída
-→ enriquece com Proveniência
-→ produz Recomendação ou Proposta
-→ apresenta ao Usuário
-```
-
----
-
-## 104. Contexto estruturado
-
-Prompts não deverão ser construídos a partir de texto livre sem controle quando houver dados estruturados.
-
-O contexto deverá incluir:
-
-* IDs;
-* fatos;
-* estimativas;
-* Restrições;
-* Preferências;
-* versão;
-* fontes;
-* instruções;
-* schema de saída.
-
----
-
-## 105. Saída estruturada
-
-Sempre que possível, a IA deverá retornar estrutura validável.
-
-Exemplo:
-
-```text
-Recommendation
-├── target
-├── reasons
-├── limitations
-├── confidence
-└── source references
-```
-
----
-
-## 106. Validação
-
-Toda saída deverá passar por:
-
-* validação estrutural;
-* validação semântica;
-* regras de domínio;
-* autorização;
-* verificação de IDs;
-* verificação de Restrições;
-* limitação de campos.
-
----
-
-## 107. Grounding
-
-Respostas deverão utilizar dados recuperados de fontes conhecidas quando dependerem de fatos.
-
----
-
-## 108. Alucinação
-
-Dados não suportados não deverão ser persistidos como fatos.
-
----
-
-## 109. Proveniência de IA
-
-Deverá ser possível registrar:
-
-* provedor;
-* modelo;
-* versão;
-* prompt ou template;
-* contexto;
-* fontes;
-* data;
-* política;
-* resultado;
-* validações.
-
----
-
-## 110. Custos
-
-Chamadas deverão considerar:
-
-* cache;
-* deduplicação;
-* limites;
-* modelos adequados à tarefa;
-* redução de contexto;
-* processamento assíncrono;
-* telemetria de custo.
-
----
-
-## 111. Falha de IA
-
-A falha deverá preservar:
+* `{proposalId}` representa `ItineraryProposalId`;
+* `{conflictId}` representa `PlanningConflictId`;
+* `{activityId}` representa `ActivityId`;
+* `{tripId}` representa `TripId`.
 
-* Roteiro atual;
-* edição manual;
-* Proposta anterior válida;
-* dados fornecidos;
-* contexto da Viagem.
+A forma abreviada não altera o tipo canônico do identificador.
 
 ---
 
-## 112. Vendor lock-in
+### 116. Idempotência de API
 
-Contratos internos deverão permitir substituição de provedor.
+Operações sensíveis deverão permitir idempotência:
 
----
-
-# Parte XV — Busca e recomendação de Lugares
-
-## 113. Estratégia inicial
-
-A busca poderá combinar:
-
-* texto;
-* categoria;
-* Distância;
-* preço;
-* Região;
-* estado operacional;
-* adequação;
-* Preferências.
-
----
-
-## 114. Filtros determinísticos
-
-Filtros obrigatórios deverão ser aplicados antes ou depois da busca conforme a capacidade, mas antes de apresentar opção incompatível como recomendada.
-
----
-
-## 115. Ranking
-
-O ranking poderá combinar:
-
-* proximidade;
-* compatibilidade;
-* qualidade dos dados;
-* disponibilidade;
-* preço;
-* interesse;
-* diversidade;
-* contexto temporal.
-
----
-
-## 116. Busca semântica
-
-Poderá ser introduzida futuramente por:
-
-* embeddings;
-* índice vetorial;
-* busca híbrida.
-
-Não é requisito inicial.
-
----
-
-## 117. Índice de busca
-
-A extração para mecanismo especializado deverá ocorrer somente quando o banco relacional deixar de atender adequadamente.
-
----
-
-# Parte XVI — Cache
-
-## 118. Objetivos
-
-Cache poderá reduzir:
-
-* latência;
-* custo externo;
-* chamadas repetidas;
-* carga de banco;
-* custo de IA.
-
----
-
-## 119. Itens candidatos
-
-* Detalhes de Lugar;
-* geocodificação;
-* Distâncias;
-* buscas frequentes;
-* imagens;
-* Recomendações válidas;
-* projeções de Visão Geral.
-
----
+* Create Trip;
+* Add Activity;
+* Accept Recommendation;
+* Accept Itinerary Proposal;
+* Accept Itinerary Proposal Partially;
+* Ignore Planning Risk.
 
-## 120. Não armazenar indiscriminadamente
-
-Não deverão ser armazenados em cache sem estratégia:
-
-* autorização;
-* dados sensíveis;
-* alterações não confirmadas;
-* respostas dependentes de versão sem chave adequada.
-
----
-
-## 121. Chaves
-
-Chaves deverão considerar contexto relevante.
-
-Exemplo:
-
-```text
-tripId
-accommodationVersion
-transportMode
-origin
-destination
-provider
-```
-
 ---
 
-## 122. Invalidação
+### 117. Concorrência
 
-Eventos de domínio deverão orientar invalidação.
+Operações sujeitas a conflito deverão utilizar mecanismos como:
 
----
-
-# Parte XVII — Segurança
-
-## 123. Autenticação
-
-Deverá ser realizada por mecanismo confiável e separada do domínio.
+* version field;
+* ETag;
+* If-Match;
+* aggregateVersion;
+* ItineraryVersion;
+* idempotency key.
 
 ---
-
-## 124. Autorização
-
-Deverá existir em cada operação protegida.
-
----
-
-## 125. Escopo por Viagem
 
-Toda consulta ou alteração deverá verificar acesso à Viagem.
+### 118. Erros
 
----
+A API deverá diferenciar:
 
-## 126. Validação de entrada
+* validation error;
+* authorization error;
+* invariant violation;
+* planning conflict;
+* concurrency conflict;
+* external dependency failure;
+* technical failure.
 
-Toda entrada externa deverá ser validada antes de atingir o domínio.
+Planning Conflict não deverá ser retornado como erro técnico genérico.
 
 ---
-
-## 127. Proteção contra acesso indireto
 
-Identificadores previsíveis não deverão permitir acesso a objetos de outros Usuários.
+## Parte XX — Segurança e privacidade
 
----
+### 119. Segurança em profundidade
 
-## 128. Segredos
+Segurança deverá existir em:
 
-Segredos deverão permanecer fora do código e da documentação pública.
+* interface;
+* API;
+* Application;
+* Domain;
+* persistência;
+* integrações;
+* infraestrutura.
 
 ---
-
-## 129. Dados pessoais
 
-Deverão ser:
+### 120. Autenticação e autorização
 
-* minimizados;
-* protegidos;
-* auditáveis;
-* retidos conforme necessidade;
-* removidos conforme política.
+Autenticação identifica o ator.
 
----
-
-## 130. Localização
+Autorização determina a ação permitida.
 
-Localização atual deverá possuir proteção adicional.
+Autorização deverá ser validada no Backend.
 
 ---
-
-## 131. IA e dados
-
-Dados enviados a provedores de IA deverão respeitar:
-
-* minimização;
-* consentimento;
-* contrato;
-* retenção;
-* finalidade;
-* mascaramento quando necessário.
 
----
+### 121. Ownership e papéis
 
-## 132. Logs
+Ações críticas deverão considerar:
 
-Logs não deverão conter dados sensíveis sem necessidade.
+* Account;
+* Trip Role;
+* ownership;
+* ação solicitada;
+* objeto afetado;
+* Contexto.
 
 ---
-
-# Parte XVIII — Resiliência
 
-## 133. Categorias de falha
+### 122. Minimização de dados
 
-* validação;
-* autorização;
-* concorrência;
-* dependência externa;
-* timeout;
-* indisponibilidade;
-* dados inválidos;
-* processamento assíncrono;
-* falha interna.
+Coletar e processar apenas dados necessários.
 
----
+Preferir:
 
-## 134. Estratégias
-
-* timeout;
-* retry;
-* fallback;
-* circuit breaker;
-* bulkhead futuro;
-* cache;
-* degradação;
-* reprocessamento;
-* compensação.
+* faixa etária;
+* necessidade funcional;
+* localização pontual;
+* referências internas;
+* contexto reduzido.
 
 ---
-
-## 135. Degradação funcional
-
-Exemplos:
 
-```text
-Mapa indisponível
-→ lista continua
+### 123. Secrets
 
-IA indisponível
-→ planejamento manual continua
+Credenciais e chaves deverão permanecer fora do código e da documentação pública.
 
-Rotas indisponíveis
-→ Atividades continuam
-
-Imagens indisponíveis
-→ Detalhes textuais continuam
-```
-
 ---
 
-## 136. Retry seguro
+### 124. Proteção de logs
 
-Retry deverá considerar:
+Logs não deverão incluir automaticamente:
 
-* idempotência;
-* tipo de falha;
-* limite;
-* backoff;
-* jitter futuro;
-* efeitos externos.
+* tokens;
+* prompts completos;
+* dados pessoais;
+* localização precisa;
+* conteúdo sensível;
+* payloads integrais.
 
 ---
 
-## 137. Estado incerto
-
-Operações com resultado incerto deverão ser reconciliadas antes de repetição destrutiva.
-
----
+## Parte XXI — Observabilidade
 
-# Parte XIX — Observabilidade
+### 125. Pilares
 
-## 138. Pilares
+A observabilidade deverá incluir:
 
 * logs;
 * métricas;
 * traces;
 * eventos;
-* auditoria.
+* auditoria;
+* health checks.
 
 ---
 
-## 139. Correlation ID
+### 126. Correlation ID
 
-Toda requisição relevante deverá possuir identificador de correlação.
+Fluxos deverão preservar `correlationId`.
 
----
+Operações assíncronas deverão preservar também:
 
-## 140. Logs estruturados
-
-Logs deverão conter campos pesquisáveis, como:
-
-* timestamp;
-* level;
-* service;
-* module;
-* operation;
-* correlationId;
-* userId anonimizado quando apropriado;
-* tripId;
-* status;
-* duration;
-* errorCode.
+* causationId;
+* EventId;
+* aggregate reference;
+* actor reference.
 
 ---
 
-## 141. Métricas técnicas
+### 127. Métricas técnicas
+
+Exemplos:
 
 * latência;
-* erros;
-* throughput;
-* chamadas externas;
-* retries;
-* timeouts;
-* jobs pendentes;
-* cache hit;
-* custo de IA;
-* tokens;
-* falhas de validação.
+* taxa de erro;
+* disponibilidade;
+* consumo de IA;
+* timeout externo;
+* retry;
+* filas;
+* cache hit rate;
+* tempo de geração de Proposta.
 
 ---
 
-## 142. Métricas de produto
+### 128. Métricas de domínio
 
-* Viagens criadas;
-* Lugares salvos;
-* Atividades adicionadas;
+Exemplos:
+
+* Recommendations geradas;
+* Recommendations aceitas;
+* Decisions registradas;
 * Propostas geradas;
 * Propostas aceitas;
-* Conflitos detectados;
-* Conflitos resolvidos;
-* falhas de planejamento.
+* Planning Conflicts por severidade;
+* riscos ignorados;
+* tempo até resolução;
+* Recomendações invalidadas;
+* dados stale.
+
+Métricas não deverão redefinir o domínio.
 
 ---
 
-## 143. Tracing
+### 129. Auditoria
 
-Fluxos distribuídos ou assíncronos deverão permitir rastrear:
+Ações críticas deverão ser auditáveis:
 
-```text
-Requisição
-→ Comando
-→ Evento
-→ Job
-→ Provedor externo
-→ Resultado
-```
-
----
-
-## 144. Auditoria
-
-Ações críticas deverão permanecer auditáveis.
+* ownership;
+* alteração de Restriction;
+* aplicação de Proposal;
+* Ignore Planning Risk;
+* exclusão;
+* alteração de permissões;
+* ações de agentes.
 
 ---
 
-## 145. Alertas operacionais
+## Parte XXII — Resiliência
 
-Alertas deverão priorizar:
+### 130. Degradação funcional
 
-* indisponibilidade;
-* erro elevado;
-* falha de jobs;
-* aumento de custo;
-* problema de segurança;
-* perda de dados;
-* falha de integração crítica.
+Quando uma dependência falhar, o produto deverá preservar capacidades não afetadas.
 
----
+Exemplos:
 
-# Parte XX — Qualidade arquitetural
-
-## 146. Atributos prioritários
-
-1. manutenibilidade;
-2. confiabilidade;
-3. testabilidade;
-4. segurança;
-5. usabilidade;
-6. acessibilidade;
-7. observabilidade;
-8. performance;
-9. escalabilidade;
-10. portabilidade.
+* sem IA, permitir edição manual;
+* sem rotas, mostrar distância indisponível;
+* sem catálogo, preservar Places existentes;
+* sem imagens, preservar conteúdo textual;
+* sem notificação, preservar Decision.
 
 ---
 
-## 147. Manutenibilidade
+### 131. Timeout
 
-Será favorecida por:
-
-* módulos;
-* contratos;
-* documentação;
-* testes;
-* baixo acoplamento;
-* alta coesão;
-* convenções;
-* decisões registradas.
+Toda integração externa deverá possuir timeout definido.
 
 ---
 
-## 148. Testabilidade
+### 132. Retry
 
-Dependências externas deverão ser substituíveis por adaptadores de teste.
+Retry deverá considerar:
 
----
-
-## 149. Performance
-
-A performance deverá ser medida antes de otimizações estruturais.
-
----
-
-## 150. Escalabilidade
-
-A arquitetura deverá escalar inicialmente por:
-
-* otimização;
-* cache;
-* índices;
-* filas;
-* processamento assíncrono;
-* replicação;
-* escalabilidade horizontal da aplicação.
+* idempotência;
+* tipo de erro;
+* backoff;
+* limite;
+* observabilidade.
 
 ---
 
-## 151. Disponibilidade
+### 133. Circuit breaker
 
-O MVP não exige disponibilidade extrema, mas deverá evitar pontos frágeis desnecessários.
+Poderá ser utilizado quando falhas repetidas de fornecedor causarem impacto sistêmico.
 
----
-
-## 152. Acessibilidade
-
-A arquitetura frontend deverá permitir conformidade com os documentos de UX e Design System.
+Não é requisito obrigatório do primeiro incremento.
 
 ---
 
-# Parte XXI — Estratégia de testes
+### 134. Reprocessamento
 
-## 153. Pirâmide conceitual
-
-```text
-Testes de domínio
-Testes de aplicação
-Testes de integração
-Testes de contrato
-Testes de componentes
-Testes E2E
-Testes exploratórios
-```
+Eventos e jobs deverão permitir reprocessamento seguro.
 
 ---
 
-## 154. Testes de domínio
+## Parte XXIII — Testabilidade
 
-Deverão cobrir:
+### 135. Pirâmide de testes
 
-* invariantes;
-* estados;
-* transições;
-* regras;
-* políticas;
-* Eventos.
+A estratégia deverá combinar:
 
----
-
-## 155. Testes de aplicação
-
-Deverão cobrir:
-
-* casos de uso;
-* autorização;
-* orquestração;
-* transações;
-* efeitos.
+* testes de domínio;
+* testes de Application;
+* testes de integração;
+* testes de contrato;
+* testes de adaptadores;
+* testes de API;
+* testes end-to-end seletivos;
+* testes de segurança;
+* testes de acessibilidade.
 
 ---
 
-## 156. Testes de integração
+### 136. Testes de domínio
 
 Deverão validar:
 
-* banco;
-* adaptadores;
-* provedores;
-* filas;
-* cache;
-* serialização.
+* invariantes;
+* regras;
+* políticas;
+* ciclos de vida;
+* transições;
+* severidades;
+* idempotência conceitual.
 
 ---
 
-## 157. Testes de contrato
+### 137. Testes entre módulos
 
-Deverão proteger:
+Deverão validar:
 
-* APIs;
-* Eventos;
-* integrações;
-* saídas de IA estruturadas.
+* contratos internos;
+* dependências permitidas;
+* eventos;
+* ownership de dados;
+* ausência de acesso indevido.
 
----
-
-## 158. Testes E2E
-
-Deverão priorizar fluxos críticos:
-
-* criar Viagem;
-* salvar Lugar;
-* adicionar ao Roteiro;
-* editar;
-* gerar Proposta;
-* aceitar Proposta;
-* revisar Conflito;
-* alterar Hospedagem.
+Testes arquiteturais automatizados poderão reforçar limites modulares.
 
 ---
 
-## 159. Testes de resiliência
+### 138. Testes de IA
 
-Deverão simular:
+Deverão validar:
 
-* timeout;
-* provedor indisponível;
-* resposta inválida;
-* retry;
-* evento duplicado;
-* concorrência;
-* falha parcial.
+* schema;
+* referências;
+* comportamento de fallback;
+* limites;
+* segurança;
+* minimização;
+* tratamento de alucinação;
+* rejeição de saída inválida.
+
+Não deverão depender exclusivamente de igualdade textual.
 
 ---
 
-# Parte XXII — Implantação
+## Parte XXIV — Implantação
 
-## 160. Ambientes
+### 139. Topologia inicial
 
-Ambientes iniciais:
+```mermaid
+flowchart TD
+    Browser["Browser"]
+    CDN["CDN / Edge"]
+    Web["Web Application"]
+    API["Backend Modular"]
+    Worker["Worker opcional"]
+    DB[("Relational Database")]
+    Storage[("Object Storage")]
+    Providers["External Providers"]
+    Observe["Observability"]
+
+    Browser --> CDN
+    CDN --> Web
+    Web --> API
+    API --> DB
+    API --> Storage
+    API --> Providers
+    API --> Observe
+
+    API --> Worker
+    Worker --> DB
+    Worker --> Providers
+    Worker --> Observe
+```
+
+---
+
+### 140. Ambientes
+
+Ambientes mínimos:
 
 * local;
 * test;
 * staging;
 * production.
 
-A nomenclatura poderá ser ajustada.
+Dados e credenciais deverão ser isolados por ambiente.
 
 ---
 
-## 161. Configuração
+### 141. Migrations
 
-Configuração deverá ser externa ao código quando variar por ambiente.
+Migrations deverão:
 
----
-
-## 162. Build reproduzível
-
-Builds deverão ser:
-
-* versionados;
-* reproduzíveis;
-* testados;
-* rastreáveis.
+* ser versionadas;
+* permanecer no repositório;
+* possuir ownership de módulo;
+* ser testadas;
+* considerar rollback ou estratégia de recuperação;
+* evitar dependências ocultas.
 
 ---
 
-## 163. Migração de banco
+### 142. Feature flags
 
-A implantação deverá coordenar código e schema com compatibilidade.
+Feature flags poderão controlar:
 
----
-
-## 164. Rollback
-
-Mudanças deverão considerar rollback ou roll-forward seguro.
-
----
-
-## 165. Feature flags
-
-Poderão ser utilizadas para:
-
-* lançamento gradual;
+* capacidades em evolução;
+* fornecedores;
 * experimentos;
-* novos provedores;
-* capacidades de IA;
-* mitigação de risco.
+* rollout;
+* fallback.
 
-Não deverão substituir remoção de código obsoleto.
-
----
-
-## 166. Infraestrutura como código
-
-Recomendada quando a infraestrutura inicial for definida.
+Não deverão substituir autorização ou regras de domínio.
 
 ---
 
-# Parte XXIII — Estrutura conceitual do repositório
+## Parte XXV — Evolução arquitetural
 
-## 167. Visão geral
+### 143. Fase inicial
 
-```text
-RouteBook/
-├── apps/
-│   ├── web/
-│   └── api/
-├── packages/
-│   ├── design-system/
-│   ├── domain/
-│   ├── contracts/
-│   ├── testing/
-│   └── shared/
-├── docs/
-│   ├── architecture/
-│   ├── domain/
-│   ├── ux/
-│   └── design-system/
-├── infrastructure/
-├── scripts/
-└── tests/
-```
+A fase inicial poderá utilizar:
 
-Essa estrutura é conceitual e deverá ser validada contra o repositório atual.
-
----
-
-## 168. Organização do backend
-
-```text
-apps/api/src/
-├── modules/
-│   ├── identity/
-│   ├── trips/
-│   ├── travelers/
-│   ├── places/
-│   ├── itinerary/
-│   ├── mobility/
-│   ├── recommendations/
-│   ├── proposals/
-│   └── conflicts/
-├── platform/
-└── bootstrap/
-```
-
----
-
-## 169. Organização de módulo
-
-```text
-trips/
-├── domain/
-├── application/
-├── infrastructure/
-├── interfaces/
-└── tests/
-```
-
----
-
-## 170. Shared
-
-`shared` deverá permanecer pequeno.
-
-Somente deverá conter:
-
-* utilidades realmente genéricas;
-* tipos técnicos comuns;
-* contratos transversais;
-* infraestrutura compartilhada.
-
-Não deverá tornar-se depósito de lógica sem owner.
-
----
-
-# Parte XXIV — Fluxos arquiteturais principais
-
-## 171. Criar Viagem
-
-```text
-Web
-→ CreateTrip API
-→ Trips Application
-→ Trip Aggregate
-→ Repository
-→ TripCreated
-→ gerar Dias
-→ inicializar Roteiro
-→ resposta
-```
-
----
-
-## 172. Salvar Lugar
-
-```text
-Web
-→ SavePlace
-→ autorização
-→ validar Viagem e Lugar
-→ criar SavedPlace idempotente
-→ persistir
-→ PlaceSaved
-→ atualizar projeções
-```
-
----
-
-## 173. Adicionar Lugar ao Roteiro
-
-```text
-Web
-→ AddPlaceToItinerary
-→ validar Viagem
-→ validar Dia
-→ validar Lugar
-→ criar Activity
-→ atualizar versão
-→ ActivityAdded
-→ recalcular Deslocamentos
-→ reavaliar Conflitos
-```
-
----
-
-## 174. Gerar Proposta
-
-```text
-Web
-→ RequestItineraryProposal
-→ capturar versão base
-→ persistir solicitação
-→ job assíncrono
-→ construir Contexto
-→ obter dados e estimativas
-→ chamar IA
-→ validar saída
-→ aplicar regras
-→ persistir Proposta
-→ ItineraryProposalGenerated
-→ disponibilizar resultado
-```
-
----
-
-## 175. Aceitar Proposta
-
-```text
-Web
-→ AcceptItineraryProposal
-→ validar autorização
-→ validar status
-→ validar versão base
-→ validar invariantes
-→ aplicar itens
-→ atualizar Roteiro
-→ nova versão
-→ ItineraryProposalAccepted
-→ recalcular derivados
-```
-
----
-
-## 176. Alterar Hospedagem
-
-```text
-Web
-→ UpdateAccommodation
-→ avaliar impacto
-→ confirmar
-→ persistir mudança
-→ TripAccommodationChanged
-→ invalidar Estimativas
-→ expirar Recomendações
-→ expirar Propostas incompatíveis
-→ solicitar recálculos
-```
-
----
-
-# Parte XXV — Decisões iniciais
-
-## 177. Decisão A — Monólito Modular
-
-### Estado
-
-Proposta inicial.
-
-### Justificativa
-
-* produto em estágio inicial;
-* baixo custo operacional;
-* desenvolvimento mais simples;
-* transações locais;
-* módulos ainda evoluindo;
-* extração futura possível.
-
----
-
-## 178. Decisão B — Banco Relacional
-
-### Estado
-
-Proposta inicial.
-
-### Justificativa
-
-* relações fortes;
-* consistência;
-* transações;
-* consultas;
-* maturidade.
-
----
-
-## 179. Decisão C — IA por adaptadores
-
-### Estado
-
-Obrigatória.
-
-### Justificativa
-
-* substituição de provedor;
-* testes;
-* controle de custo;
-* isolamento;
-* segurança.
-
----
-
-## 180. Decisão D — Eventos internos
-
-### Estado
-
-Recomendada.
-
-### Justificativa
-
-* desacoplar efeitos;
-* reprocessamento;
-* auditoria;
-* evolução assíncrona.
-
----
-
-## 181. Decisão E — Sem event sourcing inicial
-
-### Estado
-
-Proposta inicial.
-
-### Justificativa
-
-* complexidade;
-* custo;
-* baixa necessidade inicial;
-* auditoria pode ser atendida por Eventos e histórico.
-
----
-
-## 182. Decisão F — Sem mecanismo de busca especializado inicial
-
-### Estado
-
-Proposta inicial.
-
-### Justificativa
-
-* banco relacional pode atender o MVP;
-* evitar infraestrutura prematura;
-* futura extração possível.
-
----
-
-# Parte XXVI — Riscos arquiteturais
-
-## 183. Dependência de provedores externos
-
-### Risco
-
-Custo, indisponibilidade, limite ou mudança de contrato.
-
-### Mitigação
-
-* portas;
-* cache;
-* fallback;
-* abstração;
-* múltiplos provedores futuros.
-
----
-
-## 184. Qualidade dos dados
-
-### Risco
-
-Informações incompletas, desatualizadas ou conflitantes.
-
-### Mitigação
-
-* Proveniência;
-* confiança;
-* atualização;
-* validação;
-* transparência.
-
----
-
-## 185. Custo de IA
-
-### Risco
-
-Chamadas excessivas ou contextos grandes.
-
-### Mitigação
-
-* cache;
-* limites;
-* métricas;
-* modelos adequados;
-* execução assíncrona;
-* contexto estruturado.
-
----
-
-## 186. Acoplamento entre módulos
-
-### Risco
-
-Monólito tornar-se código monolítico sem limites.
-
-### Mitigação
-
-* contratos;
-* testes de arquitetura;
-* ownership;
-* eventos;
-* organização por módulos.
-
----
-
-## 187. Complexidade prematura
-
-### Risco
-
-Infraestrutura desnecessária atrasar o produto.
-
-### Mitigação
-
-* decisões incrementais;
-* Monólito Modular;
-* métricas;
-* documentação;
-* ADRs.
-
----
-
-## 188. Regras duplicadas
-
-### Risco
-
-Frontend, backend e IA divergirem.
-
-### Mitigação
-
-* domínio canônico;
-* contratos;
-* testes;
-* documentação;
-* validação central.
-
----
-
-## 189. Saídas inválidas de IA
-
-### Risco
-
-Estrutura incorreta, IDs inexistentes ou violação de regras.
-
-### Mitigação
-
-* schema;
-* validação;
-* grounding;
-* filtros;
-* controle do Usuário.
-
----
-
-# Parte XXVII — Evolução arquitetural
-
-## 190. Estágio 1 — MVP pessoal
-
-Características:
-
-* um cliente web;
+* aplicação web;
 * backend modular;
 * banco relacional;
-* poucos provedores;
-* autenticação simples;
-* Propostas assíncronas;
-* observabilidade essencial.
+* integrações síncronas;
+* jobs simples;
+* IA por gateway;
+* eventos internos em processo.
 
 ---
 
-## 191. Estágio 2 — Produto multiusuário
+### 144. Fase intermediária
 
-Possíveis evoluções:
+Conforme necessidade:
 
-* colaboração;
-* papéis;
-* convites;
-* conflitos de edição;
-* notificações;
-* filas persistentes;
-* cache distribuído.
-
----
-
-## 192. Estágio 3 — Escala de dados e integração
-
-Possíveis evoluções:
-
-* mecanismo de busca;
-* índice geográfico especializado;
-* pipeline de ingestão;
-* reconciliação avançada;
-* múltiplos provedores;
-* projeções analíticas.
+* worker dedicado;
+* fila;
+* Outbox;
+* cache;
+* search index;
+* armazenamento de eventos de integração;
+* projeções;
+* melhor isolamento de módulos.
 
 ---
 
-## 193. Estágio 4 — Extração seletiva
+### 145. Fase avançada
 
-Possíveis candidatos:
+Somente por evidência:
 
-* Places;
-* Mobility;
-* AI Orchestration;
-* Notifications;
-* Search.
-
-A extração somente ocorrerá com evidência.
-
----
-
-# Parte XXVIII — Requisitos arquiteturais
-
-## 194. Funcionais protegidos
-
-A arquitetura deverá suportar:
-
-* criação de Viagem;
-* personalização;
-* busca;
-* Salvos;
-* Roteiro;
-* Atividades;
-* Períodos Livres;
-* Mapa;
-* Distâncias;
-* Recomendações;
-* Propostas;
-* Conflitos;
-* Configurações.
+* extração de serviços;
+* bancos especializados;
+* múltiplos consumidores;
+* processamento distribuído;
+* sincronização offline;
+* streaming;
+* multi-region;
+* alta disponibilidade específica.
 
 ---
 
-## 195. Não funcionais iniciais
+### 146. Critérios de evolução
 
-A solução deverá buscar:
+Toda evolução deverá responder:
 
-* navegação responsiva;
-* feedback rápido;
-* tolerância a falhas externas;
-* proteção de dados;
-* rastreabilidade;
-* testes;
-* deploy automatizado;
-* custo controlado;
-* acessibilidade;
-* manutenção simples.
+* qual problema real está sendo resolvido;
+* qual evidência existe;
+* qual custo será introduzido;
+* qual risco será reduzido;
+* qual capacidade será habilitada;
+* qual estratégia de migração será utilizada.
 
 ---
 
-## 196. Performance inicial
+## Parte XXVI — Decisões arquiteturais
 
-Metas numéricas serão definidas posteriormente, mas deverão ser medidas:
+### 147. ADRs
 
-* carregamento inicial;
-* consultas principais;
-* salvamento;
-* busca;
-* abertura de Roteiro;
-* geração de Proposta;
-* cálculo de rota.
+Decisões significativas deverão ser registradas em Architecture Decision Records.
 
----
+Exemplos:
 
-## 197. Segurança inicial
-
-Deverá incluir:
-
-* autenticação;
-* autorização por Viagem;
-* validação;
-* proteção de segredos;
-* logs seguros;
-* política de dependências;
-* proteção contra abuso.
+* escolha do banco;
+* framework;
+* estratégia de autenticação;
+* Outbox;
+* fila;
+* cache;
+* provedor de IA;
+* extração de módulo;
+* estratégia de busca;
+* armazenamento geográfico.
 
 ---
 
-# Parte XXIX — Fitness Functions
+### 148. Estado das decisões
 
-## 198. Dependência de módulos
+ADRs poderão possuir:
 
-Deverá existir verificação automatizada para impedir dependências proibidas.
-
----
-
-## 199. Cobertura de domínio
-
-Regras críticas deverão possuir testes.
+* Proposed;
+* Accepted;
+* Deprecated;
+* Superseded;
+* Rejected.
 
 ---
 
-## 200. Acessibilidade
+### 149. Decisões já estabelecidas
 
-Componentes e fluxos críticos deverão possuir validações automatizadas e manuais.
+Esta visão estabelece:
 
----
-
-## 201. Contratos
-
-APIs e Eventos deverão possuir testes de contrato.
-
----
-
-## 202. Observabilidade
-
-Fluxos críticos deverão propagar `correlationId`.
-
----
-
-## 203. Segredos
-
-O repositório não deverá conter segredos válidos.
+* Monólito Modular como ponto de partida;
+* DDD;
+* Ports and Adapters;
+* domínio independente;
+* contratos internos;
+* IA sem autoridade autônoma;
+* banco relacional inicial;
+* estado canônico separado de estado derivado;
+* eventos para efeitos secundários;
+* evolução por evidência.
 
 ---
 
-## 204. Dependências externas
+## Parte XXVII — Governança arquitetural
 
-Integrações deverão ser acessadas por adaptadores.
+### 150. Inclusão de módulo
 
----
+Novo módulo deverá possuir:
 
-## 205. Valores de infraestrutura no domínio
-
-O domínio não deverá importar SDKs, ORMs ou frameworks.
-
----
-
-# Parte XXX — ADRs iniciais recomendados
-
-## 206. Lista
-
-Deverão ser criados posteriormente:
-
-* ADR-001 — Estilo Monólito Modular;
-* ADR-002 — Estratégia de persistência;
-* ADR-003 — Arquitetura frontend;
-* ADR-004 — Estratégia de autenticação;
-* ADR-005 — Eventos e Outbox;
-* ADR-006 — Provedor de mapas e rotas;
-* ADR-007 — Provedor e orquestração de IA;
-* ADR-008 — Estratégia de busca;
-* ADR-009 — Estratégia de implantação;
-* ADR-010 — Observabilidade.
-
----
-
-# Parte XXXI — Critérios de aceite
-
-## 207. Estrutura
-
-* o estilo arquitetural está definido;
-* os módulos estão identificados;
-* as camadas estão definidas;
-* as dependências estão orientadas;
-* os limites estão explícitos.
-
----
-
-## 208. Domínio
-
-* o domínio permanece independente;
-* regras não dependem da interface;
-* agregados orientam transações;
-* Eventos respeitam o Modelo de Domínio;
-* Proveniência está preservada.
-
----
-
-## 209. IA
-
-* IA está isolada por portas;
-* saídas são validadas;
-* estado canônico não é alterado automaticamente;
-* Proveniência e custo são observáveis;
-* falha preserva operação manual.
-
----
-
-## 210. Integrações
-
-* provedores estão isolados;
-* timeouts são obrigatórios;
-* retries são controlados;
-* fallbacks estão previstos;
-* contratos externos não vazam para o domínio.
-
----
-
-## 211. Dados
-
-* banco relacional é a proposta inicial;
-* ownership por módulo está previsto;
-* dados derivados possuem estratégia;
-* histórico crítico é rastreável;
-* exclusão possui distinções claras.
-
----
-
-## 212. Qualidade
-
-* testes estão previstos;
-* observabilidade está integrada;
-* segurança está integrada;
-* resiliência está integrada;
-* evolução está documentada.
-
----
-
-# Parte XXXII — Governança arquitetural
-
-## 213. Owner
-
-O owner desta documentação é:
-
-```text
-Architecture
-```
-
----
-
-## 214. Decisões estruturais
-
-Toda decisão estrutural deverá possuir:
-
-* contexto;
-* problema;
-* alternativas;
-* decisão;
-* consequências;
-* status;
-* data;
-* responsáveis;
-* documentos afetados.
-
----
-
-## 215. ADR obrigatório
-
-Um ADR deverá ser criado quando uma decisão:
-
-* alterar estilo;
-* introduzir tecnologia central;
-* criar dependência importante;
-* afetar múltiplos módulos;
-* criar custo operacional relevante;
-* limitar evolução;
-* alterar segurança;
-* introduzir breaking change.
-
----
-
-## 216. Revisão arquitetural
-
-Mudanças relevantes deverão ser revisadas por:
-
-* Architecture;
-* Domain;
-* área técnica responsável;
-* Security, quando aplicável;
-* QA;
-* Produto, quando houver impacto funcional.
-
----
-
-## 217. Exceções
-
-Exceções deverão possuir:
-
+* capacidade própria;
+* vocabulário;
+* ownership;
+* dados;
+* contratos;
+* dependências;
 * justificativa;
-* owner;
-* prazo;
-* risco;
-* mitigação;
-* plano de convergência.
+* fronteira clara.
+
+Uma pasta técnica não constitui módulo de domínio.
 
 ---
 
-## 218. Uso por agentes de IA
+### 151. Dependências
 
-Agentes de engenharia deverão:
+Toda dependência entre módulos deverá ser:
 
-* consultar este documento;
-* respeitar módulos;
-* respeitar camadas;
-* não introduzir dependências circulares;
-* utilizar portas;
-* não colocar regra no adapter;
-* não tornar IA autoridade canônica;
-* gerar testes;
-* registrar decisões;
-* informar quando uma solicitação exigir novo ADR.
+* explícita;
+* direcionada;
+* necessária;
+* testável;
+* documentada.
+
+Dependência circular não deverá ser aceita sem revisão arquitetural.
 
 ---
 
-## 219. Checklist de revisão
+### 152. Dados compartilhados
 
-Antes de aprovar este documento, verificar:
+Dados compartilhados deverão possuir proprietário.
 
-* drivers estão definidos;
-* restrições estão definidas;
-* princípios estão definidos;
-* estilo está definido;
-* contexto está definido;
-* módulos estão definidos;
-* limites estão definidos;
-* camadas estão definidas;
-* frontend está contemplado;
-* APIs estão contempladas;
-* persistência está contemplada;
-* eventos estão contemplados;
-* integrações estão contempladas;
-* IA está contemplada;
-* busca está contemplada;
-* cache está contemplado;
-* segurança está contemplada;
-* resiliência está contemplada;
-* observabilidade está contemplada;
-* testes estão contemplados;
-* implantação está contemplada;
-* estrutura do repositório está contemplada;
-* fluxos estão documentados;
-* riscos estão registrados;
-* evolução está definida;
-* fitness functions estão definidas;
-* ADRs estão propostos;
-* governança está definida.
+Outros módulos utilizarão:
+
+* referência;
+* consulta;
+* evento;
+* projeção;
+* contrato.
 
 ---
 
-## 220. Declaração final
+### 153. Alteração arquitetural
 
-A Visão Geral da Arquitetura estabelece como o RouteBook deverá ser estruturado para transformar seus princípios de produto e domínio em software sustentável.
+Mudanças relevantes deverão avaliar impacto em:
 
-A solução deverá iniciar simples, mas não desorganizada.
-
-Ela deverá utilizar:
-
-* Monólito Modular;
-* Domain-Driven Design;
-* arquitetura em camadas;
-* portas e adaptadores;
-* banco relacional;
-* Eventos internos;
-* processamento assíncrono seletivo;
-* integrações isoladas;
-* IA validada e controlada;
-* observabilidade;
+* Domain;
+* Product;
+* UX;
+* APIs;
+* dados;
 * segurança;
-* testes automatizados.
+* privacidade;
+* testes;
+* observabilidade;
+* implantação;
+* IA;
+* documentação.
 
-O núcleo do RouteBook deverá permanecer determinístico e orientado pelo domínio.
+---
 
-A IA deverá ampliar a capacidade de decisão, mas nunca substituir:
+### 154. Uso por agentes de engenharia
 
-* invariantes;
-* autorização;
-* Proveniência;
-* validação;
-* persistência canônica;
-* decisão do Usuário.
+Agentes de IA que produzam código deverão:
 
-A arquitetura deverá evoluir por necessidade comprovada, preservando clareza, modularidade, rastreabilidade e baixo custo operacional.
+* consultar documentação;
+* respeitar módulos;
+* não criar dependências ocultas;
+* não mover regra para Infrastructure;
+* não acessar tabelas privadas;
+* não alterar nomes canônicos;
+* não introduzir fornecedor no Domain;
+* não aplicar alterações arquiteturais sem decisão documentada.
+
+---
+
+## Parte XXVIII — Diagramas arquiteturais
+
+### 155. Diagramas obrigatórios desta visão
+
+Esta visão contém os seguintes diagramas:
+
+| ID conceitual  | Diagrama                          |
+| -------------- | --------------------------------- |
+| RB-DGM-ARC-001 | Autoridade documental             |
+| RB-DGM-ARC-002 | Direção das dependências          |
+| RB-DGM-ARC-003 | Contexto do sistema               |
+| RB-DGM-ARC-004 | Containers                        |
+| RB-DGM-ARC-005 | Mapa dos módulos                  |
+| RB-DGM-ARC-006 | Camadas internas                  |
+| RB-DGM-ARC-007 | Comunicação síncrona e assíncrona |
+| RB-DGM-ARC-008 | Recommendation e Decision         |
+| RB-DGM-ARC-009 | Itinerary Proposal                |
+| RB-DGM-ARC-010 | Planning Assurance                |
+| RB-DGM-ARC-011 | Invalidação                       |
+| RB-DGM-ARC-012 | Integração com IA                 |
+| RB-DGM-ARC-013 | Dados e Provenance                |
+| RB-DGM-ARC-014 | Implantação inicial               |
+
+---
+
+### 156. Critério para inclusão de diagramas
+
+Um diagrama deverá existir quando ajudar a explicar:
+
+* limites;
+* dependências;
+* atores;
+* fluxo causal;
+* transações;
+* estados;
+* integração;
+* implantação.
+
+Diagramas não deverão repetir parágrafos sem acrescentar compreensão.
+
+---
+
+### 157. Fonte canônica dos diagramas
+
+Diagramas Mermaid incorporados ao Markdown serão a fonte canônica inicial.
+
+Imagens exportadas poderão ser utilizadas em outros materiais, mas não substituirão o código Mermaid.
+
+---
+
+## Parte XXIX — Critérios de aceite
+
+### 158. Critérios estruturais
+
+* um único H1;
+* Partes em H2;
+* seções numeradas em H3;
+* frontmatter válido;
+* módulos normalizados;
+* dependências descritas;
+* containers descritos;
+* camadas descritas;
+* diagramas Mermaid válidos.
+
+---
+
+### 159. Critérios de domínio
+
+* Recommendation é separada de Decision;
+* Decision é separada de execução;
+* Itinerary Proposal é separada do Itinerary;
+* Planning Assurance é separado de erros técnicos;
+* PlanningConflictId é o tipo canônico;
+* ItineraryProposalId é o tipo canônico;
+* parâmetros contextuais abreviados são permitidos;
+* TripContextVersion está definida;
+* ItineraryVersion está definida;
+* aggregateVersion está definida;
+* schemaVersion está definida.
+
+---
+
+### 160. Critérios de modularidade
+
+* módulos possuem responsabilidades;
+* módulos possuem ownership;
+* não existem dependências circulares intencionais;
+* acesso direto a tabelas privadas é proibido;
+* Domain não depende de Infrastructure;
+* Platform não contém regras de negócio;
+* integrações usam portas.
+
+---
+
+### 161. Critérios de IA
+
+* IA não persiste diretamente;
+* IA não decide autorização;
+* IA não aplica Proposta;
+* IA não registra Decision do Usuário;
+* contexto enviado é minimizado;
+* saída é validada;
+* falha preserva estado;
+* Provenance é registrada.
+
+---
+
+### 162. Critérios de eventos
+
+* comandos são diferentes de eventos;
+* eventos representam fatos;
+* eventos são imutáveis;
+* eventos possuem versionamento;
+* eventos possuem correlação;
+* consumidores são idempotentes;
+* estado confirmado e evento permanecem consistentes;
+* invalidação não destrói histórico.
+
+---
+
+### 163. Critérios operacionais
+
+* falhas externas são isoladas;
+* timeouts são definidos;
+* retries são controlados;
+* observabilidade está prevista;
+* custos de IA são monitoráveis;
+* implantação inicial é simples;
+* evolução depende de evidência.
+
+---
+
+## Parte XXX — Checklist de revisão
+
+### 164. Checklist documental
+
+Antes de aprovar:
+
+* propósito está definido;
+* autoridade está definida;
+* drivers estão documentados;
+* restrições estão documentadas;
+* princípios estão documentados;
+* estilo está documentado;
+* contexto está documentado;
+* containers estão documentados;
+* módulos estão documentados;
+* camadas estão documentadas;
+* comunicação está documentada;
+* Recommendation está documentada;
+* Decision está documentada;
+* Itinerary Proposal está documentada;
+* Planning Assurance está documentado;
+* versionamento está documentado;
+* invalidação está documentada;
+* persistência está documentada;
+* integrações estão documentadas;
+* IA está documentada;
+* segurança está documentada;
+* privacidade está documentada;
+* observabilidade está documentada;
+* resiliência está documentada;
+* testes estão documentados;
+* implantação está documentada;
+* evolução está documentada;
+* governança está documentada;
+* diagramas são necessários e não decorativos;
+* Mermaid renderiza no GitHub;
+* não existem contradições com RB-DOM-001;
+* não existem contradições com RB-DOM-002;
+* não existem contradições com RB-DOM-003;
+* não existem contradições com RB-DOM-004.
+
+---
+
+## Parte XXXI — Declaração final
+
+### 165. Declaração arquitetural
+
+O RouteBook deverá iniciar como uma aplicação web apoiada por um backend organizado como Monólito Modular.
+
+Sua arquitetura deverá preservar:
+
+* domínio no centro;
+* separação por capacidade;
+* dependências direcionadas;
+* contratos internos;
+* controle do Usuário;
+* isolamento de fornecedores;
+* separação entre estado canônico e derivado;
+* Recommendation separada de Decision;
+* Decision separada de execução;
+* Itinerary Proposal separada do Itinerary;
+* Planning Assurance separado de falhas técnicas;
+* versionamento contextual;
+* invalidação não destrutiva;
+* idempotência;
+* consistência entre estado e eventos;
+* Provenance;
+* qualidade dos dados;
+* privacidade;
+* IA sem autoridade autônoma;
+* resiliência;
+* observabilidade;
+* evolução incremental.
+
+A arquitetura não deverá introduzir distribuição, complexidade operacional ou dependência tecnológica sem necessidade comprovada.
+
+Toda evolução deverá proteger os conceitos e invariantes definidos na camada de domínio.
+
+Nenhuma interface, integração, automação, fornecedor ou agente de IA poderá contornar os casos de uso, as autorizações ou as regras oficiais do RouteBook.

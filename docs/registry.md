@@ -41,6 +41,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-ARC-005 | Arquitetura de IA e Agentes | Architecture | Draft | 0.1.0 | [ai-and-agents.md](./architecture/ai-and-agents.md) |
 | RB-DATA-001 | Modelo Lógico de Dados | Data | Draft | 0.1.0 | [logical-data-model.md](./data/logical-data-model.md) |
 | RB-DATA-002 | Modelo Físico de Dados e Estratégia de Migrations | Data | Draft | 0.1.0 | [physical-data-model-and-migrations.md](./data/physical-data-model-and-migrations.md) |
+| RB-API-001 | Diretrizes e Contratos de API | API | Draft | 0.1.0 | [api-guidelines-and-contracts.md](./api/api-guidelines-and-contracts.md) |
 
 ## Status possíveis
 

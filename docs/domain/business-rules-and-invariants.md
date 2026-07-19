@@ -3,16 +3,16 @@
 id: RB-DOM-003
 
 title: Regras de Negócio e Invariantes
-description: Define as regras de negócio, invariantes, pré-condições, pós-condições, políticas, exceções e critérios de validação que governam o domínio do RouteBook.
+description: Define as regras de negócio, invariantes, políticas, pré-condições, pós-condições, severidades, precedências e critérios de validação que governam o domínio do RouteBook.
 
 document_type: domain
 owner: Domain
 
 status: Draft
-version: "0.1.0"
+version: "0.2.0"
 
-created: "2026-07-17"
-last_updated: null
+created: "2026-07-18"
+last_updated: "2026-07-18"
 
 authors:
 
@@ -23,10 +23,15 @@ tags:
 - domain
 - business-rules
 - invariants
-- validation
 - policies
-- travel-planning
+- validations
+- planning-assurance
+- decision-intelligence
+- ddd
+- diagrams
+- mermaid
 - ai-first
+- travel-planning
 
 related_documents:
 
@@ -54,12 +59,12 @@ related_documents:
 - RB-DS-004
 - RB-DOM-001
 - RB-DOM-002
+- RB-DOM-004
+- RB-ARC-001
+- RB-ARC-002
 
 prerequisites:
 
-- RB-CORE-0001
-- RB-CORE-0002
-- RB-CORE-0003
 - RB-CORE-0004
 - RB-DOM-001
 - RB-DOM-002
@@ -68,6 +73,7 @@ next_documents:
 
 - RB-DOM-004
 - RB-ARC-001
+- RB-ARC-002
 - RB-DATA-001
 - RB-QA-001
 
@@ -78,2103 +84,2798 @@ index: true
 
 # RouteBook — Regras de Negócio e Invariantes
 
-## 1. Propósito deste documento
+## Parte I — Fundamentos normativos
+
+### 1. Propósito deste documento
 
 Este documento define as regras de negócio e invariantes oficiais do RouteBook.
 
-Seu objetivo é transformar os conceitos descritos no Modelo de Domínio em comportamentos verificáveis e consistentes.
+Seu objetivo é transformar os conceitos definidos no Modelo de Domínio e na Linguagem Ubíqua em condições normativas que possam orientar:
 
-As regras definidas aqui deverão orientar:
-
-* requisitos;
+* produto;
+* experiência do usuário;
 * arquitetura;
-* implementação;
-* validação;
-* APIs;
-* persistência;
-* serviços de domínio;
+* engenharia;
+* qualidade;
+* dados;
+* integrações;
+* automações;
 * agentes de IA;
-* testes;
-* tratamento de erros;
-* auditoria;
 * analytics;
-* evolução do produto.
+* observabilidade;
+* documentação.
 
-Este documento define:
+Este documento estabelece:
 
-* invariantes;
+* regras de negócio;
+* invariantes de agregados;
 * pré-condições;
 * pós-condições;
-* políticas;
-* regras derivadas;
-* regras de validação;
+* políticas de domínio;
+* regras bloqueantes;
+* riscos;
+* sugestões;
 * regras de autorização;
-* regras temporais;
-* regras geográficas;
-* regras de planejamento;
-* regras de recomendação;
-* regras de aceitação de propostas;
-* regras de conflitos;
-* regras de proveniência;
-* exceções;
-* prioridades;
-* critérios de bloqueio;
-* critérios de invalidação.
+* regras de consistência;
+* regras de validade;
+* precedência entre regras;
+* critérios de invalidação;
+* critérios para `PlanningConflict`;
+* critérios para agentes de IA;
+* matriz de rastreabilidade.
 
 Este documento não define:
 
-* tabelas;
-* endpoints;
-* classes;
-* frameworks;
-* mensagens técnicas;
-* interface visual;
-* provedor externo;
-* algoritmo específico de recomendação;
-* implementação da IA.
+* implementação técnica;
+* linguagem de programação;
+* banco de dados físico;
+* endpoints definitivos;
+* mecanismos de autenticação;
+* fornecedores;
+* algoritmos específicos;
+* modelos específicos de IA;
+* estruturas físicas de persistência.
 
 ---
 
-## 2. Relação com os documentos de domínio
+### 2. Autoridade normativa
 
-A sequência documental é:
+A precedência normativa deverá seguir esta ordem:
 
-```text
-RB-DOM-001 — Modelo de Domínio
-→ define entidades, objetos de valor, agregados e relações
+```mermaid
+flowchart TD
+    Bible["RB-CORE-0004<br/>RouteBook Bible"]
+    Model["RB-DOM-001<br/>Modelo de Domínio"]
+    Language["RB-DOM-002<br/>Linguagem Ubíqua"]
+    Rules["RB-DOM-003<br/>Regras e Invariantes"]
+    Events["RB-DOM-004<br/>Eventos e Ciclos de Vida"]
+    Architecture["Arquitetura"]
+    Implementation["Implementação"]
+    AI["Agentes de IA"]
 
-RB-DOM-002 — Linguagem Ubíqua
-→ define o significado oficial dos termos
-
-RB-DOM-003 — Regras de Negócio e Invariantes
-→ define o que deve, pode e não pode acontecer
-
-RB-DOM-004 — Eventos e Ciclos de Vida
-→ definirá transições, eventos e efeitos temporais
+    Bible --> Model
+    Model --> Language
+    Language --> Rules
+    Rules --> Events
+    Rules --> Architecture
+    Events --> Architecture
+    Architecture --> Implementation
+    Rules --> AI
 ```
 
-Este documento deverá utilizar exclusivamente a terminologia canônica definida em `RB-DOM-002`.
+#### Interpretação da precedência
 
----
-
-## 3. Definições normativas
-
-Os termos normativos deste documento são:
-
-* `DEVE`: obrigação;
-* `NÃO DEVE`: proibição;
-* `PODE`: possibilidade permitida;
-* `RECOMENDA-SE`: orientação não obrigatória;
-* `BLOQUEANTE`: impede a operação;
-* `NÃO BLOQUEANTE`: permite continuar com comunicação;
-* `DERIVADO`: calculado a partir de outros dados;
-* `CANÔNICO`: estado oficial persistido;
-* `TRANSITÓRIO`: estado temporário de processamento.
-
----
-
-## 4. Tipos de regra
-
-As regras serão classificadas em:
-
-### Invariante
-
-Condição que deve permanecer verdadeira dentro de um limite de consistência.
-
-### Pré-condição
-
-Condição necessária antes da execução de uma operação.
-
-### Pós-condição
-
-Condição que deve ser verdadeira após uma operação concluída.
-
-### Política
-
-Critério de decisão que pode evoluir sem alterar a identidade do domínio.
-
-### Regra derivada
-
-Valor ou estado calculado a partir de dados canônicos.
-
-### Restrição operacional
-
-Limitação imposta por capacidade técnica, integração ou escopo do produto.
-
----
-
-## 5. Convenção de identificação
-
-As regras utilizarão o padrão:
-
-```text
-RB-BR-XXX
-```
-
-Exemplo:
-
-```text
-RB-BR-001 — Toda Viagem deve possuir um proprietário
-```
-
-Sub-regras poderão utilizar:
-
-```text
-RB-BR-001-A
-RB-BR-001-B
-```
-
----
-
-# Parte I — Princípios transversais
-
-## 6. RB-BR-001 — Controle do Usuário
-
-Recomendações, Propostas e automações NÃO DEVEM alterar o estado canônico da Viagem sem decisão explícita do Usuário autorizado.
-
-### Aplica-se a
-
-* Roteiro;
-* Atividades;
-* Períodos Livres;
-* Preferências;
-* Hospedagem;
-* Destino;
-* transporte;
-* Lugares Salvos.
-
-### É permitido
-
-* calcular;
-* sugerir;
-* simular;
-* pré-visualizar;
-* identificar impacto;
-* preparar alteração pendente.
-
-### Não é permitido
-
-* aplicar silenciosamente;
-* excluir;
-* substituir;
-* reorganizar;
-* ignorar Restrição obrigatória.
-
----
-
-## 7. RB-BR-002 — Preservação do estado válido
-
-Falhas em serviços externos NÃO DEVEM apagar ou corromper estado canônico válido.
-
-### Deve ser preservado
-
-* Viagem;
-* Roteiro;
-* Atividades;
-* Preferências;
-* Lugares Salvos;
-* alterações locais ainda não enviadas, quando tecnicamente possível;
-* Proposta anterior ainda válida.
-
----
-
-## 8. RB-BR-003 — Separação entre fato, estimativa e sugestão
-
-Toda informação relevante DEVE ser classificada como:
-
-* confirmada;
-* estimada;
-* inferida;
-* sugerida;
-* desconhecida;
-* indisponível;
-* desatualizada.
-
-A interface e os contratos de domínio NÃO DEVEM representar essas categorias como equivalentes.
-
----
-
-## 9. RB-BR-004 — Proveniência obrigatória
-
-Dados externos relevantes DEVEM possuir Proveniência suficiente para identificar:
-
-* Fonte de Dados;
-* momento de obtenção;
-* identificador externo, quando existir;
-* método;
-* atualização;
-* confiança, quando aplicável.
-
----
-
-## 10. RB-BR-005 — Planejamento parcial válido
-
-Uma Viagem PODE existir com:
-
-* Roteiro vazio;
-* Dias vazios;
-* Atividades sem horário;
-* Hospedagem provisória;
-* Preferências incompletas;
-* informações externas ausentes.
-
-Essas condições NÃO DEVEM invalidar a Viagem quando os requisitos mínimos forem atendidos.
-
----
-
-## 11. RB-BR-006 — Estados derivados não substituem fatos
-
-Estados como:
-
-* Lugar Planejado;
-* Dia vazio;
-* Viagem em andamento;
-* Roteiro parcial;
-* conflito ativo;
-
-DEVEM ser derivados de dados canônicos sempre que possível.
-
----
-
-## 12. RB-BR-007 — Idempotência conceitual
-
-Operações repetidas com a mesma intenção NÃO DEVEM produzir duplicações indevidas.
-
-Exemplos:
-
-* salvar o mesmo Lugar duas vezes;
-* aceitar a mesma Proposta duas vezes;
-* adicionar o mesmo evento processado novamente;
-* resolver Conflito já resolvido.
-
----
-
-# Parte II — Conta, Usuário e autorização
-
-## 13. RB-BR-008 — Responsável obrigatório pela Conta
-
-Toda Conta ativa DEVE possuir pelo menos um Usuário responsável.
-
-### Bloqueante
-
-Sim.
-
----
-
-## 14. RB-BR-009 — Proprietário obrigatório da Viagem
-
-Toda Viagem DEVE possuir pelo menos um participante com papel `owner`.
-
-### Não permitido
-
-* remover o último owner;
-* desativar o último owner sem transferência;
-* deixar a Viagem sem responsável.
-
----
-
-## 15. RB-BR-010 — Papéis e permissões
-
-As operações DEVEM respeitar o papel do participante.
-
-### Owner
-
-Pode:
-
-* editar;
-* excluir;
-* arquivar;
-* alterar participantes;
-* transferir ownership.
-
-### Editor
-
-Pode:
-
-* editar dados da Viagem;
-* editar Roteiro;
-* salvar Lugares;
-* revisar Propostas.
-
-Não pode, salvo política futura:
-
-* excluir a Viagem;
-* remover o último owner;
-* transferir ownership.
-
-### Viewer
-
-Pode consultar.
-
-Não pode alterar estado canônico.
-
----
-
-## 16. RB-BR-011 — Autorização independente da interface
-
-A permissão DEVE ser verificada no domínio ou na aplicação.
-
-Ocultar um botão NÃO É uma regra de autorização suficiente.
-
----
-
-## 17. RB-BR-012 — Associação entre Usuário e Viajante
-
-Um Usuário PODE estar associado a um Viajante.
-
-A associação NÃO É obrigatória.
-
-Um participante com acesso PODE não viajar.
-
-Um Viajante PODE não possuir Conta.
-
----
-
-# Parte III — Criação e validade da Viagem
-
-## 18. RB-BR-013 — Requisitos mínimos para criar uma Viagem planejável
-
-Para sair de `Draft` e tornar-se `Planned`, a Viagem DEVE possuir:
-
-* Destino válido;
-* Período válido;
-* pelo menos um Viajante;
-* pelo menos um owner.
-
-A Hospedagem NÃO É obrigatória.
-
----
-
-## 19. RB-BR-014 — Período válido
-
-O Período da Viagem DEVE satisfazer:
-
-```text
-dataInicial <= dataFinal
-```
-
-### Bloqueante
-
-Sim.
-
----
-
-## 20. RB-BR-015 — Datas locais
-
-As datas da Viagem DEVEM ser interpretadas como datas locais no fuso da Viagem.
-
-Elas NÃO DEVEM ser tratadas como instantes UTC puros.
-
----
-
-## 21. RB-BR-016 — Geração dos Dias da Viagem
-
-Ao validar o Período, o sistema DEVE produzir um Dia da Viagem para cada data inclusiva.
-
-Exemplo:
-
-```text
-22 a 29 de agosto
-→ 8 Dias da Viagem
-```
-
----
-
-## 22. RB-BR-017 — Unicidade de Dia
-
-Não PODE existir mais de um Dia da Viagem para a mesma data dentro da mesma Viagem.
-
----
-
-## 23. RB-BR-018 — Nome da Viagem
-
-O nome da Viagem PODE ser:
-
-* informado pelo Usuário;
-* derivado do Destino;
-* alterado posteriormente.
-
-A alteração do nome NÃO DEVE alterar a identidade da Viagem.
-
----
-
-## 24. RB-BR-019 — Estado temporal da Viagem
-
-Na ausência de estado manual prioritário:
-
-```text
-hoje < dataInicial
-→ Planned
-
-dataInicial <= hoje <= dataFinal
-→ InProgress
-
-hoje > dataFinal
-→ Completed
-```
-
-Estados manuais como `Cancelled` e `Archived` possuem precedência de apresentação.
-
----
-
-## 25. RB-BR-020 — Exclusão da Viagem
-
-Excluir uma Viagem DEVE exigir:
-
-* autorização;
-* identificação explícita da Viagem;
-* confirmação;
-* comunicação de irreversibilidade conforme política;
-* proteção contra duplicação.
-
----
-
-## 26. RB-BR-021 — Arquivamento não é exclusão
-
-Arquivar uma Viagem DEVE:
-
-* preservar dados;
-* retirar a Viagem das visões principais;
-* permitir consulta ou restauração futura conforme política.
-
----
-
-## 27. RB-BR-022 — Cancelamento não é exclusão
-
-Cancelar uma Viagem DEVE preservar seu histórico.
-
-O cancelamento NÃO DEVE apagar automaticamente:
-
-* Roteiro;
-* Lugares Salvos;
-* Preferências;
-* Propostas;
-* Conflitos históricos.
-
----
-
-# Parte IV — Alteração do Período
-
-## 28. RB-BR-023 — Ampliação do Período
-
-Ao ampliar o Período:
-
-* novos Dias DEVEM ser criados;
-* Dias existentes DEVEM ser preservados;
-* Atividades existentes DEVEM permanecer;
-* a ordem cronológica DEVE ser recalculada.
-
----
-
-## 29. RB-BR-024 — Redução do Período
-
-Ao reduzir o Período, o sistema DEVE identificar:
-
-* Dias removidos;
-* Atividades afetadas;
-* Períodos Livres afetados;
-* Propostas afetadas;
-* Conflitos afetados.
-
-A alteração NÃO DEVE ser aplicada silenciosamente quando houver conteúdo afetado.
-
----
-
-## 30. RB-BR-025 — Dias removidos sem conteúdo
-
-Dias fora do novo Período e sem conteúdo PODEM ser removidos após confirmação simples ou conforme política de edição.
-
----
-
-## 31. RB-BR-026 — Dias removidos com conteúdo
-
-Quando Dias removidos possuírem conteúdo, o Usuário DEVE poder:
-
-* cancelar a alteração;
-* revisar o conteúdo;
-* mover Atividades;
-* remover conteúdo;
-* confirmar a perda explicitamente, se permitido.
-
----
-
-## 32. RB-BR-027 — Invalidação após alteração do Período
-
-Alterar o Período DEVE reavaliar:
-
-* status da Viagem;
-* Dias;
-* Roteiro;
-* Propostas;
-* Recomendações;
-* Conflitos;
-* reservas futuras, quando existirem.
-
----
-
-# Parte V — Destino e Hospedagem
-
-## 33. RB-BR-028 — Destino geograficamente válido
-
-Um Destino DEVE possuir referência geográfica suficiente para:
-
-* identificação;
-* associação com fuso;
-* pesquisa de Lugares.
-
----
-
-## 34. RB-BR-029 — Alteração do Destino
-
-Alterar o Destino é uma operação estrutural de alto impacto.
-
-Antes da aplicação, o sistema DEVE identificar:
-
-* Hospedagem potencialmente incompatível;
-* Lugares Salvos incompatíveis;
-* Atividades associadas a outro Destino;
-* Propostas inválidas;
-* Recomendações inválidas;
-* estimativas geográficas inválidas.
-
----
-
-## 35. RB-BR-030 — Destino não remove dados silenciosamente
-
-A alteração do Destino NÃO DEVE apagar automaticamente Lugares, Atividades ou Preferências.
-
-Os elementos incompatíveis DEVEM ser:
-
-* marcados para revisão;
-* migrados por decisão explícita;
-* removidos mediante confirmação.
-
----
-
-## 36. RB-BR-031 — Hospedagem opcional
-
-A ausência de Hospedagem NÃO DEVE impedir:
-
-* criação da Viagem;
-* pesquisa de Lugares;
-* salvamento;
-* planejamento manual.
-
-Pode limitar:
-
-* Distâncias contextuais;
-* Recomendações por proximidade;
-* Deslocamentos a partir da Hospedagem.
-
----
-
-## 37. RB-BR-032 — Hospedagem provisória identificada
-
-Uma Hospedagem provisória DEVE ser claramente identificada como aproximação.
-
-Cálculos derivados DEVEM herdar essa incerteza.
-
----
-
-## 38. RB-BR-033 — Localização necessária para cálculo
-
-Uma Hospedagem somente PODE ser utilizada em cálculo geográfico quando possuir Localização válida.
-
----
-
-## 39. RB-BR-034 — Alteração da Hospedagem
-
-Alterar a Hospedagem DEVE invalidar ou recalcular:
-
-* Distâncias a partir da Hospedagem;
-* Tempos de Deslocamento;
-* rankings por proximidade;
-* Recomendações relacionadas;
-* Conflitos geográficos;
-* agrupamentos contextuais.
-
----
-
-## 40. RB-BR-035 — Hospedagem confirmada
-
-Marcar Hospedagem como confirmada DEVE exigir origem adequada:
-
-* confirmação do Usuário;
-* importação de Reserva válida;
-* fonte considerada suficiente pela política.
-
----
-
-# Parte VI — Viajantes, grupo e Preferências
-
-## 41. RB-BR-036 — Viajante mínimo
-
-Toda Viagem planejável DEVE possuir pelo menos um Viajante.
-
----
-
-## 42. RB-BR-037 — Quantidade derivada
-
-A quantidade de Viajantes DEVE ser derivada da coleção de Viajantes, não mantida como valor independente sem sincronização.
-
----
-
-## 43. RB-BR-038 — Perfil do Grupo derivado
-
-O Perfil do Grupo DEVE ser recalculado quando:
-
-* Viajante for adicionado;
-* Viajante for removido;
-* faixa etária mudar;
-* necessidade relevante mudar.
-
----
-
-## 44. RB-BR-039 — Minimização de dados pessoais
-
-O RouteBook DEVE preferir dados funcionais mínimos.
-
-Exemplo:
-
-```text
-Necessita acesso sem escadas
-```
-
-é preferível a armazenar diagnóstico médico quando não necessário.
-
----
-
-## 45. RB-BR-040 — Preferência não é Restrição
-
-Uma Preferência PODE influenciar ordenação e recomendação.
-
-Ela NÃO DEVE bloquear uma opção automaticamente.
-
----
-
-## 46. RB-BR-041 — Restrição obrigatória
-
-Uma Restrição marcada como `mandatory`:
-
-* NÃO DEVE ser violada silenciosamente;
-* DEVE bloquear recomendações incompatíveis ou gerar Erro de planejamento;
-* DEVE ser considerada em Propostas;
-* DEVE possuir origem identificável.
-
----
-
-## 47. RB-BR-042 — Conflito entre Preferências
-
-Preferências conflitantes DEVEM resultar em:
-
-* ponderação;
-* solicitação de decisão;
-* recomendação com limitação;
-* explicação.
-
-Não DEVEM ser resolvidas silenciosamente como se houvesse certeza.
-
----
-
-## 48. RB-BR-043 — Ritmo como orientação
-
-O Ritmo influencia:
-
-* densidade;
-* quantidade de Atividades;
-* intervalos;
-* distribuição.
-
-O Ritmo NÃO impõe quantidade fixa universal.
-
----
-
-## 49. RB-BR-044 — Orçamento sem moeda é incompleto
-
-Valores monetários DEVEM possuir moeda.
-
-Um número isolado NÃO DEVE ser interpretado como Orçamento válido.
-
----
-
-## 50. RB-BR-045 — Orçamento desconhecido
-
-Ausência de Orçamento DEVE ser suportada.
-
-O sistema PODE recomendar opções, mas DEVE evitar alegar compatibilidade financeira não verificada.
-
----
-
-# Parte VII — Lugar e dados do Lugar
-
-## 51. RB-BR-046 — Identidade interna do Lugar
-
-A identidade canônica de um Lugar NÃO DEVE depender exclusivamente de identificador externo.
-
----
-
-## 52. RB-BR-047 — Duplicidade de Lugar
-
-Ao receber dados potencialmente duplicados, o sistema DEVE considerar:
-
-* nome;
-* Localização;
-* categoria;
-* endereço;
-* identificadores externos;
-* fonte.
-
-A consolidação NÃO DEVE eliminar Proveniência.
-
----
-
-## 53. RB-BR-048 — Categoria múltipla
-
-Um Lugar PODE possuir várias Categorias de Lugar.
-
----
-
-## 54. RB-BR-049 — Ausência de preço não é gratuidade
-
-Quando preço não estiver disponível:
-
-```text
-Preço desconhecido
-```
-
-NÃO DEVE ser representado como:
-
-```text
-Gratuito
-```
-
----
-
-## 55. RB-BR-050 — Ausência de avaliação não é nota zero
-
-Um Lugar sem avaliação NÃO DEVE receber valor zero como representação visual ou de domínio.
-
----
-
-## 56. RB-BR-051 — Estado operacional desconhecido
-
-Quando não houver informação suficiente, o estado operacional DEVE ser `unknown`.
-
-NÃO DEVE ser inferido como aberto.
-
----
-
-## 57. RB-BR-052 — Horário não garante disponibilidade
-
-Horário de Funcionamento informado NÃO garante:
-
-* entrada;
-* reserva;
-* ausência de lotação;
-* funcionamento excepcional.
-
----
-
-## 58. RB-BR-053 — Dados de Lugar podem ser parciais
-
-Um Lugar PODE existir com:
-
-* imagem ausente;
-* preço ausente;
-* avaliação ausente;
-* horário ausente;
-* acessibilidade desconhecida.
-
-A ausência DEVE ser representada explicitamente.
-
----
-
-## 59. RB-BR-054 — Lugar indisponível no Roteiro
-
-Se um Lugar associado a uma Atividade ficar indisponível:
-
-* a Atividade NÃO DEVE ser removida automaticamente;
-* DEVE ser marcada como `needs-review` ou equivalente;
-* um Conflito DEVE ser produzido;
-* alternativas PODEM ser recomendadas.
-
----
-
-# Parte VIII — Lugares Salvos
-
-## 60. RB-BR-055 — Unicidade de Lugar Salvo
-
-Um Lugar PODE ser salvo no máximo uma vez por Viagem.
-
-### Repetição
-
-Uma nova tentativa de salvar o mesmo Lugar DEVE ser idempotente.
-
----
-
-## 61. RB-BR-056 — Salvar não cria Atividade
-
-Salvar Lugar NÃO DEVE:
-
-* criar Atividade;
-* escolher Dia;
-* definir horário;
-* alterar Roteiro.
-
----
-
-## 62. RB-BR-057 — Planejar não exige salvar
-
-Um Lugar PODE ser adicionado ao Roteiro sem estar nos Salvos.
-
----
-
-## 63. RB-BR-058 — Remover dos Salvos preserva Atividade
-
-Remover um Lugar dos Salvos NÃO DEVE remover Atividades associadas.
-
----
-
-## 64. RB-BR-059 — Estado Planejado derivado
-
-Um Lugar é Planejado quando existe pelo menos uma Atividade ativa associada a ele.
-
----
-
-## 65. RB-BR-060 — Múltiplas visitas
-
-Um mesmo Lugar PODE possuir múltiplas Atividades na mesma Viagem.
-
-A criação de visita adicional DEVE ser explícita quando o Lugar já estiver planejado.
-
----
-
-# Parte IX — Roteiro e Dias
-
-## 66. RB-BR-061 — Um Roteiro atual por Viagem
-
-Uma Viagem DEVE possuir no máximo um Roteiro atual canônico.
-
-Pode possuir:
-
-* histórico;
-* versões;
-* Propostas;
-* simulações.
-
----
-
-## 67. RB-BR-062 — Roteiro inicial vazio
-
-Ao criar uma Viagem planejável, o sistema PODE criar um Roteiro vazio com seus Dias.
-
----
-
-## 68. RB-BR-063 — Dia pertence ao mesmo Roteiro
-
-Toda Atividade e Período Livre DEVE pertencer a um Dia do mesmo Roteiro e da mesma Viagem.
-
----
-
-## 69. RB-BR-064 — Ordem determinística
-
-A ordem dos itens dentro de um Dia DEVE ser determinística.
-
-Empates ou ausência de horário DEVEM utilizar critério explícito de posição.
-
----
-
-## 70. RB-BR-065 — Atividades sem horário permitidas
-
-Uma Atividade PODE existir sem horário.
-
-Ela DEVE permanecer em contexto próprio ou possuir ordem explícita.
-
----
-
-## 71. RB-BR-066 — Dia vazio não é inválido
-
-Um Dia sem conteúdo é válido.
-
-Pode resultar em:
-
-* estado vazio;
-* sugestão;
-* decisão de Dia livre.
-
----
-
-## 72. RB-BR-067 — Dia livre intencional
-
-Um Dia marcado como livre NÃO DEVE ser preenchido automaticamente sem autorização.
-
----
-
-## 73. RB-BR-068 — Versão do Roteiro
-
-Toda alteração canônica no Roteiro DEVE incrementar ou gerar nova versão lógica.
-
-Aplica-se a:
-
-* adicionar;
-* editar;
-* remover;
-* mover;
-* aceitar Proposta;
-* alterar Período Livre.
-
----
-
-## 74. RB-BR-069 — Concorrência de edição
-
-Uma alteração baseada em versão desatualizada NÃO DEVE sobrescrever silenciosamente estado mais recente.
-
-O sistema DEVE:
-
-* rejeitar;
-* reconciliar;
-* solicitar revisão;
-* ou aplicar política explícita.
-
----
-
-# Parte X — Atividades
-
-## 75. RB-BR-070 — Título obrigatório
-
-Toda Atividade DEVE possuir título não vazio.
-
----
-
-## 76. RB-BR-071 — Dia obrigatório
-
-Toda Atividade DEVE pertencer a um Dia da Viagem.
-
----
-
-## 77. RB-BR-072 — Duração válida
-
-Quando informada, a duração DEVE ser maior que zero.
-
----
-
-## 78. RB-BR-073 — Horário no fuso correto
-
-O horário de uma Atividade DEVE ser interpretado no fuso do Dia e da Viagem.
-
----
-
-## 79. RB-BR-074 — Localização da Atividade
-
-Uma Atividade PODE possuir Localização por:
-
-* Lugar associado;
-* endereço manual;
-* coordenada manual;
-* Hospedagem;
-* ausência explícita.
-
----
-
-## 80. RB-BR-075 — Lugar associado existente
-
-Quando uma Atividade referenciar Lugar, esse Lugar DEVE existir no domínio e estar acessível à Viagem.
-
----
-
-## 81. RB-BR-076 — Remover Atividade não remove Lugar
-
-Remover Atividade NÃO DEVE:
-
-* excluir Lugar;
-* remover dos Salvos;
-* apagar dados externos.
-
----
-
-## 82. RB-BR-077 — Mover Atividade dentro do Dia
-
-Mover Atividade DEVE:
-
-* atualizar ordem;
-* gerar nova versão;
-* recalcular Deslocamentos;
-* reavaliar Conflitos.
-
----
-
-## 83. RB-BR-078 — Mover Atividade para outro Dia
-
-Mover Atividade para outro Dia DEVE:
-
-* validar se o Dia pertence à mesma Viagem;
-* atualizar relacionamento;
-* recalcular origem e destino dos Deslocamentos;
-* reavaliar horários;
-* reavaliar Conflitos;
-* preservar identidade da Atividade.
-
----
-
-## 84. RB-BR-079 — Atividade fixa
-
-Uma Atividade `fixed` NÃO DEVE ser movida automaticamente por recomendação ou geração.
-
-Alteração manual autorizada PODE ocorrer.
-
----
-
-## 85. RB-BR-080 — Atividade flexível
-
-Uma Atividade `flexible` PODE ser incluída em alternativas e Propostas.
-
-A aplicação de mudança continua exigindo decisão.
-
----
-
-## 86. RB-BR-081 — Atividade concluída
-
-Marcar Atividade como concluída NÃO DEVE alterar automaticamente:
-
-* Lugar Salvo;
-* avaliação;
-* Preferências;
-* Roteiro de outros Dias.
-
----
-
-## 87. RB-BR-082 — Atividade cancelada
-
-Uma Atividade cancelada NÃO DEVE ser considerada para planejamento futuro ativo, mas PODE permanecer no histórico.
-
----
-
-# Parte XI — Períodos Livres
-
-## 88. RB-BR-083 — Período Livre intencional
-
-Período Livre representa decisão de planejamento e NÃO DEVE ser confundido com ausência de dados.
-
----
-
-## 89. RB-BR-084 — Período Livre protegido
-
-Um Período Livre `protected` NÃO PODE ser preenchido por:
-
-* Proposta;
-* reorganização automática;
-* recomendação aplicada em lote.
-
----
-
-## 90. RB-BR-085 — Período Livre flexível
-
-Um Período Livre `flexible` PODE receber sugestão.
-
-A substituição DEVE exigir decisão explícita.
-
----
-
-## 91. RB-BR-086 — Sobreposição com Período Livre
-
-Atividade sobreposta a Período Livre protegido DEVE gerar Erro de planejamento ou impedir a operação, conforme política.
-
----
-
-## 92. RB-BR-087 — Remoção do Período Livre
-
-Remover um Período Livre NÃO cria automaticamente Atividade nem reorganiza o Dia.
-
----
-
-# Parte XII — Deslocamentos e estimativas
-
-## 93. RB-BR-088 — Deslocamento entre itens consecutivos
-
-Deslocamentos derivados DEVEM ser calculados entre referências geográficas consecutivas relevantes.
-
----
-
-## 94. RB-BR-089 — Origem inicial do Dia
-
-A origem inicial PODE ser:
-
-* Hospedagem;
-* localização escolhida;
-* Atividade anterior externa ao recorte;
-* origem manual.
-
-A origem utilizada DEVE ser identificável.
-
----
-
-## 95. RB-BR-090 — Estimativa depende de transporte
-
-Toda Estimativa de Deslocamento DEVE estar associada a um Meio de Transporte.
-
----
-
-## 96. RB-BR-091 — Mudança de transporte invalida estimativa
-
-Alterar o Meio de Transporte DEVE invalidar estimativas dependentes.
-
----
-
-## 97. RB-BR-092 — Mudança de sequência invalida estimativa
-
-Reordenar Atividades DEVE invalidar Deslocamentos afetados.
-
----
-
-## 98. RB-BR-093 — Validade temporal
-
-Toda Estimativa PODE possuir período de validade.
-
-Quando vencida, DEVE ser marcada como desatualizada.
-
----
-
-## 99. RB-BR-094 — Falha de rota não impede planejamento
-
-Se a rota não puder ser calculada:
-
-* a Atividade PODE permanecer;
-* o Roteiro PODE ser salvo;
-* um Risco ou estado indisponível PODE ser apresentado;
-* alternativas textuais DEVEM permanecer.
-
----
-
-## 100. RB-BR-095 — Precisão proporcional à fonte
-
-O sistema NÃO DEVE exibir precisão maior do que a suportada pela fonte.
-
-Exemplo inadequado:
-
-```text
-7 minutos e 14 segundos
-```
-
-para uma estimativa aproximada de tráfego.
-
----
-
-# Parte XIII — Recomendações
-
-## 101. RB-BR-096 — Contexto obrigatório
-
-Toda Recomendação personalizada DEVE possuir Contexto de Decisão identificável.
-
----
-
-## 102. RB-BR-097 — Justificativa obrigatória
-
-Toda Recomendação apresentada como personalizada DEVE possuir pelo menos uma Justificativa compreensível.
-
----
-
-## 103. RB-BR-098 — Restrição obrigatória tem precedência
-
-Uma Recomendação NÃO DEVE contradizer Restrição obrigatória.
-
-Se os dados forem insuficientes, a limitação DEVE ser informada.
-
----
-
-## 104. RB-BR-099 — Recomendação não é garantia
-
-Recomendações NÃO DEVEM utilizar linguagem de garantia quando dependerem de:
-
-* dados externos;
-* estimativas;
-* disponibilidade;
-* preferências inferidas;
-* condições futuras.
-
----
-
-## 105. RB-BR-100 — Validade contextual
-
-Uma Recomendação DEVE ser invalidada ou reavaliada quando mudar informação material, como:
-
-* Destino;
-* Hospedagem;
-* Período;
-* Viajantes;
-* Preferências;
-* Restrição;
-* Roteiro;
-* disponibilidade do Lugar.
-
----
-
-## 106. RB-BR-101 — Score interno
-
-Score de Recomendação, quando existir:
-
-* NÃO DEVE substituir Justificativa;
-* NÃO DEVE ser confundido com avaliação;
-* NÃO DEVE ser apresentado como qualidade absoluta.
-
----
-
-## 107. RB-BR-102 — Rejeição de Recomendação
-
-O Usuário PODE rejeitar Recomendação sem informar motivo.
-
-A rejeição PODE ser utilizada como sinal de personalização, conforme regras de privacidade.
-
----
-
-## 108. RB-BR-103 — Diversidade de recomendação
-
-Quando aplicável, a política de Recomendação PODE considerar diversidade para evitar resultados excessivamente homogêneos.
-
-A diversidade NÃO DEVE violar Restrições obrigatórias.
-
----
-
-## 109. RB-BR-104 — Dados insuficientes
-
-Quando não houver dados suficientes para personalização, o sistema DEVE:
-
-* informar limitação;
-* apresentar opções gerais;
-* solicitar mais contexto opcionalmente;
-* evitar alegar alta personalização.
-
----
-
-# Parte XIV — Propostas de Roteiro
-
-## 110. RB-BR-105 — Separação entre Proposta e Roteiro
-
-Uma Proposta DEVE permanecer separada do Roteiro atual até aceitação.
-
----
-
-## 111. RB-BR-106 — Versão base obrigatória
-
-Toda Proposta DEVE referenciar a versão do Roteiro e o contexto utilizados em sua geração.
-
----
-
-## 112. RB-BR-107 — Geração preserva Roteiro
-
-Falha, cancelamento ou nova tentativa de geração NÃO DEVE alterar o Roteiro atual.
-
----
-
-## 113. RB-BR-108 — Períodos protegidos respeitados
-
-Uma Proposta NÃO PODE preencher Período Livre protegido.
-
----
-
-## 114. RB-BR-109 — Atividades fixas preservadas
-
-Uma Proposta NÃO PODE mover ou remover Atividade fixa sem ação explícita posterior do Usuário.
-
----
-
-## 115. RB-BR-110 — Conflitos conhecidos apresentados
-
-A Proposta DEVE incluir Conflitos conhecidos ou limitações relevantes antes da aceitação.
-
----
-
-## 116. RB-BR-111 — Proposta expirada
-
-Uma Proposta DEVE ser considerada expirada quando:
-
-* versão base do Roteiro mudar de forma incompatível;
-* Destino mudar;
-* Período mudar;
-* Hospedagem mudar materialmente;
-* Restrições obrigatórias mudarem;
-* dados críticos deixarem de ser válidos.
-
----
-
-## 117. RB-BR-112 — Aceitação integral
-
-Aceitar integralmente uma Proposta DEVE:
-
-* validar a versão base;
-* validar autorização;
-* aplicar itens elegíveis;
-* gerar nova versão do Roteiro;
-* recalcular dados derivados;
-* reavaliar Conflitos;
-* registrar origem.
-
----
-
-## 118. RB-BR-113 — Aceitação parcial
-
-Aceitar parcialmente DEVE aplicar somente:
-
-* Dias selecionados;
-* Atividades selecionadas;
-* blocos selecionados, quando suportados.
-
-Itens não selecionados NÃO DEVEM alterar o Roteiro.
-
----
-
-## 119. RB-BR-114 — Aceitação idempotente
-
-A mesma Proposta NÃO DEVE ser aplicada duas vezes.
-
----
-
-## 120. RB-BR-115 — Proposta substituída
-
-Uma nova Proposta concluída PODE marcar a anterior como `superseded`.
-
-A anterior NÃO DEVE ser apagada antes de a nova geração concluir.
-
----
-
-## 121. RB-BR-116 — Rejeição preserva estado
-
-Rejeitar uma Proposta NÃO DEVE alterar o Roteiro atual.
-
----
-
-# Parte XV — Conflitos
-
-## 122. RB-BR-117 — Conflito possui objeto afetado
-
-Todo Conflito DEVE referenciar:
-
-* objeto;
-* regra;
-* evidência;
-* severidade;
-* estado.
-
----
-
-## 123. RB-BR-118 — Severidades oficiais
-
-As severidades de planejamento são:
-
-* `error`;
-* `risk`;
-* `suggestion`.
-
----
-
-## 124. RB-BR-119 — Erro bloqueante
-
-Um Erro de planejamento PODE bloquear uma operação específica quando a condição resultante for inválida.
-
-Exemplos:
-
-* data fora da Viagem;
-* Restrição obrigatória violada;
-* Dia pertencente a outra Viagem.
-
----
-
-## 125. RB-BR-120 — Risco não bloqueante
-
-Um Risco normalmente NÃO bloqueia salvamento.
-
-Deve:
-
-* ser comunicado;
-* possuir ação de revisão;
-* poder ser ignorado quando permitido.
-
----
-
-## 126. RB-BR-121 — Sugestão opcional
-
-Uma Sugestão de melhoria NÃO DEVE bloquear operação.
-
----
-
-## 127. RB-BR-122 — Erro não pode ser ignorado
-
-Conflitos classificados como Erro bloqueante NÃO PODEM receber estado `ignored`.
-
----
-
-## 128. RB-BR-123 — Risco ignorado permanece rastreável
-
-Ignorar um Risco DEVE registrar:
-
-* responsável;
-* data;
-* versão do contexto;
-* risco aceito.
-
----
-
-## 129. RB-BR-124 — Resolução exige mudança da condição
-
-Um Conflito somente DEVE ser marcado como resolvido quando a condição que o originou deixar de existir.
-
----
-
-## 130. RB-BR-125 — Invalidação não é resolução
-
-Conflito invalidado por mudança de contexto DEVE ser diferenciado de Conflito resolvido por correção.
-
----
-
-## 131. RB-BR-126 — Reavaliação após alterações
-
-As seguintes operações DEVEM reavaliar Conflitos relacionados:
-
-* editar horário;
-* editar duração;
-* mover Atividade;
-* alterar Dia;
-* alterar transporte;
-* alterar Hospedagem;
-* alterar Restrição;
-* aceitar Proposta.
-
----
-
-# Parte XVI — Dados, confiança e atualização
-
-## 132. RB-BR-127 — Informação desconhecida não recebe valor padrão enganoso
-
-Valores desconhecidos NÃO DEVEM ser convertidos automaticamente em:
-
-* zero;
-* falso;
-* gratuito;
-* fechado;
-* aberto;
-* sem acessibilidade.
-
----
-
-## 133. RB-BR-128 — Confiança não é certeza
-
-`ConfidenceLevel` representa qualidade da evidência.
-
-NÃO DEVE ser apresentado como probabilidade exata sem fundamento estatístico.
-
----
-
-## 134. RB-BR-129 — Atualidade contextual
-
-A validade de um dado PODE depender de:
-
-* tempo;
-* Fonte;
-* tipo de informação;
-* mudança de contexto;
-* política do provedor.
-
----
-
-## 135. RB-BR-130 — Divergência de fontes
-
-Quando fontes relevantes divergirem, o sistema DEVE:
-
-* preservar ambas as Proveniências;
-* aplicar política de precedência documentada;
-* identificar incerteza quando necessário;
-* evitar escolha silenciosa sem regra.
-
----
-
-## 136. RB-BR-131 — Dados gerados por IA
-
-Conteúdo gerado por IA NÃO DEVE tornar-se automaticamente fato canônico.
-
-Pode tornar-se:
-
-* sugestão;
-* rascunho;
-* inferência;
-* Proposta;
-* conteúdo pendente de validação.
-
----
-
-## 137. RB-BR-132 — Dados fornecidos pelo Usuário
-
-Dados fornecidos pelo Usuário DEVEM preservar sua origem.
-
-Podem possuir precedência contextual sobre dado externo, conforme política.
+* A Bible define princípios constitucionais.
+* O Modelo de Domínio define conceitos e responsabilidades.
+* A Linguagem Ubíqua define nomes e significados.
+* Este documento define condições obrigatórias.
+* Eventos e ciclos de vida refletem as mudanças permitidas.
+* Arquitetura e implementação devem garantir o cumprimento das regras.
+* Agentes de IA não podem operar fora dessas regras.
 
 ---
 
-## 138. RB-BR-133 — Atualização não apaga histórico crítico
+### 3. Definição de regra de negócio
 
-Atualizar dados externos NÃO DEVE apagar sem rastreabilidade:
+Uma regra de negócio é uma condição normativa que governa:
 
 * decisões;
-* Propostas aceitas;
-* Atividades;
-* Conflitos históricos;
-* fontes anteriores relevantes.
+* comportamentos;
+* transições;
+* permissões;
+* restrições;
+* cálculos;
+* validade;
+* consistência;
+* interpretação de dados.
+
+Uma regra pode ser:
+
+* estrutural;
+* comportamental;
+* temporal;
+* contextual;
+* derivada;
+* autorizativa;
+* impeditiva;
+* informativa.
 
 ---
 
-# Parte XVII — Regras de operação offline e falhas
+### 4. Definição de invariante
 
-## 139. RB-BR-134 — Falha parcial
+Uma invariante é uma condição que deve permanecer verdadeira dentro de um limite de consistência.
 
-Falha de uma capacidade NÃO DEVE bloquear capacidades independentes.
+Uma invariante deve ser protegida:
+
+* antes da criação;
+* durante uma alteração;
+* após uma alteração;
+* durante aplicação de Proposta;
+* durante execução de comandos;
+* durante operações de agentes de IA.
+
+Uma invariante violada deve:
+
+* impedir a operação; ou
+* produzir um `PlanningConflict`, quando a operação puder ser preservada para revisão.
+
+---
+
+### 5. Regra, política e validação
+
+| Conceito            | Definição                                         |
+| ------------------- | ------------------------------------------------- |
+| Regra de negócio    | Condição normativa do domínio                     |
+| Invariante          | Condição que deve permanecer verdadeira           |
+| Política de domínio | Estratégia para aplicar ou decidir entre regras   |
+| Validação           | Processo de verificar uma condição                |
+| Planning Conflict   | Registro de condição problemática no planejamento |
+| Erro técnico        | Falha de infraestrutura ou implementação          |
+
+Uma validação não cria uma regra.
+
+Ela apenas verifica uma regra já definida.
+
+---
+
+### 6. Classificação das regras
+
+As regras do RouteBook são classificadas como:
+
+* `mandatory`;
+* `blocking`;
+* `risk`;
+* `suggestion`;
+* `derived`;
+* `authorization`;
+* `privacy`;
+* `data-quality`.
+
+#### Mandatory
+
+Deve ser cumprida para que o estado seja válido.
+
+#### Blocking
+
+Impede uma operação específica.
+
+#### Risk
+
+Permite continuidade consciente quando autorizada.
+
+#### Suggestion
+
+Indica melhoria, sem impedir a operação.
+
+#### Derived
+
+Determina um valor calculado a partir de outros dados.
+
+#### Authorization
+
+Determina quem pode executar uma ação.
+
+#### Privacy
+
+Limita coleta, retenção ou exposição de dados.
+
+#### Data quality
+
+Determina tratamento de dados ausentes, antigos ou conflitantes.
+
+---
+
+### 7. Severidade das violações
+
+| Severidade | Consequência                                  |
+| ---------- | --------------------------------------------- |
+| error      | Operação inválida ou bloqueada                |
+| risk       | Operação pode continuar com decisão explícita |
+| suggestion | Operação válida, mas pode ser melhorada       |
+
+A severidade deve ser determinada pela regra, não pela camada de interface.
+
+---
+
+### 8. Resultado da avaliação de regras
+
+Uma avaliação pode resultar em:
+
+* `valid`;
+* `invalid`;
+* `valid-with-risks`;
+* `valid-with-suggestions`;
+* `unknown`;
+* `not-applicable`.
+
+```mermaid
+flowchart TD
+    Evaluation["Avaliar regras"]
+    Blocking{"Existe erro bloqueante?"}
+    Risk{"Existe risco?"}
+    Suggestion{"Existe sugestão?"}
+    Unknown{"Há dados insuficientes?"}
+
+    Invalid["invalid"]
+    WithRisk["valid-with-risks"]
+    WithSuggestion["valid-with-suggestions"]
+    Valid["valid"]
+    UnknownResult["unknown"]
+
+    Evaluation --> Blocking
+    Blocking -->|Sim| Invalid
+    Blocking -->|Não| Unknown
+    Unknown -->|Sim| UnknownResult
+    Unknown -->|Não| Risk
+    Risk -->|Sim| WithRisk
+    Risk -->|Não| Suggestion
+    Suggestion -->|Sim| WithSuggestion
+    Suggestion -->|Não| Valid
+```
+
+---
+
+## Parte II — Convenções para regras
+
+### 9. Identificação de regras
+
+Toda regra oficial deve possuir identificador estável.
+
+Formato:
+
+```text
+RB-BR-{DOMÍNIO}-{NÚMERO}
+```
 
 Exemplos:
 
-* Mapa falha, lista continua;
-* IA falha, edição manual continua;
-* rota falha, Atividade continua;
-* imagens falham, Detalhes textuais continuam.
-
----
-
-## 140. RB-BR-135 — Nova tentativa preserva contexto
-
-Tentar novamente DEVE preservar:
-
-* objeto;
-* filtros;
-* pesquisa;
-* Dia;
-* alterações;
-* versão base.
-
----
-
-## 141. RB-BR-136 — Operação duplicada
-
-Durante processamento, ações mutáveis DEVEM ser protegidas contra repetição acidental.
-
----
-
-## 142. RB-BR-137 — Resultado incerto
-
-Quando o sistema não souber se uma operação foi concluída, NÃO DEVE assumir sucesso ou falha definitiva.
-
-Deve:
-
-* consultar estado;
-* reconciliar;
-* informar incerteza;
-* evitar repetir ação destrutiva.
-
----
-
-## 143. RB-BR-138 — Salvamento local pendente
-
-Quando suportado, alterações locais podem permanecer pendentes.
-
-Elas DEVEM ser diferenciadas do estado persistido.
-
----
-
-# Parte XVIII — Privacidade e consentimento
-
-## 144. RB-BR-139 — Localização atual opcional
-
-A Localização atual:
-
-* depende de permissão;
-* NÃO é obrigatória para planejamento;
-* DEVE possuir finalidade clara;
-* DEVE ser descartada quando não necessária, conforme política.
-
----
-
-## 145. RB-BR-140 — Consentimento rastreável
-
-Consentimentos relevantes DEVEM possuir:
-
-* tipo;
-* versão;
-* data;
-* responsável;
-* estado.
-
----
-
-## 146. RB-BR-141 — Dados sensíveis minimizados
-
-O sistema NÃO DEVE coletar dado sensível quando uma representação funcional menos invasiva atender à necessidade.
-
----
-
-## 147. RB-BR-142 — Analytics sem conteúdo sensível desnecessário
-
-Eventos analíticos NÃO DEVEM incluir:
-
-* observações livres;
-* endereço preciso;
-* Restrição detalhada;
-* localização precisa;
-* dados pessoais não necessários.
-
----
-
-# Parte XIX — Priorização de regras
-
-## 148. Ordem de precedência
-
-Em caso de conflito entre critérios, a ordem conceitual é:
-
-1. segurança e legalidade;
-2. autorização;
-3. Restrição obrigatória;
-4. integridade do domínio;
-5. decisão explícita do Usuário;
-6. preservação de dados;
-7. consistência temporal;
-8. Preferências;
-9. políticas de Recomendação;
-10. conveniência de interface.
-
----
-
-## 149. Regra mais restritiva
-
-Quando duas regras obrigatórias se aplicarem e não puderem ser conciliadas, a operação DEVE ser bloqueada até resolução explícita.
-
----
-
-## 150. Política não pode violar invariante
-
-Uma política de produto ou algoritmo NÃO PODE sobrescrever uma invariante de domínio.
-
----
-
-# Parte XX — Catálogo de validações
-
-## 151. Validação da Viagem
-
-| Campo ou operação             | Regra                             | Severidade           |
-| ----------------------------- | --------------------------------- | -------------------- |
-| Destino ausente               | Impede tornar a Viagem planejável | Erro                 |
-| Data final anterior           | Impede criação ou alteração       | Erro                 |
-| Sem Viajante                  | Impede tornar a Viagem planejável | Erro                 |
-| Sem Hospedagem                | Permitido                         | Informação           |
-| Hospedagem provisória         | Permitido com indicação           | Informação           |
-| Período reduzido com conteúdo | Exige revisão                     | Risco ou confirmação |
-
----
-
-## 152. Validação da Atividade
-
-| Campo ou operação         | Regra                      | Severidade    |
-| ------------------------- | -------------------------- | ------------- |
-| Título vazio              | Impede salvamento          | Erro          |
-| Dia inválido              | Impede salvamento          | Erro          |
-| Duração zero ou negativa  | Impede salvamento          | Erro          |
-| Sem horário               | Permitido                  | Informação    |
-| Sem Lugar                 | Permitido                  | Informação    |
-| Sobreposição              | Depende do contexto        | Risco ou Erro |
-| Deslocamento insuficiente | Normalmente não bloqueante | Risco         |
-
----
-
-## 153. Validação da Proposta
-
-| Condição                      | Regra                         | Severidade        |
-| ----------------------------- | ----------------------------- | ----------------- |
-| Versão base alterada          | Proposta expira               | Erro de aplicação |
-| Restrição obrigatória violada | Não pode ser aplicada         | Erro              |
-| Período protegido preenchido  | Não pode ser aplicado         | Erro              |
-| Dados estimados               | Pode continuar com indicação  | Risco             |
-| Horário não confirmado        | Pode continuar                | Risco             |
-| Atividade fixa movida         | Bloqueia aplicação automática | Erro              |
-
----
-
-# Parte XXI — Cenários normativos
-
-## 154. Salvar Lugar repetido
-
 ```text
-Dado que o Lugar já está salvo na Viagem
-Quando o Usuário solicita salvar novamente
-Então nenhum novo Lugar Salvo é criado
-E o estado permanece Salvo
+RB-BR-TRIP-001
+RB-BR-ITN-001
+RB-BR-REC-001
+RB-BR-PCF-001
 ```
 
----
+Siglas iniciais:
 
-## 155. Remover Lugar planejado dos Salvos
-
-```text
-Dado que o Lugar está salvo e planejado
-Quando o Usuário remove o Lugar dos Salvos
-Então a associação Lugar Salvo é removida
-E a Atividade permanece no Roteiro
-E o Lugar continua derivado como Planejado
-```
-
----
-
-## 156. Alterar Hospedagem
-
-```text
-Dado que a Viagem possui Distâncias calculadas
-Quando a Hospedagem é alterada
-Então as Distâncias dependentes são marcadas como desatualizadas
-E o recálculo é solicitado
-E o Roteiro não é removido
-```
+| Sigla | Área               |
+| ----- | ------------------ |
+| ACC   | Account            |
+| TRIP  | Trip               |
+| TRV   | Traveler Profile   |
+| PLC   | Place              |
+| COL   | Trip Collection    |
+| ITN   | Itinerary          |
+| MOB   | Mobility           |
+| REC   | Recommendation     |
+| DEC   | Decision           |
+| PRP   | Itinerary Proposal |
+| PCF   | Planning Conflict  |
+| DAT   | Data Governance    |
+| AI    | Agentes de IA      |
+| PRI   | Privacidade        |
 
 ---
 
-## 157. Aceitar Proposta expirada
+### 10. Estrutura de uma regra
 
-```text
-Dado que a versão base do Roteiro mudou
-E existe uma Proposta baseada na versão anterior
-Quando o Usuário tenta aceitar a Proposta
-Então a aplicação é bloqueada
-E a Proposta é marcada como expirada
-E uma nova revisão é solicitada
-```
-
----
-
-## 158. Atividade em Período Livre protegido
-
-```text
-Dado que o Dia possui Período Livre protegido
-Quando uma Proposta tenta inserir Atividade nesse intervalo
-Então a Atividade não é aplicada
-E um Erro de planejamento é apresentado
-```
-
----
-
-## 159. Falha de Mapa
-
-```text
-Dado que o serviço de Mapa está indisponível
-Quando o Usuário acessa Explorar
-Então a lista de Lugares continua disponível
-E a falha é comunicada
-E uma nova tentativa é oferecida
-```
-
----
-
-# Parte XXII — Anti-patterns de regra
-
-## 160. Regra apenas na interface
-
-Não considerar uma regra implementada apenas porque:
-
-* botão está oculto;
-* campo está desabilitado;
-* fluxo visual evita a ação.
-
----
-
-## 161. Regra duplicada e divergente
-
-A mesma regra NÃO DEVE possuir versões contraditórias em:
-
-* frontend;
-* backend;
-* prompts;
-* testes;
-* documentação.
-
----
-
-## 162. Booleanos ambíguos
-
-Evitar regras baseadas em campos como:
-
-```text
-active
-valid
-ready
-processed
-```
-
-sem definição contextual.
-
----
-
-## 163. Falha externa alterando domínio
-
-Não remover Atividade porque provedor de rota falhou.
-
-Não excluir Lugar porque imagem não carregou.
-
-Não apagar Proposta porque nova geração falhou.
-
----
-
-## 164. IA ignorando invariantes
-
-Nenhum prompt, modelo ou agente PODE:
-
-* aplicar Proposta;
-* ignorar Restrição;
-* mover Atividade fixa;
-* preencher Período protegido;
-
-fora das mesmas regras do restante do sistema.
-
----
-
-## 165. Regra implícita em score
-
-Um score NÃO DEVE esconder regras obrigatórias.
-
-Exemplo incorreto:
-
-```text
-Lugar incompatível ainda aparece porque o score ficou baixo
-```
-
-Se viola Restrição obrigatória, deve ser excluído ou bloqueado conforme regra.
-
----
-
-# Parte XXIII — Rastreabilidade
-
-## 166. Regras e agregados
-
-| Área                     | Regras principais     |
-| ------------------------ | --------------------- |
-| Conta e autorização      | RB-BR-008 a RB-BR-012 |
-| Viagem                   | RB-BR-013 a RB-BR-022 |
-| Período                  | RB-BR-023 a RB-BR-027 |
-| Destino e Hospedagem     | RB-BR-028 a RB-BR-035 |
-| Viajantes e Preferências | RB-BR-036 a RB-BR-045 |
-| Lugar                    | RB-BR-046 a RB-BR-054 |
-| Salvos                   | RB-BR-055 a RB-BR-060 |
-| Roteiro                  | RB-BR-061 a RB-BR-069 |
-| Atividade                | RB-BR-070 a RB-BR-082 |
-| Período Livre            | RB-BR-083 a RB-BR-087 |
-| Deslocamento             | RB-BR-088 a RB-BR-095 |
-| Recomendação             | RB-BR-096 a RB-BR-104 |
-| Proposta                 | RB-BR-105 a RB-BR-116 |
-| Conflitos                | RB-BR-117 a RB-BR-126 |
-| Dados                    | RB-BR-127 a RB-BR-133 |
-
----
-
-## 167. Regras e superfícies
-
-| Superfície        | Regras relevantes                 |
-| ----------------- | --------------------------------- |
-| Criar Viagem      | RB-BR-013 a RB-BR-018             |
-| Configurações     | RB-BR-023 a RB-BR-045             |
-| Explorar          | RB-BR-046 a RB-BR-060             |
-| Detalhes do Lugar | RB-BR-049 a RB-BR-054             |
-| Roteiro           | RB-BR-061 a RB-BR-095             |
-| Proposta          | RB-BR-105 a RB-BR-116             |
-| Revisão           | RB-BR-117 a RB-BR-126             |
-| Mapa              | RB-BR-088 a RB-BR-095 e RB-BR-134 |
-| Salvos            | RB-BR-055 a RB-BR-060             |
-
----
-
-# Parte XXIV — Critérios de aceite
-
-## 168. Integridade
-
-* invariantes possuem identificadores;
-* operações críticas possuem pré-condições;
-* pós-condições são verificáveis;
-* regras não dependem apenas da interface;
-* políticas não violam invariantes.
-
----
-
-## 169. Viagem
-
-* requisitos mínimos estão definidos;
-* alteração de Período está coberta;
-* alteração de Destino está coberta;
-* alteração de Hospedagem está coberta;
-* cancelamento, arquivamento e exclusão estão separados.
-
----
-
-## 170. Planejamento
-
-* Roteiro parcial é válido;
-* Atividade sem horário é válida;
-* Período Livre é válido;
-* reordenação produz nova versão;
-* concorrência não sobrescreve silenciosamente.
-
----
-
-## 171. IA e Recomendação
-
-* Recomendações possuem contexto;
-* justificativas estão previstas;
-* Restrições obrigatórias têm precedência;
-* Propostas permanecem separadas;
-* aplicação exige decisão explícita.
-
----
-
-## 172. Dados
-
-* Proveniência é obrigatória;
-* desconhecido não vira zero;
-* IA não gera fato canônico automaticamente;
-* divergência de fontes é tratada;
-* atualidade é representada.
-
----
-
-## 173. Conflitos
-
-* severidades estão definidas;
-* Erro, Risco e Sugestão são distintos;
-* Erro bloqueante não pode ser ignorado;
-* resolução e invalidação são diferentes;
-* alterações reavaliam Conflitos.
-
----
-
-# Parte XXV — Governança
-
-## 174. Inclusão de nova regra
-
-Uma nova regra DEVE possuir:
+Uma regra pode conter:
 
 * identificador;
 * nome;
-* contexto;
-* motivação;
-* tipo;
-* condição;
-* resultado;
+* descrição;
+* classificação;
 * severidade;
+* escopo;
+* gatilho;
+* pré-condições;
+* condição;
+* consequência;
 * exceções;
-* testes;
-* documentos afetados.
+* evidências;
+* eventos relacionados;
+* comandos relacionados.
 
 ---
 
-## 175. Alteração de regra
+### 11. Linguagem normativa
 
-Alterações DEVEM revisar:
+Este documento utiliza:
+
+* **deve** para obrigação;
+* **não deve** para proibição;
+* **pode** para permissão;
+* **deverá** para obrigação arquitetural futura;
+* **recomenda-se** para orientação não obrigatória.
+
+---
+
+### 12. Regra de precedência
+
+Quando regras entrarem em tensão, aplicar a seguinte ordem:
+
+1. segurança e integridade;
+2. autorização;
+3. privacidade;
+4. invariantes do agregado;
+5. Restrições obrigatórias;
+6. consistência do planejamento;
+7. intenção explícita do Usuário;
+8. Preferências;
+9. otimização;
+10. sugestões.
+
+```mermaid
+flowchart TD
+    Safety["Segurança e integridade"]
+    Authorization["Autorização"]
+    Privacy["Privacidade"]
+    Aggregate["Invariantes do agregado"]
+    Mandatory["Restrições obrigatórias"]
+    Planning["Consistência do planejamento"]
+    UserIntent["Intenção explícita do Usuário"]
+    Preferences["Preferências"]
+    Optimization["Otimização"]
+    Suggestions["Sugestões"]
+
+    Safety --> Authorization
+    Authorization --> Privacy
+    Privacy --> Aggregate
+    Aggregate --> Mandatory
+    Mandatory --> Planning
+    Planning --> UserIntent
+    UserIntent --> Preferences
+    Preferences --> Optimization
+    Optimization --> Suggestions
+```
+
+---
+
+### 13. Conflito entre regras
+
+Quando duas regras aplicáveis produzirem consequências incompatíveis:
+
+* a regra de maior precedência deve prevalecer;
+* a regra não aplicada deve permanecer rastreável;
+* a decisão deve ser explicável;
+* a existência de conflito normativo deve ser registrada;
+* agentes de IA não devem escolher silenciosamente uma regra.
+
+---
+
+## Parte III — Regras transversais
+
+### 14. Controle do Usuário
+
+#### RB-BR-DEC-001 — Decisão pertence ao Usuário
+
+Uma `Decision` deve representar uma escolha atribuível a um Usuário autorizado.
+
+Classificação:
+
+```text
+mandatory
+```
+
+Consequências:
+
+* uma Recomendação não pode ser registrada como Decisão;
+* uma saída de IA não pode assumir autoria do Usuário;
+* aplicação automática deve possuir autorização explícita anterior;
+* autoria e instante da Decisão devem ser rastreáveis.
+
+---
+
+### 15. Recomendação não altera estado canônico
+
+#### RB-BR-REC-001 — Recomendação é não aplicativa
+
+A geração ou apresentação de uma `Recommendation` não deve alterar:
+
+* Trip;
+* Traveler Profile;
+* Trip Collection;
+* Itinerary;
+* Activity;
+* Free Period;
+* Itinerary Proposal;
+* Planning Conflict.
+
+Classificação:
+
+```text
+mandatory
+```
+
+---
+
+### 16. Proposta não é Roteiro
+
+#### RB-BR-PRP-001 — Proposta permanece isolada
+
+Uma `ItineraryProposal` deve permanecer separada do `Itinerary` até que seus itens sejam aceitos explicitamente.
+
+Consequências:
+
+* geração não altera o Roteiro;
+* rejeição não altera o Roteiro;
+* falha não altera o Roteiro;
+* expiração não altera o Roteiro;
+* apenas itens aceitos podem ser aplicados.
+
+---
+
+### 17. Estimativa não é confirmação
+
+#### RB-BR-DAT-001 — Estimativas devem ser identificadas
+
+Todo valor estimado deve ser apresentado como estimativa.
+
+Aplica-se a:
+
+* Distância;
+* Travel Time;
+* preço;
+* duração;
+* disponibilidade;
+* lotação;
+* Recommendation Confidence.
+
+É proibido converter ausência de certeza em valor absoluto.
+
+---
+
+### 18. Informação desconhecida
+
+#### RB-BR-DAT-002 — Desconhecido não recebe valor falso
+
+Quando uma informação for desconhecida:
+
+* não assumir zero;
+* não assumir gratuito;
+* não assumir aberto;
+* não assumir disponível;
+* não assumir ausência de conflito;
+* não assumir baixa relevância.
+
+O estado `unknown` deve ser preservado quando aplicável.
+
+---
+
+### 19. Proveniência obrigatória
+
+#### RB-BR-DAT-003 — Dados externos preservam Provenance
+
+Informações externas relevantes devem possuir `Provenance`.
+
+Inclui:
+
+* Fonte;
+* momento de coleta;
+* método;
+* identificador externo;
+* confiança;
+* atualidade.
+
+Dados gerados por IA devem ser identificados como tal.
+
+---
+
+### 20. Identidade interna
+
+#### RB-BR-DAT-004 — Identidade interna é independente de fornecedor
+
+Uma entidade interna não deve utilizar identificador externo como única identidade.
+
+Aplica-se especialmente a:
+
+* Place;
+* Data Source;
+* Recommendation;
+* Travel Estimate.
+
+---
+
+### 21. Falha externa não destrutiva
+
+#### RB-BR-DAT-005 — Falhas externas preservam estado local
+
+Falhas de:
+
+* mapas;
+* rotas;
+* IA;
+* catálogo;
+* clima;
+* avaliações;
+* preços;
+* disponibilidade;
+
+não devem apagar estado canônico local.
+
+---
+
+## Parte IV — Account e autorização
+
+### 22. Conta ativa
+
+#### RB-BR-ACC-001 — Conta ativa possui responsável
+
+Uma `Account` ativa deve possuir ao menos um `User` responsável.
+
+Classificação:
+
+```text
+mandatory
+```
+
+---
+
+### 23. Owner da Viagem
+
+#### RB-BR-ACC-002 — Toda Viagem possui owner
+
+Uma `Trip` deve possuir ao menos um Participante com papel `owner`.
+
+Não é permitido:
+
+* criar Viagem sem owner;
+* remover o último owner;
+* rebaixar o último owner sem substituição;
+* excluir o vínculo do último owner sem transferência.
+
+---
+
+### 24. Autorização de alteração
+
+#### RB-BR-ACC-003 — Alterações exigem papel compatível
+
+| Ação                         | Owner |      Editor | Viewer |
+| ---------------------------- | ----: | ----------: | -----: |
+| Visualizar Viagem            |   Sim |         Sim |    Sim |
+| Alterar Roteiro              |   Sim |         Sim |    Não |
+| Alterar Perfil dos Viajantes |   Sim |         Sim |    Não |
+| Salvar Lugar                 |   Sim |         Sim |    Não |
+| Aplicar Proposta             |   Sim |         Sim |    Não |
+| Ignorar Risco                |   Sim | Condicional |    Não |
+| Cancelar Viagem              |   Sim |         Não |    Não |
+| Excluir Viagem               |   Sim |         Não |    Não |
+| Transferir ownership         |   Sim |         Não |    Não |
+
+A autorização definitiva poderá ser refinada pela Arquitetura, mas não pode enfraquecer estas restrições.
+
+---
+
+### 25. Usuário e Viajante
+
+#### RB-BR-ACC-004 — User não implica Traveler
+
+Um `User` não deve ser criado automaticamente como `Traveler` sem decisão explícita.
+
+Um `Traveler` pode existir sem Conta.
+
+---
+
+## Parte V — Regras da Viagem
+
+### 26. Criação da Viagem
+
+#### RB-BR-TRIP-001 — Criação mínima de Viagem
+
+Uma Viagem pode ser criada em estado `Draft` com informações parciais.
+
+A criação exige:
+
+* `TripId`;
+* nome inicial ou nome derivável;
+* owner;
+* data de criação.
+
+Destino e Período podem ser adicionados posteriormente enquanto a Viagem permanecer incompleta.
+
+---
+
+### 27. Viagem planejável
+
+#### RB-BR-TRIP-002 — Requisitos para planejamento
+
+Para que uma Viagem seja considerada planejável, deve possuir:
+
+* Destination válido;
+* Trip Period válido;
+* owner;
+* Itinerary inicializado;
+* Traveler Profile inicializado;
+* Trip Collection inicializada.
+
+A ausência de Hospedagem não impede planejamento.
+
+---
+
+### 28. Período válido
+
+#### RB-BR-TRIP-003 — Intervalo cronológico válido
+
+Em `TripPeriod`:
+
+```text
+startDate <= endDate
+```
+
+A data final não pode preceder a data inicial.
+
+Violação:
+
+```text
+error
+```
+
+---
+
+### 29. Intervalo inclusivo
+
+#### RB-BR-TRIP-004 — Datas do Período são inclusivas
+
+A duração em Dias da Viagem deve considerar ambas as extremidades.
+
+Exemplo:
+
+```text
+10/08 até 12/08 = 3 TripDays
+```
+
+---
+
+### 30. Fuso horário
+
+#### RB-BR-TRIP-005 — Datas usam fuso da Viagem
+
+Datas e horários de planejamento devem utilizar o fuso associado à Viagem.
+
+O fuso do dispositivo não deve alterar silenciosamente:
+
+* data da Atividade;
+* ordem do Dia;
+* estado temporal da Viagem;
+* validade de Proposta.
+
+---
+
+### 31. Hospedagem opcional
+
+#### RB-BR-TRIP-006 — Hospedagem não é obrigatória
+
+A ausência de `Accommodation`:
+
+* não impede criação;
+* não impede planejamento;
+* pode limitar estimativas;
+* pode reduzir Recommendation Confidence;
+* deve ser comunicada quando relevante.
+
+---
+
+### 32. Alteração estrutural
+
+#### RB-BR-TRIP-007 — Alterações estruturais incrementam versão
+
+As seguintes mudanças devem incrementar `TripContextVersion`:
+
+* Destination;
+* Trip Period;
+* Accommodation;
+* composição dos Viajantes;
+* Restrição obrigatória;
+* alteração estrutural de Budget;
+* alteração estrutural de Pace.
+
+---
+
+### 33. Invalidação após alteração estrutural
+
+#### RB-BR-TRIP-008 — Dependências devem ser reavaliadas
+
+Alterações estruturais podem invalidar:
+
+* Travel Estimate;
+* Recommendation;
+* Itinerary Proposal;
+* Planning Conflict;
+* Recommendation Confidence;
+* Context Snapshot;
+* dados derivados.
+
+A invalidação não deve apagar os objetos.
+
+---
+
+### 34. Cancelamento da Viagem
+
+#### RB-BR-TRIP-009 — Cancelamento é explícito
+
+Cancelar uma Viagem:
+
+* altera Trip Status para `Cancelled`;
+* preserva histórico;
+* impede novas aplicações de Proposta;
+* não equivale a excluir;
+* não remove automaticamente o Roteiro.
+
+---
+
+### 35. Arquivamento da Viagem
+
+#### RB-BR-TRIP-010 — Arquivamento é organizacional
+
+Arquivar uma Viagem:
+
+* não altera seu histórico;
+* não significa cancelamento;
+* pode removê-la das visualizações principais;
+* deve ser reversível quando permitido.
+
+---
+
+### 36. Exclusão da Viagem
+
+#### RB-BR-TRIP-011 — Exclusão exige confirmação reforçada
+
+A exclusão deve:
+
+* exigir owner;
+* exigir confirmação explícita;
+* comunicar consequências;
+* respeitar políticas de retenção;
+* preservar registros obrigatórios quando necessário.
+
+---
+
+## Parte VI — Regras de sincronização temporal
+
+### 37. Um Dia por data
+
+#### RB-BR-ITN-001 — Unicidade de Trip Day
+
+Para cada data do `TripPeriod`, deve existir no máximo um `TripDay` ativo no `Itinerary`.
+
+Chave contextual:
+
+```text
+TripId + LocalDate
+```
+
+---
+
+### 38. Cobertura temporal do Roteiro
+
+#### RB-BR-ITN-002 — Sincronização dos Dias
+
+Quando a Viagem estiver planejável, o Roteiro deve possuir um `TripDay` para cada data do `TripPeriod`.
+
+A sincronização deve ser idempotente.
+
+---
+
+### 39. Ampliação do Período
+
+#### RB-BR-ITN-003 — Ampliação preserva conteúdo
+
+Ao ampliar o Trip Period:
+
+* criar Dias ausentes;
+* preservar Dias existentes;
+* preservar Atividades;
+* preservar Períodos Livres;
+* recalcular ordenação cronológica.
+
+---
+
+### 40. Redução do Período
+
+#### RB-BR-ITN-004 — Redução não remove conteúdo silenciosamente
+
+Ao reduzir o Trip Period, Dias externos ao novo intervalo devem ser avaliados.
+
+Se um Dia afetado possuir:
+
+* Activity;
+* Free Period;
+* anotação;
+* decisão registrada;
+
+a alteração deve exigir revisão explícita.
+
+Violação potencial:
+
+```text
+error
+```
+
+ou:
+
+```text
+risk
+```
+
+conforme a operação oferecida.
+
+---
+
+### 41. Dias vazios
+
+#### RB-BR-ITN-005 — Dia vazio é válido
+
+Um `TripDay` sem Activity e sem Free Period é válido.
+
+Ele representa planejamento incompleto, não erro.
+
+---
+
+### 42. Dia livre
+
+#### RB-BR-ITN-006 — Dia livre é intencional
+
+Um Dia só deve ser apresentado como livre quando existir decisão explícita.
+
+Dia vazio não deve ser interpretado automaticamente como Dia livre.
+
+---
+
+## Parte VII — Traveler Profile
+
+### 43. Existência do Perfil
+
+#### RB-BR-TRV-001 — Viagem possui Traveler Profile
+
+Toda Viagem planejável deve possuir exatamente um `TravelerProfile`.
+
+---
+
+### 44. Quantidade de Viajantes
+
+#### RB-BR-TRV-002 — Perfil possui ao menos um Viajante
+
+Uma Viagem planejável deve possuir ao menos um `Traveler`.
+
+A ausência de Viajantes em Draft é permitida.
+
+---
+
+### 45. Minimização de dados
+
+#### RB-BR-PRI-001 — Dados pessoais devem ser mínimos
+
+O RouteBook deve coletar apenas dados necessários à experiência.
+
+Preferir:
+
+* faixa etária em vez de data de nascimento;
+* necessidade funcional em vez de diagnóstico;
+* preferências contextuais em vez de perfil sensível;
+* localização pontual em vez de rastreamento contínuo.
+
+---
+
+### 46. Associação com User
+
+#### RB-BR-TRV-003 — Associação é opcional
+
+Um Traveler pode possuir `UserId`, mas essa associação não é obrigatória.
+
+Um mesmo User não deve ser associado duas vezes ao mesmo Traveler Profile.
+
+---
+
+### 47. Group Profile derivado
+
+#### RB-BR-TRV-004 — Perfil do Grupo é recalculável
+
+`GroupProfile` deve ser derivado dos Viajantes atuais.
+
+Mudanças nos Viajantes devem invalidar ou recalcular:
+
+* composição;
+* faixas etárias;
+* necessidades;
+* adequação de Recomendações.
+
+---
+
+### 48. Interesses
+
+#### RB-BR-TRV-005 — Interest não é obrigatório
+
+A ausência de Interest não impede planejamento.
+
+Quando existir, Interest:
+
+* pode possuir peso;
+* pode possuir escopo;
+* não deve sobrescrever Restrição obrigatória.
+
+---
+
+### 49. Restrições obrigatórias
+
+#### RB-BR-TRV-006 — Restrição mandatory não pode ser ignorada
+
+Uma Restriction de severidade `mandatory` deve impedir:
+
+* Recomendação incompatível apresentada como adequada;
+* aplicação de Atividade incompatível;
+* geração de Proposta inválida.
+
+Uma incompatibilidade obrigatória deve produzir:
+
+```text
+error
+```
+
+---
+
+### 50. Restrições importantes
+
+#### RB-BR-TRV-007 — Restrição important gera risco
+
+Uma Restriction `important` pode gerar `PlanningConflict` de severidade `risk`.
+
+A continuidade exige decisão explícita quando aplicável.
+
+---
+
+### 51. Preferências
+
+#### RB-BR-TRV-008 — Preferência não é bloqueio
+
+Uma Restriction de severidade `preference` ou um Interest deve influenciar ordenação e explicação, mas não bloquear operação válida.
+
+---
+
+### 52. Budget desconhecido
+
+#### RB-BR-TRV-009 — Ausência de Budget não significa zero
+
+Quando Budget não for informado:
+
+* Recomendações financeiras podem ser menos específicas;
+* custos estimados devem ser apresentados;
+* ausência não deve excluir opções automaticamente.
+
+---
+
+### 53. Ritmo
+
+#### RB-BR-TRV-010 — Pace orienta densidade
+
+`Pace` deve influenciar:
+
+* quantidade de Atividades;
+* duração de intervalos;
+* margem de deslocamento;
+* necessidade de descanso.
+
+Pace não define limite absoluto universal.
+
+---
+
+## Parte VIII — Place e catálogo
+
+### 54. Identidade de Lugar
+
+#### RB-BR-PLC-001 — Place possui identidade interna
+
+Todo `Place` deve possuir `PlaceId` interno.
+
+IDs externos devem ser referências, não identidade canônica.
+
+---
+
+### 55. Deduplicação
+
+#### RB-BR-PLC-002 — Lugares equivalentes podem ser reconciliados
+
+A resolução de duplicidade pode considerar:
+
+* nome;
+* coordenadas;
+* endereço;
+* identificadores externos;
+* categoria;
+* Provenance.
+
+Nenhum critério isolado deve determinar fusão automática em todos os casos.
+
+---
+
+### 56. Fusão de Lugares
+
+#### RB-BR-PLC-003 — Fusão preserva referências
+
+Ao fundir Places:
+
+* preservar PlaceId canônico;
+* preservar aliases;
+* preservar IDs externos;
+* preservar Provenance;
+* redirecionar referências;
+* preservar histórico;
+* evitar duplicação em Trip Collection.
+
+---
+
+### 57. Estado operacional desconhecido
+
+#### RB-BR-PLC-004 — Unknown não significa open
+
+Um Place com estado `unknown` não deve ser apresentado como aberto.
+
+---
+
+### 58. Fechamento temporário
+
+#### RB-BR-PLC-005 — Fechamento temporário gera revisão
+
+Quando um Place planejado estiver temporariamente fechado:
+
+* não remover Activity;
+* marcar necessidade de revisão;
+* produzir Planning Conflict;
+* permitir substituição.
+
+Se a data futura estiver fora da vigência conhecida, a avaliação pode permanecer `unknown`.
+
+---
+
+### 59. Fechamento permanente
+
+#### RB-BR-PLC-006 — Fechamento permanente torna visita inviável
+
+Uma Activity ativa vinculada a Place permanentemente fechado deve gerar:
+
+```text
+error
+```
+
+A Activity não deve ser removida automaticamente.
+
+---
+
+### 60. Horário de funcionamento
+
+#### RB-BR-PLC-007 — Horário é contextual
+
+A compatibilidade deve considerar:
+
+* data;
+* fuso;
+* intervalos;
+* exceções;
+* vigência;
+* Data Freshness.
+
+Opening Hours não garantem disponibilidade.
+
+---
+
+### 61. Preço desconhecido
+
+#### RB-BR-PLC-008 — Unknown não significa free
+
+Price Range desconhecido não deve ser exibido como gratuito.
+
+---
+
+### 62. Rating
+
+#### RB-BR-PLC-009 — Rating preserva escala e Fonte
+
+Um Rating deve possuir:
+
+* valor;
+* escala;
+* quantidade de avaliações quando disponível;
+* Data Source;
+* data ou atualidade.
+
+Ratings de escalas diferentes não devem ser combinados sem normalização explícita.
+
+---
+
+## Parte IX — Trip Collection e Lugares Salvos
+
+### 63. Unicidade de Saved Place
+
+#### RB-BR-COL-001 — Lugar é salvo uma vez por Viagem
+
+Para uma Trip Collection:
+
+```text
+TripId + PlaceId
+```
+
+deve ser único.
+
+---
+
+### 64. Salvamento idempotente
+
+#### RB-BR-COL-002 — Save Place é idempotente
+
+Salvar novamente o mesmo Place:
+
+* não cria duplicidade;
+* não altera identidade;
+* pode atualizar metadados permitidos;
+* deve retornar estado equivalente ao já salvo.
+
+---
+
+### 65. Salvar não planeja
+
+#### RB-BR-COL-003 — Saved Place não cria Activity
+
+Salvar um Place não deve:
+
+* criar Activity;
+* definir Trip Day;
+* alterar Itinerary;
+* criar Travel Estimate automaticamente como estado canônico.
+
+---
+
+### 66. Remover dos Salvos
+
+#### RB-BR-COL-004 — Unsave não remove do Roteiro
+
+Remover um Saved Place não deve remover Activities relacionadas.
+
+---
+
+### 67. Lugar planejado
+
+#### RB-BR-COL-005 — Planned Place é derivado
+
+Um Place é considerado planejado quando existe ao menos uma Activity ativa associada.
+
+Não deve existir estado canônico independente apenas para representar isso, salvo decisão arquitetural posterior devidamente documentada.
+
+---
+
+## Parte X — Itinerary
+
+### 68. Um Roteiro atual
+
+#### RB-BR-ITN-007 — Viagem possui um Itinerary atual
+
+Cada Trip deve possuir exatamente um `Itinerary` canônico atual.
+
+Histórico de versões não cria múltiplos Roteiros atuais.
+
+---
+
+### 69. Activity pertence a um Dia
+
+#### RB-BR-ITN-008 — Activity exige Trip Day
+
+Toda Activity ativa deve pertencer a exatamente um Trip Day.
+
+---
+
+### 70. Título de Activity
+
+#### RB-BR-ITN-009 — Activity possui título
+
+Toda Activity deve possuir título não vazio.
+
+---
+
+### 71. Lugar opcional
+
+#### RB-BR-ITN-010 — Activity pode existir sem Place
+
+Uma Activity pode representar:
+
+* descanso;
+* deslocamento;
+* check-in;
+* check-out;
+* compromisso manual;
+* período personalizado.
+
+Place não é obrigatório.
+
+---
+
+### 72. Duração válida
+
+#### RB-BR-ITN-011 — Duração informada é positiva
+
+Quando Duration for informada:
+
+```text
+duration > 0
+```
+
+Violação:
+
+```text
+error
+```
+
+---
+
+### 73. Horário válido
+
+#### RB-BR-ITN-012 — Horário pertence ao Dia local
+
+O horário de Activity deve ser interpretado no fuso da Viagem e associado ao Trip Day correto.
+
+Atividades que atravessam meia-noite devem possuir representação explícita.
+
+---
+
+### 74. Ordenação
+
+#### RB-BR-ITN-013 — Ordem é determinística
+
+Atividades e Free Periods devem possuir ordem determinística dentro do Dia.
+
+Empates devem ser resolvidos por política estável.
+
+---
+
+### 75. Sobreposição
+
+#### RB-BR-ITN-014 — Sobreposição é avaliada
+
+Duas Activities com horários incompatíveis devem produzir Planning Conflict.
+
+Classificação sugerida:
+
+| Situação                           | Severidade                   |
+| ---------------------------------- | ---------------------------- |
+| Atividades fixed sobrepostas       | error                        |
+| fixed e tentative sobrepostas      | risk                         |
+| Atividades sem horário             | suggestion ou not-applicable |
+| sobreposição intencional suportada | valid                        |
+
+---
+
+### 76. Activity fixa
+
+#### RB-BR-ITN-015 — Activity fixed não é movida automaticamente
+
+Atividade com flexibilidade `fixed` não deve ser:
+
+* reordenada;
+* movida;
+* redimensionada;
+* substituída;
+
+sem decisão explícita.
+
+---
+
+### 77. Activity flexible
+
+#### RB-BR-ITN-016 — Activity flexible pode ser reorganizada em Proposta
+
+Uma Activity `flexible` pode ser reorganizada por uma Itinerary Proposal.
+
+A alteração só se torna canônica após aceitação.
+
+---
+
+### 78. Free Period protected
+
+#### RB-BR-ITN-017 — Período protegido não é preenchido automaticamente
+
+Um Free Period `protected` não pode receber Proposed Activity automaticamente.
+
+Sua substituição exige decisão explícita.
+
+---
+
+### 79. Free Period flexible
+
+#### RB-BR-ITN-018 — Período flexível aceita sugestão
+
+Um Free Period `flexible` pode receber sugestões em uma Itinerary Proposal.
+
+O Período não é removido até a aplicação dos itens aceitos.
+
+---
+
+### 80. Remoção de Activity
+
+#### RB-BR-ITN-019 — Remoção preserva referências externas
+
+Remover uma Activity:
+
+* não remove Place;
+* não remove Saved Place;
+* não remove Data Source;
+* pode invalidar Travel Estimates;
+* pode resolver Planning Conflicts relacionados.
+
+---
+
+### 81. Mudança de Dia
+
+#### RB-BR-ITN-020 — Mover Activity preserva identidade
+
+Mover uma Activity para outro Trip Day deve preservar `ActivityId`.
+
+---
+
+### 82. Versão do Roteiro
+
+#### RB-BR-ITN-021 — Alteração canônica incrementa versão
+
+Devem incrementar `ItineraryVersion`:
+
+* adicionar Activity;
+* editar Activity;
+* remover Activity;
+* mover Activity;
+* reordenar Activity;
+* adicionar Free Period;
+* alterar Free Period;
+* remover Free Period;
+* aplicar itens de Proposta;
+* sincronizar Dias com impacto canônico.
+
+---
+
+### 83. Planejamento parcial
+
+#### RB-BR-ITN-022 — Itinerary parcial é válido
+
+O Roteiro pode permanecer:
+
+* vazio;
+* parcial;
+* planejado.
+
+Completude não determina validade.
+
+---
+
+### 84. Estado de revisão
+
+#### RB-BR-ITN-023 — Review State é independente
+
+O estado de revisão não deve ser inferido apenas pela existência de Activities.
+
+Alterações após revisão podem retornar o Roteiro para `not-reviewed` ou `under-review`.
+
+---
+
+### 85. Estado de consistência
+
+#### RB-BR-ITN-024 — Alterações estruturais podem tornar Roteiro outdated
+
+Mudanças no Trip Context podem alterar Consistency State para `outdated`.
+
+Outdated não significa inválido, mas exige reavaliação.
+
+---
+
+## Parte XI — Mobilidade
+
+### 86. Origem e destino
+
+#### RB-BR-MOB-001 — Travel Estimate exige referências válidas
+
+Uma Travel Estimate exige:
+
+* origem;
+* destino;
+* Transport Mode.
+
+Origem e destino não podem ser semanticamente indefinidos.
+
+---
+
+### 87. Distância não negativa
+
+#### RB-BR-MOB-002 — Distance é não negativa
+
+```text
+distance >= 0
+```
+
+Distância zero é válida quando origem e destino coincidem dentro da precisão adotada.
+
+---
+
+### 88. Tempo não negativo
+
+#### RB-BR-MOB-003 — Travel Time é não negativo
+
+```text
+travelTime >= 0
+```
+
+---
+
+### 89. Modo de transporte
+
+#### RB-BR-MOB-004 — Estimativa depende de Transport Mode
+
+Uma estimativa sem Transport Mode conhecido não deve ser apresentada como completa.
+
+---
+
+### 90. Validade temporal
+
+#### RB-BR-MOB-005 — Travel Estimate possui validade
+
+Uma estimativa deve considerar:
+
+* momento de cálculo;
+* data da Activity;
+* transporte;
+* origem;
+* destino;
+* Fonte;
+* contexto.
+
+Mudanças relevantes devem torná-la `stale` ou `invalidated`.
+
+---
+
+### 91. Margem de deslocamento
+
+#### RB-BR-MOB-006 — Planejamento deve considerar deslocamento
+
+Activities consecutivas com localização conhecida devem ser avaliadas considerando:
+
+* Travel Time;
+* margem de segurança;
+* duração;
+* flexibilidade;
+* modo de transporte.
+
+Insuficiência de intervalo pode gerar:
+
+* error;
+* risk;
+* suggestion.
+
+---
+
+### 92. Falha de rota
+
+#### RB-BR-MOB-007 — Falha não remove planejamento
+
+Falha ao calcular rota:
+
+* não remove Activities;
+* não assume tempo zero;
+* produz estado `unavailable` ou `failed`;
+* pode reduzir Recommendation Confidence;
+* pode gerar Planning Conflict de dados insuficientes.
+
+---
+
+## Parte XII — Recommendation
+
+### 93. Contexto obrigatório
+
+#### RB-BR-REC-002 — Recommendation possui Context Snapshot
+
+Toda Recommendation personalizada deve possuir `DecisionContextSnapshot`.
+
+---
+
+### 94. Validade de contexto
+
+#### RB-BR-REC-003 — Recommendation depende das versões utilizadas
+
+Uma Recommendation pode ser invalidada quando mudarem:
+
+* TripContextVersion;
+* ItineraryVersion;
+* data;
+* horário;
+* localização relevante;
+* Restrição obrigatória;
+* disponibilidade;
+* estado operacional do Place.
+
+---
+
+### 95. Justificativa
+
+#### RB-BR-REC-004 — Recommendation possui Reason
+
+Toda Recommendation apresentada deve possuir ao menos uma `RecommendationReason`.
+
+---
+
+### 96. Limitações
+
+#### RB-BR-REC-005 — Limitações relevantes devem ser comunicadas
+
+Quando houver:
+
+* dados antigos;
+* Contexto incompleto;
+* preço desconhecido;
+* funcionamento incerto;
+* rota indisponível;
+* baixa confiança;
+
+a Recommendation deve comunicar a limitação.
+
+---
+
+### 97. Confiança da Recomendação
+
+#### RB-BR-REC-006 — Recommendation Confidence não é certeza
+
+Recommendation Confidence deve:
+
+* ser contextual;
+* considerar evidências;
+* considerar atualidade;
+* considerar completude;
+* não ser apresentada como garantia.
+
+---
+
+### 98. Score e confiança
+
+#### RB-BR-REC-007 — Recommendation Score não substitui Confidence
+
+Recommendation Score pode ordenar candidatos.
+
+Ele não deve ser usado diretamente como:
+
+* confiança;
+* Rating;
+* Decision Quality;
+* probabilidade de sucesso.
+
+---
+
+### 99. Restrição obrigatória
+
+#### RB-BR-REC-008 — Recommendation incompatível não deve ser apresentada como adequada
+
+Uma opção que viola Restriction `mandatory`:
+
+* pode ser excluída;
+* pode ser apresentada como incompatível para explicação;
+* não pode ser apresentada como recomendação válida.
+
+---
+
+### 100. Recomendação expirada
+
+#### RB-BR-REC-009 — Recommendation expirada não deve ser aceita
+
+Uma Recommendation em estado:
+
+* expired;
+* invalidated;
+* superseded;
+
+não deve ser aceita como válida sem nova avaliação.
+
+---
+
+### 101. Aceitação da Recomendação
+
+#### RB-BR-REC-010 — Aceitar registra Decision
+
+Aceitar uma Recommendation deve produzir ou se relacionar a uma Decision.
+
+A aceitação não significa necessariamente execução imediata.
+
+---
+
+### 102. Rejeição da Recomendação
+
+#### RB-BR-REC-011 — Rejeição não altera estado canônico relacionado
+
+Rejeitar Recommendation:
+
+* altera estado da Recommendation;
+* não remove Place;
+* não altera Itinerary;
+* não deve ser interpretado como preferência permanente automaticamente.
+
+---
+
+## Parte XIII — Decision
+
+### 103. Contexto da Decisão
+
+#### RB-BR-DEC-002 — Decision preserva Context Snapshot
+
+Uma Decision deve preservar o Contexto relevante utilizado.
+
+---
+
+### 104. Recomendação opcional
+
+#### RB-BR-DEC-003 — Decision pode existir sem Recommendation
+
+Decisões manuais são válidas.
+
+Recommendation não é pré-condição.
+
+---
+
+### 105. Autoria
+
+#### RB-BR-DEC-004 — Decision possui ator
+
+Toda Decision deve possuir:
+
+* UserId ou ator autorizado equivalente;
+* instante;
+* tipo;
+* opção escolhida.
+
+---
+
+### 106. Execução separada
+
+#### RB-BR-DEC-005 — Decision não implica execução concluída
+
+Uma Decision pode produzir:
+
+* comando;
+* alteração;
+* reserva futura;
+* Activity;
+* nenhuma execução imediata.
+
+---
+
+### 107. Resultado posterior
+
+#### RB-BR-DEC-006 — Decision Outcome é posterior
+
+Decision Outcome:
+
+* não deve ser inventado;
+* pode ser desconhecido;
+* deve ser registrado após observação;
+* pode contribuir para Decision Quality.
+
+---
+
+### 108. Qualidade da Decisão
+
+#### RB-BR-DEC-007 — Decision Quality não julga o Usuário
+
+Decision Quality deve avaliar adequação ao Contexto e aos objetivos, não valor pessoal ou competência do Usuário.
+
+---
+
+## Parte XIV — Itinerary Proposal
+
+### 109. Versão base
+
+#### RB-BR-PRP-002 — Proposal referencia Itinerary Version
+
+Toda Itinerary Proposal deve possuir a versão do Roteiro utilizada como base.
+
+---
+
+### 110. Contexto base
+
+#### RB-BR-PRP-003 — Proposal referencia Trip Context Version
+
+Toda Itinerary Proposal deve registrar a Trip Context Version utilizada.
+
+---
+
+### 111. Proposta pronta
+
+#### RB-BR-PRP-004 — Proposal ready deve ser revisável
+
+Uma Proposta em estado `ready` deve possuir:
+
+* itens propostos;
+* critérios;
+* Justificativas;
+* versão base;
+* Contexto base;
+* limitações;
+* Planning Conflicts conhecidos.
+
+Uma Proposta pode estar vazia quando não houver alteração adequada, desde que isso seja explicado.
+
+---
+
+### 112. Proposed Activity não é Activity
+
+#### RB-BR-PRP-005 — Proposed Activity não possui identidade canônica de Activity
+
+Uma Proposed Activity:
+
+* pertence à Proposta;
+* não possui ActivityId canônico;
+* não integra o Itinerary;
+* não altera Travel Estimates canônicos;
+* pode possuir identidade interna da Proposta.
+
+---
+
+### 113. Aplicação integral
+
+#### RB-BR-PRP-006 — Aceitação integral valida versões
+
+Antes de aplicar toda a Proposta, verificar:
+
+* Proposal Status;
+* ItineraryVersion;
+* TripContextVersion;
+* Restrições;
+* Atividades fixed;
+* Free Periods protected;
+* autorização;
+* idempotência.
+
+---
+
+### 114. Aplicação parcial
+
+#### RB-BR-PRP-007 — Aceitação parcial aplica somente seleção
+
+`AcceptItineraryProposalPartially` deve:
+
+* identificar itens selecionados;
+* validar dependências;
+* aplicar somente itens válidos;
+* preservar itens não aceitos na Proposta;
+* atualizar Proposal Status;
+* incrementar ItineraryVersion uma única vez por aplicação transacional.
+
+---
+
+### 115. Proposta expirada
+
+#### RB-BR-PRP-008 — Proposal expirada não é aplicável
+
+Uma Proposta deve expirar quando:
+
+* sua validade temporal terminar;
+* a versão base se tornar incompatível;
+* o Contexto mudar de forma relevante;
+* for substituída;
+* regra específica determinar.
+
+---
+
+### 116. Idempotência
+
+#### RB-BR-PRP-009 — Aplicação é idempotente
+
+A repetição da mesma solicitação de aplicação não deve duplicar:
+
+* Activities;
+* Free Periods;
+* decisões;
+* efeitos canônicos.
+
+---
+
+### 117. Falha de aplicação
+
+#### RB-BR-PRP-010 — Falha preserva Roteiro anterior
+
+Se a aplicação falhar:
+
+* nenhuma alteração parcial inconsistente deve permanecer;
+* ItineraryVersion não deve refletir aplicação não concluída;
+* a Proposta deve permanecer auditável;
+* a falha técnica não deve ser confundida com Planning Conflict.
+
+---
+
+### 118. Fluxo de validade da Proposta
+
+```mermaid
+flowchart TD
+    Proposal["Itinerary Proposal"]
+    Ready{"Status ready?"}
+    Version{"Versão base compatível?"}
+    Context{"Contexto compatível?"}
+    Authorization{"Usuário autorizado?"}
+    Rules{"Invariantes satisfeitas?"}
+    Apply["Aplicar itens aceitos"]
+    Expired["Expirar ou invalidar"]
+    Block["Bloquear aplicação"]
+    Updated["Itinerary atualizado"]
+
+    Proposal --> Ready
+    Ready -->|Não| Block
+    Ready -->|Sim| Version
+    Version -->|Não| Expired
+    Version -->|Sim| Context
+    Context -->|Não| Expired
+    Context -->|Sim| Authorization
+    Authorization -->|Não| Block
+    Authorization -->|Sim| Rules
+    Rules -->|Não| Block
+    Rules -->|Sim| Apply
+    Apply --> Updated
+```
+
+---
+
+## Parte XV — Planning Assurance
+
+### 119. Criação de Planning Conflict
+
+#### RB-BR-PCF-001 — Conflict exige regra e evidência
+
+Um `PlanningConflict` deve possuir:
+
+* PlanningConflictId;
+* regra relacionada;
+* severidade;
+* estado;
+* evidência;
+* objeto afetado;
+* Contexto ou versões avaliadas.
+
+---
+
+### 120. Severidade error
+
+#### RB-BR-PCF-002 — Error bloqueia operação incompatível
+
+Planning Conflict de severidade `error` deve impedir a operação relacionada enquanto permanecer ativo.
+
+Não pode ser ignorado.
+
+---
+
+### 121. Severidade risk
+
+#### RB-BR-PCF-003 — Risk pode exigir Decision
+
+Planning Conflict de severidade `risk` pode ser ignorado quando:
+
+* a regra permitir;
+* o ator possuir autorização;
+* a decisão for explícita;
+* a justificativa for registrada quando exigida.
+
+---
+
+### 122. Severidade suggestion
+
+#### RB-BR-PCF-004 — Suggestion não bloqueia
+
+Planning Conflict de severidade `suggestion`:
+
+* não bloqueia;
+* pode ser dispensado;
+* pode orientar melhoria;
+* não exige Ignore Planning Risk.
+
+---
+
+### 123. Estado resolved
+
+#### RB-BR-PCF-005 — Resolução exige remoção da condição
+
+Um Planning Conflict só deve ser marcado `resolved` quando a condição problemática deixar de existir.
+
+---
+
+### 124. Estado ignored
+
+#### RB-BR-PCF-006 — Ignorar não resolve
+
+`ignored` significa:
+
+* risco conhecido;
+* decisão consciente;
+* condição ainda existente ou aceita;
+* rastreabilidade preservada.
+
+---
+
+### 125. Estado invalidated
+
+#### RB-BR-PCF-007 — Invalidação ocorre por perda de aplicabilidade
+
+Um Planning Conflict pode ser invalidado quando:
+
+* Contexto mudou;
+* objeto afetado foi removido;
+* versão mudou;
+* evidência deixou de ser aplicável;
+* regra não é mais aplicável.
+
+Invalidar não significa resolver.
+
+---
+
+### 126. Estado superseded
+
+#### RB-BR-PCF-008 — Nova avaliação pode substituir anterior
+
+Um Planning Conflict pode ser `superseded` quando uma avaliação mais recente representar melhor a mesma condição.
+
+---
+
+### 127. Deduplicação de conflitos
+
+#### RB-BR-PCF-009 — Mesma condição não gera duplicidade ativa
+
+O sistema deve evitar múltiplos Planning Conflicts ativos equivalentes para:
+
+* mesma regra;
+* mesmo objeto;
+* mesma versão;
+* mesma condição.
+
+---
+
+### 128. Reabertura
+
+#### RB-BR-PCF-010 — Condição recorrente pode gerar nova avaliação
+
+Um conflito resolvido pode:
+
+* ser reaberto, quando o modelo permitir; ou
+* originar novo Planning Conflict.
+
+A estratégia deve preservar histórico.
+
+---
+
+### 129. Resumo de conflitos
+
+#### RB-BR-PCF-011 — Conflict Summary é derivado
+
+O resumo do Roteiro deve ser calculado a partir dos Planning Conflicts ativos.
+
+Precedência sugerida:
+
+```text
+with-errors
+> with-risks
+> with-suggestions
+> without-known-conflicts
+```
+
+`without-known-conflicts` não significa garantia de ausência de problemas.
+
+---
+
+### 130. Fluxo de Planning Conflict
+
+```mermaid
+stateDiagram-v2
+    [*] --> Open
+
+    Open --> Resolved: condição removida
+    Open --> Ignored: risco aceito
+    Open --> Invalidated: contexto perdeu validade
+    Open --> Superseded: nova avaliação substitui
+
+    Ignored --> Resolved: condição removida
+    Ignored --> Invalidated: contexto perdeu validade
+    Ignored --> Superseded: nova avaliação substitui
+
+    Resolved --> Open: condição reaparece
+    Resolved --> Superseded: nova avaliação substitui
+
+    Invalidated --> [*]
+    Superseded --> [*]
+```
+
+---
+
+## Parte XVI — Regras de dados e qualidade
+
+### 131. Data Freshness
+
+#### RB-BR-DAT-006 — Atualidade deve ser avaliada por tipo
+
+O limite para considerar um dado `stale` deve depender do tipo de informação.
+
+Exemplos:
+
+* horário de funcionamento;
+* preço;
+* estado operacional;
+* Rating;
+* Travel Estimate;
+* descrição estável.
+
+Não deve existir um único prazo universal.
+
+---
+
+### 132. Dados conflitantes
+
+#### RB-BR-DAT-007 — Fontes divergentes devem ser preservadas
+
+Quando fontes confiáveis divergirem:
+
+* não sobrescrever silenciosamente;
+* preservar Provenance;
+* marcar `conflicting`;
+* reduzir Confidence Level;
+* comunicar limitação;
+* aplicar política de resolução.
+
+---
+
+### 133. Dado inferido
+
+#### RB-BR-DAT-008 — Inferência deve ser identificada
+
+Dado inferido não deve ser apresentado como confirmado.
+
+---
+
+### 134. Conteúdo de IA
+
+#### RB-BR-AI-001 — Conteúdo de IA não é fato canônico
+
+Conteúdo gerado por IA pode ser:
+
+* sugestão;
+* resumo;
+* explicação;
+* rascunho;
+* classificação;
+* hipótese.
+
+Não deve se tornar fato confirmado sem processo de validação adequado.
+
+---
+
+### 135. Precisão
+
+#### RB-BR-DAT-009 — Precisão não excede a Fonte
+
+A apresentação não deve sugerir precisão superior à informação de origem.
+
+Exemplo:
+
+* tempo aproximado não deve ser apresentado como duração exata;
+* localização aproximada não deve ser apresentada como coordenada confirmada;
+* faixa de preço não deve ser apresentada como preço final.
+
+---
+
+## Parte XVII — Regras para IA e automações
+
+### 136. Subordinação às invariantes
+
+#### RB-BR-AI-002 — Agentes respeitam as mesmas regras
+
+Agentes de IA devem cumprir as mesmas regras aplicadas a Usuários, serviços e integrações.
+
+---
+
+### 137. Sem autorização implícita
+
+#### RB-BR-AI-003 — IA não concede autorização
+
+IA não pode:
+
+* transferir ownership;
+* excluir Viagem;
+* ignorar Risco;
+* aplicar Proposta;
+* registrar Decision do Usuário;
+* alterar Restrição obrigatória;
+
+sem autorização explícita e verificável.
+
+---
+
+### 138. Explicabilidade
+
+#### RB-BR-AI-004 — Recomendações de IA devem ser explicáveis
+
+Uma Recommendation gerada com IA deve apresentar fatores compreensíveis.
+
+Não é obrigatório expor:
+
+* prompt integral;
+* raciocínio interno;
+* pesos proprietários;
+* cadeia interna do modelo.
+
+---
+
+### 139. Contexto mínimo
+
+#### RB-BR-AI-005 — IA recebe apenas contexto necessário
+
+Dados enviados a um modelo devem ser minimizados.
+
+Evitar enviar:
+
+* dados pessoais desnecessários;
+* histórico completo quando um recorte basta;
+* localização contínua;
+* diagnósticos;
+* credenciais;
+* identificadores externos irrelevantes.
+
+---
+
+### 140. Saída estruturada
+
+#### RB-BR-AI-006 — Saída de IA deve ser validada
+
+Quando uma saída de IA for utilizada para produzir objetos de domínio:
+
+* validar estrutura;
+* validar tipos;
+* validar referências;
+* validar invariantes;
+* validar enumerações;
+* validar Provenance;
+* rejeitar campos não reconhecidos quando necessário.
+
+---
+
+### 141. Falha segura
+
+#### RB-BR-AI-007 — Falha de IA não altera estado
+
+Falha, timeout ou resposta inválida de IA deve preservar estado canônico.
+
+---
+
+### 142. Alucinação e dado desconhecido
+
+#### RB-BR-AI-008 — IA não preenche lacunas como fato
+
+Quando não houver evidência suficiente, o agente deve:
+
+* indicar incerteza;
+* solicitar dado quando necessário;
+* produzir opção condicionada;
+* evitar inventar Lugar, preço, horário ou disponibilidade.
+
+---
+
+## Parte XVIII — Regras de privacidade
+
+### 143. Localização pontual
+
+#### RB-BR-PRI-002 — Localização atual deve ser contextual
+
+A localização atual:
+
+* deve ser coletada apenas quando necessária;
+* deve possuir finalidade;
+* não deve implicar rastreamento contínuo;
+* deve possuir tratamento de expiração.
+
+---
+
+### 144. Dados de crianças
+
+#### RB-BR-PRI-003 — Dados de menores devem ser minimizados
+
+Para Viajantes menores, preferir:
+
+* faixa etária;
+* necessidades funcionais;
+* restrições contextuais.
+
+Evitar:
+
+* nome completo quando desnecessário;
+* data de nascimento completa;
+* dados sensíveis sem finalidade clara.
+
+---
+
+### 145. Necessidades funcionais
+
+#### RB-BR-PRI-004 — Necessidade funcional é preferida a diagnóstico
+
+Registrar:
+
+```text
+necessita acesso sem escadas
+```
+
+em vez de:
+
+```text
+possui determinada condição médica
+```
+
+quando o diagnóstico não for necessário.
+
+---
+
+### 146. Retenção
+
+#### RB-BR-PRI-005 — Retenção deve respeitar finalidade
+
+Dados pessoais não devem ser mantidos indefinidamente sem finalidade, obrigação ou decisão do Usuário.
+
+---
+
+## Parte XIX — Pré-condições e pós-condições de comandos
+
+### 147. Create Trip
+
+#### Pré-condições
+
+* User autenticado;
+* Account ativa;
+* permissão para criação.
+
+#### Pós-condições
+
+* Trip criada em Draft;
+* owner atribuído;
+* TripContextVersion inicializada;
+* evento `TripCreated` produzido.
+
+---
+
+### 148. Update Trip Period
+
+#### Pré-condições
+
+* ator autorizado;
+* Trip existente;
+* novo Período válido;
+* impacto calculado.
+
+#### Pós-condições
+
+* Trip Period atualizado;
+* TripContextVersion incrementada;
+* sincronização dos Trip Days iniciada;
+* objetos dependentes invalidados;
+* evento `TripPeriodChanged` produzido.
+
+---
+
+### 149. Save Place
+
+#### Pré-condições
+
+* Trip existente;
+* Place existente;
+* ator autorizado.
+
+#### Pós-condições
+
+* Saved Place existente;
+* ausência de duplicidade;
+* Itinerary inalterado;
+* evento `PlaceSaved` produzido somente quando houver mudança real.
+
+---
+
+### 150. Add Activity
+
+#### Pré-condições
+
+* Trip Day existente;
+* ator autorizado;
+* título válido;
+* Duration válida quando presente;
+* Place válido quando presente.
+
+#### Pós-condições
+
+* Activity adicionada;
+* ItineraryVersion incrementada;
+* consistência marcada para reavaliação;
+* evento `ActivityAdded` produzido.
+
+---
+
+### 151. Request Recommendation
+
+#### Pré-condições
+
+* Contexto mínimo disponível;
+* escopo da decisão conhecido;
+* autorização compatível.
+
+#### Pós-condições
+
+* solicitação registrada;
+* nenhuma alteração canônica aplicada;
+* Recommendation gerada ou falha registrada.
+
+---
+
+### 152. Accept Recommendation
+
+#### Pré-condições
+
+* Recommendation existente;
+* estado aplicável;
+* validade preservada;
+* ator autorizado.
+
+#### Pós-condições
+
+* Recommendation marcada como accepted;
+* Decision registrada;
+* execução separada iniciada quando aplicável.
+
+---
+
+### 153. Accept Itinerary Proposal Partially
+
+#### Pré-condições
+
+* Itinerary Proposal ready;
+* itens selecionados;
+* versão base compatível;
+* Contexto compatível;
+* ator autorizado;
+* invariantes satisfeitas.
+
+#### Pós-condições
+
+* somente itens aceitos aplicados;
+* ItineraryVersion incrementada;
+* Proposal Status atualizado;
+* Decision registrada;
+* evento `ItineraryProposalPartiallyAccepted` produzido.
+
+---
+
+### 154. Ignore Planning Risk
+
+#### Pré-condições
+
+* Planning Conflict open;
+* severidade risk;
+* regra permite ignorar;
+* ator autorizado.
+
+#### Pós-condições
+
+* Conflict Status alterado para ignored;
+* Decision registrada;
+* justificativa preservada quando exigida;
+* evento `PlanningConflictIgnored` produzido.
+
+---
+
+## Parte XX — Matriz de regras bloqueantes
+
+### 155. Principais regras bloqueantes
+
+| Regra          | Condição bloqueante                       |
+| -------------- | ----------------------------------------- |
+| RB-BR-ACC-002  | Viagem sem owner                          |
+| RB-BR-ACC-003  | Ator sem autorização                      |
+| RB-BR-TRIP-003 | Data final anterior à inicial             |
+| RB-BR-ITN-004  | Redução de Período com perda silenciosa   |
+| RB-BR-TRV-006  | Violação de Restrição mandatory           |
+| RB-BR-PLC-006  | Activity em Place permanentemente fechado |
+| RB-BR-ITN-011  | Duration não positiva                     |
+| RB-BR-PRP-008  | Aplicação de Proposta expirada            |
+| RB-BR-PCF-002  | Ignorar Planning Conflict error           |
+| RB-BR-AI-003   | Ação de IA sem autorização                |
+
+---
+
+### 156. Principais riscos
+
+| Regra         | Situação                               |
+| ------------- | -------------------------------------- |
+| RB-BR-TRV-007 | Violação de Restrição important        |
+| RB-BR-PLC-005 | Fechamento temporário                  |
+| RB-BR-ITN-014 | Sobreposição não bloqueante            |
+| RB-BR-MOB-006 | Intervalo de deslocamento insuficiente |
+| RB-BR-DAT-006 | Dados antigos                          |
+| RB-BR-DAT-007 | Fontes conflitantes                    |
+| RB-BR-REC-006 | Baixa confiança                        |
+| RB-BR-PCF-003 | Continuidade com Risco                 |
+
+---
+
+### 157. Principais sugestões
+
+| Área         | Situação                             |
+| ------------ | ------------------------------------ |
+| Roteiro      | Dia com baixa utilização             |
+| Roteiro      | Excesso de Atividades para o Pace    |
+| Mobilidade   | Sequência geográfica pouco eficiente |
+| Preferências | Baixa aderência aos Interesses       |
+| Dados        | Hospedagem não informada             |
+| Recomendação | Contexto incompleto                  |
+| Planejamento | Free Period flexible disponível      |
+
+---
+
+## Parte XXI — Matriz de precedência aplicada
+
+### 158. Exemplos de precedência
+
+| Situação                                                        | Regra prevalente              |
+| --------------------------------------------------------------- | ----------------------------- |
+| Interesse por aventura versus Restrição mandatory de mobilidade | Restrição mandatory           |
+| Menor distância versus Place permanentemente fechado            | Estado operacional            |
+| Recomendação com score alto versus dados stale                  | Qualidade e atualidade        |
+| IA sugere alteração versus Free Period protected                | Intenção explícita do Usuário |
+| Editor tenta excluir Viagem                                     | Autorização                   |
+| Proposta otimizada versus Activity fixed                        | Invariante do Roteiro         |
+| Orçamento preferencial versus segurança                         | Segurança                     |
+
+---
+
+## Parte XXII — Validação do planejamento
+
+### 159. Escopos de revisão
+
+Uma revisão pode avaliar:
+
+* Trip;
+* Trip Day;
+* Activity;
+* Itinerary;
+* Itinerary Proposal;
+* Recommendation;
+* Place;
+* Travel Estimate.
+
+---
+
+### 160. Ordem recomendada de avaliação
+
+```mermaid
+flowchart TD
+    Authorization["1. Autorização"]
+    Structural["2. Invariantes estruturais"]
+    Mandatory["3. Restrições mandatory"]
+    Temporal["4. Consistência temporal"]
+    Operational["5. Estado operacional"]
+    Mobility["6. Mobilidade"]
+    Budget["7. Orçamento"]
+    Preferences["8. Preferências"]
+    Quality["9. Qualidade dos dados"]
+    Suggestions["10. Sugestões"]
+
+    Authorization --> Structural
+    Structural --> Mandatory
+    Mandatory --> Temporal
+    Temporal --> Operational
+    Operational --> Mobility
+    Mobility --> Budget
+    Budget --> Preferences
+    Preferences --> Quality
+    Quality --> Suggestions
+```
+
+---
+
+### 161. Resultado da revisão
+
+Uma revisão deve produzir:
+
+* resultado geral;
+* regras avaliadas;
+* Planning Conflicts;
+* evidências;
+* versões;
+* momento;
+* escopo;
+* limitações.
+
+---
+
+### 162. Revisão incompleta
+
+Quando dados necessários estiverem ausentes:
+
+* resultado pode ser `unknown`;
+* não afirmar ausência de conflitos;
+* comunicar limitações;
+* criar sugestão para completar dados quando apropriado.
+
+---
+
+## Parte XXIII — Rastreabilidade
+
+### 163. Matriz entre agregados e regras
+
+| Agregado           | Faixa principal |
+| ------------------ | --------------- |
+| Account            | RB-BR-ACC-*     |
+| Trip               | RB-BR-TRIP-*    |
+| Traveler Profile   | RB-BR-TRV-*     |
+| Place              | RB-BR-PLC-*     |
+| Trip Collection    | RB-BR-COL-*     |
+| Itinerary          | RB-BR-ITN-*     |
+| Recommendation     | RB-BR-REC-*     |
+| Decision           | RB-BR-DEC-*     |
+| Itinerary Proposal | RB-BR-PRP-*     |
+| Planning Conflict  | RB-BR-PCF-*     |
+| Data Source        | RB-BR-DAT-*     |
+
+---
+
+### 164. Matriz entre conceitos estratégicos e regras
+
+| Conceito                  | Regras relacionadas                         |
+| ------------------------- | ------------------------------------------- |
+| Context                   | RB-BR-REC-002, RB-BR-DEC-002, RB-BR-PRP-003 |
+| Recommendation            | RB-BR-REC-*                                 |
+| Decision                  | RB-BR-DEC-*                                 |
+| Recommendation Confidence | RB-BR-REC-006                               |
+| Explainability            | RB-BR-REC-004, RB-BR-REC-005, RB-BR-AI-004  |
+| Decision Quality          | RB-BR-DEC-006, RB-BR-DEC-007                |
+| Next Best Action          | Regras de Recommendation                    |
+| Provenance                | RB-BR-DAT-003                               |
+| Planning Conflict         | RB-BR-PCF-*                                 |
+
+---
+
+### 165. Rastreabilidade futura
+
+RB-DOM-004 deverá relacionar:
+
+* regra;
+* comando;
+* evento;
+* transição;
+* ciclo de vida.
+
+RB-QA-001 deverá relacionar:
+
+* regra;
+* cenário;
+* critério de aceite;
+* teste.
+
+---
+
+## Parte XXIV — Critérios de aceite
+
+### 166. Critérios estruturais
+
+* regras possuem identificadores;
+* classificação está definida;
+* severidade está definida quando aplicável;
+* invariantes por agregado estão documentadas;
+* regras transversais estão documentadas;
+* precedência está definida;
+* pré-condições e pós-condições estão documentadas;
+* Planning Conflict está normalizado;
+* Itinerary Proposal está normalizada;
+* identificadores canônicos seguem o RB-DOM-002.
+
+---
+
+### 167. Critérios de consistência
+
+* Recommendation não altera estado canônico;
+* Decision pertence ao Usuário;
+* Proposal não é Itinerary;
+* Saved Place não é Planned Place;
+* Place não é Activity;
+* Estimate não é confirmação;
+* unknown não recebe valor falso;
+* IA não possui autoridade autônoma;
+* Restrição mandatory não é ignorável;
+* Activity fixed é preservada;
+* Free Period protected é preservado.
+
+---
+
+### 168. Critérios dos diagramas
+
+* existe apenas um H1;
+* Partes utilizam H2;
+* seções numeradas utilizam H3;
+* subseções utilizam H4;
+* blocos Mermaid não possuem atributos adicionais;
+* diagramas utilizam termos oficiais;
+* diagramas não contradizem as regras;
+* diagramas não definem implementação física.
+
+---
+
+### 169. Critérios para agentes de IA
+
+* agentes consultam regras aplicáveis;
+* agentes não violam invariantes;
+* agentes preservam autoria;
+* agentes não inventam dados;
+* agentes preservam Provenance;
+* agentes comunicam limitações;
+* agentes não aplicam Proposal sem autorização;
+* agentes não ignoram Planning Conflict;
+* agentes validam saída estruturada.
+
+---
+
+## Parte XXV — Governança
+
+### 170. Inclusão de nova regra
+
+Uma nova regra deve:
+
+* possuir necessidade real;
+* possuir identificador;
+* utilizar Linguagem Ubíqua;
+* indicar classificação;
+* indicar escopo;
+* indicar consequência;
+* indicar severidade quando aplicável;
+* indicar eventos relacionados;
+* atualizar documentos afetados.
+
+---
+
+### 171. Alteração de regra
+
+Uma alteração deve avaliar impacto em:
 
 * Modelo de Domínio;
 * Linguagem Ubíqua;
-* PRD;
-* UX;
+* Eventos;
+* ciclos de vida;
 * Arquitetura;
-* Dados;
+* banco de dados;
 * APIs;
+* UX;
+* Design System;
 * testes;
 * analytics;
 * prompts;
-* agentes.
+* agentes de IA.
 
 ---
 
-## 176. Regra temporária
+### 172. Depreciação de regra
 
-Regras temporárias DEVEM possuir:
+Uma regra depreciada deve registrar:
 
+* identificador;
+* substituta;
 * motivo;
-* prazo;
-* owner;
-* condição de remoção;
-* impacto conhecido.
+* data;
+* impacto;
+* estratégia de migração.
+
+O identificador depreciado não deve ser reutilizado.
 
 ---
 
-## 177. Conflito entre documentos
+### 173. Exceções
 
-Quando houver conflito:
+Exceções devem ser:
 
-1. a RouteBook Bible possui precedência constitucional;
-2. a decisão de domínio aprovada possui precedência sobre interpretação local;
-3. a divergência DEVE ser corrigida nos documentos dependentes;
-4. agentes NÃO DEVEM escolher silenciosamente uma versão.
+* explícitas;
+* justificadas;
+* limitadas;
+* rastreáveis;
+* autorizadas;
+* testáveis.
 
----
-
-## 178. Uso por agentes de IA
-
-Agentes DEVEM:
-
-* consultar este documento antes de propor comportamento;
-* citar regras aplicáveis;
-* não inventar exceções;
-* respeitar bloqueios;
-* preservar controle do Usuário;
-* distinguir política de invariante;
-* gerar testes para regras alteradas;
-* identificar conflitos documentais.
+Uma exceção não documentada é uma violação.
 
 ---
 
-## 179. Checklist de revisão
+### 174. Uso por agentes de IA
 
-Antes de aprovar este documento, verificar:
+Agentes devem:
 
-* princípios transversais estão definidos;
-* autorização está definida;
-* criação da Viagem está definida;
-* Período está definido;
-* Destino está definido;
-* Hospedagem está definida;
-* Viajantes estão definidos;
-* Preferências estão definidas;
-* Lugares estão definidos;
-* Salvos estão definidos;
-* Roteiro está definido;
-* Atividades estão definidas;
-* Períodos Livres estão definidos;
-* Deslocamentos estão definidos;
-* Recomendações estão definidas;
-* Propostas estão definidas;
-* Conflitos estão definidos;
-* proveniência está definida;
-* falhas estão definidas;
-* privacidade está definida;
-* prioridades estão definidas;
-* validações estão catalogadas;
-* cenários normativos estão presentes;
-* rastreabilidade está presente;
-* governança está definida.
+* identificar regras aplicáveis;
+* respeitar precedência;
+* diferenciar error, risk e suggestion;
+* produzir Planning Conflict quando necessário;
+* não criar exceções;
+* não alterar severidade;
+* não considerar ausência de evidência como conformidade.
 
 ---
 
-## 180. Declaração final
+## Parte XXVI — Checklist de revisão
 
-As Regras de Negócio e Invariantes estabelecem os limites comportamentais oficiais do RouteBook.
+### 175. Checklist normativo
 
-Elas definem:
+Antes de aprovar:
 
-* o que é válido;
-* o que é obrigatório;
-* o que é permitido;
-* o que deve ser bloqueado;
-* o que exige confirmação;
-* o que deve ser recalculado;
-* o que deve ser preservado;
-* o que pode ser estimado;
-* o que não pode ser aplicado automaticamente.
+* propósito está definido;
+* autoridade está definida;
+* terminologia está alinhada ao RB-DOM-002;
+* regras possuem IDs;
+* agregados estão cobertos;
+* invariantes estão cobertas;
+* autorização está coberta;
+* privacidade está coberta;
+* dados estão cobertos;
+* IA está coberta;
+* Trip Period está coberto;
+* sincronização de Dias está coberta;
+* Traveler Profile está coberto;
+* Place está coberto;
+* Trip Collection está coberta;
+* Itinerary está coberto;
+* Recommendation está coberta;
+* Decision está coberta;
+* Itinerary Proposal está coberta;
+* Planning Conflict está coberto;
+* precedência está definida;
+* severidades estão definidas;
+* pré-condições estão definidas;
+* pós-condições estão definidas;
+* rastreabilidade está definida;
+* diagramas estão válidos;
+* títulos Markdown são únicos;
+* frontmatter YAML é válido;
+* não existem contradições com RB-DOM-001;
+* não existem contradições com RB-DOM-002.
 
-Essas regras preservam os princípios fundamentais do produto:
+---
 
-* o Usuário mantém controle;
-* Salvar não significa Planejar;
-* Lugar não significa Atividade;
-* Proposta não significa Roteiro;
-* Recomendação não significa decisão;
-* Estimativa não significa garantia;
-* falhas externas não apagam decisões válidas;
-* IA respeita as mesmas invariantes do restante do sistema.
+## Parte XXVII — Declaração final
 
-Toda implementação, automação, integração ou agente que opere no RouteBook deverá cumprir estas regras.
+### 176. Declaração normativa
+
+As Regras de Negócio e Invariantes do RouteBook estabelecem as condições obrigatórias que governam o comportamento do domínio.
+
+Todo comportamento do produto deverá preservar:
+
+* controle do Usuário;
+* integridade dos agregados;
+* autorização;
+* privacidade;
+* rastreabilidade;
+* Provenance;
+* planejamento parcial;
+* separação entre Recommendation e Decision;
+* separação entre Decision e execução;
+* separação entre Itinerary Proposal e Itinerary;
+* separação entre Place e Activity;
+* separação entre Saved Place e Planned Place;
+* caráter estimado de informações não confirmadas;
+* validade contextual;
+* consistência temporal;
+* proteção de Activities fixed;
+* proteção de Free Periods protected;
+* tratamento explícito de Planning Conflicts;
+* subordinação de agentes de IA às regras oficiais.
+
+Nenhuma interface, integração, automação, serviço ou agente de IA poderá redefinir silenciosamente essas regras.
+
+Quando uma operação não puder preservar uma invariante, ela deverá ser bloqueada ou encaminhada para revisão por meio de `PlanningConflict`, conforme a severidade definida.

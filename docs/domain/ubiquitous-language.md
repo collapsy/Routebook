@@ -580,7 +580,7 @@ validate
 
 ### 14. Convenção para identificadores
 
-Identificadores devem utilizar o nome canônico da entidade seguido de `Id`.
+Todo identificador conceitual deve utilizar o nome canônico completo da entidade seguido do sufixo `Id`.
 
 Exemplos:
 
@@ -591,16 +591,76 @@ PlaceId
 ActivityId
 DecisionId
 RecommendationId
+ItineraryProposalId
 PlanningConflictId
 ```
 
-O identificador oficial do agregado `PlanningConflict` é:
+Essa convenção se aplica a:
+
+* tipos de domínio;
+* contratos conceituais;
+* diagramas;
+* modelos de dados;
+* eventos;
+* comandos;
+* documentação técnica;
+* implementações.
+
+Nomes genéricos que omitam parte relevante do conceito não devem ser introduzidos como tipos canônicos.
+
+Exemplos a evitar:
 
 ```text
-PlanningConflictId
+ProposalId
+ConflictId
+ProfileId
+ItemId
 ```
 
-O termo `ConflictId` não deve ser introduzido em novos documentos, contratos, eventos, modelos de dados ou implementações.
+Quando o contexto da referência estiver inequivocamente definido, propriedades, parâmetros locais e placeholders de rota podem utilizar formas abreviadas.
+
+Exemplos permitidos:
+
+```text
+proposalId
+conflictId
+recommendationId
+activityId
+```
+
+Nesses casos, a forma abreviada representa o tipo canônico correspondente:
+
+| Referência contextual | Tipo canônico         |
+| --------------------- | --------------------- |
+| `proposalId`          | `ItineraryProposalId` |
+| `conflictId`          | `PlanningConflictId`  |
+| `recommendationId`    | `RecommendationId`    |
+| `activityId`          | `ActivityId`          |
+
+Exemplos válidos em rotas HTTP:
+
+```text
+POST /trips/{tripId}/itinerary/proposals/{proposalId}/accept
+POST /trips/{tripId}/conflicts/{conflictId}/ignore
+POST /trips/{tripId}/activities/{activityId}/move
+```
+
+A forma contextual abreviada:
+
+* não cria um novo conceito;
+* não altera o tipo canônico;
+* não deve ser utilizada quando houver ambiguidade;
+* não deve substituir o nome completo em definições de domínio;
+* deve permanecer consistente dentro do mesmo contrato ou superfície.
+
+Quando o contexto não for suficiente para eliminar ambiguidade, deve-se utilizar o nome completo.
+
+Exemplos:
+
+```text
+itineraryProposalId
+planningConflictId
+```
 
 ---
 

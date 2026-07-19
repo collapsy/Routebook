@@ -3,16 +3,16 @@
 id: RB-DOM-004
 
 title: Eventos de Domínio e Ciclos de Vida
-description: Define os eventos de domínio, comandos, transições de estado, ciclos de vida, efeitos, invalidações e regras temporais das principais entidades e agregados do RouteBook.
+description: Define os eventos de domínio, comandos, transições de estado, ciclos de vida, relações causais, regras de idempotência, invalidação, versionamento e integração do domínio do RouteBook.
 
 document_type: domain
 owner: Domain
 
 status: Draft
-version: "0.1.0"
+version: "0.2.0"
 
-created: "2026-07-17"
-last_updated: null
+created: "2026-07-18"
+last_updated: "2026-07-18"
 
 authors:
 
@@ -26,6 +26,12 @@ tags:
 - state-transitions
 - commands
 - event-driven
+- idempotency
+- planning-assurance
+- decision-intelligence
+- ddd
+- diagrams
+- mermaid
 - ai-first
 - travel-planning
 
@@ -56,12 +62,11 @@ related_documents:
 - RB-DOM-001
 - RB-DOM-002
 - RB-DOM-003
+- RB-ARC-001
+- RB-ARC-002
 
 prerequisites:
 
-- RB-CORE-0001
-- RB-CORE-0002
-- RB-CORE-0003
 - RB-CORE-0004
 - RB-DOM-001
 - RB-DOM-002
@@ -70,8 +75,8 @@ prerequisites:
 next_documents:
 
 - RB-ARC-001
+- RB-ARC-002
 - RB-DATA-001
-- RB-API-001
 - RB-QA-001
 
 ai_context:
@@ -81,3072 +86,2829 @@ index: true
 
 # RouteBook — Eventos de Domínio e Ciclos de Vida
 
-## 1. Propósito deste documento
+## Parte I — Fundamentos
 
-Este documento define os eventos de domínio e os ciclos de vida oficiais do RouteBook.
+### 1. Propósito deste documento
 
-Seu objetivo é estabelecer como os principais conceitos do produto:
+Este documento define os Eventos de Domínio e os Ciclos de Vida oficiais do RouteBook.
 
-* nascem;
-* mudam;
-* produzem efeitos;
-* tornam-se inválidos;
-* expiram;
-* são concluídos;
-* são cancelados;
-* são arquivados;
-* são removidos.
+Seu objetivo é estabelecer como mudanças relevantes no domínio:
 
-Este documento também define:
+* são solicitadas;
+* são validadas;
+* são aplicadas;
+* são registradas;
+* são comunicadas;
+* produzem consequências;
+* invalidam estados derivados;
+* iniciam avaliações;
+* preservam rastreabilidade.
+
+Este documento orienta:
+
+* produto;
+* arquitetura;
+* engenharia;
+* qualidade;
+* dados;
+* integrações;
+* automações;
+* analytics;
+* observabilidade;
+* agentes de IA;
+* documentação.
+
+Este documento define:
 
 * comandos conceituais;
-* eventos de domínio;
+* Eventos de Domínio;
 * transições de estado;
-* pré-condições;
-* pós-condições;
-* efeitos derivados;
-* invalidações;
-* reprocessamentos;
-* idempotência;
-* correlação;
+* ciclos de vida;
 * causalidade;
-* consistência;
-* temporalidade;
-* auditoria.
-
-Ele deverá orientar:
-
-* arquitetura;
-* aplicação;
-* domínio;
-* persistência;
-* mensageria;
-* APIs;
-* integrações;
-* processamento assíncrono;
-* IA;
-* analytics;
-* auditoria;
-* QA;
-* observabilidade;
-* agentes autônomos.
+* correlação;
+* idempotência;
+* versionamento;
+* invalidação;
+* eventos internos;
+* eventos de integração;
+* payload conceitual mínimo;
+* regras de publicação;
+* regras de consumo;
+* regras de falha;
+* rastreabilidade entre comandos, regras e eventos.
 
 Este documento não define:
 
+* broker;
+* fila;
+* tópico;
+* protocolo;
+* banco físico;
 * tecnologia de mensageria;
-* formato final de payload;
-* tópicos;
-* filas;
-* bancos de dados;
-* endpoints;
-* classes;
 * framework;
-* estratégia de event sourcing;
-* infraestrutura de processamento.
+* serialização definitiva;
+* estratégia de entrega física;
+* infraestrutura de observabilidade;
+* implementação de Event Sourcing.
 
 ---
 
-## 2. Relação com os documentos anteriores
+### 2. Autoridade documental
 
-A sequência da Epic Domain é:
+A precedência para interpretação deve ser:
 
-```text
-RB-DOM-001 — Modelo de Domínio
-→ define os conceitos e agregados
+```mermaid
+flowchart TD
+    Bible["RB-CORE-0004<br/>RouteBook Bible"]
+    Model["RB-DOM-001<br/>Modelo de Domínio"]
+    Language["RB-DOM-002<br/>Linguagem Ubíqua"]
+    Rules["RB-DOM-003<br/>Regras e Invariantes"]
+    Events["RB-DOM-004<br/>Eventos e Ciclos de Vida"]
+    Architecture["Arquitetura"]
+    Implementation["Implementação"]
 
-RB-DOM-002 — Linguagem Ubíqua
-→ define os nomes oficiais
-
-RB-DOM-003 — Regras de Negócio e Invariantes
-→ define limites e validações
-
-RB-DOM-004 — Eventos de Domínio e Ciclos de Vida
-→ define mudanças, transições e efeitos
+    Bible --> Model
+    Model --> Language
+    Language --> Rules
+    Rules --> Events
+    Events --> Architecture
+    Architecture --> Implementation
 ```
 
-Os eventos e ciclos de vida definidos aqui deverão respeitar integralmente as invariantes de `RB-DOM-003`.
+#### Interpretação
+
+* O Modelo de Domínio define os conceitos.
+* A Linguagem Ubíqua define os nomes.
+* As Regras de Negócio definem o que é permitido.
+* Este documento define como mudanças válidas são representadas.
+* A Arquitetura define como eventos serão implementados e transportados.
 
 ---
 
-## 3. Objetivos
+### 3. Definição de comando
 
-Este documento deverá:
+Um comando representa uma intenção de alterar o estado do domínio.
 
-1. tornar mudanças de estado explícitas;
-2. diferenciar intenção de fato ocorrido;
-3. definir transições válidas;
-4. impedir transições impossíveis;
-5. preservar rastreabilidade;
-6. permitir processamento assíncrono;
-7. suportar auditoria;
-8. orientar integração entre contextos;
-9. preparar o domínio para agentes de IA;
-10. reduzir lógica implícita;
-11. permitir reprocessamento seguro;
-12. evitar efeitos duplicados;
-13. preservar a ordem causal;
-14. distinguir estado canônico de estado derivado;
-15. documentar expiração e invalidação.
+Um comando:
 
----
-
-# Parte I — Conceitos fundamentais
-
-## 4. Comando
-
-Um Comando representa intenção de alterar o estado do domínio.
+* utiliza verbo de ação;
+* pode ser rejeitado;
+* possui um alvo;
+* possui um ator;
+* possui Contexto;
+* pode produzir nenhum, um ou vários eventos;
+* não representa fato ocorrido.
 
 Exemplos:
 
 ```text
 CreateTrip
+UpdateTripPeriod
 SavePlace
 AddActivity
-MoveActivity
-AcceptItineraryProposal
+AcceptItineraryProposalPartially
+ResolvePlanningConflict
 ```
-
-Um Comando:
-
-* pode ser aceito;
-* pode ser rejeitado;
-* pode produzir um ou mais Eventos;
-* pode não produzir alteração quando for idempotente;
-* não representa fato concluído.
 
 ---
 
-## 5. Evento de Domínio
+### 4. Definição de Evento de Domínio
 
-Um Evento de Domínio representa um fato relevante já ocorrido.
+Um Evento de Domínio representa um fato relevante que já ocorreu.
 
-Exemplos:
+Um evento:
 
-```text
-TripCreated
-PlaceSaved
-ActivityMoved
-ConflictDetected
-```
-
-Um Evento:
-
-* utiliza tempo passado;
+* utiliza verbo no passado;
 * é imutável;
-* representa algo que ocorreu;
-* pode produzir efeitos;
-* pode ser publicado internamente;
-* pode ser persistido para auditoria;
-* não pode ser desfeito por alteração do próprio evento.
-
----
-
-## 6. Estado
-
-Estado representa a condição atual de uma entidade, agregado ou processo.
+* possui identidade;
+* possui momento de ocorrência;
+* possui origem;
+* possui correlação;
+* representa uma mudança confirmada;
+* não deve ser utilizado como comando disfarçado.
 
 Exemplos:
-
-* Viagem planejada;
-* Atividade cancelada;
-* Proposta pronta;
-* Conflito aberto;
-* Estimativa desatualizada.
-
----
-
-## 7. Transição
-
-Transição representa mudança válida entre estados.
-
-Exemplo:
-
-```text
-Draft
-→ Planned
-```
-
-Toda transição deverá possuir:
-
-* origem;
-* destino;
-* gatilho;
-* pré-condições;
-* efeitos;
-* eventos;
-* transições proibidas.
-
----
-
-## 8. Efeito
-
-Um efeito é uma consequência produzida por um Evento.
-
-Exemplos:
-
-```text
-TripAccommodationChanged
-→ invalida Distâncias
-
-ActivityMoved
-→ recalcula Deslocamentos
-
-PlaceMarkedUnavailable
-→ detecta Conflito
-```
-
----
-
-## 9. Invalidação
-
-Invalidação ocorre quando um dado ou objeto deixa de ser aplicável ao contexto atual.
-
-Exemplos:
-
-* Recomendação invalidada;
-* Proposta expirada;
-* Estimativa desatualizada;
-* Conflito invalidado.
-
-Invalidação não significa necessariamente exclusão.
-
----
-
-## 10. Expiração
-
-Expiração ocorre quando um objeto ultrapassa sua validade temporal ou contextual.
-
-Exemplos:
-
-* Proposta baseada em versão antiga;
-* Recomendação antiga;
-* Estimativa fora da janela de validade.
-
----
-
-## 11. Conclusão
-
-Conclusão representa encerramento normal do ciclo de vida.
-
-Exemplos:
-
-* Viagem concluída;
-* Atividade concluída;
-* processamento concluído.
-
-Conclusão não significa arquivamento ou exclusão.
-
----
-
-## 12. Cancelamento
-
-Cancelamento representa interrupção explícita de um ciclo ainda relevante.
-
-Exemplos:
-
-* Viagem cancelada;
-* Atividade cancelada;
-* geração cancelada.
-
-Cancelamento deve preservar histórico.
-
----
-
-## 13. Arquivamento
-
-Arquivamento remove um objeto das visões principais sem removê-lo do histórico.
-
----
-
-## 14. Remoção
-
-Remoção representa retirada de um objeto do estado ativo.
-
-Poderá ser:
-
-* lógica;
-* física;
-* anonimizada;
-* definitiva.
-
-A estratégia técnica será definida posteriormente.
-
----
-
-# Parte II — Estrutura de um Evento de Domínio
-
-## 15. Metadados obrigatórios
-
-Todo Evento de Domínio deverá possuir conceitualmente:
-
-```text
-eventId
-eventType
-aggregateId
-aggregateType
-occurredAt
-correlationId
-causationId
-actor
-version
-schemaVersion
-```
-
----
-
-## 16. eventId
-
-Identificador único do Evento.
-
-Deverá impedir processamento duplicado.
-
----
-
-## 17. eventType
-
-Nome canônico do Evento.
-
-Exemplo:
 
 ```text
 TripCreated
+TripPeriodChanged
+PlaceSaved
+ActivityAdded
+DecisionRecorded
+PlanningConflictDetected
 ```
 
 ---
 
-## 18. aggregateId
+### 5. Comando, evento e efeito
 
-Identificador do agregado que produziu o Evento.
+```mermaid
+flowchart LR
+    Actor["Ator"]
+    Command["Comando"]
+    Rules["Regras e invariantes"]
+    Aggregate["Agregado"]
+    Event["Evento de Domínio"]
+    Reaction["Reações"]
+    Projection["Projeções"]
+    Integration["Integrações"]
 
----
-
-## 19. aggregateType
-
-Tipo do agregado.
-
-Exemplos:
-
-* Trip;
-* Itinerary;
-* Place;
-* ItineraryProposal.
-
----
-
-## 20. occurredAt
-
-Instante em que o fato ocorreu.
-
-Deverá utilizar referência temporal inequívoca.
+    Actor --> Command
+    Command --> Rules
+    Rules -->|válido| Aggregate
+    Rules -->|inválido| Rejection["Rejeição"]
+    Aggregate --> Event
+    Event --> Reaction
+    Event --> Projection
+    Event --> Integration
+```
 
 ---
 
-## 21. correlationId
+### 6. Evento não é log técnico
 
-Identificador utilizado para agrupar operações do mesmo fluxo.
+Evento de Domínio não deve representar:
+
+* stack trace;
+* timeout;
+* requisição HTTP;
+* execução de query;
+* mudança visual;
+* clique;
+* métrica técnica;
+* mensagem de depuração.
+
+Falhas técnicas podem produzir eventos operacionais, mas não devem ser confundidas com fatos do domínio.
+
+---
+
+### 7. Evento não é notificação
+
+Uma notificação pode ser consequência de um Evento de Domínio.
 
 Exemplo:
 
 ```text
-CreateTrip
-→ TripCreated
-→ TripDaysGenerated
-→ ItineraryInitialized
+PlanningConflictDetected
+→ usuário pode ser notificado
 ```
 
-Todos podem compartilhar o mesmo `correlationId`.
+A notificação não é o evento canônico.
 
 ---
 
-## 22. causationId
+## Parte II — Convenções de eventos
 
-Identificador do Comando ou Evento que causou diretamente o Evento atual.
+### 8. Identificação de eventos
+
+Todo Evento de Domínio deve possuir:
+
+```text
+EventId
+```
+
+O identificador deve ser único no escopo global do sistema.
 
 ---
 
-## 23. actor
+### 9. Nome dos eventos
 
-Origem responsável pela ação.
+Eventos devem utilizar:
+
+```text
+Entidade + fato no passado
+```
+
+Exemplos:
+
+```text
+TripCreated
+ActivityMovedToAnotherDay
+RecommendationInvalidated
+ItineraryProposalPartiallyAccepted
+PlanningConflictResolved
+```
+
+Evitar:
+
+```text
+TripCreate
+ActivityMove
+ConflictProcess
+ProposalUpdate
+```
+
+---
+
+### 10. Metadados conceituais mínimos
+
+Todo evento deve possuir, conceitualmente:
+
+* `eventId`;
+* `eventType`;
+* `occurredAt`;
+* `aggregateId`;
+* `aggregateType`;
+* `aggregateVersion`;
+* `correlationId`;
+* `causationId`;
+* `actorReference`;
+* `schemaVersion`.
+
+Quando aplicável:
+
+* `tripId`;
+* `tenantReference`;
+* `source`;
+* `traceReference`;
+* `contextVersion`;
+* `itineraryVersion`.
+
+---
+
+### 11. Payload conceitual
+
+O payload deve conter apenas dados necessários para representar o fato e permitir reações autorizadas.
+
+Não deve incluir automaticamente:
+
+* agregado inteiro;
+* dados pessoais completos;
+* credenciais;
+* tokens;
+* diagnósticos;
+* localização contínua;
+* prompts;
+* raciocínio interno de IA;
+* dados externos sem necessidade.
+
+---
+
+### 12. Actor Reference
+
+Um evento que resulte de uma ação atribuível deve registrar o ator conceitual.
 
 Tipos possíveis:
 
-* user;
-* system;
-* scheduler;
-* integration;
-* ai-agent;
-* administrator.
+* `User`;
+* `System`;
+* `Agent`;
+* `Integration`;
+* `ScheduledProcess`.
 
-O ator não substitui autorização.
-
----
-
-## 24. version
-
-Versão do agregado após a aplicação do Evento.
+O tipo `Agent` não substitui o Usuário quando a ação exigir decisão humana.
 
 ---
 
-## 25. schemaVersion
+### 13. Correlation ID
 
-Versão estrutural do Evento.
+`correlationId` relaciona eventos e operações pertencentes ao mesmo fluxo de negócio.
 
-Permite evolução do contrato.
+Exemplo:
 
----
+```text
+AcceptItineraryProposalPartially
+→ DecisionRecorded
+→ ItineraryProposalPartiallyAccepted
+→ ActivityAdded
+→ ItineraryVersionChanged
+```
 
-## 26. Payload
-
-O payload deverá conter apenas os dados necessários para representar o fato.
-
-Não deverá conter:
-
-* estado completo sem necessidade;
-* dado sensível desnecessário;
-* objetos externos inteiros;
-* conteúdo técnico irrelevante.
+Todos podem compartilhar a mesma correlação.
 
 ---
 
-# Parte III — Regras gerais para Eventos
+### 14. Causation ID
 
-## 27. Imutabilidade
+`causationId` identifica o comando ou evento que causou diretamente outro evento.
 
-Eventos publicados não deverão ser alterados.
+Exemplo:
 
-Correções deverão ocorrer por:
+```text
+TripPeriodChanged
+causa
+TripDaysSynchronized
+```
 
-* novo Evento;
+---
+
+### 15. Versionamento de schema
+
+Eventos devem possuir `schemaVersion`.
+
+Mudanças compatíveis podem incluir:
+
+* campo opcional;
+* novo metadado;
+* novo valor documentado;
+* enriquecimento não obrigatório.
+
+Mudanças incompatíveis exigem:
+
+* nova versão de schema;
+* estratégia de migração;
+* compatibilidade de consumidores;
+* atualização documental.
+
+---
+
+### 16. Versionamento do agregado
+
+Eventos de um agregado devem indicar sua versão após a alteração.
+
+Exemplo:
+
+```text
+aggregateVersion: 12
+```
+
+Essa versão não substitui:
+
+* `TripContextVersion`;
+* `ItineraryVersion`;
+* `schemaVersion`.
+
+---
+
+### 17. Ordenação
+
+A ordem global de eventos não deve ser assumida.
+
+A ordenação deve ser garantida apenas quando necessária dentro de:
+
+* mesmo agregado;
+* mesma partição lógica;
+* mesma correlação;
+* mesma operação transacional.
+
+---
+
+### 18. Idempotência
+
+Consumidores devem tratar reentrega do mesmo `EventId` sem duplicar efeitos.
+
+Comandos sensíveis devem possuir mecanismo de idempotência quando repetição puder duplicar:
+
+* Activities;
+* Decisions;
+* Saved Places;
+* aplicação de Proposta;
+* resolução de Planning Conflict.
+
+---
+
+## Parte III — Tipos de eventos
+
+### 19. Evento de Domínio interno
+
+Evento interno representa fato relevante dentro do mesmo limite lógico.
+
+Pode ser utilizado para:
+
+* sincronizar agregados;
+* invalidar objetos;
+* iniciar cálculo;
+* atualizar projeções;
+* iniciar revisão.
+
+---
+
+### 20. Evento de integração
+
+Evento de integração representa fato compartilhado com outro módulo ou sistema.
+
+Deve:
+
+* expor apenas dados necessários;
+* possuir contrato estável;
+* evitar detalhes internos;
+* preservar privacidade;
+* ser publicado após confirmação da mudança.
+
+---
+
+### 21. Evento derivado
+
+Evento derivado representa consequência de outro fato.
+
+Exemplo:
+
+```text
+TripPeriodChanged
+→ TripDaysSynchronized
+→ ItineraryMarkedOutdated
+```
+
+Um evento derivado deve manter `causationId`.
+
+---
+
+### 22. Evento de invalidação
+
+Evento de invalidação informa que um objeto deixou de ser aplicável ao Contexto atual.
+
+Exemplos:
+
+```text
+RecommendationInvalidated
+ItineraryProposalExpired
+PlanningConflictInvalidated
+TravelEstimateInvalidated
+```
+
+Invalidação não significa exclusão.
+
+---
+
+### 23. Evento de ciclo de vida
+
+Evento de ciclo de vida representa mudança relevante de estado.
+
+Exemplos:
+
+```text
+TripCancelled
+RecommendationExpired
+ItineraryProposalRejected
+PlanningConflictResolved
+```
+
+---
+
+## Parte IV — Regras gerais de emissão
+
+### 24. Evento somente após sucesso
+
+Um evento deve ser produzido apenas após a mudança correspondente ser considerada válida e confirmada.
+
+Não produzir:
+
+```text
+ActivityAdded
+```
+
+quando a Activity não tiver sido adicionada.
+
+---
+
+### 25. Operação rejeitada
+
+Uma operação rejeitada não deve produzir evento de sucesso.
+
+Pode produzir registro operacional ou evento específico de auditoria, se necessário, sem afirmar mudança inexistente.
+
+---
+
+### 26. Evento após persistência
+
+A Arquitetura deverá garantir que:
+
+* estado confirmado não fique sem evento necessário;
+* evento publicado não represente estado não confirmado.
+
+A estratégia física será definida posteriormente.
+
+---
+
+### 27. Evento não altera o passado
+
+Eventos publicados são imutáveis.
+
+Correções devem ocorrer por:
+
+* novo evento;
+* invalidação;
 * compensação;
-* migração documentada;
+* supersessão;
 * correção de projeção.
 
 ---
 
-## 28. Tempo passado
+### 28. Reações não podem enfraquecer invariantes
 
-Eventos deverão utilizar nomes no passado.
+Consumidores de eventos não podem produzir alterações que violem regras do domínio.
 
-Correto:
-
-```text
-TripCreated
-ActivityRemoved
-ProposalExpired
-```
-
-Incorreto:
-
-```text
-CreateTrip
-RemoveActivity
-ExpireProposal
-```
+Toda reação que altere estado deve executar as validações aplicáveis.
 
 ---
 
-## 29. Relevância de domínio
+## Parte V — Eventos de Account e acesso
 
-Eventos deverão representar fatos relevantes.
+### 29. AccountCreated
 
-Não deverão ser criados Eventos de Domínio para toda ação da interface.
+#### Gatilho
 
-Exemplos que normalmente não são Eventos de Domínio:
+Criação válida de uma Account.
 
-* ButtonClicked;
-* ModalOpened;
-* TabSelected;
-* TooltipDisplayed.
+#### Payload conceitual
 
----
+* AccountId;
+* responsável inicial;
+* status inicial;
+* occurredAt.
 
-## 30. Idempotência
+#### Pós-condições
 
-Consumidores deverão poder identificar Eventos já processados.
-
-O mesmo Evento não deverá produzir o mesmo efeito duas vezes.
-
----
-
-## 31. Ordenação
-
-A ordem de Eventos do mesmo agregado deverá ser preservada ou detectável por versão.
+* Account existe;
+* responsável existe;
+* identidade interna foi criada.
 
 ---
 
-## 32. Processamento fora de ordem
+### 30. UserAddedToAccount
 
-Quando um Evento chegar fora de ordem, o consumidor deverá:
+Representa inclusão de User em uma Account.
 
-* aguardar;
-* rejeitar;
-* reconciliar;
-* reprocessar;
-* registrar inconsistência.
-
-Não deverá aplicar silenciosamente estado impossível.
+Não significa inclusão em uma Trip.
 
 ---
 
-## 33. Reprocessamento
+### 31. UserRemovedFromAccount
 
-Eventos poderão ser reprocessados para:
+Deve respeitar:
 
-* reconstrução;
-* projeção;
-* auditoria;
-* correção;
-* nova capacidade derivada.
-
-O reprocessamento não deverá repetir efeitos externos irreversíveis sem proteção.
+* responsabilidade mínima;
+* consentimentos;
+* ownership de Trips;
+* retenção de histórico.
 
 ---
 
-## 34. Eventos internos e de integração
+### 32. TripParticipantAdded
 
-### Evento de Domínio
+Representa vínculo de um User a uma Trip com papel de acesso.
 
-Representa fato interno do domínio.
+Payload:
 
-### Evento de Integração
-
-Representa fato publicado para outros contextos ou sistemas.
-
-Nem todo Evento de Domínio deverá ser exposto externamente.
+* TripId;
+* UserId;
+* TripRole.
 
 ---
 
-# Parte IV — Ciclo de vida da Viagem
+### 33. TripParticipantRoleChanged
 
-## 35. Estados da Viagem
+Representa alteração de papel.
 
-```text
-Draft
-Planned
-InProgress
-Completed
-Cancelled
-Archived
-Deleted
-```
-
-`Deleted` representa estado conceitual terminal ou processo de remoção conforme política.
+Não pode resultar em Trip sem owner.
 
 ---
 
-## 36. Fluxo principal
+### 34. TripParticipantRemoved
 
-```text
-Draft
-→ Planned
-→ InProgress
-→ Completed
-→ Archived
-```
+Não pode remover o último owner.
 
 ---
 
-## 37. Fluxos alternativos
+### 35. TripOwnershipTransferred
 
-```text
-Draft → Cancelled
-Planned → Cancelled
-InProgress → Cancelled
-Completed → Archived
-Cancelled → Archived
-```
-
----
-
-## 38. Transições proibidas
-
-Exemplos:
-
-```text
-Deleted → Planned
-Archived → InProgress
-Completed → Draft
-Cancelled → InProgress
-```
-
-Restauração futura deverá utilizar transição específica e política explícita.
-
----
-
-## 39. CreateTrip
-
-### Pré-condições
-
-* ator autorizado;
-* dados mínimos disponíveis;
-* Destino válido;
-* Período válido;
-* pelo menos um Viajante.
-
-### Evento principal
-
-```text
-TripCreated
-```
-
-### Efeitos
-
-* gerar Dias;
-* inicializar Roteiro;
-* registrar owner;
-* gerar versão inicial;
-* tornar a Viagem planejável.
-
-### Eventos derivados possíveis
-
-```text
-TripDaysGenerated
-ItineraryInitialized
-TripOwnerAssigned
-```
-
----
-
-## 40. TripCreated
-
-### Significado
-
-Uma nova Viagem foi criada com contexto mínimo válido.
-
-### Pós-condições
-
-* TripId existe;
-* status inicial é `Planned`, ou `Draft` se o fluxo permitir persistência incompleta;
-* owner existe;
-* Período foi validado;
-* Dias podem ser gerados.
-
----
-
-## 41. CompleteTripDraft
-
-### Objetivo
-
-Concluir um Rascunho de Viagem.
-
-### Evento
-
-```text
-TripPlanningContextCompleted
-```
-
-### Transição
-
-```text
-Draft → Planned
-```
-
----
-
-## 42. StartTrip
-
-A transição para `InProgress` deverá normalmente ser derivada da data atual.
-
-Evento conceitual possível:
-
-```text
-TripStarted
-```
-
-Pode ser emitido por processo temporal.
-
-### Transição
-
-```text
-Planned → InProgress
-```
-
----
-
-## 43. CompleteTrip
-
-A transição para `Completed` poderá ser automática com base no Período.
-
-Evento:
-
-```text
-TripCompleted
-```
-
-### Transição
-
-```text
-InProgress → Completed
-```
-
----
-
-## 44. CancelTrip
-
-### Pré-condições
-
-* Viagem não excluída;
-* ator autorizado.
-
-### Evento
-
-```text
-TripCancelled
-```
-
-### Efeitos
-
-* preservar histórico;
-* impedir novas operações não permitidas;
-* invalidar Recomendações futuras;
-* invalidar Propostas pendentes;
-* manter Roteiro para consulta.
-
----
-
-## 45. ArchiveTrip
-
-### Evento
-
-```text
-TripArchived
-```
-
-### Efeitos
-
-* remover de visões principais;
-* preservar consulta;
-* impedir edição conforme política;
-* manter histórico.
-
----
-
-## 46. RestoreArchivedTrip
-
-Poderá existir futuramente.
-
-Evento:
-
-```text
-TripRestored
-```
-
-### Transição possível
-
-```text
-Archived → Completed
-```
-
-ou estado temporal correspondente.
-
----
-
-## 47. DeleteTrip
-
-### Pré-condições
-
-* autorização elevada;
-* confirmação explícita;
-* política de retenção conhecida.
-
-### Evento inicial
-
-```text
-TripDeletionRequested
-```
-
-### Eventos seguintes possíveis
-
-```text
-TripDeletionScheduled
-TripAnonymizationCompleted
-TripDeleted
-```
-
-A remoção poderá ser assíncrona.
-
----
-
-# Parte V — Alterações estruturais da Viagem
-
-## 48. UpdateTripDestination
-
-### Evento
-
-```text
-TripDestinationChanged
-```
-
-### Efeitos
-
-* marcar Hospedagem para revisão;
-* invalidar Estimativas;
-* invalidar Recomendações;
-* expirar Propostas;
-* reavaliar Lugares;
-* reavaliar Atividades;
-* gerar Conflitos estruturais.
-
----
-
-## 49. UpdateTripPeriod
-
-### Evento
-
-```text
-TripPeriodChanged
-```
-
-### Eventos derivados possíveis
-
-```text
-TripDaysAdded
-TripDaysRemovalRequested
-TripDaysRemoved
-ItineraryMarkedOutdated
-ProposalExpired
-```
-
----
-
-## 50. UpdateAccommodation
-
-### Evento
-
-```text
-TripAccommodationChanged
-```
-
-### Efeitos
-
-* invalidar Distâncias;
-* invalidar rankings por proximidade;
-* solicitar recálculo;
-* expirar Recomendações dependentes;
-* reavaliar Conflitos geográficos.
-
----
-
-## 51. AddTraveler
-
-### Evento
-
-```text
-TravelerAdded
-```
-
-### Efeitos
-
-* atualizar Perfil do Grupo;
-* reavaliar Recomendações;
-* reavaliar Restrições;
-* reavaliar custos por grupo.
-
----
-
-## 52. RemoveTraveler
-
-### Evento
-
-```text
-TravelerRemoved
-```
-
-### Efeitos
-
-* recalcular Perfil do Grupo;
-* reavaliar Preferências;
-* reavaliar custos;
-* invalidar Recomendações personalizadas quando necessário.
-
----
-
-## 53. UpdateTripPreferences
-
-Eventos mais específicos deverão ser preferidos quando relevantes:
-
-```text
-TripInterestAdded
-TripInterestRemoved
-TripBudgetChanged
-TripPaceChanged
-TripRestrictionAdded
-TripRestrictionRemoved
-TripTransportModeChanged
-```
-
-Eventos excessivamente genéricos deverão ser evitados quando impedirem rastreabilidade.
-
----
-
-# Parte VI — Ciclo de vida da Hospedagem
-
-## 54. Estados
-
-```text
-Provisional
-Confirmed
-Outdated
-Removed
-```
-
----
-
-## 55. Fluxo principal
-
-```text
-Provisional
-→ Confirmed
-```
-
----
-
-## 56. Fluxos alternativos
-
-```text
-Provisional → Removed
-Confirmed → Outdated
-Outdated → Confirmed
-Confirmed → Removed
-```
-
----
-
-## 57. AccommodationAdded
-
-Emitido quando uma Hospedagem é associada à Viagem.
-
----
-
-## 58. AccommodationConfirmed
-
-Emitido quando a Hospedagem é validada por origem adequada.
-
----
-
-## 59. AccommodationMarkedOutdated
-
-Emitido quando a referência deixa de ser confiável ou compatível.
-
----
-
-## 60. AccommodationRemoved
-
-Emitido quando a Hospedagem é retirada da Viagem.
-
-### Efeitos
-
-* invalidar Distâncias dependentes;
-* alterar origem padrão;
-* reavaliar Recomendações.
-
----
-
-# Parte VII — Ciclo de vida do Roteiro
-
-## 61. Estados do Roteiro
-
-```text
-Empty
-Partial
-Planned
-WithConflicts
-UnderReview
-Outdated
-```
-
-Esses estados podem ser derivados e alguns podem coexistir conceitualmente.
-
----
-
-## 62. ItineraryInitialized
-
-Emitido após criação da estrutura inicial do Roteiro.
-
-### Pós-condições
-
-* ItineraryId existe;
-* versão inicial existe;
-* Dias estão associados.
-
----
-
-## 63. ItineraryChanged
-
-Evento genérico não deverá substituir Eventos específicos.
-
-Pode ser utilizado apenas como Evento de integração resumido.
-
-Eventos internos preferidos:
-
-```text
-ActivityAdded
-ActivityUpdated
-ActivityRemoved
-ActivityMoved
-FreePeriodAdded
-FreePeriodUpdated
-FreePeriodRemoved
-```
-
----
-
-## 64. ItineraryVersionChanged
-
-Pode ser emitido quando a versão lógica do Roteiro é atualizada.
-
----
-
-## 65. ItineraryMarkedOutdated
-
-Emitido quando dados derivados deixam de corresponder ao contexto atual.
-
-### Causas
-
-* Hospedagem alterada;
-* Destino alterado;
-* transporte alterado;
-* dados externos relevantes alterados.
-
----
-
-## 66. ItineraryRecalculated
-
-Emitido após atualização bem-sucedida de dados derivados.
-
----
-
-## 67. ItineraryReviewStarted
-
-### Transição
-
-```text
-Planned ou WithConflicts
-→ UnderReview
-```
-
----
-
-## 68. ItineraryReviewCompleted
-
-Emitido após análise.
+Representa transferência explícita de ownership.
 
 Pode produzir:
 
-```text
-ConflictDetected
-ConflictInvalidated
-NoKnownConflictDetected
-```
-
-`NoKnownConflictDetected` deverá ser usado com cautela por não representar garantia absoluta.
-
----
-
-# Parte VIII — Ciclo de vida do Dia da Viagem
-
-## 69. Estados derivados
-
-```text
-Empty
-PartiallyPlanned
-Planned
-Current
-Past
-Future
-WithConflicts
-Free
-```
-
----
-
-## 70. TripDayCreated
-
-Emitido quando um Dia é criado a partir do Período.
-
----
-
-## 71. TripDayRemoved
-
-Emitido quando um Dia é removido após alteração confirmada do Período.
-
-Não deverá ocorrer silenciosamente quando houver conteúdo.
-
----
-
-## 72. TripDayMarkedFree
-
-Emitido quando o Usuário declara intenção de manter o Dia livre.
-
----
-
-## 73. TripDayPlanningStarted
-
-Evento opcional para representar início de planejamento relevante.
-
-Não deverá ser emitido por simples abertura da tela.
-
----
-
-## 74. TripDayPlanningCompleted
-
-Pode ser emitido quando o Dia atende critérios definidos de planejamento.
-
-Esses critérios devem permanecer políticas, não invariantes universais.
-
----
-
-# Parte IX — Ciclo de vida da Atividade
-
-## 75. Estados
-
-```text
-Planned
-Tentative
-Completed
-Skipped
-Cancelled
-Unavailable
-NeedsReview
-Removed
-```
-
----
-
-## 76. Fluxo principal
-
-```text
-Planned
-→ Completed
-```
-
----
-
-## 77. Fluxos alternativos
-
-```text
-Planned → Cancelled
-Planned → Skipped
-Planned → NeedsReview
-Tentative → Planned
-Tentative → Cancelled
-NeedsReview → Planned
-NeedsReview → Cancelled
-```
-
----
-
-## 78. AddActivity
-
-### Evento
-
-```text
-ActivityAdded
-```
-
-### Efeitos
-
-* incrementar versão do Roteiro;
-* recalcular ordem;
-* recalcular Deslocamentos;
-* reavaliar Conflitos;
-* atualizar estado Planejado do Lugar.
-
----
-
-## 79. UpdateActivity
-
-### Evento
-
-```text
-ActivityUpdated
-```
-
-Quando possível, Eventos específicos podem ser melhores:
-
-```text
-ActivityTimeChanged
-ActivityDurationChanged
-ActivityLocationChanged
-ActivityTitleChanged
-ActivityFlexibilityChanged
-```
-
----
-
-## 80. MoveActivity
-
-### Eventos possíveis
-
-```text
-ActivityReordered
-ActivityMovedToAnotherDay
-```
-
-### Efeitos
-
-* atualizar ordem;
-* recalcular Deslocamentos;
-* reavaliar Conflitos;
-* gerar nova versão.
-
----
-
-## 81. RemoveActivity
-
-### Evento
-
-```text
-ActivityRemoved
-```
-
-### Efeitos
-
-* preservar Lugar;
-* preservar Lugar Salvo;
-* recalcular ordem;
-* recalcular Deslocamentos;
-* atualizar estado Planejado derivado.
-
----
-
-## 82. CompleteActivity
-
-### Evento
-
-```text
-ActivityCompleted
-```
-
-### Transição
-
-```text
-Planned → Completed
-```
-
----
-
-## 83. SkipActivity
-
-### Evento
-
-```text
-ActivitySkipped
-```
-
-### Significado
-
-A Atividade não foi realizada, mas permanece no histórico.
-
----
-
-## 84. CancelActivity
-
-### Evento
-
-```text
-ActivityCancelled
-```
-
-### Efeito
-
-A Atividade deixa de participar do planejamento ativo.
-
----
-
-## 85. ActivityMarkedUnavailable
-
-Emitido quando a Atividade associada a um Lugar indisponível exige revisão.
-
-### Transição
-
-```text
-Planned → Unavailable
-```
-
----
-
-## 86. ActivityMarkedForReview
-
-### Evento
-
-```text
-ActivityMarkedForReview
-```
-
-### Causas
-
-* Lugar indisponível;
-* conflito temporal;
-* alteração estrutural;
-* dado crítico desatualizado.
-
----
-
-# Parte X — Ciclo de vida do Período Livre
-
-## 87. Estados
-
-```text
-Flexible
-Protected
-Removed
-```
-
-O modo é parte principal do estado.
-
----
-
-## 88. AddFreePeriod
-
-### Evento
-
-```text
-FreePeriodAdded
-```
-
----
-
-## 89. UpdateFreePeriod
-
-Eventos possíveis:
-
-```text
-FreePeriodUpdated
-FreePeriodProtected
-FreePeriodMadeFlexible
-```
-
----
-
-## 90. RemoveFreePeriod
-
-### Evento
-
-```text
-FreePeriodRemoved
-```
-
-A remoção não gera Atividade automaticamente.
-
----
-
-## 91. ReplaceFreePeriodWithActivity
-
-Operação possível apenas com decisão explícita.
-
-Eventos possíveis:
-
-```text
-FreePeriodRemoved
-ActivityAdded
-```
-
-Devem compartilhar correlação.
-
----
-
-# Parte XI — Ciclo de vida do Lugar Salvo
-
-## 92. Estados
-
-```text
-Saved
-Removed
-```
-
----
-
-## 93. SavePlace
-
-### Evento
-
-```text
-PlaceSaved
-```
-
-### Regra
-
-Operação idempotente.
-
----
-
-## 94. UnsavePlace
-
-### Evento
-
-```text
-PlaceUnsaved
-```
-
-### Efeitos
-
-* remover associação com Salvos;
-* preservar Atividades;
-* preservar Lugar;
-* atualizar visualizações derivadas.
-
----
-
-## 95. PlacePlanned
-
-Pode ser Evento derivado quando a primeira Atividade associada é criada.
-
-### Evento
-
-```text
-PlacePlanned
-```
-
-Quando a última Atividade ativa for removida:
-
-```text
-PlaceNoLongerPlanned
-```
-
-Esses Eventos representam estados derivados e devem ser usados somente se houver necessidade de integração.
-
----
-
-# Parte XII — Ciclo de vida do Lugar
-
-## 96. Estados operacionais
-
-```text
-Open
-TemporarilyClosed
-PermanentlyClosed
-Seasonal
-Unknown
-```
-
----
-
-## 97. PlaceCreated
-
-Emitido quando um Lugar interno é criado.
-
----
-
-## 98. PlaceDataUpdated
-
-Emitido quando informações relevantes são atualizadas.
-
----
-
-## 99. PlaceMarkedTemporarilyClosed
-
-Emitido quando fonte adequada indica fechamento temporário.
-
----
-
-## 100. PlaceMarkedPermanentlyClosed
-
-Emitido quando encerramento definitivo é identificado.
-
-### Efeitos
-
-* marcar Atividades para revisão;
-* invalidar Recomendações;
-* detectar Conflitos;
-* retirar de resultados ativos conforme política.
-
----
-
-## 101. PlaceDataConflictDetected
-
-Emitido quando fontes divergentes relevantes são identificadas.
-
----
-
-## 102. PlaceMerged
-
-Emitido quando duplicações são consolidadas.
-
-### Deve preservar
-
-* identificadores externos;
-* Proveniência;
-* referências;
-* associações;
-* histórico.
-
----
-
-# Parte XIII — Ciclo de vida da Estimativa de Deslocamento
-
-## 103. Estados
-
-```text
-Requested
-Calculating
-Available
-Estimated
-Unavailable
-Stale
-Failed
-```
-
----
-
-## 104. TravelEstimateRequested
-
-Emitido quando cálculo é solicitado.
-
----
-
-## 105. TravelEstimateCalculationStarted
-
-Estado transitório opcional.
-
----
-
-## 106. TravelEstimateCalculated
-
-Emitido quando Distância e Tempo são calculados.
-
-### Pós-condições
-
-* origem definida;
-* destino definido;
-* transporte definido;
-* Fonte definida;
-* validade definida quando aplicável.
-
----
-
-## 107. TravelEstimateMarkedStale
-
-Emitido quando contexto muda.
-
-### Causas
-
-* Hospedagem alterada;
-* Atividade movida;
-* transporte alterado;
-* rota atualizada;
-* validade expirada.
-
----
-
-## 108. TravelEstimateUnavailable
-
-Emitido quando não há dados suficientes ou provedor não suporta o cálculo.
-
----
-
-## 109. TravelEstimateFailed
-
-Representa falha técnica transitória.
-
-Diferença:
-
-* `Unavailable`: capacidade ou dado não disponível;
-* `Failed`: tentativa falhou.
-
----
-
-# Parte XIV — Ciclo de vida da Recomendação
-
-## 110. Estados
-
-```text
-Generated
-Presented
-Accepted
-Rejected
-Expired
-Invalidated
-Superseded
-```
-
----
-
-## 111. RecommendationRequested
-
-Emitido quando uma recomendação é solicitada.
-
----
-
-## 112. RecommendationGenerated
-
-### Pré-condições
-
-* Contexto de Decisão disponível;
-* regras aplicadas;
-* Restrições respeitadas;
-* Justificativas produzidas.
-
----
-
-## 113. RecommendationPresented
-
-Emitido quando a Recomendação é apresentada ao Usuário.
-
-Esse Evento pode ser analítico ou de domínio conforme a necessidade.
-
----
-
-## 114. RecommendationAccepted
-
-Emitido quando o Usuário aceita a sugestão.
-
-A aceitação pode produzir outro Comando.
-
-Exemplo:
-
-```text
-RecommendationAccepted
-→ AddPlaceToItinerary
-```
-
-A aceitação da Recomendação não deve alterar o domínio sem operação específica.
-
----
-
-## 115. RecommendationRejected
-
-Emitido quando recusada explicitamente.
-
----
-
-## 116. RecommendationExpired
-
-Emitido quando a validade temporal termina.
-
----
-
-## 117. RecommendationInvalidated
-
-Emitido quando o Contexto muda.
-
-### Causas
-
-* Hospedagem alterada;
-* Preferência alterada;
-* Restrição adicionada;
-* Lugar indisponível;
-* Roteiro alterado.
-
----
-
-## 118. RecommendationSuperseded
-
-Emitido quando nova Recomendação substitui uma anterior para o mesmo contexto.
-
----
-
-# Parte XV — Ciclo de vida da Proposta de Roteiro
-
-## 119. Estados
-
-```text
-Requested
-Generating
-Ready
-PartiallyAccepted
-Accepted
-Rejected
-Expired
-Failed
-Cancelled
-Superseded
-```
-
----
-
-## 120. Fluxo principal
-
-```text
-Requested
-→ Generating
-→ Ready
-→ Accepted
-```
-
----
-
-## 121. Fluxos alternativos
-
-```text
-Generating → Failed
-Generating → Cancelled
-Ready → PartiallyAccepted
-Ready → Rejected
-Ready → Expired
-Ready → Superseded
-```
-
----
-
-## 122. RequestItineraryProposal
-
-### Evento
-
-```text
-ItineraryProposalRequested
-```
-
-### Pós-condições
-
-* contexto registrado;
-* versão base registrada;
-* solicitação identificada;
-* Roteiro atual preservado.
-
----
-
-## 123. ItineraryProposalGenerationStarted
-
-### Transição
-
-```text
-Requested → Generating
-```
-
----
-
-## 124. ItineraryProposalGenerated
-
-### Transição
-
-```text
-Generating → Ready
-```
-
-### Pós-condições
-
-* Dias propostos existem;
-* Atividades propostas existem ou resultado vazio explicado;
-* critérios registrados;
-* Conflitos conhecidos registrados;
-* validade definida.
-
----
-
-## 125. ItineraryProposalGenerationFailed
-
-### Transição
-
-```text
-Generating → Failed
-```
-
-### Efeitos
-
-* preservar Roteiro atual;
-* preservar Proposta anterior válida;
-* permitir nova tentativa.
-
----
-
-## 126. CancelItineraryProposalGeneration
-
-### Evento
-
-```text
-ItineraryProposalGenerationCancelled
-```
-
-### Transição
-
-```text
-Generating → Cancelled
-```
-
----
-
-## 127. AcceptItineraryProposal
-
-### Pré-condições
-
-* Proposta em `Ready`;
-* versão base válida;
-* ator autorizado;
-* invariantes preservadas.
-
-### Eventos possíveis
-
-```text
-ItineraryProposalAccepted
-ProposalActivitiesApplied
-ItineraryVersionChanged
-```
-
-### Transição
-
-```text
-Ready → Accepted
-```
-
----
-
-## 128. AcceptItineraryProposalPartially
-
-### Evento
-
-```text
-ItineraryProposalPartiallyAccepted
-```
-
-### Transição
-
-```text
-Ready → PartiallyAccepted
-```
-
-A Proposta pode permanecer disponível para itens restantes conforme política.
-
----
-
-## 129. RejectItineraryProposal
-
-### Evento
-
-```text
-ItineraryProposalRejected
-```
-
-### Transição
-
-```text
-Ready → Rejected
-```
-
----
-
-## 130. ExpireItineraryProposal
-
-### Evento
-
-```text
-ItineraryProposalExpired
-```
-
-### Causas
-
-* versão base alterada;
-* Destino alterado;
-* Período alterado;
-* Hospedagem alterada;
-* Restrição obrigatória alterada.
-
----
-
-## 131. SupersedeItineraryProposal
-
-### Evento
-
-```text
-ItineraryProposalSuperseded
-```
-
-Emitido quando outra Proposta passa a ser a alternativa atual.
-
----
-
-# Parte XVI — Ciclo de vida do Conflito
-
-## 132. Estados
-
-```text
-Open
-Resolved
-Ignored
-Invalidated
-Superseded
-```
-
----
-
-## 133. Fluxos
-
-```text
-Open → Resolved
-Open → Ignored
-Open → Invalidated
-Open → Superseded
-Ignored → Resolved
-Ignored → Invalidated
-```
-
-Erros bloqueantes não podem transicionar para `Ignored`.
-
----
-
-## 134. ConflictDetected
-
-### Pré-condições
-
-* regra identificada;
-* objeto afetado;
-* evidência;
-* severidade;
-* versão de contexto.
-
-### Transição
-
-```text
-inexistente → Open
-```
-
----
-
-## 135. ResolveConflict
-
-### Evento
-
-```text
-ConflictResolved
-```
-
-### Pré-condição
-
-A condição que originou o Conflito deixou de existir.
-
----
-
-## 136. IgnoreRisk
-
-### Evento
-
-```text
-ConflictIgnored
-```
-
-### Pré-condições
-
-* severidade `risk`;
-* ator autorizado;
-* justificativa opcional;
-* regra permite ignorar.
-
----
-
-## 137. ConflictInvalidated
-
-Emitido quando o Conflito deixa de se aplicar por mudança de contexto.
-
----
-
-## 138. ConflictSuperseded
-
-Emitido quando um novo Conflito representa de maneira mais atual a mesma condição.
-
----
-
-## 139. ConflictReopened
-
-Poderá ser utilizado quando uma condição resolvida voltar a ocorrer.
-
-Recomenda-se criar novo Conflito com referência ao anterior, em vez de reabrir silenciosamente, quando a rastreabilidade exigir.
-
----
-
-# Parte XVII — Processos temporais
-
-## 140. Relógio do domínio
-
-Regras temporais deverão utilizar uma abstração de relógio.
-
-Não deverão depender diretamente do relógio do dispositivo ou de chamadas não controladas.
-
----
-
-## 141. Transições automáticas
-
-Podem ocorrer automaticamente:
-
-* Viagem planejada para em andamento;
-* Viagem em andamento para concluída;
-* Recomendação para expirada;
-* Proposta para expirada;
-* Estimativa para desatualizada.
-
----
-
-## 142. Eventos temporais
-
-Exemplos:
-
-```text
-TripStarted
-TripCompleted
-RecommendationExpired
-ItineraryProposalExpired
-TravelEstimateMarkedStale
-```
-
----
-
-## 143. Agendamento
-
-A Arquitetura poderá utilizar:
-
-* scheduler;
-* processamento sob demanda;
-* avaliação na leitura;
-* combinação dessas estratégias.
-
-O domínio deverá definir o resultado, não a tecnologia.
-
----
-
-## 144. Estado derivado versus Evento persistido
-
-Nem toda mudança temporal precisa gerar Evento persistido.
-
-Exemplo:
-
-`Viagem em andamento` pode ser derivado na leitura.
-
-Um Evento `TripStarted` só será necessário se houver efeitos relevantes, como:
-
-* notificação;
-* mudança de política;
-* preparação de conteúdo;
-* auditoria.
-
----
-
-# Parte XVIII — Efeitos e reações
-
-## 145. Reação síncrona
-
-Deve ocorrer dentro do mesmo limite de consistência quando necessária para preservar invariantes.
-
-Exemplos:
-
-* validar Dia;
-* atualizar ordem;
-* incrementar versão;
-* impedir duplicação.
-
----
-
-## 146. Reação assíncrona
-
-Pode ocorrer posteriormente quando não for necessária para a validade imediata.
-
-Exemplos:
-
-* recalcular Distâncias;
-* gerar Recomendações;
-* atualizar projeções;
-* reavaliar Conflitos;
-* enviar notificações.
-
----
-
-## 147. Matriz de efeitos principais
-
-| Evento                       | Efeito                               |
-| ---------------------------- | ------------------------------------ |
-| TripCreated                  | Criar Dias e inicializar Roteiro     |
-| TripPeriodChanged            | Adicionar ou revisar remoção de Dias |
-| TripAccommodationChanged     | Invalidar Distâncias                 |
-| TravelerAdded                | Atualizar Perfil do Grupo            |
-| TripRestrictionAdded         | Reavaliar Recomendações e Propostas  |
-| ActivityAdded                | Recalcular Deslocamentos             |
-| ActivityMoved                | Reavaliar Conflitos                  |
-| PlaceUnsaved                 | Preservar Atividades                 |
-| PlaceMarkedPermanentlyClosed | Marcar Atividades para revisão       |
-| ItineraryProposalAccepted    | Aplicar itens e gerar nova versão    |
-| ConflictResolved             | Atualizar revisão                    |
-| TravelEstimateMarkedStale    | Solicitar recálculo                  |
-
----
-
-## 148. Falha em reação assíncrona
-
-Falha em reação assíncrona não deve reverter automaticamente o fato original quando ele já for válido.
-
-Exemplo:
-
-```text
-ActivityMoved
-→ recálculo de rota falha
-```
-
-A Atividade permanece movida.
-
-A rota fica:
-
-```text
-Unavailable ou Failed
-```
-
----
-
-## 149. Compensação
-
-Quando um efeito externo irreversível falhar parcialmente, poderá ser necessário Evento compensatório.
-
-Exemplo conceitual:
-
-```text
-ExternalReservationRequested
-ExternalReservationFailed
-ReservationCompensationRequested
-```
-
-Esse cenário é futuro e não pertence ao MVP inicial.
-
----
-
-# Parte XIX — Idempotência e deduplicação
-
-## 150. Comandos idempotentes
-
-Operações conceitualmente idempotentes:
-
-* SavePlace;
-* ArchiveTrip já arquivada;
-* IgnoreRisk já ignorado;
-* AcceptProposal já aceita deve ser rejeitada sem reaplicar;
-* Remove item já removido pode retornar estado atual.
-
----
-
-## 151. Chave de idempotência
-
-Comandos externos poderão possuir:
-
-```text
-idempotencyKey
-```
-
-A tecnologia será definida na Arquitetura.
-
----
-
-## 152. Deduplicação de Eventos
-
-Consumidores deverão registrar `eventId` processados quando necessário.
-
----
-
-## 153. Efeitos externos
-
-Notificações, integrações e chamadas externas deverão possuir proteção adicional contra repetição.
-
----
-
-# Parte XX — Concorrência e versionamento
-
-## 154. Versão do agregado
-
-Agregados mutáveis deverão possuir versão lógica.
-
----
-
-## 155. Comando baseado em versão
-
-Operações sensíveis poderão informar:
-
-```text
-expectedVersion
-```
-
----
-
-## 156. Conflito de concorrência
-
-Quando a versão atual divergir:
-
-```text
-expectedVersion != currentVersion
-```
-
-o Comando deverá:
-
-* ser rejeitado;
-* solicitar recarregamento;
-* tentar reconciliação;
-* ou aplicar política específica.
-
-Nunca deverá sobrescrever silenciosamente.
-
----
-
-## 157. Proposta e concorrência
-
-A Proposta deverá registrar:
-
-```text
-baseItineraryVersion
-```
-
-Se a versão mudar de forma incompatível, a Proposta expira.
-
----
-
-# Parte XXI — Eventos de integração
-
-## 158. Objetivo
-
-Eventos de integração poderão expor fatos para:
-
-* IA;
-* dados;
-* analytics;
-* notificações;
-* busca;
-* indexação;
-* provedores;
-* outros contextos.
-
----
-
-## 159. Exemplos
-
-```text
-TripCreatedIntegrationEvent
-TripContextChangedIntegrationEvent
-ItineraryUpdatedIntegrationEvent
-PlaceSavedIntegrationEvent
-ProposalAcceptedIntegrationEvent
-```
-
-Os nomes finais poderão ser simplificados conforme o padrão técnico.
-
----
-
-## 160. Redução de acoplamento
-
-Eventos de integração deverão expor contratos estáveis e mínimos.
-
-Não deverão vazar estrutura interna dos agregados.
-
----
-
-## 161. Privacidade
-
-Eventos de integração não deverão incluir dados pessoais ou sensíveis sem finalidade legítima.
-
----
-
-# Parte XXII — Eventos e IA
-
-## 162. Ator IA
-
-Quando uma ação for proposta por IA, o ator deverá ser identificado como:
-
-```text
-ai-agent
-```
-
-Mas o responsável pela decisão final deverá permanecer distinguível.
-
----
-
-## 163. Ação sugerida por IA
-
-Exemplo:
-
-```text
-ItineraryProposalGenerated
-actor = ai-agent
-```
-
-A aplicação posterior:
-
-```text
-ItineraryProposalAccepted
-actor = user
-```
-
----
-
-## 164. IA não produz fato canônico sem validação
-
-Conteúdo gerado por IA poderá produzir:
-
-* RecommendationGenerated;
-* ItineraryProposalGenerated;
-* ConflictSuggestionGenerated;
-* DraftContentGenerated.
-
-Não deverá produzir diretamente:
-
-* ActivityAdded;
-* TripDestinationChanged;
-* TripDeleted;
-
-sem Comando autorizado.
-
----
-
-## 165. Auditoria de IA
-
-Eventos gerados com assistência de IA deverão poder registrar:
-
-* agente;
-* versão;
-* política;
-* Contexto de Decisão;
-* fontes;
-* limitações.
-
-Detalhes técnicos serão definidos posteriormente.
-
----
-
-# Parte XXIII — Auditoria
-
-## 166. Eventos auditáveis
-
-Operações críticas deverão ser auditáveis:
-
-* criação;
-* exclusão;
-* mudança de owner;
-* alteração de Destino;
-* alteração de Período;
-* alteração de Hospedagem;
-* aceitação de Proposta;
-* ignorar Risco;
-* mudança de Restrição;
-* remoção de Atividade.
-
----
-
-## 167. Dados de auditoria
-
-A auditoria deverá registrar:
-
-* quem;
-* quando;
-* o quê;
-* objeto;
-* versão anterior;
-* versão nova;
-* correlação;
-* origem.
-
-Não é obrigatório armazenar estado completo em todo Evento.
-
----
-
-## 168. Histórico de estado
-
-O sistema poderá reconstruir parcialmente o histórico a partir de:
-
-* Eventos;
-* versões;
+* alteração de dois ou mais participantes;
 * auditoria;
-* snapshots;
-* diffs.
-
-A estratégia será definida pela Arquitetura.
+* notificações.
 
 ---
 
-# Parte XXIV — Catálogo de Comandos
+## Parte VI — Ciclo de vida da Trip
 
-## 169. Viagem
+### 36. Estados oficiais da Trip
+
+* Draft;
+* Planned;
+* InProgress;
+* Completed;
+* Cancelled;
+* Archived.
+
+---
+
+### 37. Diagrama do ciclo de vida da Trip
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft
+
+    Draft --> Planned: requisitos mínimos atendidos
+    Planned --> Draft: dados essenciais removidos
+    Planned --> InProgress: período iniciado
+    InProgress --> Completed: período encerrado
+
+    Draft --> Cancelled: cancelamento
+    Planned --> Cancelled: cancelamento
+    InProgress --> Cancelled: cancelamento excepcional
+
+    Draft --> Archived: arquivamento
+    Planned --> Archived: arquivamento
+    Completed --> Archived: arquivamento
+    Cancelled --> Archived: arquivamento
+
+    Archived --> Draft: restauração incompleta
+    Archived --> Planned: restauração planejável
+    Archived --> Completed: restauração histórica
+```
+
+---
+
+### 38. TripCreated
+
+Produzido por:
 
 ```text
 CreateTrip
-CompleteTripDraft
+```
+
+Pré-condições:
+
+* Account ativa;
+* ator autorizado.
+
+Pós-condições:
+
+* Trip em Draft;
+* owner atribuído;
+* TripContextVersion inicializada;
+* agregados dependentes podem ser inicializados.
+
+---
+
+### 39. TripNameChanged
+
+Produzido por:
+
+```text
 UpdateTripName
+```
+
+Não deve incrementar `TripContextVersion`, salvo regra futura que atribua impacto estrutural ao nome.
+
+---
+
+### 40. TripDestinationChanged
+
+Produzido por:
+
+```text
 UpdateTripDestination
+```
+
+Consequências possíveis:
+
+* incremento de TripContextVersion;
+* invalidação de Recommendation;
+* invalidação de Itinerary Proposal;
+* invalidação de Travel Estimate;
+* reavaliação de Places;
+* reavaliação de Planning Conflicts;
+* Itinerary marcado como outdated.
+
+---
+
+### 41. TripPeriodChanged
+
+Produzido por:
+
+```text
 UpdateTripPeriod
+```
+
+Payload mínimo:
+
+* TripId;
+* período anterior;
+* novo período;
+* TripContextVersion;
+* impacto calculado.
+
+Consequências:
+
+* sincronização de Trip Days;
+* reavaliação de Activities;
+* invalidação de objetos dependentes.
+
+---
+
+### 42. TripAccommodationChanged
+
+Produzido por:
+
+```text
 UpdateAccommodation
-AddTraveler
-RemoveTraveler
-AssignTripOwner
-UpdateTripRole
-CancelTrip
-ArchiveTrip
-RestoreTrip
-DeleteTrip
+```
+
+Consequências possíveis:
+
+* Travel Estimates invalidadas;
+* Recomendações invalidadas;
+* Propostas invalidadas;
+* planejamento reavaliado.
+
+---
+
+### 43. TripBecamePlannable
+
+Evento derivado quando a Trip passa a atender requisitos mínimos de planejamento.
+
+Não substitui `TripStatusChanged` quando este existir como evento explícito.
+
+---
+
+### 44. TripPlanningRequirementsLost
+
+Evento derivado quando uma Trip deixa de atender requisitos mínimos.
+
+Pode mover:
+
+```text
+Planned → Draft
 ```
 
 ---
 
-## 170. Preferências
+### 45. TripStarted
+
+Evento derivado do tempo ou de ação explícita quando a Trip entra em andamento.
+
+---
+
+### 46. TripCompleted
+
+Evento derivado quando o período termina e a Trip é considerada concluída.
+
+Não deve ser confundido com conclusão integral de Activities.
+
+---
+
+### 47. TripCancelled
+
+Produzido por:
+
+```text
+CancelTrip
+```
+
+Consequências:
+
+* impede aplicações futuras de Propostas;
+* preserva Roteiro;
+* pode invalidar Recomendações;
+* preserva histórico.
+
+---
+
+### 48. TripArchived
+
+Produzido por:
+
+```text
+ArchiveTrip
+```
+
+Arquivamento não significa exclusão.
+
+---
+
+### 49. TripDeleted
+
+Produzido apenas após confirmação válida da exclusão lógica ou física, conforme política futura.
+
+Não deve ser emitido no momento da solicitação se a exclusão ainda não foi concluída.
+
+---
+
+## Parte VII — Sincronização de Trip Days
+
+### 50. Fluxo de alteração do Período
+
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant T as Trip
+    participant I as Itinerary
+    participant P as Planning Assurance
+
+    U->>T: UpdateTripPeriod
+    T->>T: validar novo período
+    T-->>I: TripPeriodChanged
+    I->>I: calcular sincronização
+
+    alt ampliação
+        I->>I: criar Trip Days ausentes
+    else redução sem conteúdo afetado
+        I->>I: remover Dias externos
+    else redução com conteúdo afetado
+        I-->>P: solicitar avaliação
+        P-->>I: PlanningConflictDetected
+    end
+
+    I-->>T: TripDaysSynchronized
+```
+
+---
+
+### 51. TripDaysSynchronizationRequested
+
+Evento ou mensagem interna que solicita sincronização após alteração do Período.
+
+Pode ser omitido da linguagem pública se a Arquitetura tratar a sincronização de forma imediata.
+
+---
+
+### 52. TripDaysSynchronized
+
+Representa que os Dias foram alinhados ao Trip Period.
+
+Payload:
+
+* TripId;
+* ItineraryId;
+* datas adicionadas;
+* datas removidas;
+* datas preservadas;
+* ItineraryVersion.
+
+---
+
+### 53. TripDayAdded
+
+Pode ser utilizado quando cada criação de Dia precisar de rastreabilidade individual.
+
+Seu uso é opcional se `TripDaysSynchronized` representar adequadamente o fato agregado.
+
+---
+
+### 54. TripDayRemoved
+
+Só deve ser emitido quando a remoção for válida e não ocorrer perda silenciosa.
+
+---
+
+### 55. TripDayMarkedFree
+
+Produzido por:
+
+```text
+MarkTripDayFree
+```
+
+Representa intenção explícita.
+
+---
+
+## Parte VIII — Traveler Profile
+
+### 56. TravelerProfileInitialized
+
+Representa criação do agregado de perfil para uma Trip.
+
+---
+
+### 57. TravelerAdded
+
+Produzido por:
+
+```text
+AddTraveler
+```
+
+Consequências:
+
+* Group Profile atualizado;
+* TripContextVersion incrementada quando estrutural;
+* Recommendation invalidada;
+* Itinerary Proposal invalidada;
+* Planning Conflicts reavaliados.
+
+---
+
+### 58. TravelerUpdated
+
+Pode incluir mudanças em:
+
+* faixa etária;
+* necessidades;
+* associação com User;
+* tipo.
+
+Mudanças relevantes devem invalidar objetos dependentes.
+
+---
+
+### 59. TravelerRemoved
+
+Não pode deixar uma Trip planejável sem nenhum Traveler.
+
+---
+
+### 60. GroupProfileUpdated
+
+Evento derivado após alteração dos Viajantes.
+
+Não deve ser emitido quando não houver mudança efetiva no valor derivado.
+
+---
+
+### 61. TripInterestAdded
+
+Produzido por:
 
 ```text
 AddTripInterest
-RemoveTripInterest
-UpdateTripBudget
-UpdateTripPace
-AddTripRestriction
-RemoveTripRestriction
-UpdateTripTransportMode
 ```
+
+Pode alterar:
+
+* ranking;
+* Recomendações;
+* Propostas;
+* explicações.
 
 ---
 
-## 171. Lugares
+### 62. TripInterestRemoved
+
+Não deve ser interpretado automaticamente como aversão.
+
+---
+
+### 63. TripRestrictionAdded
+
+Consequências dependem da severidade:
+
+* preference: reordenação;
+* important: risco;
+* mandatory: bloqueio e invalidação.
+
+---
+
+### 64. TripRestrictionRemoved
+
+Pode:
+
+* resolver Planning Conflicts;
+* ampliar opções;
+* invalidar Recomendações anteriores;
+* gerar novas Recomendações.
+
+---
+
+### 65. TripBudgetChanged
+
+Pode invalidar Recomendações e Propostas.
+
+---
+
+### 66. TripPaceChanged
+
+Pode tornar o Roteiro outdated e exigir reavaliação de densidade.
+
+---
+
+## Parte IX — Place e Data Source
+
+### 67. PlaceCreated
+
+Representa criação de Place interno.
+
+Não significa confirmação de todos os seus dados.
+
+---
+
+### 68. PlaceDataUpdated
+
+Deve indicar quais categorias de informação mudaram.
+
+Exemplos:
+
+* Location;
+* Opening Hours;
+* Price Range;
+* Operational Status;
+* Rating;
+* Provenance.
+
+---
+
+### 69. PlaceMerged
+
+Payload conceitual:
+
+* PlaceId canônico;
+* PlaceIds substituídos;
+* motivo;
+* referências preservadas.
+
+Consequências:
+
+* atualização de Saved Places;
+* atualização de Activities;
+* atualização de Recommendations;
+* prevenção de duplicidade.
+
+---
+
+### 70. PlaceMarkedTemporarilyClosed
+
+Pode causar:
+
+* Recommendation invalidada;
+* Activity marcada para revisão;
+* Planning Conflict detectado.
+
+---
+
+### 71. PlaceMarkedPermanentlyClosed
+
+Activities ativas associadas devem ser reavaliadas.
+
+---
+
+### 72. PlaceOperationalStatusBecameUnknown
+
+Representa perda de confiança no estado operacional.
+
+Não significa fechamento.
+
+---
+
+### 73. DataSourceRegistered
+
+Representa registro de uma Fonte de Dados.
+
+---
+
+### 74. DataSourceUpdated
+
+Pode alterar:
+
+* confiança;
+* disponibilidade;
+* licença;
+* método;
+* prioridade.
+
+---
+
+### 75. DataSourceDisabled
+
+Não deve apagar Provenance histórica.
+
+---
+
+### 76. PlaceDataFreshnessChanged
+
+Pode assumir:
+
+* current;
+* stale;
+* unknown;
+* conflicting;
+* unavailable.
+
+---
+
+## Parte X — Trip Collection
+
+### 77. PlaceSaved
+
+Produzido por:
 
 ```text
 SavePlace
+```
+
+Só deve ser emitido quando houver mudança real.
+
+Repetição idempotente não deve produzir duplicidade.
+
+---
+
+### 78. PlaceUnsaved
+
+Produzido por:
+
+```text
 UnsavePlace
-CreateCustomPlace
-UpdateCustomPlace
-MergePlaces
-MarkPlaceUnavailable
+```
+
+Não remove Activity relacionada.
+
+---
+
+### 79. SavedPlaceNoteChanged
+
+Representa alteração de observação contextual.
+
+Não deve alterar o Place canônico.
+
+---
+
+### 80. Fluxo de Saved Place
+
+```mermaid
+stateDiagram-v2
+    [*] --> NotSaved
+    NotSaved --> Saved: SavePlace
+    Saved --> Saved: SavePlace idempotente
+    Saved --> NotSaved: UnsavePlace
 ```
 
 ---
 
-## 172. Roteiro
+## Parte XI — Ciclo de vida da Activity
+
+### 81. Estados oficiais da Activity
+
+* planned;
+* tentative;
+* completed;
+* skipped;
+* cancelled;
+* unavailable;
+* needs-review;
+* removed.
+
+---
+
+### 82. Diagrama do ciclo de vida da Activity
+
+```mermaid
+stateDiagram-v2
+    [*] --> Planned
+
+    Planned --> Tentative: marcar como provisória
+    Tentative --> Planned: confirmar planejamento
+
+    Planned --> Completed: registrar realização
+    Tentative --> Completed: registrar realização
+
+    Planned --> Skipped: não realizada
+    Tentative --> Skipped: não realizada
+
+    Planned --> Cancelled: cancelar
+    Tentative --> Cancelled: cancelar
+
+    Planned --> Unavailable: condição inviável
+    Tentative --> Unavailable: condição inviável
+
+    Unavailable --> NeedsReview: solicitar revisão
+    Planned --> NeedsReview: conflito identificado
+    Tentative --> NeedsReview: conflito identificado
+
+    NeedsReview --> Planned: corrigida
+    NeedsReview --> Cancelled: cancelada
+    NeedsReview --> Removed: removida
+
+    Planned --> Removed: remover
+    Tentative --> Removed: remover
+    Cancelled --> Removed: remover
+    Skipped --> Removed: remover
+```
+
+---
+
+### 83. ActivityAdded
+
+Produzido por:
 
 ```text
 AddActivity
-UpdateActivity
-MoveActivity
+```
+
+Pós-condições:
+
+* Activity pertence a um Trip Day;
+* ItineraryVersion incrementada;
+* planejamento pode ser reavaliado.
+
+---
+
+### 84. ActivityUpdated
+
+Deve indicar campos alterados, sem necessariamente expor conteúdo completo.
+
+---
+
+### 85. ActivityMovedToAnotherDay
+
+Produzido por:
+
+```text
 MoveActivityToAnotherDay
-RemoveActivity
-CompleteActivity
-SkipActivity
-CancelActivity
+```
+
+Deve preservar `ActivityId`.
+
+---
+
+### 86. ActivityReordered
+
+Representa mudança de posição no mesmo Trip Day.
+
+---
+
+### 87. ActivityMarkedTentative
+
+Representa mudança explícita de flexibilidade ou estado para provisório.
+
+---
+
+### 88. ActivityCompleted
+
+Não deve ser produzido automaticamente apenas pela passagem do horário.
+
+Exige:
+
+* confirmação;
+* evidência;
+* regra explícita futura.
+
+---
+
+### 89. ActivitySkipped
+
+Representa decisão ou observação de que a Activity não ocorreu.
+
+---
+
+### 90. ActivityCancelled
+
+Diferencia-se de `ActivityRemoved`.
+
+Cancelamento preserva que a Activity existiu como compromisso planejado.
+
+---
+
+### 91. ActivityMarkedUnavailable
+
+Pode ser consequência de:
+
+* Place fechado;
+* transporte inviável;
+* reserva cancelada;
+* restrição;
+* evento externo.
+
+---
+
+### 92. ActivityMarkedForReview
+
+Representa necessidade de revisão sem afirmar inviabilidade definitiva.
+
+---
+
+### 93. ActivityRemoved
+
+Representa retirada do Roteiro ativo.
+
+Não remove Place ou Saved Place.
+
+---
+
+## Parte XII — Free Period
+
+### 94. FreePeriodAdded
+
+Produzido por:
+
+```text
 AddFreePeriod
-UpdateFreePeriod
-RemoveFreePeriod
-MarkTripDayFree
-ReviewItinerary
 ```
 
 ---
 
-## 173. Recomendações e Propostas
+### 95. FreePeriodUpdated
+
+Pode alterar:
+
+* horário;
+* duração;
+* modo;
+* ordem.
+
+---
+
+### 96. FreePeriodRemoved
+
+Não cria Activity automaticamente.
+
+---
+
+### 97. FreePeriodProtected
+
+Representa alteração para modo `protected`.
+
+---
+
+### 98. FreePeriodMadeFlexible
+
+Representa alteração para modo `flexible`.
+
+---
+
+## Parte XIII — Itinerary
+
+### 99. ItineraryInitialized
+
+Representa criação do Roteiro canônico de uma Trip.
+
+---
+
+### 100. ItineraryVersionChanged
+
+Deve ser emitido quando houver alteração canônica relevante.
+
+Pode ser redundante se a versão estiver presente em todos os eventos de Activity e Free Period; a decisão arquitetural deve ser consistente.
+
+---
+
+### 101. ItineraryMarkedOutdated
+
+Pode ser causado por:
+
+* TripDestinationChanged;
+* TripPeriodChanged;
+* TripAccommodationChanged;
+* TravelerAdded;
+* TripRestrictionAdded;
+* TripBudgetChanged;
+* TripPaceChanged;
+* PlaceDataUpdated.
+
+---
+
+### 102. ItineraryReviewed
+
+Representa conclusão de uma revisão em determinada versão.
+
+Payload:
+
+* ItineraryId;
+* ItineraryVersion;
+* resultado;
+* Planning Conflicts;
+* momento.
+
+---
+
+### 103. ItineraryReviewInvalidated
+
+Produzido quando uma mudança torna uma revisão anterior não aplicável.
+
+---
+
+### 104. ItineraryPlanningCompletenessChanged
+
+Evento derivado quando muda entre:
+
+* empty;
+* partial;
+* planned.
+
+Pode ser mantido como projeção em vez de Evento de Domínio, conforme decisão arquitetural.
+
+---
+
+## Parte XIV — Travel Estimate
+
+### 105. TravelEstimateRequested
+
+Representa solicitação de cálculo.
+
+Não significa que a estimativa esteja disponível.
+
+---
+
+### 106. TravelEstimateCalculated
+
+Payload conceitual:
+
+* origem;
+* destino;
+* Transport Mode;
+* Distance;
+* Travel Time;
+* Provenance;
+* validade;
+* confiança.
+
+---
+
+### 107. TravelEstimateFailed
+
+Representa falha de cálculo.
+
+Não deve assumir:
+
+* Distance zero;
+* Travel Time zero;
+* rota inviável.
+
+---
+
+### 108. TravelEstimateInvalidated
+
+Pode ser causado por mudança de:
+
+* origem;
+* destino;
+* Accommodation;
+* Activity;
+* Transport Mode;
+* validade temporal;
+* Fonte.
+
+---
+
+### 109. TravelEstimateBecameStale
+
+Representa perda de atualidade sem necessariamente invalidar o valor histórico.
+
+---
+
+## Parte XV — Ciclo de vida da Recommendation
+
+### 110. Estados oficiais
+
+* generated;
+* presented;
+* accepted;
+* rejected;
+* expired;
+* invalidated;
+* superseded.
+
+---
+
+### 111. Diagrama do ciclo de vida da Recommendation
+
+```mermaid
+stateDiagram-v2
+    [*] --> Generated
+
+    Generated --> Presented: apresentar
+    Generated --> Invalidated: contexto mudou
+    Generated --> Expired: validade terminou
+
+    Presented --> Accepted: aceitar
+    Presented --> Rejected: rejeitar
+    Presented --> Expired: validade terminou
+    Presented --> Invalidated: contexto mudou
+    Presented --> Superseded: nova recomendação
+
+    Generated --> Superseded: nova recomendação
+
+    Accepted --> Superseded: nova avaliação posterior
+    Rejected --> Superseded: nova avaliação posterior
+
+    Expired --> [*]
+    Invalidated --> [*]
+    Superseded --> [*]
+```
+
+---
+
+### 112. RecommendationRequested
+
+Produzido por:
 
 ```text
 RequestRecommendation
+```
+
+Pode ser tratado como evento de processo ou mensagem interna.
+
+---
+
+### 113. RecommendationGenerated
+
+Deve possuir:
+
+* RecommendationId;
+* Context Snapshot;
+* Reasons;
+* validade;
+* Recommendation Confidence;
+* Provenance;
+* limitações.
+
+---
+
+### 114. RecommendationPresented
+
+Representa que a Recomendação foi disponibilizada ao Usuário.
+
+Não significa que foi lida.
+
+---
+
+### 115. RecommendationAccepted
+
+Produzido por:
+
+```text
 AcceptRecommendation
-RejectRecommendation
-RequestItineraryProposal
-CancelItineraryProposalGeneration
+```
+
+Deve estar correlacionado a:
+
+```text
+DecisionRecorded
+```
+
+---
+
+### 116. RecommendationRejected
+
+Não deve criar preferência permanente automaticamente.
+
+---
+
+### 117. RecommendationExpired
+
+Representa fim de validade temporal.
+
+---
+
+### 118. RecommendationInvalidated
+
+Representa incompatibilidade com Contexto atual.
+
+Pode ser causada por:
+
+* TripContextVersion alterada;
+* ItineraryVersion alterada;
+* Place indisponível;
+* Restrição adicionada;
+* horário alterado;
+* localização relevante alterada.
+
+---
+
+### 119. RecommendationSuperseded
+
+Representa substituição por Recomendação mais recente ou mais aplicável.
+
+---
+
+## Parte XVI — Ciclo de vida da Decision
+
+### 120. DecisionRecorded
+
+Produzido por:
+
+```text
+RecordDecision
+```
+
+ou como consequência de:
+
+```text
+AcceptRecommendation
 AcceptItineraryProposal
 AcceptItineraryProposalPartially
-RejectItineraryProposal
-RegenerateItineraryProposal
+IgnorePlanningRisk
+```
+
+Payload:
+
+* DecisionId;
+* Decision Type;
+* ator;
+* Context Snapshot;
+* opção escolhida;
+* RecommendationId opcional;
+* occurredAt.
+
+---
+
+### 121. DecisionExecutionRequested
+
+Pode representar que uma Decisão originou uma execução separada.
+
+Não significa execução concluída.
+
+---
+
+### 122. DecisionExecutionCompleted
+
+Representa conclusão da aplicação associada.
+
+---
+
+### 123. DecisionExecutionFailed
+
+Falha de execução não invalida automaticamente a existência da Decision.
+
+---
+
+### 124. DecisionOutcomeRecorded
+
+Representa resultado observado posteriormente.
+
+---
+
+### 125. DecisionQualityEvaluated
+
+Evento derivado quando houver avaliação de qualidade da Decisão.
+
+Não deve julgar o Usuário.
+
+---
+
+## Parte XVII — Ciclo de vida da Itinerary Proposal
+
+### 126. Estados oficiais
+
+* requested;
+* generating;
+* ready;
+* partially-accepted;
+* accepted;
+* rejected;
+* expired;
+* failed;
+* cancelled;
+* superseded.
+
+---
+
+### 127. Diagrama do ciclo de vida da Itinerary Proposal
+
+```mermaid
+stateDiagram-v2
+    [*] --> Requested
+
+    Requested --> Generating: iniciar geração
+    Requested --> Cancelled: cancelar
+
+    Generating --> Ready: geração concluída
+    Generating --> Failed: geração falhou
+    Generating --> Cancelled: cancelar
+
+    Ready --> PartiallyAccepted: aceitar parte
+    Ready --> Accepted: aceitar integralmente
+    Ready --> Rejected: rejeitar
+    Ready --> Expired: perder validade
+    Ready --> Superseded: substituir
+
+    PartiallyAccepted --> PartiallyAccepted: aceitar nova seleção válida
+    PartiallyAccepted --> Accepted: aplicar restante
+    PartiallyAccepted --> Expired: perder validade
+    PartiallyAccepted --> Superseded: substituir
+
+    Failed --> Requested: solicitar novamente
+    Rejected --> [*]
+    Accepted --> [*]
+    Expired --> [*]
+    Cancelled --> [*]
+    Superseded --> [*]
 ```
 
 ---
 
-## 174. Conflitos
+### 128. ItineraryProposalRequested
+
+Produzido por:
 
 ```text
-DetectConflicts
-ResolveConflict
-IgnoreRisk
-RestoreIgnoredRisk
+RequestItineraryProposal
 ```
+
+Não altera o Roteiro.
 
 ---
 
-## 175. Deslocamentos
+### 129. ItineraryProposalGenerationStarted
+
+Representa início do processo de geração.
+
+Pode ser evento de processo, não necessariamente Evento de Domínio persistente.
+
+---
+
+### 130. ItineraryProposalGenerated
+
+Deve possuir:
+
+* ItineraryProposalId;
+* ItineraryVersion base;
+* TripContextVersion base;
+* itens;
+* justificativas;
+* limitações;
+* validade;
+* Planning Conflicts conhecidos.
+
+---
+
+### 131. ItineraryProposalGenerationFailed
+
+Não altera o Itinerary.
+
+---
+
+### 132. ItineraryProposalAccepted
+
+Produzido por:
 
 ```text
-RequestTravelEstimate
-RefreshTravelEstimate
-ChangeTransportMode
+AcceptItineraryProposal
 ```
+
+Deve ocorrer apenas após aplicação válida.
+
+Pode estar correlacionado a:
+
+* DecisionRecorded;
+* ActivityAdded;
+* ActivityUpdated;
+* ActivityRemoved;
+* FreePeriodUpdated;
+* ItineraryVersionChanged.
 
 ---
 
-# Parte XXV — Catálogo de Eventos
+### 133. ItineraryProposalPartiallyAccepted
 
-## 176. Viagem
+Produzido por:
 
 ```text
-TripCreated
-TripPlanningContextCompleted
-TripNameChanged
-TripDestinationChanged
-TripPeriodChanged
-TripStarted
-TripCompleted
-TripCancelled
-TripArchived
-TripRestored
-TripDeletionRequested
-TripDeleted
+AcceptItineraryProposalPartially
+```
+
+Deve registrar:
+
+* itens aceitos;
+* itens não aplicados;
+* versão resultante;
+* DecisionId;
+* idempotency reference.
+
+---
+
+### 134. ItineraryProposalRejected
+
+Não altera o Roteiro.
+
+---
+
+### 135. ItineraryProposalExpired
+
+Pode ser causado por:
+
+* validade temporal;
+* versão incompatível;
+* Contexto alterado;
+* cancelamento da Trip;
+* substituição.
+
+---
+
+### 136. ItineraryProposalCancelled
+
+Representa cancelamento durante processo de geração ou revisão.
+
+---
+
+### 137. ItineraryProposalSuperseded
+
+Representa substituição por nova Proposta.
+
+---
+
+### 138. Fluxo de aplicação parcial
+
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant P as Itinerary Proposal
+    participant I as Itinerary
+    participant D as Decision
+    participant A as Planning Assurance
+
+    U->>P: AcceptItineraryProposalPartially
+    P->>P: validar estado e versões
+    P->>A: validar regras e conflitos
+    A-->>P: resultado
+
+    alt inválida
+        P-->>U: aplicação rejeitada
+    else válida
+        P->>I: aplicar itens selecionados
+        I->>I: incrementar ItineraryVersion
+        P->>D: registrar Decision
+        P-->>U: ItineraryProposalPartiallyAccepted
+    end
 ```
 
 ---
 
-## 177. Participantes e Preferências
+## Parte XVIII — Ciclo de vida do Planning Conflict
+
+### 139. Estados oficiais
+
+* open;
+* resolved;
+* ignored;
+* invalidated;
+* superseded.
+
+---
+
+### 140. Diagrama do ciclo de vida
+
+```mermaid
+stateDiagram-v2
+    [*] --> Open
+
+    Open --> Resolved: condição removida
+    Open --> Ignored: risco aceito
+    Open --> Invalidated: contexto perdeu aplicabilidade
+    Open --> Superseded: avaliação substituída
+
+    Ignored --> Resolved: condição removida
+    Ignored --> Invalidated: contexto perdeu aplicabilidade
+    Ignored --> Superseded: avaliação substituída
+
+    Resolved --> Open: condição reaparece
+    Resolved --> Superseded: nova avaliação
+
+    Invalidated --> [*]
+    Superseded --> [*]
+```
+
+---
+
+### 141. PlanningConflictDetected
+
+Deve possuir:
+
+* PlanningConflictId;
+* regra;
+* severidade;
+* evidência;
+* objeto afetado;
+* versões avaliadas;
+* estado open.
+
+Não deve haver duplicidade ativa equivalente.
+
+---
+
+### 142. PlanningConflictResolved
+
+Produzido por:
 
 ```text
-TripOwnerAssigned
-TripRoleChanged
-TravelerAdded
-TravelerRemoved
-GroupProfileUpdated
-TripInterestAdded
-TripInterestRemoved
-TripBudgetChanged
-TripPaceChanged
-TripRestrictionAdded
-TripRestrictionRemoved
-TripTransportModeChanged
+ResolvePlanningConflict
 ```
+
+ou por resolução automática comprovada da condição.
+
+Exige:
+
+* condição não mais presente;
+* evidência de nova avaliação;
+* ator ou processo responsável.
 
 ---
 
-## 178. Hospedagem
+### 143. PlanningConflictIgnored
+
+Produzido por:
 
 ```text
-AccommodationAdded
-AccommodationConfirmed
-AccommodationChanged
-AccommodationMarkedOutdated
-AccommodationRemoved
+IgnorePlanningRisk
 ```
 
----
+Só é válido para severidade `risk` quando permitido.
 
-## 179. Lugares
+Deve estar correlacionado a:
 
 ```text
-PlaceCreated
-PlaceUpdated
-PlaceSaved
-PlaceUnsaved
-PlacePlanned
-PlaceNoLongerPlanned
-PlaceMarkedTemporarilyClosed
-PlaceMarkedPermanentlyClosed
-PlaceDataConflictDetected
-PlaceMerged
+DecisionRecorded
 ```
 
 ---
 
-## 180. Roteiro
+### 144. PlanningConflictInvalidated
+
+Representa perda de aplicabilidade.
+
+Não significa que a condição foi corrigida.
+
+---
+
+### 145. PlanningConflictSuperseded
+
+Representa substituição por avaliação mais recente.
+
+---
+
+### 146. PlanningConflictReopened
+
+Pode ser utilizado quando o mesmo agregado for reaberto.
+
+Alternativamente, pode ser criado novo Planning Conflict.
+
+A estratégia deve ser única e documentada pela Arquitetura.
+
+---
+
+### 147. Fluxo de detecção e resolução
+
+```mermaid
+sequenceDiagram
+    participant I as Itinerary
+    participant P as Planning Assurance
+    participant U as Usuário
+    participant D as Decision
+
+    I->>P: solicitar revisão
+    P->>P: avaliar regras
+
+    alt erro
+        P-->>I: PlanningConflictDetected(error)
+        I-->>U: operação bloqueada
+    else risco
+        P-->>I: PlanningConflictDetected(risk)
+        I-->>U: solicitar decisão
+        U->>P: IgnorePlanningRisk
+        P->>D: DecisionRecorded
+        P-->>I: PlanningConflictIgnored
+    else condição corrigida
+        P-->>I: PlanningConflictResolved
+    end
+```
+
+---
+
+## Parte XIX — Invalidação por Contexto
+
+### 148. Eventos que alteram Trip Context Version
+
+Podem incluir:
+
+* TripDestinationChanged;
+* TripPeriodChanged;
+* TripAccommodationChanged;
+* TravelerAdded;
+* TravelerRemoved;
+* TripRestrictionAdded;
+* TripRestrictionRemoved;
+* TripBudgetChanged;
+* TripPaceChanged.
+
+---
+
+### 149. Matriz de invalidação
+
+| Evento causador          | Objetos potencialmente invalidados                                        |
+| ------------------------ | ------------------------------------------------------------------------- |
+| TripDestinationChanged   | Recommendation, Itinerary Proposal, Travel Estimate, Planning Conflict    |
+| TripPeriodChanged        | Trip Day, Activity, Recommendation, Itinerary Proposal, Planning Conflict |
+| TripAccommodationChanged | Travel Estimate, Recommendation, Itinerary Proposal                       |
+| TravelerAdded            | Group Profile, Recommendation, Itinerary Proposal                         |
+| TripRestrictionAdded     | Recommendation, Itinerary Proposal, Planning Conflict                     |
+| TripBudgetChanged        | Recommendation, Itinerary Proposal                                        |
+| TripPaceChanged          | Itinerary review, Recommendation, Itinerary Proposal                      |
+| PlaceDataUpdated         | Recommendation, Activity review, Planning Conflict                        |
+| ItineraryVersionChanged  | Recommendation, Itinerary Proposal, Itinerary review                      |
+
+---
+
+### 150. Fluxo de invalidação
+
+```mermaid
+flowchart TD
+    Change["Mudança estrutural"]
+    Version["Incrementar versão"]
+    Dependencies["Localizar dependências"]
+    Evaluate["Avaliar aplicabilidade"]
+
+    Recommendation["RecommendationInvalidated"]
+    Proposal["ItineraryProposalExpired"]
+    Estimate["TravelEstimateInvalidated"]
+    Conflict["PlanningConflictInvalidated"]
+    Itinerary["ItineraryMarkedOutdated"]
+
+    Change --> Version
+    Version --> Dependencies
+    Dependencies --> Evaluate
+
+    Evaluate --> Recommendation
+    Evaluate --> Proposal
+    Evaluate --> Estimate
+    Evaluate --> Conflict
+    Evaluate --> Itinerary
+```
+
+---
+
+### 151. Invalidação não destrutiva
+
+Objetos invalidados devem permanecer disponíveis para:
+
+* auditoria;
+* explicação;
+* histórico;
+* análise;
+* rastreabilidade.
+
+---
+
+## Parte XX — Processos longos e assíncronos
+
+### 152. Process Manager conceitual
+
+Fluxos que atravessam vários agregados podem exigir coordenação.
+
+Exemplos:
+
+* alteração de Trip Period;
+* geração de Itinerary Proposal;
+* aplicação de Proposta;
+* revisão de Roteiro;
+* reconciliação de Place;
+* atualização de dados externos.
+
+A Arquitetura definirá se será utilizado:
+
+* process manager;
+* saga;
+* workflow;
+* orquestração;
+* coreografia.
+
+---
+
+### 153. Geração de Proposta
+
+Fluxo conceitual:
+
+```mermaid
+flowchart LR
+    Request["ItineraryProposalRequested"]
+    Context["Construir Context Snapshot"]
+    Data["Obter dados necessários"]
+    Generate["Gerar proposta"]
+    Validate["Validar regras"]
+    Ready["ItineraryProposalGenerated"]
+    Fail["ItineraryProposalGenerationFailed"]
+
+    Request --> Context
+    Context --> Data
+    Data --> Generate
+    Generate --> Validate
+    Validate -->|válida| Ready
+    Validate -->|falha| Fail
+```
+
+---
+
+### 154. Revisão de Roteiro
+
+Fluxo conceitual:
 
 ```text
-ItineraryInitialized
-ItineraryMarkedOutdated
-ItineraryRecalculated
-ItineraryReviewStarted
-ItineraryReviewCompleted
-ItineraryVersionChanged
-TripDayCreated
-TripDayRemoved
-TripDayMarkedFree
+ReviewItinerary
+→ regras avaliadas
+→ PlanningConflictDetected ou PlanningConflictResolved
+→ ItineraryReviewed
 ```
 
 ---
 
-## 181. Atividades
+### 155. Compensação
 
-```text
-ActivityAdded
-ActivityUpdated
-ActivityTimeChanged
-ActivityDurationChanged
-ActivityLocationChanged
-ActivityReordered
-ActivityMovedToAnotherDay
-ActivityRemoved
-ActivityCompleted
-ActivitySkipped
-ActivityCancelled
-ActivityMarkedUnavailable
-ActivityMarkedForReview
-```
+Quando um processo distribuído falhar após efeitos parciais, compensações podem ser necessárias.
+
+Compensação:
+
+* não apaga eventos;
+* produz novos fatos;
+* deve ser rastreável;
+* não pode violar invariantes;
+* deve distinguir falha técnica de Decisão.
 
 ---
 
-## 182. Períodos Livres
+## Parte XXI — Idempotência por comando
 
-```text
-FreePeriodAdded
-FreePeriodUpdated
-FreePeriodProtected
-FreePeriodMadeFlexible
-FreePeriodRemoved
-```
+### 156. Create Trip
+
+Repetição com mesma chave idempotente deve retornar a mesma Trip ou resultado equivalente.
 
 ---
 
-## 183. Deslocamentos
+### 157. Save Place
 
-```text
-TravelEstimateRequested
-TravelEstimateCalculationStarted
-TravelEstimateCalculated
-TravelEstimateMarkedStale
-TravelEstimateUnavailable
-TravelEstimateFailed
-```
+Repetição não cria novo Saved Place.
 
 ---
 
-## 184. Recomendações
+### 158. Add Activity
 
-```text
-RecommendationRequested
-RecommendationGenerated
-RecommendationPresented
-RecommendationAccepted
-RecommendationRejected
-RecommendationExpired
-RecommendationInvalidated
-RecommendationSuperseded
-```
+Deve utilizar idempotência quando o mesmo comando puder ser reenviado por falha de comunicação.
 
 ---
 
-## 185. Propostas
+### 159. Accept Recommendation
 
-```text
-ItineraryProposalRequested
-ItineraryProposalGenerationStarted
-ItineraryProposalGenerated
-ItineraryProposalGenerationFailed
-ItineraryProposalGenerationCancelled
-ItineraryProposalAccepted
-ItineraryProposalPartiallyAccepted
-ItineraryProposalRejected
-ItineraryProposalExpired
-ItineraryProposalSuperseded
-```
+Não deve registrar múltiplas Decisions para a mesma aceitação idempotente.
 
 ---
 
-## 186. Conflitos
+### 160. Accept Itinerary Proposal
 
-```text
-ConflictDetected
-ConflictResolved
-ConflictIgnored
-ConflictInvalidated
-ConflictSuperseded
-```
+Não deve aplicar os mesmos itens duas vezes.
 
 ---
 
-# Parte XXVI — Cenários normativos
+### 161. Accept Itinerary Proposal Partially
 
-## 187. Criação da Viagem
+A seleção aplicada deve possuir referência idempotente.
 
-```text
-Dado que o Usuário possui autorização
-E informou Destino, Período e Viajantes válidos
-Quando executa CreateTrip
-Então TripCreated é emitido
-E os Dias da Viagem são gerados
-E o Roteiro é inicializado
-E a versão inicial é registrada
-```
+Repetir a mesma seleção:
+
+* não duplica Activities;
+* não incrementa versão novamente sem mudança;
+* não registra nova Decision equivalente.
 
 ---
 
-## 188. Mudança de Hospedagem
+### 162. Ignore Planning Risk
 
-```text
-Dado que a Viagem possui Hospedagem confirmada
-E existem Estimativas calculadas
-Quando UpdateAccommodation é aceito
-Então TripAccommodationChanged é emitido
-E as Estimativas dependentes são marcadas como desatualizadas
-E o recálculo é solicitado
-E o Roteiro permanece preservado
-```
+Repetição não cria múltiplas Decisions de aceite do mesmo risco na mesma condição.
 
 ---
 
-## 189. Reordenação de Atividade
+## Parte XXII — Falhas e eventos
 
-```text
-Dado que o Dia possui três Atividades
-Quando MoveActivity altera a segunda para a primeira posição
-Então ActivityReordered é emitido
-E a versão do Roteiro é incrementada
-E os Deslocamentos afetados são invalidados
-E os Conflitos são reavaliados
-```
+### 163. Falha de comando
+
+Uma falha de validação deve retornar resultado de rejeição.
+
+Não deve produzir evento de sucesso.
 
 ---
 
-## 190. Aceitação de Proposta
+### 164. Falha técnica após mudança
 
-```text
-Dado que a Proposta está pronta
-E sua versão base ainda é válida
-Quando o Usuário executa AcceptItineraryProposal
-Então ItineraryProposalAccepted é emitido
-E as Atividades elegíveis são aplicadas
-E a versão do Roteiro é alterada
-E os Conflitos são reavaliados
-```
+A Arquitetura deve impedir inconsistência entre:
+
+* estado confirmado;
+* evento necessário;
+* publicação externa.
 
 ---
 
-## 191. Proposta expirada
+### 165. Evento não processado
 
-```text
-Dado que uma Proposta foi gerada para a versão 5
-E o Roteiro foi alterado para a versão 6
-Quando a Proposta é revisada
-Então ItineraryProposalExpired é emitido
-E a aplicação é bloqueada
-E uma nova geração pode ser solicitada
-```
+Consumidores devem permitir:
 
----
+* repetição;
+* retry;
+* dead-letter ou equivalente;
+* reprocessamento;
+* observabilidade;
+* reconciliação.
 
-## 192. Lugar encerrado
-
-```text
-Dado que um Lugar está associado a uma Atividade futura
-Quando PlaceMarkedPermanentlyClosed é emitido
-Então a Atividade é marcada para revisão
-E um Conflito é detectado
-E Recomendações relacionadas são invalidadas
-```
+A tecnologia será definida posteriormente.
 
 ---
 
-## 193. Risco ignorado
+### 166. Evento desconhecido
 
-```text
-Dado que existe um Conflito de severidade Risco
-Quando o Usuário autorizado executa IgnoreRisk
-Então ConflictIgnored é emitido
-E a decisão permanece auditável
-E o Roteiro continua válido
-```
+Consumidores devem:
 
----
-
-# Parte XXVII — Anti-patterns
-
-## 194. Evento como Comando
-
-Evitar:
-
-```text
-TripCreateRequestedEvent
-```
-
-quando o conceito correto for um Comando.
+* rejeitar com segurança; ou
+* ignorar campos desconhecidos quando compatível;
+* registrar observabilidade;
+* não assumir significado.
 
 ---
 
-## 195. Evento genérico excessivo
+### 167. Evento fora de ordem
 
-Evitar:
+Consumidores que dependem de ordem devem utilizar:
 
-```text
-TripUpdated
-DataChanged
-ItemModified
-```
-
-quando a mudança relevante puder ser nomeada.
+* aggregateVersion;
+* occurredAt;
+* causalidade;
+* políticas de reprocessamento.
 
 ---
 
-## 196. Evento técnico como Evento de Domínio
+## Parte XXIII — Eventos e privacidade
 
-Evitar:
+### 168. Minimização de payload
 
-```text
-DatabaseRowInserted
-CacheCleared
-HttpRequestCompleted
-```
+Eventos devem transportar somente dados necessários.
 
 ---
 
-## 197. Payload completo sem necessidade
+### 169. Dados pessoais
 
-Não publicar todo o agregado em todos os Eventos.
+Evitar incluir:
 
----
+* nome completo;
+* email;
+* endereço completo;
+* diagnóstico;
+* localização atual precisa;
+* dados de menores.
 
-## 198. Estado impossível
-
-Não permitir:
-
-```text
-Accepted Proposal
-→ Generating
-```
-
-sem novo ciclo ou nova identidade.
+Utilizar referências quando suficiente.
 
 ---
 
-## 199. Efeito duplicado
+### 170. Retenção
 
-Não permitir que o mesmo Evento:
+A retenção de eventos deve considerar:
 
-* adicione duas Atividades;
-* envie duas notificações;
-* aplique duas vezes a Proposta.
-
----
-
-## 200. IA como ator final indevido
-
-Não registrar decisão do Usuário como se fosse decisão autônoma da IA.
-
----
-
-## 201. Exclusão sem histórico
-
-Não remover objetos críticos sem Evento, auditoria ou política de retenção.
-
----
-
-# Parte XXVIII — Rastreabilidade
-
-## 202. Eventos e Regras de Negócio
-
-| Evento                    | Regras principais     |
-| ------------------------- | --------------------- |
-| TripCreated               | RB-BR-013 a RB-BR-018 |
-| TripPeriodChanged         | RB-BR-023 a RB-BR-027 |
-| TripAccommodationChanged  | RB-BR-031 a RB-BR-035 |
-| PlaceSaved                | RB-BR-055 a RB-BR-060 |
-| ActivityAdded             | RB-BR-061 a RB-BR-082 |
-| FreePeriodProtected       | RB-BR-083 a RB-BR-087 |
-| TravelEstimateMarkedStale | RB-BR-088 a RB-BR-095 |
-| RecommendationGenerated   | RB-BR-096 a RB-BR-104 |
-| ItineraryProposalAccepted | RB-BR-105 a RB-BR-116 |
-| ConflictDetected          | RB-BR-117 a RB-BR-126 |
-
----
-
-## 203. Ciclos e Agregados
-
-| Agregado          | Ciclo principal                              |
-| ----------------- | -------------------------------------------- |
-| Trip              | Draft → Planned → InProgress → Completed     |
-| Accommodation     | Provisional → Confirmed                      |
-| Activity          | Planned → Completed                          |
-| Recommendation    | Generated → Presented → Accepted ou Rejected |
-| ItineraryProposal | Requested → Generating → Ready → Accepted    |
-| Conflict          | Open → Resolved                              |
-| TravelEstimate    | Requested → Calculating → Available          |
-
----
-
-## 204. Eventos e superfícies
-
-| Superfície    | Eventos principais                                              |
-| ------------- | --------------------------------------------------------------- |
-| Criar Viagem  | TripCreated, TripDaysGenerated                                  |
-| Configurações | TripDestinationChanged, TripPeriodChanged, AccommodationChanged |
-| Explorar      | PlaceSaved, PlaceUnsaved, RecommendationPresented               |
-| Roteiro       | ActivityAdded, ActivityMoved, FreePeriodAdded                   |
-| Proposta      | ItineraryProposalGenerated, ItineraryProposalAccepted           |
-| Revisão       | ConflictDetected, ConflictResolved, ConflictIgnored             |
-| Mapa          | TravelEstimateCalculated, TravelEstimateFailed                  |
-
----
-
-# Parte XXIX — Critérios de aceite
-
-## 205. Comandos
-
-* representam intenção;
-* utilizam verbo;
-* possuem pré-condições;
-* respeitam autorização;
-* não são confundidos com Eventos.
-
----
-
-## 206. Eventos
-
-* representam fatos;
-* utilizam passado;
-* são imutáveis;
-* possuem metadados;
-* são idempotentes no consumo;
-* preservam causalidade.
-
----
-
-## 207. Ciclos de vida
-
-* estados estão definidos;
-* transições válidas estão definidas;
-* transições proibidas estão identificadas;
-* cancelamento, conclusão e arquivamento são distintos;
-* expiração e invalidação são distintas.
-
----
-
-## 208. Efeitos
-
-* efeitos síncronos e assíncronos estão diferenciados;
-* falha assíncrona não corrompe fato válido;
-* dados derivados são invalidados corretamente;
-* efeitos duplicados são prevenidos.
-
----
-
-## 209. IA
-
-* IA pode gerar Recomendações e Propostas;
-* IA não aplica estado canônico sem autorização;
-* ator e decisão permanecem distinguíveis;
-* outputs gerados por IA são auditáveis.
-
----
-
-## 210. Concorrência
-
-* agregados possuem versão;
-* comandos podem utilizar versão esperada;
-* Propostas registram versão base;
-* sobrescrita silenciosa é proibida.
-
----
-
-# Parte XXX — Governança
-
-## 211. Inclusão de novo Evento
-
-Um novo Evento deverá possuir:
-
-* nome;
-* significado;
-* agregado;
-* gatilho;
-* Comando ou causa;
-* payload;
-* efeitos;
-* idempotência;
-* consumidores;
+* finalidade;
+* auditoria;
 * privacidade;
-* versão;
-* testes.
+* obrigações;
+* exclusão;
+* anonimização.
 
 ---
 
-## 212. Alteração de Evento
+### 171. Eventos de exclusão
 
-Mudanças deverão considerar:
+Exclusão ou anonimização deve preservar coerência histórica sem reter dados pessoais desnecessários.
 
-* consumidores;
+---
+
+## Parte XXIV — Eventos e IA
+
+### 172. AIRecommendationGenerationRequested
+
+Pode representar solicitação técnica de geração.
+
+Não é equivalente a RecommendationRequested quando a Recommendation puder ser produzida sem IA.
+
+---
+
+### 173. AIRecommendationGenerationCompleted
+
+Não significa que a Recommendation foi validada ou apresentada.
+
+A saída deve passar por validações de domínio.
+
+---
+
+### 174. AIRecommendationGenerationFailed
+
+Não altera estado canônico.
+
+---
+
+### 175. AIOutputRejected
+
+Pode representar rejeição de saída inválida por:
+
+* schema;
+* referência inexistente;
+* violação de regra;
+* dado inventado;
+* enumeração inválida;
+* falta de Provenance.
+
+---
+
+### 176. Agente como ator
+
+Quando um agente iniciar uma operação permitida:
+
+* `actorType` deve indicar Agent;
+* autorização original deve ser rastreável;
+* não deve assumir UserId como autoria;
+* decisões humanas permanecem atribuídas ao Usuário.
+
+---
+
+## Parte XXV — Matriz comando, regra e evento
+
+### 177. Trip
+
+| Comando               | Regras principais              | Evento                   |
+| --------------------- | ------------------------------ | ------------------------ |
+| CreateTrip            | RB-BR-TRIP-001                 | TripCreated              |
+| UpdateTripDestination | RB-BR-TRIP-007, RB-BR-TRIP-008 | TripDestinationChanged   |
+| UpdateTripPeriod      | RB-BR-TRIP-003, RB-BR-ITN-004  | TripPeriodChanged        |
+| UpdateAccommodation   | RB-BR-TRIP-006, RB-BR-TRIP-008 | TripAccommodationChanged |
+| CancelTrip            | RB-BR-TRIP-009                 | TripCancelled            |
+| ArchiveTrip           | RB-BR-TRIP-010                 | TripArchived             |
+| DeleteTrip            | RB-BR-TRIP-011                 | TripDeleted              |
+
+---
+
+### 178. Traveler Profile
+
+| Comando            | Regras principais            | Evento               |
+| ------------------ | ---------------------------- | -------------------- |
+| AddTraveler        | RB-BR-TRV-002, RB-BR-TRV-003 | TravelerAdded        |
+| RemoveTraveler     | RB-BR-TRV-002                | TravelerRemoved      |
+| AddTripInterest    | RB-BR-TRV-005                | TripInterestAdded    |
+| AddTripRestriction | RB-BR-TRV-006, RB-BR-TRV-007 | TripRestrictionAdded |
+| UpdateTripBudget   | RB-BR-TRV-009                | TripBudgetChanged    |
+| UpdateTripPace     | RB-BR-TRV-010                | TripPaceChanged      |
+
+---
+
+### 179. Trip Collection
+
+| Comando     | Regras principais            | Evento       |
+| ----------- | ---------------------------- | ------------ |
+| SavePlace   | RB-BR-COL-001, RB-BR-COL-002 | PlaceSaved   |
+| UnsavePlace | RB-BR-COL-004                | PlaceUnsaved |
+
+---
+
+### 180. Itinerary
+
+| Comando                  | Regras principais            | Evento                    |
+| ------------------------ | ---------------------------- | ------------------------- |
+| AddActivity              | RB-BR-ITN-008, RB-BR-ITN-009 | ActivityAdded             |
+| UpdateActivity           | RB-BR-ITN-011, RB-BR-ITN-012 | ActivityUpdated           |
+| MoveActivityToAnotherDay | RB-BR-ITN-020                | ActivityMovedToAnotherDay |
+| RemoveActivity           | RB-BR-ITN-019                | ActivityRemoved           |
+| AddFreePeriod            | RB-BR-ITN-017, RB-BR-ITN-018 | FreePeriodAdded           |
+| MarkTripDayFree          | RB-BR-ITN-006                | TripDayMarkedFree         |
+
+---
+
+### 181. Recommendation e Decision
+
+| Comando               | Regras principais            | Evento                                   |
+| --------------------- | ---------------------------- | ---------------------------------------- |
+| RequestRecommendation | RB-BR-REC-002                | RecommendationRequested                  |
+| AcceptRecommendation  | RB-BR-REC-009, RB-BR-REC-010 | RecommendationAccepted, DecisionRecorded |
+| RejectRecommendation  | RB-BR-REC-011                | RecommendationRejected                   |
+| RecordDecisionOutcome | RB-BR-DEC-006                | DecisionOutcomeRecorded                  |
+
+---
+
+### 182. Itinerary Proposal
+
+| Comando                          | Regras principais            | Evento                                                  |
+| -------------------------------- | ---------------------------- | ------------------------------------------------------- |
+| RequestItineraryProposal         | RB-BR-PRP-002, RB-BR-PRP-003 | ItineraryProposalRequested                              |
+| AcceptItineraryProposal          | RB-BR-PRP-006, RB-BR-PRP-009 | ItineraryProposalAccepted                               |
+| AcceptItineraryProposalPartially | RB-BR-PRP-007, RB-BR-PRP-009 | ItineraryProposalPartiallyAccepted                      |
+| RejectItineraryProposal          | RB-BR-PRP-001                | ItineraryProposalRejected                               |
+| RegenerateItineraryProposal      | RB-BR-PRP-008                | ItineraryProposalRequested, ItineraryProposalSuperseded |
+
+---
+
+### 183. Planning Conflict
+
+| Comando                    | Regras principais            | Evento                                      |
+| -------------------------- | ---------------------------- | ------------------------------------------- |
+| ReviewItinerary            | RB-BR-PCF-001                | PlanningConflictDetected, ItineraryReviewed |
+| ResolvePlanningConflict    | RB-BR-PCF-005                | PlanningConflictResolved                    |
+| IgnorePlanningRisk         | RB-BR-PCF-003, RB-BR-PCF-006 | PlanningConflictIgnored, DecisionRecorded   |
+| RestoreIgnoredPlanningRisk | RB-BR-PCF-010                | PlanningConflictReopened                    |
+
+---
+
+## Parte XXVI — Catálogo oficial de eventos
+
+### 184. Identidade e acesso
+
+* AccountCreated;
+* UserAddedToAccount;
+* UserRemovedFromAccount;
+* TripParticipantAdded;
+* TripParticipantRoleChanged;
+* TripParticipantRemoved;
+* TripOwnershipTransferred.
+
+---
+
+### 185. Trip
+
+* TripCreated;
+* TripNameChanged;
+* TripDestinationChanged;
+* TripPeriodChanged;
+* TripAccommodationChanged;
+* TripBecamePlannable;
+* TripPlanningRequirementsLost;
+* TripStarted;
+* TripCompleted;
+* TripCancelled;
+* TripArchived;
+* TripDeleted.
+
+---
+
+### 186. Traveler Profile
+
+* TravelerProfileInitialized;
+* TravelerAdded;
+* TravelerUpdated;
+* TravelerRemoved;
+* GroupProfileUpdated;
+* TripInterestAdded;
+* TripInterestRemoved;
+* TripRestrictionAdded;
+* TripRestrictionRemoved;
+* TripBudgetChanged;
+* TripPaceChanged.
+
+---
+
+### 187. Place e dados
+
+* PlaceCreated;
+* PlaceDataUpdated;
+* PlaceMerged;
+* PlaceMarkedTemporarilyClosed;
+* PlaceMarkedPermanentlyClosed;
+* PlaceOperationalStatusBecameUnknown;
+* DataSourceRegistered;
+* DataSourceUpdated;
+* DataSourceDisabled;
+* PlaceDataFreshnessChanged.
+
+---
+
+### 188. Trip Collection
+
+* PlaceSaved;
+* PlaceUnsaved;
+* SavedPlaceNoteChanged.
+
+---
+
+### 189. Itinerary
+
+* ItineraryInitialized;
+* TripDaysSynchronized;
+* TripDayAdded;
+* TripDayRemoved;
+* TripDayMarkedFree;
+* ActivityAdded;
+* ActivityUpdated;
+* ActivityMovedToAnotherDay;
+* ActivityReordered;
+* ActivityMarkedTentative;
+* ActivityCompleted;
+* ActivitySkipped;
+* ActivityCancelled;
+* ActivityMarkedUnavailable;
+* ActivityMarkedForReview;
+* ActivityRemoved;
+* FreePeriodAdded;
+* FreePeriodUpdated;
+* FreePeriodRemoved;
+* FreePeriodProtected;
+* FreePeriodMadeFlexible;
+* ItineraryVersionChanged;
+* ItineraryMarkedOutdated;
+* ItineraryReviewed;
+* ItineraryReviewInvalidated;
+* ItineraryPlanningCompletenessChanged.
+
+---
+
+### 190. Mobilidade
+
+* TravelEstimateRequested;
+* TravelEstimateCalculated;
+* TravelEstimateFailed;
+* TravelEstimateInvalidated;
+* TravelEstimateBecameStale.
+
+---
+
+### 191. Recommendation e Decision
+
+* RecommendationRequested;
+* RecommendationGenerated;
+* RecommendationPresented;
+* RecommendationAccepted;
+* RecommendationRejected;
+* RecommendationExpired;
+* RecommendationInvalidated;
+* RecommendationSuperseded;
+* DecisionRecorded;
+* DecisionExecutionRequested;
+* DecisionExecutionCompleted;
+* DecisionExecutionFailed;
+* DecisionOutcomeRecorded;
+* DecisionQualityEvaluated.
+
+---
+
+### 192. Itinerary Proposal
+
+* ItineraryProposalRequested;
+* ItineraryProposalGenerationStarted;
+* ItineraryProposalGenerated;
+* ItineraryProposalGenerationFailed;
+* ItineraryProposalAccepted;
+* ItineraryProposalPartiallyAccepted;
+* ItineraryProposalRejected;
+* ItineraryProposalExpired;
+* ItineraryProposalCancelled;
+* ItineraryProposalSuperseded.
+
+---
+
+### 193. Planning Assurance
+
+* PlanningConflictDetected;
+* PlanningConflictResolved;
+* PlanningConflictIgnored;
+* PlanningConflictInvalidated;
+* PlanningConflictSuperseded;
+* PlanningConflictReopened.
+
+---
+
+### 194. IA
+
+* AIRecommendationGenerationRequested;
+* AIRecommendationGenerationCompleted;
+* AIRecommendationGenerationFailed;
+* AIOutputRejected.
+
+---
+
+## Parte XXVII — Critérios de aceite
+
+### 195. Critérios de eventos
+
+* eventos utilizam fatos no passado;
+* comandos utilizam ações;
+* eventos possuem identidade;
+* eventos são imutáveis;
+* eventos possuem momento;
+* eventos possuem correlação;
+* eventos possuem causalidade;
+* eventos possuem versão de schema;
+* eventos não afirmam mudanças inexistentes;
+* payloads são mínimos;
+* dados pessoais são minimizados.
+
+---
+
+### 196. Critérios de ciclos de vida
+
+* Trip possui ciclo documentado;
+* Activity possui ciclo documentado;
+* Recommendation possui ciclo documentado;
+* Itinerary Proposal possui ciclo documentado;
+* Planning Conflict possui ciclo documentado;
+* transições inválidas são rejeitadas;
+* invalidação é distinta de exclusão;
+* ignored é distinto de resolved;
+* rejected é distinto de failed;
+* cancelled é distinto de removed.
+
+---
+
+### 197. Critérios de consistência
+
+* eventos respeitam RB-DOM-003;
+* nomes respeitam RB-DOM-002;
+* agregados respeitam RB-DOM-001;
+* Proposal não altera Itinerary antes de aceitação;
+* Recommendation não registra Decision automaticamente;
+* Decision e execução permanecem separadas;
+* PlanningConflictId é o identificador canônico;
+* ItineraryProposalId é o identificador canônico;
+* parâmetros contextuais abreviados não alteram os tipos canônicos.
+
+---
+
+### 198. Critérios de idempotência
+
+* SavePlace é idempotente;
+* aplicação de Proposta é idempotente;
+* aceite parcial é idempotente;
+* IgnorePlanningRisk é idempotente;
+* eventos reentregues não duplicam efeitos;
+* EventId é utilizado para deduplicação.
+
+---
+
+### 199. Critérios de diagramas
+
+* existe apenas um H1;
+* Partes utilizam H2;
+* seções numeradas utilizam H3;
+* subseções utilizam H4;
+* blocos Mermaid não possuem atributos extras;
+* diagramas utilizam nomes oficiais;
+* transições são coerentes com as regras;
+* diagramas não definem tecnologia física.
+
+---
+
+## Parte XXVIII — Governança
+
+### 200. Inclusão de evento
+
+Um novo evento deve:
+
+* representar fato relevante;
+* utilizar linguagem oficial;
+* possuir origem;
+* possuir agregado responsável;
+* indicar gatilho;
+* indicar payload mínimo;
+* indicar consumidores esperados;
+* indicar regras relacionadas;
+* indicar ciclo de vida;
+* atualizar matrizes.
+
+---
+
+### 201. Alteração de evento
+
+Uma alteração deve avaliar:
+
 * compatibilidade;
 * schemaVersion;
-* migração;
-* replay;
-* documentação;
+* consumidores;
+* persistência;
 * analytics;
+* observabilidade;
 * testes;
-* integração.
+* agentes de IA;
+* privacidade;
+* documentação.
 
 ---
 
-## 213. Depreciação
+### 202. Depreciação de evento
 
-Eventos depreciados deverão:
+Evento depreciado deve registrar:
 
-* permanecer documentados;
-* possuir substituto;
-* possuir período de compatibilidade;
-* não ser removidos abruptamente.
+* nome;
+* versão;
+* substituto;
+* motivo;
+* prazo;
+* consumidores afetados;
+* estratégia de migração.
 
----
-
-## 214. Breaking change
-
-Alterações incompatíveis no contrato de Evento deverão:
-
-* incrementar versão;
-* possuir migração;
-* atualizar consumidores;
-* preservar histórico.
+Nomes depreciados não devem ser reutilizados com outro significado.
 
 ---
 
-## 215. Uso por agentes de IA
+### 203. Inclusão de estado
 
-Agentes deverão:
+Um novo estado deve:
 
-* distinguir Comando de Evento;
-* utilizar nomes oficiais;
-* respeitar transições;
-* não inventar estados;
-* citar efeitos esperados;
-* não aplicar Proposta automaticamente;
-* preservar correlação e causalidade;
-* gerar testes de transição;
-* identificar impacto em consumidores.
+* representar condição observável;
+* possuir transições válidas;
+* possuir eventos de entrada ou saída;
+* possuir regras;
+* possuir significado na Linguagem Ubíqua;
+* não duplicar estado existente.
 
 ---
 
-## 216. Checklist de revisão
+### 204. Uso por agentes de IA
 
-Antes de aprovar este documento, verificar:
+Agentes devem:
 
-* conceitos fundamentais estão definidos;
-* estrutura de Evento está definida;
-* regras gerais estão definidas;
-* ciclo da Viagem está definido;
-* ciclo da Hospedagem está definido;
-* ciclo do Roteiro está definido;
-* ciclo do Dia está definido;
-* ciclo da Atividade está definido;
-* ciclo do Período Livre está definido;
-* ciclo de Salvos está definido;
-* ciclo do Lugar está definido;
-* ciclo das Estimativas está definido;
-* ciclo das Recomendações está definido;
-* ciclo das Propostas está definido;
-* ciclo dos Conflitos está definido;
-* temporalidade está definida;
-* efeitos estão definidos;
+* distinguir comando de evento;
+* não afirmar evento antes da confirmação;
+* não registrar Decision do Usuário;
+* não alterar ciclos de vida;
+* não inventar transições;
+* preservar correlação;
+* preservar Provenance;
+* validar saídas antes de produzir comando.
+
+---
+
+## Parte XXIX — Checklist de revisão
+
+### 205. Checklist documental
+
+Antes de aprovar:
+
+* propósito está definido;
+* autoridade está definida;
+* comandos estão definidos;
+* eventos estão definidos;
+* metadados estão definidos;
 * idempotência está definida;
-* concorrência está definida;
-* integração está definida;
-* IA está contemplada;
-* auditoria está contemplada;
-* catálogos estão presentes;
-* cenários normativos estão presentes;
-* anti-patterns estão definidos;
-* rastreabilidade está presente;
-* governança está definida.
+* causalidade está definida;
+* correlação está definida;
+* versionamento está definido;
+* privacidade está definida;
+* eventos internos estão diferenciados;
+* eventos de integração estão diferenciados;
+* Trip está coberta;
+* Traveler Profile está coberto;
+* Place está coberto;
+* Trip Collection está coberta;
+* Itinerary está coberto;
+* Activity está coberta;
+* Free Period está coberto;
+* Travel Estimate está coberta;
+* Recommendation está coberta;
+* Decision está coberta;
+* Itinerary Proposal está coberta;
+* Planning Conflict está coberto;
+* IA está coberta;
+* ciclos de vida estão diagramados;
+* matrizes estão completas;
+* frontmatter YAML é válido;
+* títulos Markdown são únicos;
+* diagramas Mermaid são válidos;
+* não existem contradições com RB-DOM-001;
+* não existem contradições com RB-DOM-002;
+* não existem contradições com RB-DOM-003.
 
 ---
 
-## 217. Declaração final
+## Parte XXX — Declaração final
 
-Os Eventos de Domínio e Ciclos de Vida definem como o RouteBook representa mudanças relevantes.
+### 206. Declaração normativa
 
-Eles estabelecem:
+Os Eventos de Domínio e Ciclos de Vida do RouteBook estabelecem a forma oficial de representar mudanças relevantes no produto.
 
-* quais intenções podem ser solicitadas;
-* quais fatos podem ocorrer;
-* quais estados são válidos;
-* quais transições são permitidas;
-* quais efeitos devem ser produzidos;
-* quais objetos devem expirar;
-* quais dados devem ser invalidados;
-* quais decisões devem permanecer auditáveis.
+Todo Evento de Domínio deve:
 
-O RouteBook deverá preservar uma distinção rigorosa entre:
+* representar um fato ocorrido;
+* utilizar a Linguagem Ubíqua;
+* respeitar Regras e Invariantes;
+* preservar identidade;
+* preservar causalidade;
+* preservar correlação;
+* preservar versionamento;
+* preservar privacidade;
+* permitir idempotência;
+* evitar efeitos duplicados;
+* evitar afirmações falsas;
+* permanecer imutável.
 
-* Comando e Evento;
+Todo ciclo de vida deve preservar as distinções entre:
+
 * intenção e fato;
-* geração e aplicação;
-* expiração e exclusão;
-* invalidação e resolução;
-* conclusão e arquivamento;
-* recomendação e decisão.
+* Recommendation e Decision;
+* Decision e execução;
+* Itinerary Proposal e Itinerary;
+* Planning Conflict resolved e ignored;
+* invalidated e deleted;
+* rejected e failed;
+* cancelled e removed;
+* estimated e confirmed.
 
-Essa distinção é essencial para garantir:
+Nenhuma interface, integração, automação ou agente de IA poderá produzir, omitir ou reinterpretar Eventos de Domínio de maneira incompatível com este documento.
 
-* consistência;
-* rastreabilidade;
-* automação segura;
-* processamento assíncrono;
-* auditabilidade;
-* evolução arquitetural;
-* controle do Usuário.
-
-Com este documento, a documentação principal da Epic Domain está concluída.
+A Arquitetura deverá implementar mecanismos que garantam que mudanças confirmadas e eventos necessários permaneçam consistentes, auditáveis e recuperáveis.

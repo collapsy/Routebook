@@ -44,6 +44,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-API-001 | Diretrizes e Contratos de API | API | Draft | 0.1.0 | [api-guidelines-and-contracts.md](./api/api-guidelines-and-contracts.md) |
 | RB-SEC-001 | Arquitetura de Segurança e Privacidade | Security | Draft | 0.1.0 | [security-and-privacy-architecture.md](./security/security-and-privacy-architecture.md) |
 | RB-OBS-001 | Observabilidade e Operação | Observability | Draft | 0.1.0 | [observability-and-operations.md](./observability/observability-and-operations.md) |
+| RB-QA-001 | Estratégia de Qualidade e Testes | Quality | Draft | 0.1.0 | [quality-and-testing-strategy.md](./quality/quality-and-testing-strategy.md) |
 
 ## Status possíveis
 

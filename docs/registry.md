@@ -53,6 +53,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-AI-004 | Padrões de Prompts, Contexto e Structured Outputs | AI Standards | Draft | 0.1.0 | [prompts-context-and-structured-outputs-standards.md](./ai/prompts-context-and-structured-outputs-standards.md) |
 | RB-AI-005 | Segurança, Red Teaming e Resiliência de Inteligência Artificial | AI Security | Draft | 0.1.0 | [ai-security-red-teaming-and-resilience.md](./ai/ai-security-red-teaming-and-resilience.md) |
 | RB-AI-006 | Runtime, Orquestração e Execução de Agentes | AI Runtime | Draft | 0.1.0 | [ai-runtime-agent-orchestration-and-execution.md](./ai/ai-runtime-agent-orchestration-and-execution.md) |
+| RB-QA-002 | Plano Mestre de Testes | Quality | Draft | 0.1.0 | [master-test-plan.md](./quality/master-test-plan.md) |
 
 ## Status possíveis
 

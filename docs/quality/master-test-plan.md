@@ -1,4 +1,3 @@
-````markdown
 ---
 id: RB-QA-002
 
@@ -3299,4 +3298,3 @@ Falhas críticas não poderão ser compensadas por médias positivas em outras �
 O RouteBook deverá tratar testes, dados, suites, execuções, relatórios e evidências como artefatos versionados, governados e integrados ao ciclo de desenvolvimento.
 
 A qualidade deverá ser construída continuamente, desde a definição do requisito até a operação em produção.
-````

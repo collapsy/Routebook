@@ -48,6 +48,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-OPS-001 | Runbooks e Procedimentos Operacionais | Operations | Draft | 0.1.0 | [runbooks-and-operational-procedures.md](./operations/runbooks-and-operational-procedures.md) |
 | RB-SRE-001 | Estratégia de Confiabilidade e Continuidade | Reliability | Draft | 0.1.0 | [reliability-and-continuity-strategy.md](./reliability/reliability-and-continuity-strategy.md) |
 | RB-AI-001 | Governança de Inteligência Artificial | AI Governance | Draft | 0.1.0 | [ai-governance.md](./ai/ai-governance.md) |
+| RB-AI-002 | Estratégia de Avaliação de Inteligência Artificial | AI Evaluation | Draft | 0.1.0 | [ai-evaluation-strategy.md](./ai/ai-evaluation-strategy.md) |
 
 ## Status possíveis
 

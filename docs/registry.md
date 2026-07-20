@@ -50,6 +50,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-AI-001 | Governança de Inteligência Artificial | AI Governance | Draft | 0.1.0 | [ai-governance.md](./ai/ai-governance.md) |
 | RB-AI-002 | Estratégia de Avaliação de Inteligência Artificial | AI Evaluation | Draft | 0.1.0 | [ai-evaluation-strategy.md](./ai/ai-evaluation-strategy.md) |
 | RB-AI-003 | Catálogo de Capacidades, Agentes, Modelos e Ferramentas | AI Catalog | Draft | 0.1.0 | [ai-capabilities-agents-models-and-tools-catalog.md](./ai/ai-capabilities-agents-models-and-tools-catalog.md) |
+| RB-AI-004 | Padrões de Prompts, Contexto e Structured Outputs | AI Standards | Draft | 0.1.0 | [prompts-context-and-structured-outputs-standards.md](./ai/prompts-context-and-structured-outputs-standards.md) |
 
 ## Status possíveis
 

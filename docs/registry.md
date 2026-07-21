@@ -56,6 +56,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-QA-002 | Plano Mestre de Testes | Quality | Draft | 0.1.0 | [master-test-plan.md](./quality/master-test-plan.md) |
 | RB-OPS-002 | Catálogo Detalhado de Runbooks | Operations | Draft | 0.1.0 | [runbook-catalog.md](./operations/runbook-catalog.md) |
 | RB-SEC-002 | Modelo de Ameaças e Controles de Segurança | Security | Draft | 0.1.0 | [threat-model-and-security-controls.md](./security/threat-model-and-security-controls.md) |
+| RB-SEC-003 | Desenvolvimento Seguro e Gestão de Vulnerabilidades | Security | Draft | 0.1.0 | [secure-development-and-vulnerability-management.md](./security/secure-development-and-vulnerability-management.md) |
 
 ## Status possíveis
 

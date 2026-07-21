@@ -55,6 +55,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-AI-006 | Runtime, Orquestração e Execução de Agentes | AI Runtime | Draft | 0.1.0 | [ai-runtime-agent-orchestration-and-execution.md](./ai/ai-runtime-agent-orchestration-and-execution.md) |
 | RB-QA-002 | Plano Mestre de Testes | Quality | Draft | 0.1.0 | [master-test-plan.md](./quality/master-test-plan.md) |
 | RB-OPS-002 | Catálogo Detalhado de Runbooks | Operations | Draft | 0.1.0 | [runbook-catalog.md](./operations/runbook-catalog.md) |
+| RB-SEC-002 | Modelo de Ameaças e Controles de Segurança | Security | Draft | 0.1.0 | [threat-model-and-security-controls.md](./security/threat-model-and-security-controls.md) |
 
 ## Status possíveis
 

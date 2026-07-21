@@ -57,6 +57,11 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-OPS-002 | Catálogo Detalhado de Runbooks | Operations | Draft | 0.1.0 | [runbook-catalog.md](./operations/runbook-catalog.md) |
 | RB-SEC-002 | Modelo de Ameaças e Controles de Segurança | Security | Draft | 0.1.0 | [threat-model-and-security-controls.md](./security/threat-model-and-security-controls.md) |
 | RB-SEC-003 | Desenvolvimento Seguro e Gestão de Vulnerabilidades | Security | Draft | 0.1.0 | [secure-development-and-vulnerability-management.md](./security/secure-development-and-vulnerability-management.md) |
+| RB-PRIV-001 | Privacidade, Proteção de Dados e Ciclo de Vida das Informações | Privacy | Draft | 0.1.0 | [privacy-data-protection-and-information-lifecycle.md](./privacy/privacy-data-protection-and-information-lifecycle.md) |
+| RB-PRIV-002 | Registro de Atividades de Tratamento e Avaliações de Impacto à Privacidade | Privacy | Draft | 0.1.0 | [records-of-processing-and-privacy-impact-assessments.md](./privacy/records-of-processing-and-privacy-impact-assessments.md) |
+| RB-PRIV-003 | Direitos dos Titulares e Operações de Privacidade | Privacy | Draft | 0.1.0 | [data-subject-rights-and-privacy-operations.md](./privacy/data-subject-rights-and-privacy-operations.md) |
+| RB-COMP-001 | Governança de Conformidade, Evidências e Preparação para Auditoria | Compliance | Draft | 0.1.0 | [compliance-evidence-and-audit-readiness.md](./compliance/compliance-evidence-and-audit-readiness.md) |
+| RB-GOV-001 | Governança de Produto, Arquitetura e Decisões | Governance | Draft | 0.1.0 | [product-architecture-and-decision-governance.md](./governance/product-architecture-and-decision-governance.md) |
 
 ## Status possíveis
 

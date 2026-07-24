@@ -62,6 +62,10 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-PRIV-003 | Direitos dos Titulares e Operações de Privacidade | Privacy | Draft | 0.1.0 | [data-subject-rights-and-privacy-operations.md](./privacy/data-subject-rights-and-privacy-operations.md) |
 | RB-COMP-001 | Governança de Conformidade, Evidências e Preparação para Auditoria | Compliance | Draft | 0.1.0 | [compliance-evidence-and-audit-readiness.md](./compliance/compliance-evidence-and-audit-readiness.md) |
 | RB-GOV-001 | Governança de Produto, Arquitetura e Decisões | Governance | Draft | 0.1.0 | [product-architecture-and-decision-governance.md](./governance/product-architecture-and-decision-governance.md) |
+| RB-GOV-002 | Registros de Decisão, ADRs e Gestão de Mudanças | Governance | Draft | 0.1.0 | [decision-records-adrs-and-change-management.md](./governance/decision-records-adrs-and-change-management.md) |
+| RB-COMP-002 | Catálogo de Controles, Evidências e Avaliação de Efetividade | Compliance | Draft | 0.1.0 | [control-catalog-evidence-and-effectiveness-assessment.md](./compliance/control-catalog-evidence-and-effectiveness-assessment.md) |
+| RB-COMP-003 | Auditorias, Achados e Planos de Ação Corretiva | Compliance | Draft | 0.1.0 | [audits-findings-and-corrective-action-management.md](./compliance/audits-findings-and-corrective-action-management.md) |
+| RB-RISK-001 | Gestão Integrada de Riscos e Registro de Riscos | Risk | Draft | 0.1.0 | [integrated-risk-management-and-risk-register.md](./risk/integrated-risk-management-and-risk-register.md) |
 
 ## Status possíveis
 

@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: null
+last_updated: "2026-07-28"
 authors:
   - RouteBook Team
 tags:
@@ -41,8 +41,9 @@ ai_context:
 
 | Campo | Valor |
 | --- | --- |
-| Estado operacional | In Progress |
+| Estado operacional | Ready for Review |
 | Issue | #2 |
+| Pull request | #3 |
 | Branch | `chore/rb-inc-000-readiness` |
 | Base | `main` |
 
@@ -65,7 +66,8 @@ A documentação detalhava produto e arquitetura, mas o repositório ainda não 
 - formalizar `RB-INC-000` e `RB-INC-001`;
 - criar templates de issue e PR;
 - criar validação documental e workflow;
-- atualizar o registro documental.
+- atualizar o registro documental;
+- normalizar dívidas documentais detectadas pela primeira execução do validador.
 
 ## Fora de escopo
 
@@ -83,16 +85,19 @@ A documentação detalhava produto e arquitetura, mas o repositório ainda não 
 - [x] issue #2 criada;
 - [x] README atualizado;
 - [x] cenário canônico corrigido para 22 a 29 de agosto de 2026;
+- [x] referências antigas de julho corrigidas nos documentos identificados;
+- [x] frontmatter legado de `RB-AI-005` normalizado;
 - [x] IDs `RB-CORE-*` materializados;
 - [x] instruções de agentes criadas;
 - [x] operação por incrementos documentada;
-- [ ] registro sincronizado;
-- [ ] templates GitHub criados;
-- [ ] validação automatizada criada;
-- [ ] pull request aberto;
-- [ ] checks avaliados.
+- [x] registro sincronizado;
+- [x] templates GitHub criados;
+- [x] validação automatizada criada;
+- [x] pull request #3 aberto;
+- [ ] check final do head aprovado;
+- [ ] revisão e integração humanas concluídas.
 
-A lista deve ser atualizada no pull request antes da integração.
+A integração na `main` permanece uma decisão humana.
 
 ## Caminhos permitidos
 
@@ -124,6 +129,16 @@ node scripts/validate-docs.mjs
 
 Como a aplicação ainda não existe, comandos de lint, typecheck, testes e build de produto não se aplicam a este incremento.
 
+## Achados da validação
+
+A primeira execução do workflow detectou e permitiu corrigir:
+
+- frontmatter de `RB-AI-005` cercado incorretamente por bloco de código;
+- quatro documentos com a data histórica de julho de 2026;
+- referências a documentos futuros ainda não materializados.
+
+Referências futuras permanecem como avisos, pois representam `next_documents` planejados e não bloqueiam a integridade dos 102 documentos registrados.
+
 ## Riscos
 
 | Risco | Mitigação |
@@ -132,6 +147,7 @@ Como a aplicação ainda não existe, comandos de lint, typecheck, testes e buil
 | excesso de burocracia para projeto pessoal | templates pequenos e incrementos proporcionais ao risco |
 | status de publicação confundido com status decisório de ADR | dimensões documentadas separadamente |
 | documentação divergir do código futuro | validação e atualização no mesmo incremento |
+| referência futura interpretada como documento existente | validador reporta aviso e exige registro quando o arquivo for criado |
 
 ## Rollback
 
@@ -139,9 +155,9 @@ A mudança é documental e operacional. O rollback pode ser realizado revertendo
 
 ## Evidências
 
-Serão registradas no pull request:
-
-- diff dos arquivos;
-- resultado do validador;
-- resultado do workflow;
-- revisão do responsável pelo repositório.
+- issue #2;
+- pull request #3;
+- diff controlado da branch;
+- primeira execução do workflow identificou uma falha real;
+- normalização aplicada aos documentos afetados;
+- check final deverá ser registrado antes da integração.

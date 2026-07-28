@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS "trips" (
+  "id" uuid PRIMARY KEY NOT NULL,
+  "name" varchar(160) NOT NULL,
+  "destination_name" varchar(180) NOT NULL,
+  "destination_type" varchar(32) NOT NULL,
+  "country_code" varchar(2) NOT NULL,
+  "latitude" text NOT NULL,
+  "longitude" text NOT NULL,
+  "time_zone" varchar(64) NOT NULL,
+  "start_date" date NOT NULL,
+  "end_date" date NOT NULL,
+  "accommodation_name" varchar(180),
+  "accommodation_address" text,
+  "status" varchar(32) NOT NULL,
+  "participants" jsonb NOT NULL,
+  "context_version" integer NOT NULL,
+  "created_at" timestamp with time zone NOT NULL,
+  "updated_at" timestamp with time zone NOT NULL,
+  CONSTRAINT "trips_period_order" CHECK ("end_date" >= "start_date"),
+  CONSTRAINT "trips_context_version_positive" CHECK ("context_version" > 0)
+);

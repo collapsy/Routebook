@@ -110,6 +110,15 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-IMP-004 | Matriz de Rastreabilidade da Implementação | Implementation | Published | 1.0.0 | [traceability-matrix.md](./implementation/traceability-matrix.md) |
 | RB-INC-000 | Implementation Readiness | Implementation Increment | Published | 1.0.0 | [rb-inc-000-implementation-readiness.md](./implementation/increments/rb-inc-000-implementation-readiness.md) |
 | RB-INC-001 | Bootstrap do Monorepo | Implementation Increment | Planned | 0.1.0 | [rb-inc-001-monorepo-bootstrap.md](./implementation/increments/rb-inc-001-monorepo-bootstrap.md) |
+| RB-AI-007 | Operação e Gestão do Ciclo de Vida de Inteligência Artificial | AI Operations | Planned | 0.1.0 | [ai-operations-and-lifecycle-management.md](./ai/ai-operations-and-lifecycle-management.md) |
+| RB-API-002 | Catálogo de Contratos de API | API | Planned | 0.1.0 | [api-contract-catalog.md](./data/api-contract-catalog.md) |
+| RB-API-003 | Versionamento e Depreciação de APIs | API | Planned | 0.1.0 | [api-versioning-and-deprecation-policy.md](./data/api-versioning-and-deprecation-policy.md) |
+| RB-DATA-003 | Estratégia de Qualidade e Proveniência de Dados | Data | Planned | 0.1.0 | [data-quality-and-provenance-strategy.md](./data/data-quality-and-provenance-strategy.md) |
+| RB-FE-001 | Arquitetura Frontend e Padrões de Engenharia | Development | Planned | 0.1.0 | [frontend-architecture-and-engineering-standards.md](./development/frontend-architecture-and-engineering-standards.md) |
+| RB-QA-003 | Plano de Testes de Segurança e Resiliência de IA | Quality | Planned | 0.1.0 | [security-and-ai-resilience-test-plan.md](./quality/security-and-ai-resilience-test-plan.md) |
+| RB-QA-004 | Plano de Testes de Resiliência Operacional e Recuperação | Quality | Planned | 0.1.0 | [operational-resilience-and-recovery-test-plan.md](./quality/operational-resilience-and-recovery-test-plan.md) |
+| RB-INT-001 | Catálogo de Integrações e Providers | Integrations | Planned | 0.1.0 | [integration-catalog.md](./integrations/integration-catalog.md) |
+| RB-SRE-002 | Objetivos de Nível de Serviço e Error Budgets | Reliability | Planned | 0.1.0 | [service-level-objectives-and-error-budgets.md](./reliability/service-level-objectives-and-error-budgets.md) |
 
 ## Status possíveis
 

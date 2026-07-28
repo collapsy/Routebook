@@ -37,17 +37,24 @@ function read(path) {
 }
 
 function parseFrontmatter(content, path) {
-  if (!content.startsWith('---')) {
+  let sourceContent = content;
+
+  if (sourceContent.startsWith('```yaml\n---')) {
+    warn(`${relative(root, path)}: frontmatter legado está cercado por bloco de código YAML.`);
+    sourceContent = sourceContent.slice('```yaml\n'.length);
+  }
+
+  if (!sourceContent.startsWith('---')) {
     return null;
   }
 
-  const end = content.indexOf('\n---', 3);
+  const end = sourceContent.indexOf('\n---', 3);
   if (end === -1) {
     fail(`${relative(root, path)}: frontmatter não foi encerrado.`);
     return null;
   }
 
-  const source = content.slice(3, end).trim();
+  const source = sourceContent.slice(3, end).trim();
   const scalar = (key) => {
     const match = source.match(new RegExp(`^${key}:\\s*(.+?)\\s*$`, 'm'));
     return match?.[1]?.replace(/^['"]|['"]$/g, '') ?? null;

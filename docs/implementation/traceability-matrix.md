@@ -26,6 +26,7 @@ prerequisites:
 next_documents:
   - RB-INC-000
   - RB-INC-001
+  - RB-INC-002
 ai_context:
   priority: high
   index: true
@@ -46,7 +47,8 @@ ai_context:
 | Incremento | Requisito/decisão | Issue | Branch/PR | Caminhos | Testes/evidências | Estado |
 | --- | --- | --- | --- | --- | --- | --- |
 | RB-INC-000 | RB-DEL-001, RB-DEV-001, RB-CICD-001 | #2 | `chore/rb-inc-000-readiness`, PR #3 | documentação, templates e validação | 111 documentos registrados, 0 avisos, workflow aprovado | Integrado |
-| RB-INC-001 | RB-ADR-002, RB-ADR-003, RB-ADR-004, RB-ADR-010, RB-ADR-011, RB-ADR-019 | #4 | `feature/rb-inc-001-monorepo-bootstrap`, PR #5 | workspace, `apps/web`, configurações compartilhadas e CI | frozen install, format, docs, lint, typecheck, componente, dev smoke, build e E2E responsivo | Ready for Review |
+| RB-INC-001 | RB-ADR-002, RB-ADR-003, RB-ADR-004, RB-ADR-010, RB-ADR-011, RB-ADR-019 | #4 | `feature/rb-inc-001-monorepo-bootstrap`, PR #5 | workspace, `apps/web`, configurações compartilhadas e CI | frozen install, format, docs, lint, typecheck, componente, dev smoke, build e E2E responsivo | Integrado |
+| RB-INC-002 | RB-DEL-001, RB-UX-001, RB-UX-003, RB-UX-004, RB-UX-005, RB-UX-006, RB-DS-001, RB-DS-002 | #6 | `feature/rb-inc-002-product-shell`, PR a criar | landing, product shell, Minhas Viagens, estados globais e testes | evidências pendentes de execução no PR | Em execução |
 
 ## Evidências do RB-INC-001
 
@@ -60,6 +62,19 @@ ai_context:
 | lockfile reproduzível | `pnpm-lock.yaml` |
 | quality gates | `.github/workflows/engineering-validation.yml` |
 | instruções de execução | `apps/web/README.md` e `README.md` |
+
+## Evidências previstas do RB-INC-002
+
+| Evidência | Localização |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-002-product-shell.md` |
+| entrada pela landing | `apps/web/app/page.tsx` |
+| shell global | `apps/web/components/app-shell.tsx` |
+| Minhas Viagens e estado vazio | `apps/web/app/viagens/page.tsx` e `apps/web/components/empty-trips-state.tsx` |
+| preparação da criação | `apps/web/app/viagens/nova/page.tsx` |
+| loading, erro e 404 | `apps/web/app/viagens/loading.tsx`, `apps/web/app/viagens/error.tsx` e `apps/web/app/not-found.tsx` |
+| testes de componente | `apps/web/components/empty-trips-state.test.tsx` e `apps/web/components/product-error-state.test.tsx` |
+| testes E2E | `apps/web/e2e/home.spec.ts` e `apps/web/e2e/product-shell.spec.ts` |
 
 ## Cadeia mínima
 

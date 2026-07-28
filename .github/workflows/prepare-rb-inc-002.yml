@@ -1,9 +1,9 @@
 name: Prepare RB-INC-002
 
 on:
-  pull_request:
+  push:
     branches:
-      - main
+      - feature/rb-inc-002-product-shell
     paths:
       - ".github/workflows/prepare-rb-inc-002.yml"
 

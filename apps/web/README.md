@@ -9,12 +9,12 @@ Aplicação web principal do RouteBook, implementada com Next.js App Router e Ty
 - Next.js `16.2.12`;
 - React `19.2.8`;
 - Tailwind CSS `4.3.3`;
-- TypeScript `7.0.2`;
+- TypeScript `6.0.3`;
 - ESLint `9.39.5`;
 - Vitest `4.1.10`;
 - Playwright `1.62.0`.
 
-As versões são exatas e o `pnpm-lock.yaml` é obrigatório. O ESLint permanece na linha 9 por compatibilidade com os plugins utilizados pelo `eslint-config-next`.
+As versões são exatas e o `pnpm-lock.yaml` é obrigatório. O ESLint permanece na linha 9 por compatibilidade com os plugins utilizados pelo `eslint-config-next`. O TypeScript permanece na linha 6 porque a API de compilador da linha 7 ainda não é suportada pelo Next.js `16.2.12`.
 
 ## Pré-requisitos
 

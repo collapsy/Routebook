@@ -1,4 +1,3 @@
-```yaml
 ---
 id: RB-AI-005
 
@@ -96,7 +95,6 @@ ai_context:
   index: true
 ---
 
-```
 # RouteBook — Segurança, Red Teaming e Resiliência de Inteligência Artificial
 
 ## Parte I — Fundamentos

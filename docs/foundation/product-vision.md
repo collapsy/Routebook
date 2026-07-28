@@ -74,7 +74,7 @@ Quando houver dúvida sobre a direção de uma funcionalidade, a decisão dever�
 
 O RouteBook surgiu de uma necessidade real de planejamento de viagem.
 
-Durante a preparação de uma viagem entre **22 e 29 de julho de 2026**, tornou-se necessário reunir informações sobre:
+Durante a preparação de uma viagem entre **22 e 29 de agosto de 2026**, tornou-se necessário reunir informações sobre:
 
 * lugares para conhecer;
 * melhores praias;

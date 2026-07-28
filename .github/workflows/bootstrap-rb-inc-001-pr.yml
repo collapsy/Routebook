@@ -49,6 +49,7 @@ jobs:
         run: |
           cat >> pnpm-workspace.yaml <<'YAML'
           allowBuilds:
+            sharp: true
             unrs-resolver: true
           YAML
           pnpm add -Dw turbo@latest prettier@latest --save-exact

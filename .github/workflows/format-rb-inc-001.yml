@@ -1,0 +1,54 @@
+name: Format RB-INC-001
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/format-rb-inc-001.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    name: Format new implementation files
+    if: github.head_ref == 'feature/rb-inc-001-monorepo-bootstrap'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout implementation branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-001-monorepo-bootstrap
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Format new files
+        run: |
+          pnpm exec prettier --write \
+            apps/web/app/globals.css \
+            apps/web/app/page.tsx \
+            apps/web/e2e/home.spec.ts
+
+      - name: Commit formatting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            apps/web/app/globals.css \
+            apps/web/app/page.tsx \
+            apps/web/e2e/home.spec.ts
+          git diff --cached --quiet || git commit -m "style(rb-inc-001): format web implementation"
+          git push origin HEAD:feature/rb-inc-001-monorepo-bootstrap

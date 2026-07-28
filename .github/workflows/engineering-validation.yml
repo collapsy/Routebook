@@ -81,12 +81,12 @@ jobs:
       - name: Smoke development server
         shell: bash
         run: |
-          pnpm --filter @routebook/web dev > /tmp/routebook-dev.log 2>&1 &
+          pnpm --filter @routebook/web exec next dev --port 3100 > /tmp/routebook-dev.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
 
           for attempt in {1..30}; do
-            if curl --fail --silent --show-error http://127.0.0.1:3000 > /dev/null; then
+            if curl --fail --silent --show-error http://127.0.0.1:3100 > /dev/null; then
               exit 0
             fi
             sleep 1

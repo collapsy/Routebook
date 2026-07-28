@@ -29,7 +29,8 @@ export default function NewTripPage() {
           <strong>Primeiro destino suportado: Pipa.</strong>
           <p>
             O MVP utiliza Pipa, Tibau do Sul — RN como destino canônico, com coordenadas e fuso já
-            definidos. Outros destinos serão habilitados quando a resolução geográfica estiver pronta.
+            definidos. Outros destinos serão habilitados quando a resolução geográfica estiver
+            pronta.
           </p>
         </aside>
       </div>

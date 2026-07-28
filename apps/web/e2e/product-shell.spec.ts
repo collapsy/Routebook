@@ -4,9 +4,7 @@ test("exibe Minhas viagens com ação de criação", async ({ page }) => {
   await page.goto("/viagens");
 
   await expect(page.getByRole("heading", { name: "Minhas viagens" })).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: /Criar (primeira|nova) viagem/ }),
-  ).toBeVisible();
+  await expect(page.getByRole("link", { name: /Criar (primeira|nova) viagem/ })).toBeVisible();
 });
 
 test("cria e mantém uma viagem persistida", async ({ page }, testInfo) => {

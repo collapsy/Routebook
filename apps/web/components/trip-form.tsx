@@ -2,10 +2,7 @@
 
 import { useActionState } from "react";
 
-import {
-  createTripAction,
-  initialCreateTripState,
-} from "@/app/viagens/nova/actions";
+import { createTripAction, initialCreateTripState } from "@/app/viagens/nova/actions";
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;

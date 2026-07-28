@@ -7,25 +7,27 @@ import { trips } from "./schema";
 
 export class DrizzleTripRepository implements TripRepository {
   async create(trip: Trip): Promise<void> {
-    await getDatabase().insert(trips).values({
-      id: trip.id,
-      name: trip.name,
-      destinationName: trip.destination.name,
-      destinationType: trip.destination.type,
-      countryCode: trip.destination.countryCode,
-      latitude: String(trip.destination.latitude),
-      longitude: String(trip.destination.longitude),
-      timeZone: trip.destination.timeZone,
-      startDate: trip.period.startDate,
-      endDate: trip.period.endDate,
-      accommodationName: trip.accommodation?.name,
-      accommodationAddress: trip.accommodation?.address,
-      status: trip.status,
-      participants: trip.participants,
-      contextVersion: trip.contextVersion,
-      createdAt: trip.createdAt,
-      updatedAt: trip.updatedAt,
-    });
+    await getDatabase()
+      .insert(trips)
+      .values({
+        id: trip.id,
+        name: trip.name,
+        destinationName: trip.destination.name,
+        destinationType: trip.destination.type,
+        countryCode: trip.destination.countryCode,
+        latitude: String(trip.destination.latitude),
+        longitude: String(trip.destination.longitude),
+        timeZone: trip.destination.timeZone,
+        startDate: trip.period.startDate,
+        endDate: trip.period.endDate,
+        accommodationName: trip.accommodation?.name,
+        accommodationAddress: trip.accommodation?.address,
+        status: trip.status,
+        participants: trip.participants,
+        contextVersion: trip.contextVersion,
+        createdAt: trip.createdAt,
+        updatedAt: trip.updatedAt,
+      });
   }
 
   async list(): Promise<Trip[]> {

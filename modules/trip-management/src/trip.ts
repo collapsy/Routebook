@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
-export type TripStatus = "draft" | "planned" | "in-progress" | "completed" | "cancelled" | "archived";
+export type TripStatus =
+  "draft" | "planned" | "in-progress" | "completed" | "cancelled" | "archived";
 export type TripRole = "owner" | "editor" | "viewer";
 
 export type Destination = {
@@ -83,7 +84,11 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
   if (name.length < 3) fieldErrors.name = "Informe um nome com pelo menos 3 caracteres.";
   if (!isLocalDate(input.startDate)) fieldErrors.startDate = "Informe uma data inicial válida.";
   if (!isLocalDate(input.endDate)) fieldErrors.endDate = "Informe uma data final válida.";
-  if (isLocalDate(input.startDate) && isLocalDate(input.endDate) && input.endDate < input.startDate) {
+  if (
+    isLocalDate(input.startDate) &&
+    isLocalDate(input.endDate) &&
+    input.endDate < input.startDate
+  ) {
     fieldErrors.endDate = "A data final não pode ser anterior à data inicial.";
   }
   if (ownerName.length < 2) fieldErrors.ownerName = "Informe o nome do responsável pela viagem.";
@@ -109,7 +114,10 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
       timeZone: PIPA_DESTINATION.timeZone,
     },
     accommodation: accommodationName
-      ? { name: accommodationName, ...(accommodationAddress ? { address: accommodationAddress } : {}) }
+      ? {
+          name: accommodationName,
+          ...(accommodationAddress ? { address: accommodationAddress } : {}),
+        }
       : undefined,
     status: "draft",
     participants: [owner],

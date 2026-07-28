@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { DrizzleTripRepository } from "@routebook/database";
-import { createAndPersistTrip, TripValidationError, type TripFieldErrors } from "@routebook/trip-management";
+import {
+  createAndPersistTrip,
+  TripValidationError,
+  type TripFieldErrors,
+} from "@routebook/trip-management";
 
 export type CreateTripActionState = {
   fieldErrors: TripFieldErrors;

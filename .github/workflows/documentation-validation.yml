@@ -1,0 +1,50 @@
+name: Documentation Validation
+
+on:
+  pull_request:
+    paths:
+      - "README.md"
+      - "AGENTS.md"
+      - "CONTRIBUTING.md"
+      - "docs/**"
+      - "scripts/validate-docs.mjs"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - ".github/workflows/documentation-validation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "README.md"
+      - "AGENTS.md"
+      - "CONTRIBUTING.md"
+      - "docs/**"
+      - "scripts/validate-docs.mjs"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - ".github/workflows/documentation-validation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: documentation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-documentation:
+    name: Validate documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate documentation registry and metadata
+        run: node scripts/validate-docs.mjs

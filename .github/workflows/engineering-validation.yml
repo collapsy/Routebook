@@ -45,7 +45,7 @@ jobs:
   validate:
     name: Validate monorepo
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Checkout repository
@@ -78,11 +78,28 @@ jobs:
       - name: Run component tests
         run: pnpm test
 
+      - name: Smoke development server
+        shell: bash
+        run: |
+          pnpm --filter @routebook/web dev > /tmp/routebook-dev.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error http://127.0.0.1:3000 > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          cat /tmp/routebook-dev.log
+          exit 1
+
       - name: Build application
         run: pnpm build
 
       - name: Install Playwright Chromium
         run: pnpm --filter @routebook/web exec playwright install --with-deps chromium
 
-      - name: Run smoke tests
+      - name: Run responsive smoke tests
         run: pnpm test:e2e

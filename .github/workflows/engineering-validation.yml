@@ -16,6 +16,8 @@ on:
       - "packages/**"
       - "scripts/**"
       - "docs/**"
+      - "compose.yaml"
+      - ".env.example"
       - ".github/workflows/engineering-validation.yml"
   push:
     branches:
@@ -34,6 +36,8 @@ on:
       - "packages/**"
       - "scripts/**"
       - "docs/**"
+      - "compose.yaml"
+      - ".env.example"
       - ".github/workflows/engineering-validation.yml"
 
 permissions:
@@ -53,7 +57,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:17-alpine
+        image: postgis/postgis:17-3.5-alpine
         env:
           POSTGRES_DB: routebook
           POSTGRES_USER: routebook

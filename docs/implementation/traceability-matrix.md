@@ -53,6 +53,7 @@ ai_context:
 | Evidência | Localização |
 | --- | --- |
 | definição do incremento | `docs/implementation/increments/rb-inc-001-monorepo-bootstrap.md` |
+| registro publicado | `docs/registry.md`, status `Published`, versão `1.0.0` |
 | aplicação institucional | `apps/web/app` |
 | teste de componente | `apps/web/components/decision-pillars.test.tsx` |
 | smoke desktop e móvel | `apps/web/e2e/home.spec.ts` e `apps/web/playwright.config.ts` |

@@ -23,7 +23,7 @@ test("navega até a preparação da criação sem persistir dados", async ({ pag
 
 test("mantém a navegação global utilizável", async ({ page }) => {
   await page.goto("/viagens/nova");
-  await page.getByRole("link", { name: "Minhas viagens" }).click();
+  await page.getByRole("link", { name: "Minhas viagens", exact: true }).click();
 
   await expect(page).toHaveURL(/\/viagens$/);
   await expect(page.getByRole("heading", { name: "Minhas viagens" })).toBeVisible();

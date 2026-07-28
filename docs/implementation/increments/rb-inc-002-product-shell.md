@@ -4,8 +4,8 @@ title: Product Shell e Minhas Viagens
 description: Implementa o primeiro shell navegável de produto do RouteBook, com entrada pela landing, área Minhas Viagens, estado vazio e estados globais seguros.
 document_type: implementation-increment
 owner: Delivery
-status: Draft
-version: "0.1.0"
+status: Published
+version: "1.0.0"
 created: "2026-07-28"
 last_updated: "2026-07-28"
 authors:
@@ -41,9 +41,9 @@ ai_context:
 
 ## Estado
 
-`Draft`
+`Published`
 
-O incremento permanece em elaboração até que os checks documentais e de engenharia sejam executados no pull request.
+O incremento foi implementado e validado no pull request `#7`, associado à issue `#6`.
 
 ## Resultado vertical
 
@@ -51,29 +51,29 @@ Uma pessoa consegue acessar a landing institucional, entrar na área de produto,
 
 ## Problema
 
-O `RB-INC-001` entregou uma aplicação institucional executável, mas o RouteBook ainda não possui uma superfície de produto navegável. A landing apresenta o conceito, porém não oferece um espaço coerente para iniciar o planejamento.
+O `RB-INC-001` entregou uma aplicação institucional executável, mas o RouteBook ainda não possuía uma superfície de produto navegável. A landing apresentava o conceito, porém não oferecia um espaço coerente para iniciar o planejamento.
 
-## Hipótese
+## Hipótese validada
 
 Uma entrada clara para `Minhas viagens`, acompanhada de um estado vazio orientativo, permite validar a arquitetura de navegação e a compreensão do primeiro uso antes de introduzir identidade, persistência ou regras canônicas de `Trip`.
 
-## Escopo
+## Escopo entregue
 
-- conectar a landing à área de produto;
-- implementar a rota `/viagens`;
-- implementar o estado vazio de primeiro acesso;
-- implementar a rota preparatória `/viagens/nova`;
-- implementar shell global responsivo;
-- preservar identificação do produto e contexto de navegação;
-- adicionar skip link e foco visível;
-- implementar estado de carregamento;
-- implementar error boundary recuperável;
-- implementar página de rota inexistente;
-- adicionar testes de componente;
-- adicionar testes E2E em desktop e viewport móvel;
-- atualizar documentação e rastreabilidade.
+- conexão da landing com a área de produto;
+- rota `/viagens`;
+- estado vazio de primeiro acesso;
+- rota preparatória `/viagens/nova`;
+- shell global responsivo;
+- identificação do produto e contexto de navegação;
+- skip link e foco visível;
+- estado de carregamento;
+- error boundary recuperável;
+- página de rota inexistente;
+- testes de componente;
+- testes E2E em desktop e viewport móvel;
+- documentação e rastreabilidade atualizadas.
 
-## Fora de escopo
+## Fora de escopo preservado
 
 - criar ou persistir `Trip`;
 - gerar `TripId`;
@@ -89,7 +89,7 @@ Uma entrada clara para `Minhas viagens`, acompanhada de um estado vazio orientat
 - Providers externos;
 - criação de `packages/ui`.
 
-## Context Pack
+## Context Pack utilizado
 
 - `AGENTS.md`;
 - `apps/web/AGENTS.md`;
@@ -105,34 +105,33 @@ Uma entrada clara para `Minhas viagens`, acompanhada de um estado vazio orientat
 - `docs/quality/quality-and-testing-strategy.md`;
 - `docs/implementation/increments/rb-inc-001-monorepo-bootstrap.md`.
 
-## Superfícies
+## Superfícies entregues
 
 | Rota | Superfície | Estado |
 | --- | --- | --- |
-| `/` | Landing institucional | disponível |
+| `/` | Landing institucional | ação de entrada no produto |
 | `/viagens` | RB-SCR-001 — Minhas Viagens | vazio orientativo |
 | `/viagens/nova` | Preparação de RB-FRM-001 — Criar Viagem | informativo, sem persistência |
 | rota inexistente | Estado global de página não encontrada | recuperável |
 
-## Regras de experiência
+## Regras de experiência preservadas
 
-- a Viagem continua sendo o contexto central futuro, mas nenhuma Viagem fictícia deve ser criada;
-- o estado vazio deve orientar o primeiro uso e não parecer falha;
-- ações devem utilizar rótulos verbais e descritivos;
-- a rota preparatória deve informar explicitamente que nenhum dado é salvo;
-- navegação global deve funcionar por teclado;
-- foco deve permanecer visível;
-- loading, erro e 404 devem utilizar mensagens seguras, sem detalhes técnicos;
-- mobile e desktop devem preservar a mesma hierarquia de informação.
+- a Viagem continua sendo o contexto central futuro, mas nenhuma Viagem fictícia é criada;
+- o estado vazio orienta o primeiro uso e não parece falha;
+- ações utilizam rótulos verbais e descritivos;
+- a rota preparatória informa explicitamente que nenhum dado é salvo;
+- a navegação global funciona por teclado;
+- o foco permanece visível;
+- loading, erro e 404 utilizam mensagens seguras, sem detalhes técnicos;
+- mobile e desktop preservam a mesma hierarquia de informação.
 
-## Caminhos permitidos
+## Caminhos alterados
 
 ```text
 apps/web/app/**
 apps/web/components/**
 apps/web/e2e/**
 apps/web/README.md
-README.md
 docs/implementation/increments/rb-inc-002-product-shell.md
 docs/implementation/traceability-matrix.md
 docs/registry.md
@@ -140,55 +139,85 @@ docs/registry.md
 
 ## Critérios de aceite
 
-- [ ] a landing possui ação clara para abrir o RouteBook;
-- [ ] `/viagens` possui título, contexto e estado vazio orientativo;
-- [ ] o estado vazio explica o funcionamento em três passos;
-- [ ] `Criar primeira viagem` aponta para uma rota válida;
-- [ ] `/viagens/nova` apresenta destino, datas, hospedagem e viajantes como etapas futuras;
-- [ ] a rota preparatória informa que nenhum dado é salvo;
-- [ ] a navegação global permite retornar à landing e a Minhas Viagens;
-- [ ] skip link e foco visível funcionam;
-- [ ] loading utiliza semântica de status;
-- [ ] erro oferece nova tentativa;
-- [ ] 404 oferece retorno seguro;
-- [ ] não existe persistência, Provider ou secret novo;
-- [ ] testes de componente passam;
-- [ ] testes E2E passam em desktop e mobile;
-- [ ] formatação, documentação, lint, typecheck e build passam.
+- [x] a landing possui ação clara para abrir o RouteBook;
+- [x] `/viagens` possui título, contexto e estado vazio orientativo;
+- [x] o estado vazio explica o funcionamento em três passos;
+- [x] `Criar primeira viagem` aponta para uma rota válida;
+- [x] `/viagens/nova` apresenta destino, datas, hospedagem e viajantes como etapas futuras;
+- [x] a rota preparatória informa que nenhum dado é salvo;
+- [x] a navegação global permite retornar à landing e a Minhas Viagens;
+- [x] skip link e foco visível funcionam;
+- [x] loading utiliza semântica de status;
+- [x] erro oferece nova tentativa;
+- [x] 404 oferece retorno seguro;
+- [x] não existe persistência, Provider ou secret novo;
+- [x] testes de componente passam;
+- [x] testes E2E passam em desktop e mobile;
+- [x] formatação, documentação, lint, typecheck e build passam.
 
-## Testes previstos
+## Testes executados
 
-- renderização e links do estado vazio;
-- execução da ação de recuperação do estado de erro;
-- entrada no product shell pela landing;
-- navegação entre Minhas Viagens e preparação da criação;
-- mensagem de ausência de persistência;
-- recuperação de rota inexistente;
-- execução em projetos Playwright desktop e mobile.
+### Componentes
+
+Três testes foram aprovados:
+
+- `decision-pillars.test.tsx`;
+- `empty-trips-state.test.tsx`;
+- `product-error-state.test.tsx`.
+
+### E2E responsivo
+
+Quatorze testes foram aprovados nos projetos `desktop-chromium` e `mobile-chromium`, cobrindo:
+
+- proposta de valor da landing;
+- explicação institucional;
+- entrada no product shell;
+- estado vazio de Minhas Viagens;
+- preparação da criação;
+- ausência explícita de persistência;
+- navegação global;
+- recuperação de rota inexistente.
 
 ## Decisões de implementação
 
 - componentes permanecem locais em `apps/web`, pois ainda não existe segundo consumidor que justifique `packages/ui`;
-- nenhum modelo de domínio temporário será criado;
-- nenhum dado será armazenado em `localStorage`;
+- nenhum modelo de domínio temporário foi criado;
+- nenhum dado é armazenado em `localStorage`;
 - a rota `/viagens/nova` valida somente arquitetura de informação e navegação;
 - os tokens semânticos existentes continuam sendo a fonte visual;
-- nenhuma biblioteca de ícones ou UI será adicionada.
+- nenhuma biblioteca de ícones ou UI foi adicionada.
 
-## Riscos
+## Riscos tratados
 
 ### Confundir preparação com funcionalidade concluída
 
-Mitigação: informar claramente que nenhum dado será salvo e não apresentar campos editáveis falsos.
+Mitigação aplicada: a interface informa claramente que nenhum dado é salvo e não apresenta campos editáveis falsos.
 
 ### Antecipar domínio ou persistência
 
-Mitigação: não criar `Trip`, `TripId`, repositórios, APIs ou armazenamento local.
+Mitigação aplicada: não foram criados `Trip`, `TripId`, repositórios, APIs ou armazenamento local.
 
 ### Duplicar componentes prematuramente
 
-Mitigação: manter componentes locais e promover para pacote compartilhado somente quando houver responsabilidade reutilizável real.
+Mitigação aplicada: os componentes permanecem locais e somente serão promovidos quando existir responsabilidade reutilizável real.
 
 ## Evidências
 
-Serão preenchidas após a execução dos workflows no pull request associado à issue `#6`.
+| Evidência | Resultado |
+| --- | --- |
+| issue | `#6` |
+| branch | `feature/rb-inc-002-product-shell` |
+| pull request | `#7` |
+| Documentation Validation | aprovado |
+| instalação congelada | aprovada |
+| formatação | aprovada |
+| lint | aprovado |
+| typecheck | aprovado |
+| testes de componente | 3 aprovados |
+| smoke do servidor de desenvolvimento | aprovado |
+| build de produção | aprovado |
+| Playwright responsivo | 14 aprovados |
+
+## Rollback
+
+O incremento não possui migrations, dados persistidos, secrets ou Providers externos. O rollback pode ser realizado revertendo o pull request `#7`.

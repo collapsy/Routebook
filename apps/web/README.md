@@ -1,6 +1,20 @@
 # RouteBook Web
 
-Aplicação web principal do RouteBook, implementada com Next.js App Router e TypeScript.
+Aplicação web principal do RouteBook, implementada com Next.js App Router e TypeScript estrito.
+
+## Stack do bootstrap
+
+- Node.js `24.18.0`;
+- pnpm `11.17.0`;
+- Next.js `16.2.12`;
+- React `19.2.8`;
+- Tailwind CSS `4.3.3`;
+- TypeScript `7.0.2`;
+- ESLint `9.39.5`;
+- Vitest `4.1.10`;
+- Playwright `1.62.0`.
+
+As versões são exatas e o `pnpm-lock.yaml` é obrigatório. O ESLint permanece na linha 9 por compatibilidade com os plugins utilizados pelo `eslint-config-next`.
 
 ## Pré-requisitos
 
@@ -24,6 +38,7 @@ A aplicação ficará disponível em `http://localhost:3000`.
 
 ```bash
 pnpm format:check
+pnpm docs:validate
 pnpm lint
 pnpm typecheck
 pnpm test

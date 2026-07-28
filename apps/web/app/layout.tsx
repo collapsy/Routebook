@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 import "./product-shell.css";
+import "./trip-creation.css";
 
 export const metadata: Metadata = {
   title: "RouteBook — Decisões melhores durante sua viagem",

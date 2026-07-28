@@ -8,7 +8,7 @@ description: Define o modelo oficial de governança do RouteBook para decisões 
 document_type: governance
 owner: Governance
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-21"

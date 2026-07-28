@@ -8,7 +8,7 @@ description: Define os atributos de qualidade, restrições operacionais e crit�
 document_type: product
 owner: Product
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-17"

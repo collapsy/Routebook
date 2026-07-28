@@ -8,7 +8,7 @@ description: Define a visão arquitetural de alto nível do RouteBook, incluindo
 document_type: architecture
 owner: Architecture
 
-status: Draft
+status: Published
 version: "0.2.0"
 
 created: "2026-07-17"

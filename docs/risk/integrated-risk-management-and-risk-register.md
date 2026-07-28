@@ -8,7 +8,7 @@ description: Define o sistema oficial do RouteBook para identificar, analisar, a
 document_type: risk
 owner: Governance
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-24"

@@ -8,7 +8,7 @@ description: Define a biblioteca de componentes do RouteBook, incluindo anatomia
 document_type: design-system
 owner: Experience
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-17"

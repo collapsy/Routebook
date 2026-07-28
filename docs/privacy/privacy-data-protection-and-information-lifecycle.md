@@ -6,7 +6,7 @@ title: Privacidade, Proteção de Dados e Ciclo de Vida das Informações
 description: Define os princípios, responsabilidades, controles e processos oficiais de privacidade, proteção de dados pessoais e cype: privacy
 owner: Privacy
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-21"

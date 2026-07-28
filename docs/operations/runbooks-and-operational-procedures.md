@@ -8,7 +8,7 @@ description: Define os runbooks, procedimentos operacionais, fluxos de resposta 
 document_type: operations
 owner: Platform
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-19"

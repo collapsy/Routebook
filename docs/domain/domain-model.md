@@ -7,7 +7,7 @@ description: Define o modelo conceitual oficial do RouteBook, incluindo domínio
 document_type: domain
 owner: Domain
 
-status: Draft
+status: Published
 version: "0.2.0"
 
 created: "2026-07-17"

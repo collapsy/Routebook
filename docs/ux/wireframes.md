@@ -8,7 +8,7 @@ description: Define os wireframes de baixa fidelidade das principais superfície
 document_type: ux
 owner: Experience
 
-status: Draft
+status: Published
 version: "0.2.0"
 
 created: "2026-07-17"

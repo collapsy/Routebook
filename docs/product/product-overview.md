@@ -8,7 +8,7 @@ description: Consolida a definição funcional de alto nível do RouteBook, seus
 document_type: product
 owner: Product
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-15"

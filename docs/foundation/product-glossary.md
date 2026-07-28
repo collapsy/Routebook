@@ -8,7 +8,7 @@ description: Define a terminologia oficial do RouteBook e estabelece o significa
 document_type: foundation
 owner: Product
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-15"

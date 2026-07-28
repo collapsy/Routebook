@@ -8,7 +8,7 @@ description: Define a estratégia oficial de avaliação das capacidades de inte
 document_type: ai-evaluation
 owner: Artificial Intelligence
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-20"

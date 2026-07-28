@@ -8,7 +8,7 @@ description: Define as principais jornadas ponta a ponta do RouteBook, desde a c
 document_type: product
 owner: Product
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-15"

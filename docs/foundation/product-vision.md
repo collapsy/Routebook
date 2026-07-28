@@ -8,7 +8,7 @@ description: Define a visão de longo prazo, o propósito, o problema central e 
 document_type: foundation
 owner: Product
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-15"

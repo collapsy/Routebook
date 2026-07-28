@@ -8,7 +8,7 @@ description: Define o catálogo operacional oficial das capacidades de inteligê
 document_type: ai-catalog
 owner: Artificial Intelligence
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-20"

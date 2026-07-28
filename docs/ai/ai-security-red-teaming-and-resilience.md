@@ -8,7 +8,7 @@ description: Define a estratégia oficial de segurança, testes adversariais, pr
 document_type: ai-security
 owner: Artificial Intelligence
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-20"

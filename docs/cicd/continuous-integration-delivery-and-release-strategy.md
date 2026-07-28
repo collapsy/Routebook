@@ -8,7 +8,7 @@ description: Define a estratégia oficial do RouteBook para integração contín
 document_type: cicd
 owner: Platform
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-24"

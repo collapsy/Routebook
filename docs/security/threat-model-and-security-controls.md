@@ -8,7 +8,7 @@ description: Define o modelo oficial de ameaças do RouteBook, seu processo de a
 document_type: security
 owner: Security
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-21"

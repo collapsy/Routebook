@@ -8,7 +8,7 @@ description: Define o sistema oficial do RouteBook para registrar decisões de g
 document_type: governance
 owner: Governance
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-24"
@@ -1848,7 +1848,7 @@ superseded_by: null
 ---
 id: RB-CHG-NNNNN
 title:
-status: Draft
+status: Published
 change_type:
 impact_level:
 owner:

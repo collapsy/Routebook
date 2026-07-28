@@ -67,7 +67,8 @@ A documentação detalhava produto e arquitetura, mas o repositório ainda não 
 - criar templates de issue e PR;
 - criar validação documental e workflow;
 - atualizar o registro documental;
-- normalizar dívidas documentais detectadas pela primeira execução do validador.
+- normalizar dívidas documentais detectadas pela primeira execução do validador;
+- materializar como `Planned` os documentos futuros já referenciados.
 
 ## Fora de escopo
 
@@ -93,8 +94,9 @@ A documentação detalhava produto e arquitetura, mas o repositório ainda não 
 - [x] registro sincronizado;
 - [x] templates GitHub criados;
 - [x] validação automatizada criada;
+- [x] referências documentais futuras resolvidas como itens `Planned`;
 - [x] pull request #3 aberto;
-- [ ] check final do head aprovado;
+- [x] check documental do head aprovado;
 - [ ] revisão e integração humanas concluídas.
 
 A integração na `main` permanece uma decisão humana.
@@ -137,7 +139,7 @@ A primeira execução do workflow detectou e permitiu corrigir:
 - quatro documentos com a data histórica de julho de 2026;
 - referências a documentos futuros ainda não materializados.
 
-Referências futuras permanecem como avisos, pois representam `next_documents` planejados e não bloqueiam a integridade dos 102 documentos registrados.
+Os nove documentos futuros foram criados com status `Planned`, sem antecipar decisões ou implementação. A validação consolidada encontrou **111 documentos com ID**, **111 registros correspondentes** e **0 avisos**.
 
 ## Riscos
 
@@ -147,7 +149,7 @@ Referências futuras permanecem como avisos, pois representam `next_documents` p
 | excesso de burocracia para projeto pessoal | templates pequenos e incrementos proporcionais ao risco |
 | status de publicação confundido com status decisório de ADR | dimensões documentadas separadamente |
 | documentação divergir do código futuro | validação e atualização no mesmo incremento |
-| referência futura interpretada como documento existente | validador reporta aviso e exige registro quando o arquivo for criado |
+| documento futuro receber conteúdo especulativo | arquivos `Planned` delimitam finalidade e gate de elaboração, sem definir solução antecipada |
 
 ## Rollback
 
@@ -160,4 +162,5 @@ A mudança é documental e operacional. O rollback pode ser realizado revertendo
 - diff controlado da branch;
 - primeira execução do workflow identificou uma falha real;
 - normalização aplicada aos documentos afetados;
-- check final deverá ser registrado antes da integração.
+- registro sincronizado com 111 documentos;
+- workflow `Documentation Validation` concluído com sucesso e 0 avisos.

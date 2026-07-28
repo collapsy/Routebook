@@ -1,0 +1,42 @@
+name: Publish RB-INC-003 Registry
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/publish-rb-inc-003-registry.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-003-trip-creation
+          fetch-depth: 0
+      - name: Publish registry entry
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path("docs/registry.md")
+          content = path.read_text(encoding="utf-8")
+          content = content.replace(
+              "| RB-INC-003 | Criação Canônica de Viagem | Implementation Increment | Draft | 0.1.0 |",
+              "| RB-INC-003 | Criação Canônica de Viagem | Implementation Increment | Published | 1.0.0 |",
+          )
+          path.write_text(content, encoding="utf-8")
+      - name: Commit registry
+        run: |
+          git config user.name "routebook-automation"
+          git config user.email "routebook-automation@users.noreply.github.com"
+          git add docs/registry.md
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "docs: publish RB-INC-003 registry entry"
+          git pull --rebase origin feature/rb-inc-003-trip-creation
+          git push origin HEAD:feature/rb-inc-003-trip-creation

@@ -59,8 +59,8 @@ export default function NewTripPreparationPage() {
         <aside className="preparation-note">
           <strong>Nenhum dado será salvo nesta etapa.</strong>
           <p>
-            Esta versão confirma a estrutura e a navegação do produto. A criação completa e persistente
-            da Viagem será ativada quando o fluxo estiver pronto para uso.
+            Esta versão confirma a estrutura e a navegação do produto. A criação completa e
+            persistente da Viagem será ativada quando o fluxo estiver pronto para uso.
           </p>
         </aside>
       </div>

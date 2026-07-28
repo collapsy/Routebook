@@ -14,8 +14,8 @@ export default function TripsPage() {
         <p className="product-eyebrow">Seu espaço de planejamento</p>
         <h1>Minhas viagens</h1>
         <p>
-          Cada viagem reúne contexto, lugares, distâncias e roteiro em um único espaço. Comece criando
-          seu primeiro planejamento.
+          Cada viagem reúne contexto, lugares, distâncias e roteiro em um único espaço. Comece
+          criando seu primeiro planejamento.
         </p>
       </header>
 

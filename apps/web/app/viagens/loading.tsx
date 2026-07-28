@@ -1,6 +1,11 @@
 export default function TripsLoading() {
   return (
-    <section aria-busy="true" aria-label="Carregando suas viagens" className="product-state-page" role="status">
+    <section
+      aria-busy="true"
+      aria-label="Carregando suas viagens"
+      className="product-state-page"
+      role="status"
+    >
       <div className="product-state-card loading-card">
         <p className="product-eyebrow">Organizando seu espaço</p>
         <div className="loading-line loading-line-short" />

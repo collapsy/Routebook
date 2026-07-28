@@ -18,7 +18,11 @@
 
 .app-surface {
   background:
-    radial-gradient(circle at 8% 0%, color-mix(in oklab, var(--accent) 18%, transparent), transparent 24rem),
+    radial-gradient(
+      circle at 8% 0%,
+      color-mix(in oklab, var(--accent) 18%, transparent),
+      transparent 24rem
+    ),
     linear-gradient(180deg, var(--background-subtle), var(--background) 18rem);
   display: flex;
   flex-direction: column;
@@ -267,8 +271,16 @@
 .empty-state-visual {
   align-items: center;
   background:
-    radial-gradient(circle at 35% 25%, color-mix(in oklab, var(--accent) 38%, transparent), transparent 9rem),
-    linear-gradient(150deg, var(--surface-soft), color-mix(in oklab, var(--primary) 13%, var(--surface)));
+    radial-gradient(
+      circle at 35% 25%,
+      color-mix(in oklab, var(--accent) 38%, transparent),
+      transparent 9rem
+    ),
+    linear-gradient(
+      150deg,
+      var(--surface-soft),
+      color-mix(in oklab, var(--primary) 13%, var(--surface))
+    );
   border: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
   border-radius: calc(var(--radius-large) - 0.5rem);
   display: flex;
@@ -445,7 +457,6 @@
 }
 
 .loading-card {
-  aria-busy: true;
 }
 
 .loading-line,

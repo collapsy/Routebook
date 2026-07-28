@@ -1,0 +1,15 @@
+{
+  "name": "@routebook/eslint-config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "next.mjs"
+  ],
+  "exports": {
+    "./next": "./next.mjs"
+  },
+  "dependencies": {
+    "eslint-config-next": "16.2.12"
+  }
+}

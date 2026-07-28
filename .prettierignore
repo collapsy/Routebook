@@ -1,0 +1,28 @@
+# Generated and dependency artifacts
+node_modules
+.pnpm-store
+.turbo
+.next
+out
+dist
+coverage
+playwright-report
+test-results
+pnpm-lock.yaml
+
+# Documentation remains governed by the dedicated validator
+# until the existing Markdown corpus is normalized incrementally.
+docs
+README.md
+AGENTS.md
+CONTRIBUTING.md
+
+# Existing placeholder package documentation.
+packages/domain
+packages/maps
+
+# Legacy repository automation created before the formatting gate.
+.github/ISSUE_TEMPLATE
+.github/PULL_REQUEST_TEMPLATE.md
+.github/workflows/documentation-validation.yml
+scripts/validate-docs.mjs

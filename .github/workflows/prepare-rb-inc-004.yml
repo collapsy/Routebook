@@ -1,0 +1,48 @@
+name: Prepare RB-INC-004
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/prepare-rb-inc-004.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-004-trip-overview
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Synchronize registry
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path("docs/registry.md")
+          content = path.read_text(encoding="utf-8")
+          anchor = "| RB-INC-003 | Criação Canônica de Viagem | Implementation Increment | Published | 1.0.0 | [rb-inc-003-trip-creation.md](./implementation/increments/rb-inc-003-trip-creation.md) |"
+          entry = "| RB-INC-004 | Visão Inicial da Viagem | Implementation Increment | Draft | 0.1.0 | [rb-inc-004-trip-overview.md](./implementation/increments/rb-inc-004-trip-overview.md) |"
+          if entry not in content:
+              content = content.replace(anchor, anchor + "\n" + entry)
+          path.write_text(content, encoding="utf-8")
+      - run: pnpm exec prettier --write modules/trip-management/src packages/database/src/trip-repository.ts apps/web/app/viagens apps/web/components/trip-card.tsx apps/web/e2e/product-shell.spec.ts docs/implementation
+      - name: Commit preparation
+        run: |
+          git config user.name "routebook-automation"
+          git config user.email "routebook-automation@users.noreply.github.com"
+          git add docs/registry.md modules/trip-management/src packages/database/src/trip-repository.ts apps/web/app/viagens apps/web/components/trip-card.tsx apps/web/e2e/product-shell.spec.ts docs/implementation
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "chore: prepare RB-INC-004 validation"
+          git pull --rebase origin feature/rb-inc-004-trip-overview
+          git push origin HEAD:feature/rb-inc-004-trip-overview

@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgis/postgis:17-3.5-alpine
+    environment:
+      POSTGRES_DB: routebook
+      POSTGRES_USER: routebook
+      POSTGRES_PASSWORD: routebook
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U routebook -d routebook"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+    volumes:
+      - routebook-postgres:/var/lib/postgresql/data
+
+volumes:
+  routebook-postgres:

@@ -49,12 +49,14 @@ export class DrizzleTripRepository implements TripRepository {
         endDate: row.endDate,
         timeZone: "America/Fortaleza",
       },
-      accommodation: row.accommodationName
+      ...(row.accommodationName
         ? {
-            name: row.accommodationName,
-            ...(row.accommodationAddress ? { address: row.accommodationAddress } : {}),
+            accommodation: {
+              name: row.accommodationName,
+              ...(row.accommodationAddress ? { address: row.accommodationAddress } : {}),
+            },
           }
-        : undefined,
+        : {}),
       status: row.status as Trip["status"],
       participants: row.participants as TripParticipant[],
       contextVersion: row.contextVersion,

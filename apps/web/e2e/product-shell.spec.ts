@@ -7,7 +7,7 @@ test("exibe Minhas viagens com ação de criação", async ({ page }) => {
   await expect(page.getByRole("link", { name: /Criar (primeira|nova) viagem/ })).toBeVisible();
 });
 
-test("cria e mantém uma viagem persistida", async ({ page }, testInfo) => {
+test("cria, abre e mantém uma viagem persistida", async ({ page }, testInfo) => {
   const tripName = `Pipa persistida ${testInfo.project.name} ${Date.now()}`;
 
   await page.goto("/viagens/nova");
@@ -19,9 +19,16 @@ test("cria e mantém uma viagem persistida", async ({ page }, testInfo) => {
   await expect(page.getByRole("status")).toContainText("Viagem criada e salva");
   await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
 
+  await page.getByRole("link", { name: "Abrir viagem" }).first().click();
+  await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+$/);
+  await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "8 dias de viagem" })).toBeVisible();
+  await expect(page.getByText("Dia 1", { exact: true })).toBeVisible();
+  await expect(page.getByText("Dia 8", { exact: true })).toBeVisible();
+  await expect(page.getByText("Condomínio Solar Água")).toBeVisible();
+
   await page.reload();
   await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
-  await expect(page.getByText("Condomínio Solar Água").first()).toBeVisible();
 });
 
 test("apresenta erro quando o período é invertido", async ({ page }) => {
@@ -35,13 +42,12 @@ test("apresenta erro quando o período é invertido", async ({ page }) => {
   await expect(page).toHaveURL(/\/viagens\/nova$/);
 });
 
-test("mantém a navegação global e a recuperação de 404", async ({ page }) => {
-  await page.goto("/viagens/nova");
-  await page.getByRole("link", { name: "Minhas viagens", exact: true }).click();
+test("trata TripId inexistente e mantém a navegação global", async ({ page }) => {
+  await page.goto("/viagens/00000000-0000-0000-0000-000000000000");
+  await expect(page.getByRole("heading", { name: "Este TripId não está disponível." })).toBeVisible();
+  await page.getByRole("link", { name: "Voltar para Minhas viagens" }).click();
   await expect(page).toHaveURL(/\/viagens$/);
 
   await page.goto("/rota-inexistente");
   await expect(page.getByRole("heading", { name: "Essa página saiu do roteiro." })).toBeVisible();
-  await page.getByRole("link", { name: "Voltar para Minhas viagens" }).click();
-  await expect(page).toHaveURL(/\/viagens$/);
 });

@@ -1,0 +1,67 @@
+name: Decisão arquitetural
+description: Avaliar uma decisão técnica material antes de criar ou alterar ADR
+title: "architecture: "
+labels: []
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto
+      description: Qual situação exige uma decisão arquitetural?
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema de decisão
+      description: Formule a pergunta que precisa ser respondida.
+    validations:
+      required: true
+  - type: textarea
+    id: forces
+    attributes:
+      label: Forças e restrições
+      description: Custo, estágio do produto, segurança, privacidade, operação, portabilidade e prazo.
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Alternativas consideradas
+      description: Inclua manter o estado atual quando aplicável.
+    validations:
+      required: true
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Recomendação inicial
+      description: Apresente a opção recomendada e suas razões. Não marque como aceita antes da decisão humana.
+    validations:
+      required: false
+  - type: textarea
+    id: consequences
+    attributes:
+      label: Consequências e estratégia de saída
+      description: Benefícios, custos, riscos, lock-in, reversibilidade e migração.
+    validations:
+      required: true
+  - type: textarea
+    id: related
+    attributes:
+      label: Documentos e ADRs relacionados
+      description: IDs e caminhos que precisam ser consultados ou atualizados.
+    validations:
+      required: true
+  - type: checkboxes
+    id: decision_gate
+    attributes:
+      label: Gate de decisão
+      options:
+        - label: A decisão é material e não apenas detalhe local de implementação.
+          required: true
+        - label: As alternativas foram comparadas.
+          required: true
+        - label: Impactos de segurança, privacidade, custo e operação foram considerados.
+          required: true
+        - label: A aceitação final será realizada por uma pessoa autorizada.
+          required: true

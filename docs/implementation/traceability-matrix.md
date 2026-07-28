@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: null
+last_updated: "2026-07-28"
 authors:
   - RouteBook Team
 tags:
@@ -45,8 +45,20 @@ ai_context:
 
 | Incremento | Requisito/decisão | Issue | Branch/PR | Caminhos | Testes/evidências | Estado |
 | --- | --- | --- | --- | --- | --- | --- |
-| RB-INC-000 | RB-DEL-001, RB-DEV-001, RB-CICD-001 | #2 | `chore/rb-inc-000-readiness` | documentação, templates e validação | validação documental e revisão do PR | Em execução |
-| RB-INC-001 | RB-ADR-002, RB-ADR-003, RB-ADR-004, RB-ADR-010, RB-ADR-011, RB-ADR-019 | a criar | a criar | bootstrap do monorepo | format, lint, typecheck, testes e build mínimos | Planejado |
+| RB-INC-000 | RB-DEL-001, RB-DEV-001, RB-CICD-001 | #2 | `chore/rb-inc-000-readiness`, PR #3 | documentação, templates e validação | 111 documentos registrados, 0 avisos, workflow aprovado | Integrado |
+| RB-INC-001 | RB-ADR-002, RB-ADR-003, RB-ADR-004, RB-ADR-010, RB-ADR-011, RB-ADR-019 | #4 | `feature/rb-inc-001-monorepo-bootstrap`, PR #5 | workspace, `apps/web`, configurações compartilhadas e CI | frozen install, format, docs, lint, typecheck, componente, dev smoke, build e E2E responsivo | Ready for Review |
+
+## Evidências do RB-INC-001
+
+| Evidência | Localização |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-001-monorepo-bootstrap.md` |
+| aplicação institucional | `apps/web/app` |
+| teste de componente | `apps/web/components/decision-pillars.test.tsx` |
+| smoke desktop e móvel | `apps/web/e2e/home.spec.ts` e `apps/web/playwright.config.ts` |
+| lockfile reproduzível | `pnpm-lock.yaml` |
+| quality gates | `.github/workflows/engineering-validation.yml` |
+| instruções de execução | `apps/web/README.md` e `README.md` |
 
 ## Cadeia mínima
 

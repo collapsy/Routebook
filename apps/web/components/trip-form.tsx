@@ -4,7 +4,7 @@ import { useActionState } from "react";
 
 import { createTripAction, initialCreateTripState } from "@/app/viagens/nova/actions";
 
-function FieldError({ message }: { message?: string }) {
+function FieldError({ message }: { message: string | undefined }) {
   if (!message) return null;
   return (
     <p className="field-error" role="alert">

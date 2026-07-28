@@ -40,7 +40,133 @@ Para isso, o produto deverá integrar:
 - justificativas compreensíveis;
 - controle final pelo usuário.
 
-## Capacidades do MVP
+## Estado atual
+
+A trilha documental inicial está publicada e o primeiro bootstrap executável foi materializado pelo `RB-INC-001`.
+
+| Área | Estado |
+| --- | --- |
+| Visão, produto, domínio, UX e arquitetura | Publicado |
+| Governança para implementação | Integrada pelo RB-INC-000 |
+| Monorepo executável | Implementado pelo RB-INC-001 |
+| Página institucional responsiva | Implementada |
+| Quality gates de engenharia | Automatizados |
+| Módulos de negócio | Não iniciados |
+| Integrações externas | Não provisionadas |
+| MVP funcional | Não validado |
+
+O bootstrap não representa o MVP. Ele fornece apenas a base reproduzível para os próximos incrementos verticais.
+
+## Execução local
+
+### Pré-requisitos
+
+- Node.js `24.18.0`;
+- Corepack disponível;
+- Git.
+
+### Instalação
+
+```bash
+git clone https://github.com/collapsy/Routebook.git
+cd Routebook
+corepack enable
+pnpm install --frozen-lockfile
+```
+
+### Desenvolvimento
+
+```bash
+pnpm dev
+```
+
+A aplicação fica disponível em `http://localhost:3000`.
+
+### Validação completa
+
+```bash
+pnpm format:check
+pnpm docs:validate
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm test:e2e
+```
+
+Para o primeiro uso local do Playwright:
+
+```bash
+pnpm --filter @routebook/web exec playwright install chromium
+```
+
+## Stack do bootstrap
+
+| Componente | Versão |
+| --- | --- |
+| Node.js | 24.18.0 |
+| pnpm | 11.17.0 |
+| Turborepo | 2.10.7 |
+| Next.js | 16.2.12 |
+| React | 19.2.8 |
+| Tailwind CSS | 4.3.3 |
+| TypeScript | 6.0.3 |
+| ESLint | 9.39.5 |
+| Vitest | 4.1.10 |
+| Playwright | 1.62.0 |
+
+As versões são fixadas de forma exata e o `pnpm-lock.yaml` é obrigatório.
+
+## Estrutura executável atual
+
+```text
+Routebook/
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   └── workflows/
+│       ├── documentation-validation.yml
+│       └── engineering-validation.yml
+├── apps/
+│   └── web/
+│       ├── app/
+│       ├── components/
+│       ├── e2e/
+│       └── package.json
+├── packages/
+│   ├── eslint-config/
+│   ├── typescript-config/
+│   ├── domain/
+│   └── maps/
+├── docs/
+├── scripts/
+├── package.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── turbo.json
+├── AGENTS.md
+├── CONTRIBUTING.md
+└── README.md
+```
+
+`packages/domain` e `packages/maps` ainda são placeholders documentais. Módulos, banco, autenticação, mapas e IA serão adicionados somente quando um incremento concreto exigir essas responsabilidades.
+
+## Quality gates
+
+O workflow `.github/workflows/engineering-validation.yml` executa:
+
+1. instalação com `pnpm install --frozen-lockfile`;
+2. verificação de formatação;
+3. validação documental;
+4. lint;
+5. typecheck;
+6. testes de componente;
+7. smoke do servidor de desenvolvimento;
+8. build de produção;
+9. smoke tests com Chromium em desktop e viewport móvel.
+
+Nenhum secret ou Provider externo é necessário para esse pipeline.
+
+## Capacidades planejadas para o MVP
 
 O MVP deverá permitir que o usuário:
 
@@ -59,108 +185,28 @@ Reservas, pagamentos, colaboração avançada e automações autônomas permanec
 
 ## Princípios permanentes
 
-### Decisão antes de conteúdo
-
-Cada capacidade deve ajudar o usuário a descobrir, decidir, organizar ou executar uma viagem.
-
-### Visual antes de textual
-
-Mapas, cartões, fotografias e indicadores devem comunicar o essencial antes de blocos extensos de texto.
-
-### Contexto antes de popularidade
-
-Um Lugar popular não é necessariamente a melhor opção para uma Viagem específica.
-
-### Controle do usuário
-
-Recomendações e Propostas podem ser aceitas, alteradas ou rejeitadas. A IA não altera o estado canônico silenciosamente.
-
-### Transparência
-
-Distâncias, estimativas, disponibilidade, confiança e motivos relevantes devem ser apresentados sem falsa precisão.
-
-### Simplicidade progressiva
-
-O produto deve gerar valor com contexto mínimo e permitir refinamento gradual.
-
-## Estado atual
-
-A trilha documental inicial está publicada. O repositório contém documentação de Foundation, Product, UX, Design System, Domain, Architecture, Data, Security, Privacy, Quality, Delivery, Operations e ADRs.
-
-A implementação executável ainda será construída por **incrementos verticais**, começando pelo `RB-INC-000 — Implementation Readiness` e, em seguida, pelo bootstrap do monorepo.
-
-Estado resumido:
-
-| Área | Estado |
-| --- | --- |
-| Visão e escopo do produto | Publicado |
-| Domínio e linguagem ubíqua | Publicado |
-| UX e Design System | Publicado |
-| Arquitetura e ADRs | Publicado |
-| Estratégia de entrega e qualidade | Publicado |
-| Aplicação executável | Não iniciada |
-| Integrações externas | Não provisionadas |
-| MVP validado | Não |
+- **Decisão antes de conteúdo:** cada capacidade deve ajudar a descobrir, decidir, organizar ou executar uma viagem.
+- **Visual antes de textual:** mapas, cartões, fotografias e indicadores comunicam o essencial primeiro.
+- **Contexto antes de popularidade:** um Lugar popular não é necessariamente a melhor opção para uma Viagem específica.
+- **Controle do usuário:** recomendações e Propostas podem ser aceitas, alteradas ou rejeitadas.
+- **Transparência:** estimativas e motivos relevantes não devem comunicar falsa precisão.
+- **Simplicidade progressiva:** o produto gera valor com contexto mínimo e permite refinamento gradual.
 
 ## Arquitetura adotada
 
 O RouteBook será implementado inicialmente como um **monólito modular**, em TypeScript, organizado como monorepo com pnpm Workspaces e Turborepo.
 
-A aplicação web utilizará Next.js com App Router. As decisões de persistência, autenticação, mapas, observabilidade e demais Providers estão registradas nos ADRs, mas serão ativadas somente quando um incremento concreto exigir sua utilização.
-
-A estrutura física alvo é:
-
-```text
-Routebook/
-├── .github/
-│   ├── ISSUE_TEMPLATE/
-│   ├── workflows/
-│   └── PULL_REQUEST_TEMPLATE.md
-├── apps/
-│   └── web/
-├── modules/
-│   ├── identity-access/
-│   ├── trip-management/
-│   ├── traveler-profile/
-│   ├── place-catalog/
-│   ├── trip-collection/
-│   ├── itinerary-planning/
-│   ├── mobility/
-│   ├── decision-intelligence/
-│   ├── proposal-management/
-│   ├── planning-assurance/
-│   ├── data-governance/
-│   └── platform/
-├── packages/
-│   ├── ui/
-│   ├── shared-kernel/
-│   ├── database/
-│   ├── observability/
-│   ├── configuration/
-│   ├── eslint-config/
-│   └── typescript-config/
-├── docs/
-├── scripts/
-├── tests/
-├── tooling/
-├── AGENTS.md
-├── CONTRIBUTING.md
-└── README.md
-```
-
-Essa estrutura será criada progressivamente. Diretórios e dependências não serão adicionados antes de existir uma responsabilidade real.
+A aplicação web utiliza Next.js com App Router. Persistência, autenticação, mapas, observabilidade e demais Providers estão registrados nos ADRs, mas serão ativados somente quando um incremento concreto exigir sua utilização.
 
 ## Documentação
-
-A documentação é parte do produto e precede a implementação.
 
 Entradas principais:
 
 - [`docs/README.md`](./docs/README.md): navegação e hierarquia documental;
 - [`docs/registry.md`](./docs/registry.md): registro oficial dos documentos;
 - [`docs/core/routebook-bible.md`](./docs/core/routebook-bible.md): constituição semântica do projeto;
-- [`docs/delivery/delivery-strategy-and-implementation-roadmap.md`](./docs/delivery/delivery-strategy-and-implementation-roadmap.md): estratégia de entrega;
 - [`docs/implementation/README.md`](./docs/implementation/README.md): operação por incrementos e Context Packs;
+- [`docs/implementation/increments/rb-inc-001-monorepo-bootstrap.md`](./docs/implementation/increments/rb-inc-001-monorepo-bootstrap.md): evidências do bootstrap;
 - [`AGENTS.md`](./AGENTS.md): regras obrigatórias para agentes de IA.
 
 A ordem de autoridade é:
@@ -178,42 +224,17 @@ RouteBook Bible
 
 Em caso de conflito, a camada inferior não pode redefinir silenciosamente a camada superior.
 
-## Desenvolvimento por incrementos
-
-Cada entrega deve representar valor vertical verificável e possuir:
-
-- identificador `RB-INC-NNN`;
-- objetivo e problema;
-- documentos de contexto;
-- caminhos permitidos;
-- critérios de aceite;
-- testes e evidências;
-- impactos documentais;
-- riscos e itens fora de escopo.
-
-O agente responsável por uma tarefa deve receber somente o Context Pack necessário. Todo trabalho deve ser revisável por diff, testável e rastreável a uma issue e a um pull request.
-
 ## Fonte oficial de verdade
 
 O repositório Git é a fonte canônica do RouteBook.
 
-Uma decisão somente é oficial quando registrada por meio de documentos versionados, ADRs, issues, commits ou pull requests.
-
-Conversas, memórias de agentes e respostas externas podem apoiar o trabalho, mas não substituem o conteúdo versionado.
+Uma decisão somente é oficial quando registrada por meio de documentos versionados, ADRs, issues, commits ou pull requests. Conversas e memórias de agentes podem apoiar o trabalho, mas não substituem o conteúdo versionado.
 
 ## Contribuição
 
 As regras de contribuição estão em [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
-Alterações devem preservar:
-
-- escopo controlado;
-- consistência com o domínio;
-- atualização documental;
-- validação automatizada;
-- rastreabilidade;
-- ausência de secrets;
-- revisão antes da integração na `main`.
+Toda alteração deve preservar escopo controlado, rastreabilidade, validação automatizada, ausência de secrets e revisão antes da integração na `main`.
 
 ## Licença
 

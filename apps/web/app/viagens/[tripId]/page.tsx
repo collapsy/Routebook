@@ -40,7 +40,9 @@ export default async function TripOverviewPage({
 
       <header className="trip-overview-hero">
         <div>
-          <p className="product-eyebrow">{trip.status === "draft" ? "Viagem em rascunho" : trip.status}</p>
+          <p className="product-eyebrow">
+            {trip.status === "draft" ? "Viagem em rascunho" : trip.status}
+          </p>
           <h1>{trip.name}</h1>
           <p>
             Esta é a base estrutural da viagem. Preferências, lugares e roteiro serão adicionados em

@@ -44,7 +44,9 @@ test("apresenta erro quando o período é invertido", async ({ page }) => {
 
 test("trata TripId inexistente e mantém a navegação global", async ({ page }) => {
   await page.goto("/viagens/00000000-0000-0000-0000-000000000000");
-  await expect(page.getByRole("heading", { name: "Este TripId não está disponível." })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Este TripId não está disponível." }),
+  ).toBeVisible();
   await page.getByRole("link", { name: "Voltar para Minhas viagens" }).click();
   await expect(page).toHaveURL(/\/viagens$/);
 

@@ -4,8 +4,8 @@ title: Criação Canônica de Viagem
 description: Implementa a criação validada e persistente do agregado Trip para o cenário inicial de Pipa.
 document_type: implementation-increment
 owner: Delivery
-status: Draft
-version: "0.1.0"
+status: Published
+version: "1.0.0"
 created: "2026-07-28"
 last_updated: "2026-07-28"
 authors:
@@ -44,62 +44,45 @@ ai_context:
 
 ## Estado
 
-`Draft`
+`Published`
 
-O incremento permanece em elaboração até a aprovação dos checks documentais e de engenharia no PR #9.
+O incremento foi validado e integrado pelo PR #9.
 
 ## Resultado vertical
 
 Uma pessoa consegue criar uma Viagem para Pipa informando nome, período, owner inicial e hospedagem opcional. O RouteBook valida as invariantes, gera identidade interna, persiste o agregado em PostgreSQL/PostGIS e apresenta a Viagem em `Minhas viagens` após a gravação.
-
-## Problema
-
-O RB-INC-002 entregou navegação e estado vazio, porém a rota `/viagens/nova` ainda não criava estado canônico. Sem uma `Trip` persistida, nenhum contexto posterior — preferências, Lugares, distâncias, Roteiro ou recomendações — pode ser associado com segurança.
-
-## Hipótese
-
-A ativação do agregado `Trip` com um destino inicial controlado permite validar domínio, persistência e fluxo de criação sem antecipar geocodificação, autenticação ou outros agregados.
 
 ## Decisões de recorte
 
 - Pipa, Tibau do Sul — RN é o único destino canônico suportado neste incremento;
 - o destino possui coordenadas e fuso definidos internamente;
 - a Viagem nasce em estado `draft`;
-- um owner local é criado para satisfazer a invariante de ownership enquanto autenticação permanece fora de escopo;
+- um owner local satisfaz a invariante de ownership enquanto autenticação permanece fora de escopo;
 - participantes representam acesso à Viagem e não o perfil de Viajantes;
 - hospedagem é opcional;
-- alterações futuras de destino, período ou hospedagem deverão incrementar `TripContextVersion`;
 - o agregado é persistido por uma porta de repositório e adapter Drizzle.
 
-## Escopo
+## Escopo entregue
 
-- adicionar `modules/trip-management`;
-- modelar `Trip`, `TripId`, `Destination`, `TripPeriod`, `Accommodation` e `TripParticipant`;
-- validar nome, período, owner e hospedagem;
-- gerar `TripId` e `UserId` internamente;
-- adicionar `packages/database`;
-- configurar Drizzle ORM e Postgres.js;
-- versionar migration inicial;
-- adicionar PostGIS local por Compose;
-- implementar Server Action de criação;
-- implementar formulário acessível;
-- listar viagens persistidas;
-- adicionar testes de domínio e E2E de persistência;
-- atualizar CI, documentação e rastreabilidade.
+- módulo `trip-management` com domínio puro;
+- agregado `Trip` e objetos de valor;
+- validações de nome, período, owner e hospedagem;
+- geração interna de `TripId` e `UserId`;
+- adapter Drizzle/PostgreSQL;
+- migration inicial versionada;
+- PostGIS local por Docker Compose;
+- formulário acessível com Server Action;
+- listagem persistida em `/viagens`;
+- testes de domínio, componentes e E2E;
+- CI com banco isolado e migration.
 
 ## Fora de escopo
 
 - autenticação e Account reais;
-- convites, editor e viewer;
 - perfil de Viajantes;
-- resolução dinâmica de destinos;
-- múltiplos destinos;
+- resolução dinâmica ou múltiplos destinos;
 - edição, cancelamento, arquivamento ou exclusão;
-- mapas e rotas;
-- catálogo de Lugares;
-- Salvos;
-- Roteiro;
-- Recomendações e IA.
+- mapas, Lugares, Salvos, Roteiro, Recomendações e IA.
 
 ## Invariantes implementadas
 
@@ -113,33 +96,6 @@ A ativação do agregado `Trip` com um destino inicial controlado permite valida
 8. endereço de hospedagem não existe sem nome de hospedagem;
 9. a versão estrutural inicial é `1`;
 10. a persistência possui checks adicionais para ordem do período e versão positiva.
-
-## Superfícies
-
-| Superfície | Comportamento |
-| --- | --- |
-| `/viagens/nova` | formulário de criação canônica |
-| Server Action | valida, persiste, revalida e redireciona |
-| `/viagens` | lista viagens persistidas ou apresenta estado vazio |
-| PostgreSQL/PostGIS | armazena o agregado Trip |
-| migration | cria a tabela `trips` e invariantes físicas |
-
-## Estrutura técnica
-
-```text
-apps/web
-├── app/viagens/nova/actions.ts
-├── app/viagens/nova/page.tsx
-├── app/viagens/page.tsx
-└── components/{trip-form,trip-card}.tsx
-
-modules/trip-management
-└── src/{trip,repository,service}.ts
-
-packages/database
-├── drizzle/0000_create_trips.sql
-└── src/{client,schema,trip-repository,migrate}.ts
-```
 
 ## Persistência local
 
@@ -156,39 +112,30 @@ A variável obrigatória é `DATABASE_URL`. Credenciais de produção não são 
 
 ## Critérios de aceite
 
-- [ ] `Trip` é criada somente com dados válidos;
-- [ ] data final não precede a inicial;
-- [ ] toda Viagem possui owner inicial;
-- [ ] hospedagem permanece opcional;
-- [ ] `TripId` é gerado internamente;
-- [ ] Pipa possui referência geográfica e fuso canônicos;
-- [ ] migration é aplicada em PostgreSQL/PostGIS;
-- [ ] formulário apresenta erros junto aos campos;
-- [ ] criação redireciona para `/viagens`;
-- [ ] viagem permanece visível após recarregar a página;
-- [ ] CI provisiona banco e aplica migration;
-- [ ] testes de domínio passam;
-- [ ] testes E2E passam em desktop e mobile;
-- [ ] formatação, documentação, lint, typecheck e build passam.
-
-## Riscos
-
-### Owner temporário sem autenticação
-
-Mitigação: manter o identificador interno e limitar o recorte a um owner local. A futura autenticação deverá migrar ou associar essa participação explicitamente, sem redefinir `Trip`.
-
-### Destino único
-
-Mitigação: comunicar claramente o limite na interface. A resolução dinâmica de destino será um incremento separado.
-
-### Agregado armazenado parcialmente em JSON
-
-Mitigação: utilizar JSON apenas para participantes pertencentes ao agregado e manter atributos estruturais consultáveis em colunas. Novos agregados terão tabelas próprias.
-
-## Rollback
-
-O rollback exige reverter o PR e, quando houver dados locais de teste, remover a tabela `trips`. Em ambientes compartilhados, migrations aplicadas não devem ser apagadas silenciosamente; uma migration corretiva deverá ser criada.
+- [x] `Trip` é criada somente com dados válidos;
+- [x] data final não precede a inicial;
+- [x] toda Viagem possui owner inicial;
+- [x] hospedagem permanece opcional;
+- [x] `TripId` é gerado internamente;
+- [x] migration é aplicada em PostgreSQL/PostGIS;
+- [x] formulário apresenta erros junto aos campos;
+- [x] criação redireciona para `/viagens`;
+- [x] viagem permanece visível após recarregar a página;
+- [x] CI provisiona banco e aplica migration;
+- [x] testes passam em desktop e mobile;
+- [x] formatação, documentação, lint, typecheck e build passam.
 
 ## Evidências
 
-Serão preenchidas após a execução definitiva dos workflows associados à issue #8 e ao PR #9.
+| Evidência | Resultado |
+| --- | --- |
+| issue | #8 |
+| pull request | #9, integrado |
+| validação documental | 113 documentos registrados, 0 avisos |
+| domínio | 4 testes aprovados |
+| componentes | 3 testes aprovados |
+| migration | aplicada com sucesso em PostGIS 17 |
+| servidor de desenvolvimento | smoke aprovado |
+| build | produção aprovada |
+| E2E | 14 testes aprovados em desktop Chromium e Pixel 7 |
+| quality gates | instalação congelada, format, docs, lint, typecheck, migration, testes, dev smoke, build e Playwright aprovados |

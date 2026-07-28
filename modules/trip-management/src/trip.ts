@@ -1,7 +1,12 @@
 import { randomUUID } from "node:crypto";
 
 export type TripStatus =
-  "draft" | "planned" | "in-progress" | "completed" | "cancelled" | "archived";
+  | "draft"
+  | "planned"
+  | "in-progress"
+  | "completed"
+  | "cancelled"
+  | "archived";
 export type TripRole = "owner" | "editor" | "viewer";
 
 export type Destination = {
@@ -113,12 +118,14 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
       endDate: input.endDate,
       timeZone: PIPA_DESTINATION.timeZone,
     },
-    accommodation: accommodationName
+    ...(accommodationName
       ? {
-          name: accommodationName,
-          ...(accommodationAddress ? { address: accommodationAddress } : {}),
+          accommodation: {
+            name: accommodationName,
+            ...(accommodationAddress ? { address: accommodationAddress } : {}),
+          },
         }
-      : undefined,
+      : {}),
     status: "draft",
     participants: [owner],
     contextVersion: 1,

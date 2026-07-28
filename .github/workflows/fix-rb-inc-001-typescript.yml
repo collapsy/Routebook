@@ -1,0 +1,47 @@
+name: Fix RB-INC-001 TypeScript
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/fix-rb-inc-001-typescript.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  fix-typescript:
+    name: Align TypeScript with Next.js
+    if: github.head_ref == 'feature/rb-inc-001-monorepo-bootstrap'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout implementation branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-001-monorepo-bootstrap
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install current lockfile
+        run: pnpm install --frozen-lockfile
+
+      - name: Pin compatible TypeScript line
+        run: pnpm --filter @routebook/web add -D typescript@6 --save-exact
+
+      - name: Commit toolchain alignment
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/package.json pnpm-lock.yaml
+          git commit -m "fix(rb-inc-001): align TypeScript with Next.js"
+          git push origin HEAD:feature/rb-inc-001-monorepo-bootstrap

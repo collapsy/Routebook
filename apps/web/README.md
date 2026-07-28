@@ -2,7 +2,18 @@
 
 Aplicação web principal do RouteBook, implementada com Next.js App Router e TypeScript estrito.
 
-## Stack do bootstrap
+## Superfícies atuais
+
+| Rota | Finalidade |
+| --- | --- |
+| `/` | landing institucional e entrada no produto |
+| `/viagens` | área Minhas Viagens no estado vazio de primeiro acesso |
+| `/viagens/nova` | preparação do futuro fluxo de criação, sem persistência |
+| rota inexistente | estado 404 com retorno seguro |
+
+O product shell inclui navegação global, skip link, foco visível, loading, error boundary e comportamento responsivo em desktop e mobile.
+
+## Stack
 
 - Node.js `24.18.0`;
 - pnpm `11.17.0`;
@@ -52,6 +63,13 @@ O teste end-to-end requer o Chromium do Playwright:
 pnpm --filter @routebook/web exec playwright install chromium
 ```
 
+## Cobertura atual
+
+- três testes de componente;
+- quatorze testes E2E distribuídos entre desktop Chromium e viewport móvel Pixel 7;
+- smoke do servidor de desenvolvimento;
+- build de produção.
+
 ## Limites atuais
 
-Este bootstrap entrega somente a página institucional e a infraestrutura de engenharia. Não existem autenticação, banco, mapas, catálogo de lugares, roteiro ou integrações externas neste incremento.
+O shell não cria nem persiste uma `Trip`. Ainda não existem autenticação, banco, mapas, catálogo de Lugares, Salvos, Roteiro, Recomendações ou integrações externas. A rota `/viagens/nova` representa somente a preparação navegável do próximo fluxo vertical.

@@ -110,6 +110,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-IMP-004 | Matriz de Rastreabilidade da Implementação | Implementation | Published | 1.0.0 | [traceability-matrix.md](./implementation/traceability-matrix.md) |
 | RB-INC-000 | Implementation Readiness | Implementation Increment | Published | 1.0.0 | [rb-inc-000-implementation-readiness.md](./implementation/increments/rb-inc-000-implementation-readiness.md) |
 | RB-INC-001 | Bootstrap do Monorepo | Implementation Increment | Published | 1.0.0 | [rb-inc-001-monorepo-bootstrap.md](./implementation/increments/rb-inc-001-monorepo-bootstrap.md) |
+| RB-INC-002 | Product Shell e Minhas Viagens | Implementation Increment | Published | 1.0.0 | [rb-inc-002-product-shell.md](./implementation/increments/rb-inc-002-product-shell.md) |
 | RB-AI-007 | Operação e Gestão do Ciclo de Vida de Inteligência Artificial | AI Operations | Planned | 0.1.0 | [ai-operations-and-lifecycle-management.md](./ai/ai-operations-and-lifecycle-management.md) |
 | RB-API-002 | Catálogo de Contratos de API | API | Planned | 0.1.0 | [api-contract-catalog.md](./data/api-contract-catalog.md) |
 | RB-API-003 | Versionamento e Depreciação de APIs | API | Planned | 0.1.0 | [api-versioning-and-deprecation-policy.md](./data/api-versioning-and-deprecation-policy.md) |

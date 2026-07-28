@@ -4,8 +4,8 @@ title: Visão Inicial da Viagem
 description: Entrega a primeira visão contextual de uma Trip persistida e deriva seus Dias da Viagem.
 document_type: implementation-increment
 owner: Delivery
-status: Draft
-version: "0.1.0"
+status: Published
+version: "1.0.0"
 created: "2026-07-28"
 last_updated: "2026-07-28"
 authors:
@@ -36,9 +36,9 @@ ai_context:
 
 ## Estado
 
-`Draft`
+`Ready for Integration`
 
-O incremento permanece em elaboração até a aprovação dos checks documentais e de engenharia no PR associado à issue #11.
+A implementação foi validada no PR #12 e está pronta para revisão humana e integração.
 
 ## Resultado vertical
 
@@ -87,16 +87,16 @@ Uma visão inicial enxuta, derivada somente do agregado `Trip`, permite validar 
 
 ## Critérios de aceite
 
-- [ ] uma Viagem existente pode ser aberta por seu `TripId`;
-- [ ] os cards de `Minhas viagens` possuem ação clara de abertura;
-- [ ] destino, período, hospedagem, owner, status e versão são apresentados;
-- [ ] os Dias correspondem ao intervalo inclusivo do período;
-- [ ] hospedagem ausente é tratada sem informação inventada;
-- [ ] `TripId` inexistente apresenta 404 específico;
-- [ ] loading e erro recuperável existem na rota;
-- [ ] navegação por teclado e foco visível são preservados;
-- [ ] testes passam em desktop e mobile;
-- [ ] formatação, documentação, lint, typecheck, migration, testes e build passam.
+- [x] uma Viagem existente pode ser aberta por seu `TripId`;
+- [x] os cards de `Minhas viagens` possuem ação clara de abertura;
+- [x] destino, período, hospedagem, owner, status e versão são apresentados;
+- [x] os Dias correspondem ao intervalo inclusivo do período;
+- [x] hospedagem ausente é tratada sem informação inventada;
+- [x] `TripId` inexistente apresenta 404 específico;
+- [x] loading e erro recuperável existem na rota;
+- [x] navegação por teclado e foco visível são preservados;
+- [x] testes passam em desktop e mobile;
+- [x] formatação, documentação, lint, typecheck, migration, testes e build passam.
 
 ## Estrutura técnica
 
@@ -122,4 +122,10 @@ O rollback consiste em reverter o PR. Não há migration, alteração física de
 
 ## Evidências
 
-Serão preenchidas após a execução definitiva dos workflows da issue #11 e do PR correspondente.
+- issue #11 e PR #12;
+- 5 testes de domínio aprovados, incluindo derivação inclusiva dos Dias;
+- 4 testes de componente aprovados;
+- 14 testes Playwright aprovados em desktop Chromium e Pixel 7;
+- instalação congelada, formatação, documentação, lint e typecheck aprovados;
+- migration PostGIS, smoke do servidor e build de produção aprovados;
+- rota persistente e 404 específico validados ponta a ponta.

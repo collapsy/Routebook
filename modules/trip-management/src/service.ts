@@ -13,3 +13,7 @@ export async function createAndPersistTrip(
 export function listTrips(repository: TripRepository): Promise<Trip[]> {
   return repository.list();
 }
+
+export function findTripById(repository: TripRepository, tripId: string): Promise<Trip | null> {
+  return repository.findById(tripId);
+}

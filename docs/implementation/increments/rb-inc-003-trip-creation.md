@@ -4,8 +4,8 @@ title: Criação Canônica de Viagem
 description: Implementa a criação validada e persistente do agregado Trip para o cenário inicial de Pipa.
 document_type: implementation-increment
 owner: Delivery
-status: Draft
-version: "0.1.0"
+status: Published
+version: "1.0.0"
 created: "2026-07-28"
 last_updated: "2026-07-28"
 authors:
@@ -44,9 +44,9 @@ ai_context:
 
 ## Estado
 
-`Draft`
+`Published`
 
-O incremento permanece em elaboração até a aprovação dos checks documentais e de engenharia no PR #9.
+O incremento foi validado no PR #9 por meio dos workflows permanentes de documentação e engenharia.
 
 ## Resultado vertical
 
@@ -56,7 +56,7 @@ Uma pessoa consegue criar uma Viagem para Pipa informando nome, período, owner 
 
 O RB-INC-002 entregou navegação e estado vazio, porém a rota `/viagens/nova` ainda não criava estado canônico. Sem uma `Trip` persistida, nenhum contexto posterior — preferências, Lugares, distâncias, Roteiro ou recomendações — pode ser associado com segurança.
 
-## Hipótese
+## Hipótese validada
 
 A ativação do agregado `Trip` com um destino inicial controlado permite validar domínio, persistência e fluxo de criação sem antecipar geocodificação, autenticação ou outros agregados.
 
@@ -71,21 +71,21 @@ A ativação do agregado `Trip` com um destino inicial controlado permite valida
 - alterações futuras de destino, período ou hospedagem deverão incrementar `TripContextVersion`;
 - o agregado é persistido por uma porta de repositório e adapter Drizzle.
 
-## Escopo
+## Escopo entregue
 
-- adicionar `modules/trip-management`;
-- modelar `Trip`, `TripId`, `Destination`, `TripPeriod`, `Accommodation` e `TripParticipant`;
-- validar nome, período, owner e hospedagem;
-- gerar `TripId` e `UserId` internamente;
-- adicionar `packages/database`;
-- configurar Drizzle ORM e Postgres.js;
-- versionar migration inicial;
-- adicionar PostGIS local por Compose;
-- implementar Server Action de criação;
-- implementar formulário acessível;
-- listar viagens persistidas;
-- adicionar testes de domínio e E2E de persistência;
-- atualizar CI, documentação e rastreabilidade.
+- `modules/trip-management` com domínio puro e testável;
+- `Trip`, `TripId`, `Destination`, `TripPeriod`, `Accommodation` e `TripParticipant`;
+- validação de nome, período, owner e hospedagem;
+- geração interna de `TripId` e `UserId`;
+- `packages/database` com Drizzle ORM e Postgres.js;
+- migration inicial versionada;
+- PostGIS local por Docker Compose;
+- Server Action de criação;
+- formulário acessível com erros junto aos campos;
+- listagem de viagens persistidas;
+- testes de domínio e E2E de persistência;
+- CI com banco isolado, migration e testes responsivos;
+- documentação, registro e rastreabilidade.
 
 ## Fora de escopo
 
@@ -128,8 +128,7 @@ A ativação do agregado `Trip` com um destino inicial controlado permite valida
 
 ```text
 apps/web
-├── app/viagens/nova/actions.ts
-├── app/viagens/nova/page.tsx
+├── app/viagens/nova/{actions,state,page}.ts(x)
 ├── app/viagens/page.tsx
 └── components/{trip-form,trip-card}.tsx
 
@@ -156,34 +155,34 @@ A variável obrigatória é `DATABASE_URL`. Credenciais de produção não são 
 
 ## Critérios de aceite
 
-- [ ] `Trip` é criada somente com dados válidos;
-- [ ] data final não precede a inicial;
-- [ ] toda Viagem possui owner inicial;
-- [ ] hospedagem permanece opcional;
-- [ ] `TripId` é gerado internamente;
-- [ ] Pipa possui referência geográfica e fuso canônicos;
-- [ ] migration é aplicada em PostgreSQL/PostGIS;
-- [ ] formulário apresenta erros junto aos campos;
-- [ ] criação redireciona para `/viagens`;
-- [ ] viagem permanece visível após recarregar a página;
-- [ ] CI provisiona banco e aplica migration;
-- [ ] testes de domínio passam;
-- [ ] testes E2E passam em desktop e mobile;
-- [ ] formatação, documentação, lint, typecheck e build passam.
+- [x] `Trip` é criada somente com dados válidos;
+- [x] data final não precede a inicial;
+- [x] toda Viagem possui owner inicial;
+- [x] hospedagem permanece opcional;
+- [x] `TripId` é gerado internamente;
+- [x] Pipa possui referência geográfica e fuso canônicos;
+- [x] migration é aplicada em PostgreSQL/PostGIS;
+- [x] formulário apresenta erros junto aos campos;
+- [x] criação redireciona para `/viagens`;
+- [x] viagem permanece visível após recarregar a página;
+- [x] CI provisiona banco e aplica migration;
+- [x] testes de domínio passam;
+- [x] testes E2E passam em desktop e mobile;
+- [x] formatação, documentação, lint, typecheck e build passam.
 
-## Riscos
+## Riscos e mitigação
 
 ### Owner temporário sem autenticação
 
-Mitigação: manter o identificador interno e limitar o recorte a um owner local. A futura autenticação deverá migrar ou associar essa participação explicitamente, sem redefinir `Trip`.
+O identificador interno e a participação explícita são preservados. A futura autenticação deverá associar essa participação sem redefinir `Trip`.
 
 ### Destino único
 
-Mitigação: comunicar claramente o limite na interface. A resolução dinâmica de destino será um incremento separado.
+O limite é comunicado na interface. A resolução dinâmica de destino permanece como incremento separado.
 
-### Agregado armazenado parcialmente em JSON
+### Participantes em JSON
 
-Mitigação: utilizar JSON apenas para participantes pertencentes ao agregado e manter atributos estruturais consultáveis em colunas. Novos agregados terão tabelas próprias.
+O JSON é utilizado apenas para participantes pertencentes ao agregado. Atributos estruturais continuam consultáveis em colunas e novos agregados terão tabelas próprias.
 
 ## Rollback
 
@@ -191,4 +190,16 @@ O rollback exige reverter o PR e, quando houver dados locais de teste, remover a
 
 ## Evidências
 
-Serão preenchidas após a execução definitiva dos workflows associados à issue #8 e ao PR #9.
+| Evidência | Resultado |
+| --- | --- |
+| issue | #8 |
+| pull request | #9 |
+| validação documental | 113 documentos registrados, 0 avisos |
+| instalação | `pnpm install --frozen-lockfile` aprovado |
+| domínio | 4 testes aprovados |
+| componentes | 3 testes aprovados |
+| migration | aplicada com sucesso em PostGIS 17 |
+| servidor de desenvolvimento | smoke aprovado |
+| build | produção aprovada |
+| E2E | 14 testes aprovados em desktop Chromium e Pixel 7 |
+| quality gates | formatação, documentação, lint, typecheck, migration, testes, dev smoke, build e Playwright aprovados |

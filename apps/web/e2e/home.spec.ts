@@ -10,13 +10,21 @@ test("exibe a proposta de valor e a prévia do guia", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Pipa, Rio Grande do Norte" })).toBeVisible();
 });
 
-test("mantém a ação principal utilizável", async ({ page }) => {
+test("mantém a explicação institucional acessível", async ({ page }) => {
   await page.goto("/");
 
-  const action = page.getByRole("link", { name: "Entender o RouteBook" });
+  const action = page.getByRole("link", { name: "Entender o projeto" });
   await expect(action).toBeVisible();
   await action.click();
   await expect(
     page.getByRole("heading", { name: "Menos listas. Mais contexto para decidir." }),
   ).toBeVisible();
+});
+
+test("abre a área de produto a partir da landing", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("link", { name: "Abrir o RouteBook" }).first().click();
+
+  await expect(page).toHaveURL(/\/viagens$/);
+  await expect(page.getByRole("heading", { name: "Minhas viagens" })).toBeVisible();
 });

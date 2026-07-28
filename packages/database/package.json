@@ -13,13 +13,17 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@routebook/trip-management": "workspace:*"
+    "@routebook/trip-management": "workspace:*",
+    "drizzle-orm": "0.45.2",
+    "postgres": "3.4.9"
   },
   "devDependencies": {
     "@routebook/eslint-config": "workspace:*",
     "@routebook/typescript-config": "workspace:*",
     "@types/node": "26.1.2",
+    "drizzle-kit": "0.31.10",
     "eslint": "9.39.5",
+    "tsx": "4.22.5",
     "typescript": "6.0.3",
     "vitest": "4.1.10"
   }

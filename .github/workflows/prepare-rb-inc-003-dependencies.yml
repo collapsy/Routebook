@@ -1,9 +1,9 @@
 name: Prepare RB-INC-003 Dependencies
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/rb-inc-003-trip-creation
+      - main
     paths:
       - ".github/workflows/prepare-rb-inc-003-dependencies.yml"
 
@@ -32,10 +32,10 @@ jobs:
         run: corepack enable
 
       - name: Resolve exact runtime dependencies
-        run: pnpm --filter @routebook/database add --save-exact drizzle-orm@latest postgres@latest
+        run: pnpm --filter @routebook/database add --save-exact drizzle-orm@0.45.2 postgres@3.4.9
 
       - name: Resolve exact migration tooling
-        run: pnpm --filter @routebook/database add --save-dev --save-exact drizzle-kit@latest tsx@latest
+        run: pnpm --filter @routebook/database add --save-dev --save-exact drizzle-kit@0.31.10 tsx@4.22.5
 
       - name: Format manifests
         run: pnpm exec prettier --write package.json apps/web/package.json modules/trip-management/package.json packages/database/package.json pnpm-workspace.yaml

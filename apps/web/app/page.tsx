@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { DecisionPillars } from "@/components/decision-pillars";
 
 const previewPlaces = [
@@ -17,9 +19,9 @@ export default function Home() {
             </span>
             <span>RouteBook</span>
           </a>
-          <a className="nav-link" href="#proposito">
-            Conhecer o projeto
-          </a>
+          <Link className="nav-link" href="/viagens">
+            Abrir o RouteBook
+          </Link>
         </nav>
 
         <div className="hero-grid" id="inicio">
@@ -34,10 +36,12 @@ export default function Home() {
               visual que ajuda você a escolher o que realmente vale a pena.
             </p>
             <div className="hero-actions">
-              <a className="primary-action" href="#proposito">
-                Entender o RouteBook
+              <Link className="primary-action" href="/viagens">
+                Abrir o RouteBook
+              </Link>
+              <a className="nav-link" href="#proposito">
+                Entender o projeto
               </a>
-              <span>Aplicação em construção</span>
             </div>
           </div>
 

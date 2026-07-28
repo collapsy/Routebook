@@ -47,6 +47,7 @@ jobs:
 
       - name: Resolve exact stable dependencies
         run: |
+          node -e "const fs=require('node:fs'); const path='package.json'; const pkg=JSON.parse(fs.readFileSync(path,'utf8')); pkg.pnpm={...(pkg.pnpm ?? {}),onlyBuiltDependencies:['unrs-resolver']}; fs.writeFileSync(path,JSON.stringify(pkg,null,2)+'\n');"
           pnpm add -Dw turbo@latest prettier@latest --save-exact
           pnpm --filter @routebook/eslint-config add eslint-config-next@latest --save-exact
           pnpm --filter @routebook/web add next@latest react@latest react-dom@latest --save-exact

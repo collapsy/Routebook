@@ -35,7 +35,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Normalize product shell styles
-        run: sed -i '/^[[:space:]]*aria-busy: true;[[:space:]]*$/d' apps/web/app/product-shell.css
+        run: |
+          sed -i '/^[[:space:]]*aria-busy: true;[[:space:]]*$/d' apps/web/app/product-shell.css
 
       - name: Format new implementation files
         run: |

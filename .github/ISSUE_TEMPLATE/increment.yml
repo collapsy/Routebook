@@ -1,0 +1,89 @@
+name: Incremento vertical
+description: Planejar uma entrega vertical do RouteBook
+title: "RB-INC-NNN — "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use este template para trabalho planejado por incremento. Leia `AGENTS.md` e a documentação de implementação antes de iniciar.
+  - type: input
+    id: result
+    attributes:
+      label: Resultado vertical
+      description: Qual comportamento utilizável existirá após este incremento?
+      placeholder: Uma pessoa consegue...
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema
+      description: Qual problema concreto precisa ser resolvido?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Escopo
+      description: Liste entregas incluídas.
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Fora de escopo
+      description: Liste itens explicitamente excluídos.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context Pack e documentos
+      description: Liste documentos, ADRs e Context Pack aplicáveis.
+    validations:
+      required: true
+  - type: textarea
+    id: paths
+    attributes:
+      label: Caminhos permitidos
+      description: Informe os caminhos que podem ser alterados.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critérios de aceite
+      description: Use checkboxes e comportamentos verificáveis.
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Testes e validações
+      description: Comandos e cenários obrigatórios.
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Riscos, segurança e privacidade
+      description: Registre riscos, dados tratados e mitigação.
+    validations:
+      required: true
+  - type: checkboxes
+    id: ready
+    attributes:
+      label: Definition of Ready
+      options:
+        - label: O problema está claro.
+          required: true
+        - label: O escopo e o fora de escopo estão definidos.
+          required: true
+        - label: Os critérios de aceite são verificáveis.
+          required: true
+        - label: As decisões bloqueantes estão resolvidas ou identificadas.
+          required: true

@@ -157,7 +157,9 @@ export default async function TripOverviewPage({
             </div>
             <div>
               <dt>Orçamento estimado</dt>
-              <dd>{profile.budget ? formatBudget(profile.budget.totalCents) : "Ainda não informado"}</dd>
+              <dd>
+                {profile.budget ? formatBudget(profile.budget.totalCents) : "Ainda não informado"}
+              </dd>
             </div>
             <div>
               <dt>Versão do perfil</dt>
@@ -203,8 +205,8 @@ export default async function TripOverviewPage({
           <p className="product-eyebrow">Próximos passos</p>
           <h2 id="trip-next-steps-title">Continue no seu ritmo</h2>
           <p>
-            Depois do contexto, o próximo ciclo poderá iniciar a descoberta de praias, restaurantes e
-            vida noturna com informações rastreáveis.
+            Depois do contexto, o próximo ciclo poderá iniciar a descoberta de praias, restaurantes
+            e vida noturna com informações rastreáveis.
           </p>
         </div>
         <Link className="product-secondary-action" href="/viagens">

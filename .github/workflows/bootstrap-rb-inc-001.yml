@@ -1,0 +1,259 @@
+name: Bootstrap RB-INC-001
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-001-monorepo-bootstrap
+    paths:
+      - ".github/workflows/bootstrap-rb-inc-001.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    name: Create and validate monorepo
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-001-monorepo-bootstrap
+
+      - name: Materialize reviewed scaffold
+        shell: bash
+        run: |
+          cat > /tmp/routebook-scaffold.tar.gz.b64 <<'ARCHIVE'
+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
+ARCHIVE
+          base64 --decode /tmp/routebook-scaffold.tar.gz.b64 > /tmp/routebook-scaffold.tar.gz
+          tar -xzf /tmp/routebook-scaffold.tar.gz -C .
+          rm -f .github/workflows/bootstrap-rb-inc-001.yml
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Resolve exact stable dependencies
+        run: |
+          pnpm add -Dw turbo@latest prettier@latest --save-exact
+          pnpm --filter @routebook/eslint-config add eslint-config-next@latest --save-exact
+          pnpm --filter @routebook/web add next@latest react@latest react-dom@latest --save-exact
+          pnpm --filter @routebook/web add -D \
+            "@routebook/eslint-config@workspace:*" \
+            "@routebook/typescript-config@workspace:*" \
+            @playwright/test@latest \
+            @tailwindcss/postcss@latest \
+            @testing-library/jest-dom@latest \
+            @testing-library/react@latest \
+            @testing-library/user-event@latest \
+            @types/node@latest \
+            @types/react@latest \
+            @types/react-dom@latest \
+            @vitejs/plugin-react@latest \
+            eslint@latest \
+            jsdom@latest \
+            tailwindcss@latest \
+            typescript@latest \
+            vite-tsconfig-paths@latest \
+            vitest@latest \
+            --save-exact
+
+      - name: Commit scaffold and lockfile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "feat(rb-inc-001): bootstrap executable monorepo"
+          git push origin HEAD:feature/rb-inc-001-monorepo-bootstrap
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Validate documentation
+        run: pnpm docs:validate
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Run component tests
+        run: pnpm test
+
+      - name: Build application
+        run: pnpm build
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @routebook/web exec playwright install --with-deps chromium
+
+      - name: Run smoke tests
+        run: pnpm test:e2e

@@ -31,6 +31,39 @@ test("cria, abre e mantém uma viagem persistida", async ({ page }, testInfo) =>
   await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
 });
 
+test("configura e mantém o contexto progressivo da viagem", async ({ page }, testInfo) => {
+  const tripName = `Contexto Pipa ${testInfo.project.name} ${Date.now()}`;
+
+  await page.goto("/viagens/nova");
+  await page.getByLabel("Nome da viagem").fill(tripName);
+  await page.getByLabel("Responsável pela viagem").fill("Ronaldo Gentil");
+  await page.getByRole("button", { name: "Criar viagem" }).click();
+  await page.getByRole("link", { name: "Abrir viagem" }).first().click();
+
+  await page.getByRole("link", { name: "Configurar contexto" }).click();
+  await page.getByLabel("Quantidade de viajantes").fill("3");
+  await page.getByLabel("Praias").check();
+  await page.getByLabel("Gastronomia").check();
+  await page.getByLabel("Vida noturna").check();
+  await page.getByLabel("Ritmo da viagem").selectOption("balanced");
+  await page.getByLabel("Transporte preferencial").selectOption("ride-hailing");
+  await page.getByLabel("Orçamento total estimado").fill("4.500,00");
+  await page.getByRole("button", { name: "Salvar contexto" }).click();
+
+  await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\?contextUpdated=1$/);
+  await expect(page.getByRole("status")).toContainText("Contexto da viagem salvo");
+  await expect(page.getByText("Praias, Gastronomia, Vida noturna")).toBeVisible();
+  await expect(page.getByText("Equilibrado", { exact: true })).toBeVisible();
+  await expect(page.getByText("Aplicativos e táxi", { exact: true })).toBeVisible();
+  await expect(page.getByText("R$ 4.500,00", { exact: true })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText("Praias, Gastronomia, Vida noturna")).toBeVisible();
+  await page.getByRole("link", { name: "Editar contexto" }).click();
+  await expect(page.getByLabel("Quantidade de viajantes")).toHaveValue("3");
+  await expect(page.getByLabel("Praias")).toBeChecked();
+});
+
 test("apresenta erro quando o período é invertido", async ({ page }) => {
   await page.goto("/viagens/nova");
   await page.getByLabel("Responsável pela viagem").fill("Ronaldo Gentil");

@@ -16,3 +16,5 @@ packages/domain
 packages/maps
 .github/ISSUE_TEMPLATE
 .github/PULL_REQUEST_TEMPLATE.md
+.github/workflows/documentation-validation.yml
+scripts/validate-docs.mjs

@@ -1,0 +1,26 @@
+{
+  "name": "@routebook/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "db:migrate": "tsx src/migrate.ts",
+    "lint": "eslint src --max-warnings=0",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@routebook/trip-management": "workspace:*"
+  },
+  "devDependencies": {
+    "@routebook/eslint-config": "workspace:*",
+    "@routebook/typescript-config": "workspace:*",
+    "@types/node": "26.1.2",
+    "eslint": "9.39.5",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
+}

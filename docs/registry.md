@@ -87,6 +87,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-ADR-015 | Adoção de Inngest para Jobs Assíncronos e Workflows Duráveis | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-015-inngest-for-asynchronous-jobs-and-durable-workflows.md](./architecture/adrs/rb-adr-015-inngest-for-asynchronous-jobs-and-durable-workflows.md) |
 | RB-ADR-016 | Adoção de Cloudflare R2 como Armazenamento de Objetos Compatível com S3 | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-016-cloudflare-r2-for-object-storage.md](./architecture/adrs/rb-adr-016-cloudflare-r2-for-object-storage.md) |
 | RB-ADR-017 | Adoção da Vercel como Plataforma Inicial de Deployment da Aplicação Web | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-017-vercel-as-initial-web-deployment-platform.md](./architecture/adrs/rb-adr-017-vercel-as-initial-web-deployment-platform.md) |
+| RB-ADR-018 | Adoção do Neon como Provider Gerenciado de PostgreSQL e PostGIS | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-018-neon-as-managed-postgresql-and-postgis-provider.md](./architecture/adrs/rb-adr-018-neon-as-managed-postgresql-and-postgis-provider.md) |
+| RB-ADR-019 | Adoção do GitHub Actions para Integração Contínua e Governança de Entregas | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-019-github-actions-for-continuous-integration-and-delivery-governance.md](./architecture/adrs/rb-adr-019-github-actions-for-continuous-integration-and-delivery-governance.md) |
+| RB-ADR-020 | Adoção de OpenFeature com Flags Persistidas no PostgreSQL para Rollouts Controlados | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-020-openfeature-and-postgresql-for-feature-flags-and-progressive-rollouts.md](./architecture/adrs/rb-adr-020-openfeature-and-postgresql-for-feature-flags-and-progressive-rollouts.md) |
 
 ## Status possíveis
 

@@ -14,3 +14,5 @@ AGENTS.md
 CONTRIBUTING.md
 packages/domain
 packages/maps
+.github/ISSUE_TEMPLATE
+.github/PULL_REQUEST_TEMPLATE.md

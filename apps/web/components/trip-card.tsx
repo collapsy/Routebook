@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type { Trip } from "@routebook/trip-management";
 
 function formatDate(value: string): string {
@@ -14,7 +16,11 @@ export function TripCard({ trip }: { trip: Trip }) {
       <div className="trip-card-heading">
         <div>
           <p className="product-eyebrow">{trip.status === "draft" ? "Rascunho" : trip.status}</p>
-          <h2>{trip.name}</h2>
+          <h2>
+            <Link className="trip-card-link" href={`/viagens/${trip.id}`}>
+              {trip.name}
+            </Link>
+          </h2>
         </div>
         <span className="trip-context-version">Contexto v{trip.contextVersion}</span>
       </div>
@@ -40,7 +46,12 @@ export function TripCard({ trip }: { trip: Trip }) {
         </div>
       </dl>
 
-      <p className="trip-card-id">TripId: {trip.id}</p>
+      <div className="trip-card-footer">
+        <p className="trip-card-id">TripId: {trip.id}</p>
+        <Link className="product-secondary-action" href={`/viagens/${trip.id}`}>
+          Abrir viagem
+        </Link>
+      </div>
     </article>
   );
 }

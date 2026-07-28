@@ -1,9 +1,44 @@
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 import type { Trip, TripParticipant, TripRepository } from "@routebook/trip-management";
 
 import { getDatabase } from "./client";
 import { trips } from "./schema";
+
+type TripRow = typeof trips.$inferSelect;
+
+function mapTrip(row: TripRow): Trip {
+  return {
+    id: row.id,
+    name: row.name,
+    destination: {
+      name: row.destinationName,
+      type: "district",
+      countryCode: "BR",
+      latitude: Number(row.latitude),
+      longitude: Number(row.longitude),
+      timeZone: "America/Fortaleza",
+    },
+    period: {
+      startDate: row.startDate,
+      endDate: row.endDate,
+      timeZone: "America/Fortaleza",
+    },
+    ...(row.accommodationName
+      ? {
+          accommodation: {
+            name: row.accommodationName,
+            ...(row.accommodationAddress ? { address: row.accommodationAddress } : {}),
+          },
+        }
+      : {}),
+    status: row.status as Trip["status"],
+    participants: row.participants as TripParticipant[],
+    contextVersion: row.contextVersion,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
 
 export class DrizzleTripRepository implements TripRepository {
   async create(trip: Trip): Promise<void> {
@@ -32,36 +67,11 @@ export class DrizzleTripRepository implements TripRepository {
 
   async list(): Promise<Trip[]> {
     const rows = await getDatabase().select().from(trips).orderBy(desc(trips.createdAt));
+    return rows.map(mapTrip);
+  }
 
-    return rows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      destination: {
-        name: row.destinationName,
-        type: "district",
-        countryCode: "BR",
-        latitude: Number(row.latitude),
-        longitude: Number(row.longitude),
-        timeZone: "America/Fortaleza",
-      },
-      period: {
-        startDate: row.startDate,
-        endDate: row.endDate,
-        timeZone: "America/Fortaleza",
-      },
-      ...(row.accommodationName
-        ? {
-            accommodation: {
-              name: row.accommodationName,
-              ...(row.accommodationAddress ? { address: row.accommodationAddress } : {}),
-            },
-          }
-        : {}),
-      status: row.status as Trip["status"],
-      participants: row.participants as TripParticipant[],
-      contextVersion: row.contextVersion,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-    }));
+  async findById(tripId: string): Promise<Trip | null> {
+    const [row] = await getDatabase().select().from(trips).where(eq(trips.id, tripId)).limit(1);
+    return row ? mapTrip(row) : null;
   }
 }

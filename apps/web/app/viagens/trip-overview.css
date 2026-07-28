@@ -4,7 +4,8 @@
 }
 
 .trip-overview-hero,
-.trip-next-steps {
+.trip-next-steps,
+.traveler-context-summary {
   align-items: start;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -25,13 +26,15 @@
 
 .trip-overview-hero p:last-child,
 .trip-next-steps p:last-child,
-.section-heading-row > p {
+.section-heading-row > p,
+.traveler-context-summary > p {
   color: var(--foreground-muted);
   line-height: 1.6;
   max-width: 44rem;
 }
 
-.trip-overview-summary {
+.trip-overview-summary,
+.traveler-context-details {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
@@ -39,6 +42,7 @@
 }
 
 .trip-overview-summary > div,
+.traveler-context-details > div,
 .trip-days-grid li {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -46,7 +50,8 @@
   padding: 1.1rem;
 }
 
-.trip-overview-summary dt {
+.trip-overview-summary dt,
+.traveler-context-details dt {
   color: var(--foreground-muted);
   font-size: 0.78rem;
   font-weight: 800;
@@ -55,7 +60,8 @@
   text-transform: uppercase;
 }
 
-.trip-overview-summary dd {
+.trip-overview-summary dd,
+.traveler-context-details dd {
   font-weight: 760;
   margin: 0;
 }
@@ -65,6 +71,14 @@
   color: var(--foreground-muted);
   display: block;
   margin-top: 0.35rem;
+}
+
+.traveler-context-summary {
+  display: grid;
+}
+
+.traveler-context-details {
+  width: 100%;
 }
 
 .trip-days-section {
@@ -120,6 +134,64 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.context-page .app-page-heading {
+  margin-bottom: 2rem;
+}
+
+.interest-fieldset {
+  border: 0;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+.interest-fieldset legend {
+  font-weight: 750;
+  margin-bottom: 0.35rem;
+}
+
+.choice-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  margin-top: 0.9rem;
+}
+
+.choice-card {
+  align-items: center;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.85rem;
+}
+
+.choice-card:has(input:checked) {
+  border-color: var(--primary);
+  color: var(--primary-strong);
+}
+
+.money-input {
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  display: flex;
+  overflow: hidden;
+}
+
+.money-input > span {
+  background: var(--surface-soft);
+  font-weight: 800;
+  padding: 0.85rem;
+}
+
+.money-input input {
+  border: 0;
+  flex: 1;
 }
 
 @media (min-width: 48rem) {

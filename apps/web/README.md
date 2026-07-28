@@ -7,8 +7,8 @@ Aplicação web principal do RouteBook, implementada com Next.js App Router e Ty
 | Rota | Finalidade |
 | --- | --- |
 | `/` | landing institucional e entrada no produto |
-| `/viagens` | área Minhas Viagens no estado vazio de primeiro acesso |
-| `/viagens/nova` | preparação do futuro fluxo de criação, sem persistência |
+| `/viagens` | listagem de Viagens persistidas ou estado vazio |
+| `/viagens/nova` | criação canônica de uma Viagem para Pipa |
 | rota inexistente | estado 404 com retorno seguro |
 
 O product shell inclui navegação global, skip link, foco visível, loading, error boundary e comportamento responsivo em desktop e mobile.
@@ -23,7 +23,10 @@ O product shell inclui navegação global, skip link, foco visível, loading, er
 - TypeScript `6.0.3`;
 - ESLint `9.39.5`;
 - Vitest `4.1.10`;
-- Playwright `1.62.0`.
+- Playwright `1.62.0`;
+- PostgreSQL/PostGIS `17`;
+- Drizzle ORM `0.45.2`;
+- Postgres.js `3.4.9`.
 
 As versões são exatas e o `pnpm-lock.yaml` é obrigatório. O ESLint permanece na linha 9 por compatibilidade com os plugins utilizados pelo `eslint-config-next`. O TypeScript permanece na linha 6 porque a API de compilador da linha 7 ainda não é suportada pelo Next.js `16.2.12`.
 
@@ -31,19 +34,38 @@ As versões são exatas e o `pnpm-lock.yaml` é obrigatório. O ESLint permanece
 
 - Node.js `24.18.0`;
 - Corepack habilitado;
+- Docker com Compose;
 - pnpm definido pelo campo `packageManager` da raiz.
 
-## Execução
+## Configuração local
 
 A partir da raiz do repositório:
 
 ```bash
+cp .env.example .env.local
+docker compose up -d postgres
 corepack enable
 pnpm install --frozen-lockfile
+pnpm db:migrate
 pnpm dev
 ```
 
 A aplicação ficará disponível em `http://localhost:3000`.
+
+A variável `DATABASE_URL` é obrigatória. O arquivo `.env.example` contém somente credenciais descartáveis do ambiente local.
+
+## Fluxo de Viagem
+
+O incremento atual permite:
+
+1. abrir `/viagens/nova`;
+2. informar nome, período, owner inicial e hospedagem opcional;
+3. validar as invariantes do agregado `Trip`;
+4. gerar `TripId` interno;
+5. persistir a Viagem em PostgreSQL;
+6. retornar para `/viagens` e manter a Viagem visível após recarregar a página.
+
+Pipa, Tibau do Sul — RN é o único destino canônico habilitado neste recorte. O destino possui coordenadas e fuso definidos internamente; não existe geocodificação externa.
 
 ## Validações
 
@@ -52,6 +74,7 @@ pnpm format:check
 pnpm docs:validate
 pnpm lint
 pnpm typecheck
+pnpm db:migrate
 pnpm test
 pnpm build
 pnpm test:e2e
@@ -63,13 +86,6 @@ O teste end-to-end requer o Chromium do Playwright:
 pnpm --filter @routebook/web exec playwright install chromium
 ```
 
-## Cobertura atual
-
-- três testes de componente;
-- quatorze testes E2E distribuídos entre desktop Chromium e viewport móvel Pixel 7;
-- smoke do servidor de desenvolvimento;
-- build de produção.
-
 ## Limites atuais
 
-O shell não cria nem persiste uma `Trip`. Ainda não existem autenticação, banco, mapas, catálogo de Lugares, Salvos, Roteiro, Recomendações ou integrações externas. A rota `/viagens/nova` representa somente a preparação navegável do próximo fluxo vertical.
+Ainda não existem autenticação real, convites, perfil de Viajantes, múltiplos destinos, mapas, catálogo de Lugares, Salvos, Roteiro, Recomendações ou IA. A participação criada no formulário representa somente o owner local inicial da Viagem.

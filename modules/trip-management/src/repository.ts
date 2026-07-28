@@ -1,0 +1,6 @@
+import type { Trip } from "./trip";
+
+export interface TripRepository {
+  create(trip: Trip): Promise<void>;
+  list(): Promise<Trip[]>;
+}

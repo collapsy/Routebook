@@ -10,68 +10,51 @@ O produto combina contexto da viagem, preferências, localização, mapas, orça
 
 O projeto surgiu para apoiar uma viagem real a **Pipa (RN), de 22 a 29 de agosto de 2026**, realizada por três adultos e com hospedagem principal no Condomínio Solar Água.
 
-Esse cenário será utilizado para validar o primeiro ciclo do produto, incluindo:
+Esse cenário será utilizado para validar o primeiro ciclo do produto, incluindo praias, restaurantes, vida noturna, distâncias a partir da hospedagem e organização das atividades por dia.
 
-- praias e atrações;
-- restaurantes e custo-benefício;
-- bares e vida noturna;
-- distâncias a partir da hospedagem;
-- organização das atividades por dia;
-- equilíbrio entre planejamento e períodos livres.
-
-Pipa é o cenário inicial, não uma limitação estrutural. O RouteBook deverá atender progressivamente outros destinos, grupos, períodos e estilos de viagem.
+Pipa é o cenário inicial, não uma limitação estrutural. Outros destinos serão habilitados quando a resolução geográfica estiver implementada.
 
 ## Proposta de valor
 
-O RouteBook não é apenas um catálogo de pontos turísticos.
-
-Seu objetivo é ajudar o viajante a responder:
+O RouteBook não é apenas um catálogo de pontos turísticos. Seu objetivo é ajudar o viajante a responder:
 
 > Considerando onde estou, quanto tempo tenho, quanto posso gastar e o que gosto de fazer, qual é a próxima melhor decisão para esta viagem?
 
-Para isso, o produto deverá integrar:
-
-- descoberta de lugares;
-- contexto geográfico;
-- mapas, distâncias e rotas;
-- personalização progressiva;
-- organização de roteiro;
-- recomendações contextualizadas;
-- justificativas compreensíveis;
-- controle final pelo usuário.
-
 ## Estado atual
-
-A trilha documental inicial está publicada e o primeiro bootstrap executável foi materializado pelo `RB-INC-001`.
 
 | Área | Estado |
 | --- | --- |
 | Visão, produto, domínio, UX e arquitetura | Publicado |
 | Governança para implementação | Integrada pelo RB-INC-000 |
 | Monorepo executável | Implementado pelo RB-INC-001 |
-| Página institucional responsiva | Implementada |
-| Quality gates de engenharia | Automatizados |
-| Módulos de negócio | Não iniciados |
-| Integrações externas | Não provisionadas |
-| MVP funcional | Não validado |
+| Product shell e Minhas Viagens | Implementados pelo RB-INC-002 |
+| Agregado `Trip` | Implementado no RB-INC-003 |
+| Persistência PostgreSQL/PostGIS | Ativada no RB-INC-003 |
+| Criação e listagem de Viagens | Implementadas para Pipa |
+| Mapas, Lugares, Roteiro e Recomendações | Não iniciados |
+| MVP funcional completo | Não validado |
 
-O bootstrap não representa o MVP. Ele fornece apenas a base reproduzível para os próximos incrementos verticais.
+A aplicação já cria uma `Trip` canônica, gera identidade interna, valida período e ownership, persiste o agregado e mantém a Viagem visível após recarregar a página.
 
 ## Execução local
 
 ### Pré-requisitos
 
 - Node.js `24.18.0`;
-- Corepack disponível;
+- Corepack;
+- Docker com Compose;
 - Git.
 
-### Instalação
+### Instalação e banco
 
 ```bash
 git clone https://github.com/collapsy/Routebook.git
 cd Routebook
+cp .env.example .env.local
+docker compose up -d postgres
 corepack enable
 pnpm install --frozen-lockfile
+pnpm db:migrate
 ```
 
 ### Desenvolvimento
@@ -89,6 +72,7 @@ pnpm format:check
 pnpm docs:validate
 pnpm lint
 pnpm typecheck
+pnpm db:migrate
 pnpm test
 pnpm build
 pnpm test:e2e
@@ -100,7 +84,7 @@ Para o primeiro uso local do Playwright:
 pnpm --filter @routebook/web exec playwright install chromium
 ```
 
-## Stack do bootstrap
+## Stack ativa
 
 | Componente | Versão |
 | --- | --- |
@@ -114,6 +98,11 @@ pnpm --filter @routebook/web exec playwright install chromium
 | ESLint | 9.39.5 |
 | Vitest | 4.1.10 |
 | Playwright | 1.62.0 |
+| PostgreSQL/PostGIS | 17 / 3.5 |
+| Drizzle ORM | 0.45.2 |
+| Drizzle Kit | 0.31.10 |
+| Postgres.js | 3.4.9 |
+| tsx | 4.22.5 |
 
 As versões são fixadas de forma exata e o `pnpm-lock.yaml` é obrigatório.
 
@@ -132,13 +121,17 @@ Routebook/
 │       ├── components/
 │       ├── e2e/
 │       └── package.json
+├── modules/
+│   └── trip-management/
 ├── packages/
+│   ├── database/
 │   ├── eslint-config/
 │   ├── typescript-config/
 │   ├── domain/
 │   └── maps/
 ├── docs/
 ├── scripts/
+├── compose.yaml
 ├── package.json
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
@@ -148,21 +141,22 @@ Routebook/
 └── README.md
 ```
 
-`packages/domain` e `packages/maps` ainda são placeholders documentais. Módulos, banco, autenticação, mapas e IA serão adicionados somente quando um incremento concreto exigir essas responsabilidades.
+`modules/trip-management` contém o agregado e suas invariantes. `packages/database` contém schema, migration e adapter Drizzle. `packages/domain` e `packages/maps` permanecem placeholders documentais.
 
 ## Quality gates
 
 O workflow `.github/workflows/engineering-validation.yml` executa:
 
-1. instalação com `pnpm install --frozen-lockfile`;
-2. verificação de formatação;
-3. validação documental;
-4. lint;
-5. typecheck;
-6. testes de componente;
-7. smoke do servidor de desenvolvimento;
-8. build de produção;
-9. smoke tests com Chromium em desktop e viewport móvel.
+1. PostGIS isolado para o job;
+2. instalação congelada;
+3. verificação de formatação;
+4. validação documental;
+5. lint e typecheck;
+6. aplicação da migration;
+7. testes de domínio e componente;
+8. smoke do servidor de desenvolvimento;
+9. build de produção;
+10. testes E2E persistentes em desktop e mobile.
 
 Nenhum secret ou Provider externo é necessário para esse pipeline.
 
@@ -194,9 +188,9 @@ Reservas, pagamentos, colaboração avançada e automações autônomas permanec
 
 ## Arquitetura adotada
 
-O RouteBook será implementado inicialmente como um **monólito modular**, em TypeScript, organizado como monorepo com pnpm Workspaces e Turborepo.
+O RouteBook é implementado inicialmente como um **monólito modular**, em TypeScript, organizado como monorepo com pnpm Workspaces e Turborepo.
 
-A aplicação web utiliza Next.js com App Router. Persistência, autenticação, mapas, observabilidade e demais Providers estão registrados nos ADRs, mas serão ativados somente quando um incremento concreto exigir sua utilização.
+A aplicação web utiliza Next.js com App Router. O domínio permanece desacoplado da interface por portas, e o PostgreSQL/PostGIS é acessado por um adapter Drizzle.
 
 ## Documentação
 
@@ -206,7 +200,7 @@ Entradas principais:
 - [`docs/registry.md`](./docs/registry.md): registro oficial dos documentos;
 - [`docs/core/routebook-bible.md`](./docs/core/routebook-bible.md): constituição semântica do projeto;
 - [`docs/implementation/README.md`](./docs/implementation/README.md): operação por incrementos e Context Packs;
-- [`docs/implementation/increments/rb-inc-001-monorepo-bootstrap.md`](./docs/implementation/increments/rb-inc-001-monorepo-bootstrap.md): evidências do bootstrap;
+- [`docs/implementation/increments/rb-inc-003-trip-creation.md`](./docs/implementation/increments/rb-inc-003-trip-creation.md): escopo e evidências da criação de Viagem;
 - [`AGENTS.md`](./AGENTS.md): regras obrigatórias para agentes de IA.
 
 A ordem de autoridade é:

@@ -27,6 +27,7 @@ next_documents:
   - RB-INC-000
   - RB-INC-001
   - RB-INC-002
+  - RB-INC-003
 ai_context:
   priority: high
   index: true
@@ -48,7 +49,8 @@ ai_context:
 | --- | --- | --- | --- | --- | --- | --- |
 | RB-INC-000 | RB-DEL-001, RB-DEV-001, RB-CICD-001 | #2 | `chore/rb-inc-000-readiness`, PR #3 | documentação, templates e validação | 111 documentos registrados, 0 avisos, workflow aprovado | Integrado |
 | RB-INC-001 | RB-ADR-002, RB-ADR-003, RB-ADR-004, RB-ADR-010, RB-ADR-011, RB-ADR-019 | #4 | `feature/rb-inc-001-monorepo-bootstrap`, PR #5 | workspace, `apps/web`, configurações compartilhadas e CI | frozen install, format, docs, lint, typecheck, componente, dev smoke, build e E2E responsivo | Integrado |
-| RB-INC-002 | RB-DEL-001, RB-UX-001, RB-UX-003, RB-UX-004, RB-UX-005, RB-UX-006, RB-DS-001, RB-DS-002 | #6 | `feature/rb-inc-002-product-shell`, PR #7 | landing, product shell, Minhas Viagens, estados globais e testes | 3 testes de componente, 14 testes E2E, frozen install, format, docs, lint, typecheck, dev smoke e build | Ready for Review |
+| RB-INC-002 | RB-DEL-001, RB-UX-001, RB-UX-003, RB-UX-004, RB-UX-005, RB-UX-006, RB-DS-001, RB-DS-002 | #6 | `feature/rb-inc-002-product-shell`, PR #7 | landing, product shell, Minhas Viagens, estados globais e testes | 3 testes de componente, 14 testes E2E, frozen install, format, docs, lint, typecheck, dev smoke e build | Integrado |
+| RB-INC-003 | RB-DOM-001, RB-DOM-003, RB-ARC-004, RB-DATA-001, RB-DATA-002, RB-ADR-005, RB-ADR-006 | #8 | `feature/rb-inc-003-trip-creation`, PR #9 | `trip-management`, database, migration, formulário, listagem e CI PostgreSQL | evidências pendentes dos workflows definitivos | Em execução |
 
 ## Evidências do RB-INC-001
 
@@ -77,6 +79,21 @@ ai_context:
 | testes E2E | 14 aprovados em desktop e mobile |
 | quality gates | Documentation Validation e Engineering Validation aprovados |
 | rastreabilidade | issue #6 e PR #7 |
+
+## Evidências previstas do RB-INC-003
+
+| Evidência | Localização |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-003-trip-creation.md` |
+| agregado e invariantes | `modules/trip-management/src/trip.ts` |
+| porta de repositório | `modules/trip-management/src/repository.ts` |
+| schema e adapter | `packages/database/src/schema.ts` e `packages/database/src/trip-repository.ts` |
+| migration | `packages/database/drizzle/0000_create_trips.sql` |
+| criação | `apps/web/app/viagens/nova/actions.ts` e `apps/web/components/trip-form.tsx` |
+| leitura | `apps/web/app/viagens/page.tsx` e `apps/web/components/trip-card.tsx` |
+| ambiente local | `compose.yaml` e `.env.example` |
+| CI | `.github/workflows/engineering-validation.yml` |
+| testes | `modules/trip-management/src/trip.test.ts` e `apps/web/e2e/product-shell.spec.ts` |
 
 ## Cadeia mínima
 

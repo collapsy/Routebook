@@ -12,9 +12,12 @@ on:
       - ".prettierignore"
       - "prettier.config.mjs"
       - "apps/**"
+      - "modules/**"
       - "packages/**"
       - "scripts/**"
       - "docs/**"
+      - "compose.yaml"
+      - ".env.example"
       - ".github/workflows/engineering-validation.yml"
   push:
     branches:
@@ -29,9 +32,12 @@ on:
       - ".prettierignore"
       - "prettier.config.mjs"
       - "apps/**"
+      - "modules/**"
       - "packages/**"
       - "scripts/**"
       - "docs/**"
+      - "compose.yaml"
+      - ".env.example"
       - ".github/workflows/engineering-validation.yml"
 
 permissions:
@@ -45,7 +51,24 @@ jobs:
   validate:
     name: Validate monorepo
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: postgresql://routebook:routebook@127.0.0.1:5432/routebook
+
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5-alpine
+        env:
+          POSTGRES_DB: routebook
+          POSTGRES_USER: routebook
+          POSTGRES_PASSWORD: routebook
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U routebook -d routebook"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
       - name: Checkout repository
@@ -75,7 +98,10 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Run component tests
+      - name: Apply database migrations
+        run: pnpm db:migrate
+
+      - name: Run component and domain tests
         run: pnpm test
 
       - name: Smoke development server
@@ -86,7 +112,7 @@ jobs:
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
 
           for attempt in {1..30}; do
-            if curl --fail --silent --show-error http://127.0.0.1:3100 > /dev/null; then
+            if curl --fail --silent --show-error http://127.0.0.1:3100/viagens > /dev/null; then
               exit 0
             fi
             sleep 1
@@ -101,5 +127,5 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm --filter @routebook/web exec playwright install --with-deps chromium
 
-      - name: Run responsive smoke tests
+      - name: Run responsive persistence tests
         run: pnpm test:e2e

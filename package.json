@@ -10,6 +10,7 @@
   "scripts": {
     "build": "turbo run build",
     "check": "pnpm format:check && pnpm docs:validate && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "db:migrate": "pnpm --filter @routebook/database db:migrate",
     "dev": "turbo run dev",
     "docs:validate": "node scripts/validate-docs.mjs",
     "format": "prettier --write .",

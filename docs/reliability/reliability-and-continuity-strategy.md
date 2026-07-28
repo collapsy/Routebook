@@ -8,7 +8,7 @@ description: Define a estratégia oficial de confiabilidade, resiliência e cont
 document_type: reliability
 owner: Platform
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-19"

@@ -8,7 +8,7 @@ description: Define o sistema oficial do RouteBook para identificar obrigações
 document_type: compliance
 owner: Governance
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-21"

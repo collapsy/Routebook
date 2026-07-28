@@ -8,7 +8,7 @@ description: Define as telas, páginas, painéis, modais, estados e superfícies
 document_type: ux
 owner: Experience
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-17"

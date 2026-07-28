@@ -8,7 +8,7 @@ description: Define as diretrizes oficiais de APIs do RouteBook, incluindo estil
 document_type: api
 owner: API
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-18"

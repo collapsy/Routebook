@@ -8,7 +8,7 @@ description: Define o vocabulário oficial do RouteBook, as relações semântic
 document_type: domain
 owner: Domain
 
-status: Draft
+status: Published
 version: "0.2.0"
 
 created: "2026-07-18"

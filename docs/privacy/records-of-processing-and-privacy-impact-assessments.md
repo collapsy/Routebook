@@ -8,7 +8,7 @@ description: Define o inventário oficial das atividades de tratamento de dados 
 document_type: privacy
 owner: Privacy
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-21"

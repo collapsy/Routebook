@@ -8,7 +8,7 @@ description: Define a arquitetura operacional de infraestrutura do RouteBook, os
 document_type: infrastructure
 owner: Platform
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-24"

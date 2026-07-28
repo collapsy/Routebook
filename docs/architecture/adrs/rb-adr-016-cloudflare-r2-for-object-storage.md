@@ -8,7 +8,7 @@ description: Registra a decisão de adotar Cloudflare R2 como armazenamento de o
 document_type: architecture_decision_record
 owner: Architecture
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-24"

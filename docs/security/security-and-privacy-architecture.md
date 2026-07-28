@@ -8,7 +8,7 @@ description: Define a arquitetura oficial de segurança e privacidade do RouteBo
 document_type: security
 owner: Security
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-18"

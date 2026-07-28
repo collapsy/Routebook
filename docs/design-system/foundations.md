@@ -8,7 +8,7 @@ description: Define os fundamentos visuais, semânticos e estruturais do Design 
 document_type: design-system
 owner: Experience
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-17"

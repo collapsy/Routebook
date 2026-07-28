@@ -7,7 +7,7 @@ description: Define o catálogo oficial de runbooks operacionais do RouteBook, i
 document_type: operations
 owner: Platform
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-20"

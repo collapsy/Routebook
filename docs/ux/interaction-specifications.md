@@ -8,7 +8,7 @@ description: Define os comportamentos, estados, feedbacks, transições, gestos,
 document_type: ux
 owner: Experience
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-17"

@@ -8,7 +8,7 @@ description: Define a estratégia oficial do RouteBook para transformar sua docu
 document_type: delivery
 owner: Delivery
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-24"

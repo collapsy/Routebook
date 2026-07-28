@@ -8,7 +8,7 @@ description: Define a governança oficial das capacidades de inteligência artif
 document_type: ai-governance
 owner: Artificial Intelligence
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-20"

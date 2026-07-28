@@ -8,7 +8,7 @@ description: Define a voz, o tom, a terminologia, os rótulos, as mensagens, os 
 document_type: ux
 owner: Experience
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-17"

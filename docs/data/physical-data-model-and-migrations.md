@@ -8,7 +8,7 @@ description: Define o modelo físico inicial de dados do RouteBook, incluindo sc
 document_type: data
 owner: Data
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-18"

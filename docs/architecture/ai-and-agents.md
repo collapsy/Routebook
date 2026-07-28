@@ -8,7 +8,7 @@ description: Define a arquitetura de inteligência artificial e agentes do Route
 document_type: architecture
 owner: Architecture
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-18"

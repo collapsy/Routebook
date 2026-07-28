@@ -7,7 +7,7 @@ description: Define os padrões oficiais do RouteBook para prompts, Context Buil
 document_type: ai-standards
 owner: Artificial Intelligence
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-20"

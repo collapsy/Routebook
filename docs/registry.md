@@ -8,94 +8,105 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | ID         | Documento             | Área       | Status | Versão | Arquivo                                                     |
 | ---------- | --------------------- | ---------- | ------ | ------ | ----------------------------------------------------------- |
-| RB-FND-001 | Visão do Produto      | Foundation | Draft  | 0.1.0  | [product-vision.md](./foundation/product-vision.md)         |
-| RB-FND-002 | Princípios do Produto | Foundation | Draft  | 0.1.0  | [product-principles.md](./foundation/product-principles.md) |
-| RB-FND-003 | Escopo do Produto | Foundation | Draft | 0.1.0 | [product-scope.md](./foundation/product-scope.md) |
-| RB-FND-004 | Glossário do Produto | Foundation | Draft | 0.1.0 | [product-glossary.md](./foundation/product-glossary.md) |
-| RB-PRD-001 | Visão Geral do Produto | Product | Draft | 0.1.0 | [product-overview.md](./product/product-overview.md) |
-| RB-PRD-002 | Definição do MVP | Product | Draft | 0.1.0 | [mvp-definition.md](./product/mvp-definition.md) |
-| RB-PRD-003 | Personas | Product | Draft | 0.1.0 | [personas.md](./product/personas.md) |
-| RB-PRD-004 | Jornadas do Usuário | Product | Draft | 0.1.0 | [user-journeys.md](./product/user-journeys.md) |
-| RB-PRD-005 | Casos de Uso | Product | Draft | 0.1.0 | [use-cases.md](./product/use-cases.md) |
-| RB-PRD-006 | Requisitos Funcionais | Product | Draft | 0.1.0 | [functional-requirements.md](./product/functional-requirements.md) |
-| RB-PRD-007 | Regras de Negócio | Product | Draft | 0.1.0 | [business-rules.md](./product/business-rules.md) |
-| RB-PRD-008 | Requisitos Não Funcionais | Product | Draft | 0.1.0 | [non-functional-requirements.md](./product/non-functional-requirements.md) |
-| RB-UX-001 | Arquitetura da Informação | Experience | Draft | 0.1.0 | [information-architecture.md](./ux/information-architecture.md) |
-| RB-UX-002 | Fluxos do Usuário | Experience | Draft | 0.1.0 | [user-flows.md](./ux/user-flows.md) |
-| RB-UX-003 | Inventário de Telas | Experience | Draft | 0.1.0 | [screen-inventory.md](./ux/screen-inventory.md) |
-| RB-UX-004 | Wireframes | Experience | Draft | 0.2.0 | [wireframes.md](./ux/wireframes.md) |
-| RB-UX-005 | Especificações de Interação | Experience | Draft | 0.1.0 | [interaction-specifications.md](./ux/interaction-specifications.md) |
-| RB-UX-006 | Diretrizes de Conteúdo e Microcopy | Experience | Draft | 0.1.0 | [content-guidelines.md](./ux/content-guidelines.md) |
-| RB-DS-001 | Design System Foundations | Experience | Draft | 0.1.0 | [foundations.md](./design-system/foundations.md) |
-| RB-DS-002 | Component Library | Experience | Draft | 0.1.0 | [component-library.md](./design-system/component-library.md) |
-| RB-DS-003 | UI Patterns | Experience | Draft | 0.1.0 | [ui-patterns.md](./design-system/ui-patterns.md) |
-| RB-DS-004 | Design System Governance | Experience | Draft | 0.1.0 | [governance.md](./design-system/governance.md) |
-| RB-DOM-001 | Modelo de Domínio | Domain | Draft | 0.2.0 | [domain-model.md](./domain/domain-model.md) |
-| RB-DOM-002 | Linguagem Ubíqua e Glossário de Domínio | Domain | Draft | 0.2.0 | [ubiquitous-language.md](./domain/ubiquitous-language.md) |
-| RB-DOM-003 | Regras de Negócio e Invariantes | Domain | Draft | 0.2.0 | [business-rules-and-invariants.md](./domain/business-rules-and-invariants.md) |
-| RB-DOM-004 | Eventos de Domínio e Ciclos de Vida | Domain | Draft | 0.2.0 | [domain-events-and-lifecycles.md](./domain/domain-events-and-lifecycles.md) |
-| RB-ARC-001 | Visão Geral da Arquitetura | Architecture | Draft | 0.2.0 | [architecture-overview.md](./architecture/architecture-overview.md) |
-| RB-ARC-002 | Arquitetura de Módulos e Contextos Delimitados | Architecture | Draft | 0.2.0 | [modules-and-bounded-contexts.md](./architecture/modules-and-bounded-contexts.md) |
-| RB-ARC-003 | Arquitetura de Integrações e Portas | Architecture | Draft | 0.1.0 | [integrations-and-ports.md](./architecture/integrations-and-ports.md) |
-| RB-ARC-004 | Arquitetura de Dados e Persistência | Architecture | Draft | 0.1.0 | [data-and-persistence.md](./architecture/data-and-persistence.md) |
-| RB-ARC-005 | Arquitetura de IA e Agentes | Architecture | Draft | 0.1.0 | [ai-and-agents.md](./architecture/ai-and-agents.md) |
-| RB-DATA-001 | Modelo Lógico de Dados | Data | Draft | 0.1.0 | [logical-data-model.md](./data/logical-data-model.md) |
-| RB-DATA-002 | Modelo Físico de Dados e Estratégia de Migrations | Data | Draft | 0.1.0 | [physical-data-model-and-migrations.md](./data/physical-data-model-and-migrations.md) |
-| RB-API-001 | Diretrizes e Contratos de API | API | Draft | 0.1.0 | [api-guidelines-and-contracts.md](./api/api-guidelines-and-contracts.md) |
-| RB-SEC-001 | Arquitetura de Segurança e Privacidade | Security | Draft | 0.1.0 | [security-and-privacy-architecture.md](./security/security-and-privacy-architecture.md) |
-| RB-OBS-001 | Observabilidade e Operação | Observability | Draft | 0.1.0 | [observability-and-operations.md](./observability/observability-and-operations.md) |
-| RB-QA-001 | Estratégia de Qualidade e Testes | Quality | Draft | 0.1.0 | [quality-and-testing-strategy.md](./quality/quality-and-testing-strategy.md) |
-| RB-OPS-001 | Runbooks e Procedimentos Operacionais | Operations | Draft | 0.1.0 | [runbooks-and-operational-procedures.md](./operations/runbooks-and-operational-procedures.md) |
-| RB-SRE-001 | Estratégia de Confiabilidade e Continuidade | Reliability | Draft | 0.1.0 | [reliability-and-continuity-strategy.md](./reliability/reliability-and-continuity-strategy.md) |
-| RB-AI-001 | Governança de Inteligência Artificial | AI Governance | Draft | 0.1.0 | [ai-governance.md](./ai/ai-governance.md) |
-| RB-AI-002 | Estratégia de Avaliação de Inteligência Artificial | AI Evaluation | Draft | 0.1.0 | [ai-evaluation-strategy.md](./ai/ai-evaluation-strategy.md) |
-| RB-AI-003 | Catálogo de Capacidades, Agentes, Modelos e Ferramentas | AI Catalog | Draft | 0.1.0 | [ai-capabilities-agents-models-and-tools-catalog.md](./ai/ai-capabilities-agents-models-and-tools-catalog.md) |
-| RB-AI-004 | Padrões de Prompts, Contexto e Structured Outputs | AI Standards | Draft | 0.1.0 | [prompts-context-and-structured-outputs-standards.md](./ai/prompts-context-and-structured-outputs-standards.md) |
-| RB-AI-005 | Segurança, Red Teaming e Resiliência de Inteligência Artificial | AI Security | Draft | 0.1.0 | [ai-security-red-teaming-and-resilience.md](./ai/ai-security-red-teaming-and-resilience.md) |
-| RB-AI-006 | Runtime, Orquestração e Execução de Agentes | AI Runtime | Draft | 0.1.0 | [ai-runtime-agent-orchestration-and-execution.md](./ai/ai-runtime-agent-orchestration-and-execution.md) |
-| RB-QA-002 | Plano Mestre de Testes | Quality | Draft | 0.1.0 | [master-test-plan.md](./quality/master-test-plan.md) |
-| RB-OPS-002 | Catálogo Detalhado de Runbooks | Operations | Draft | 0.1.0 | [runbook-catalog.md](./operations/runbook-catalog.md) |
-| RB-SEC-002 | Modelo de Ameaças e Controles de Segurança | Security | Draft | 0.1.0 | [threat-model-and-security-controls.md](./security/threat-model-and-security-controls.md) |
-| RB-SEC-003 | Desenvolvimento Seguro e Gestão de Vulnerabilidades | Security | Draft | 0.1.0 | [secure-development-and-vulnerability-management.md](./security/secure-development-and-vulnerability-management.md) |
-| RB-PRIV-001 | Privacidade, Proteção de Dados e Ciclo de Vida das Informações | Privacy | Draft | 0.1.0 | [privacy-data-protection-and-information-lifecycle.md](./privacy/privacy-data-protection-and-information-lifecycle.md) |
-| RB-PRIV-002 | Registro de Atividades de Tratamento e Avaliações de Impacto à Privacidade | Privacy | Draft | 0.1.0 | [records-of-processing-and-privacy-impact-assessments.md](./privacy/records-of-processing-and-privacy-impact-assessments.md) |
-| RB-PRIV-003 | Direitos dos Titulares e Operações de Privacidade | Privacy | Draft | 0.1.0 | [data-subject-rights-and-privacy-operations.md](./privacy/data-subject-rights-and-privacy-operations.md) |
-| RB-COMP-001 | Governança de Conformidade, Evidências e Preparação para Auditoria | Compliance | Draft | 0.1.0 | [compliance-evidence-and-audit-readiness.md](./compliance/compliance-evidence-and-audit-readiness.md) |
-| RB-GOV-001 | Governança de Produto, Arquitetura e Decisões | Governance | Draft | 0.1.0 | [product-architecture-and-decision-governance.md](./governance/product-architecture-and-decision-governance.md) |
-| RB-GOV-002 | Registros de Decisão, ADRs e Gestão de Mudanças | Governance | Draft | 0.1.0 | [decision-records-adrs-and-change-management.md](./governance/decision-records-adrs-and-change-management.md) |
-| RB-COMP-002 | Catálogo de Controles, Evidências e Avaliação de Efetividade | Compliance | Draft | 0.1.0 | [control-catalog-evidence-and-effectiveness-assessment.md](./compliance/control-catalog-evidence-and-effectiveness-assessment.md) |
-| RB-COMP-003 | Auditorias, Achados e Planos de Ação Corretiva | Compliance | Draft | 0.1.0 | [audits-findings-and-corrective-action-management.md](./compliance/audits-findings-and-corrective-action-management.md) |
-| RB-RISK-001 | Gestão Integrada de Riscos e Registro de Riscos | Risk | Draft | 0.1.0 | [integrated-risk-management-and-risk-register.md](./risk/integrated-risk-management-and-risk-register.md) |
-| RB-DEL-001 | Estratégia de Entrega e Roadmap de Implementação | Delivery | Draft | 0.1.0 | [delivery-strategy-and-implementation-roadmap.md](./delivery/delivery-strategy-and-implementation-roadmap.md) |
-| RB-DEV-001 | Ambiente de Desenvolvimento e Padrões de Engenharia | Development | Draft | 0.1.0 | [development-environment-and-engineering-standards.md](./development/development-environment-and-engineering-standards.md) |
-| RB-CICD-001 | Integração Contínua, Entrega Contínua e Estratégia de Releases | CI/CD | Draft | 0.1.0 | [continuous-integration-delivery-and-release-strategy.md](./cicd/continuous-integration-delivery-and-release-strategy.md) |
-| RB-INFRA-001 | Infraestrutura, Ambientes e Estratégia de Deployment | Infrastructure | Draft | 0.1.0 | [infrastructure-environments-and-deployment-strategy.md](./infrastructure/infrastructure-environments-and-deployment-strategy.md) |
-| RB-ADR-001 | Adoção de Monólito Modular como Arquitetura Inicial | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-001-modular-monolith-as-initial-architecture.md](./architecture/adrs/rb-adr-001-modular-monolith-as-initial-architecture.md) |
-| RB-ADR-002 | Adoção de TypeScript e Node.js como Base Tecnológica Inicial | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-002-typescript-and-nodejs-as-initial-technology-base.md](./architecture/adrs/rb-adr-002-typescript-and-nodejs-as-initial-technology-base.md) |
-| RB-ADR-003 | Adoção de Next.js com App Router como Estrutura Principal da Aplicação Web | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-003-nextjs-app-router-as-primary-web-application-framework.md](./architecture/adrs/rb-adr-003-nextjs-app-router-as-primary-web-application-framework.md) |
-| RB-ADR-004 | Adoção de Monorepo com pnpm Workspaces e Turborepo | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-004-monorepo-with-pnpm-workspaces-and-turborepo.md](./architecture/adrs/rb-adr-004-monorepo-with-pnpm-workspaces-and-turborepo.md) |
-| RB-ADR-005 | Adoção de PostgreSQL com PostGIS como Persistência Relacional Principal | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-005-postgresql-and-postgis-as-primary-persistence.md](./architecture/adrs/rb-adr-005-postgresql-and-postgis-as-primary-persistence.md) |
-| RB-ADR-006 | Adoção de Drizzle ORM e Drizzle Kit para Acesso a Dados e Migrations | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-006-drizzle-orm-and-drizzle-kit-for-data-access-and-migrations.md](./architecture/adrs/rb-adr-006-drizzle-orm-and-drizzle-kit-for-data-access-and-migrations.md) |
-| RB-ADR-007 | Adoção de Better Auth para Identidade, Autenticação e Gestão de Sessões | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-007-better-auth-for-identity-authentication-and-session-management.md](./architecture/adrs/rb-adr-007-better-auth-for-identity-authentication-and-session-management.md) |
-| RB-ADR-008 | Modelo Híbrido de Autorização e Isolamento Multi-Tenant por Account | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-008-hybrid-authorization-and-account-tenant-isolation.md](./architecture/adrs/rb-adr-008-hybrid-authorization-and-account-tenant-isolation.md) |
-| RB-ADR-009 | Adoção de Zod para Validação de Schemas e Contratos em Runtime | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-009-zod-for-runtime-schema-and-contract-validation.md](./architecture/adrs/rb-adr-009-zod-for-runtime-schema-and-contract-validation.md) |
-| RB-ADR-010 | Estratégia de Testes Automatizados com Vitest, Testing Library, Playwright e Testcontainers | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-010-automated-testing-strategy-with-vitest-playwright-and-testcontainers.md](./architecture/adrs/rb-adr-010-automated-testing-strategy-with-vitest-playwright-and-testcontainers.md) |
-| RB-ADR-011 | Adoção de Tailwind CSS, Radix Primitives e shadcn/ui como Base de Implementação do Design System | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-011-tailwind-radix-and-shadcn-as-design-system-implementation-base.md](./architecture/adrs/rb-adr-011-tailwind-radix-and-shadcn-as-design-system-implementation-base.md) |
-| RB-ADR-012 | Adoção da Google Maps Platform como Provider Geoespacial Inicial | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-012-google-maps-platform-as-initial-geospatial-provider.md](./architecture/adrs/rb-adr-012-google-maps-platform-as-initial-geospatial-provider.md) |
-| RB-ADR-013 | Adoção de OpenTelemetry e Sentry para Observabilidade, Rastreamento e Monitoramento de Erros | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-013-opentelemetry-and-sentry-for-observability.md](./architecture/adrs/rb-adr-013-opentelemetry-and-sentry-for-observability.md) |
-| RB-ADR-014 | Adoção de Redis Gerenciado para Cache Distribuído, Rate Limiting, Idempotência e Estado Temporário | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-014-managed-redis-for-distributed-cache-rate-limiting-and-temporary-state.md](./architecture/adrs/rb-adr-014-managed-redis-for-distributed-cache-rate-limiting-and-temporary-state.md) |
-| RB-ADR-015 | Adoção de Inngest para Jobs Assíncronos e Workflows Duráveis | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-015-inngest-for-asynchronous-jobs-and-durable-workflows.md](./architecture/adrs/rb-adr-015-inngest-for-asynchronous-jobs-and-durable-workflows.md) |
-| RB-ADR-016 | Adoção de Cloudflare R2 como Armazenamento de Objetos Compatível com S3 | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-016-cloudflare-r2-for-object-storage.md](./architecture/adrs/rb-adr-016-cloudflare-r2-for-object-storage.md) |
-| RB-ADR-017 | Adoção da Vercel como Plataforma Inicial de Deployment da Aplicação Web | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-017-vercel-as-initial-web-deployment-platform.md](./architecture/adrs/rb-adr-017-vercel-as-initial-web-deployment-platform.md) |
-| RB-ADR-018 | Adoção do Neon como Provider Gerenciado de PostgreSQL e PostGIS | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-018-neon-as-managed-postgresql-and-postgis-provider.md](./architecture/adrs/rb-adr-018-neon-as-managed-postgresql-and-postgis-provider.md) |
-| RB-ADR-019 | Adoção do GitHub Actions para Integração Contínua e Governança de Entregas | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-019-github-actions-for-continuous-integration-and-delivery-governance.md](./architecture/adrs/rb-adr-019-github-actions-for-continuous-integration-and-delivery-governance.md) |
-| RB-ADR-020 | Adoção de OpenFeature com Flags Persistidas no PostgreSQL para Rollouts Controlados | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-020-openfeature-and-postgresql-for-feature-flags-and-progressive-rollouts.md](./architecture/adrs/rb-adr-020-openfeature-and-postgresql-for-feature-flags-and-progressive-rollouts.md) |
+| RB-FND-001 | Visão do Produto      | Foundation | Published | 0.1.0  | [product-vision.md](./foundation/product-vision.md)         |
+| RB-FND-002 | Princípios do Produto | Foundation | Published | 0.1.0  | [product-principles.md](./foundation/product-principles.md) |
+| RB-FND-003 | Escopo do Produto | Foundation | Published | 0.1.0 | [product-scope.md](./foundation/product-scope.md) |
+| RB-FND-004 | Glossário do Produto | Foundation | Published | 0.1.0 | [product-glossary.md](./foundation/product-glossary.md) |
+| RB-PRD-001 | Visão Geral do Produto | Product | Published | 0.1.0 | [product-overview.md](./product/product-overview.md) |
+| RB-PRD-002 | Definição do MVP | Product | Published | 0.1.0 | [mvp-definition.md](./product/mvp-definition.md) |
+| RB-PRD-003 | Personas | Product | Published | 0.1.0 | [personas.md](./product/personas.md) |
+| RB-PRD-004 | Jornadas do Usuário | Product | Published | 0.1.0 | [user-journeys.md](./product/user-journeys.md) |
+| RB-PRD-005 | Casos de Uso | Product | Published | 0.1.0 | [use-cases.md](./product/use-cases.md) |
+| RB-PRD-006 | Requisitos Funcionais | Product | Published | 0.1.0 | [functional-requirements.md](./product/functional-requirements.md) |
+| RB-PRD-007 | Regras de Negócio | Product | Published | 0.1.0 | [business-rules.md](./product/business-rules.md) |
+| RB-PRD-008 | Requisitos Não Funcionais | Product | Published | 0.1.0 | [non-functional-requirements.md](./product/non-functional-requirements.md) |
+| RB-UX-001 | Arquitetura da Informação | Experience | Published | 0.1.0 | [information-architecture.md](./ux/information-architecture.md) |
+| RB-UX-002 | Fluxos do Usuário | Experience | Published | 0.1.0 | [user-flows.md](./ux/user-flows.md) |
+| RB-UX-003 | Inventário de Telas | Experience | Published | 0.1.0 | [screen-inventory.md](./ux/screen-inventory.md) |
+| RB-UX-004 | Wireframes | Experience | Published | 0.2.0 | [wireframes.md](./ux/wireframes.md) |
+| RB-UX-005 | Especificações de Interação | Experience | Published | 0.1.0 | [interaction-specifications.md](./ux/interaction-specifications.md) |
+| RB-UX-006 | Diretrizes de Conteúdo e Microcopy | Experience | Published | 0.1.0 | [content-guidelines.md](./ux/content-guidelines.md) |
+| RB-DS-001 | Design System Foundations | Experience | Published | 0.1.0 | [foundations.md](./design-system/foundations.md) |
+| RB-DS-002 | Component Library | Experience | Published | 0.1.0 | [component-library.md](./design-system/component-library.md) |
+| RB-DS-003 | UI Patterns | Experience | Published | 0.1.0 | [ui-patterns.md](./design-system/ui-patterns.md) |
+| RB-DS-004 | Design System Governance | Experience | Published | 0.1.0 | [governance.md](./design-system/governance.md) |
+| RB-DOM-001 | Modelo de Domínio | Domain | Published | 0.2.0 | [domain-model.md](./domain/domain-model.md) |
+| RB-DOM-002 | Linguagem Ubíqua e Glossário de Domínio | Domain | Published | 0.2.0 | [ubiquitous-language.md](./domain/ubiquitous-language.md) |
+| RB-DOM-003 | Regras de Negócio e Invariantes | Domain | Published | 0.2.0 | [business-rules-and-invariants.md](./domain/business-rules-and-invariants.md) |
+| RB-DOM-004 | Eventos de Domínio e Ciclos de Vida | Domain | Published | 0.2.0 | [domain-events-and-lifecycles.md](./domain/domain-events-and-lifecycles.md) |
+| RB-ARC-001 | Visão Geral da Arquitetura | Architecture | Published | 0.2.0 | [architecture-overview.md](./architecture/architecture-overview.md) |
+| RB-ARC-002 | Arquitetura de Módulos e Contextos Delimitados | Architecture | Published | 0.2.0 | [modules-and-bounded-contexts.md](./architecture/modules-and-bounded-contexts.md) |
+| RB-ARC-003 | Arquitetura de Integrações e Portas | Architecture | Published | 0.1.0 | [integrations-and-ports.md](./architecture/integrations-and-ports.md) |
+| RB-ARC-004 | Arquitetura de Dados e Persistência | Architecture | Published | 0.1.0 | [data-and-persistence.md](./architecture/data-and-persistence.md) |
+| RB-ARC-005 | Arquitetura de IA e Agentes | Architecture | Published | 0.1.0 | [ai-and-agents.md](./architecture/ai-and-agents.md) |
+| RB-DATA-001 | Modelo Lógico de Dados | Data | Published | 0.1.0 | [logical-data-model.md](./data/logical-data-model.md) |
+| RB-DATA-002 | Modelo Físico de Dados e Estratégia de Migrations | Data | Published | 0.1.0 | [physical-data-model-and-migrations.md](./data/physical-data-model-and-migrations.md) |
+| RB-API-001 | Diretrizes e Contratos de API | API | Published | 0.1.0 | [api-guidelines-and-contracts.md](./data/api-guidelines-and-contracts.md) |
+| RB-SEC-001 | Arquitetura de Segurança e Privacidade | Security | Published | 0.1.0 | [security-and-privacy-architecture.md](./security/security-and-privacy-architecture.md) |
+| RB-OBS-001 | Observabilidade e Operação | Observability | Published | 0.1.0 | [observability-and-operations.md](./observability/observability-and-operations.md) |
+| RB-QA-001 | Estratégia de Qualidade e Testes | Quality | Published | 0.1.0 | [quality-and-testing-strategy.md](./quality/quality-and-testing-strategy.md) |
+| RB-OPS-001 | Runbooks e Procedimentos Operacionais | Operations | Published | 0.1.0 | [runbooks-and-operational-procedures.md](./operations/runbooks-and-operational-procedures.md) |
+| RB-SRE-001 | Estratégia de Confiabilidade e Continuidade | Reliability | Published | 0.1.0 | [reliability-and-continuity-strategy.md](./reliability/reliability-and-continuity-strategy.md) |
+| RB-AI-001 | Governança de Inteligência Artificial | AI Governance | Published | 0.1.0 | [ai-governance.md](./ai/ai-governance.md) |
+| RB-AI-002 | Estratégia de Avaliação de Inteligência Artificial | AI Evaluation | Published | 0.1.0 | [ai-evaluation-strategy.md](./ai/ai-evaluation-strategy.md) |
+| RB-AI-003 | Catálogo de Capacidades, Agentes, Modelos e Ferramentas | AI Catalog | Published | 0.1.0 | [ai-capabilities-agents-models-and-tools-catalog.md](./ai/ai-capabilities-agents-models-and-tools-catalog.md) |
+| RB-AI-004 | Padrões de Prompts, Contexto e Structured Outputs | AI Standards | Published | 0.1.0 | [prompts-context-and-structured-outputs-standards.md](./ai/prompts-context-and-structured-outputs-standards.md) |
+| RB-AI-005 | Segurança, Red Teaming e Resiliência de Inteligência Artificial | AI Security | Published | 0.1.0 | [ai-security-red-teaming-and-resilience.md](./ai/ai-security-red-teaming-and-resilience.md) |
+| RB-AI-006 | Runtime, Orquestração e Execução de Agentes | AI Runtime | Published | 0.1.0 | [ai-runtime-agent-orchestration-and-execution.md](./ai/ai-runtime-agent-orchestration-and-execution.md) |
+| RB-QA-002 | Plano Mestre de Testes | Quality | Published | 0.1.0 | [master-test-plan.md](./quality/master-test-plan.md) |
+| RB-OPS-002 | Catálogo Detalhado de Runbooks | Operations | Published | 0.1.0 | [runbook-catalog.md](./operations/runbook-catalog.md) |
+| RB-SEC-002 | Modelo de Ameaças e Controles de Segurança | Security | Published | 0.1.0 | [threat-model-and-security-controls.md](./security/threat-model-and-security-controls.md) |
+| RB-SEC-003 | Desenvolvimento Seguro e Gestão de Vulnerabilidades | Security | Published | 0.1.0 | [secure-development-and-vulnerability-management.md](./security/secure-development-and-vulnerability-management.md) |
+| RB-PRIV-001 | Privacidade, Proteção de Dados e Ciclo de Vida das Informações | Privacy | Published | 0.1.0 | [privacy-data-protection-and-information-lifecycle.md](./privacy/privacy-data-protection-and-information-lifecycle.md) |
+| RB-PRIV-002 | Registro de Atividades de Tratamento e Avaliações de Impacto à Privacidade | Privacy | Published | 0.1.0 | [records-of-processing-and-privacy-impact-assessments.md](./privacy/records-of-processing-and-privacy-impact-assessments.md) |
+| RB-PRIV-003 | Direitos dos Titulares e Operações de Privacidade | Privacy | Published | 0.1.0 | [data-subject-rights-and-privacy-operations.md](./privacy/data-subject-rights-and-privacy-operations.md) |
+| RB-COMP-001 | Governança de Conformidade, Evidências e Preparação para Auditoria | Compliance | Published | 0.1.0 | [compliance-evidence-and-audit-readiness.md](./compliance/compliance-evidence-and-audit-readiness.md) |
+| RB-GOV-001 | Governança de Produto, Arquitetura e Decisões | Governance | Published | 0.1.0 | [product-architecture-and-decision-governance.md](./governance/product-architecture-and-decision-governance.md) |
+| RB-GOV-002 | Registros de Decisão, ADRs e Gestão de Mudanças | Governance | Published | 0.1.0 | [decision-records-adrs-and-change-management.md](./governance/decision-records-adrs-and-change-management.md) |
+| RB-COMP-002 | Catálogo de Controles, Evidências e Avaliação de Efetividade | Compliance | Published | 0.1.0 | [control-catalog-evidence-and-effectiveness-assessment.md](./compliance/control-catalog-evidence-and-effectiveness-assessment.md) |
+| RB-COMP-003 | Auditorias, Achados e Planos de Ação Corretiva | Compliance | Published | 0.1.0 | [audits-findings-and-corrective-action-management.md](./compliance/audits-findings-and-corrective-action-management.md) |
+| RB-RISK-001 | Gestão Integrada de Riscos e Registro de Riscos | Risk | Published | 0.1.0 | [integrated-risk-management-and-risk-register.md](./risk/integrated-risk-management-and-risk-register.md) |
+| RB-DEL-001 | Estratégia de Entrega e Roadmap de Implementação | Delivery | Published | 0.1.0 | [delivery-strategy-and-implementation-roadmap.md](./delivery/delivery-strategy-and-implementation-roadmap.md) |
+| RB-DEV-001 | Ambiente de Desenvolvimento e Padrões de Engenharia | Development | Published | 0.1.0 | [development-environment-and-engineering-standards.md](./development/development-environment-and-engineering-standards.md) |
+| RB-CICD-001 | Integração Contínua, Entrega Contínua e Estratégia de Releases | CI/CD | Published | 0.1.0 | [continuous-integration-delivery-and-release-strategy.md](./cicd/continuous-integration-delivery-and-release-strategy.md) |
+| RB-INFRA-001 | Infraestrutura, Ambientes e Estratégia de Deployment | Infrastructure | Published | 0.1.0 | [infrastructure-environments-and-deployment-strategy.md](./infrastructure/infrastructure-environments-and-deployment-strategy.md) |
+| RB-ADR-001 | Adoção de Monólito Modular como Arquitetura Inicial | Architecture Decision Record | Published | 0.1.0 | [rb-adr-001-modular-monolith-as-initial-architecture.md](./architecture/adrs/rb-adr-001-modular-monolith-as-initial-architecture.md) |
+| RB-ADR-002 | Adoção de TypeScript e Node.js como Base Tecnológica Inicial | Architecture Decision Record | Published | 0.1.0 | [rb-adr-002-typescript-and-nodejs-as-initial-technology-base.md](./architecture/adrs/rb-adr-002-typescript-and-nodejs-as-initial-technology-base.md) |
+| RB-ADR-003 | Adoção de Next.js com App Router como Estrutura Principal da Aplicação Web | Architecture Decision Record | Published | 0.1.0 | [rb-adr-003-nextjs-app-router-as-primary-web-application-framework.md](./architecture/adrs/rb-adr-003-nextjs-app-router-as-primary-web-application-framework.md) |
+| RB-ADR-004 | Adoção de Monorepo com pnpm Workspaces e Turborepo | Architecture Decision Record | Published | 0.1.0 | [rb-adr-004-monorepo-with-pnpm-workspaces-and-turborepo.md](./architecture/adrs/rb-adr-004-monorepo-with-pnpm-workspaces-and-turborepo.md) |
+| RB-ADR-005 | Adoção de PostgreSQL com PostGIS como Persistência Relacional Principal | Architecture Decision Record | Published | 0.1.0 | [rb-adr-005-postgresql-and-postgis-as-primary-persistence.md](./architecture/adrs/rb-adr-005-postgresql-and-postgis-as-primary-persistence.md) |
+| RB-ADR-006 | Adoção de Drizzle ORM e Drizzle Kit para Acesso a Dados e Migrations | Architecture Decision Record | Published | 0.1.0 | [rb-adr-006-drizzle-orm-and-drizzle-kit-for-data-access-and-migrations.md](./architecture/adrs/rb-adr-006-drizzle-orm-and-drizzle-kit-for-data-access-and-migrations.md) |
+| RB-ADR-007 | Adoção de Better Auth para Identidade, Autenticação e Gestão de Sessões | Architecture Decision Record | Published | 0.1.0 | [rb-adr-007-better-auth-for-identity-authentication-and-session-management.md](./architecture/adrs/rb-adr-007-better-auth-for-identity-authentication-and-session-management.md) |
+| RB-ADR-008 | Modelo Híbrido de Autorização e Isolamento Multi-Tenant por Account | Architecture Decision Record | Published | 0.1.0 | [rb-adr-008-hybrid-authorization-and-account-tenant-isolation.md](./architecture/adrs/rb-adr-008-hybrid-authorization-and-account-tenant-isolation.md) |
+| RB-ADR-009 | Adoção de Zod para Validação de Schemas e Contratos em Runtime | Architecture Decision Record | Published | 0.1.0 | [rb-adr-009-zod-for-runtime-schema-and-contract-validation.md](./architecture/adrs/rb-adr-009-zod-for-runtime-schema-and-contract-validation.md) |
+| RB-ADR-010 | Estratégia de Testes Automatizados com Vitest, Testing Library, Playwright e Testcontainers | Architecture Decision Record | Published | 0.1.0 | [rb-adr-010-automated-testing-strategy-with-vitest-playwright-and-testcontainers.md](./architecture/adrs/rb-adr-010-automated-testing-strategy-with-vitest-playwright-and-testcontainers.md) |
+| RB-ADR-011 | Adoção de Tailwind CSS, Radix Primitives e shadcn/ui como Base de Implementação do Design System | Architecture Decision Record | Published | 0.1.0 | [rb-adr-011-tailwind-radix-and-shadcn-as-design-system-implementation-base.md](./architecture/adrs/rb-adr-011-tailwind-radix-and-shadcn-as-design-system-implementation-base.md) |
+| RB-ADR-012 | Adoção da Google Maps Platform como Provider Geoespacial Inicial | Architecture Decision Record | Published | 0.1.0 | [rb-adr-012-google-maps-platform-as-initial-geospatial-provider.md](./architecture/adrs/rb-adr-012-google-maps-platform-as-initial-geospatial-provider.md) |
+| RB-ADR-013 | Adoção de OpenTelemetry e Sentry para Observabilidade, Rastreamento e Monitoramento de Erros | Architecture Decision Record | Published | 0.1.0 | [rb-adr-013-opentelemetry-and-sentry-for-observability.md](./architecture/adrs/rb-adr-013-opentelemetry-and-sentry-for-observability.md) |
+| RB-ADR-014 | Adoção de Redis Gerenciado para Cache Distribuído, Rate Limiting, Idempotência e Estado Temporário | Architecture Decision Record | Published | 0.1.0 | [rb-adr-014-managed-redis-for-distributed-cache-rate-limiting-and-temporary-state.md](./architecture/adrs/rb-adr-014-managed-redis-for-distributed-cache-rate-limiting-and-temporary-state.md) |
+| RB-ADR-015 | Adoção de Inngest para Jobs Assíncronos e Workflows Duráveis | Architecture Decision Record | Published | 0.1.0 | [rb-adr-015-inngest-for-asynchronous-jobs-and-durable-workflows.md](./architecture/adrs/rb-adr-015-inngest-for-asynchronous-jobs-and-durable-workflows.md) |
+| RB-ADR-016 | Adoção de Cloudflare R2 como Armazenamento de Objetos Compatível com S3 | Architecture Decision Record | Published | 0.1.0 | [rb-adr-016-cloudflare-r2-for-object-storage.md](./architecture/adrs/rb-adr-016-cloudflare-r2-for-object-storage.md) |
+| RB-ADR-017 | Adoção da Vercel como Plataforma Inicial de Deployment da Aplicação Web | Architecture Decision Record | Published | 0.1.0 | [rb-adr-017-vercel-as-initial-web-deployment-platform.md](./architecture/adrs/rb-adr-017-vercel-as-initial-web-deployment-platform.md) |
+| RB-ADR-018 | Adoção do Neon como Provider Gerenciado de PostgreSQL e PostGIS | Architecture Decision Record | Published | 0.1.0 | [rb-adr-018-neon-as-managed-postgresql-and-postgis-provider.md](./architecture/adrs/rb-adr-018-neon-as-managed-postgresql-and-postgis-provider.md) |
+| RB-ADR-019 | Adoção do GitHub Actions para Integração Contínua e Governança de Entregas | Architecture Decision Record | Published | 0.1.0 | [rb-adr-019-github-actions-for-continuous-integration-and-delivery-governance.md](./architecture/adrs/rb-adr-019-github-actions-for-continuous-integration-and-delivery-governance.md) |
+| RB-ADR-020 | Adoção de OpenFeature com Flags Persistidas no PostgreSQL para Rollouts Controlados | Architecture Decision Record | Published | 0.1.0 | [rb-adr-020-openfeature-and-postgresql-for-feature-flags-and-progressive-rollouts.md](./architecture/adrs/rb-adr-020-openfeature-and-postgresql-for-feature-flags-and-progressive-rollouts.md) |
+| RB-ADR-021 | Estratégia de Product Analytics, Eventos Comportamentais e Medição de Adoção | Architecture Decision Record | Published | 0.1.0 | [rb-adr-021-product-analytics-behavioral-events-and-adoption-measurement.md](./architecture/adrs/rb-adr-021-product-analytics-behavioral-events-and-adoption-measurement.md) |
+| RB-ADR-022 | Estratégia de Privacidade, Consentimento, Retenção e Exclusão de Dados | Architecture Decision Record | Published | 0.1.0 | [rb-adr-022-privacy-consent-data-retention-and-erasure-strategy.md](./architecture/adrs/rb-adr-022-privacy-consent-data-retention-and-erasure-strategy.md) |
+| RB-ADR-023 | Estratégia de Backup, Recuperação de Desastres e Continuidade | Architecture Decision Record | Published | 0.1.0 | [rb-adr-023-backup-disaster-recovery-and-business-continuity.md](./architecture/adrs/rb-adr-023-backup-disaster-recovery-and-business-continuity.md) |
+| RB-ADR-024 | Estratégia de Gestão de Incidentes e Resposta Operacional | Architecture Decision Record | Published | 0.1.0 | [rb-adr-024-incident-management-and-operational-response.md](./architecture/adrs/rb-adr-024-incident-management-and-operational-response.md) |
+| RB-ADR-025 | Estratégia de Governança de Custos, Quotas e Capacidade | Architecture Decision Record | Published | 0.1.0 | [rb-adr-025-cost-governance-quotas-and-capacity.md](./architecture/adrs/rb-adr-025-cost-governance-quotas-and-capacity.md) |
+| RB-ADR-026 | Estratégia de Evolução Arquitetural, Depreciação e Ciclo de Vida Tecnológico | Architecture Decision Record | Published | 0.1.0 | [rb-adr-026-architecture-evolution-deprecation-and-technology-lifecycle.md](./architecture/adrs/rb-adr-026-architecture-evolution-deprecation-and-technology-lifecycle.md) |
+| RB-OPS-003 | Runbook de Backup e Restauração | Operations Runbook | Published | 0.1.0 | [rb-ops-003-backup-and-restore-runbook.md](./operations/rb-ops-003-backup-and-restore-runbook.md) |
+| RB-OPS-004 | Plano de Teste de Recuperação de Desastres | Operations Test Plan | Published | 0.1.0 | [rb-ops-004-disaster-recovery-test-plan.md](./operations/rb-ops-004-disaster-recovery-test-plan.md) |
+| RB-OPS-005 | Runbook de Resposta a Incidentes | Operations Runbook | Published | 0.1.0 | [rb-ops-005-incident-response-runbook.md](./operations/rb-ops-005-incident-response-runbook.md) |
+| RB-DOC-001 | Roadmap de Conclusão Documental | Documentation Roadmap | Published | 0.1.0 | [documentation-roadmap.md](./documentation-roadmap.md) |
 
 ## Status possíveis
 
 * `Planned`: documento previsto, mas ainda não iniciado;
 * `Draft`: documento em elaboração ou aguardando validação;
 * `Approved`: documento validado e adotado como referência oficial;
+* `Published`: documento oficialmente publicado e disponível como referência;
 * `Deprecated`: documento substituído ou descontinuado;
 * `Archived`: documento mantido apenas para histórico.
 

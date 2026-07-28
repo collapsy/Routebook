@@ -8,7 +8,7 @@ description: Define o catálogo operacional de controles do RouteBook, os requis
 document_type: compliance
 owner: Governance
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-24"

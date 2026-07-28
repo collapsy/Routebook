@@ -8,7 +8,7 @@ description: Define os contextos delimitados, módulos, responsabilidades, owner
 document_type: architecture
 owner: Architecture
 
-status: Draft
+status: Published
 version: "0.2.0"
 
 created: "2026-07-17"

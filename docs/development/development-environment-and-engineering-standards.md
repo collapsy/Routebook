@@ -8,7 +8,7 @@ description: Define o ambiente oficial de desenvolvimento do RouteBook, as conve
 document_type: development
 owner: Engineering
 
-status: Draft
+status: Published
 version: "0.1.0"
 
 created: "2026-07-24"

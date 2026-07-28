@@ -1,0 +1,79 @@
+name: Bug
+description: Registrar comportamento incorreto ou regressão no RouteBook
+title: "bug: "
+labels: []
+body:
+  - type: input
+    id: area
+    attributes:
+      label: Área ou módulo
+      placeholder: trip-management, itinerary-planning, apps/web...
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Comportamento observado
+      description: Descreva o que ocorreu, sem incluir secrets ou dados pessoais.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento esperado
+      description: Cite requisito, regra ou documento quando possível.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Passos para reproduzir
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidências
+      description: Logs sanitizados, screenshots, vídeo ou erro. Remova tokens e dados sensíveis.
+    validations:
+      required: false
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impacto
+      options:
+        - Bloqueia jornada crítica
+        - Causa perda ou corrupção de dados
+        - Viola segurança ou privacidade
+        - Degrada funcionalidade importante
+        - Problema visual ou de acessibilidade
+        - Baixo impacto
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Ambiente
+      description: Branch, commit, navegador, dispositivo e configuração relevante.
+    validations:
+      required: true
+  - type: textarea
+    id: regression
+    attributes:
+      label: Regressão e contexto
+      description: Funcionava antes? Qual mudança pode estar relacionada?
+    validations:
+      required: false
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Verificações
+      options:
+        - label: As evidências não contêm secrets nem dados pessoais reais.
+          required: true
+        - label: O comportamento esperado foi baseado em fonte versionada ou está explicitamente marcado como hipótese.
+          required: true

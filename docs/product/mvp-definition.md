@@ -146,7 +146,7 @@ gera valor suficiente para justificar a evolução do produto.
 
 ## 5. Cenário inicial de validação
 
-A primeira validação será realizada com uma viagem real entre **22 e 29 de julho de 2026**.
+A primeira validação será realizada com uma viagem real entre **22 e 29 de agosto de 2026**.
 
 O cenário inicial deverá considerar:
 

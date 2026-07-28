@@ -158,7 +158,7 @@ O produto deverá responder perguntas como:
 
 O RouteBook surgiu de uma necessidade pessoal de planejamento.
 
-A primeira experiência de validação será uma viagem entre **22 e 29 de julho de 2026**.
+A primeira experiência de validação será uma viagem entre **22 e 29 de agosto de 2026**.
 
 Nesse contexto, tornou-se necessário organizar informações relacionadas a:
 

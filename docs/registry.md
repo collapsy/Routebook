@@ -6,10 +6,14 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 ## Documentos registrados
 
-| ID         | Documento             | Área       | Status | Versão | Arquivo                                                     |
-| ---------- | --------------------- | ---------- | ------ | ------ | ----------------------------------------------------------- |
-| RB-FND-001 | Visão do Produto      | Foundation | Published | 0.1.0  | [product-vision.md](./foundation/product-vision.md)         |
-| RB-FND-002 | Princípios do Produto | Foundation | Published | 0.1.0  | [product-principles.md](./foundation/product-principles.md) |
+| ID | Documento | Área | Status | Versão | Arquivo |
+| --- | --- | --- | --- | --- | --- |
+| RB-CORE-0001 | RouteBook README Canônico | Core | Published | 1.0.0 | [readme.md](./core/readme.md) |
+| RB-CORE-0002 | Project Charter do RouteBook | Core | Published | 1.0.0 | [project-charter.md](./core/project-charter.md) |
+| RB-CORE-0003 | Visão Canônica do RouteBook | Core | Published | 1.0.0 | [vision.md](./core/vision.md) |
+| RB-CORE-0004 | RouteBook Bible | Core | Published | 1.0.0 | [routebook-bible.md](./core/routebook-bible.md) |
+| RB-FND-001 | Visão do Produto | Foundation | Published | 0.1.0 | [product-vision.md](./foundation/product-vision.md) |
+| RB-FND-002 | Princípios do Produto | Foundation | Published | 0.1.0 | [product-principles.md](./foundation/product-principles.md) |
 | RB-FND-003 | Escopo do Produto | Foundation | Published | 0.1.0 | [product-scope.md](./foundation/product-scope.md) |
 | RB-FND-004 | Glossário do Produto | Foundation | Published | 0.1.0 | [product-glossary.md](./foundation/product-glossary.md) |
 | RB-PRD-001 | Visão Geral do Produto | Product | Published | 0.1.0 | [product-overview.md](./product/product-overview.md) |
@@ -100,20 +104,38 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-OPS-004 | Plano de Teste de Recuperação de Desastres | Operations Test Plan | Published | 0.1.0 | [rb-ops-004-disaster-recovery-test-plan.md](./operations/rb-ops-004-disaster-recovery-test-plan.md) |
 | RB-OPS-005 | Runbook de Resposta a Incidentes | Operations Runbook | Published | 0.1.0 | [rb-ops-005-incident-response-runbook.md](./operations/rb-ops-005-incident-response-runbook.md) |
 | RB-DOC-001 | Roadmap de Conclusão Documental | Documentation Roadmap | Published | 0.1.0 | [documentation-roadmap.md](./documentation-roadmap.md) |
+| RB-IMP-001 | Operação de Implementação por Incrementos | Implementation | Published | 1.0.0 | [README.md](./implementation/README.md) |
+| RB-IMP-002 | Template de Incremento Vertical | Implementation | Published | 1.0.0 | [increment-template.md](./implementation/increment-template.md) |
+| RB-IMP-003 | Template de Context Pack | Implementation | Published | 1.0.0 | [context-pack-template.md](./implementation/context-pack-template.md) |
+| RB-IMP-004 | Matriz de Rastreabilidade da Implementação | Implementation | Published | 1.0.0 | [traceability-matrix.md](./implementation/traceability-matrix.md) |
+| RB-INC-000 | Implementation Readiness | Implementation Increment | Published | 1.0.0 | [rb-inc-000-implementation-readiness.md](./implementation/increments/rb-inc-000-implementation-readiness.md) |
+| RB-INC-001 | Bootstrap do Monorepo | Implementation Increment | Planned | 0.1.0 | [rb-inc-001-monorepo-bootstrap.md](./implementation/increments/rb-inc-001-monorepo-bootstrap.md) |
+| RB-AI-007 | Operação e Gestão do Ciclo de Vida de Inteligência Artificial | AI Operations | Planned | 0.1.0 | [ai-operations-and-lifecycle-management.md](./ai/ai-operations-and-lifecycle-management.md) |
+| RB-API-002 | Catálogo de Contratos de API | API | Planned | 0.1.0 | [api-contract-catalog.md](./data/api-contract-catalog.md) |
+| RB-API-003 | Versionamento e Depreciação de APIs | API | Planned | 0.1.0 | [api-versioning-and-deprecation-policy.md](./data/api-versioning-and-deprecation-policy.md) |
+| RB-DATA-003 | Estratégia de Qualidade e Proveniência de Dados | Data | Planned | 0.1.0 | [data-quality-and-provenance-strategy.md](./data/data-quality-and-provenance-strategy.md) |
+| RB-FE-001 | Arquitetura Frontend e Padrões de Engenharia | Development | Planned | 0.1.0 | [frontend-architecture-and-engineering-standards.md](./development/frontend-architecture-and-engineering-standards.md) |
+| RB-QA-003 | Plano de Testes de Segurança e Resiliência de IA | Quality | Planned | 0.1.0 | [security-and-ai-resilience-test-plan.md](./quality/security-and-ai-resilience-test-plan.md) |
+| RB-QA-004 | Plano de Testes de Resiliência Operacional e Recuperação | Quality | Planned | 0.1.0 | [operational-resilience-and-recovery-test-plan.md](./quality/operational-resilience-and-recovery-test-plan.md) |
+| RB-INT-001 | Catálogo de Integrações e Providers | Integrations | Planned | 0.1.0 | [integration-catalog.md](./integrations/integration-catalog.md) |
+| RB-SRE-002 | Objetivos de Nível de Serviço e Error Budgets | Reliability | Planned | 0.1.0 | [service-level-objectives-and-error-budgets.md](./reliability/service-level-objectives-and-error-budgets.md) |
 
 ## Status possíveis
 
-* `Planned`: documento previsto, mas ainda não iniciado;
-* `Draft`: documento em elaboração ou aguardando validação;
-* `Approved`: documento validado e adotado como referência oficial;
-* `Published`: documento oficialmente publicado e disponível como referência;
-* `Deprecated`: documento substituído ou descontinuado;
-* `Archived`: documento mantido apenas para histórico.
+- `Planned`: documento previsto, mas ainda não iniciado;
+- `Draft`: documento em elaboração ou aguardando validação;
+- `Approved`: documento validado e adotado como referência oficial;
+- `Published`: documento oficialmente publicado e disponível como referência;
+- `Deprecated`: documento substituído ou descontinuado;
+- `Archived`: documento mantido apenas para histórico.
+
+O status do frontmatter representa o ciclo de publicação do arquivo. Em ADRs, o status interno da decisão é uma dimensão distinta e deve ser governado conforme `RB-GOV-002`.
 
 ## Regras de manutenção
 
-* Cada documento deve possuir um identificador único.
-* O ID registrado deve ser igual ao informado no frontmatter do arquivo.
-* O caminho deve apontar para o arquivo atual.
-* O status e a versão devem permanecer sincronizados com o frontmatter.
-* Documentos removidos não devem desaparecer sem histórico; devem ser marcados como `Deprecated` ou `Archived` quando necessário.
+- Cada documento deve possuir um identificador único.
+- O ID registrado deve ser igual ao informado no frontmatter do arquivo.
+- O caminho deve apontar para o arquivo atual.
+- O status e a versão devem permanecer sincronizados com o frontmatter.
+- Documentos removidos não devem desaparecer sem histórico; devem ser marcados como `Deprecated` ou `Archived` quando necessário.
+- Alterações no registro devem passar por `node scripts/validate-docs.mjs`.

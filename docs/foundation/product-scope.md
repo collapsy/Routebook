@@ -458,7 +458,7 @@ O detalhamento definitivo será feito no documento específico de definição do
 
 ## 8. Cenário inicial de validação
 
-A primeira validação será orientada por uma viagem real entre **22 e 29 de julho de 2026**.
+A primeira validação será orientada por uma viagem real entre **22 e 29 de agosto de 2026**.
 
 Esse cenário deverá permitir avaliar:
 

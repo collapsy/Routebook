@@ -1,0 +1,16 @@
+node_modules
+.pnpm-store
+.turbo
+.next
+out
+dist
+coverage
+playwright-report
+test-results
+pnpm-lock.yaml
+docs
+README.md
+AGENTS.md
+CONTRIBUTING.md
+packages/domain
+packages/maps

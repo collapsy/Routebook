@@ -63,8 +63,16 @@ a:focus-visible {
 
 .hero-shell {
   background:
-    radial-gradient(circle at 8% 15%, color-mix(in oklab, var(--accent) 35%, transparent), transparent 28rem),
-    radial-gradient(circle at 90% 30%, color-mix(in oklab, var(--primary) 20%, transparent), transparent 32rem),
+    radial-gradient(
+      circle at 8% 15%,
+      color-mix(in oklab, var(--accent) 35%, transparent),
+      transparent 28rem
+    ),
+    radial-gradient(
+      circle at 90% 30%,
+      color-mix(in oklab, var(--primary) 20%, transparent),
+      transparent 32rem
+    ),
     linear-gradient(180deg, var(--background), var(--background-subtle));
   min-height: 46rem;
   overflow: hidden;
@@ -183,7 +191,9 @@ h1 {
   display: inline-flex;
   font-weight: 750;
   padding: 0.9rem 1.25rem;
-  transition: transform 160ms ease, background 160ms ease;
+  transition:
+    transform 160ms ease,
+    background 160ms ease;
 }
 
 .primary-action:hover {
@@ -237,8 +247,18 @@ h1 {
 
 .map-preview {
   background:
-    linear-gradient(30deg, transparent 42%, color-mix(in oklab, var(--primary) 12%, transparent) 43% 46%, transparent 47%),
-    linear-gradient(120deg, transparent 45%, color-mix(in oklab, var(--accent) 22%, transparent) 46% 49%, transparent 50%),
+    linear-gradient(
+      30deg,
+      transparent 42%,
+      color-mix(in oklab, var(--primary) 12%, transparent) 43% 46%,
+      transparent 47%
+    ),
+    linear-gradient(
+      120deg,
+      transparent 45%,
+      color-mix(in oklab, var(--accent) 22%, transparent) 46% 49%,
+      transparent 50%
+    ),
     var(--surface-soft);
   border: 1px solid var(--border);
   border-radius: var(--radius-medium);

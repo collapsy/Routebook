@@ -30,8 +30,8 @@ export default function Home() {
             </p>
             <h1>Decisões melhores para cada momento da sua viagem.</h1>
             <p className="hero-lead">
-              O RouteBook transforma lugares, distâncias, preferências e tempo disponível em um
-              guia visual que ajuda você a escolher o que realmente vale a pena.
+              O RouteBook transforma lugares, distâncias, preferências e tempo disponível em um guia
+              visual que ajuda você a escolher o que realmente vale a pena.
             </p>
             <div className="hero-actions">
               <a className="primary-action" href="#proposito">

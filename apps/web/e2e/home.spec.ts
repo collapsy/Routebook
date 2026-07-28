@@ -16,5 +16,7 @@ test("mantém a ação principal utilizável", async ({ page }) => {
   const action = page.getByRole("link", { name: "Entender o RouteBook" });
   await expect(action).toBeVisible();
   await action.click();
-  await expect(page.getByRole("heading", { name: "Menos listas. Mais contexto para decidir." })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Menos listas. Mais contexto para decidir." }),
+  ).toBeVisible();
 });

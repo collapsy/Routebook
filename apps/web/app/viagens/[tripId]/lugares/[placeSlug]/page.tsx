@@ -157,9 +157,9 @@ export default async function PlaceDetailsPage({
         <h2 id="place-data-note">Detalhes básicos do catálogo</h2>
         <p>
           Esta página apresenta somente informações persistidas e publicadas pelo RouteBook. A
-          distância é uma estimativa geodésica em linha reta e não representa rota por ruas, trânsito
-          ou tempo de deslocamento. Horários, preços, avaliações e disponibilidade em tempo real ainda
-          não fazem parte deste ciclo.
+          distância é uma estimativa geodésica em linha reta e não representa rota por ruas,
+          trânsito ou tempo de deslocamento. Horários, preços, avaliações e disponibilidade em tempo
+          real ainda não fazem parte deste ciclo.
         </p>
       </section>
     </section>

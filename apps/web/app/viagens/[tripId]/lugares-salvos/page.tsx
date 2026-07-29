@@ -76,7 +76,9 @@ export default async function SavedPlacesPage({
         <div>
           <p className="product-eyebrow">Sua seleção</p>
           <h1>Lugares salvos</h1>
-          <p>Reúna os lugares que deseja considerar durante a viagem para {trip.destination.name}.</p>
+          <p>
+            Reúna os lugares que deseja considerar durante a viagem para {trip.destination.name}.
+          </p>
         </div>
         <span className="trip-context-version">{places.length} salvos</span>
       </header>
@@ -85,7 +87,10 @@ export default async function SavedPlacesPage({
         <section className="traveler-context-summary" aria-labelledby="saved-empty-title">
           <p className="product-eyebrow">Seleção vazia</p>
           <h2 id="saved-empty-title">Você ainda não salvou nenhum lugar</h2>
-          <p>Explore o catálogo e salve praias, restaurantes, natureza ou vida noturna para encontrá-los aqui.</p>
+          <p>
+            Explore o catálogo e salve praias, restaurantes, natureza ou vida noturna para
+            encontrá-los aqui.
+          </p>
           <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
             Explorar lugares
           </Link>

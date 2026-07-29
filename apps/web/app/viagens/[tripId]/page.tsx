@@ -157,7 +157,9 @@ export default async function TripOverviewPage({
             </div>
             <div>
               <dt>Orçamento estimado</dt>
-              <dd>{profile.budget ? formatBudget(profile.budget.totalCents) : "Ainda não informado"}</dd>
+              <dd>
+                {profile.budget ? formatBudget(profile.budget.totalCents) : "Ainda não informado"}
+              </dd>
             </div>
             <div>
               <dt>Versão do perfil</dt>

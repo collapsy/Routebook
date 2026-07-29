@@ -205,6 +205,9 @@ importers:
 
   packages/database:
     dependencies:
+      '@routebook/geo-distance':
+        specifier: workspace:*
+        version: link:../../modules/geo-distance
       '@routebook/place-catalog':
         specifier: workspace:*
         version: link:../../modules/place-catalog

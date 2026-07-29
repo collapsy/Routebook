@@ -23,8 +23,13 @@ describe("saveTravelerProfile", () => {
   });
 
   it("mantém orçamento ausente como não informado", () => {
-    const { budgetTotalCents: _budget, ...withoutBudget } = validInput;
-    const profile = saveTravelerProfile(withoutBudget);
+    const profile = saveTravelerProfile({
+      tripId: validInput.tripId,
+      travelerCount: validInput.travelerCount,
+      interests: validInput.interests,
+      pace: validInput.pace,
+      transportPreference: validInput.transportPreference,
+    });
     expect(profile.budget).toBeUndefined();
   });
 

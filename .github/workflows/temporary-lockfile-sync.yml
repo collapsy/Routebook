@@ -1,9 +1,10 @@
 name: Temporary Lockfile Sync
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/rb-inc-006-place-catalog
+      - main
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write

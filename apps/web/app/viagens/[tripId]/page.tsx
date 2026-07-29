@@ -202,15 +202,15 @@ export default async function TripOverviewPage({
 
       <section className="trip-next-steps" aria-labelledby="trip-next-steps-title">
         <div>
-          <p className="product-eyebrow">Próximos passos</p>
-          <h2 id="trip-next-steps-title">Continue no seu ritmo</h2>
+          <p className="product-eyebrow">Descoberta do destino</p>
+          <h2 id="trip-next-steps-title">Explore lugares de {trip.destination.name}</h2>
           <p>
-            Depois do contexto, o próximo ciclo poderá iniciar a descoberta de praias, restaurantes
-            e vida noturna com informações rastreáveis.
+            Consulte praias, gastronomia, natureza e vida noturna em um catálogo inicial com dados
+            publicados e filtros por categoria.
           </p>
         </div>
-        <Link className="product-secondary-action" href="/viagens">
-          Ver todas as viagens
+        <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
+          Explorar lugares
         </Link>
       </section>
     </section>

@@ -203,10 +203,11 @@ export function updateTripAccommodation(
     };
   }
 
-  const { accommodation: _accommodation, ...tripWithoutAccommodation } = trip;
-  return {
-    ...tripWithoutAccommodation,
+  const updatedTrip: Trip = {
+    ...trip,
     contextVersion: trip.contextVersion + 1,
     updatedAt: now,
   };
+  delete updatedTrip.accommodation;
+  return updatedTrip;
 }

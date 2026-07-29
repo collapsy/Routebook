@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { createCoordinate, type GeoCoordinate } from "@routebook/geo-distance";
+import { createGeoCoordinate, type GeoCoordinate } from "@routebook/geo-distance";
 
 export type TripStatus =
   "draft" | "planned" | "in-progress" | "completed" | "cancelled" | "archived";
@@ -117,7 +117,7 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
   let accommodationCoordinate: GeoCoordinate | undefined;
   if (hasAccommodationLatitude && hasAccommodationLongitude) {
     try {
-      accommodationCoordinate = createCoordinate({
+      accommodationCoordinate = createGeoCoordinate({
         latitude: input.accommodationLatitude,
         longitude: input.accommodationLongitude,
       });

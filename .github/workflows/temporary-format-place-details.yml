@@ -1,0 +1,35 @@
+name: Temporary Format Place Details
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  format-place-details:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-018-accommodation-distance-ui
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prettier --write 'apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx'
+      - name: Commit formatting
+        run: |
+          if git diff --quiet -- 'apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx'; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 'apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx'
+          git commit -m "style: format place details distance"
+          git push origin HEAD:feature/rb-inc-018-accommodation-distance-ui

@@ -49,7 +49,7 @@ export default async function SavedPlacesPage({
 
   const [savedPlaces, publishedPlaces] = await Promise.all([
     listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
-    listPublishedPlaces(new DrizzlePlaceRepository(), { destinationId }),
+    listPublishedPlaces(new DrizzlePlaceRepository(), destinationId),
   ]);
 
   const savedIds = new Set(savedPlaces.map((selection) => selection.placeId));

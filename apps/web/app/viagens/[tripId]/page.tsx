@@ -157,9 +157,7 @@ export default async function TripOverviewPage({
             </div>
             <div>
               <dt>Orçamento estimado</dt>
-              <dd>
-                {profile.budget ? formatBudget(profile.budget.totalCents) : "Ainda não informado"}
-              </dd>
+              <dd>{profile.budget ? formatBudget(profile.budget.totalCents) : "Ainda não informado"}</dd>
             </div>
             <div>
               <dt>Versão do perfil</dt>
@@ -205,13 +203,18 @@ export default async function TripOverviewPage({
           <p className="product-eyebrow">Descoberta do destino</p>
           <h2 id="trip-next-steps-title">Explore lugares de {trip.destination.name}</h2>
           <p>
-            Consulte praias, gastronomia, natureza e vida noturna em um catálogo inicial com dados
-            publicados e filtros por categoria.
+            Consulte o catálogo publicado e mantenha uma seleção pessoal de lugares para considerar
+            durante a viagem.
           </p>
         </div>
-        <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
-          Explorar lugares
-        </Link>
+        <div className="section-heading-row">
+          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
+            Explorar lugares
+          </Link>
+          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares-salvos`}>
+            Ver lugares salvos
+          </Link>
+        </div>
       </section>
     </section>
   );

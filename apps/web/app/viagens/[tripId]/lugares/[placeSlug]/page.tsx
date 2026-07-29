@@ -3,7 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { DrizzlePlaceRepository, DrizzleTripRepository } from "@routebook/database";
-import { findPublishedPlace, type PlaceCategory } from "@routebook/place-catalog";
+import {
+  findPublishedPlace,
+  type PlaceCategory,
+} from "@routebook/place-catalog";
 import { findTripById } from "@routebook/trip-management";
 
 export const dynamic = "force-dynamic";
@@ -88,7 +91,10 @@ export default async function PlaceDetailsPage({
         </div>
       </dl>
 
-      <section className="traveler-context-summary" aria-labelledby="place-data-note">
+      <section
+        className="traveler-context-summary"
+        aria-labelledby="place-data-note"
+      >
         <p className="product-eyebrow">Informação rastreável</p>
         <h2 id="place-data-note">Detalhes básicos do catálogo</h2>
         <p>

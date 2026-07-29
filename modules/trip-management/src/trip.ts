@@ -115,7 +115,10 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
   }
 
   let accommodationCoordinate: GeoCoordinate | undefined;
-  if (hasAccommodationLatitude && hasAccommodationLongitude) {
+  if (
+    input.accommodationLatitude !== undefined &&
+    input.accommodationLongitude !== undefined
+  ) {
     try {
       accommodationCoordinate = createGeoCoordinate({
         latitude: input.accommodationLatitude,

@@ -24,6 +24,8 @@ export const trips = pgTable("trips", {
   endDate: date("end_date", { mode: "string" }).notNull(),
   accommodationName: varchar("accommodation_name", { length: 180 }),
   accommodationAddress: text("accommodation_address"),
+  accommodationLatitude: doublePrecision("accommodation_latitude"),
+  accommodationLongitude: doublePrecision("accommodation_longitude"),
   status: varchar("status", { length: 32 }).notNull(),
   participants: jsonb("participants").notNull(),
   contextVersion: integer("context_version").notNull(),

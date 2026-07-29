@@ -7,13 +7,7 @@ import type { Accommodation } from "@routebook/trip-management";
 import { updateAccommodationAction } from "@/app/viagens/[tripId]/hospedagem/actions";
 import { initialAccommodationState } from "@/app/viagens/[tripId]/hospedagem/state";
 
-function FieldError({
-  id,
-  message,
-}: {
-  id: string;
-  message: string | undefined;
-}) {
+function FieldError({ id, message }: { id: string; message: string | undefined }) {
   return message ? (
     <p className="field-error" id={id} role="alert">
       {message}
@@ -56,10 +50,7 @@ export function AccommodationForm({
         <p className="field-hint">
           Deixe todos os campos vazios para remover a hospedagem da viagem.
         </p>
-        <FieldError
-          id="accommodationName-error"
-          message={state.fieldErrors.accommodationName}
-        />
+        <FieldError id="accommodationName-error" message={state.fieldErrors.accommodationName} />
       </div>
 
       <div className="form-field form-field-wide">
@@ -122,10 +113,7 @@ export function AccommodationForm({
         <button className="product-button" disabled={pending} type="submit">
           {pending ? "Salvando hospedagem…" : "Salvar hospedagem"}
         </button>
-        <p>
-          As distâncias em linha reta serão recalculadas com as coordenadas
-          salvas.
-        </p>
+        <p>As distâncias em linha reta serão recalculadas com as coordenadas salvas.</p>
       </div>
     </form>
   );

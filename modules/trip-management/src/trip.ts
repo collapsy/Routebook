@@ -3,12 +3,7 @@ import { randomUUID } from "node:crypto";
 import { createCoordinate, type GeoCoordinate } from "@routebook/geo-distance";
 
 export type TripStatus =
-  | "draft"
-  | "planned"
-  | "in-progress"
-  | "completed"
-  | "cancelled"
-  | "archived";
+  "draft" | "planned" | "in-progress" | "completed" | "cancelled" | "archived";
 export type TripRole = "owner" | "editor" | "viewer";
 
 export type Destination = {
@@ -123,8 +118,8 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
   if (hasAccommodationLatitude && hasAccommodationLongitude) {
     try {
       accommodationCoordinate = createCoordinate({
-        latitude: input.accommodationLatitude as number,
-        longitude: input.accommodationLongitude as number,
+        latitude: input.accommodationLatitude,
+        longitude: input.accommodationLongitude,
       });
     } catch {
       fieldErrors.accommodationLatitude = "Informe uma latitude válida entre -90 e 90.";

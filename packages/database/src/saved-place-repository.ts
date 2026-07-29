@@ -38,9 +38,12 @@ export class DrizzleSavedPlaceRepository implements SavedPlaceRepository {
   }
 
   async save(selection: SavedPlace): Promise<SavedPlace> {
-    await getDatabase().insert(savedPlaces).values(selection).onConflictDoNothing({
-      target: [savedPlaces.tripId, savedPlaces.placeId],
-    });
+    await getDatabase()
+      .insert(savedPlaces)
+      .values(selection)
+      .onConflictDoNothing({
+        target: [savedPlaces.tripId, savedPlaces.placeId],
+      });
 
     return (await this.find(selection.tripId, selection.placeId)) ?? selection;
   }

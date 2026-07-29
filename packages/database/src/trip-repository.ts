@@ -1,5 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 
+import { createGeoCoordinate } from "@routebook/geo-distance";
 import type { Trip, TripParticipant, TripRepository } from "@routebook/trip-management";
 
 import { getDatabase } from "./client";
@@ -8,6 +9,9 @@ import { trips } from "./schema";
 type TripRow = typeof trips.$inferSelect;
 
 function mapTrip(row: TripRow): Trip {
+  const hasAccommodationCoordinate =
+    row.accommodationLatitude !== null && row.accommodationLongitude !== null;
+
   return {
     id: row.id,
     name: row.name,
@@ -29,6 +33,14 @@ function mapTrip(row: TripRow): Trip {
           accommodation: {
             name: row.accommodationName,
             ...(row.accommodationAddress ? { address: row.accommodationAddress } : {}),
+            ...(hasAccommodationCoordinate
+              ? {
+                  coordinate: createGeoCoordinate({
+                    latitude: row.accommodationLatitude,
+                    longitude: row.accommodationLongitude,
+                  }),
+                }
+              : {}),
           },
         }
       : {}),
@@ -57,6 +69,8 @@ export class DrizzleTripRepository implements TripRepository {
         endDate: trip.period.endDate,
         accommodationName: trip.accommodation?.name,
         accommodationAddress: trip.accommodation?.address,
+        accommodationLatitude: trip.accommodation?.coordinate?.latitude,
+        accommodationLongitude: trip.accommodation?.coordinate?.longitude,
         status: trip.status,
         participants: trip.participants,
         contextVersion: trip.contextVersion,

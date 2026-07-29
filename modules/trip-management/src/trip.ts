@@ -153,9 +153,15 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
 
   const accommodation = createAccommodation({
     accommodationName: input.accommodationName ?? "",
-    accommodationAddress: input.accommodationAddress,
-    accommodationLatitude: input.accommodationLatitude,
-    accommodationLongitude: input.accommodationLongitude,
+    ...(input.accommodationAddress !== undefined
+      ? { accommodationAddress: input.accommodationAddress }
+      : {}),
+    ...(input.accommodationLatitude !== undefined
+      ? { accommodationLatitude: input.accommodationLatitude }
+      : {}),
+    ...(input.accommodationLongitude !== undefined
+      ? { accommodationLongitude: input.accommodationLongitude }
+      : {}),
   });
   const owner: TripParticipant = {
     userId: randomUUID(),
@@ -188,9 +194,18 @@ export function updateTripAccommodation(
 ): Trip {
   const accommodation = createAccommodation(input);
 
+  if (accommodation) {
+    return {
+      ...trip,
+      accommodation,
+      contextVersion: trip.contextVersion + 1,
+      updatedAt: now,
+    };
+  }
+
+  const { accommodation: _accommodation, ...tripWithoutAccommodation } = trip;
   return {
-    ...trip,
-    ...(accommodation ? { accommodation } : { accommodation: undefined }),
+    ...tripWithoutAccommodation,
     contextVersion: trip.contextVersion + 1,
     updatedAt: now,
   };

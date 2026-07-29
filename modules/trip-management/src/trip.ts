@@ -57,7 +57,16 @@ export type CreateTripInput = {
   accommodationLongitude?: number;
 };
 
-export type TripFieldErrors = Partial<Record<keyof CreateTripInput, string>>;
+export type UpdateAccommodationInput = {
+  accommodationName: string;
+  accommodationAddress?: string;
+  accommodationLatitude?: number;
+  accommodationLongitude?: number;
+};
+
+export type TripFieldErrors = Partial<
+  Record<keyof CreateTripInput | keyof UpdateAccommodationInput, string>
+>;
 
 export class TripValidationError extends Error {
   constructor(public readonly fieldErrors: TripFieldErrors) {
@@ -79,26 +88,13 @@ function isLocalDate(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
 }
 
-export function createTrip(input: CreateTripInput, now = new Date()): Trip {
-  const name = input.name.trim();
-  const ownerName = input.ownerName.trim();
-  const accommodationName = input.accommodationName?.trim();
+function createAccommodation(input: UpdateAccommodationInput): Accommodation | undefined {
+  const accommodationName = input.accommodationName.trim();
   const accommodationAddress = input.accommodationAddress?.trim();
   const hasAccommodationLatitude = input.accommodationLatitude !== undefined;
   const hasAccommodationLongitude = input.accommodationLongitude !== undefined;
   const fieldErrors: TripFieldErrors = {};
 
-  if (name.length < 3) fieldErrors.name = "Informe um nome com pelo menos 3 caracteres.";
-  if (!isLocalDate(input.startDate)) fieldErrors.startDate = "Informe uma data inicial válida.";
-  if (!isLocalDate(input.endDate)) fieldErrors.endDate = "Informe uma data final válida.";
-  if (
-    isLocalDate(input.startDate) &&
-    isLocalDate(input.endDate) &&
-    input.endDate < input.startDate
-  ) {
-    fieldErrors.endDate = "A data final não pode ser anterior à data inicial.";
-  }
-  if (ownerName.length < 2) fieldErrors.ownerName = "Informe o nome do responsável pela viagem.";
   if (accommodationAddress && !accommodationName) {
     fieldErrors.accommodationName = "Informe o nome da hospedagem antes do endereço.";
   }
@@ -128,7 +124,39 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
   }
 
   if (Object.keys(fieldErrors).length > 0) throw new TripValidationError(fieldErrors);
+  if (!accommodationName) return undefined;
 
+  return {
+    name: accommodationName,
+    ...(accommodationAddress ? { address: accommodationAddress } : {}),
+    ...(accommodationCoordinate ? { coordinate: accommodationCoordinate } : {}),
+  };
+}
+
+export function createTrip(input: CreateTripInput, now = new Date()): Trip {
+  const name = input.name.trim();
+  const ownerName = input.ownerName.trim();
+  const fieldErrors: TripFieldErrors = {};
+
+  if (name.length < 3) fieldErrors.name = "Informe um nome com pelo menos 3 caracteres.";
+  if (!isLocalDate(input.startDate)) fieldErrors.startDate = "Informe uma data inicial válida.";
+  if (!isLocalDate(input.endDate)) fieldErrors.endDate = "Informe uma data final válida.";
+  if (
+    isLocalDate(input.startDate) &&
+    isLocalDate(input.endDate) &&
+    input.endDate < input.startDate
+  ) {
+    fieldErrors.endDate = "A data final não pode ser anterior à data inicial.";
+  }
+  if (ownerName.length < 2) fieldErrors.ownerName = "Informe o nome do responsável pela viagem.";
+  if (Object.keys(fieldErrors).length > 0) throw new TripValidationError(fieldErrors);
+
+  const accommodation = createAccommodation({
+    accommodationName: input.accommodationName ?? "",
+    accommodationAddress: input.accommodationAddress,
+    accommodationLatitude: input.accommodationLatitude,
+    accommodationLongitude: input.accommodationLongitude,
+  });
   const owner: TripParticipant = {
     userId: randomUUID(),
     displayName: ownerName,
@@ -144,19 +172,26 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
       endDate: input.endDate,
       timeZone: PIPA_DESTINATION.timeZone,
     },
-    ...(accommodationName
-      ? {
-          accommodation: {
-            name: accommodationName,
-            ...(accommodationAddress ? { address: accommodationAddress } : {}),
-            ...(accommodationCoordinate ? { coordinate: accommodationCoordinate } : {}),
-          },
-        }
-      : {}),
+    ...(accommodation ? { accommodation } : {}),
     status: "draft",
     participants: [owner],
     contextVersion: 1,
     createdAt: now,
+    updatedAt: now,
+  };
+}
+
+export function updateTripAccommodation(
+  trip: Trip,
+  input: UpdateAccommodationInput,
+  now = new Date(),
+): Trip {
+  const accommodation = createAccommodation(input);
+
+  return {
+    ...trip,
+    ...(accommodation ? { accommodation } : { accommodation: undefined }),
+    contextVersion: trip.contextVersion + 1,
     updatedAt: now,
   };
 }

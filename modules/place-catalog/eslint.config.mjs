@@ -1,3 +1,3 @@
-import config from "@routebook/eslint-config/base";
+import routeBookConfig from "@routebook/eslint-config/next";
 
-export default config;
+export default routeBookConfig;

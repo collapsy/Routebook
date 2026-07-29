@@ -1,7 +1,14 @@
 import { randomUUID } from "node:crypto";
 
+import { createCoordinate, type GeoCoordinate } from "@routebook/geo-distance";
+
 export type TripStatus =
-  "draft" | "planned" | "in-progress" | "completed" | "cancelled" | "archived";
+  | "draft"
+  | "planned"
+  | "in-progress"
+  | "completed"
+  | "cancelled"
+  | "archived";
 export type TripRole = "owner" | "editor" | "viewer";
 
 export type Destination = {
@@ -22,6 +29,7 @@ export type TripPeriod = {
 export type Accommodation = {
   name: string;
   address?: string;
+  coordinate?: GeoCoordinate;
 };
 
 export type TripParticipant = {
@@ -50,6 +58,8 @@ export type CreateTripInput = {
   ownerName: string;
   accommodationName?: string;
   accommodationAddress?: string;
+  accommodationLatitude?: number;
+  accommodationLongitude?: number;
 };
 
 export type TripFieldErrors = Partial<Record<keyof CreateTripInput, string>>;
@@ -79,6 +89,8 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
   const ownerName = input.ownerName.trim();
   const accommodationName = input.accommodationName?.trim();
   const accommodationAddress = input.accommodationAddress?.trim();
+  const hasAccommodationLatitude = input.accommodationLatitude !== undefined;
+  const hasAccommodationLongitude = input.accommodationLongitude !== undefined;
   const fieldErrors: TripFieldErrors = {};
 
   if (name.length < 3) fieldErrors.name = "Informe um nome com pelo menos 3 caracteres.";
@@ -94,6 +106,30 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
   if (ownerName.length < 2) fieldErrors.ownerName = "Informe o nome do responsável pela viagem.";
   if (accommodationAddress && !accommodationName) {
     fieldErrors.accommodationName = "Informe o nome da hospedagem antes do endereço.";
+  }
+  if ((hasAccommodationLatitude || hasAccommodationLongitude) && !accommodationName) {
+    fieldErrors.accommodationName = "Informe o nome da hospedagem antes das coordenadas.";
+  }
+  if (hasAccommodationLatitude !== hasAccommodationLongitude) {
+    if (!hasAccommodationLatitude) {
+      fieldErrors.accommodationLatitude = "Informe latitude e longitude da hospedagem juntas.";
+    }
+    if (!hasAccommodationLongitude) {
+      fieldErrors.accommodationLongitude = "Informe latitude e longitude da hospedagem juntas.";
+    }
+  }
+
+  let accommodationCoordinate: GeoCoordinate | undefined;
+  if (hasAccommodationLatitude && hasAccommodationLongitude) {
+    try {
+      accommodationCoordinate = createCoordinate({
+        latitude: input.accommodationLatitude as number,
+        longitude: input.accommodationLongitude as number,
+      });
+    } catch {
+      fieldErrors.accommodationLatitude = "Informe uma latitude válida entre -90 e 90.";
+      fieldErrors.accommodationLongitude = "Informe uma longitude válida entre -180 e 180.";
+    }
   }
 
   if (Object.keys(fieldErrors).length > 0) throw new TripValidationError(fieldErrors);
@@ -118,6 +154,7 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
           accommodation: {
             name: accommodationName,
             ...(accommodationAddress ? { address: accommodationAddress } : {}),
+            ...(accommodationCoordinate ? { coordinate: accommodationCoordinate } : {}),
           },
         }
       : {}),

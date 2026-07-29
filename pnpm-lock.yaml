@@ -20,6 +20,9 @@ importers:
       '@routebook/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@routebook/geo-distance':
+        specifier: workspace:*
+        version: link:../../modules/geo-distance
       '@routebook/place-catalog':
         specifier: workspace:*
         version: link:../../modules/place-catalog

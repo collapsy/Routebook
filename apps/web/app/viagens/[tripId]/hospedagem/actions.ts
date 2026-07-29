@@ -28,19 +28,23 @@ export async function updateAccommodationAction(
 ): Promise<AccommodationActionState> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const accommodationName = String(formData.get("accommodationName") ?? "").trim();
+  const accommodationAddress = optionalText(formData, "accommodationAddress");
+  const accommodationLatitude = optionalCoordinate(formData, "accommodationLatitude");
+  const accommodationLongitude = optionalCoordinate(formData, "accommodationLongitude");
 
-  const input: UpdateAccommodationInput = {
-    accommodationName,
-    ...(optionalText(formData, "accommodationAddress") !== undefined
-      ? { accommodationAddress: optionalText(formData, "accommodationAddress") }
-      : {}),
-    ...(optionalCoordinate(formData, "accommodationLatitude") !== undefined
-      ? { accommodationLatitude: optionalCoordinate(formData, "accommodationLatitude") }
-      : {}),
-    ...(optionalCoordinate(formData, "accommodationLongitude") !== undefined
-      ? { accommodationLongitude: optionalCoordinate(formData, "accommodationLongitude") }
-      : {}),
-  };
+  const input: UpdateAccommodationInput = { accommodationName };
+
+  if (accommodationAddress !== undefined) {
+    input.accommodationAddress = accommodationAddress;
+  }
+
+  if (accommodationLatitude !== undefined) {
+    input.accommodationLatitude = accommodationLatitude;
+  }
+
+  if (accommodationLongitude !== undefined) {
+    input.accommodationLongitude = accommodationLongitude;
+  }
 
   try {
     const updatedTrip = await updateAndPersistTripAccommodation(

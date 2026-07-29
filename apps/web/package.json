@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@routebook/database": "workspace:*",
+    "@routebook/place-catalog": "workspace:*",
     "@routebook/traveler-profile": "workspace:*",
     "@routebook/trip-management": "workspace:*",
     "next": "16.2.12",

@@ -20,6 +20,9 @@ importers:
       '@routebook/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@routebook/place-catalog':
+        specifier: workspace:*
+        version: link:../../modules/place-catalog
       '@routebook/traveler-profile':
         specifier: workspace:*
         version: link:../../modules/traveler-profile

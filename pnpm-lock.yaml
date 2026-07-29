@@ -23,6 +23,9 @@ importers:
       '@routebook/place-catalog':
         specifier: workspace:*
         version: link:../../modules/place-catalog
+      '@routebook/saved-places':
+        specifier: workspace:*
+        version: link:../../modules/saved-places
       '@routebook/traveler-profile':
         specifier: workspace:*
         version: link:../../modules/traveler-profile

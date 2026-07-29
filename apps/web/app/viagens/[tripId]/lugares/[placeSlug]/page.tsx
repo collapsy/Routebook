@@ -2,9 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { DrizzlePlaceRepository, DrizzleTripRepository } from "@routebook/database";
+import {
+  DrizzlePlaceRepository,
+  DrizzleSavedPlaceRepository,
+  DrizzleTripRepository,
+} from "@routebook/database";
 import { findPublishedPlace, type PlaceCategory } from "@routebook/place-catalog";
 import { findTripById } from "@routebook/trip-management";
+
+import { removePlaceAction, savePlaceAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -34,10 +40,13 @@ function formatCoordinate(value: number): string {
 
 export default async function PlaceDetailsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tripId: string; placeSlug: string }>;
+  searchParams: Promise<{ saved?: string; removed?: string }>;
 }) {
   const { tripId, placeSlug } = await params;
+  const { saved, removed } = await searchParams;
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
 
   if (!trip) notFound();
@@ -47,6 +56,8 @@ export default async function PlaceDetailsPage({
 
   const place = await findPublishedPlace(new DrizzlePlaceRepository(), destinationId, placeSlug);
   if (!place) notFound();
+
+  const savedPlace = await new DrizzleSavedPlaceRepository().find(tripId, place.id);
 
   return (
     <section className="app-page trip-overview-page">
@@ -59,6 +70,18 @@ export default async function PlaceDetailsPage({
         </Link>
       </div>
 
+      {saved === "1" ? (
+        <p className="success-banner" role="status">
+          Lugar salvo na sua viagem.
+        </p>
+      ) : null}
+
+      {removed === "1" ? (
+        <p className="success-banner" role="status">
+          Lugar removido da sua seleção.
+        </p>
+      ) : null}
+
       <header className="trip-overview-hero">
         <div>
           <p className="product-eyebrow">{categoryLabels[place.category]}</p>
@@ -66,6 +89,29 @@ export default async function PlaceDetailsPage({
           <p>{place.summary}</p>
         </div>
       </header>
+
+      <section className="traveler-context-summary" aria-labelledby="saved-place-title">
+        <div className="section-heading-row">
+          <div>
+            <p className="product-eyebrow">Sua seleção</p>
+            <h2 id="saved-place-title">
+              {savedPlace ? "Este lugar está salvo" : "Adicionar à viagem"}
+            </h2>
+            <p>
+              {savedPlace
+                ? "Ele faz parte da sua seleção pessoal e continuará salvo após recarregar a página."
+                : "Salve este lugar para encontrá-lo depois na seleção da viagem."}
+            </p>
+          </div>
+          <form action={savedPlace ? removePlaceAction : savePlaceAction}>
+            <input name="tripId" type="hidden" value={tripId} />
+            <input name="placeSlug" type="hidden" value={placeSlug} />
+            <button className="product-secondary-action" type="submit">
+              {savedPlace ? "Remover dos salvos" : "Salvar lugar"}
+            </button>
+          </form>
+        </div>
+      </section>
 
       <dl className="trip-overview-summary">
         <div>

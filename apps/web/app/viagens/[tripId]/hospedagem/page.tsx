@@ -11,7 +11,8 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Hospedagem da viagem — RouteBook",
-  description: "Edite a hospedagem e as coordenadas usadas nas distâncias da viagem.",
+  description:
+    "Edite a hospedagem e as coordenadas usadas nas distâncias da viagem.",
 };
 
 export default async function AccommodationPage({
@@ -43,12 +44,16 @@ export default async function AccommodationPage({
         <p className="product-eyebrow">Contexto da viagem</p>
         <h1>Hospedagem de {trip.name}</h1>
         <p>
-          Atualize nome, endereço e coordenadas. As distâncias exibidas são geodésicas, em linha reta,
-          e não representam rotas, trânsito ou tempo de deslocamento.
+          Atualize nome, endereço e coordenadas. As distâncias exibidas são
+          geodésicas, em linha reta, e não representam rotas, trânsito ou tempo
+          de deslocamento.
         </p>
       </header>
 
-      <AccommodationForm accommodation={trip.accommodation} tripId={tripId} />
+      <AccommodationForm
+        accommodation={trip.accommodation}
+        tripId={tripId}
+      />
     </section>
   );
 }

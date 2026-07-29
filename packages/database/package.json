@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@routebook/geo-distance": "workspace:*",
     "@routebook/place-catalog": "workspace:*",
     "@routebook/saved-places": "workspace:*",
     "@routebook/traveler-profile": "workspace:*",

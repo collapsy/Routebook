@@ -1,5 +1,6 @@
 import {
   date,
+  doublePrecision,
   integer,
   jsonb,
   pgTable,
@@ -48,4 +49,25 @@ export const travelerProfiles = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
   },
   (table) => [uniqueIndex("traveler_profiles_trip_id_unique").on(table.tripId)],
+);
+
+export const places = pgTable(
+  "places",
+  {
+    id: uuid("id").primaryKey(),
+    destinationId: varchar("destination_id", { length: 120 }).notNull(),
+    slug: varchar("slug", { length: 160 }).notNull(),
+    name: varchar("name", { length: 180 }).notNull(),
+    summary: text("summary").notNull(),
+    category: varchar("category", { length: 32 }).notNull(),
+    latitude: doublePrecision("latitude").notNull(),
+    longitude: doublePrecision("longitude").notNull(),
+    addressLabel: text("address_label"),
+    publicationStatus: varchar("publication_status", { length: 24 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
+  },
+  (table) => [
+    uniqueIndex("places_destination_slug_unique").on(table.destinationId, table.slug),
+  ],
 );

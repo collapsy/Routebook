@@ -109,6 +109,9 @@ export default async function TripOverviewPage({
           <dt>Hospedagem</dt>
           <dd>{trip.accommodation?.name ?? "Ainda não informada"}</dd>
           {trip.accommodation?.address ? <small>{trip.accommodation.address}</small> : null}
+          <Link className="product-inline-link" href={`/viagens/${tripId}/hospedagem`}>
+            {trip.accommodation ? "Editar hospedagem" : "Informar hospedagem"}
+          </Link>
         </div>
         <div>
           <dt>Responsável</dt>

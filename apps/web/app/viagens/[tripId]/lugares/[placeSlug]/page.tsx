@@ -138,8 +138,9 @@ export default async function PlaceDetailsPage({
         <p className="product-eyebrow">Informação rastreável</p>
         <h2 id="place-data-note">Detalhes básicos do catálogo</h2>
         <p>
-          Esta página apresenta somente informações persistidas e publicadas pelo RouteBook. Horários,
-          preços, avaliações, rotas e disponibilidade em tempo real ainda não fazem parte deste ciclo.
+          Esta página apresenta somente informações persistidas e publicadas pelo RouteBook.
+          Horários, preços, avaliações, rotas e disponibilidade em tempo real ainda não fazem parte
+          deste ciclo.
         </p>
       </section>
     </section>

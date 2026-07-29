@@ -25,9 +25,7 @@ export function calculateGeodesicDistance(
 
   const haversine =
     Math.sin(latitudeDelta / 2) ** 2 +
-    Math.cos(originLatitude) *
-      Math.cos(destinationLatitude) *
-      Math.sin(longitudeDelta / 2) ** 2;
+    Math.cos(originLatitude) * Math.cos(destinationLatitude) * Math.sin(longitudeDelta / 2) ** 2;
   const angularDistance = 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
   const meters = EARTH_RADIUS_METERS * angularDistance;
 

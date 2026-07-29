@@ -1,10 +1,6 @@
 import { and, asc, eq } from "drizzle-orm";
 
-import type {
-  ListPublishedPlacesQuery,
-  Place,
-  PlaceRepository,
-} from "@routebook/place-catalog";
+import type { ListPublishedPlacesQuery, Place, PlaceRepository } from "@routebook/place-catalog";
 
 import { getDatabase } from "./client";
 import { places } from "./schema";

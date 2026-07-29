@@ -1,0 +1,35 @@
+name: Temporary Format Schema
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  format-schema:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-017-accommodation-coordinate-persistence
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prettier --write packages/database/src/schema.ts
+      - name: Commit formatting
+        run: |
+          if git diff --quiet -- packages/database/src/schema.ts; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/database/src/schema.ts
+          git commit -m "style: format database schema"
+          git push origin HEAD:feature/rb-inc-017-accommodation-coordinate-persistence

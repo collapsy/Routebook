@@ -93,6 +93,12 @@ export default async function PlacesPage({
               <strong>{place.name}</strong>
               <p>{place.summary}</p>
               <small>{place.addressLabel ?? "Endereço ainda não informado"}</small>
+              <Link
+                className="product-secondary-action"
+                href={`/viagens/${tripId}/lugares/${place.slug}`}
+              >
+                Ver detalhes
+              </Link>
             </li>
           ))}
         </ul>

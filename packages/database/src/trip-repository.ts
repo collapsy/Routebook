@@ -9,8 +9,13 @@ import { trips } from "./schema";
 type TripRow = typeof trips.$inferSelect;
 
 function mapTrip(row: TripRow): Trip {
-  const hasAccommodationCoordinate =
-    row.accommodationLatitude !== null && row.accommodationLongitude !== null;
+  const accommodationCoordinate =
+    row.accommodationLatitude !== null && row.accommodationLongitude !== null
+      ? createGeoCoordinate({
+          latitude: row.accommodationLatitude,
+          longitude: row.accommodationLongitude,
+        })
+      : undefined;
 
   return {
     id: row.id,
@@ -33,14 +38,7 @@ function mapTrip(row: TripRow): Trip {
           accommodation: {
             name: row.accommodationName,
             ...(row.accommodationAddress ? { address: row.accommodationAddress } : {}),
-            ...(hasAccommodationCoordinate
-              ? {
-                  coordinate: createGeoCoordinate({
-                    latitude: row.accommodationLatitude,
-                    longitude: row.accommodationLongitude,
-                  }),
-                }
-              : {}),
+            ...(accommodationCoordinate ? { coordinate: accommodationCoordinate } : {}),
           },
         }
       : {}),

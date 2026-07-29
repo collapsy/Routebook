@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createTrip, TripValidationError } from "./trip";
+import { createTrip, TripValidationError, updateTripAccommodation } from "./trip";
 
 const validInput = {
   name: "Pipa em agosto",
@@ -84,5 +84,59 @@ describe("createTrip", () => {
       expect(error).toBeInstanceOf(TripValidationError);
       expect((error as TripValidationError).fieldErrors.ownerName).toBeDefined();
     }
+  });
+});
+
+describe("updateTripAccommodation", () => {
+  it("atualiza hospedagem, coordenadas e versão de contexto", () => {
+    const trip = createTrip(validInput, new Date("2026-07-28T12:00:00Z"));
+    const updatedAt = new Date("2026-07-29T12:00:00Z");
+
+    const updatedTrip = updateTripAccommodation(
+      trip,
+      {
+        accommodationName: "Solar Água Pipa",
+        accommodationAddress: "Rua das Gameleiras, Pipa",
+        accommodationLatitude: -6.2289,
+        accommodationLongitude: -35.0521,
+      },
+      updatedAt,
+    );
+
+    expect(updatedTrip.accommodation).toEqual({
+      name: "Solar Água Pipa",
+      address: "Rua das Gameleiras, Pipa",
+      coordinate: { latitude: -6.2289, longitude: -35.0521 },
+    });
+    expect(updatedTrip.contextVersion).toBe(2);
+    expect(updatedTrip.updatedAt).toEqual(updatedAt);
+    expect(updatedTrip.id).toBe(trip.id);
+  });
+
+  it("remove somente as coordenadas mantendo a hospedagem", () => {
+    const trip = createTrip({
+      ...validInput,
+      accommodationLatitude: -6.2289,
+      accommodationLongitude: -35.0521,
+    });
+
+    const updatedTrip = updateTripAccommodation(trip, {
+      accommodationName: "Condomínio Solar Água",
+      accommodationAddress: "Pipa, Tibau do Sul - RN",
+    });
+
+    expect(updatedTrip.accommodation?.coordinate).toBeUndefined();
+    expect(updatedTrip.accommodation?.name).toBe("Condomínio Solar Água");
+  });
+
+  it("rejeita coordenadas parciais na atualização", () => {
+    const trip = createTrip(validInput);
+
+    expect(() =>
+      updateTripAccommodation(trip, {
+        accommodationName: "Condomínio Solar Água",
+        accommodationLatitude: -6.2289,
+      }),
+    ).toThrow(TripValidationError);
   });
 });

@@ -77,6 +77,20 @@ export class DrizzleTripRepository implements TripRepository {
       });
   }
 
+  async update(trip: Trip): Promise<void> {
+    await getDatabase()
+      .update(trips)
+      .set({
+        accommodationName: trip.accommodation?.name ?? null,
+        accommodationAddress: trip.accommodation?.address ?? null,
+        accommodationLatitude: trip.accommodation?.coordinate?.latitude ?? null,
+        accommodationLongitude: trip.accommodation?.coordinate?.longitude ?? null,
+        contextVersion: trip.contextVersion,
+        updatedAt: trip.updatedAt,
+      })
+      .where(eq(trips.id, trip.id));
+  }
+
   async list(): Promise<Trip[]> {
     const rows = await getDatabase().select().from(trips).orderBy(desc(trips.createdAt));
     return rows.map(mapTrip);

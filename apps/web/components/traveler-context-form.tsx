@@ -18,7 +18,7 @@ const interests = [
   ["shopping", "Compras"],
 ] as const;
 
-function FieldError({ message }: { message?: string }) {
+function FieldError({ message }: { message: string | undefined }) {
   return message ? (
     <p className="field-error" role="alert">
       {message}

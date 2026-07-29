@@ -67,7 +67,5 @@ export const places = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
   },
-  (table) => [
-    uniqueIndex("places_destination_slug_unique").on(table.destinationId, table.slug),
-  ],
+  (table) => [uniqueIndex("places_destination_slug_unique").on(table.destinationId, table.slug)],
 );

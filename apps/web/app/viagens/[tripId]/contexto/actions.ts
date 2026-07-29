@@ -7,6 +7,7 @@ import { DrizzleTravelerProfileRepository, DrizzleTripRepository } from "@routeb
 import {
   saveAndPersistTravelerProfile,
   TravelerProfileValidationError,
+  type SaveTravelerProfileInput,
 } from "@routebook/traveler-profile";
 import { findTripById } from "@routebook/trip-management";
 
@@ -29,14 +30,20 @@ export async function saveTravelerContextAction(
     const trip = await findTripById(new DrizzleTripRepository(), tripId);
     if (!trip) return { fieldErrors: {}, formError: "A viagem informada não existe." };
 
-    await saveAndPersistTravelerProfile(new DrizzleTravelerProfileRepository(), {
+    const pace = String(formData.get("pace") ?? "");
+    const transportPreference = String(formData.get("transportPreference") ?? "");
+    const budgetTotalCents = parseBudget(String(formData.get("budget") ?? ""));
+
+    const input: SaveTravelerProfileInput = {
       tripId,
       travelerCount: Number(formData.get("travelerCount") ?? 0),
       interests: formData.getAll("interests").map(String),
-      pace: String(formData.get("pace") ?? "") || undefined,
-      transportPreference: String(formData.get("transportPreference") ?? "") || undefined,
-      budgetTotalCents: parseBudget(String(formData.get("budget") ?? "")),
-    });
+      ...(pace ? { pace } : {}),
+      ...(transportPreference ? { transportPreference } : {}),
+      ...(budgetTotalCents === undefined ? {} : { budgetTotalCents }),
+    };
+
+    await saveAndPersistTravelerProfile(new DrizzleTravelerProfileRepository(), input);
   } catch (error) {
     if (error instanceof TravelerProfileValidationError) {
       return { fieldErrors: error.fieldErrors };

@@ -153,6 +153,9 @@ importers:
 
   packages/database:
     dependencies:
+      '@routebook/place-catalog':
+        specifier: workspace:*
+        version: link:../../modules/place-catalog
       '@routebook/traveler-profile':
         specifier: workspace:*
         version: link:../../modules/traveler-profile

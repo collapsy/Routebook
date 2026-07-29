@@ -10,6 +10,7 @@ import {
 import { findPublishedPlace, type PlaceCategory } from "@routebook/place-catalog";
 import { findTripById } from "@routebook/trip-management";
 
+import { presentAccommodationDistance } from "../distance";
 import { removePlaceAction, savePlaceAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -58,6 +59,10 @@ export default async function PlaceDetailsPage({
   if (!place) notFound();
 
   const savedPlace = await new DrizzleSavedPlaceRepository().find(tripId, place.id);
+  const accommodationDistance = presentAccommodationDistance(trip.accommodation?.coordinate, {
+    latitude: place.latitude,
+    longitude: place.longitude,
+  });
 
   return (
     <section className="app-page trip-overview-page">
@@ -127,6 +132,19 @@ export default async function PlaceDetailsPage({
           <dd>{place.addressLabel ?? "Ainda não informado"}</dd>
         </div>
         <div>
+          <dt>Distância da hospedagem</dt>
+          <dd>
+            {accommodationDistance ? (
+              <>
+                <strong>{accommodationDistance.label}</strong>
+                <span>{accommodationDistance.description}</span>
+              </>
+            ) : (
+              "Indisponível enquanto a hospedagem não possuir coordenadas."
+            )}
+          </dd>
+        </div>
+        <div>
           <dt>Coordenadas</dt>
           <dd>
             {formatCoordinate(place.latitude)}, {formatCoordinate(place.longitude)}
@@ -138,9 +156,10 @@ export default async function PlaceDetailsPage({
         <p className="product-eyebrow">Informação rastreável</p>
         <h2 id="place-data-note">Detalhes básicos do catálogo</h2>
         <p>
-          Esta página apresenta somente informações persistidas e publicadas pelo RouteBook.
-          Horários, preços, avaliações, rotas e disponibilidade em tempo real ainda não fazem parte
-          deste ciclo.
+          Esta página apresenta somente informações persistidas e publicadas pelo RouteBook. A
+          distância é uma estimativa geodésica em linha reta e não representa rota por ruas,
+          trânsito ou tempo de deslocamento. Horários, preços, avaliações e disponibilidade em tempo
+          real ainda não fazem parte deste ciclo.
         </p>
       </section>
     </section>

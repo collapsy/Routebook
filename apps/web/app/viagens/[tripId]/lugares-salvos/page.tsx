@@ -11,6 +11,7 @@ import { listPublishedPlaces, type PlaceCategory } from "@routebook/place-catalo
 import { listSavedPlaces } from "@routebook/saved-places";
 import { findTripById } from "@routebook/trip-management";
 
+import { presentAccommodationDistance } from "../lugares/distance";
 import { removeSavedPlaceAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -79,6 +80,10 @@ export default async function SavedPlacesPage({
           <p>
             Reúna os lugares que deseja considerar durante a viagem para {trip.destination.name}.
           </p>
+          <p>
+            As distâncias exibidas são estimativas em linha reta a partir da hospedagem e não
+            representam rota, trânsito ou tempo de deslocamento.
+          </p>
         </div>
         <span className="trip-context-version">{places.length} salvos</span>
       </header>
@@ -97,28 +102,44 @@ export default async function SavedPlacesPage({
         </section>
       ) : (
         <ul className="place-catalog-grid">
-          {places.map((place) => (
-            <li className="place-card" key={place.id}>
-              <p className="product-eyebrow">{categoryLabels[place.category]}</p>
-              <h2>{place.name}</h2>
-              <p>{place.summary}</p>
-              <div className="section-heading-row">
-                <Link
-                  className="product-secondary-action"
-                  href={`/viagens/${tripId}/lugares/${place.slug}`}
-                >
-                  Ver detalhes
-                </Link>
-                <form action={removeSavedPlaceAction}>
-                  <input name="tripId" type="hidden" value={tripId} />
-                  <input name="placeSlug" type="hidden" value={place.slug} />
-                  <button className="product-secondary-action" type="submit">
-                    Remover
-                  </button>
-                </form>
-              </div>
-            </li>
-          ))}
+          {places.map((place) => {
+            const accommodationDistance = presentAccommodationDistance(
+              trip.accommodation?.coordinate,
+              {
+                latitude: place.latitude,
+                longitude: place.longitude,
+              },
+            );
+
+            return (
+              <li className="place-card" key={place.id}>
+                <p className="product-eyebrow">{categoryLabels[place.category]}</p>
+                <h2>{place.name}</h2>
+                <p>{place.summary}</p>
+                <p>
+                  <strong>Distância da hospedagem: </strong>
+                  {accommodationDistance
+                    ? `${accommodationDistance.label} — ${accommodationDistance.description}`
+                    : "indisponível enquanto a hospedagem não possuir coordenadas."}
+                </p>
+                <div className="section-heading-row">
+                  <Link
+                    className="product-secondary-action"
+                    href={`/viagens/${tripId}/lugares/${place.slug}`}
+                  >
+                    Ver detalhes
+                  </Link>
+                  <form action={removeSavedPlaceAction}>
+                    <input name="tripId" type="hidden" value={tripId} />
+                    <input name="placeSlug" type="hidden" value={place.slug} />
+                    <button className="product-secondary-action" type="submit">
+                      Remover
+                    </button>
+                  </form>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

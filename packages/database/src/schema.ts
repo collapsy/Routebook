@@ -69,3 +69,18 @@ export const places = pgTable(
   },
   (table) => [uniqueIndex("places_destination_slug_unique").on(table.destinationId, table.slug)],
 );
+
+export const savedPlaces = pgTable(
+  "saved_places",
+  {
+    id: uuid("id").primaryKey(),
+    tripId: uuid("trip_id")
+      .notNull()
+      .references(() => trips.id, { onDelete: "cascade" }),
+    placeId: uuid("place_id")
+      .notNull()
+      .references(() => places.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
+  },
+  (table) => [uniqueIndex("saved_places_trip_place_unique").on(table.tripId, table.placeId)],
+);

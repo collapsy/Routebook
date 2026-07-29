@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@routebook/place-catalog": "workspace:*",
+    "@routebook/saved-places": "workspace:*",
     "@routebook/traveler-profile": "workspace:*",
     "@routebook/trip-management": "workspace:*",
     "drizzle-orm": "0.45.2",

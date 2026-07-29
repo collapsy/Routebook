@@ -29,6 +29,7 @@ next_documents:
   - RB-INC-002
   - RB-INC-003
   - RB-INC-004
+  - RB-INC-005
 ai_context:
   priority: high
   index: true
@@ -44,7 +45,8 @@ ai_context:
 | RB-INC-001 | RB-ADR-002, RB-ADR-003, RB-ADR-004, RB-ADR-010, RB-ADR-011, RB-ADR-019 | #4 | `feature/rb-inc-001-monorepo-bootstrap`, PR #5 | workspace, `apps/web`, configurações compartilhadas e CI | frozen install, format, docs, lint, typecheck, componente, dev smoke, build e E2E | Integrado |
 | RB-INC-002 | RB-DEL-001, RB-UX-001, RB-UX-003, RB-UX-004, RB-UX-005, RB-UX-006, RB-DS-001, RB-DS-002 | #6 | `feature/rb-inc-002-product-shell`, PR #7 | landing, product shell, Minhas Viagens e estados globais | 3 testes de componente e 14 E2E | Integrado |
 | RB-INC-003 | RB-DOM-001, RB-DOM-003, RB-ARC-004, RB-DATA-001, RB-DATA-002, RB-ADR-005, RB-ADR-006 | #8 | `feature/rb-inc-003-trip-creation`, PR #9 | `trip-management`, database, migration, formulário, listagem e CI PostgreSQL | 4 testes de domínio, 3 de componente, migration PostGIS, build e 14 E2E persistentes | Integrado |
-| RB-INC-004 | RB-PRD-004, RB-UX-001, RB-UX-002, RB-UX-003, RB-DOM-001, RB-DOM-003 | #11 | `feature/rb-inc-004-trip-overview`, PR #12 | consulta por TripId, visão inicial, Dias derivados e estados da rota | 5 testes de domínio, 4 de componente, build e 14 E2E persistentes | Ready for Integration |
+| RB-INC-004 | RB-PRD-004, RB-UX-001, RB-UX-002, RB-UX-003, RB-DOM-001, RB-DOM-003 | #11 | `feature/rb-inc-004-trip-overview`, PR #12 | consulta por TripId, visão inicial, Dias derivados e estados da rota | 5 testes de domínio, 4 de componente, build e 14 E2E persistentes | Integrado |
+| RB-INC-005 | RB-PRD-004, RB-DOM-001, RB-DOM-003, RB-ARC-004, RB-DATA-001, RB-DATA-002 | #13 | `feature/rb-inc-005-traveler-context`, PR pendente | `traveler-profile`, migration, formulário de contexto e resumo na visão inicial | evidências pendentes dos workflows definitivos | Em execução |
 
 ## Evidências do RB-INC-003
 
@@ -80,6 +82,19 @@ ai_context:
 | testes E2E | 14 aprovados em desktop Chromium e Pixel 7 |
 | quality gates | frozen install, format, docs, lint, typecheck, migration, dev smoke, build e Playwright aprovados |
 | rastreabilidade | issue #11 e PR #12 |
+
+## Evidências previstas do RB-INC-005
+
+| Evidência | Localização |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-005-traveler-context.md` |
+| agregado e invariantes | `modules/traveler-profile/src/profile.ts` |
+| porta e serviços | `modules/traveler-profile/src/repository.ts` e `src/service.ts` |
+| schema e adapter | `packages/database/src/schema.ts` e `src/traveler-profile-repository.ts` |
+| migration | `packages/database/drizzle/0001_create_traveler_profiles.sql` |
+| configuração | `apps/web/app/viagens/[tripId]/contexto` e `apps/web/components/traveler-context-form.tsx` |
+| resumo | `apps/web/app/viagens/[tripId]/page.tsx` |
+| testes | `modules/traveler-profile/src/profile.test.ts` e `apps/web/e2e/product-shell.spec.ts` |
 
 ## Cadeia mínima
 

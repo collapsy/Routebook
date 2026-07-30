@@ -1,5 +1,3 @@
-"use server";
-
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -15,6 +13,8 @@ function recommendationPath(tripId: string): string {
 }
 
 export async function ignoreRecommendationAction(formData: FormData): Promise<never> {
+  "use server";
+
   const tripId = String(formData.get("tripId") ?? "").trim();
   const rawRecommendationId = String(formData.get("recommendationId") ?? "").trim();
 

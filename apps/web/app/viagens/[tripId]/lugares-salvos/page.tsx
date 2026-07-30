@@ -11,6 +11,8 @@ import { listPublishedPlaces, type PlaceCategory } from "@routebook/place-catalo
 import { listSavedPlaces } from "@routebook/saved-places";
 import { findTripById } from "@routebook/trip-management";
 
+import { TripMap } from "../../../../components/trip-map";
+import type { TripMapPoint } from "../../../../lib/trip-map";
 import { presentAccommodationDistance } from "../lugares/distance";
 import { removeSavedPlaceAction } from "./actions";
 
@@ -55,6 +57,24 @@ export default async function SavedPlacesPage({
 
   const savedIds = new Set(savedPlaces.map((selection) => selection.placeId));
   const places = publishedPlaces.filter((place) => savedIds.has(place.id));
+  const mapPoints: TripMapPoint[] = places.map((place) => ({
+    id: place.id,
+    label: place.name,
+    kind: "saved-place",
+    latitude: place.latitude,
+    longitude: place.longitude,
+    href: `/viagens/${tripId}/lugares/${place.slug}`,
+  }));
+
+  if (trip.accommodation?.coordinate) {
+    mapPoints.unshift({
+      id: "accommodation",
+      label: trip.accommodation.name,
+      kind: "accommodation",
+      latitude: trip.accommodation.coordinate.latitude,
+      longitude: trip.accommodation.coordinate.longitude,
+    });
+  }
 
   return (
     <section className="app-page trip-overview-page">
@@ -87,6 +107,8 @@ export default async function SavedPlacesPage({
         </div>
         <span className="trip-context-version">{places.length} salvos</span>
       </header>
+
+      <TripMap points={mapPoints} title="Hospedagem e lugares salvos" />
 
       {places.length === 0 ? (
         <section className="traveler-context-summary" aria-labelledby="saved-empty-title">

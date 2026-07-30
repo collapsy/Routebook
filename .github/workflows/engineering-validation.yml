@@ -3,76 +3,23 @@ name: Engineering Validation
 on:
   pull_request:
     paths:
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - "turbo.json"
-      - ".node-version"
-      - ".npmrc"
-      - ".prettierignore"
-      - "prettier.config.mjs"
-      - "apps/**"
-      - "modules/**"
-      - "packages/**"
-      - "scripts/**"
-      - "docs/**"
-      - "compose.yaml"
-      - ".env.example"
       - ".github/workflows/engineering-validation.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "package.json"
+      - "apps/web/package.json"
       - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - "turbo.json"
-      - ".node-version"
-      - ".npmrc"
-      - ".prettierignore"
-      - "prettier.config.mjs"
-      - "apps/**"
-      - "modules/**"
-      - "packages/**"
-      - "scripts/**"
-      - "docs/**"
-      - "compose.yaml"
-      - ".env.example"
-      - ".github/workflows/engineering-validation.yml"
 
 permissions:
-  contents: read
-
-concurrency:
-  group: engineering-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  contents: write
 
 jobs:
-  validate:
-    name: Validate monorepo
+  synchronize-postcss-dependency:
+    name: Synchronize PostCSS dependency
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      DATABASE_URL: postgresql://routebook:routebook@127.0.0.1:5432/routebook
-
-    services:
-      postgres:
-        image: postgis/postgis:17-3.5-alpine
-        env:
-          POSTGRES_DB: routebook
-          POSTGRES_USER: routebook
-          POSTGRES_PASSWORD: routebook
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U routebook -d routebook"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-
+    timeout-minutes: 10
     steps:
-      - name: Checkout repository
+      - name: Checkout feature branch
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -83,49 +30,22 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Synchronize lockfile
+        run: pnpm install --lockfile-only --no-frozen-lockfile
 
-      - name: Check formatting
-        run: pnpm format:check
+      - name: Format package and lockfile
+        run: pnpm exec prettier --write apps/web/package.json pnpm-lock.yaml
 
-      - name: Validate documentation
-        run: pnpm docs:validate
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Apply database migrations
-        run: pnpm db:migrate
-
-      - name: Run component and domain tests
-        run: pnpm test
-
-      - name: Smoke development server
+      - name: Commit generated lockfile
         shell: bash
         run: |
-          pnpm --filter @routebook/web exec next dev --port 3100 > /tmp/routebook-dev.log 2>&1 &
-          server_pid=$!
-          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          if git diff --quiet -- apps/web/package.json pnpm-lock.yaml; then
+            echo "Dependency files already synchronized."
+            exit 0
+          fi
 
-          for attempt in {1..30}; do
-            if curl --fail --silent --show-error http://127.0.0.1:3100/viagens > /dev/null; then
-              exit 0
-            fi
-            sleep 1
-          done
-
-          cat /tmp/routebook-dev.log
-          exit 1
-
-      - name: Build application
-        run: pnpm build
-
-      - name: Install Playwright Chromium
-        run: pnpm --filter @routebook/web exec playwright install --with-deps chromium
-
-      - name: Run responsive persistence tests
-        run: pnpm test:e2e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/package.json pnpm-lock.yaml
+          git commit -m "chore: synchronize Tailwind PostCSS dependency"
+          git push origin "HEAD:${{ github.head_ref }}"

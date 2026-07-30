@@ -75,13 +75,7 @@ export type AddActivityInput = {
 
 export type ItineraryFieldErrors = Partial<
   Record<
-    | "tripId"
-    | "period"
-    | "dayDate"
-    | "title"
-    | "startTime"
-    | "durationMinutes"
-    | "placeId",
+    "tripId" | "period" | "dayDate" | "title" | "startTime" | "durationMinutes" | "placeId",
     string
   >
 >;
@@ -94,10 +88,7 @@ export class ItineraryValidationError extends Error {
 }
 
 function isLocalDate(value: string): boolean {
-  return (
-    /^\d{4}-\d{2}-\d{2}$/.test(value) &&
-    !Number.isNaN(Date.parse(`${value}T00:00:00Z`))
-  );
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
 }
 
 function isLocalTime(value: string): boolean {
@@ -119,10 +110,7 @@ function validatePeriod(period: TripPeriod): ItineraryFieldErrors {
   return {};
 }
 
-export function createItinerary(
-  input: CreateItineraryInput,
-  now = new Date(),
-): Itinerary {
+export function createItinerary(input: CreateItineraryInput, now = new Date()): Itinerary {
   const tripId = input.tripId.trim();
   const fieldErrors: ItineraryFieldErrors = {
     ...validatePeriod(input.period),
@@ -168,8 +156,7 @@ export function addActivity(
     input.durationMinutes !== undefined &&
     (!Number.isInteger(input.durationMinutes) || input.durationMinutes <= 0)
   ) {
-    fieldErrors.durationMinutes =
-      "A duração deve ser informada em minutos inteiros e positivos.";
+    fieldErrors.durationMinutes = "A duração deve ser informada em minutos inteiros e positivos.";
   }
   if (input.placeId !== undefined && !placeId) {
     fieldErrors.placeId = "Informe um lugar válido ou remova o vínculo com o lugar.";
@@ -188,9 +175,7 @@ export function addActivity(
     createdAt: now,
     updatedAt: now,
     ...(input.startTime !== undefined ? { startTime: input.startTime } : {}),
-    ...(input.durationMinutes !== undefined
-      ? { durationMinutes: input.durationMinutes }
-      : {}),
+    ...(input.durationMinutes !== undefined ? { durationMinutes: input.durationMinutes } : {}),
     ...(placeId ? { placeId } : {}),
   };
 

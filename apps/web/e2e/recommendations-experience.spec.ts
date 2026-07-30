@@ -70,7 +70,7 @@ test("apresenta Recommendations explicáveis e preserva a rejeição após recar
   await expect(
     praiaDoAmor.getByText(/categoria do Lugar corresponde a um interesse/i),
   ).toBeVisible();
-  await expect(praiaDoAmor.getByText(/em linha reta/i)).toBeVisible();
+  await expect(praiaDoAmor.getByText(/^Distância da hospedagem:/)).toBeVisible();
   await expect(praiaDoAmor.getByRole("heading", { name: /Confiança/ })).toBeVisible();
   await expect(page.getByText(/score/i)).toHaveCount(0);
   await expect(page.getByText(/\d+%/)).toHaveCount(0);

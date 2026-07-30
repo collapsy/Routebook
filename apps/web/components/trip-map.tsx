@@ -14,6 +14,7 @@ const kindLabels: Record<TripMapPointKind, string> = {
   accommodation: "Hospedagem",
   "published-place": "Lugar publicado",
   "saved-place": "Lugar salvo",
+  "itinerary-activity": "Atividade planejada",
 };
 
 function buildOpenStreetMapEmbedUrl(bounds: TripMapBounds): string {
@@ -33,19 +34,30 @@ function calculateMarkerPosition(point: TripMapPoint, bounds: TripMapBounds) {
   };
 }
 
+function describePoint(point: TripMapPoint): string {
+  if (point.kind === "itinerary-activity" && point.sequence !== undefined) {
+    return `Atividade ${point.sequence}: ${point.label}`;
+  }
+
+  return `${kindLabels[point.kind]}: ${point.label}`;
+}
+
 function Marker({ point, bounds }: { point: TripMapPoint; bounds: TripMapBounds }) {
   const className = `${styles.marker} ${styles[point.kind]}`;
   const markerContent = (
     <>
-      <span aria-hidden="true" className={styles.markerDot} />
+      <span aria-hidden="true" className={styles.markerDot}>
+        {point.kind === "itinerary-activity" ? point.sequence : null}
+      </span>
       <span className={styles.markerLabel}>{point.label}</span>
     </>
   );
+  const accessibleName = describePoint(point);
 
   if (point.href) {
     return (
       <Link
-        aria-label={`${kindLabels[point.kind]}: ${point.label}. Abrir detalhes.`}
+        aria-label={`${accessibleName}. Abrir detalhes.`}
         className={className}
         href={point.href}
         style={calculateMarkerPosition(point, bounds)}
@@ -57,7 +69,7 @@ function Marker({ point, bounds }: { point: TripMapPoint; bounds: TripMapBounds 
 
   return (
     <span
-      aria-label={`${kindLabels[point.kind]}: ${point.label}`}
+      aria-label={accessibleName}
       className={className}
       role="img"
       style={calculateMarkerPosition(point, bounds)}
@@ -67,19 +79,32 @@ function Marker({ point, bounds }: { point: TripMapPoint; bounds: TripMapBounds 
   );
 }
 
-export function TripMap({ points, title }: { points: readonly TripMapPoint[]; title: string }) {
+type TripMapProps = {
+  points: readonly TripMapPoint[];
+  title: string;
+  description?: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
+};
+
+export function TripMap({
+  points,
+  title,
+  description = "Use os marcadores para localizar a hospedagem e abrir os detalhes dos lugares.",
+  emptyTitle = "Mapa ainda indisponível",
+  emptyDescription =
+    "Informe as coordenadas da hospedagem ou aguarde a publicação de lugares com localização para visualizar o mapa. As demais áreas da viagem continuam disponíveis normalmente.",
+}: TripMapProps) {
   const validPoints = points.filter(isValidTripMapPoint);
   const bounds = deriveTripMapBounds(validPoints);
+  const visibleKinds = Array.from(new Set(validPoints.map((point) => point.kind)));
 
   if (!bounds) {
     return (
       <section aria-labelledby="trip-map-title" className={styles.emptyState}>
         <p className={styles.eyebrow}>Contexto espacial</p>
-        <h2 id="trip-map-title">Mapa ainda indisponível</h2>
-        <p>
-          Informe as coordenadas da hospedagem ou aguarde a publicação de lugares com localização
-          para visualizar o mapa. As demais áreas da viagem continuam disponíveis normalmente.
-        </p>
+        <h2 id="trip-map-title">{emptyTitle}</h2>
+        <p>{emptyDescription}</p>
       </section>
     );
   }
@@ -90,13 +115,13 @@ export function TripMap({ points, title }: { points: readonly TripMapPoint[]; ti
         <div>
           <p className={styles.eyebrow}>Contexto espacial</p>
           <h2 id="trip-map-title">{title}</h2>
-          <p>Use os marcadores para localizar a hospedagem e abrir os detalhes dos lugares.</p>
+          <p>{description}</p>
         </div>
         <ul aria-label="Legenda do mapa" className={styles.legend}>
-          {Object.entries(kindLabels).map(([kind, label]) => (
+          {visibleKinds.map((kind) => (
             <li key={kind}>
               <span aria-hidden="true" className={`${styles.legendDot} ${styles[kind]}`} />
-              {label}
+              {kindLabels[kind]}
             </li>
           ))}
         </ul>
@@ -124,7 +149,7 @@ export function TripMap({ points, title }: { points: readonly TripMapPoint[]; ti
         {validPoints.map((point) => (
           <li key={`list-${point.kind}-${point.id}`}>
             <div>
-              <span>{kindLabels[point.kind]}</span>
+              <span>{describePoint(point)}</span>
               <strong>{point.label}</strong>
             </div>
             {point.href ? <Link href={point.href}>Ver detalhes</Link> : null}

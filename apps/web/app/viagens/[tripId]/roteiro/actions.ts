@@ -66,7 +66,9 @@ export async function addManualActivityAction(formData: FormData): Promise<never
       ...(durationMinutes !== undefined ? { durationMinutes } : {}),
     });
   } catch (error) {
-    if (error instanceof ItineraryValidationError) redirectWithItineraryError(tripId, error);
+    if (error instanceof ItineraryValidationError) {
+      redirectWithItineraryError(tripId, error);
+    }
     throw error;
   }
 
@@ -97,7 +99,9 @@ export async function updateItineraryActivityAction(formData: FormData): Promise
       ...(durationMinutes !== undefined ? { durationMinutes } : {}),
     });
   } catch (error) {
-    if (error instanceof ItineraryValidationError) redirectWithItineraryError(tripId, error);
+    if (error instanceof ItineraryValidationError) {
+      redirectWithItineraryError(tripId, error);
+    }
     throw error;
   }
 
@@ -107,7 +111,9 @@ export async function updateItineraryActivityAction(formData: FormData): Promise
   redirect(`/viagens/${tripId}/roteiro?atividadeEditada=1`);
 }
 
-export async function reorderItineraryActivitiesAction(formData: FormData): Promise<never> {
+export async function reorderItineraryActivitiesAction(
+  formData: FormData,
+): Promise<never> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const activityId = String(formData.get("activityId") ?? "").trim();
   const targetActivityId = String(formData.get("targetActivityId") ?? "").trim();
@@ -120,7 +126,9 @@ export async function reorderItineraryActivitiesAction(formData: FormData): Prom
   try {
     updatedItinerary = reorderActivities(itinerary, { activityId, targetActivityId });
   } catch (error) {
-    if (error instanceof ItineraryValidationError) redirectWithItineraryError(tripId, error);
+    if (error instanceof ItineraryValidationError) {
+      redirectWithItineraryError(tripId, error);
+    }
     throw error;
   }
 
@@ -142,7 +150,9 @@ export async function removeItineraryActivityAction(formData: FormData): Promise
   try {
     updatedItinerary = removeActivity(itinerary, { activityId });
   } catch (error) {
-    if (error instanceof ItineraryValidationError) redirectWithItineraryError(tripId, error);
+    if (error instanceof ItineraryValidationError) {
+      redirectWithItineraryError(tripId, error);
+    }
     throw error;
   }
 

@@ -16,9 +16,7 @@ export type ItineraryLegEndpoint = {
 };
 
 export type ItineraryLegUnavailableReason =
-  | "origin-unavailable"
-  | "destination-unavailable"
-  | "both-unavailable";
+  "origin-unavailable" | "destination-unavailable" | "both-unavailable";
 
 export type ItinerarySpatialLeg =
   | {
@@ -135,7 +133,10 @@ export function deriveItineraryDayLegSummary(
 
   const totalMeters =
     legs.length > 0 && legs.every((leg) => leg.status === "available")
-      ? legs.reduce((total, leg) => total + (leg.status === "available" ? leg.distanceMeters : 0), 0)
+      ? legs.reduce(
+          (total, leg) => total + (leg.status === "available" ? leg.distanceMeters : 0),
+          0,
+        )
       : undefined;
 
   return {

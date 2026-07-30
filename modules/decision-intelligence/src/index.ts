@@ -19,6 +19,12 @@ export type {
 } from "./deterministic-recommendations";
 
 export {
+  createRecommendationContextFingerprint,
+  fingerprintRecommendation,
+} from "./recommendation-fingerprint";
+export type { RecommendationContextFingerprintInput } from "./recommendation-fingerprint";
+
+export {
   acceptRecommendation,
   createDecisionId,
   createRecommendation,
@@ -51,3 +57,9 @@ export type {
   RecommendationTarget,
   RecommendationValidity,
 } from "./recommendation";
+
+export { RecommendationRepositoryError } from "./repository";
+export type {
+  RecommendationRepository,
+  SaveGeneratedRecommendationMode,
+} from "./repository";

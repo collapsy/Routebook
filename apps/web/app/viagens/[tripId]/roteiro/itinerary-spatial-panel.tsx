@@ -68,7 +68,11 @@ export function ItinerarySpatialPanel({
   const unavailable = context.activitySteps.filter((step) => step.status === "unavailable");
 
   return (
-    <section aria-labelledby="itinerary-spatial-title" className={styles.panel} id="contexto-geografico">
+    <section
+      aria-labelledby="itinerary-spatial-title"
+      className={styles.panel}
+      id="contexto-geografico"
+    >
       <header className={styles.header}>
         <p className={styles.eyebrow}>Visualização geográfica do Dia</p>
         <h2 id="itinerary-spatial-title">Onde estão as decisões do Roteiro</h2>
@@ -115,16 +119,24 @@ export function ItinerarySpatialPanel({
 
         {unavailable.length > 0 ? (
           <p className={styles.notice} role="status">
-            {unavailable.length} {unavailable.length === 1 ? "Atividade não pôde" : "Atividades não puderam"} ser localizada.
+            {unavailable.length}{" "}
+            {unavailable.length === 1 ? "Atividade não pôde" : "Atividades não puderam"} ser
+            localizada.
           </p>
         ) : null}
 
         {context.activitySteps.length === 0 ? (
           <p className={styles.emptyDay}>Nenhuma Atividade planejada para este Dia.</p>
         ) : (
-          <ol aria-label={`Atividades do Dia ${selectedDay.position}`} className={styles.activityList}>
+          <ol
+            aria-label={`Atividades do Dia ${selectedDay.position}`}
+            className={styles.activityList}
+          >
             {context.activitySteps.map((step) => (
-              <li className={step.status === "available" ? styles.available : styles.unavailable} key={step.activityId}>
+              <li
+                className={step.status === "available" ? styles.available : styles.unavailable}
+                key={step.activityId}
+              >
                 <span className={styles.sequence}>{step.order}</span>
                 <div>
                   <strong>{step.title}</strong>

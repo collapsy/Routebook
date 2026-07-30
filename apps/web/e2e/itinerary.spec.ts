@@ -48,9 +48,7 @@ test("remove uma atividade do roteiro e preserva a remoção", async ({ page }, 
   await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
 
   await expect(page.getByText(activityTitle, { exact: true })).toBeVisible();
-  await page
-    .getByRole("button", { name: `Remover ${activityTitle} do roteiro` })
-    .click();
+  await page.getByRole("button", { name: `Remover ${activityTitle} do roteiro` }).click();
 
   await expect(page).toHaveURL(/atividadeRemovida=1$/);
   await expect(page.getByRole("status")).toContainText("Atividade removida");

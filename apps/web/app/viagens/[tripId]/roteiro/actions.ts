@@ -9,6 +9,7 @@ import {
   createItinerary,
   findTripById,
   ItineraryValidationError,
+  type Itinerary,
 } from "@routebook/trip-management";
 
 function optionalText(value: FormDataEntryValue | null): string | undefined {
@@ -32,7 +33,7 @@ export async function addManualActivityAction(formData: FormData): Promise<never
     (await itineraryRepository.findByTripId(tripId)) ??
     createItinerary({ tripId, period: trip.period });
 
-  let updatedItinerary;
+  let updatedItinerary: Itinerary;
   try {
     updatedItinerary = addActivity(itinerary, {
       dayDate,

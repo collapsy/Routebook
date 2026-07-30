@@ -1,5 +1,14 @@
 export { closeDatabase, getDatabase } from "./client";
-export { places, savedPlaces, travelerProfiles, trips } from "./schema";
+export {
+  itineraries,
+  itineraryActivities,
+  itineraryDays,
+  places,
+  savedPlaces,
+  travelerProfiles,
+  trips,
+} from "./schema";
+export { DrizzleItineraryRepository } from "./itinerary-repository";
 export { DrizzlePlaceRepository } from "./place-repository";
 export { DrizzleSavedPlaceRepository } from "./saved-place-repository";
 export { DrizzleTravelerProfileRepository } from "./traveler-profile-repository";

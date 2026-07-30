@@ -58,6 +58,42 @@ test("remove uma atividade do roteiro e preserva a remoção", async ({ page }, 
   await expect(page.getByText(activityTitle, { exact: true })).toHaveCount(0);
 });
 
+test("edita uma atividade preservando sua identidade no roteiro", async ({ page }, testInfo) => {
+  const tripName = `Edição ${testInfo.project.name} ${Date.now()}`;
+  const activityTitle = "Passeio inicial";
+  const updatedTitle = "Passeio revisado";
+
+  await page.goto("/viagens/nova");
+  await page.getByLabel("Nome da viagem").fill(tripName);
+  await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
+  await page.getByRole("button", { name: "Criar viagem" }).click();
+
+  await page.getByRole("link", { name: tripName }).click();
+  await page.getByRole("link", { name: "Abrir roteiro" }).click();
+  await page.getByLabel("Título").fill(activityTitle);
+  await page.getByLabel("Horário opcional").fill("10:00");
+  await page.getByLabel("Duração opcional").fill("120");
+  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+
+  await page.getByRole("button", { name: `Editar ${activityTitle}` }).click();
+  const editForm = page.getByRole("form", { name: `Editar ${activityTitle}` });
+  await editForm.getByLabel("Título").fill(updatedTitle);
+  await editForm.getByLabel("Horário opcional").fill("");
+  await editForm.getByLabel("Duração opcional").fill("90");
+  await editForm.getByRole("button", { name: "Salvar alterações" }).click();
+
+  await expect(page).toHaveURL(/atividadeEditada=1$/);
+  await expect(page.getByRole("status")).toContainText("Atividade atualizada");
+  await expect(page.getByText(updatedTitle, { exact: true })).toBeVisible();
+  await expect(page.getByText(activityTitle, { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Livre", { exact: true })).toBeVisible();
+  await expect(page.getByText("1 h 30 min", { exact: true })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText(updatedTitle, { exact: true })).toBeVisible();
+  await expect(page.getByText("1 h 30 min", { exact: true })).toBeVisible();
+});
+
 test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ page }, testInfo) => {
   const tripName = `Lugar no roteiro ${testInfo.project.name} ${Date.now()}`;
 

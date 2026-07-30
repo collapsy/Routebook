@@ -37,7 +37,9 @@ export function removeFreePeriod(
         .filter((freePeriod) => freePeriod.id !== freePeriodId)
         .map((freePeriod, index) => {
           const order = index + 1;
-          return freePeriod.order === order ? freePeriod : { ...freePeriod, order, updatedAt: now };
+          return freePeriod.order === order
+            ? freePeriod
+            : { ...freePeriod, order, updatedAt: now };
         });
 
       return { ...day, freePeriods };

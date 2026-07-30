@@ -186,14 +186,22 @@ export function ItinerarySpatialPanel({
             Ainda não há dois pontos consecutivos disponíveis para formar uma etapa.
           </p>
         ) : (
-          <ol aria-label={`Deslocamentos do Dia ${selectedDay.position}`} className={styles.legList}>
+          <ol
+            aria-label={`Deslocamentos do Dia ${selectedDay.position}`}
+            className={styles.legList}
+          >
             {legSummary.legs.map((leg, index) => {
               const originLabel = leg.status === "available" ? leg.origin.label : leg.originLabel;
               const destinationLabel =
                 leg.status === "available" ? leg.destination.label : leg.destinationLabel;
 
               return (
-                <li className={leg.status === "available" ? styles.availableLeg : styles.unavailableLeg} key={leg.id}>
+                <li
+                  className={
+                    leg.status === "available" ? styles.availableLeg : styles.unavailableLeg
+                  }
+                  key={leg.id}
+                >
                   <strong
                     aria-label={`Deslocamento de ${originLabel} para ${destinationLabel}`}
                     data-route={` — de ${originLabel} para ${destinationLabel}`}

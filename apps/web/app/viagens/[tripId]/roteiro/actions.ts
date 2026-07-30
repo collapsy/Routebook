@@ -9,6 +9,7 @@ import {
   createItinerary,
   findTripById,
   ItineraryValidationError,
+  moveActivity,
   removeActivity,
   reorderActivities,
   updateActivity,
@@ -132,6 +133,31 @@ export async function reorderItineraryActivitiesAction(formData: FormData): Prom
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/roteiro`);
   redirect(`/viagens/${tripId}/roteiro?atividadeReordenada=1`);
+}
+
+export async function moveItineraryActivityAction(formData: FormData): Promise<never> {
+  const tripId = String(formData.get("tripId") ?? "").trim();
+  const activityId = String(formData.get("activityId") ?? "").trim();
+  const targetDayDate = String(formData.get("targetDayDate") ?? "").trim();
+  const trip = await findTripById(new DrizzleTripRepository(), tripId);
+
+  if (!trip) notFound();
+
+  const { repository, itinerary } = await loadItinerary(tripId);
+  let updatedItinerary: Itinerary;
+  try {
+    updatedItinerary = moveActivity(itinerary, { activityId, targetDayDate });
+  } catch (error) {
+    if (error instanceof ItineraryValidationError) {
+      redirectWithItineraryError(tripId, error);
+    }
+    throw error;
+  }
+
+  await repository.save(updatedItinerary);
+  revalidatePath(`/viagens/${tripId}`);
+  revalidatePath(`/viagens/${tripId}/roteiro`);
+  redirect(`/viagens/${tripId}/roteiro?atividadeMovida=1`);
 }
 
 export async function removeItineraryActivityAction(formData: FormData): Promise<never> {

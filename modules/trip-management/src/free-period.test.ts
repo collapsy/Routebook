@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { addFreePeriod, createItinerary, ItineraryValidationError } from "./itinerary";
+import {
+  addFreePeriod,
+  createItinerary,
+  ItineraryValidationError,
+} from "./itinerary";
 
 const period = {
   startDate: "2026-08-22",

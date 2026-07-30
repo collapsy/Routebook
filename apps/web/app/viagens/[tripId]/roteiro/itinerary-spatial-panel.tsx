@@ -139,7 +139,12 @@ export function ItinerarySpatialPanel({
               >
                 <span className={styles.sequence}>{step.order}</span>
                 <div>
-                  <strong>{`Etapa ${step.order} — ${step.title}`}</strong>
+                  <strong
+                    aria-label={`Etapa ${step.order}: ${step.title}`}
+                    data-title={` — ${step.title}`}
+                  >
+                    Etapa {step.order}
+                  </strong>
                   <span>
                     {step.status === "available"
                       ? "Localização disponível no mapa."

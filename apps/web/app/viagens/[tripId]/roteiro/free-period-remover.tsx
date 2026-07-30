@@ -4,7 +4,13 @@ import { useParams } from "next/navigation";
 
 import { removeItineraryFreePeriodAction } from "./actions";
 
-export function FreePeriodRemover({ freePeriodId }: { freePeriodId: string }) {
+export function FreePeriodRemover({
+  freePeriodId,
+  label,
+}: {
+  freePeriodId: string;
+  label: string;
+}) {
   const { tripId } = useParams<{ tripId: string }>();
 
   return (
@@ -12,7 +18,7 @@ export function FreePeriodRemover({ freePeriodId }: { freePeriodId: string }) {
       <input name="tripId" type="hidden" value={tripId} />
       <input name="freePeriodId" type="hidden" value={freePeriodId} />
       <button
-        aria-label={`Remover período livre ${freePeriodId} do roteiro`}
+        aria-label={`Remover ${label} do roteiro`}
         className="itinerary-danger-action"
         type="submit"
       >

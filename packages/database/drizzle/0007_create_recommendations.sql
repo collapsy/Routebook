@@ -33,7 +33,7 @@ ALTER TABLE "recommendations" ADD CONSTRAINT "recommendations_trip_id_trips_id_f
 --> statement-breakpoint
 ALTER TABLE "recommendations" ADD CONSTRAINT "recommendations_place_id_places_id_fk" FOREIGN KEY ("place_id") REFERENCES "public"."places"("id") ON DELETE restrict ON UPDATE no action;
 --> statement-breakpoint
-ALTER TABLE "recommendations" ADD CONSTRAINT "recommendations_superseded_by_recommendation_id_fk" FOREIGN KEY ("superseded_by_recommendation_id") REFERENCES "public"."recommendations"("id") ON DELETE set null ON UPDATE no action;
+ALTER TABLE "recommendations" ADD CONSTRAINT "recommendations_superseded_by_recommendation_id_fk" FOREIGN KEY ("superseded_by_recommendation_id") REFERENCES "public"."recommendations"("id") ON DELETE set null ON UPDATE no action DEFERRABLE INITIALLY DEFERRED;
 --> statement-breakpoint
 CREATE INDEX "recommendations_trip_id_idx" ON "recommendations" USING btree ("trip_id");
 --> statement-breakpoint

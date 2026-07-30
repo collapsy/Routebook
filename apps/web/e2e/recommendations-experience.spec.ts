@@ -32,9 +32,9 @@ async function createTripWithRecommendationContext(page: import("@playwright/tes
 
   await page.goto(`${tripUrl}/hospedagem`);
   await page.getByLabel("Nome da hospedagem").fill("Condomínio Solar Água");
-  await page.getByLabel("Endereço").fill("Pipa, Tibau do Sul — RN");
-  await page.getByLabel("Latitude").fill("-6,2302");
-  await page.getByLabel("Longitude").fill("-35,0503");
+  await page.getByLabel("Endereço", { exact: true }).fill("Pipa, Tibau do Sul — RN");
+  await page.getByLabel("Latitude", { exact: true }).fill("-6,2302");
+  await page.getByLabel("Longitude", { exact: true }).fill("-35,0503");
   await Promise.all([
     page.waitForURL(/\/hospedagem\?saved=1$/),
     page.getByRole("button", { name: "Salvar hospedagem" }).click(),

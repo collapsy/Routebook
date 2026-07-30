@@ -177,11 +177,7 @@ describe("removeFreePeriod", () => {
       { dayDate: "2026-08-23", mode: "protected" },
       secondAt,
     );
-    itinerary = addFreePeriod(
-      itinerary,
-      { dayDate: "2026-08-23", mode: "flexible" },
-      thirdAt,
-    );
+    itinerary = addFreePeriod(itinerary, { dayDate: "2026-08-23", mode: "flexible" }, thirdAt);
     itinerary = addFreePeriod(
       itinerary,
       { dayDate: "2026-08-24", mode: "protected" },

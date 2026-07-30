@@ -114,6 +114,13 @@ export type UpdateActivityInput = {
   durationMinutes?: number;
 };
 
+export type UpdateFreePeriodInput = {
+  freePeriodId: string;
+  mode: FreePeriodMode;
+  startTime?: string;
+  durationMinutes?: number;
+};
+
 export type ItineraryFieldErrors = Partial<
   Record<
     | "tripId"
@@ -306,6 +313,55 @@ export function addFreePeriod(
     days: itinerary.days.map((day) =>
       day.id === targetDay.id ? { ...day, freePeriods: [...day.freePeriods, freePeriod] } : day,
     ),
+    version: itinerary.version + 1,
+    updatedAt: now,
+  };
+}
+
+export function updateFreePeriod(
+  itinerary: Itinerary,
+  input: UpdateFreePeriodInput,
+  now = new Date(),
+): Itinerary {
+  const freePeriodId = input.freePeriodId.trim();
+  const sourceDay = itinerary.days.find((day) =>
+    day.freePeriods.some((freePeriod) => freePeriod.id === freePeriodId),
+  );
+  const fieldErrors = validateFreePeriodDetails(input.mode, input.startTime, input.durationMinutes);
+
+  if (!freePeriodId) fieldErrors.freePeriodId = "Informe um período livre válido.";
+  else if (!sourceDay) {
+    fieldErrors.freePeriodId = "O período livre não pertence a este roteiro.";
+  }
+
+  if (Object.keys(fieldErrors).length > 0 || !sourceDay) {
+    throw new ItineraryValidationError(fieldErrors);
+  }
+
+  return {
+    ...itinerary,
+    days: itinerary.days.map((day) => {
+      if (day.id !== sourceDay.id) return day;
+
+      return {
+        ...day,
+        freePeriods: day.freePeriods.map((freePeriod) => {
+          if (freePeriod.id !== freePeriodId) return freePeriod;
+
+          return {
+            id: freePeriod.id,
+            mode: input.mode,
+            order: freePeriod.order,
+            createdAt: freePeriod.createdAt,
+            updatedAt: now,
+            ...(input.startTime !== undefined ? { startTime: input.startTime } : {}),
+            ...(input.durationMinutes !== undefined
+              ? { durationMinutes: input.durationMinutes }
+              : {}),
+          };
+        }),
+      };
+    }),
     version: itinerary.version + 1,
     updatedAt: now,
   };

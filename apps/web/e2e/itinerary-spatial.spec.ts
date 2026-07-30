@@ -25,14 +25,17 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
 
   await firstPublishedPlace.getByRole("link", { name: "Ver detalhes" }).click();
   await page.getByRole("button", { name: "Salvar lugar" }).click();
+  await expect(page.getByRole("status")).toContainText("Lugar salvo");
   await page.getByRole("link", { name: "Voltar para lugares" }).click();
-  await page
+
+  const secondPublishedPlaceByName = page
     .getByRole("list", { name: "Lugares publicados" })
     .getByRole("listitem")
-    .nth(1)
-    .getByRole("link", { name: "Ver detalhes" })
-    .click();
+    .filter({ hasText: secondPlaceName! });
+  await expect(secondPublishedPlaceByName).toHaveCount(1);
+  await secondPublishedPlaceByName.getByRole("link", { name: "Ver detalhes" }).click();
   await page.getByRole("button", { name: "Salvar lugar" }).click();
+  await expect(page.getByRole("status")).toContainText("Lugar salvo");
   await page.getByRole("link", { name: "Visão da viagem" }).click();
   await page.getByRole("link", { name: "Ver lugares salvos" }).click();
 

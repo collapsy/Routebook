@@ -28,8 +28,12 @@ describe("TripMap", () => {
   it("shows an explicit empty state without valid points", () => {
     render(<TripMap points={[]} title="Mapa de Pipa" />);
 
-    expect(screen.getByRole("heading", { name: "Mapa ainda indisponível" })).toBeInTheDocument();
-    expect(screen.getByText(/demais áreas da viagem continuam disponíveis/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Mapa ainda indisponível" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/demais áreas da viagem continuam disponíveis/i),
+    ).toBeInTheDocument();
   });
 
   it("renders the cartographic layer, legend and accessible location list", () => {

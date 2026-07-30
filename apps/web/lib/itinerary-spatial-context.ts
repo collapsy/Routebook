@@ -20,21 +20,22 @@ export type SpatialUnavailableReason =
   | "place-not-found"
   | "coordinates-unavailable";
 
-export type SpatialActivityStep = {
+type SpatialActivityStepBase = {
   activityId: string;
   title: string;
   order: number;
   placeId?: string;
-} & (
-  | {
+};
+
+export type SpatialActivityStep =
+  | (SpatialActivityStepBase & {
       status: "available";
       point: ItinerarySpatialPoint;
-    }
-  | {
+    })
+  | (SpatialActivityStepBase & {
       status: "unavailable";
       reason: SpatialUnavailableReason;
-    }
-);
+    });
 
 export type SpatialAccommodation =
   | {

@@ -119,9 +119,7 @@ function rehydrateRecommendation(row: RecommendationRow): Recommendation {
 
   if (row.status === "generated") return generated;
 
-  const active = row.presentedAt
-    ? presentRecommendation(generated, row.presentedAt)
-    : generated;
+  const active = row.presentedAt ? presentRecommendation(generated, row.presentedAt) : generated;
 
   switch (row.status) {
     case "presented":
@@ -214,7 +212,10 @@ async function assertRecommendationReferences(recommendation: Recommendation): P
     .where(eq(trips.id, recommendation.snapshot.tripId))
     .limit(1);
   if (!trip) {
-    throw new RecommendationRepositoryError("A Viagem da Recommendation não existe.", "trip-not-found");
+    throw new RecommendationRepositoryError(
+      "A Viagem da Recommendation não existe.",
+      "trip-not-found",
+    );
   }
 
   const [place] = await database
@@ -306,10 +307,7 @@ export class DrizzleRecommendationRepository implements RecommendationRepository
           .update(recommendations)
           .set(valuesFor(superseded))
           .where(
-            and(
-              eq(recommendations.id, activeRow.id),
-              eq(recommendations.tripId, activeRow.tripId),
-            ),
+            and(eq(recommendations.id, activeRow.id), eq(recommendations.tripId, activeRow.tripId)),
           );
       }
 

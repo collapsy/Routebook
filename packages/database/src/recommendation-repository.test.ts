@@ -124,15 +124,9 @@ describe("DrizzleRecommendationRepository", () => {
         generatedAt,
       );
       await repository.saveGenerated(generated);
-      const presented = presentRecommendation(
-        generated,
-        new Date("2026-07-30T20:01:00.000Z"),
-      );
+      const presented = presentRecommendation(generated, new Date("2026-07-30T20:01:00.000Z"));
       await repository.save(presented);
-      const rejected = rejectRecommendation(
-        presented,
-        new Date("2026-07-30T20:02:00.000Z"),
-      );
+      const rejected = rejectRecommendation(presented, new Date("2026-07-30T20:02:00.000Z"));
       await repository.save(rejected);
 
       const persisted = await repository.findById(fixture.trip.id, generated.id);

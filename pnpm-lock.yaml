@@ -236,6 +236,9 @@ importers:
 
   packages/database:
     dependencies:
+      '@routebook/decision-intelligence':
+        specifier: workspace:*
+        version: link:../../modules/decision-intelligence
       '@routebook/geo-distance':
         specifier: workspace:*
         version: link:../../modules/geo-distance

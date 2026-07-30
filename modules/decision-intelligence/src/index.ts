@@ -59,7 +59,4 @@ export type {
 } from "./recommendation";
 
 export { RecommendationRepositoryError } from "./repository";
-export type {
-  RecommendationRepository,
-  SaveGeneratedRecommendationMode,
-} from "./repository";
+export type { RecommendationRepository, SaveGeneratedRecommendationMode } from "./repository";

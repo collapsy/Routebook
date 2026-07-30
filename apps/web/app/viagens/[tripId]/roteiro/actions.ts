@@ -14,6 +14,7 @@ import {
   removeActivity,
   reorderActivities,
   updateActivity,
+  updateFreePeriod,
   type FreePeriodMode,
   type Itinerary,
 } from "@routebook/trip-management";
@@ -110,6 +111,39 @@ export async function addItineraryFreePeriodAction(formData: FormData): Promise<
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/roteiro`);
   redirect(`/viagens/${tripId}/roteiro?periodoLivreCriado=1`);
+}
+
+export async function updateItineraryFreePeriodAction(formData: FormData): Promise<never> {
+  const tripId = String(formData.get("tripId") ?? "").trim();
+  const freePeriodId = String(formData.get("freePeriodId") ?? "").trim();
+  const mode = String(formData.get("freePeriodMode") ?? "").trim() as FreePeriodMode;
+  const startTime = optionalText(formData.get("freePeriodStartTime"));
+  const durationValue = optionalText(formData.get("freePeriodDurationMinutes"));
+  const durationMinutes = durationValue === undefined ? undefined : Number(durationValue);
+  const trip = await findTripById(new DrizzleTripRepository(), tripId);
+
+  if (!trip) notFound();
+
+  const { repository, itinerary } = await loadItinerary(tripId);
+  let updatedItinerary: Itinerary;
+  try {
+    updatedItinerary = updateFreePeriod(itinerary, {
+      freePeriodId,
+      mode,
+      ...(startTime ? { startTime } : {}),
+      ...(durationMinutes !== undefined ? { durationMinutes } : {}),
+    });
+  } catch (error) {
+    if (error instanceof ItineraryValidationError) {
+      redirectWithItineraryError(tripId, error);
+    }
+    throw error;
+  }
+
+  await repository.save(updatedItinerary);
+  revalidatePath(`/viagens/${tripId}`);
+  revalidatePath(`/viagens/${tripId}/roteiro`);
+  redirect(`/viagens/${tripId}/roteiro?periodoLivreEditado=1`);
 }
 
 export async function updateItineraryActivityAction(formData: FormData): Promise<never> {

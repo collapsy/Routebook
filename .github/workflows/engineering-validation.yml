@@ -3,25 +3,76 @@ name: Engineering Validation
 on:
   pull_request:
     paths:
-      - ".github/workflows/engineering-validation.yml"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - ".node-version"
+      - ".npmrc"
+      - ".prettierignore"
+      - "prettier.config.mjs"
+      - "apps/**"
       - "modules/**"
       - "packages/**"
+      - "scripts/**"
       - "docs/**"
+      - "compose.yaml"
+      - ".env.example"
+      - ".github/workflows/engineering-validation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "package.json"
       - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - ".node-version"
+      - ".npmrc"
+      - ".prettierignore"
+      - "prettier.config.mjs"
+      - "apps/**"
+      - "modules/**"
+      - "packages/**"
+      - "scripts/**"
+      - "docs/**"
+      - "compose.yaml"
+      - ".env.example"
+      - ".github/workflows/engineering-validation.yml"
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: engineering-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  synchronize-rb-inc-040:
-    name: Synchronize RB-INC-040 generated files
+  validate:
+    name: Validate monorepo
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: postgresql://routebook:routebook@127.0.0.1:5432/routebook
+
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5-alpine
+        env:
+          POSTGRES_DB: routebook
+          POSTGRES_USER: routebook
+          POSTGRES_PASSWORD: routebook
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U routebook -d routebook"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
-      - name: Checkout feature branch
+      - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.head_ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -32,22 +83,49 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Install and synchronize lockfile
-        run: pnpm install --no-frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Format changed files
-        run: pnpm exec prettier --write modules/decision-intelligence/src/recommendation-fingerprint.ts modules/decision-intelligence/src/recommendation-fingerprint.test.ts modules/decision-intelligence/src/repository.ts modules/decision-intelligence/src/index.ts packages/database/src/schema.ts packages/database/src/recommendation-repository.ts packages/database/src/recommendation-repository.test.ts packages/database/src/index.ts packages/database/package.json packages/database/drizzle/meta/_journal.json docs/implementation/increments/rb-inc-040-recommendation-persistence.md docs/implementation/context-packs/rb-inc-040-recommendation-persistence.md docs/registry.md
+      - name: Check formatting
+        run: pnpm format:check
 
-      - name: Commit generated changes
+      - name: Validate documentation
+        run: pnpm docs:validate
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Apply database migrations
+        run: pnpm db:migrate
+
+      - name: Run component and domain tests
+        run: pnpm test
+
+      - name: Smoke development server
         shell: bash
         run: |
-          if git diff --quiet; then
-            echo "Generated files already synchronized."
-            exit 0
-          fi
+          pnpm --filter @routebook/web exec next dev --port 3100 > /tmp/routebook-dev.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pnpm-lock.yaml modules/decision-intelligence packages/database docs
-          git commit -m "chore: synchronize RB-INC-040 generated files"
-          git push origin "HEAD:${{ github.head_ref }}"
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error http://127.0.0.1:3100/viagens > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          cat /tmp/routebook-dev.log
+          exit 1
+
+      - name: Build application
+        run: pnpm build
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @routebook/web exec playwright install --with-deps chromium
+
+      - name: Run responsive persistence tests
+        run: pnpm test:e2e

@@ -312,7 +312,9 @@ export default async function ItineraryPage({
                                     </div>
                                   ) : null}
                                   <details className="itinerary-edit-disclosure">
-                                    <summary aria-label={`Editar ${activity.title}`}>Editar</summary>
+                                    <summary aria-label={`Editar ${activity.title}`}>
+                                      Editar
+                                    </summary>
                                     <form
                                       action={updateItineraryActivityAction}
                                       aria-label={`Editar ${activity.title}`}

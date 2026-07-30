@@ -1,21 +1,13 @@
-import { GeocodingProviderError, NominatimGeocoder, type GeocodingResult } from "@/lib/geocoding";
+"use server";
 
-export type GeocodingActionState = {
-  query: string;
-  result?: GeocodingResult;
-  error?: string;
-};
+import { GeocodingProviderError, NominatimGeocoder } from "@/lib/geocoding";
 
-export const initialGeocodingState: GeocodingActionState = {
-  query: "",
-};
+import type { GeocodingActionState } from "./geocoding-state";
 
 export async function geocodeAccommodationAction(
   _state: GeocodingActionState,
   formData: FormData,
 ): Promise<GeocodingActionState> {
-  "use server";
-
   const query = String(formData.get("geocodingQuery") ?? "").trim();
 
   if (query.length < 5) {

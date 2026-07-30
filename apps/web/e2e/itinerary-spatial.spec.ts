@@ -20,7 +20,11 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   expect(firstPlaceName).toBeTruthy();
   expect(secondPlaceName).toBeTruthy();
 
-  await publishedPlaces.getByRole("listitem").first().getByRole("link", { name: "Ver detalhes" }).click();
+  await publishedPlaces
+    .getByRole("listitem")
+    .first()
+    .getByRole("link", { name: "Ver detalhes" })
+    .click();
   await page.getByRole("button", { name: "Salvar lugar" }).click();
   await page.getByRole("link", { name: "Voltar para lugares" }).click();
   await page
@@ -35,11 +39,17 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
 
   let savedPlaceCards = page.locator("ul.place-catalog-grid > li");
   await savedPlaceCards.first().getByLabel("Adicionar ao dia").selectOption("2026-08-23");
-  await savedPlaceCards.first().getByRole("button", { name: "Adicionar ao roteiro" }).click();
+  await savedPlaceCards
+    .first()
+    .getByRole("button", { name: "Adicionar ao roteiro" })
+    .click();
 
   savedPlaceCards = page.locator("ul.place-catalog-grid > li");
   await savedPlaceCards.nth(1).getByLabel("Adicionar ao dia").selectOption("2026-08-23");
-  await savedPlaceCards.nth(1).getByRole("button", { name: "Adicionar ao roteiro" }).click();
+  await savedPlaceCards
+    .nth(1)
+    .getByRole("button", { name: "Adicionar ao roteiro" })
+    .click();
 
   await page.getByRole("link", { name: "Abrir roteiro" }).click();
   await page.getByLabel("Dia da viagem").selectOption("2026-08-23");

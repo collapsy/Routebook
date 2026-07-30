@@ -56,9 +56,7 @@ describe("DrizzleItineraryRepository com períodos livres", () => {
         freePeriodId: firstFreePeriod!.id,
         mode: "protected",
       });
-      itinerary = removeFreePeriod(itinerary, {
-        freePeriodId: removedFreePeriod!.id,
-      });
+      itinerary = removeFreePeriod(itinerary, { freePeriodId: removedFreePeriod!.id });
 
       await repository.save(itinerary);
       const persisted = await repository.findByTripId(trip.id);
@@ -84,9 +82,9 @@ describe("DrizzleItineraryRepository com períodos livres", () => {
         startTime: "17:00",
         durationMinutes: 60,
       });
-      expect(persisted?.days[0]?.freePeriods.some((item) => item.id === removedFreePeriod?.id)).toBe(
-        false,
-      );
+      expect(
+        persisted?.days[0]?.freePeriods.some((item) => item.id === removedFreePeriod?.id),
+      ).toBe(false);
       expect(persisted?.days[1]?.freePeriods).toEqual([]);
 
       await database.delete(trips).where(eq(trips.id, trip.id));

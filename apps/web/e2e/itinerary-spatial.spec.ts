@@ -41,9 +41,7 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
     page.waitForURL(/\/lugares-salvos$/),
     page.getByRole("link", { name: "Ver lugares salvos" }).click(),
   ]);
-  await expect(
-    page.getByRole("heading", { name: "Lugares salvos", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Lugares salvos", exact: true })).toBeVisible();
 
   const savedPlacesPath = new URL(page.url()).pathname;
   const addSavedPlaceToDay = async (placeName: string) => {

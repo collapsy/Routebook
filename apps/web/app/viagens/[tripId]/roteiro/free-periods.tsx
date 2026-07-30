@@ -22,25 +22,38 @@ function formatDuration(durationMinutes: number): string {
 }
 
 function freePeriodLabel(item: FreePeriod): string {
-  return item.mode === "protected" ? "Período livre protegido" : "Período livre flexível";
+  return item.mode === "protected"
+    ? "Período livre protegido"
+    : "Período livre flexível";
 }
 
 function freePeriodDescription(item: FreePeriod): string {
-  const duration = item.durationMinutes ? formatDuration(item.durationMinutes) : "duração aberta";
+  const duration = item.durationMinutes
+    ? formatDuration(item.durationMinutes)
+    : "duração aberta";
   return item.mode === "protected"
     ? `${duration}. Não deve receber sugestões automáticas sem sua confirmação.`
     : `${duration}. Pode receber sugestões futuras, sem alterar o roteiro automaticamente.`;
 }
 
-export function FreePeriodComposer({ itinerary, tripId }: { itinerary: Itinerary; tripId: string }) {
+export function FreePeriodComposer({
+  itinerary,
+  tripId,
+}: {
+  itinerary: Itinerary;
+  tripId: string;
+}) {
   return (
-    <section className={styles.composer} aria-labelledby="new-free-period-title">
+    <section
+      className={styles.composer}
+      aria-labelledby="new-free-period-title"
+    >
       <div>
         <p className="product-eyebrow">Espaço intencional</p>
         <h2 id="new-free-period-title">Adicione um período livre</h2>
         <p>
-          Preserve descanso, margem de deslocamento ou tempo para decidir durante a viagem sem criar
-          uma atividade artificial.
+          Preserve descanso, margem de deslocamento ou tempo para decidir
+          durante a viagem sem criar uma atividade artificial.
         </p>
       </div>
 
@@ -65,15 +78,26 @@ export function FreePeriodComposer({ itinerary, tripId }: { itinerary: Itinerary
 
         <div className={styles.field}>
           <label htmlFor="freePeriodMode">Proteção do espaço</label>
-          <select defaultValue="flexible" id="freePeriodMode" name="freePeriodMode" required>
+          <select
+            defaultValue="flexible"
+            id="freePeriodMode"
+            name="freePeriodMode"
+            required
+          >
             <option value="flexible">Flexível — pode receber sugestões</option>
-            <option value="protected">Protegido — preservar sem preenchimento automático</option>
+            <option value="protected">
+              Protegido — preservar sem preenchimento automático
+            </option>
           </select>
         </div>
 
         <div className={styles.field}>
           <label htmlFor="freePeriodStartTime">Horário opcional</label>
-          <input id="freePeriodStartTime" name="freePeriodStartTime" type="time" />
+          <input
+            id="freePeriodStartTime"
+            name="freePeriodStartTime"
+            type="time"
+          />
         </div>
 
         <div className={styles.field}>
@@ -89,11 +113,14 @@ export function FreePeriodComposer({ itinerary, tripId }: { itinerary: Itinerary
         </div>
 
         <p className={styles.explanation}>
-          Sem horário ou duração, o RouteBook mantém o espaço aberto sem inventar limites.
+          Sem horário ou duração, o RouteBook mantém o espaço aberto sem
+          inventar limites.
         </p>
 
         <div className={styles.actions}>
-          <span>O período será registrado como decisão separada das atividades.</span>
+          <span>
+            O período será registrado como decisão separada das atividades.
+          </span>
           <button className="product-button" type="submit">
             Adicionar período livre
           </button>
@@ -103,16 +130,27 @@ export function FreePeriodComposer({ itinerary, tripId }: { itinerary: Itinerary
   );
 }
 
-export function FreePeriodList({ freePeriods, dayId }: { freePeriods: FreePeriod[]; dayId: string }) {
+export function FreePeriodList({
+  freePeriods,
+  dayId,
+}: {
+  freePeriods: FreePeriod[];
+  dayId: string;
+}) {
   if (freePeriods.length === 0) return null;
 
   return (
-    <section className={styles.listSection} aria-labelledby={`${dayId}-free-periods`}>
+    <section
+      className={styles.listSection}
+      aria-labelledby={`${dayId}-free-periods`}
+    >
       <h3 id={`${dayId}-free-periods`}>Períodos livres</h3>
       <ol className={styles.list} aria-label="Períodos livres do dia">
         {freePeriods.map((item) => (
           <li className={styles.item} key={item.id}>
-            <span className={styles.time}>{item.startTime ?? "Horário aberto"}</span>
+            <span className={styles.time}>
+              {item.startTime ?? "Horário aberto"}
+            </span>
             <div className={styles.copy}>
               <strong>{freePeriodLabel(item)}</strong>
               <small>{freePeriodDescription(item)}</small>

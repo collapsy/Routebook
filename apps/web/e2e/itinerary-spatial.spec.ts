@@ -38,7 +38,7 @@ test("visualiza no mapa a sequência geográfica de um Dia sem ocultar lacunas",
   await expect(
     page
       .getByRole("list", { name: "Atividades do Dia 2" })
-      .getByText(`Etapa 1 — ${placeName}`, { exact: true }),
+      .locator(`[aria-label="Etapa 1: ${placeName}"]`),
   ).toBeVisible();
 
   const hasHorizontalOverflow = await page.evaluate(

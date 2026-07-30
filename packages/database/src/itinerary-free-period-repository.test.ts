@@ -1,7 +1,12 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
 
-import { addFreePeriod, createItinerary, createTrip } from "@routebook/trip-management";
+import {
+  addFreePeriod,
+  createItinerary,
+  createTrip,
+  updateFreePeriod,
+} from "@routebook/trip-management";
 
 import { closeDatabase, getDatabase } from "./client";
 import { DrizzleItineraryRepository } from "./itinerary-repository";
@@ -13,7 +18,7 @@ afterAll(async () => {
 });
 
 describe("DrizzleItineraryRepository com períodos livres", () => {
-  it("preserva modos, opcionais, ordem e cascata", async () => {
+  it("preserva criação, edição, opcionais, ordem e cascata", async () => {
     const trip = createTrip({
       name: "Persistência de períodos livres",
       startDate: "2026-08-22",
@@ -37,6 +42,11 @@ describe("DrizzleItineraryRepository com períodos livres", () => {
         dayDate: "2026-08-22",
         mode: "protected",
       });
+      const firstFreePeriod = itinerary.days[0]?.freePeriods[0];
+      itinerary = updateFreePeriod(itinerary, {
+        freePeriodId: firstFreePeriod!.id,
+        mode: "protected",
+      });
 
       await repository.save(itinerary);
       const persisted = await repository.findByTripId(trip.id);
@@ -44,10 +54,13 @@ describe("DrizzleItineraryRepository com períodos livres", () => {
       expect(persisted).toEqual(itinerary);
       expect(persisted?.days[0]?.freePeriods.map((item) => item.order)).toEqual([1, 2]);
       expect(persisted?.days[0]?.freePeriods[0]).toMatchObject({
-        mode: "flexible",
-        startTime: "13:30",
-        durationMinutes: 90,
+        id: firstFreePeriod?.id,
+        mode: "protected",
+        order: 1,
+        createdAt: firstFreePeriod?.createdAt,
       });
+      expect(persisted?.days[0]?.freePeriods[0]?.startTime).toBeUndefined();
+      expect(persisted?.days[0]?.freePeriods[0]?.durationMinutes).toBeUndefined();
       expect(persisted?.days[0]?.freePeriods[1]).toMatchObject({ mode: "protected" });
       expect(persisted?.days[0]?.freePeriods[1]?.startTime).toBeUndefined();
       expect(persisted?.days[0]?.freePeriods[1]?.durationMinutes).toBeUndefined();

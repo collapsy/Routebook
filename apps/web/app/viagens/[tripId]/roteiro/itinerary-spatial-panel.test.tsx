@@ -62,7 +62,7 @@ afterEach(() => {
 });
 
 describe("ItinerarySpatialPanel", () => {
-  it("selects the requested day and preserves unavailable activities and legs in text", () => {
+  it("exposes a safe external route only for available legs", () => {
     render(
       <ItinerarySpatialPanel
         days={[
@@ -129,5 +129,21 @@ describe("ItinerarySpatialPanel", () => {
       screen.getByText(/Distância indisponível porque existe uma lacuna geográfica/),
     ).toBeInTheDocument();
     expect(screen.queryByText(/Total geodésico/)).not.toBeInTheDocument();
+
+    const routeLinks = screen.getAllByRole("link", { name: /Abrir rota externa de/ });
+    expect(routeLinks).toHaveLength(1);
+
+    const routeLink = screen.getByRole("link", {
+      name: "Abrir rota externa de Condomínio Solar Água para Praia do Amor",
+    });
+    expect(routeLink).toHaveAttribute("target", "_blank");
+    expect(routeLink).toHaveAttribute("rel", "noreferrer");
+
+    const routeUrl = new URL(routeLink.getAttribute("href")!);
+    expect(routeUrl.protocol).toBe("https:");
+    expect(routeUrl.hostname).toBe("www.google.com");
+    expect(routeUrl.pathname).toBe("/maps/dir/");
+    expect(routeUrl.searchParams.get("origin")).toBe("-6.2302,-35.0503");
+    expect(routeUrl.searchParams.get("destination")).toBe("-6.244,-35.041");
   });
 });

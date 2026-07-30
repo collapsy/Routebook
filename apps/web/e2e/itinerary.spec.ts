@@ -75,7 +75,7 @@ test("edita uma atividade preservando sua identidade no roteiro", async ({ page 
   await page.getByLabel("Duração opcional").fill("120");
   await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
 
-  await page.getByRole("button", { name: `Editar ${activityTitle}` }).click();
+  await page.locator(`summary[aria-label="Editar ${activityTitle}"]`).click();
   const editForm = page.getByRole("form", { name: `Editar ${activityTitle}` });
   await editForm.getByLabel("Título").fill(updatedTitle);
   await editForm.getByLabel("Horário opcional").fill("");

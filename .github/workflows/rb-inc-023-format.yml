@@ -1,0 +1,38 @@
+name: RB-INC-023 Formatter
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-023-itinerary-core
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Format itinerary
+        run: pnpm exec prettier --write modules/trip-management/src/itinerary.ts
+
+      - name: Upload formatted itinerary
+        uses: actions/upload-artifact@v6
+        with:
+          name: rb-inc-023-formatted-itinerary
+          path: modules/trip-management/src/itinerary.ts
+          if-no-files-found: error

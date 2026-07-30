@@ -1,0 +1,43 @@
+name: Temporary RB040 Document Sync
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-040-recommendation-persistence
+    paths:
+      - ".github/workflows/temporary-rb040-doc-sync.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Register documents
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path("docs/registry.md")
+          text = path.read_text()
+          marker = "| RB-AI-007 |"
+          rows = (
+              "| RB-INC-040 | Persistência e Ciclo de Vida das Recommendations | Implementation Increment | Draft | 0.1.0 | [rb-inc-040-recommendation-persistence.md](./implementation/increments/rb-inc-040-recommendation-persistence.md) |\n"
+              "| RB-CTX-040 | Context Pack do RB-INC-040 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-040-recommendation-persistence.md](./implementation/context-packs/rb-inc-040-recommendation-persistence.md) |\n"
+          )
+          if "| RB-INC-040 |" not in text:
+              path.write_text(text.replace(marker, rows + marker))
+      - name: Format documents
+        run: npx --yes prettier@3.9.6 --write docs/implementation/increments/rb-inc-040-recommendation-persistence.md docs/implementation/context-packs/rb-inc-040-recommendation-persistence.md docs/registry.md
+      - name: Commit changes
+        shell: bash
+        run: |
+          if git diff --quiet -- docs; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs
+          git commit -m "docs: register RB-INC-040"
+          git push origin "HEAD:${{ github.ref_name }}"

@@ -284,11 +284,7 @@ export function addFreePeriod(
   now = new Date(),
 ): Itinerary {
   const targetDay = itinerary.days.find((day) => day.date === input.dayDate);
-  const fieldErrors = validateFreePeriodDetails(
-    input.mode,
-    input.startTime,
-    input.durationMinutes,
-  );
+  const fieldErrors = validateFreePeriodDetails(input.mode, input.startTime, input.durationMinutes);
 
   if (!targetDay) fieldErrors.dayDate = "Selecione um dia válido da viagem.";
   if (Object.keys(fieldErrors).length > 0 || !targetDay) {
@@ -308,9 +304,7 @@ export function addFreePeriod(
   return {
     ...itinerary,
     days: itinerary.days.map((day) =>
-      day.id === targetDay.id
-        ? { ...day, freePeriods: [...day.freePeriods, freePeriod] }
-        : day,
+      day.id === targetDay.id ? { ...day, freePeriods: [...day.freePeriods, freePeriod] } : day,
     ),
     version: itinerary.version + 1,
     updatedAt: now,

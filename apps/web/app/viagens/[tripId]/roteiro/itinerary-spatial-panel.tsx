@@ -118,7 +118,7 @@ export function ItinerarySpatialPanel({
         </div>
 
         {unavailable.length > 0 ? (
-          <p className={styles.notice} role="status">
+          <p className={styles.notice}>
             {unavailable.length}{" "}
             {unavailable.length === 1 ? "Atividade não pôde" : "Atividades não puderam"} ser
             localizada.
@@ -139,7 +139,7 @@ export function ItinerarySpatialPanel({
               >
                 <span className={styles.sequence}>{step.order}</span>
                 <div>
-                  <strong>{step.title}</strong>
+                  <strong>{`Etapa ${step.order} — ${step.title}`}</strong>
                   <span>
                     {step.status === "available"
                       ? "Localização disponível no mapa."

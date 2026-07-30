@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { addActivity, createItinerary, ItineraryValidationError } from "./itinerary";
+import {
+  addActivity,
+  createItinerary,
+  ItineraryValidationError,
+  removeActivity,
+} from "./itinerary";
 
 const period = {
   startDate: "2026-08-22",
@@ -105,6 +110,54 @@ describe("addActivity", () => {
       expect(validationError.fieldErrors.title).toBeDefined();
       expect(validationError.fieldErrors.startTime).toBeDefined();
       expect(validationError.fieldErrors.durationMinutes).toBeDefined();
+    }
+  });
+});
+
+describe("removeActivity", () => {
+  it("remove a atividade e normaliza a ordem sem mutar o roteiro original", () => {
+    const first = addActivity(createBaseItinerary(), {
+      dayDate: "2026-08-24",
+      title: "Café da manhã",
+    });
+    const second = addActivity(first, {
+      dayDate: "2026-08-24",
+      title: "Passeio de barco",
+      placeId: "place-passeio-de-barco",
+    });
+    const third = addActivity(second, {
+      dayDate: "2026-08-24",
+      title: "Jantar",
+    });
+    const removedId = third.days[2]?.activities[1]?.id;
+    expect(removedId).toBeDefined();
+
+    const updatedAt = new Date("2026-07-30T04:00:00Z");
+    const updated = removeActivity(third, { activityId: removedId! }, updatedAt);
+
+    expect(updated.days[2]?.activities.map((activity) => activity.title)).toEqual([
+      "Café da manhã",
+      "Jantar",
+    ]);
+    expect(updated.days[2]?.activities.map((activity) => activity.order)).toEqual([1, 2]);
+    expect(updated.days[2]?.activities[1]?.updatedAt).toEqual(updatedAt);
+    expect(updated.version).toBe(5);
+    expect(updated.updatedAt).toEqual(updatedAt);
+    expect(third.days[2]?.activities).toHaveLength(3);
+    expect(third.days[2]?.activities[1]?.placeId).toBe("place-passeio-de-barco");
+  });
+
+  it("rejeita identidade vazia ou ausente do roteiro", () => {
+    expect(() => removeActivity(createBaseItinerary(), { activityId: " " })).toThrow(
+      ItineraryValidationError,
+    );
+
+    try {
+      removeActivity(createBaseItinerary(), { activityId: "activity-inexistente" });
+      throw new Error("A validação deveria falhar.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ItineraryValidationError);
+      expect((error as ItineraryValidationError).fieldErrors.activityId).toBeDefined();
     }
   });
 });

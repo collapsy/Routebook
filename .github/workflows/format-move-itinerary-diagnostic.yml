@@ -1,0 +1,45 @@
+name: Format Move Itinerary Diagnostic
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-030-move-itinerary-activity-between-days
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply repository formatting
+        run: pnpm exec prettier --write 'apps/web/app/viagens/[tripId]/roteiro/page.tsx'
+
+      - name: Remove diagnostic workflow
+        run: git rm .github/workflows/format-move-itinerary-diagnostic.yml
+
+      - name: Commit formatted page
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 'apps/web/app/viagens/[tripId]/roteiro/page.tsx'
+          git commit -m "style(web): apply repository formatting to move controls"
+          git push origin HEAD:feature/rb-inc-030-move-itinerary-activity-between-days

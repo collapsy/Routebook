@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { addFreePeriod, createItinerary, ItineraryValidationError } from "./itinerary";
+import {
+  addFreePeriod,
+  createItinerary,
+  ItineraryValidationError,
+  updateFreePeriod,
+} from "./itinerary";
 
 const period = {
   startDate: "2026-08-22",
@@ -67,6 +72,87 @@ describe("addFreePeriod", () => {
       expect(error).toBeInstanceOf(ItineraryValidationError);
       const validationError = error as ItineraryValidationError;
       expect(validationError.fieldErrors.dayDate).toBeDefined();
+      expect(validationError.fieldErrors.mode).toBeDefined();
+      expect(validationError.fieldErrors.startTime).toBeDefined();
+      expect(validationError.fieldErrors.durationMinutes).toBeDefined();
+    }
+  });
+});
+
+describe("updateFreePeriod", () => {
+  it("edita modo e opcionais preservando identidade, dia, ordem e criação", () => {
+    const createdAt = new Date("2026-07-30T13:10:00Z");
+    const itinerary = addFreePeriod(
+      createBaseItinerary(),
+      {
+        dayDate: "2026-08-23",
+        mode: "flexible",
+        startTime: "14:00",
+        durationMinutes: 120,
+      },
+      createdAt,
+    );
+    const originalFreePeriod = itinerary.days[1]?.freePeriods[0];
+    const updatedAt = new Date("2026-07-30T14:00:00Z");
+    const updated = updateFreePeriod(
+      itinerary,
+      {
+        freePeriodId: originalFreePeriod!.id,
+        mode: "protected",
+      },
+      updatedAt,
+    );
+    const editedFreePeriod = updated.days[1]?.freePeriods[0];
+
+    expect(itinerary.days[1]?.freePeriods[0]).toEqual(originalFreePeriod);
+    expect(editedFreePeriod).toEqual({
+      id: originalFreePeriod?.id,
+      mode: "protected",
+      order: originalFreePeriod?.order,
+      createdAt,
+      updatedAt,
+    });
+    expect(updated.days[1]?.id).toBe(itinerary.days[1]?.id);
+    expect(updated.version).toBe(itinerary.version + 1);
+    expect(updated.updatedAt).toEqual(updatedAt);
+  });
+
+  it("define novamente horário e duração opcionais", () => {
+    const itinerary = addFreePeriod(createBaseItinerary(), {
+      dayDate: "2026-08-23",
+      mode: "protected",
+    });
+    const freePeriod = itinerary.days[1]?.freePeriods[0];
+    const updated = updateFreePeriod(itinerary, {
+      freePeriodId: freePeriod!.id,
+      mode: "flexible",
+      startTime: "16:30",
+      durationMinutes: 75,
+    });
+
+    expect(updated.days[1]?.freePeriods[0]).toMatchObject({
+      id: freePeriod?.id,
+      mode: "flexible",
+      startTime: "16:30",
+      durationMinutes: 75,
+      order: freePeriod?.order,
+      createdAt: freePeriod?.createdAt,
+    });
+  });
+
+  it("rejeita identidade ausente e detalhes inválidos", () => {
+    try {
+      updateFreePeriod(createBaseItinerary(), {
+        freePeriodId: "free-period-inexistente",
+        mode: "invalid" as "flexible",
+        startTime: "26:00",
+        durationMinutes: -10,
+      });
+      throw new Error("A validação deveria falhar.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ItineraryValidationError);
+      const validationError = error as ItineraryValidationError;
+      expect(validationError.fieldErrors.freePeriodId).toBeDefined();
       expect(validationError.fieldErrors.mode).toBeDefined();
       expect(validationError.fieldErrors.startTime).toBeDefined();
       expect(validationError.fieldErrors.durationMinutes).toBeDefined();

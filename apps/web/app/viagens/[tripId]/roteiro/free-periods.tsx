@@ -1,6 +1,8 @@
 import type { FreePeriod, Itinerary } from "@routebook/trip-management";
 
 import { addItineraryFreePeriodAction } from "./actions";
+import { FreePeriodEditor } from "./free-period-editor";
+import { FreePeriodFeedback } from "./free-period-feedback";
 import styles from "./free-periods.module.css";
 
 function formatDate(value: string): string {
@@ -40,72 +42,75 @@ export function FreePeriodComposer({
   tripId: string;
 }) {
   return (
-    <section className={styles.composer} aria-labelledby="new-free-period-title">
-      <div>
-        <p className="product-eyebrow">Espaço intencional</p>
-        <h2 id="new-free-period-title">Adicione um período livre</h2>
-        <p>
-          Preserve descanso, margem de deslocamento ou tempo para decidir durante a viagem sem criar
-          uma atividade artificial.
-        </p>
-      </div>
-
-      <form className={styles.form} action={addItineraryFreePeriodAction}>
-        <input name="tripId" type="hidden" value={tripId} />
-
-        <div className={styles.field}>
-          <label htmlFor="freePeriodDayDate">Dia do período livre</label>
-          <select
-            defaultValue={itinerary.days[0]?.date}
-            id="freePeriodDayDate"
-            name="freePeriodDayDate"
-            required
-          >
-            {itinerary.days.map((day) => (
-              <option key={day.id} value={day.date}>
-                Dia {day.position} — {formatDate(day.date)}
-              </option>
-            ))}
-          </select>
+    <>
+      <FreePeriodFeedback />
+      <section className={styles.composer} aria-labelledby="new-free-period-title">
+        <div>
+          <p className="product-eyebrow">Espaço intencional</p>
+          <h2 id="new-free-period-title">Adicione um período livre</h2>
+          <p>
+            Preserve descanso, margem de deslocamento ou tempo para decidir durante a viagem sem
+            criar uma atividade artificial.
+          </p>
         </div>
 
-        <div className={styles.field}>
-          <label htmlFor="freePeriodMode">Proteção do espaço</label>
-          <select defaultValue="flexible" id="freePeriodMode" name="freePeriodMode" required>
-            <option value="flexible">Flexível — pode receber sugestões</option>
-            <option value="protected">Protegido — preservar sem preenchimento automático</option>
-          </select>
-        </div>
+        <form className={styles.form} action={addItineraryFreePeriodAction}>
+          <input name="tripId" type="hidden" value={tripId} />
 
-        <div className={styles.field}>
-          <label htmlFor="freePeriodStartTime">Horário do período livre (opcional)</label>
-          <input id="freePeriodStartTime" name="freePeriodStartTime" type="time" />
-        </div>
+          <div className={styles.field}>
+            <label htmlFor="freePeriodDayDate">Dia do período livre</label>
+            <select
+              defaultValue={itinerary.days[0]?.date}
+              id="freePeriodDayDate"
+              name="freePeriodDayDate"
+              required
+            >
+              {itinerary.days.map((day) => (
+                <option key={day.id} value={day.date}>
+                  Dia {day.position} — {formatDate(day.date)}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className={styles.field}>
-          <label htmlFor="freePeriodDurationMinutes">Duração do período livre (opcional)</label>
-          <input
-            id="freePeriodDurationMinutes"
-            min={1}
-            name="freePeriodDurationMinutes"
-            placeholder="Minutos"
-            step={1}
-            type="number"
-          />
-        </div>
+          <div className={styles.field}>
+            <label htmlFor="freePeriodMode">Proteção do espaço</label>
+            <select defaultValue="flexible" id="freePeriodMode" name="freePeriodMode" required>
+              <option value="flexible">Flexível — pode receber sugestões</option>
+              <option value="protected">Protegido — preservar sem preenchimento automático</option>
+            </select>
+          </div>
 
-        <p className={styles.explanation}>
-          Sem horário ou duração, o RouteBook mantém o espaço aberto sem inventar limites.
-        </p>
+          <div className={styles.field}>
+            <label htmlFor="freePeriodStartTime">Horário do período livre (opcional)</label>
+            <input id="freePeriodStartTime" name="freePeriodStartTime" type="time" />
+          </div>
 
-        <div className={styles.actions}>
-          <span>O período será registrado como decisão separada das atividades.</span>
-          <button className="product-button" type="submit">
-            Adicionar período livre
-          </button>
-        </div>
-      </form>
-    </section>
+          <div className={styles.field}>
+            <label htmlFor="freePeriodDurationMinutes">Duração do período livre (opcional)</label>
+            <input
+              id="freePeriodDurationMinutes"
+              min={1}
+              name="freePeriodDurationMinutes"
+              placeholder="Minutos"
+              step={1}
+              type="number"
+            />
+          </div>
+
+          <p className={styles.explanation}>
+            Sem horário ou duração, o RouteBook mantém o espaço aberto sem inventar limites.
+          </p>
+
+          <div className={styles.actions}>
+            <span>O período será registrado como decisão separada das atividades.</span>
+            <button className="product-button" type="submit">
+              Adicionar período livre
+            </button>
+          </div>
+        </form>
+      </section>
+    </>
   );
 }
 
@@ -131,6 +136,12 @@ export function FreePeriodList({
               <span className={styles.badge}>
                 {item.mode === "protected" ? "Protegido" : "Flexível"}
               </span>
+              <FreePeriodEditor
+                durationMinutes={item.durationMinutes}
+                freePeriodId={item.id}
+                mode={item.mode}
+                startTime={item.startTime}
+              />
             </div>
           </li>
         ))}

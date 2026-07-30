@@ -14,6 +14,7 @@ import {
 import {
   addManualActivityAction,
   removeItineraryActivityAction,
+  reorderItineraryActivitiesAction,
   updateItineraryActivityAction,
 } from "./actions";
 
@@ -79,6 +80,33 @@ async function loadOrCreateItinerary(trip: Trip): Promise<Itinerary> {
   return repository.save(createItinerary({ tripId: trip.id, period: trip.period }));
 }
 
+function ReorderActivityForm({
+  activity,
+  direction,
+  targetActivity,
+  tripId,
+}: {
+  activity: Activity;
+  direction: "Subir" | "Descer";
+  targetActivity: Activity;
+  tripId: string;
+}) {
+  return (
+    <form action={reorderItineraryActivitiesAction}>
+      <input name="tripId" type="hidden" value={tripId} />
+      <input name="activityId" type="hidden" value={activity.id} />
+      <input name="targetActivityId" type="hidden" value={targetActivity.id} />
+      <button
+        aria-label={`${direction} ${activity.title} no roteiro`}
+        className="itinerary-order-action"
+        type="submit"
+      >
+        {direction}
+      </button>
+    </form>
+  );
+}
+
 export default async function ItineraryPage({
   params,
   searchParams,
@@ -88,6 +116,7 @@ export default async function ItineraryPage({
     atividadeCriada?: string;
     atividadeEditada?: string;
     atividadeRemovida?: string;
+    atividadeReordenada?: string;
     erro?: string;
   }>;
 }) {
@@ -96,7 +125,13 @@ export default async function ItineraryPage({
   if (!trip) notFound();
 
   const itinerary = await loadOrCreateItinerary(trip);
-  const { atividadeCriada, atividadeEditada, atividadeRemovida, erro } = await searchParams;
+  const {
+    atividadeCriada,
+    atividadeEditada,
+    atividadeRemovida,
+    atividadeReordenada,
+    erro,
+  } = await searchParams;
   const activityCount = itinerary.days.reduce((total, day) => total + day.activities.length, 0);
 
   return (
@@ -113,6 +148,11 @@ export default async function ItineraryPage({
       {atividadeEditada === "1" ? (
         <p className="success-banner" role="status">
           Atividade atualizada no roteiro.
+        </p>
+      ) : null}
+      {atividadeReordenada === "1" ? (
+        <p className="success-banner" role="status">
+          Ordem das atividades atualizada.
         </p>
       ) : null}
       {atividadeRemovida === "1" ? (
@@ -229,88 +269,116 @@ export default async function ItineraryPage({
                     <section key={period.id} aria-labelledby={`${day.id}-${period.id}`}>
                       <h3 id={`${day.id}-${period.id}`}>{period.label}</h3>
                       <ol>
-                        {period.activities.map((activity) => (
-                          <li key={activity.id}>
-                            <span className="itinerary-activity-time">
-                              {activity.startTime ?? "Livre"}
-                            </span>
-                            <div className="itinerary-activity-content">
-                              <div className="itinerary-activity-copy">
-                                <strong>{activity.title}</strong>
-                                <small>
-                                  {activity.durationMinutes
-                                    ? formatDuration(activity.durationMinutes)
-                                    : "Duração aberta"}
-                                </small>
-                              </div>
-                              <div className="itinerary-activity-actions">
-                                <details className="itinerary-edit-disclosure">
-                                  <summary aria-label={`Editar ${activity.title}`}>Editar</summary>
-                                  <form
-                                    action={updateItineraryActivityAction}
-                                    aria-label={`Editar ${activity.title}`}
-                                    className="itinerary-edit-form"
-                                  >
+                        {period.activities.map((activity, index) => {
+                          const previousActivity = period.activities[index - 1];
+                          const nextActivity = period.activities[index + 1];
+
+                          return (
+                            <li key={activity.id}>
+                              <span className="itinerary-activity-time">
+                                {activity.startTime ?? "Livre"}
+                              </span>
+                              <div className="itinerary-activity-content">
+                                <div className="itinerary-activity-copy">
+                                  <strong>{activity.title}</strong>
+                                  <small>
+                                    {activity.durationMinutes
+                                      ? formatDuration(activity.durationMinutes)
+                                      : "Duração aberta"}
+                                  </small>
+                                </div>
+                                <div className="itinerary-activity-actions">
+                                  {previousActivity || nextActivity ? (
+                                    <div
+                                      aria-label={`Ordenar ${activity.title}`}
+                                      className="itinerary-order-actions"
+                                    >
+                                      {previousActivity ? (
+                                        <ReorderActivityForm
+                                          activity={activity}
+                                          direction="Subir"
+                                          targetActivity={previousActivity}
+                                          tripId={tripId}
+                                        />
+                                      ) : null}
+                                      {nextActivity ? (
+                                        <ReorderActivityForm
+                                          activity={activity}
+                                          direction="Descer"
+                                          targetActivity={nextActivity}
+                                          tripId={tripId}
+                                        />
+                                      ) : null}
+                                    </div>
+                                  ) : null}
+                                  <details className="itinerary-edit-disclosure">
+                                    <summary aria-label={`Editar ${activity.title}`}>Editar</summary>
+                                    <form
+                                      action={updateItineraryActivityAction}
+                                      aria-label={`Editar ${activity.title}`}
+                                      className="itinerary-edit-form"
+                                    >
+                                      <input name="tripId" type="hidden" value={tripId} />
+                                      <input name="activityId" type="hidden" value={activity.id} />
+
+                                      <div className="form-field itinerary-edit-title">
+                                        <label htmlFor={`edit-title-${activity.id}`}>Título</label>
+                                        <input
+                                          defaultValue={activity.title}
+                                          id={`edit-title-${activity.id}`}
+                                          maxLength={180}
+                                          name="title"
+                                          required
+                                        />
+                                      </div>
+
+                                      <div className="form-field">
+                                        <label htmlFor={`edit-time-${activity.id}`}>
+                                          Horário opcional
+                                        </label>
+                                        <input
+                                          defaultValue={activity.startTime ?? ""}
+                                          id={`edit-time-${activity.id}`}
+                                          name="startTime"
+                                          type="time"
+                                        />
+                                      </div>
+
+                                      <div className="form-field">
+                                        <label htmlFor={`edit-duration-${activity.id}`}>
+                                          Duração opcional
+                                        </label>
+                                        <input
+                                          defaultValue={activity.durationMinutes ?? ""}
+                                          id={`edit-duration-${activity.id}`}
+                                          min={1}
+                                          name="durationMinutes"
+                                          step={1}
+                                          type="number"
+                                        />
+                                      </div>
+
+                                      <button className="product-button" type="submit">
+                                        Salvar alterações
+                                      </button>
+                                    </form>
+                                  </details>
+                                  <form action={removeItineraryActivityAction}>
                                     <input name="tripId" type="hidden" value={tripId} />
                                     <input name="activityId" type="hidden" value={activity.id} />
-
-                                    <div className="form-field itinerary-edit-title">
-                                      <label htmlFor={`edit-title-${activity.id}`}>Título</label>
-                                      <input
-                                        defaultValue={activity.title}
-                                        id={`edit-title-${activity.id}`}
-                                        maxLength={180}
-                                        name="title"
-                                        required
-                                      />
-                                    </div>
-
-                                    <div className="form-field">
-                                      <label htmlFor={`edit-time-${activity.id}`}>
-                                        Horário opcional
-                                      </label>
-                                      <input
-                                        defaultValue={activity.startTime ?? ""}
-                                        id={`edit-time-${activity.id}`}
-                                        name="startTime"
-                                        type="time"
-                                      />
-                                    </div>
-
-                                    <div className="form-field">
-                                      <label htmlFor={`edit-duration-${activity.id}`}>
-                                        Duração opcional
-                                      </label>
-                                      <input
-                                        defaultValue={activity.durationMinutes ?? ""}
-                                        id={`edit-duration-${activity.id}`}
-                                        min={1}
-                                        name="durationMinutes"
-                                        step={1}
-                                        type="number"
-                                      />
-                                    </div>
-
-                                    <button className="product-button" type="submit">
-                                      Salvar alterações
+                                    <button
+                                      aria-label={`Remover ${activity.title} do roteiro`}
+                                      className="itinerary-danger-action"
+                                      type="submit"
+                                    >
+                                      Remover
                                     </button>
                                   </form>
-                                </details>
-                                <form action={removeItineraryActivityAction}>
-                                  <input name="tripId" type="hidden" value={tripId} />
-                                  <input name="activityId" type="hidden" value={activity.id} />
-                                  <button
-                                    aria-label={`Remover ${activity.title} do roteiro`}
-                                    className="itinerary-danger-action"
-                                    type="submit"
-                                  >
-                                    Remover
-                                  </button>
-                                </form>
+                                </div>
                               </div>
-                            </div>
-                          </li>
-                        ))}
+                            </li>
+                          );
+                        })}
                       </ol>
                     </section>
                   ))}

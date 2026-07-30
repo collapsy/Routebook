@@ -13,8 +13,8 @@ import { listSavedPlaces } from "@routebook/saved-places";
 import { findTravelerProfile } from "@routebook/traveler-profile";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
-import { TripMap } from "../../components/trip-map";
-import type { TripMapPoint } from "../../lib/trip-map";
+import { TripMap } from "../../../components/trip-map";
+import type { TripMapPoint } from "../../../lib/trip-map";
 
 export const dynamic = "force-dynamic";
 

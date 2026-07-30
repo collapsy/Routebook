@@ -11,7 +11,11 @@ import {
   type Trip,
 } from "@routebook/trip-management";
 
-import { addManualActivityAction, removeItineraryActivityAction } from "./actions";
+import {
+  addManualActivityAction,
+  removeItineraryActivityAction,
+  updateItineraryActivityAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -80,14 +84,19 @@ export default async function ItineraryPage({
   searchParams,
 }: {
   params: Promise<{ tripId: string }>;
-  searchParams: Promise<{ atividadeCriada?: string; atividadeRemovida?: string; erro?: string }>;
+  searchParams: Promise<{
+    atividadeCriada?: string;
+    atividadeEditada?: string;
+    atividadeRemovida?: string;
+    erro?: string;
+  }>;
 }) {
   const { tripId } = await params;
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
   const itinerary = await loadOrCreateItinerary(trip);
-  const { atividadeCriada, atividadeRemovida, erro } = await searchParams;
+  const { atividadeCriada, atividadeEditada, atividadeRemovida, erro } = await searchParams;
   const activityCount = itinerary.days.reduce((total, day) => total + day.activities.length, 0);
 
   return (
@@ -99,6 +108,11 @@ export default async function ItineraryPage({
       {atividadeCriada === "1" ? (
         <p className="success-banner" role="status">
           Atividade adicionada ao roteiro.
+        </p>
+      ) : null}
+      {atividadeEditada === "1" ? (
+        <p className="success-banner" role="status">
+          Atividade atualizada no roteiro.
         </p>
       ) : null}
       {atividadeRemovida === "1" ? (
@@ -229,20 +243,71 @@ export default async function ItineraryPage({
                                     : "Duração aberta"}
                                 </small>
                               </div>
-                              <form
-                                action={removeItineraryActivityAction}
-                                className="itinerary-activity-actions"
-                              >
-                                <input name="tripId" type="hidden" value={tripId} />
-                                <input name="activityId" type="hidden" value={activity.id} />
-                                <button
-                                  aria-label={`Remover ${activity.title} do roteiro`}
-                                  className="itinerary-danger-action"
-                                  type="submit"
-                                >
-                                  Remover
-                                </button>
-                              </form>
+                              <div className="itinerary-activity-actions">
+                                <details className="itinerary-edit-disclosure">
+                                  <summary aria-label={`Editar ${activity.title}`}>Editar</summary>
+                                  <form
+                                    action={updateItineraryActivityAction}
+                                    aria-label={`Editar ${activity.title}`}
+                                    className="itinerary-edit-form"
+                                  >
+                                    <input name="tripId" type="hidden" value={tripId} />
+                                    <input name="activityId" type="hidden" value={activity.id} />
+
+                                    <div className="form-field itinerary-edit-title">
+                                      <label htmlFor={`edit-title-${activity.id}`}>Título</label>
+                                      <input
+                                        defaultValue={activity.title}
+                                        id={`edit-title-${activity.id}`}
+                                        maxLength={180}
+                                        name="title"
+                                        required
+                                      />
+                                    </div>
+
+                                    <div className="form-field">
+                                      <label htmlFor={`edit-time-${activity.id}`}>
+                                        Horário opcional
+                                      </label>
+                                      <input
+                                        defaultValue={activity.startTime ?? ""}
+                                        id={`edit-time-${activity.id}`}
+                                        name="startTime"
+                                        type="time"
+                                      />
+                                    </div>
+
+                                    <div className="form-field">
+                                      <label htmlFor={`edit-duration-${activity.id}`}>
+                                        Duração opcional
+                                      </label>
+                                      <input
+                                        defaultValue={activity.durationMinutes ?? ""}
+                                        id={`edit-duration-${activity.id}`}
+                                        min={1}
+                                        name="durationMinutes"
+                                        step={1}
+                                        type="number"
+                                      />
+                                    </div>
+
+                                    <button className="product-button" type="submit">
+                                      Salvar alterações
+                                    </button>
+                                  </form>
+                                </details>
+                                <form action={removeItineraryActivityAction}>
+                                  <input name="tripId" type="hidden" value={tripId} />
+                                  <input name="activityId" type="hidden" value={activity.id} />
+                                  <button
+                                    aria-label={`Remover ${activity.title} do roteiro`}
+                                    className="itinerary-danger-action"
+                                    type="submit"
+                                  >
+                                    Remover
+                                  </button>
+                                </form>
+                              </div>
                             </div>
                           </li>
                         ))}

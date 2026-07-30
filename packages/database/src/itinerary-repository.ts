@@ -9,12 +9,7 @@ import type {
 } from "@routebook/trip-management";
 
 import { getDatabase } from "./client";
-import {
-  itineraries,
-  itineraryActivities,
-  itineraryDays,
-  itineraryFreePeriods,
-} from "./schema";
+import { itineraries, itineraryActivities, itineraryDays, itineraryFreePeriods } from "./schema";
 
 type ItineraryRow = typeof itineraries.$inferSelect;
 type ItineraryDayRow = typeof itineraryDays.$inferSelect;

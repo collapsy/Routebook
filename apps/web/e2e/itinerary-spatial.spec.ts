@@ -14,17 +14,16 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   await page.getByRole("link", { name: "Explorar lugares" }).click();
 
   const publishedPlaces = page.getByRole("list", { name: "Lugares publicados" });
-  const placeNames = await publishedPlaces.locator("strong").allTextContents();
-  const firstPlaceName = placeNames[0]?.trim();
-  const secondPlaceName = placeNames[1]?.trim();
+  const firstPublishedPlace = publishedPlaces.getByRole("listitem").first();
+  const secondPublishedPlace = publishedPlaces.getByRole("listitem").nth(1);
+  await expect(firstPublishedPlace).toBeVisible();
+  await expect(secondPublishedPlace).toBeVisible();
+  const firstPlaceName = (await firstPublishedPlace.locator("strong").textContent())?.trim();
+  const secondPlaceName = (await secondPublishedPlace.locator("strong").textContent())?.trim();
   expect(firstPlaceName).toBeTruthy();
   expect(secondPlaceName).toBeTruthy();
 
-  await publishedPlaces
-    .getByRole("listitem")
-    .first()
-    .getByRole("link", { name: "Ver detalhes" })
-    .click();
+  await firstPublishedPlace.getByRole("link", { name: "Ver detalhes" }).click();
   await page.getByRole("button", { name: "Salvar lugar" }).click();
   await page.getByRole("link", { name: "Voltar para lugares" }).click();
   await page

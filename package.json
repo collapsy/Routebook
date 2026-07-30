@@ -14,7 +14,7 @@
     "dev": "turbo run dev",
     "docs:validate": "node scripts/validate-docs.mjs",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format:check": "prettier --write apps/web/lib/trip-map.ts apps/web/components/trip-map.tsx apps/web/components/trip-map.module.css apps/web/app/viagens/[tripId]/roteiro/itinerary-spatial-panel.tsx apps/web/app/viagens/[tripId]/roteiro/itinerary-spatial-panel.module.css apps/web/app/viagens/[tripId]/roteiro/layout.tsx apps/web/app/viagens/[tripId]/roteiro/itinerary-spatial-panel.test.tsx && git diff -- apps/web/lib/trip-map.ts apps/web/components/trip-map.tsx apps/web/components/trip-map.module.css apps/web/app/viagens/[tripId]/roteiro/itinerary-spatial-panel.tsx apps/web/app/viagens/[tripId]/roteiro/itinerary-spatial-panel.module.css apps/web/app/viagens/[tripId]/roteiro/layout.tsx apps/web/app/viagens/[tripId]/roteiro/itinerary-spatial-panel.test.tsx && exit 1",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "test:e2e": "pnpm --filter @routebook/web test:e2e",

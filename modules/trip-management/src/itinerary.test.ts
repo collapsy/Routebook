@@ -5,6 +5,7 @@ import {
   createItinerary,
   ItineraryValidationError,
   removeActivity,
+  updateActivity,
 } from "./itinerary";
 
 const period = {
@@ -107,6 +108,71 @@ describe("addActivity", () => {
       expect(error).toBeInstanceOf(ItineraryValidationError);
       const validationError = error as ItineraryValidationError;
       expect(validationError.fieldErrors.dayDate).toBeDefined();
+      expect(validationError.fieldErrors.title).toBeDefined();
+      expect(validationError.fieldErrors.startTime).toBeDefined();
+      expect(validationError.fieldErrors.durationMinutes).toBeDefined();
+    }
+  });
+});
+
+describe("updateActivity", () => {
+  it("edita dados planejáveis preservando identidade, posição e vínculo", () => {
+    const itinerary = addActivity(createBaseItinerary(), {
+      dayDate: "2026-08-24",
+      title: "Praia do Amor",
+      type: "place-visit",
+      placeId: "place-praia-do-amor",
+      startTime: "09:00",
+      durationMinutes: 180,
+    });
+    const original = itinerary.days[2]?.activities[0];
+    expect(original).toBeDefined();
+
+    const updatedAt = new Date("2026-07-30T03:30:00Z");
+    const updated = updateActivity(
+      itinerary,
+      {
+        activityId: original!.id,
+        title: "Caminhada na Praia do Amor",
+        durationMinutes: 120,
+      },
+      updatedAt,
+    );
+    const activity = updated.days[2]?.activities[0];
+
+    expect(activity).toMatchObject({
+      id: original!.id,
+      title: "Caminhada na Praia do Amor",
+      type: "place-visit",
+      status: "planned",
+      flexibility: "flexible",
+      durationMinutes: 120,
+      order: 1,
+      placeId: "place-praia-do-amor",
+      createdAt: original!.createdAt,
+      updatedAt,
+    });
+    expect(activity?.startTime).toBeUndefined();
+    expect(updated.days[2]?.id).toBe(itinerary.days[2]?.id);
+    expect(updated.version).toBe(3);
+    expect(updated.updatedAt).toEqual(updatedAt);
+    expect(original?.title).toBe("Praia do Amor");
+    expect(original?.startTime).toBe("09:00");
+  });
+
+  it("rejeita identidade ausente e dados planejáveis inválidos", () => {
+    try {
+      updateActivity(createBaseItinerary(), {
+        activityId: "activity-inexistente",
+        title: " ",
+        startTime: "29:00",
+        durationMinutes: -1,
+      });
+      throw new Error("A validação deveria falhar.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ItineraryValidationError);
+      const validationError = error as ItineraryValidationError;
+      expect(validationError.fieldErrors.activityId).toBeDefined();
       expect(validationError.fieldErrors.title).toBeDefined();
       expect(validationError.fieldErrors.startTime).toBeDefined();
       expect(validationError.fieldErrors.durationMinutes).toBeDefined();

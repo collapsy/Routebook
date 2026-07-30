@@ -9,10 +9,10 @@ document_type: ux
 owner: Experience
 
 status: Published
-version: "0.2.0"
+version: "0.3.0"
 
 created: "2026-07-17"
-last_updated: "2026-07-17"
+last_updated: "2026-07-30"
 
 authors:
 
@@ -2774,3 +2774,36 @@ A documentação deverá manter ambas as representações:
 * visual, para validação espacial e comunicação da interface.
 
 Os wireframes deverão ser validados antes da definição visual de alta fidelidade e antes da implementação final das superfícies.
+
+---
+
+## Wireframe contextual — Recommendations da Viagem
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ ← Voltar para a visão da viagem                            │
+│ DECISION INTELLIGENCE DETERMINÍSTICA                        │
+│ Sugestões para [nome da viagem]                             │
+│ Usa Contexto conhecido; nenhuma escolha é automática.       │
+├──────────────────────────────────────────────────────────────┤
+│ [Aviso de Contexto parcial, quando aplicável]                │
+│ [Revisar Contexto]                                           │
+├──────────────────────────────────────────────────────────────┤
+│ [Categoria]                                                  │
+│ Nome do Place                                                │
+│ Resumo publicado                                             │
+│ [Confiança qualitativa] [Salvo] [Já está no roteiro]         │
+│ Distância em linha reta + limitação da medida                │
+│                                                              │
+│ Por que foi sugerido                                         │
+│ • Reason baseada em dado conhecido                           │
+│                                                              │
+│ O que não foi possível considerar                            │
+│ • Limitation explícita                                       │
+│                                                              │
+│ [Ver detalhes] [Ignorar]                                     │
+└──────────────────────────────────────────────────────────────┘
+```
+
+Em mobile, os cards ocupam uma coluna e as ações empilham. Em desktop, a lista pode usar duas colunas sem alterar a ordem semântica. Recommendations não entram na navegação global e não executam mudanças em Saved Place ou Itinerary.
+

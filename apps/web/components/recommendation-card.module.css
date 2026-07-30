@@ -1,0 +1,155 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1.25rem;
+}
+
+.rejected {
+  background: var(--surface-soft);
+  border-style: dashed;
+}
+
+.header {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.header h2,
+.section h3,
+.header p,
+.section p {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--primary-strong);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.summary,
+.distance,
+.section li,
+.confidenceBasis,
+.stateText {
+  color: var(--foreground-muted);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.badge {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--foreground);
+  font-size: 0.78rem;
+  font-weight: 750;
+  padding: 0.35rem 0.6rem;
+}
+
+.section {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.section h3 {
+  font-size: 1rem;
+}
+
+.list {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.limitations {
+  background: var(--surface-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-small);
+  padding: 0.85rem;
+}
+
+.confidence {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.85rem;
+}
+
+.confidenceBasis {
+  margin: 0;
+}
+
+.actions {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.details,
+.ignoreButton {
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-small);
+  font: inherit;
+  font-weight: 800;
+  max-width: 100%;
+  padding: 0.7rem 0.9rem;
+  text-align: center;
+}
+
+.details {
+  color: var(--primary-strong);
+  text-decoration: none;
+}
+
+.ignoreButton {
+  background: var(--surface);
+  color: var(--foreground);
+  cursor: pointer;
+  width: 100%;
+}
+
+.details:hover,
+.ignoreButton:hover {
+  background: var(--surface-soft);
+}
+
+.details:focus-visible,
+.ignoreButton:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.stateText {
+  background: var(--surface-soft);
+  border-radius: var(--radius-small);
+  font-weight: 750;
+  margin: 0;
+  padding: 0.75rem;
+}
+
+@media (min-width: 40rem) {
+  .actions {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .ignoreButton {
+    width: auto;
+  }
+}

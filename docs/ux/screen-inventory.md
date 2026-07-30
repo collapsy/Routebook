@@ -9,10 +9,10 @@ document_type: ux
 owner: Experience
 
 status: Published
-version: "0.1.0"
+version: "0.2.0"
 
 created: "2026-07-17"
-last_updated: null
+last_updated: "2026-07-30"
 
 authors:
 
@@ -3195,3 +3195,30 @@ Ele define:
 * quais variações mobile e desktop devem ser consideradas.
 
 A próxima etapa deverá transformar este inventário em wireframes de baixa fidelidade, preservando hierarquia, navegação, conteúdo, estados e ações definidos neste documento.
+
+---
+
+## Superfície contextual — Recommendations da Viagem
+
+**Rota:** `/viagens/[tripId]/recomendacoes`
+
+**Papel:** transformar o Contexto já informado em uma lista pequena, ordenada e explicável de Places publicados, sem executar Decisions automáticas.
+
+**Entrada:** ação explícita na Visão Geral da Trip. A superfície não adiciona um sexto item à navegação global.
+
+**Conteúdo essencial:**
+
+- nome, categoria e resumo existente do Place;
+- distância geodésica da Accommodation, quando disponível;
+- RecommendationReasons baseadas em dados conhecidos;
+- RecommendationLimitations para Contexto ou dados indisponíveis;
+- RecommendationConfidence qualitativa, distinta de score e avaliação pública;
+- estado salvo ou planejado, quando aplicável;
+- acesso aos detalhes e ação `Ignorar`.
+
+**Estados:** carregando, Recommendations disponíveis, geração parcial, nenhum candidato publicado, erro recuperável, rejeitada, invalidada e lista atualizada após mudança do Contexto.
+
+**Acessibilidade:** um `h1` inequívoco, cards nomeados de forma acessível, Reasons e Limitations compreensíveis em texto, sucesso com `role="status"`, falha com `role="alert"`, foco visível, teclado e ausência de informação comunicada somente por cor.
+
+**Limites:** a tela não apresenta score bruto, estrelas, porcentagem arbitrária, preço, avaliação pública, horário, disponibilidade, rota, trânsito, duração ou texto atribuído à IA.
+

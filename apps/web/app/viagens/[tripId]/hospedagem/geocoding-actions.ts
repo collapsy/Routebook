@@ -1,16 +1,8 @@
 "use server";
 
-import { GeocodingProviderError, NominatimGeocoder, type GeocodingResult } from "@/lib/geocoding";
+import { GeocodingProviderError, NominatimGeocoder } from "@/lib/geocoding";
 
-export type GeocodingActionState = {
-  query: string;
-  result?: GeocodingResult;
-  error?: string;
-};
-
-export const initialGeocodingState: GeocodingActionState = {
-  query: "",
-};
+import type { GeocodingActionState } from "./geocoding-state";
 
 export async function geocodeAccommodationAction(
   _state: GeocodingActionState,

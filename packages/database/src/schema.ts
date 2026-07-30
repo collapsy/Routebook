@@ -1,6 +1,7 @@
 import {
   date,
   doublePrecision,
+  index,
   integer,
   jsonb,
   pgTable,
@@ -85,6 +86,43 @@ export const savedPlaces = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
   },
   (table) => [uniqueIndex("saved_places_trip_place_unique").on(table.tripId, table.placeId)],
+);
+
+export const recommendations = pgTable(
+  "recommendations",
+  {
+    id: uuid("id").primaryKey(),
+    tripId: uuid("trip_id")
+      .notNull()
+      .references(() => trips.id, { onDelete: "cascade" }),
+    placeId: uuid("place_id")
+      .notNull()
+      .references(() => places.id, { onDelete: "restrict" }),
+    status: varchar("status", { length: 24 }).notNull(),
+    contextSnapshot: jsonb("context_snapshot").notNull(),
+    contextFingerprint: varchar("context_fingerprint", { length: 64 }).notNull(),
+    reasons: jsonb("reasons").notNull(),
+    limitations: jsonb("limitations").notNull(),
+    score: doublePrecision("score").notNull(),
+    confidenceLevel: varchar("confidence_level", { length: 16 }).notNull(),
+    confidenceBasis: jsonb("confidence_basis").notNull(),
+    validFrom: timestamp("valid_from", { withTimezone: true, mode: "date" }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }),
+    generator: varchar("generator", { length: 24 }).notNull(),
+    policyVersion: varchar("policy_version", { length: 80 }).notNull(),
+    generatedAt: timestamp("generated_at", { withTimezone: true, mode: "date" }).notNull(),
+    presentedAt: timestamp("presented_at", { withTimezone: true, mode: "date" }),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true, mode: "date" }),
+    linkedDecisionId: uuid("linked_decision_id"),
+    statusReason: varchar("status_reason", { length: 160 }),
+    supersededByRecommendationId: uuid("superseded_by_recommendation_id"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
+  },
+  (table) => [
+    index("recommendations_trip_id_idx").on(table.tripId),
+    index("recommendations_trip_status_idx").on(table.tripId, table.status),
+  ],
 );
 
 export const itineraries = pgTable(

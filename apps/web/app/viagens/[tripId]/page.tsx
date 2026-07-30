@@ -14,6 +14,7 @@ import { findTravelerProfile } from "@routebook/traveler-profile";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { TripMap } from "../../../components/trip-map";
+import { resolveTripDestinationId } from "../../../lib/trip-destination";
 import type { TripMapPoint } from "../../../lib/trip-map";
 
 export const dynamic = "force-dynamic";
@@ -48,11 +49,6 @@ const transportLabels: Record<string, string> = {
   mixed: "Combinação de meios",
 };
 
-function resolveDestinationId(destinationName: string): string | null {
-  const normalized = destinationName.trim().toLocaleLowerCase("pt-BR");
-  return normalized.includes("pipa") ? "pipa-rn-br" : null;
-}
-
 function formatDate(value: string, options?: Intl.DateTimeFormatOptions): string {
   return new Intl.DateTimeFormat("pt-BR", {
     timeZone: "UTC",
@@ -79,7 +75,7 @@ export default async function TripOverviewPage({
 
   if (!trip) notFound();
 
-  const destinationId = resolveDestinationId(trip.destination.name);
+  const destinationId = resolveTripDestinationId(trip.destination.name);
   const [profile, publishedPlaces, savedPlaces] = await Promise.all([
     findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
     destinationId ? listPublishedPlaces(new DrizzlePlaceRepository(), destinationId) : [],
@@ -249,6 +245,18 @@ export default async function TripOverviewPage({
             </li>
           ))}
         </ol>
+      </section>
+
+      <section className="traveler-context-summary" aria-labelledby="recommendations-title">
+        <p className="product-eyebrow">Sugestões contextualizadas</p>
+        <h2 id="recommendations-title">Transforme o Contexto em uma lista explicável</h2>
+        <p>
+          As Recommendations usam apenas dados conhecidos da Viagem. Elas não salvam Lugares nem
+          alteram o Roteiro automaticamente.
+        </p>
+        <Link className="product-secondary-action" href={`/viagens/${tripId}/recomendacoes`}>
+          Ver sugestões contextualizadas
+        </Link>
       </section>
 
       <section className="trip-next-steps" aria-labelledby="trip-next-steps-title">

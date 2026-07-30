@@ -47,6 +47,10 @@ ai_context:
 | RB-INC-003 | RB-DOM-001, RB-DOM-003, RB-ARC-004, RB-DATA-001, RB-DATA-002, RB-ADR-005, RB-ADR-006 | #8 | `feature/rb-inc-003-trip-creation`, PR #9 | `trip-management`, database, migration, formulário, listagem e CI PostgreSQL | 4 testes de domínio, 3 de componente, migration PostGIS, build e 14 E2E persistentes | Integrado |
 | RB-INC-004 | RB-PRD-004, RB-UX-001, RB-UX-002, RB-UX-003, RB-DOM-001, RB-DOM-003 | #11 | `feature/rb-inc-004-trip-overview`, PR #12 | consulta por TripId, visão inicial, Dias derivados e estados da rota | 5 testes de domínio, 4 de componente, build e 14 E2E persistentes | Integrado |
 | RB-INC-005 | RB-PRD-004, RB-DOM-001, RB-DOM-003, RB-ARC-004, RB-DATA-001, RB-DATA-002 | #13 | `feature/rb-inc-005-traveler-context`, PR pendente | `traveler-profile`, migration, formulário de contexto e resumo na visão inicial | evidências pendentes dos workflows definitivos | Em execução |
+| RB-INC-038 | RB-FR-097–103, RB-BR-REC-002–011, RB-BR-DEC-002–007 | #83 | `feature/rb-inc-038-recommendation-core`, PR #88 | `modules/decision-intelligence`, Recommendation e Context Snapshot | run 30577548188, job 90989479708, SHA cc4d36d | Verde em Draft |
+| RB-INC-039 | RB-FR-097–103, RB-BR-REC-002–011 | #84 | `feature/rb-inc-039-deterministic-recommendations`, PR #89 | geração determinística, Reasons, Limitations, score e Confidence | run 30578729497, job 90993423544, SHA a6037c1 | Verde em Draft |
+| RB-INC-040 | RB-BR-REC-002–011, RB-ARC-004, RB-DATA-001, RB-DATA-002 | #85 | `feature/rb-inc-040-recommendation-persistence`, PR #90 | repository, schema, migration 0007, adapter e lifecycle | run 30580262262, job 90998461192, SHA 190ebd9 | Verde em Draft |
+| RB-INC-041 | RB-FR-097–103, RB-BR-REC-002–011, RB-UX-001–006, RB-DS-002–003 | #86 | `feature/rb-inc-041-recommendations-experience`, PR #91 | rota contextual, cards, composição e ação Ignorar | evidências pendentes do workflow definitivo | Em execução |
 
 ## Evidências do RB-INC-003
 

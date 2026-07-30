@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@routebook/database": "workspace:*",
+    "@routebook/decision-intelligence": "workspace:*",
     "@routebook/geo-distance": "workspace:*",
     "@routebook/place-catalog": "workspace:*",
     "@routebook/saved-places": "workspace:*",

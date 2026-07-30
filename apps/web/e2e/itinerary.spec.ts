@@ -159,7 +159,10 @@ test("move uma atividade para outro dia e preserva seus dados", async ({ page },
   await composer.getByLabel("Título").fill(activityTitle);
   await composer.getByLabel("Horário opcional").fill("11:15");
   await composer.getByLabel("Duração opcional").fill("150");
-  await composer.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+  await Promise.all([
+    page.waitForURL(/atividadeCriada=1$/),
+    composer.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
+  ]);
 
   const dayCards = page.locator(".itinerary-day-card");
   const firstDay = dayCards.nth(0);
@@ -170,7 +173,10 @@ test("move uma atividade para outro dia e preserva seus dados", async ({ page },
   await page.locator(`summary[aria-label="Mover ${activityTitle} para outro dia"]`).click();
   const moveForm = page.getByRole("form", { name: `Mover ${activityTitle} para outro dia` });
   await moveForm.getByLabel("Dia de destino").selectOption("2026-08-23");
-  await moveForm.getByRole("button", { name: "Mover atividade" }).click();
+  await Promise.all([
+    page.waitForURL(/atividadeMovida=1$/),
+    moveForm.getByRole("button", { name: "Mover atividade" }).click(),
+  ]);
 
   await expect(page).toHaveURL(/atividadeMovida=1$/);
   await expect(page.getByRole("status")).toContainText("Atividade movida para outro dia");
@@ -215,9 +221,11 @@ test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ 
   await page.getByLabel("Adicionar ao dia").selectOption("2026-08-23");
   await page.getByLabel("Horário opcional").fill("14:15");
   await page.getByLabel("Duração opcional").fill("120");
-  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+  await Promise.all([
+    page.waitForURL(/adicionadoAoRoteiro=1$/),
+    page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
+  ]);
 
-  await expect(page).toHaveURL(/adicionadoAoRoteiro=1$/);
   await expect(page.getByRole("status")).toContainText("continua salvo");
   await expect(page.getByRole("heading", { name: placeName! })).toBeVisible();
 

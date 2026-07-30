@@ -31,10 +31,12 @@ O RouteBook não é apenas um catálogo de pontos turísticos. Seu objetivo é a
 | Agregado `Trip` | Implementado no RB-INC-003 |
 | Persistência PostgreSQL/PostGIS | Ativada no RB-INC-003 |
 | Criação e listagem de Viagens | Implementadas para Pipa |
-| Mapas, Lugares, Roteiro e Recomendações | Não iniciados |
+| Contexto, Hospedagem, Lugares, salvos, mapas e Roteiro | Implementados nos incrementos integrados |
+| Recommendations determinísticas, explicáveis e persistidas | Implementadas no ciclo RB-INC-038–041 |
+| Decisions explícitas sobre Recommendations | Em implementação no RB-INC-042 |
 | MVP funcional completo | Não validado |
 
-A aplicação já cria uma `Trip` canônica, gera identidade interna, valida período e ownership, persiste o agregado e mantém a Viagem visível após recarregar a página.
+A aplicação já cria e persiste Trips, Contexto dos viajantes, Accommodation, catálogo de Places, Saved Places, mapas, distância geodésica e Itinerary manual. O ciclo RB-INC-038–041 adiciona Recommendations determinísticas com Context Snapshot, Reasons, Limitations, Confidence qualitativa, persistência e rejeição explícita, sem uso de LLM ou mutação automática do Roteiro.
 
 ## Execução local
 
@@ -122,13 +124,16 @@ Routebook/
 │       ├── e2e/
 │       └── package.json
 ├── modules/
+│   ├── decision-intelligence/
+│   ├── geo-distance/
+│   ├── place-catalog/
+│   ├── saved-places/
+│   ├── traveler-profile/
 │   └── trip-management/
 ├── packages/
 │   ├── database/
 │   ├── eslint-config/
-│   ├── typescript-config/
-│   ├── domain/
-│   └── maps/
+│   └── typescript-config/
 ├── docs/
 ├── scripts/
 ├── compose.yaml
@@ -141,7 +146,7 @@ Routebook/
 └── README.md
 ```
 
-`modules/trip-management` contém o agregado e suas invariantes. `packages/database` contém schema, migration e adapter Drizzle. `packages/domain` e `packages/maps` permanecem placeholders documentais.
+Os módulos de domínio preservam ownership por bounded context. `modules/decision-intelligence` contém Recommendations, geração determinística e contratos de Decision; `packages/database` contém schemas, migrations e adapters Drizzle; `apps/web` concentra a composição e a experiência navegável.
 
 ## Quality gates
 
@@ -200,7 +205,7 @@ Entradas principais:
 - [`docs/registry.md`](./docs/registry.md): registro oficial dos documentos;
 - [`docs/core/routebook-bible.md`](./docs/core/routebook-bible.md): constituição semântica do projeto;
 - [`docs/implementation/README.md`](./docs/implementation/README.md): operação por incrementos e Context Packs;
-- [`docs/implementation/increments/rb-inc-003-trip-creation.md`](./docs/implementation/increments/rb-inc-003-trip-creation.md): escopo e evidências da criação de Viagem;
+- [`docs/implementation/increments/rb-inc-041-recommendations-experience.md`](./docs/implementation/increments/rb-inc-041-recommendations-experience.md): experiência explicável de Recommendations;
 - [`AGENTS.md`](./AGENTS.md): regras obrigatórias para agentes de IA.
 
 A ordem de autoridade é:

@@ -172,17 +172,9 @@ describe("removeFreePeriod", () => {
       { dayDate: "2026-08-23", mode: "flexible" },
       firstAt,
     );
-    itinerary = addFreePeriod(
-      itinerary,
-      { dayDate: "2026-08-23", mode: "protected" },
-      secondAt,
-    );
+    itinerary = addFreePeriod(itinerary, { dayDate: "2026-08-23", mode: "protected" }, secondAt);
     itinerary = addFreePeriod(itinerary, { dayDate: "2026-08-23", mode: "flexible" }, thirdAt);
-    itinerary = addFreePeriod(
-      itinerary,
-      { dayDate: "2026-08-24", mode: "protected" },
-      otherDayAt,
-    );
+    itinerary = addFreePeriod(itinerary, { dayDate: "2026-08-24", mode: "protected" }, otherDayAt);
     const [first, target, third] = itinerary.days[1]!.freePeriods;
     const otherDayPeriod = itinerary.days[2]!.freePeriods[0];
     const removedAt = new Date("2026-07-30T16:00:00Z");

@@ -81,7 +81,7 @@ function deriveLeg(
       distanceMeters: calculateGeodesicDistance(
         origin.endpoint.coordinate,
         destination.endpoint.coordinate,
-      ),
+      ).meters,
     };
   }
 

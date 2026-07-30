@@ -1,0 +1,33 @@
+export {
+  acceptRecommendation,
+  createDecisionId,
+  createRecommendation,
+  createRecommendationId,
+  expireRecommendation,
+  invalidateRecommendation,
+  isRecommendationExpiredAt,
+  presentRecommendation,
+  RecommendationTransitionError,
+  RecommendationValidationError,
+  recommendationStatuses,
+  rejectRecommendation,
+  supersedeRecommendation,
+} from "./recommendation";
+
+export type {
+  CreateRecommendationInput,
+  DecisionContextSnapshot,
+  DecisionId,
+  Recommendation,
+  RecommendationConfidence,
+  RecommendationConfidenceLevel,
+  RecommendationEvidenceValue,
+  RecommendationGenerationMetadata,
+  RecommendationId,
+  RecommendationLimitation,
+  RecommendationReason,
+  RecommendationScore,
+  RecommendationStatus,
+  RecommendationTarget,
+  RecommendationValidity,
+} from "./recommendation";

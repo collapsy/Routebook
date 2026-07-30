@@ -92,7 +92,9 @@ export default async function RecommendationsPage({
       {experience.invalidatedCount > 0 ? (
         <p className={styles.notice} role="status">
           O Contexto mudou. {experience.invalidatedCount} Recommendation
-          {experience.invalidatedCount === 1 ? " anterior foi invalidada" : "s anteriores foram invalidadas"}
+          {experience.invalidatedCount === 1
+            ? " anterior foi invalidada"
+            : "s anteriores foram invalidadas"}
           e a lista foi atualizada com os dados atuais.
         </p>
       ) : null}

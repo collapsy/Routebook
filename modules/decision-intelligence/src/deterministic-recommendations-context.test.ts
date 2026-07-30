@@ -33,9 +33,7 @@ describe("deterministic recommendation context limitations", () => {
     });
 
     expect(result?.recommendation.limitations).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ code: "traveler-interests-unavailable" }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ code: "traveler-interests-unavailable" })]),
     );
     expect(result?.recommendation.confidence.level).toBe("low");
   });

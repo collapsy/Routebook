@@ -120,6 +120,14 @@ function commonLimitations(
     },
   ];
 
+  if (context.interests.length === 0) {
+    limitations.push({
+      code: "traveler-interests-unavailable",
+      message:
+        "Nenhum interesse do grupo foi informado; a correspondência de categorias não participou do score.",
+    });
+  }
+
   if (!context.accommodationCoordinate) {
     limitations.push({
       code: "accommodation-distance-unavailable",

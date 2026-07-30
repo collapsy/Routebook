@@ -47,7 +47,9 @@ test("apresenta Recommendations explicáveis e preserva a rejeição após recar
   ]);
 
   const praiaDoAmor = page.getByRole("article", { name: "Praia do Amor" });
-  await expect(praiaDoAmor.getByText(/categoria do Lugar corresponde a um interesse/i)).toBeVisible();
+  await expect(
+    praiaDoAmor.getByText(/categoria do Lugar corresponde a um interesse/i),
+  ).toBeVisible();
   await expect(praiaDoAmor.getByText(/em linha reta/i)).toBeVisible();
   await expect(praiaDoAmor.getByRole("heading", { name: /Confiança/ })).toBeVisible();
   await expect(page.getByText(/score/i)).toHaveCount(0);
@@ -68,7 +70,9 @@ test("apresenta Recommendations explicáveis e preserva a rejeição após recar
   ).toHaveCount(0);
 
   await page.goto(`${tripUrl}/lugares-salvos`);
-  await expect(page.getByRole("heading", { name: "Você ainda não salvou nenhum lugar" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Você ainda não salvou nenhum lugar" }),
+  ).toBeVisible();
 
   await page.goto(`${tripUrl}/roteiro`);
   await expect(page.getByLabel("Resumo do roteiro")).toContainText("0atividades");

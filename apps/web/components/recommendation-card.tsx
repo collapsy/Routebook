@@ -63,9 +63,7 @@ export function RecommendationCard({
       </section>
 
       <section className={styles.confidence} aria-labelledby={`${titleId}-confidence`}>
-        <h3 id={`${titleId}-confidence`}>
-          Confiança {confidenceLabels[card.confidenceLevel]}
-        </h3>
+        <h3 id={`${titleId}-confidence`}>Confiança {confidenceLabels[card.confidenceLevel]}</h3>
         <p className={styles.confidenceBasis}>
           Essa leitura considera {card.confidenceBasis.join(" e ")}. Não é garantia de qualidade ou
           de disponibilidade.

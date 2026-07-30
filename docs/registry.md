@@ -26,8 +26,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-PRD-008 | Requisitos Não Funcionais | Product | Published | 0.1.0 | [non-functional-requirements.md](./product/non-functional-requirements.md) |
 | RB-UX-001 | Arquitetura da Informação | Experience | Published | 0.1.0 | [information-architecture.md](./ux/information-architecture.md) |
 | RB-UX-002 | Fluxos do Usuário | Experience | Published | 0.1.0 | [user-flows.md](./ux/user-flows.md) |
-| RB-UX-003 | Inventário de Telas | Experience | Published | 0.1.0 | [screen-inventory.md](./ux/screen-inventory.md) |
-| RB-UX-004 | Wireframes | Experience | Published | 0.2.0 | [wireframes.md](./ux/wireframes.md) |
+| RB-UX-003 | Inventário de Telas | Experience | Published | 0.2.0 | [screen-inventory.md](./ux/screen-inventory.md) |
+| RB-UX-004 | Wireframes | Experience | Published | 0.3.0 | [wireframes.md](./ux/wireframes.md) |
 | RB-UX-005 | Especificações de Interação | Experience | Published | 0.1.0 | [interaction-specifications.md](./ux/interaction-specifications.md) |
 | RB-UX-006 | Diretrizes de Conteúdo e Microcopy | Experience | Published | 0.1.0 | [content-guidelines.md](./ux/content-guidelines.md) |
 | RB-DS-001 | Design System Foundations | Experience | Published | 0.1.0 | [foundations.md](./design-system/foundations.md) |

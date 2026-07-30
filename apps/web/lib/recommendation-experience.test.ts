@@ -3,10 +3,7 @@ import { describe, expect, it } from "vitest";
 import { createRecommendation, presentRecommendation } from "@routebook/decision-intelligence";
 import { createPlace } from "@routebook/place-catalog";
 
-import {
-  formatGeodesicDistance,
-  toRecommendationCardViewModel,
-} from "./recommendation-experience";
+import { formatGeodesicDistance, toRecommendationCardViewModel } from "./recommendation-experience";
 
 const generatedAt = new Date("2026-07-30T20:00:00.000Z");
 

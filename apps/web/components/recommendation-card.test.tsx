@@ -42,14 +42,16 @@ afterEach(() => {
 
 describe("RecommendationCard", () => {
   it("presents known reasons, limitations, qualitative confidence and contextual states", () => {
-    render(
-      <RecommendationCard card={presentedCard} ignoreAction={vi.fn()} tripId="trip-1" />,
-    );
+    render(<RecommendationCard card={presentedCard} ignoreAction={vi.fn()} tripId="trip-1" />);
 
     expect(screen.getByRole("heading", { name: "Praia do Amor" })).toBeInTheDocument();
     expect(screen.getByText("Praia publicada no catálogo de Pipa.")).toBeInTheDocument();
-    expect(screen.getByText("A categoria do Lugar corresponde a um interesse informado.")).toBeInTheDocument();
-    expect(screen.getByText("O catálogo não possui horário de funcionamento verificável.")).toBeInTheDocument();
+    expect(
+      screen.getByText("A categoria do Lugar corresponde a um interesse informado."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("O catálogo não possui horário de funcionamento verificável."),
+    ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Confiança Alta" })).toBeInTheDocument();
     expect(screen.getByText("Lugar salvo")).toBeInTheDocument();
     expect(screen.getByText("Já está no roteiro")).toBeInTheDocument();
@@ -64,9 +66,7 @@ describe("RecommendationCard", () => {
   });
 
   it("does not expose internal score, stars or arbitrary percentages", () => {
-    render(
-      <RecommendationCard card={presentedCard} ignoreAction={vi.fn()} tripId="trip-1" />,
-    );
+    render(<RecommendationCard card={presentedCard} ignoreAction={vi.fn()} tripId="trip-1" />);
 
     expect(screen.queryByText(/score/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/estrela/i)).not.toBeInTheDocument();

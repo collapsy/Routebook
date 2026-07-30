@@ -94,6 +94,42 @@ test("edita uma atividade preservando sua identidade no roteiro", async ({ page 
   await expect(page.getByText("1 h 30 min", { exact: true })).toBeVisible();
 });
 
+test("reordena atividades dentro do mesmo período e preserva a sequência", async ({
+  page,
+}, testInfo) => {
+  const tripName = `Ordem ${testInfo.project.name} ${Date.now()}`;
+  const firstTitle = "Primeira decisão";
+  const secondTitle = "Segunda decisão";
+
+  await page.goto("/viagens/nova");
+  await page.getByLabel("Nome da viagem").fill(tripName);
+  await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
+  await page.getByRole("button", { name: "Criar viagem" }).click();
+
+  await page.getByRole("link", { name: tripName }).click();
+  await page.getByRole("link", { name: "Abrir roteiro" }).click();
+  await page.getByLabel("Título").fill(firstTitle);
+  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+  await page.getByLabel("Título").fill(secondTitle);
+  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+
+  const firstDay = page.locator(".itinerary-day-card").first();
+  const activityTitles = firstDay.locator(".itinerary-activity-copy strong");
+  await expect(activityTitles).toHaveText([firstTitle, secondTitle]);
+
+  await page.getByRole("button", { name: `Subir ${secondTitle} no roteiro` }).click();
+
+  await expect(page).toHaveURL(/atividadeReordenada=1$/);
+  await expect(page.getByRole("status")).toContainText("Ordem das atividades atualizada");
+  await expect(activityTitles).toHaveText([secondTitle, firstTitle]);
+
+  await page.reload();
+  await expect(firstDay.locator(".itinerary-activity-copy strong")).toHaveText([
+    secondTitle,
+    firstTitle,
+  ]);
+});
+
 test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ page }, testInfo) => {
   const tripName = `Lugar no roteiro ${testInfo.project.name} ${Date.now()}`;
 

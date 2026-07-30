@@ -116,10 +116,7 @@ export const itineraryDays = pgTable(
   },
   (table) => [
     uniqueIndex("itinerary_days_itinerary_date_unique").on(table.itineraryId, table.date),
-    uniqueIndex("itinerary_days_itinerary_position_unique").on(
-      table.itineraryId,
-      table.position,
-    ),
+    uniqueIndex("itinerary_days_itinerary_position_unique").on(table.itineraryId, table.position),
   ],
 );
 
@@ -142,9 +139,6 @@ export const itineraryActivities = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
   },
   (table) => [
-    uniqueIndex("itinerary_activities_day_order_unique").on(
-      table.itineraryDayId,
-      table.order,
-    ),
+    uniqueIndex("itinerary_activities_day_order_unique").on(table.itineraryDayId, table.order),
   ],
 );

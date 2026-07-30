@@ -137,7 +137,7 @@ describe("ItinerarySpatialPanel", () => {
       name: "Abrir rota externa de Condomínio Solar Água para Praia do Amor",
     });
     expect(routeLink).toHaveAttribute("target", "_blank");
-    expect(routeLink).toHaveAttribute("rel", "noreferrer");
+    expect(routeLink).toHaveAttribute("rel", "noopener noreferrer");
 
     const routeUrl = new URL(routeLink.getAttribute("href")!);
     expect(routeUrl.protocol).toBe("https:");

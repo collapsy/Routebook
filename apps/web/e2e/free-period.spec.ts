@@ -11,10 +11,10 @@ test("cria e preserva um período livre protegido", async ({ page }, testInfo) =
   await page.getByRole("link", { name: tripName }).click();
   await page.getByRole("link", { name: "Abrir roteiro" }).click();
 
-  await page.getByLabel("Dia da viagem").nth(1).selectOption("2026-08-23");
+  await page.getByLabel("Dia do período livre").selectOption("2026-08-23");
   await page.getByLabel("Proteção do espaço").selectOption("protected");
-  await page.getByLabel("Horário opcional").nth(1).fill("15:30");
-  await page.getByLabel("Duração opcional").nth(1).fill("90");
+  await page.getByLabel("Horário do período livre (opcional)").fill("15:30");
+  await page.getByLabel("Duração do período livre (opcional)").fill("90");
   await page.getByRole("button", { name: "Adicionar período livre" }).click();
 
   await expect(page).toHaveURL(/periodoLivreCriado=1$/);

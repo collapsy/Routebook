@@ -114,6 +114,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-003 | Criação Canônica de Viagem | Implementation Increment | Published | 1.0.0 | [rb-inc-003-trip-creation.md](./implementation/increments/rb-inc-003-trip-creation.md) |
 | RB-INC-004 | Visão Inicial da Viagem | Implementation Increment | Published | 1.0.0 | [rb-inc-004-trip-overview.md](./implementation/increments/rb-inc-004-trip-overview.md) |
 | RB-INC-005 | Contexto Progressivo da Viagem | Implementation Increment | Draft | 0.1.0 | [rb-inc-005-traveler-context.md](./implementation/increments/rb-inc-005-traveler-context.md) |
+| RB-INC-038 | Núcleo de Recommendation e Context Snapshot | Implementation Increment | Draft | 0.1.0 | [rb-inc-038-recommendation-core.md](./implementation/increments/rb-inc-038-recommendation-core.md) |
+| RB-CTX-038 | Context Pack do RB-INC-038 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-038-recommendation-core.md](./implementation/context-packs/rb-inc-038-recommendation-core.md) |
 | RB-AI-007 | Operação e Gestão do Ciclo de Vida de Inteligência Artificial | AI Operations | Planned | 0.1.0 | [ai-operations-and-lifecycle-management.md](./ai/ai-operations-and-lifecycle-management.md) |
 | RB-API-002 | Catálogo de Contratos de API | API | Planned | 0.1.0 | [api-contract-catalog.md](./data/api-contract-catalog.md) |
 | RB-API-003 | Versionamento e Depreciação de APIs | API | Planned | 0.1.0 | [api-versioning-and-deprecation-policy.md](./data/api-versioning-and-deprecation-policy.md) |

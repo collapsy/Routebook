@@ -1,0 +1,39 @@
+name: Temporary Lockfile Sync
+
+on:
+  pull_request:
+    paths:
+      - "modules/decision-intelligence/package.json"
+      - ".github/workflows/temporary-lockfile-sync.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    name: Generate lockfile artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Generate lockfile
+        run: pnpm install --lockfile-only --no-frozen-lockfile
+
+      - name: Upload lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: routebook-lockfile
+          path: pnpm-lock.yaml
+          if-no-files-found: error
+          retention-days: 1

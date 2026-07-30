@@ -137,6 +137,49 @@ test("reordena atividades dentro do mesmo período e preserva a sequência", asy
   ]);
 });
 
+test("move uma atividade para outro dia e preserva seus dados", async ({ page }, testInfo) => {
+  const tripName = `Movimentação ${testInfo.project.name} ${Date.now()}`;
+  const activityTitle = "Passeio para mover";
+
+  await page.goto("/viagens/nova");
+  await page.getByLabel("Nome da viagem").fill(tripName);
+  await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
+  await page.getByRole("button", { name: "Criar viagem" }).click();
+
+  await page.getByRole("link", { name: tripName }).click();
+  await page.getByRole("link", { name: "Abrir roteiro" }).click();
+
+  const composer = page.locator(".itinerary-form");
+  await composer.getByLabel("Dia da viagem").selectOption("2026-08-22");
+  await composer.getByLabel("Título").fill(activityTitle);
+  await composer.getByLabel("Horário opcional").fill("11:15");
+  await composer.getByLabel("Duração opcional").fill("150");
+  await composer.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+
+  const dayCards = page.locator(".itinerary-day-card");
+  const firstDay = dayCards.nth(0);
+  const secondDay = dayCards.nth(1);
+  await expect(firstDay.locator(".itinerary-activity-copy strong")).toHaveText(activityTitle);
+  await expect(secondDay.locator(".itinerary-activity-copy strong")).toHaveCount(0);
+
+  await page.locator(`summary[aria-label="Mover ${activityTitle} para outro dia"]`).click();
+  const moveForm = page.getByRole("form", { name: `Mover ${activityTitle} para outro dia` });
+  await moveForm.getByLabel("Dia de destino").selectOption("2026-08-23");
+  await moveForm.getByRole("button", { name: "Mover atividade" }).click();
+
+  await expect(page).toHaveURL(/atividadeMovida=1$/);
+  await expect(page.getByRole("status")).toContainText("Atividade movida para outro dia");
+  await expect(firstDay.locator(".itinerary-activity-copy strong")).toHaveCount(0);
+  await expect(secondDay.locator(".itinerary-activity-copy strong")).toHaveText(activityTitle);
+  await expect(secondDay.getByText("11:15", { exact: true })).toBeVisible();
+  await expect(secondDay.getByText("2 h 30 min", { exact: true })).toBeVisible();
+
+  await page.reload();
+  await expect(firstDay.locator(".itinerary-activity-copy strong")).toHaveCount(0);
+  await expect(secondDay.locator(".itinerary-activity-copy strong")).toHaveText(activityTitle);
+  await expect(secondDay.getByText("11:15", { exact: true })).toBeVisible();
+});
+
 test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ page }, testInfo) => {
   const tripName = `Lugar no roteiro ${testInfo.project.name} ${Date.now()}`;
 

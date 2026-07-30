@@ -1,0 +1,183 @@
+.composer {
+  background: color-mix(in oklab, var(--surface-soft) 68%, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-large);
+  display: grid;
+  gap: 1.5rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.composer h2 {
+  font-size: clamp(1.6rem, 4vw, 2.35rem);
+  letter-spacing: -0.04em;
+  margin-bottom: 0.75rem;
+}
+
+.composer p,
+.explanation {
+  color: var(--foreground-muted);
+  line-height: 1.6;
+}
+
+.form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.field label {
+  font-weight: 750;
+}
+
+.field input,
+.field select {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  color: var(--foreground);
+  font: inherit;
+  min-height: 3rem;
+  padding: 0.75rem 0.9rem;
+  width: 100%;
+}
+
+.field input:focus-visible,
+.field select:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.listSection {
+  border-top: 1px solid var(--border);
+  padding: 1.25rem;
+}
+
+.listSection h3 {
+  color: var(--foreground-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.09em;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+}
+
+.list {
+  display: grid;
+  gap: 0.65rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  align-items: start;
+  background: color-mix(in oklab, var(--surface-soft) 74%, var(--background));
+  border: 1px dashed var(--border-strong, var(--border));
+  border-radius: var(--radius-small);
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: minmax(4.2rem, auto) 1fr;
+  padding: 0.85rem;
+}
+
+.time {
+  color: var(--primary-strong);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.copy {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.copy strong {
+  overflow-wrap: anywhere;
+}
+
+.copy small {
+  color: var(--foreground-muted);
+  line-height: 1.45;
+}
+
+.badge {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 800;
+  margin-top: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  width: fit-content;
+}
+
+.editDisclosure {
+  margin-top: 0.6rem;
+}
+
+.editDisclosure summary {
+  cursor: pointer;
+  font-weight: 800;
+  width: fit-content;
+}
+
+.editDisclosure summary:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.editForm {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.75rem;
+  padding: 1rem;
+}
+
+@media (min-width: 42rem) {
+  .composer {
+    align-items: start;
+    grid-template-columns: minmax(14rem, 0.65fr) minmax(0, 1.35fr);
+  }
+
+  .form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .actions,
+  .explanation {
+    grid-column: 1 / -1;
+  }
+
+  .editForm {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .editForm button {
+    width: fit-content;
+  }
+}
+
+@media (max-width: 44rem) {
+  .item {
+    grid-template-columns: 1fr;
+  }
+}

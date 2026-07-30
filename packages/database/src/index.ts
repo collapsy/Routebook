@@ -3,6 +3,7 @@ export {
   itineraries,
   itineraryActivities,
   itineraryDays,
+  itineraryFreePeriods,
   places,
   savedPlaces,
   travelerProfiles,

@@ -18,12 +18,13 @@ import {
   reorderItineraryActivitiesAction,
   updateItineraryActivityAction,
 } from "./actions";
+import { FreePeriodComposer, FreePeriodList } from "./free-periods";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Roteiro da viagem — RouteBook",
-  description: "Organize atividades manuais por dia e período da viagem.",
+  description: "Organize atividades e períodos livres por dia da viagem.",
 };
 
 type ItineraryPeriod = {
@@ -48,6 +49,12 @@ function formatDuration(durationMinutes: number): string {
   if (hours === 0) return `${minutes} min`;
   if (minutes === 0) return `${hours} h`;
   return `${hours} h ${minutes} min`;
+}
+
+function formatDaySummary(activityCount: number, freePeriodCount: number): string {
+  const activityLabel = activityCount === 1 ? "atividade" : "atividades";
+  const freePeriodLabel = freePeriodCount === 1 ? "período livre" : "períodos livres";
+  return `${activityCount} ${activityLabel} · ${freePeriodCount} ${freePeriodLabel}`;
 }
 
 function groupByPeriod(activities: Activity[]): ItineraryPeriod[] {
@@ -119,6 +126,7 @@ export default async function ItineraryPage({
     atividadeMovida?: string;
     atividadeRemovida?: string;
     atividadeReordenada?: string;
+    periodoLivreCriado?: string;
     erro?: string;
   }>;
 }) {
@@ -133,9 +141,11 @@ export default async function ItineraryPage({
     atividadeMovida,
     atividadeRemovida,
     atividadeReordenada,
+    periodoLivreCriado,
     erro,
   } = await searchParams;
   const activityCount = itinerary.days.reduce((total, day) => total + day.activities.length, 0);
+  const freePeriodCount = itinerary.days.reduce((total, day) => total + day.freePeriods.length, 0);
 
   return (
     <section className="app-page itinerary-page">
@@ -168,6 +178,11 @@ export default async function ItineraryPage({
           Atividade removida do roteiro.
         </p>
       ) : null}
+      {periodoLivreCriado === "1" ? (
+        <p className="success-banner" role="status">
+          Período livre adicionado ao roteiro.
+        </p>
+      ) : null}
       {erro ? (
         <p className="form-error itinerary-feedback" role="alert">
           {erro}
@@ -179,8 +194,8 @@ export default async function ItineraryPage({
           <p className="product-eyebrow">Roteiro manual</p>
           <h1>{trip.name}</h1>
           <p>
-            Organize decisões confirmadas por dia. Horários e durações continuam opcionais para que
-            o roteiro possa evoluir sem criar rigidez artificial.
+            Organize decisões confirmadas e espaços livres por dia. Horários e durações continuam
+            opcionais para que o roteiro possa evoluir sem criar rigidez artificial.
           </p>
         </div>
         <div className="itinerary-summary" aria-label="Resumo do roteiro">
@@ -188,6 +203,8 @@ export default async function ItineraryPage({
           <span>dias</span>
           <strong>{activityCount}</strong>
           <span>{activityCount === 1 ? "atividade" : "atividades"}</span>
+          <strong>{freePeriodCount}</strong>
+          <span>{freePeriodCount === 1 ? "período livre" : "períodos livres"}</span>
         </div>
       </header>
 
@@ -251,28 +268,31 @@ export default async function ItineraryPage({
         </form>
       </section>
 
+      <FreePeriodComposer itinerary={itinerary} tripId={tripId} />
+
       <ol className="itinerary-days" aria-label="Dias do roteiro">
         {itinerary.days.map((day) => {
           const periods = groupByPeriod(day.activities);
           const targetDays = itinerary.days.filter((targetDay) => targetDay.id !== day.id);
+          const itemCount = day.activities.length + day.freePeriods.length;
+          const daySummary = formatDaySummary(day.activities.length, day.freePeriods.length);
 
           return (
             <li className="itinerary-day-card" key={day.id}>
               <header>
                 <span>Dia {day.position}</span>
                 <h2>{formatDate(day.date)}</h2>
-                <small>
-                  {day.activities.length === 0
-                    ? "Planejamento aberto"
-                    : `${day.activities.length} ${day.activities.length === 1 ? "atividade" : "atividades"}`}
-                </small>
+                <small>{itemCount === 0 ? "Planejamento aberto" : daySummary}</small>
               </header>
 
-              {periods.length === 0 ? (
+              <FreePeriodList dayId={day.id} freePeriods={day.freePeriods} />
+
+              {periods.length === 0 && day.freePeriods.length === 0 ? (
                 <p className="itinerary-empty-day">
-                  Nenhuma atividade planejada. Este dia continua livre para novas decisões.
+                  Nenhuma atividade ou período livre planejado. Este dia continua aberto para novas
+                  decisões.
                 </p>
-              ) : (
+              ) : periods.length > 0 ? (
                 <div className="itinerary-periods">
                   {periods.map((period) => (
                     <section key={period.id} aria-labelledby={`${day.id}-${period.id}`}>
@@ -430,7 +450,7 @@ export default async function ItineraryPage({
                     </section>
                   ))}
                 </div>
-              )}
+              ) : null}
             </li>
           );
         })}

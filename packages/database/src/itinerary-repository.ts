@@ -2,17 +2,19 @@ import { asc, eq, inArray } from "drizzle-orm";
 
 import type {
   Activity,
+  FreePeriod,
   Itinerary,
   ItineraryDay,
   ItineraryRepository,
 } from "@routebook/trip-management";
 
 import { getDatabase } from "./client";
-import { itineraries, itineraryActivities, itineraryDays } from "./schema";
+import { itineraries, itineraryActivities, itineraryDays, itineraryFreePeriods } from "./schema";
 
 type ItineraryRow = typeof itineraries.$inferSelect;
 type ItineraryDayRow = typeof itineraryDays.$inferSelect;
 type ItineraryActivityRow = typeof itineraryActivities.$inferSelect;
+type ItineraryFreePeriodRow = typeof itineraryFreePeriods.$inferSelect;
 
 function mapActivity(row: ItineraryActivityRow): Activity {
   return {
@@ -30,12 +32,26 @@ function mapActivity(row: ItineraryActivityRow): Activity {
   };
 }
 
+function mapFreePeriod(row: ItineraryFreePeriodRow): FreePeriod {
+  return {
+    id: row.id,
+    mode: row.mode as FreePeriod["mode"],
+    order: row.order,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    ...(row.startTime ? { startTime: row.startTime } : {}),
+    ...(row.durationMinutes !== null ? { durationMinutes: row.durationMinutes } : {}),
+  };
+}
+
 function mapItinerary(
   row: ItineraryRow,
   dayRows: ItineraryDayRow[],
   activityRows: ItineraryActivityRow[],
+  freePeriodRows: ItineraryFreePeriodRow[],
 ): Itinerary {
   const activitiesByDay = new Map<string, Activity[]>();
+  const freePeriodsByDay = new Map<string, FreePeriod[]>();
 
   for (const activityRow of activityRows) {
     const activities = activitiesByDay.get(activityRow.itineraryDayId) ?? [];
@@ -43,11 +59,18 @@ function mapItinerary(
     activitiesByDay.set(activityRow.itineraryDayId, activities);
   }
 
+  for (const freePeriodRow of freePeriodRows) {
+    const freePeriods = freePeriodsByDay.get(freePeriodRow.itineraryDayId) ?? [];
+    freePeriods.push(mapFreePeriod(freePeriodRow));
+    freePeriodsByDay.set(freePeriodRow.itineraryDayId, freePeriods);
+  }
+
   const days: ItineraryDay[] = dayRows.map((dayRow) => ({
     id: dayRow.id,
     date: dayRow.date,
     position: dayRow.position,
     activities: activitiesByDay.get(dayRow.id) ?? [],
+    freePeriods: freePeriodsByDay.get(dayRow.id) ?? [],
   }));
 
   return {
@@ -90,8 +113,16 @@ export class DrizzleItineraryRepository implements ItineraryRepository {
             .from(itineraryActivities)
             .where(inArray(itineraryActivities.itineraryDayId, dayIds))
             .orderBy(asc(itineraryActivities.itineraryDayId), asc(itineraryActivities.order));
+    const freePeriodRows =
+      dayIds.length === 0
+        ? []
+        : await database
+            .select()
+            .from(itineraryFreePeriods)
+            .where(inArray(itineraryFreePeriods.itineraryDayId, dayIds))
+            .orderBy(asc(itineraryFreePeriods.itineraryDayId), asc(itineraryFreePeriods.order));
 
-    return mapItinerary(itineraryRow, dayRows, activityRows);
+    return mapItinerary(itineraryRow, dayRows, activityRows, freePeriodRows);
   }
 
   async save(itinerary: Itinerary): Promise<Itinerary> {
@@ -135,9 +166,24 @@ export class DrizzleItineraryRepository implements ItineraryRepository {
           updatedAt: activity.updatedAt,
         })),
       );
+      const freePeriods = itinerary.days.flatMap((day) =>
+        day.freePeriods.map((freePeriod) => ({
+          id: freePeriod.id,
+          itineraryDayId: day.id,
+          mode: freePeriod.mode,
+          startTime: freePeriod.startTime ?? null,
+          durationMinutes: freePeriod.durationMinutes ?? null,
+          order: freePeriod.order,
+          createdAt: freePeriod.createdAt,
+          updatedAt: freePeriod.updatedAt,
+        })),
+      );
 
       if (activities.length > 0) {
         await transaction.insert(itineraryActivities).values(activities);
+      }
+      if (freePeriods.length > 0) {
+        await transaction.insert(itineraryFreePeriods).values(freePeriods);
       }
     });
 

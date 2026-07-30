@@ -142,3 +142,22 @@ export const itineraryActivities = pgTable(
     uniqueIndex("itinerary_activities_day_order_unique").on(table.itineraryDayId, table.order),
   ],
 );
+
+export const itineraryFreePeriods = pgTable(
+  "itinerary_free_periods",
+  {
+    id: uuid("id").primaryKey(),
+    itineraryDayId: uuid("itinerary_day_id")
+      .notNull()
+      .references(() => itineraryDays.id, { onDelete: "cascade" }),
+    mode: varchar("mode", { length: 24 }).notNull(),
+    startTime: varchar("start_time", { length: 5 }),
+    durationMinutes: integer("duration_minutes"),
+    order: integer("order").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
+  },
+  (table) => [
+    uniqueIndex("itinerary_free_periods_day_order_unique").on(table.itineraryDayId, table.order),
+  ],
+);

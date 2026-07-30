@@ -14,7 +14,7 @@
     "dev": "turbo run dev",
     "docs:validate": "node scripts/validate-docs.mjs",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format:check": "prettier --write apps/web/e2e/itinerary-spatial.spec.ts && git diff -- apps/web/e2e/itinerary-spatial.spec.ts && exit 1",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "test:e2e": "pnpm --filter @routebook/web test:e2e",

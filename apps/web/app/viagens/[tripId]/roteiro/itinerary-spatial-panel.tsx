@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import { TripMap } from "../../../../components/trip-map";
+import { buildExternalDirectionsUrl } from "../../../../lib/external-directions";
 import {
   formatGeodesicDistance,
   type ItineraryDayLegSummary,
@@ -209,7 +210,20 @@ export function ItinerarySpatialPanel({
                     Etapa geográfica {index + 1}
                   </strong>
                   {leg.status === "available" ? (
-                    <span>{formatGeodesicDistance(leg.distanceMeters)}</span>
+                    <div className={styles.legActions}>
+                      <span>{formatGeodesicDistance(leg.distanceMeters)}</span>
+                      <a
+                        aria-label={`Abrir rota externa de ${originLabel} para ${destinationLabel}`}
+                        href={buildExternalDirectionsUrl({
+                          origin: leg.origin.coordinate,
+                          destination: leg.destination.coordinate,
+                        })}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        Abrir rota externa
+                      </a>
+                    </div>
                   ) : (
                     <span>
                       Distância indisponível porque existe uma lacuna geográfica entre os pontos

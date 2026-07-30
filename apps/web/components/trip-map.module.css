@@ -70,6 +70,18 @@
   width: 0.8rem;
 }
 
+.markerDot {
+  align-items: center;
+  color: var(--surface);
+  display: flex;
+  flex: 0 0 auto;
+  font-size: 0.68rem;
+  font-weight: 900;
+  height: 1.35rem;
+  justify-content: center;
+  width: 1.35rem;
+}
+
 .saved-place .legendDot,
 .legendDot.saved-place,
 .marker.saved-place .markerDot {
@@ -82,6 +94,13 @@
 .marker.accommodation .markerDot {
   background: var(--primary-strong);
   box-shadow: 0 0 0 2px var(--primary-strong);
+}
+
+.itinerary-activity .legendDot,
+.legendDot.itinerary-activity,
+.marker.itinerary-activity .markerDot {
+  background: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 70%, var(--foreground));
 }
 
 .mapShell {
@@ -117,7 +136,7 @@
   pointer-events: auto;
   position: absolute;
   text-decoration: none;
-  transform: translate(-0.4rem, -0.4rem);
+  transform: translate(-0.675rem, -0.675rem);
 }
 
 .markerLabel {
@@ -158,6 +177,7 @@
   display: flex;
   gap: 1rem;
   justify-content: space-between;
+  min-width: 0;
   padding: 0.7rem 0;
 }
 
@@ -168,6 +188,7 @@
 .locationList div {
   display: grid;
   gap: 0.15rem;
+  min-width: 0;
 }
 
 .locationList span {
@@ -176,8 +197,13 @@
   font-weight: 700;
 }
 
+.locationList strong {
+  overflow-wrap: anywhere;
+}
+
 .locationList a {
   color: var(--primary-strong);
+  flex: 0 0 auto;
   font-size: 0.85rem;
   font-weight: 800;
 }

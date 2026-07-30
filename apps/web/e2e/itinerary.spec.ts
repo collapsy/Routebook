@@ -75,14 +75,19 @@ test("edita uma atividade preservando sua identidade no roteiro", async ({ page 
   await page.getByLabel("Duração opcional").fill("120");
   await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
 
+  await expect(page).toHaveURL(/atividadeCriada=1$/);
+  await expect(page.getByText(activityTitle, { exact: true })).toBeVisible();
   await page.locator(`summary[aria-label="Editar ${activityTitle}"]`).click();
   const editForm = page.getByRole("form", { name: `Editar ${activityTitle}` });
+  await expect(editForm).toBeVisible();
   await editForm.getByLabel("Título").fill(updatedTitle);
   await editForm.getByLabel("Horário opcional").fill("");
   await editForm.getByLabel("Duração opcional").fill("90");
-  await editForm.getByRole("button", { name: "Salvar alterações" }).click();
+  await Promise.all([
+    page.waitForURL(/atividadeEditada=1$/),
+    editForm.getByRole("button", { name: "Salvar alterações" }).click(),
+  ]);
 
-  await expect(page).toHaveURL(/atividadeEditada=1$/);
   await expect(page.getByRole("status")).toContainText("Atividade atualizada");
   await expect(page.getByText(updatedTitle, { exact: true })).toBeVisible();
   await expect(page.getByText(activityTitle, { exact: true })).toHaveCount(0);
@@ -202,7 +207,10 @@ test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ 
 
   await expect(page.getByRole("status")).toContainText("Lugar salvo");
   await page.getByRole("link", { name: "Visão da viagem" }).click();
-  await page.getByRole("link", { name: "Ver lugares salvos" }).click();
+  await Promise.all([
+    page.waitForURL(/\/lugares-salvos$/),
+    page.getByRole("link", { name: "Ver lugares salvos" }).click(),
+  ]);
 
   await page.getByLabel("Adicionar ao dia").selectOption("2026-08-23");
   await page.getByLabel("Horário opcional").fill("14:15");

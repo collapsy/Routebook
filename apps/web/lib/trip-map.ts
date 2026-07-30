@@ -1,4 +1,5 @@
-export type TripMapPointKind = "accommodation" | "published-place" | "saved-place";
+export type TripMapPointKind =
+  "accommodation" | "published-place" | "saved-place" | "itinerary-activity";
 
 export type TripMapPoint = {
   id: string;
@@ -7,6 +8,7 @@ export type TripMapPoint = {
   latitude: number;
   longitude: number;
   href?: string;
+  sequence?: number;
 };
 
 export type TripMapBounds = {

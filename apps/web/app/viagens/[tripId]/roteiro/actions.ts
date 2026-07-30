@@ -35,9 +35,7 @@ async function loadItinerary(tripId: string): Promise<{
 }
 
 function redirectWithItineraryError(tripId: string, error: ItineraryValidationError): never {
-  redirect(
-    `/viagens/${tripId}/roteiro?erro=${encodeURIComponent(itineraryErrorMessage(error))}`,
-  );
+  redirect(`/viagens/${tripId}/roteiro?erro=${encodeURIComponent(itineraryErrorMessage(error))}`);
 }
 
 export async function addManualActivityAction(formData: FormData): Promise<never> {
@@ -111,9 +109,7 @@ export async function updateItineraryActivityAction(formData: FormData): Promise
   redirect(`/viagens/${tripId}/roteiro?atividadeEditada=1`);
 }
 
-export async function reorderItineraryActivitiesAction(
-  formData: FormData,
-): Promise<never> {
+export async function reorderItineraryActivitiesAction(formData: FormData): Promise<never> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const activityId = String(formData.get("activityId") ?? "").trim();
   const targetActivityId = String(formData.get("targetActivityId") ?? "").trim();

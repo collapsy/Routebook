@@ -125,13 +125,8 @@ export default async function ItineraryPage({
   if (!trip) notFound();
 
   const itinerary = await loadOrCreateItinerary(trip);
-  const {
-    atividadeCriada,
-    atividadeEditada,
-    atividadeRemovida,
-    atividadeReordenada,
-    erro,
-  } = await searchParams;
+  const { atividadeCriada, atividadeEditada, atividadeRemovida, atividadeReordenada, erro } =
+    await searchParams;
   const activityCount = itinerary.days.reduce((total, day) => total + day.activities.length, 0);
 
   return (

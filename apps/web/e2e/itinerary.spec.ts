@@ -33,6 +33,33 @@ test("cria e preserva uma atividade no roteiro manual", async ({ page }, testInf
   await expect(page.getByText("09:30")).toBeVisible();
 });
 
+test("remove uma atividade do roteiro e preserva a remoção", async ({ page }, testInfo) => {
+  const tripName = `Remoção ${testInfo.project.name} ${Date.now()}`;
+  const activityTitle = "Atividade removível";
+
+  await page.goto("/viagens/nova");
+  await page.getByLabel("Nome da viagem").fill(tripName);
+  await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
+  await page.getByRole("button", { name: "Criar viagem" }).click();
+
+  await page.getByRole("link", { name: tripName }).click();
+  await page.getByRole("link", { name: "Abrir roteiro" }).click();
+  await page.getByLabel("Título").fill(activityTitle);
+  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+
+  await expect(page.getByText(activityTitle, { exact: true })).toBeVisible();
+  await page
+    .getByRole("button", { name: `Remover ${activityTitle} do roteiro` })
+    .click();
+
+  await expect(page).toHaveURL(/atividadeRemovida=1$/);
+  await expect(page.getByRole("status")).toContainText("Atividade removida");
+  await expect(page.getByText(activityTitle, { exact: true })).toHaveCount(0);
+
+  await page.reload();
+  await expect(page.getByText(activityTitle, { exact: true })).toHaveCount(0);
+});
+
 test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ page }, testInfo) => {
   const tripName = `Lugar no roteiro ${testInfo.project.name} ${Date.now()}`;
 

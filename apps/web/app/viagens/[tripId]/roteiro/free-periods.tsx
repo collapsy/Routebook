@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import type { FreePeriod, Itinerary } from "@routebook/trip-management";
 
 import { addItineraryFreePeriodAction } from "./actions";
@@ -43,7 +45,9 @@ export function FreePeriodComposer({
 }) {
   return (
     <>
-      <FreePeriodFeedback />
+      <Suspense fallback={null}>
+        <FreePeriodFeedback />
+      </Suspense>
       <section className={styles.composer} aria-labelledby="new-free-period-title">
         <div>
           <p className="product-eyebrow">Espaço intencional</p>

@@ -159,14 +159,24 @@ describe("deriveItineraryDaySpatialContext", () => {
     const context = deriveItineraryDaySpatialContext({
       itinerary,
       dayDate: "2026-08-22",
-      publishedPlaces: [{ id: "place-praia", name: "Origem", slug: "origem", latitude: 0, longitude: 0 }],
+      publishedPlaces: [
+        {
+          id: "place-praia",
+          name: "Origem",
+          slug: "origem",
+          latitude: 0,
+          longitude: 0,
+        },
+      ],
     });
 
     expect(context.activitySteps[0]).toMatchObject({
       status: "available",
       point: { coordinate: { latitude: 0, longitude: 0 } },
     });
-    expect(itinerary.days[0]?.activities.map((activity) => activity.id)).toEqual(originalActivityIds);
+    expect(itinerary.days[0]?.activities.map((activity) => activity.id)).toEqual(
+      originalActivityIds,
+    );
   });
 
   it("distinguishes missing accommodation from accommodation without valid coordinates", () => {
@@ -190,7 +200,10 @@ describe("deriveItineraryDaySpatialContext", () => {
           coordinate: { latitude: 120, longitude: 0 },
         },
       }).accommodation,
-    ).toEqual({ status: "coordinates-unavailable", label: "Hospedagem sem ponto" });
+    ).toEqual({
+      status: "coordinates-unavailable",
+      label: "Hospedagem sem ponto",
+    });
   });
 
   it("rejects a day outside the itinerary", () => {

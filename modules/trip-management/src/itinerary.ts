@@ -73,9 +73,20 @@ export type AddActivityInput = {
   placeId?: string;
 };
 
+export type RemoveActivityInput = {
+  activityId: string;
+};
+
 export type ItineraryFieldErrors = Partial<
   Record<
-    "tripId" | "period" | "dayDate" | "title" | "startTime" | "durationMinutes" | "placeId",
+    | "tripId"
+    | "period"
+    | "dayDate"
+    | "activityId"
+    | "title"
+    | "startTime"
+    | "durationMinutes"
+    | "placeId",
     string
   >
 >;
@@ -184,6 +195,43 @@ export function addActivity(
     days: itinerary.days.map((day) =>
       day.id === targetDay.id ? { ...day, activities: [...day.activities, activity] } : day,
     ),
+    version: itinerary.version + 1,
+    updatedAt: now,
+  };
+}
+
+export function removeActivity(
+  itinerary: Itinerary,
+  input: RemoveActivityInput,
+  now = new Date(),
+): Itinerary {
+  const activityId = input.activityId.trim();
+  const sourceDay = itinerary.days.find((day) =>
+    day.activities.some((activity) => activity.id === activityId),
+  );
+  const fieldErrors: ItineraryFieldErrors = {};
+
+  if (!activityId) fieldErrors.activityId = "Informe uma atividade válida.";
+  else if (!sourceDay) fieldErrors.activityId = "A atividade não pertence a este roteiro.";
+
+  if (Object.keys(fieldErrors).length > 0 || !sourceDay) {
+    throw new ItineraryValidationError(fieldErrors);
+  }
+
+  return {
+    ...itinerary,
+    days: itinerary.days.map((day) => {
+      if (day.id !== sourceDay.id) return day;
+
+      const activities = day.activities
+        .filter((activity) => activity.id !== activityId)
+        .map((activity, index) => {
+          const order = index + 1;
+          return activity.order === order ? activity : { ...activity, order, updatedAt: now };
+        });
+
+      return { ...day, activities };
+    }),
     version: itinerary.version + 1,
     updatedAt: now,
   };

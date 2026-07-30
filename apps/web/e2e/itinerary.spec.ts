@@ -33,9 +33,7 @@ test("cria e preserva uma atividade no roteiro manual", async ({ page }, testInf
   await expect(page.getByText("09:30")).toBeVisible();
 });
 
-test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({
-  page,
-}, testInfo) => {
+test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ page }, testInfo) => {
   const tripName = `Lugar no roteiro ${testInfo.project.name} ${Date.now()}`;
 
   await page.goto("/viagens/nova");

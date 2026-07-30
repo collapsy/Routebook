@@ -27,6 +27,7 @@
     "@playwright/test": "1.62.0",
     "@routebook/eslint-config": "workspace:*",
     "@routebook/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "4.3.3",
     "@testing-library/jest-dom": "7.0.0",
     "@testing-library/react": "16.3.2",
     "@testing-library/user-event": "14.6.1",

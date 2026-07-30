@@ -38,14 +38,20 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   await page.getByRole("link", { name: "Ver lugares salvos" }).click();
 
   let savedPlaceCards = page.locator("ul.place-catalog-grid > li");
-  await savedPlaceCards.first().getByLabel("Adicionar ao dia").selectOption("2026-08-23");
+  await savedPlaceCards
+    .first()
+    .getByLabel("Adicionar ao dia")
+    .selectOption("2026-08-23");
   await savedPlaceCards
     .first()
     .getByRole("button", { name: "Adicionar ao roteiro" })
     .click();
 
   savedPlaceCards = page.locator("ul.place-catalog-grid > li");
-  await savedPlaceCards.nth(1).getByLabel("Adicionar ao dia").selectOption("2026-08-23");
+  await savedPlaceCards
+    .nth(1)
+    .getByLabel("Adicionar ao dia")
+    .selectOption("2026-08-23");
   await savedPlaceCards
     .nth(1)
     .getByRole("button", { name: "Adicionar ao roteiro" })

@@ -49,7 +49,7 @@ test("edita e limpa os dados temporais de um período livre", async ({ page }, t
     hasText: "Período livre flexível",
   });
   const editor = freePeriodItem.locator("details");
-  await editor.getByRole("button", { name: /Editar período livre/ }).click();
+  await editor.locator("summary").click();
   await editor.getByLabel("Proteção do espaço").selectOption("protected");
   await editor.getByLabel("Horário do período livre (opcional)").fill("");
   await editor.getByLabel("Duração do período livre (opcional)").fill("");

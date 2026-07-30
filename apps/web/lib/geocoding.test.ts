@@ -61,12 +61,14 @@ describe("NominatimGeocoder", () => {
   it("rejects malformed coordinates", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        new Response(
-          JSON.stringify([{ display_name: "Resultado inválido", lat: "200", lon: "x" }]),
-          { status: 200 },
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(
+            JSON.stringify([{ display_name: "Resultado inválido", lat: "200", lon: "x" }]),
+            { status: 200 },
+          ),
         ),
-      ),
     );
 
     await expect(

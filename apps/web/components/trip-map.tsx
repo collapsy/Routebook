@@ -33,7 +33,13 @@ function calculateMarkerPosition(point: TripMapPoint, bounds: TripMapBounds) {
   };
 }
 
-function Marker({ point, bounds }: { point: TripMapPoint; bounds: TripMapBounds }) {
+function Marker({
+  point,
+  bounds,
+}: {
+  point: TripMapPoint;
+  bounds: TripMapBounds;
+}) {
   const className = `${styles.marker} ${styles[point.kind]}`;
   const markerContent = (
     <>
@@ -83,8 +89,9 @@ export function TripMap({
         <p className={styles.eyebrow}>Contexto espacial</p>
         <h2 id="trip-map-title">Mapa ainda indisponível</h2>
         <p>
-          Informe as coordenadas da hospedagem ou aguarde a publicação de lugares com localização
-          para visualizar o mapa. As demais áreas da viagem continuam disponíveis normalmente.
+          Informe as coordenadas da hospedagem ou aguarde a publicação de
+          lugares com localização para visualizar o mapa. As demais áreas da
+          viagem continuam disponíveis normalmente.
         </p>
       </section>
     );
@@ -96,7 +103,10 @@ export function TripMap({
         <div>
           <p className={styles.eyebrow}>Contexto espacial</p>
           <h2 id="trip-map-title">{title}</h2>
-          <p>Use os marcadores para localizar a hospedagem e abrir os detalhes dos lugares.</p>
+          <p>
+            Use os marcadores para localizar a hospedagem e abrir os detalhes
+            dos lugares.
+          </p>
         </div>
         <ul aria-label="Legenda do mapa" className={styles.legend}>
           {Object.entries(kindLabels).map(([kind, label]) => (
@@ -120,13 +130,19 @@ export function TripMap({
         />
         <div aria-label="Marcadores do mapa" className={styles.markerLayer}>
           {validPoints.map((point) => (
-            <Marker bounds={bounds} key={`${point.kind}-${point.id}`} point={point} />
+            <Marker
+              bounds={bounds}
+              key={`${point.kind}-${point.id}`}
+              point={point}
+            />
           ))}
         </div>
       </div>
 
       <noscript>
-        <p className={styles.notice}>Ative o JavaScript para carregar a camada cartográfica.</p>
+        <p className={styles.notice}>
+          Ative o JavaScript para carregar a camada cartográfica.
+        </p>
       </noscript>
 
       <ul aria-label="Locais exibidos no mapa" className={styles.locationList}>
@@ -142,8 +158,9 @@ export function TripMap({
       </ul>
 
       <p className={styles.attribution}>
-        Camada cartográfica por OpenStreetMap. Os marcadores representam coordenadas cadastradas e
-        não indicam rota, trânsito ou tempo de deslocamento.
+        Camada cartográfica por OpenStreetMap. Os marcadores representam
+        coordenadas cadastradas e não indicam rota, trânsito ou tempo de
+        deslocamento.
       </p>
     </section>
   );

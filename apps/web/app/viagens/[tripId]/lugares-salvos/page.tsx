@@ -9,12 +9,12 @@ import {
 } from "@routebook/database";
 import { listPublishedPlaces, type PlaceCategory } from "@routebook/place-catalog";
 import { listSavedPlaces } from "@routebook/saved-places";
-import { findTripById } from "@routebook/trip-management";
+import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { TripMap } from "../../../../components/trip-map";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { presentAccommodationDistance } from "../lugares/distance";
-import { removeSavedPlaceAction } from "./actions";
+import { addSavedPlaceToItineraryAction, removeSavedPlaceAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -35,15 +35,28 @@ function resolveDestinationId(destinationName: string): string | null {
   return normalized.includes("pipa") ? "pipa-rn-br" : null;
 }
 
+function formatDate(value: string): string {
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "UTC",
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+  }).format(new Date(`${value}T00:00:00Z`));
+}
+
 export default async function SavedPlacesPage({
   params,
   searchParams,
 }: {
   params: Promise<{ tripId: string }>;
-  searchParams: Promise<{ removed?: string }>;
+  searchParams: Promise<{
+    removed?: string;
+    adicionadoAoRoteiro?: string;
+    erro?: string;
+  }>;
 }) {
   const { tripId } = await params;
-  const { removed } = await searchParams;
+  const { removed, adicionadoAoRoteiro, erro } = await searchParams;
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
@@ -57,6 +70,7 @@ export default async function SavedPlacesPage({
 
   const savedIds = new Set(savedPlaces.map((selection) => selection.placeId));
   const places = publishedPlaces.filter((place) => savedIds.has(place.id));
+  const tripDays = deriveTripDays(trip.period);
   const mapPoints: TripMapPoint[] = places.map((place) => ({
     id: place.id,
     label: place.name,
@@ -82,14 +96,29 @@ export default async function SavedPlacesPage({
         <Link className="back-link" href={`/viagens/${tripId}`}>
           ← Voltar para a viagem
         </Link>
-        <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
-          Explorar catálogo
-        </Link>
+        <div className="section-heading-row">
+          <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
+            Abrir roteiro
+          </Link>
+          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
+            Explorar catálogo
+          </Link>
+        </div>
       </div>
 
       {removed === "1" ? (
         <p className="success-banner" role="status">
           Lugar removido da sua seleção.
+        </p>
+      ) : null}
+      {adicionadoAoRoteiro === "1" ? (
+        <p className="success-banner" role="status">
+          Lugar adicionado ao roteiro. Ele continua salvo na sua seleção.
+        </p>
+      ) : null}
+      {erro ? (
+        <p className="form-error itinerary-feedback" role="alert">
+          {erro}
         </p>
       ) : null}
 
@@ -98,7 +127,8 @@ export default async function SavedPlacesPage({
           <p className="product-eyebrow">Sua seleção</p>
           <h1>Lugares salvos</h1>
           <p>
-            Reúna os lugares que deseja considerar durante a viagem para {trip.destination.name}.
+            Reúna os lugares que deseja considerar durante a viagem para {trip.destination.name} e
+            transforme uma intenção em Atividade quando decidir o Dia.
           </p>
           <p>
             As distâncias exibidas são estimativas em linha reta a partir da hospedagem e não
@@ -132,11 +162,12 @@ export default async function SavedPlacesPage({
                 longitude: place.longitude,
               },
             );
+            const titleId = `saved-place-${place.id}`;
 
             return (
               <li className="place-card" key={place.id}>
                 <p className="product-eyebrow">{categoryLabels[place.category]}</p>
-                <h2>{place.name}</h2>
+                <h2 id={titleId}>{place.name}</h2>
                 <p>{place.summary}</p>
                 <p>
                   <strong>Distância da hospedagem: </strong>
@@ -144,7 +175,54 @@ export default async function SavedPlacesPage({
                     ? `${accommodationDistance.label} — ${accommodationDistance.description}`
                     : "indisponível enquanto a hospedagem não possuir coordenadas."}
                 </p>
-                <div className="section-heading-row">
+
+                <form
+                  action={addSavedPlaceToItineraryAction}
+                  aria-labelledby={titleId}
+                  className="saved-place-itinerary-form"
+                >
+                  <input name="tripId" type="hidden" value={tripId} />
+                  <input name="placeSlug" type="hidden" value={place.slug} />
+
+                  <div className="form-field saved-place-itinerary-day">
+                    <label htmlFor={`day-${place.id}`}>Adicionar ao dia</label>
+                    <select
+                      defaultValue={tripDays[0]?.date}
+                      id={`day-${place.id}`}
+                      name="dayDate"
+                      required
+                    >
+                      {tripDays.map((day) => (
+                        <option key={day.date} value={day.date}>
+                          Dia {day.index} — {formatDate(day.date)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-field">
+                    <label htmlFor={`time-${place.id}`}>Horário opcional</label>
+                    <input id={`time-${place.id}`} name="startTime" type="time" />
+                  </div>
+
+                  <div className="form-field">
+                    <label htmlFor={`duration-${place.id}`}>Duração opcional</label>
+                    <input
+                      id={`duration-${place.id}`}
+                      min={1}
+                      name="durationMinutes"
+                      placeholder="Minutos"
+                      step={1}
+                      type="number"
+                    />
+                  </div>
+
+                  <button className="product-button" type="submit">
+                    Adicionar ao roteiro
+                  </button>
+                </form>
+
+                <div className="section-heading-row saved-place-card-actions">
                   <Link
                     className="product-secondary-action"
                     href={`/viagens/${tripId}/lugares/${place.slug}`}

@@ -7,22 +7,35 @@ async function createTripWithRecommendationContext(page: import("@playwright/tes
   await page.getByLabel("Nome da viagem").fill(tripName);
   await page.getByLabel("Data de início").fill("2026-08-22");
   await page.getByLabel("Data de término").fill("2026-08-24");
-  await page.getByRole("button", { name: "Criar viagem" }).click();
+  await Promise.all([
+    page.waitForURL(/\/viagens\/[^/?]+$/),
+    page.getByRole("button", { name: "Criar viagem" }).click(),
+  ]);
   await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
 
-  await page.getByRole("link", { name: "Configurar contexto da viagem" }).click();
+  await Promise.all([
+    page.waitForURL(/\/contexto$/),
+    page.getByRole("link", { name: "Configurar contexto da viagem" }).click(),
+  ]);
   await page.getByRole("checkbox", { name: "Praias" }).check();
   await page.getByRole("checkbox", { name: "Natureza" }).check();
-  await page.getByRole("button", { name: "Salvar contexto" }).click();
-  await expect(page).toHaveURL(/\/viagens\/[^/]+\?contextoSalvo=1$/);
+  await Promise.all([
+    page.waitForURL(/\/viagens\/[^/]+\?contextoSalvo=1$/),
+    page.getByRole("button", { name: "Salvar contexto" }).click(),
+  ]);
 
-  await page.getByRole("link", { name: "Editar hospedagem" }).click();
+  await Promise.all([
+    page.waitForURL(/\/hospedagem$/),
+    page.getByRole("link", { name: "Editar hospedagem" }).click(),
+  ]);
   await page.getByLabel("Nome da hospedagem").fill("Condomínio Solar Água");
   await page.getByLabel("Endereço").fill("Pipa, Tibau do Sul — RN");
   await page.getByLabel("Latitude").fill("-6,2302");
   await page.getByLabel("Longitude").fill("-35,0503");
-  await page.getByRole("button", { name: "Salvar hospedagem" }).click();
-  await expect(page).toHaveURL(/\/viagens\/[^/]+\?hospedagemSalva=1$/);
+  await Promise.all([
+    page.waitForURL(/\/viagens\/[^/]+\?hospedagemSalva=1$/),
+    page.getByRole("button", { name: "Salvar hospedagem" }).click(),
+  ]);
 
   return { tripName, tripUrl: new URL(page.url()).pathname };
 }
@@ -32,7 +45,10 @@ test("apresenta Recommendations explicáveis e preserva a rejeição após recar
 }) => {
   const { tripName, tripUrl } = await createTripWithRecommendationContext(page);
 
-  await page.getByRole("link", { name: "Ver sugestões contextualizadas" }).click();
+  await Promise.all([
+    page.waitForURL(/\/recomendacoes$/),
+    page.getByRole("link", { name: "Ver sugestões contextualizadas" }).click(),
+  ]);
   await expect(page.getByRole("heading", { name: `Sugestões para ${tripName}` })).toBeVisible();
   await expect(page.getByText(/você continua no controle de cada escolha/i)).toBeVisible();
 

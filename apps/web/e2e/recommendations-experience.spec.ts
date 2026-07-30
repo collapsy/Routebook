@@ -12,6 +12,7 @@ async function createTripWithRecommendationContext(page: import("@playwright/tes
 
   await page.getByRole("link", { name: "Configurar contexto da viagem" }).click();
   await page.getByRole("checkbox", { name: "Praias" }).check();
+  await page.getByRole("checkbox", { name: "Natureza" }).check();
   await page.getByRole("button", { name: "Salvar contexto" }).click();
   await expect(page).toHaveURL(/\/viagens\/[^/]+\?contextoSalvo=1$/);
 
@@ -38,11 +39,11 @@ test("apresenta Recommendations explicáveis e preserva a rejeição após recar
   const list = page.getByRole("list", { name: "Recommendations de Lugares" });
   await expect(list).toBeVisible();
   await expect(list.getByRole("heading", { level: 2 })).toHaveText([
-    "Praia do Amor",
     "Baía dos Golfinhos",
     "Chapadão de Pipa",
-    "Centro Gastronômico de Pipa",
+    "Praia do Amor",
     "Vida Noturna na Avenida Baía dos Golfinhos",
+    "Centro Gastronômico de Pipa",
   ]);
 
   const praiaDoAmor = page.getByRole("article", { name: "Praia do Amor" });

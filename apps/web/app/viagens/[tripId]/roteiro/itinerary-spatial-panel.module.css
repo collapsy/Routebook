@@ -134,6 +134,10 @@
   overflow-wrap: anywhere;
 }
 
+.activityList strong::after {
+  content: attr(data-title);
+}
+
 .sequence {
   align-items: center;
   background: var(--primary-strong);

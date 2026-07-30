@@ -1,8 +1,4 @@
-import {
-  ItineraryValidationError,
-  type Itinerary,
-  type ItineraryFieldErrors,
-} from "./itinerary";
+import { ItineraryValidationError, type Itinerary, type ItineraryFieldErrors } from "./itinerary";
 
 export type RemoveFreePeriodInput = {
   freePeriodId: string;
@@ -37,9 +33,7 @@ export function removeFreePeriod(
         .filter((freePeriod) => freePeriod.id !== freePeriodId)
         .map((freePeriod, index) => {
           const order = index + 1;
-          return freePeriod.order === order
-            ? freePeriod
-            : { ...freePeriod, order, updatedAt: now };
+          return freePeriod.order === order ? freePeriod : { ...freePeriod, order, updatedAt: now };
         });
 
       return { ...day, freePeriods };

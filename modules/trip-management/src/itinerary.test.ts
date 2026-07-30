@@ -4,6 +4,7 @@ import {
   addActivity,
   createItinerary,
   ItineraryValidationError,
+  moveActivity,
   removeActivity,
   reorderActivities,
   updateActivity,
@@ -261,6 +262,96 @@ describe("reorderActivities", () => {
         targetActivityId: targetId!,
       }),
     ).toThrow(ItineraryValidationError);
+  });
+});
+
+describe("moveActivity", () => {
+  it("move para outro dia preservando identidade e normalizando as duas sequências", () => {
+    const first = addActivity(createBaseItinerary(), {
+      dayDate: "2026-08-22",
+      title: "Café da manhã",
+    });
+    const second = addActivity(first, {
+      dayDate: "2026-08-22",
+      title: "Praia do Amor",
+      type: "place-visit",
+      placeId: "place-praia-do-amor",
+      startTime: "10:30",
+      durationMinutes: 180,
+    });
+    const third = addActivity(second, {
+      dayDate: "2026-08-22",
+      title: "Jantar",
+    });
+    const fourth = addActivity(third, {
+      dayDate: "2026-08-23",
+      title: "Passeio existente",
+    });
+    const sourceActivities = fourth.days[0]?.activities;
+    const moved = sourceActivities?.[1];
+    expect(moved).toBeDefined();
+
+    const updatedAt = new Date("2026-07-30T03:50:00Z");
+    const updated = moveActivity(
+      fourth,
+      { activityId: moved!.id, targetDayDate: "2026-08-23" },
+      updatedAt,
+    );
+
+    expect(updated.days[0]?.activities.map((activity) => activity.title)).toEqual([
+      "Café da manhã",
+      "Jantar",
+    ]);
+    expect(updated.days[0]?.activities.map((activity) => activity.order)).toEqual([1, 2]);
+    expect(updated.days[0]?.activities[1]?.updatedAt).toEqual(updatedAt);
+    expect(updated.days[1]?.activities.map((activity) => activity.title)).toEqual([
+      "Passeio existente",
+      "Praia do Amor",
+    ]);
+    expect(updated.days[1]?.activities.map((activity) => activity.order)).toEqual([1, 2]);
+    expect(updated.days[1]?.activities[1]).toMatchObject({
+      id: moved!.id,
+      title: "Praia do Amor",
+      type: "place-visit",
+      status: "planned",
+      flexibility: "flexible",
+      placeId: "place-praia-do-amor",
+      startTime: "10:30",
+      durationMinutes: 180,
+      createdAt: moved!.createdAt,
+      updatedAt,
+    });
+    expect(updated.version).toBe(6);
+    expect(updated.updatedAt).toEqual(updatedAt);
+    expect(fourth.days[0]?.activities).toHaveLength(3);
+    expect(fourth.days[1]?.activities).toHaveLength(1);
+  });
+
+  it("rejeita atividade inexistente, destino inválido e o próprio dia", () => {
+    const itinerary = addActivity(createBaseItinerary(), {
+      dayDate: "2026-08-22",
+      title: "Atividade",
+    });
+    const activityId = itinerary.days[0]?.activities[0]?.id;
+    expect(activityId).toBeDefined();
+
+    expect(() =>
+      moveActivity(itinerary, {
+        activityId: "activity-inexistente",
+        targetDayDate: "2026-08-23",
+      }),
+    ).toThrow(ItineraryValidationError);
+    expect(() =>
+      moveActivity(itinerary, { activityId: activityId!, targetDayDate: "2026-08-30" }),
+    ).toThrow(ItineraryValidationError);
+
+    try {
+      moveActivity(itinerary, { activityId: activityId!, targetDayDate: "2026-08-22" });
+      throw new Error("A validação deveria falhar.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ItineraryValidationError);
+      expect((error as ItineraryValidationError).fieldErrors.targetDayDate).toBeDefined();
+    }
   });
 });
 

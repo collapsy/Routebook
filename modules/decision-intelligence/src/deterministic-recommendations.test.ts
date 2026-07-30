@@ -80,9 +80,7 @@ describe("deterministic place recommendations", () => {
     for (const result of results) {
       expect(result.recommendation.score.value).toBe(INTEREST_MATCH_WEIGHT);
       expect(result.recommendation.reasons).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ code: "interest-category-match" }),
-        ]),
+        expect.arrayContaining([expect.objectContaining({ code: "interest-category-match" })]),
       );
     }
   });
@@ -95,9 +93,7 @@ describe("deterministic place recommendations", () => {
 
     expect(result?.recommendation.score.value).toBe(0);
     expect(result?.recommendation.limitations).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ code: "interest-category-unavailable" }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ code: "interest-category-unavailable" })]),
     );
   });
 
@@ -134,10 +130,7 @@ describe("deterministic place recommendations", () => {
   });
 
   it("continues without distance and records an explicit limitation", () => {
-    const [result] = generate(
-      [place("1", "praia", "beach")],
-      context(["beaches"]),
-    );
+    const [result] = generate([place("1", "praia", "beach")], context(["beaches"]));
 
     expect(result?.geodesicDistanceMeters).toBeUndefined();
     expect(result?.recommendation.score.value).toBe(INTEREST_MATCH_WEIGHT);
@@ -181,26 +174,15 @@ describe("deterministic place recommendations", () => {
 
   it("orders by score and uses slug as a stable tie breaker", () => {
     const results = generate(
-      [
-        place("3", "zeta", "nightlife"),
-        place("2", "beta", "beach"),
-        place("1", "alfa", "beach"),
-      ],
+      [place("3", "zeta", "nightlife"), place("2", "beta", "beach"), place("1", "alfa", "beach")],
       context(["beaches"]),
     );
 
-    expect(results.map((result) => result.place.slug)).toEqual([
-      "alfa",
-      "beta",
-      "zeta",
-    ]);
+    expect(results.map((result) => result.place.slug)).toEqual(["alfa", "beta", "zeta"]);
   });
 
   it("produces the same order and recommendation data for the same input", () => {
-    const places = [
-      place("2", "beta", "beach"),
-      place("1", "alfa", "beach"),
-    ];
+    const places = [place("2", "beta", "beach"), place("1", "alfa", "beach")];
     const recommendationContext = context(["beaches"], {
       accommodationCoordinate: { latitude: -6.23, longitude: -35.05 },
     });
@@ -218,10 +200,7 @@ describe("deterministic place recommendations", () => {
         accommodationCoordinate: { latitude: -6.23, longitude: -35.05 },
       }),
     )[0];
-    const minimal = generate(
-      [place("1", "praia", "beach")],
-      context([]),
-    )[0];
+    const minimal = generate([place("1", "praia", "beach")], context([]))[0];
 
     expect(complete?.recommendation.confidence.level).toBe("high");
     expect(minimal?.recommendation.confidence.level).toBe("low");
@@ -241,16 +220,11 @@ describe("deterministic place recommendations", () => {
 
     expect(contextualized?.isSaved).toBe(true);
     expect(contextualized?.isPlanned).toBe(true);
-    expect(contextualized?.recommendation.score).toEqual(
-      plain?.recommendation.score,
-    );
+    expect(contextualized?.recommendation.score).toEqual(plain?.recommendation.score);
   });
 
   it("contains no unsupported claims in reasons", () => {
-    const [result] = generate(
-      [place("1", "praia", "beach")],
-      context(["beaches"]),
-    );
+    const [result] = generate([place("1", "praia", "beach")], context(["beaches"]));
     const text = result?.recommendation.reasons
       .map((reason) => reason.message.toLowerCase())
       .join(" ");

@@ -1,7 +1,4 @@
-import {
-  calculateGeodesicDistance,
-  type GeoCoordinate,
-} from "@routebook/geo-distance";
+import { calculateGeodesicDistance, type GeoCoordinate } from "@routebook/geo-distance";
 import type { Place, PlaceCategory } from "@routebook/place-catalog";
 
 import {
@@ -27,15 +24,10 @@ export const SUPPORTED_INTEREST_CATEGORY_MAP = Object.freeze({
   nightlife: "nightlife",
 } satisfies Readonly<Record<string, PlaceCategory>>);
 
-export const unsupportedTravelerInterests = [
-  "culture",
-  "rest",
-  "adventure",
-  "shopping",
-] as const;
+export const unsupportedTravelerInterests = ["culture", "rest", "adventure", "shopping"] as const;
 
-export type TravelerInterest = keyof typeof SUPPORTED_INTEREST_CATEGORY_MAP |
-  (typeof unsupportedTravelerInterests)[number];
+export type TravelerInterest =
+  keyof typeof SUPPORTED_INTEREST_CATEGORY_MAP | (typeof unsupportedTravelerInterests)[number];
 
 export type DeterministicRecommendationContext = Readonly<{
   tripId: string;
@@ -64,29 +56,21 @@ export type GenerateDeterministicRecommendationsInput = Readonly<{
   createRecommendationId: (place: Place, index: number) => string;
 }>;
 
-function normalizedInterests(
-  interests: readonly TravelerInterest[],
-): readonly TravelerInterest[] {
+function normalizedInterests(interests: readonly TravelerInterest[]): readonly TravelerInterest[] {
   return Object.freeze([...new Set(interests)].sort());
 }
 
-function supportedCategories(
-  interests: readonly TravelerInterest[],
-): ReadonlySet<PlaceCategory> {
+function supportedCategories(interests: readonly TravelerInterest[]): ReadonlySet<PlaceCategory> {
   const categories = interests.flatMap((interest) => {
-    const category = SUPPORTED_INTEREST_CATEGORY_MAP[interest as keyof typeof SUPPORTED_INTEREST_CATEGORY_MAP];
+    const category =
+      SUPPORTED_INTEREST_CATEGORY_MAP[interest as keyof typeof SUPPORTED_INTEREST_CATEGORY_MAP];
     return category ? [category] : [];
   });
   return new Set(categories);
 }
 
-function unsupportedInterests(
-  interests: readonly TravelerInterest[],
-): readonly TravelerInterest[] {
-  return interests.filter(
-    (interest) =>
-      !(interest in SUPPORTED_INTEREST_CATEGORY_MAP),
-  );
+function unsupportedInterests(interests: readonly TravelerInterest[]): readonly TravelerInterest[] {
+  return interests.filter((interest) => !(interest in SUPPORTED_INTEREST_CATEGORY_MAP));
 }
 
 export function distanceWeight(distanceMeters: number): number {
@@ -103,10 +87,7 @@ function confidenceFor(
   if (hasSupportedInterests && hasDistance) {
     return {
       level: "high",
-      basis: [
-        "interesses compatíveis disponíveis",
-        "distância geodésica da hospedagem disponível",
-      ],
+      basis: ["interesses compatíveis disponíveis", "distância geodésica da hospedagem disponível"],
     };
   }
 
@@ -142,8 +123,7 @@ function commonLimitations(
   if (!context.accommodationCoordinate) {
     limitations.push({
       code: "accommodation-distance-unavailable",
-      message:
-        "A Hospedagem não possui coordenadas; a distância não participou da ordenação.",
+      message: "A Hospedagem não possui coordenadas; a distância não participou da ordenação.",
     });
   }
 
@@ -266,7 +246,9 @@ export function generateDeterministicPlaceRecommendations(
         place.destinationId === input.context.destinationId,
     )
     .map((place) => evaluatePlace(place, input.context, categories, unsupported))
-    .sort((left, right) => right.score - left.score || left.place.slug.localeCompare(right.place.slug));
+    .sort(
+      (left, right) => right.score - left.score || left.place.slug.localeCompare(right.place.slug),
+    );
 
   return Object.freeze(
     evaluated.map((result, index) => {

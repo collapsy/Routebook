@@ -6,23 +6,24 @@ import { describe, expect, it } from "vitest";
 import type { TripMapPoint } from "../lib/trip-map";
 import { TripMap } from "./trip-map";
 
-const points: TripMapPoint[] = [
-  {
-    id: "accommodation",
-    label: "Condomínio Solar Água",
-    kind: "accommodation",
-    latitude: -6.2302,
-    longitude: -35.0503,
-  },
-  {
-    id: "praia-do-amor",
-    label: "Praia do Amor",
-    kind: "saved-place",
-    latitude: -6.244,
-    longitude: -35.041,
-    href: "/viagens/trip-1/lugares/praia-do-amor",
-  },
-];
+const accommodationPoint: TripMapPoint = {
+  id: "accommodation",
+  label: "Condomínio Solar Água",
+  kind: "accommodation",
+  latitude: -6.2302,
+  longitude: -35.0503,
+};
+
+const savedPlacePoint: TripMapPoint = {
+  id: "praia-do-amor",
+  label: "Praia do Amor",
+  kind: "saved-place",
+  latitude: -6.244,
+  longitude: -35.041,
+  href: "/viagens/trip-1/lugares/praia-do-amor",
+};
+
+const points: TripMapPoint[] = [accommodationPoint, savedPlacePoint];
 
 describe("TripMap", () => {
   it("shows an explicit empty state without valid points", () => {
@@ -48,7 +49,12 @@ describe("TripMap", () => {
   });
 
   it("ignores malformed coordinates", () => {
-    render(<TripMap points={[{ ...points[0], latitude: 120 }, points[1]]} title="Mapa de Pipa" />);
+    render(
+      <TripMap
+        points={[{ ...accommodationPoint, latitude: 120 }, savedPlacePoint]}
+        title="Mapa de Pipa"
+      />,
+    );
 
     expect(screen.queryByText("Condomínio Solar Água")).not.toBeInTheDocument();
     expect(screen.getAllByText("Praia do Amor").length).toBeGreaterThan(0);

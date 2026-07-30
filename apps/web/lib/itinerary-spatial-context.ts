@@ -16,9 +16,7 @@ export type ItinerarySpatialPoint = {
 };
 
 export type SpatialUnavailableReason =
-  | "manual-activity"
-  | "place-not-found"
-  | "coordinates-unavailable";
+  "manual-activity" | "place-not-found" | "coordinates-unavailable";
 
 type SpatialActivityStepBase = {
   activityId: string;

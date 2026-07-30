@@ -5,6 +5,7 @@ import {
   createItinerary,
   ItineraryValidationError,
   removeActivity,
+  reorderActivities,
   updateActivity,
 } from "./itinerary";
 
@@ -177,6 +178,89 @@ describe("updateActivity", () => {
       expect(validationError.fieldErrors.startTime).toBeDefined();
       expect(validationError.fieldErrors.durationMinutes).toBeDefined();
     }
+  });
+});
+
+describe("reorderActivities", () => {
+  it("troca duas posições no mesmo dia preservando dados e imutabilidade", () => {
+    const first = addActivity(createBaseItinerary(), {
+      dayDate: "2026-08-24",
+      title: "Primeira atividade",
+      placeId: "place-primeira",
+    });
+    const second = addActivity(first, {
+      dayDate: "2026-08-24",
+      title: "Segunda atividade",
+      startTime: "10:00",
+    });
+    const third = addActivity(second, {
+      dayDate: "2026-08-24",
+      title: "Terceira atividade",
+    });
+    const activities = third.days[2]?.activities;
+    expect(activities).toHaveLength(3);
+
+    const updatedAt = new Date("2026-07-30T03:45:00Z");
+    const updated = reorderActivities(
+      third,
+      {
+        activityId: activities![1]!.id,
+        targetActivityId: activities![0]!.id,
+      },
+      updatedAt,
+    );
+
+    expect(updated.days[2]?.activities.map((activity) => activity.title)).toEqual([
+      "Segunda atividade",
+      "Primeira atividade",
+      "Terceira atividade",
+    ]);
+    expect(updated.days[2]?.activities.map((activity) => activity.order)).toEqual([1, 2, 3]);
+    expect(updated.days[2]?.activities[0]).toMatchObject({
+      id: activities![1]!.id,
+      startTime: "10:00",
+      updatedAt,
+    });
+    expect(updated.days[2]?.activities[1]).toMatchObject({
+      id: activities![0]!.id,
+      placeId: "place-primeira",
+      updatedAt,
+    });
+    expect(updated.days[2]?.activities[2]).toBe(activities![2]);
+    expect(updated.version).toBe(5);
+    expect(third.days[2]?.activities.map((activity) => activity.title)).toEqual([
+      "Primeira atividade",
+      "Segunda atividade",
+      "Terceira atividade",
+    ]);
+  });
+
+  it("rejeita identidades iguais, ausentes ou pertencentes a dias diferentes", () => {
+    const first = addActivity(createBaseItinerary(), {
+      dayDate: "2026-08-22",
+      title: "Dia um",
+    });
+    const second = addActivity(first, {
+      dayDate: "2026-08-23",
+      title: "Dia dois",
+    });
+    const sourceId = second.days[0]?.activities[0]?.id;
+    const targetId = second.days[1]?.activities[0]?.id;
+    expect(sourceId).toBeDefined();
+    expect(targetId).toBeDefined();
+
+    expect(() =>
+      reorderActivities(second, { activityId: sourceId!, targetActivityId: sourceId! }),
+    ).toThrow(ItineraryValidationError);
+    expect(() =>
+      reorderActivities(second, { activityId: sourceId!, targetActivityId: targetId! }),
+    ).toThrow(ItineraryValidationError);
+    expect(() =>
+      reorderActivities(second, {
+        activityId: "activity-inexistente",
+        targetActivityId: targetId!,
+      }),
+    ).toThrow(ItineraryValidationError);
   });
 });
 

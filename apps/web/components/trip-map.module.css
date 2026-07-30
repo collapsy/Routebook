@@ -1,0 +1,215 @@
+.section,
+.emptyState {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.emptyState {
+  background: var(--surface-soft);
+}
+
+.heading {
+  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.heading h2,
+.emptyState h2 {
+  margin: 0.2rem 0 0;
+}
+
+.heading p,
+.emptyState p {
+  color: var(--foreground-muted);
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+.eyebrow {
+  color: var(--primary-strong) !important;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.legend li {
+  align-items: center;
+  color: var(--foreground-muted);
+  display: flex;
+  font-size: 0.82rem;
+  font-weight: 700;
+  gap: 0.4rem;
+}
+
+.legendDot,
+.markerDot {
+  background: var(--primary);
+  border: 2px solid var(--surface);
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px var(--primary);
+  display: block;
+  height: 0.8rem;
+  width: 0.8rem;
+}
+
+.saved-place .legendDot,
+.legendDot.saved-place,
+.marker.saved-place .markerDot {
+  background: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 75%, var(--foreground));
+}
+
+.accommodation .legendDot,
+.legendDot.accommodation,
+.marker.accommodation .markerDot {
+  background: var(--primary-strong);
+  box-shadow: 0 0 0 2px var(--primary-strong);
+}
+
+.mapShell {
+  background: var(--background-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  min-height: 22rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.mapFrame {
+  border: 0;
+  height: 100%;
+  inset: 0;
+  min-height: 22rem;
+  position: absolute;
+  width: 100%;
+}
+
+.markerLayer {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.marker {
+  align-items: center;
+  color: var(--foreground);
+  display: flex;
+  gap: 0.45rem;
+  max-width: 12rem;
+  pointer-events: auto;
+  position: absolute;
+  text-decoration: none;
+  transform: translate(-0.4rem, -0.4rem);
+}
+
+.markerLabel {
+  background: color-mix(in oklab, var(--surface) 94%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 8px 18px color-mix(in oklab, var(--foreground) 12%, transparent);
+  display: none;
+  font-size: 0.72rem;
+  font-weight: 800;
+  overflow: hidden;
+  padding: 0.35rem 0.55rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.marker:hover .markerLabel,
+.marker:focus-visible .markerLabel {
+  display: block;
+}
+
+.marker:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 4px;
+}
+
+.locationList {
+  display: grid;
+  gap: 0.6rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.locationList li {
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.7rem 0;
+}
+
+.locationList li:last-child {
+  border-bottom: 0;
+}
+
+.locationList div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.locationList span {
+  color: var(--foreground-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.locationList a {
+  color: var(--primary-strong);
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.attribution,
+.notice {
+  color: var(--foreground-muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (min-width: 48rem) {
+  .section,
+  .emptyState {
+    padding: 1.5rem;
+  }
+
+  .heading {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .markerLabel {
+    display: block;
+  }
+
+  .locationList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .locationList li:nth-last-child(2):nth-child(odd) {
+    border-bottom: 0;
+  }
+}

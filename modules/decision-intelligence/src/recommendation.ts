@@ -196,10 +196,7 @@ function freezeSnapshot(snapshot: DecisionContextSnapshot): DecisionContextSnaps
     schemaVersion: 1,
     tripId: requiredText(snapshot.tripId, "snapshot.tripId"),
     destinationId: requiredText(snapshot.destinationId, "snapshot.destinationId"),
-    tripContextVersion: positiveInteger(
-      snapshot.tripContextVersion,
-      "snapshot.tripContextVersion",
-    ),
+    tripContextVersion: positiveInteger(snapshot.tripContextVersion, "snapshot.tripContextVersion"),
     capturedAt: validDate(snapshot.capturedAt, "snapshot.capturedAt"),
     ...(snapshot.travelerProfileVersion !== undefined
       ? {
@@ -354,14 +351,11 @@ export function createRecommendation(input: CreateRecommendationInput): Recommen
   });
 }
 
-export function isRecommendationExpiredAt(
-  recommendation: Recommendation,
-  at: Date,
-): boolean {
+export function isRecommendationExpiredAt(recommendation: Recommendation, at: Date): boolean {
   const instant = validDate(at, "at");
   return Boolean(
     recommendation.validity.expiresAt &&
-      instant.getTime() >= recommendation.validity.expiresAt.getTime(),
+    instant.getTime() >= recommendation.validity.expiresAt.getTime(),
   );
 }
 

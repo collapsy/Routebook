@@ -226,15 +226,13 @@ describe("Recommendation", () => {
     );
     const rejected = rejectRecommendation(presented, resolvedAt);
 
-    expect(() => rejectRecommendation(rejected, resolvedAt)).toThrow(
-      RecommendationTransitionError,
-    );
+    expect(() => rejectRecommendation(rejected, resolvedAt)).toThrow(RecommendationTransitionError);
     expect(() => invalidateRecommendation(rejected, "context-changed", resolvedAt)).toThrow(
       RecommendationTransitionError,
     );
-    expect(() =>
-      rejectRecommendation(presented, new Date("2026-07-30T19:59:00.000Z")),
-    ).toThrow(RecommendationValidationError);
+    expect(() => rejectRecommendation(presented, new Date("2026-07-30T19:59:00.000Z"))).toThrow(
+      RecommendationValidationError,
+    );
   });
 
   it("copies mutable inputs so callers cannot change the aggregate afterwards", () => {

@@ -9,6 +9,10 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@routebook/geo-distance": "workspace:*",
+    "@routebook/place-catalog": "workspace:*"
+  },
   "devDependencies": {
     "@routebook/eslint-config": "workspace:*",
     "@routebook/typescript-config": "workspace:*",

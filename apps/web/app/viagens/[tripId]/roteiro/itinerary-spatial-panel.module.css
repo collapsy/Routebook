@@ -169,6 +169,36 @@
   border-left: 4px solid var(--foreground-muted) !important;
 }
 
+.legActions {
+  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.legActions a {
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-small);
+  color: var(--primary-strong);
+  font-size: 0.82rem;
+  font-weight: 800;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 0.55rem 0.7rem;
+  text-align: center;
+  text-decoration: none;
+}
+
+.legActions a:hover {
+  background: var(--surface-soft);
+}
+
+.legActions a:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
 .sequence {
   align-items: center;
   background: var(--primary-strong);
@@ -214,5 +244,10 @@
   .legList li {
     align-items: center;
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .legActions {
+    align-items: center;
+    flex-direction: row;
   }
 }

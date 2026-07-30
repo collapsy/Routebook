@@ -23,8 +23,8 @@ export class GeocodingProviderError extends Error {
 
 export class NominatimGeocoder implements Geocoder {
   constructor(
-    private readonly endpoint =
-      process.env.NOMINATIM_BASE_URL ?? "https://nominatim.openstreetmap.org",
+    private readonly endpoint = process.env.NOMINATIM_BASE_URL ??
+      "https://nominatim.openstreetmap.org",
   ) {}
 
   async geocode(query: string): Promise<GeocodingResult | undefined> {

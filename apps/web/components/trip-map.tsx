@@ -92,8 +92,7 @@ export function TripMap({
   title,
   description = "Use os marcadores para localizar a hospedagem e abrir os detalhes dos lugares.",
   emptyTitle = "Mapa ainda indisponível",
-  emptyDescription =
-    "Informe as coordenadas da hospedagem ou aguarde a publicação de lugares com localização para visualizar o mapa. As demais áreas da viagem continuam disponíveis normalmente.",
+  emptyDescription = "Informe as coordenadas da hospedagem ou aguarde a publicação de lugares com localização para visualizar o mapa. As demais áreas da viagem continuam disponíveis normalmente.",
 }: TripMapProps) {
   const validPoints = points.filter(isValidTripMapPoint);
   const bounds = deriveTripMapBounds(validPoints);

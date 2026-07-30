@@ -10,6 +10,7 @@ import {
   findTripById,
   ItineraryValidationError,
   removeActivity,
+  updateActivity,
   type Itinerary,
 } from "@routebook/trip-management";
 
@@ -20,6 +21,16 @@ function optionalText(value: FormDataEntryValue | null): string | undefined {
 
 function itineraryErrorMessage(error: ItineraryValidationError): string {
   return Object.values(error.fieldErrors).find(Boolean) ?? error.message;
+}
+
+async function loadItinerary(tripId: string): Promise<{
+  repository: DrizzleItineraryRepository;
+  itinerary: Itinerary;
+}> {
+  const repository = new DrizzleItineraryRepository();
+  const itinerary = await repository.findByTripId(tripId);
+  if (!itinerary) notFound();
+  return { repository, itinerary };
 }
 
 export async function addManualActivityAction(formData: FormData): Promise<never> {
@@ -63,6 +74,42 @@ export async function addManualActivityAction(formData: FormData): Promise<never
   redirect(`/viagens/${tripId}/roteiro?atividadeCriada=1`);
 }
 
+export async function updateItineraryActivityAction(formData: FormData): Promise<never> {
+  const tripId = String(formData.get("tripId") ?? "").trim();
+  const activityId = String(formData.get("activityId") ?? "").trim();
+  const title = String(formData.get("title") ?? "");
+  const startTime = optionalText(formData.get("startTime"));
+  const durationValue = optionalText(formData.get("durationMinutes"));
+  const durationMinutes = durationValue === undefined ? undefined : Number(durationValue);
+  const trip = await findTripById(new DrizzleTripRepository(), tripId);
+
+  if (!trip) notFound();
+
+  const { repository, itinerary } = await loadItinerary(tripId);
+  let updatedItinerary: Itinerary;
+  try {
+    updatedItinerary = updateActivity(itinerary, {
+      activityId,
+      title,
+      ...(startTime ? { startTime } : {}),
+      ...(durationMinutes !== undefined ? { durationMinutes } : {}),
+    });
+  } catch (error) {
+    if (error instanceof ItineraryValidationError) {
+      redirect(
+        `/viagens/${tripId}/roteiro?erro=${encodeURIComponent(itineraryErrorMessage(error))}`,
+      );
+    }
+
+    throw error;
+  }
+
+  await repository.save(updatedItinerary);
+  revalidatePath(`/viagens/${tripId}`);
+  revalidatePath(`/viagens/${tripId}/roteiro`);
+  redirect(`/viagens/${tripId}/roteiro?atividadeEditada=1`);
+}
+
 export async function removeItineraryActivityAction(formData: FormData): Promise<never> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const activityId = String(formData.get("activityId") ?? "").trim();
@@ -70,10 +117,7 @@ export async function removeItineraryActivityAction(formData: FormData): Promise
 
   if (!trip) notFound();
 
-  const itineraryRepository = new DrizzleItineraryRepository();
-  const itinerary = await itineraryRepository.findByTripId(tripId);
-  if (!itinerary) notFound();
-
+  const { repository, itinerary } = await loadItinerary(tripId);
   let updatedItinerary: Itinerary;
   try {
     updatedItinerary = removeActivity(itinerary, { activityId });
@@ -87,7 +131,7 @@ export async function removeItineraryActivityAction(formData: FormData): Promise
     throw error;
   }
 
-  await itineraryRepository.save(updatedItinerary);
+  await repository.save(updatedItinerary);
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/roteiro`);
   redirect(`/viagens/${tripId}/roteiro?atividadeRemovida=1`);

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
-import { deriveTripDays, type TripPeriod } from "./trip-days";
+import { deriveTripDays } from "./trip-days";
+import type { TripPeriod } from "./trip";
 
 export type ActivityType =
   | "place-visit"

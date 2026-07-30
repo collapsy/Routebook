@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 
 import type { TripMapPoint } from "../lib/trip-map";
 import { TripMap } from "./trip-map";
@@ -24,6 +24,10 @@ const savedPlacePoint: TripMapPoint = {
 };
 
 const points: TripMapPoint[] = [accommodationPoint, savedPlacePoint];
+
+afterEach(() => {
+  cleanup();
+});
 
 describe("TripMap", () => {
   it("shows an explicit empty state without valid points", () => {

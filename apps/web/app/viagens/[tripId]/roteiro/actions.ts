@@ -9,12 +9,17 @@ import {
   createItinerary,
   findTripById,
   ItineraryValidationError,
+  removeActivity,
   type Itinerary,
 } from "@routebook/trip-management";
 
 function optionalText(value: FormDataEntryValue | null): string | undefined {
   const normalized = typeof value === "string" ? value.trim() : "";
   return normalized || undefined;
+}
+
+function itineraryErrorMessage(error: ItineraryValidationError): string {
+  return Object.values(error.fieldErrors).find(Boolean) ?? error.message;
 }
 
 export async function addManualActivityAction(formData: FormData): Promise<never> {
@@ -44,8 +49,7 @@ export async function addManualActivityAction(formData: FormData): Promise<never
     });
   } catch (error) {
     if (error instanceof ItineraryValidationError) {
-      const message = Object.values(error.fieldErrors).find(Boolean) ?? error.message;
-      redirect(`/viagens/${tripId}/roteiro?erro=${encodeURIComponent(message)}`);
+      redirect(`/viagens/${tripId}/roteiro?erro=${encodeURIComponent(itineraryErrorMessage(error))}`);
     }
 
     throw error;
@@ -55,4 +59,32 @@ export async function addManualActivityAction(formData: FormData): Promise<never
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/roteiro`);
   redirect(`/viagens/${tripId}/roteiro?atividadeCriada=1`);
+}
+
+export async function removeItineraryActivityAction(formData: FormData): Promise<never> {
+  const tripId = String(formData.get("tripId") ?? "").trim();
+  const activityId = String(formData.get("activityId") ?? "").trim();
+  const trip = await findTripById(new DrizzleTripRepository(), tripId);
+
+  if (!trip) notFound();
+
+  const itineraryRepository = new DrizzleItineraryRepository();
+  const itinerary = await itineraryRepository.findByTripId(tripId);
+  if (!itinerary) notFound();
+
+  let updatedItinerary: Itinerary;
+  try {
+    updatedItinerary = removeActivity(itinerary, { activityId });
+  } catch (error) {
+    if (error instanceof ItineraryValidationError) {
+      redirect(`/viagens/${tripId}/roteiro?erro=${encodeURIComponent(itineraryErrorMessage(error))}`);
+    }
+
+    throw error;
+  }
+
+  await itineraryRepository.save(updatedItinerary);
+  revalidatePath(`/viagens/${tripId}`);
+  revalidatePath(`/viagens/${tripId}/roteiro`);
+  redirect(`/viagens/${tripId}/roteiro?atividadeRemovida=1`);
 }

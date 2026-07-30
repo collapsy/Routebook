@@ -75,7 +75,9 @@ describe("ItinerarySpatialPanel", () => {
 
     expect(screen.getByRole("heading", { name: "Mapa do Dia 2" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Dia 2/i })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("img", { name: "Atividade 1: Praia do Amor" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Atividade 1: Praia do Amor. Abrir detalhes." }),
+    ).toHaveAttribute("href", "/viagens/trip-1/lugares/praia-do-amor");
     expect(screen.getByText("Atividade manual sem Lugar associado.")).toBeInTheDocument();
     expect(screen.getByText("1 Atividade não pôde ser localizada.")).toBeInTheDocument();
   });

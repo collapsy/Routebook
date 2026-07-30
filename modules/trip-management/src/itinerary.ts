@@ -77,6 +77,13 @@ export type RemoveActivityInput = {
   activityId: string;
 };
 
+export type UpdateActivityInput = {
+  activityId: string;
+  title: string;
+  startTime?: string;
+  durationMinutes?: number;
+};
+
 export type ItineraryFieldErrors = Partial<
   Record<
     | "tripId"
@@ -121,6 +128,27 @@ function validatePeriod(period: TripPeriod): ItineraryFieldErrors {
   return {};
 }
 
+function validateActivityDetails(
+  title: string,
+  startTime?: string,
+  durationMinutes?: number,
+): ItineraryFieldErrors {
+  const fieldErrors: ItineraryFieldErrors = {};
+
+  if (!title) fieldErrors.title = "Informe um título para a atividade.";
+  if (startTime !== undefined && !isLocalTime(startTime)) {
+    fieldErrors.startTime = "Informe um horário válido no formato HH:mm.";
+  }
+  if (
+    durationMinutes !== undefined &&
+    (!Number.isInteger(durationMinutes) || durationMinutes <= 0)
+  ) {
+    fieldErrors.durationMinutes = "A duração deve ser informada em minutos inteiros e positivos.";
+  }
+
+  return fieldErrors;
+}
+
 export function createItinerary(input: CreateItineraryInput, now = new Date()): Itinerary {
   const tripId = input.tripId.trim();
   const fieldErrors: ItineraryFieldErrors = {
@@ -156,19 +184,11 @@ export function addActivity(
   const title = input.title.trim();
   const placeId = input.placeId?.trim();
   const targetDay = itinerary.days.find((day) => day.date === input.dayDate);
-  const fieldErrors: ItineraryFieldErrors = {};
+  const fieldErrors: ItineraryFieldErrors = {
+    ...validateActivityDetails(title, input.startTime, input.durationMinutes),
+  };
 
   if (!targetDay) fieldErrors.dayDate = "Selecione um dia válido da viagem.";
-  if (!title) fieldErrors.title = "Informe um título para a atividade.";
-  if (input.startTime !== undefined && !isLocalTime(input.startTime)) {
-    fieldErrors.startTime = "Informe um horário válido no formato HH:mm.";
-  }
-  if (
-    input.durationMinutes !== undefined &&
-    (!Number.isInteger(input.durationMinutes) || input.durationMinutes <= 0)
-  ) {
-    fieldErrors.durationMinutes = "A duração deve ser informada em minutos inteiros e positivos.";
-  }
   if (input.placeId !== undefined && !placeId) {
     fieldErrors.placeId = "Informe um lugar válido ou remova o vínculo com o lugar.";
   }
@@ -195,6 +215,55 @@ export function addActivity(
     days: itinerary.days.map((day) =>
       day.id === targetDay.id ? { ...day, activities: [...day.activities, activity] } : day,
     ),
+    version: itinerary.version + 1,
+    updatedAt: now,
+  };
+}
+
+export function updateActivity(
+  itinerary: Itinerary,
+  input: UpdateActivityInput,
+  now = new Date(),
+): Itinerary {
+  const activityId = input.activityId.trim();
+  const title = input.title.trim();
+  const sourceDay = itinerary.days.find((day) =>
+    day.activities.some((activity) => activity.id === activityId),
+  );
+  const fieldErrors: ItineraryFieldErrors = {
+    ...validateActivityDetails(title, input.startTime, input.durationMinutes),
+  };
+
+  if (!activityId) fieldErrors.activityId = "Informe uma atividade válida.";
+  else if (!sourceDay) fieldErrors.activityId = "A atividade não pertence a este roteiro.";
+
+  if (Object.keys(fieldErrors).length > 0 || !sourceDay) {
+    throw new ItineraryValidationError(fieldErrors);
+  }
+
+  return {
+    ...itinerary,
+    days: itinerary.days.map((day) => {
+      if (day.id !== sourceDay.id) return day;
+
+      return {
+        ...day,
+        activities: day.activities.map((activity) => {
+          if (activity.id !== activityId) return activity;
+
+          const { startTime: _startTime, durationMinutes: _durationMinutes, ...preserved } = activity;
+          return {
+            ...preserved,
+            title,
+            updatedAt: now,
+            ...(input.startTime !== undefined ? { startTime: input.startTime } : {}),
+            ...(input.durationMinutes !== undefined
+              ? { durationMinutes: input.durationMinutes }
+              : {}),
+          };
+        }),
+      };
+    }),
     version: itinerary.version + 1,
     updatedAt: now,
   };

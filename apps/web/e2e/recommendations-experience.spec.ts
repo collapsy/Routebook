@@ -8,8 +8,12 @@ async function createTripWithRecommendationContext(page: import("@playwright/tes
   await page.getByLabel("Data de início").fill("2026-08-22");
   await page.getByLabel("Data de término").fill("2026-08-24");
   await Promise.all([
-    page.waitForURL(/\/viagens\/[^/?]+$/),
+    page.waitForURL(/\/viagens\?created=1$/),
     page.getByRole("button", { name: "Criar viagem" }).click(),
+  ]);
+  await Promise.all([
+    page.waitForURL(/\/viagens\/[^/?]+$/),
+    page.getByRole("link", { name: tripName }).click(),
   ]);
   await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
 

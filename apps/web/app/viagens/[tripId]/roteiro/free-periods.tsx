@@ -141,10 +141,12 @@ export function FreePeriodList({
                 {item.mode === "protected" ? "Protegido" : "Flexível"}
               </span>
               <FreePeriodEditor
-                durationMinutes={item.durationMinutes}
                 freePeriodId={item.id}
                 mode={item.mode}
-                startTime={item.startTime}
+                {...(item.startTime !== undefined ? { startTime: item.startTime } : {})}
+                {...(item.durationMinutes !== undefined
+                  ? { durationMinutes: item.durationMinutes }
+                  : {})}
               />
             </div>
           </li>

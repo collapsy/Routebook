@@ -3,22 +3,76 @@ name: Engineering Validation
 on:
   pull_request:
     paths:
-      - ".github/workflows/engineering-validation.yml"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - ".node-version"
+      - ".npmrc"
+      - ".prettierignore"
+      - "prettier.config.mjs"
+      - "apps/**"
+      - "modules/**"
+      - "packages/**"
+      - "scripts/**"
       - "docs/**"
+      - "compose.yaml"
+      - ".env.example"
+      - ".github/workflows/engineering-validation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - ".node-version"
+      - ".npmrc"
+      - ".prettierignore"
+      - "prettier.config.mjs"
+      - "apps/**"
+      - "modules/**"
+      - "packages/**"
+      - "scripts/**"
+      - "docs/**"
+      - "compose.yaml"
+      - ".env.example"
+      - ".github/workflows/engineering-validation.yml"
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: engineering-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  register-rb-inc-041:
-    name: Register RB-INC-041 documentation
+  validate:
+    name: Validate monorepo
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: postgresql://routebook:routebook@127.0.0.1:5432/routebook
+
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5-alpine
+        env:
+          POSTGRES_DB: routebook
+          POSTGRES_USER: routebook
+          POSTGRES_PASSWORD: routebook
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U routebook -d routebook"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
-      - name: Checkout feature branch
+      - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.head_ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -32,47 +86,46 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Register documents and traceability
-        shell: python
-        run: |
-          from pathlib import Path
+      - name: Check formatting
+        run: pnpm format:check
 
-          registry_path = Path("docs/registry.md")
-          registry = registry_path.read_text()
-          registry_marker = "| RB-AI-007 |"
-          registry_rows = (
-              "| RB-INC-041 | Experiência de Recommendations Contextualizadas | Implementation Increment | Draft | 0.1.0 | [rb-inc-041-recommendations-experience.md](./implementation/increments/rb-inc-041-recommendations-experience.md) |\n"
-              "| RB-CTX-041 | Context Pack do RB-INC-041 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-041-recommendations-experience.md](./implementation/context-packs/rb-inc-041-recommendations-experience.md) |\n"
-          )
-          if "| RB-INC-041 |" not in registry:
-              registry_path.write_text(registry.replace(registry_marker, registry_rows + registry_marker))
+      - name: Validate documentation
+        run: pnpm docs:validate
 
-          matrix_path = Path("docs/implementation/traceability-matrix.md")
-          matrix = matrix_path.read_text()
-          row_marker = "| RB-INC-005 | RB-PRD-004, RB-DOM-001, RB-DOM-003, RB-ARC-004, RB-DATA-001, RB-DATA-002 | #13 | `feature/rb-inc-005-traveler-context`, PR pendente | `traveler-profile`, migration, formulário de contexto e resumo na visão inicial | evidências pendentes dos workflows definitivos | Em execução |\n"
-          rows = (
-              "| RB-INC-038 | RB-FR-097–103, RB-BR-REC-002–011, RB-BR-DEC-002–007 | #83 | `feature/rb-inc-038-recommendation-core`, PR #88 | `modules/decision-intelligence`, Recommendation e Context Snapshot | run 30577548188, job 90989479708, SHA cc4d36d | Verde em Draft |\n"
-              "| RB-INC-039 | RB-FR-097–103, RB-BR-REC-002–011 | #84 | `feature/rb-inc-039-deterministic-recommendations`, PR #89 | geração determinística, Reasons, Limitations, score e Confidence | run 30578729497, job 90993423544, SHA a6037c1 | Verde em Draft |\n"
-              "| RB-INC-040 | RB-BR-REC-002–011, RB-ARC-004, RB-DATA-001, RB-DATA-002 | #85 | `feature/rb-inc-040-recommendation-persistence`, PR #90 | repository, schema, migration 0007, adapter e lifecycle | run 30580262262, job 90998461192, SHA 190ebd9 | Verde em Draft |\n"
-              "| RB-INC-041 | RB-FR-097–103, RB-BR-REC-002–011, RB-UX-001–006, RB-DS-002–003 | #86 | `feature/rb-inc-041-recommendations-experience`, PR #91 | rota contextual, cards, composição e ação Ignorar | evidências pendentes do workflow definitivo | Em execução |\n"
-          )
-          if "| RB-INC-041 |" not in matrix:
-              matrix = matrix.replace(row_marker, row_marker + rows)
-              matrix_path.write_text(matrix)
+      - name: Lint
+        run: pnpm lint
 
-      - name: Format documentation
-        run: pnpm exec prettier --write docs/implementation/increments/rb-inc-041-recommendations-experience.md docs/implementation/context-packs/rb-inc-041-recommendations-experience.md docs/implementation/traceability-matrix.md docs/registry.md
+      - name: Typecheck
+        run: pnpm typecheck
 
-      - name: Commit documentation registry
+      - name: Apply database migrations
+        run: pnpm db:migrate
+
+      - name: Run component and domain tests
+        run: pnpm test
+
+      - name: Smoke development server
         shell: bash
         run: |
-          if git diff --quiet -- docs; then
-            echo "Documentation already registered."
-            exit 0
-          fi
+          pnpm --filter @routebook/web exec next dev --port 3100 > /tmp/routebook-dev.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs
-          git commit -m "docs: register RB-INC-041"
-          git push origin "HEAD:${{ github.head_ref }}"
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error http://127.0.0.1:3100/viagens > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          cat /tmp/routebook-dev.log
+          exit 1
+
+      - name: Build application
+        run: pnpm build
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @routebook/web exec playwright install --with-deps chromium
+
+      - name: Run responsive persistence tests
+        run: pnpm test:e2e

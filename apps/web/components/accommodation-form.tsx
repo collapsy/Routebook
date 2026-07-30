@@ -41,8 +41,8 @@ export function AccommodationForm({
         <div className="form-field form-field-wide">
           <h2 id="geocoding-title">Encontrar coordenadas pelo endereço</h2>
           <p className="field-hint">
-            Busque uma localização e revise o resultado antes de confirmar. As coordenadas atuais não
-            serão alteradas durante a busca.
+            Busque uma localização e revise o resultado antes de confirmar. As coordenadas atuais
+            não serão alteradas durante a busca.
           </p>
         </div>
 

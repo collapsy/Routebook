@@ -1,10 +1,6 @@
 "use server";
 
-import {
-  GeocodingProviderError,
-  NominatimGeocoder,
-  type GeocodingResult,
-} from "@/lib/geocoding";
+import { GeocodingProviderError, NominatimGeocoder, type GeocodingResult } from "@/lib/geocoding";
 
 export type GeocodingActionState = {
   query: string;
@@ -35,7 +31,8 @@ export async function geocodeAccommodationAction(
     if (!result) {
       return {
         query,
-        error: "Nenhuma localização foi encontrada. Revise o endereço ou informe as coordenadas manualmente.",
+        error:
+          "Nenhuma localização foi encontrada. Revise o endereço ou informe as coordenadas manualmente.",
       };
     }
 
@@ -48,7 +45,8 @@ export async function geocodeAccommodationAction(
     console.error("Falha inesperada ao geocodificar hospedagem", error);
     return {
       query,
-      error: "Não foi possível buscar a localização agora. Tente novamente ou use as coordenadas manuais.",
+      error:
+        "Não foi possível buscar a localização agora. Tente novamente ou use as coordenadas manuais.",
     };
   }
 }

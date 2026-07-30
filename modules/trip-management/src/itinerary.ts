@@ -40,11 +40,24 @@ export type Activity = {
   updatedAt: Date;
 };
 
+export type FreePeriodMode = "flexible" | "protected";
+
+export type FreePeriod = {
+  id: string;
+  mode: FreePeriodMode;
+  startTime?: string;
+  durationMinutes?: number;
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type ItineraryDay = {
   id: string;
   date: string;
   position: number;
   activities: Activity[];
+  freePeriods: FreePeriod[];
 };
 
 export type Itinerary = {
@@ -71,6 +84,13 @@ export type AddActivityInput = {
   startTime?: string;
   durationMinutes?: number;
   placeId?: string;
+};
+
+export type AddFreePeriodInput = {
+  dayDate: string;
+  mode: FreePeriodMode;
+  startTime?: string;
+  durationMinutes?: number;
 };
 
 export type MoveActivityInput = {
@@ -102,7 +122,9 @@ export type ItineraryFieldErrors = Partial<
     | "targetDayDate"
     | "activityId"
     | "targetActivityId"
+    | "freePeriodId"
     | "title"
+    | "mode"
     | "startTime"
     | "durationMinutes"
     | "placeId",
@@ -161,6 +183,29 @@ function validateActivityDetails(
   return fieldErrors;
 }
 
+function validateFreePeriodDetails(
+  mode: string,
+  startTime?: string,
+  durationMinutes?: number,
+): ItineraryFieldErrors {
+  const fieldErrors: ItineraryFieldErrors = {};
+
+  if (mode !== "flexible" && mode !== "protected") {
+    fieldErrors.mode = "Selecione um modo válido para o período livre.";
+  }
+  if (startTime !== undefined && !isLocalTime(startTime)) {
+    fieldErrors.startTime = "Informe um horário válido no formato HH:mm.";
+  }
+  if (
+    durationMinutes !== undefined &&
+    (!Number.isInteger(durationMinutes) || durationMinutes <= 0)
+  ) {
+    fieldErrors.durationMinutes = "A duração deve ser informada em minutos inteiros e positivos.";
+  }
+
+  return fieldErrors;
+}
+
 export function createItinerary(input: CreateItineraryInput, now = new Date()): Itinerary {
   const tripId = input.tripId.trim();
   const fieldErrors: ItineraryFieldErrors = {
@@ -181,6 +226,7 @@ export function createItinerary(input: CreateItineraryInput, now = new Date()): 
       date: day.date,
       position: day.index,
       activities: [],
+      freePeriods: [],
     })),
     version: 1,
     createdAt: now,
@@ -226,6 +272,45 @@ export function addActivity(
     ...itinerary,
     days: itinerary.days.map((day) =>
       day.id === targetDay.id ? { ...day, activities: [...day.activities, activity] } : day,
+    ),
+    version: itinerary.version + 1,
+    updatedAt: now,
+  };
+}
+
+export function addFreePeriod(
+  itinerary: Itinerary,
+  input: AddFreePeriodInput,
+  now = new Date(),
+): Itinerary {
+  const targetDay = itinerary.days.find((day) => day.date === input.dayDate);
+  const fieldErrors = validateFreePeriodDetails(
+    input.mode,
+    input.startTime,
+    input.durationMinutes,
+  );
+
+  if (!targetDay) fieldErrors.dayDate = "Selecione um dia válido da viagem.";
+  if (Object.keys(fieldErrors).length > 0 || !targetDay) {
+    throw new ItineraryValidationError(fieldErrors);
+  }
+
+  const freePeriod: FreePeriod = {
+    id: randomUUID(),
+    mode: input.mode,
+    order: targetDay.freePeriods.length + 1,
+    createdAt: now,
+    updatedAt: now,
+    ...(input.startTime !== undefined ? { startTime: input.startTime } : {}),
+    ...(input.durationMinutes !== undefined ? { durationMinutes: input.durationMinutes } : {}),
+  };
+
+  return {
+    ...itinerary,
+    days: itinerary.days.map((day) =>
+      day.id === targetDay.id
+        ? { ...day, freePeriods: [...day.freePeriods, freePeriod] }
+        : day,
     ),
     version: itinerary.version + 1,
     updatedAt: now,

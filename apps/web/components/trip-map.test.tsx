@@ -28,12 +28,8 @@ describe("TripMap", () => {
   it("shows an explicit empty state without valid points", () => {
     render(<TripMap points={[]} title="Mapa de Pipa" />);
 
-    expect(
-      screen.getByRole("heading", { name: "Mapa ainda indisponível" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/demais áreas da viagem continuam disponíveis/i),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Mapa ainda indisponível" })).toBeInTheDocument();
+    expect(screen.getByText(/demais áreas da viagem continuam disponíveis/i)).toBeInTheDocument();
   });
 
   it("renders the cartographic layer, legend and accessible location list", () => {
@@ -43,12 +39,8 @@ describe("TripMap", () => {
       "src",
       expect.stringContaining("openstreetmap.org/export/embed.html"),
     );
-    expect(
-      screen.getByRole("list", { name: "Legenda do mapa" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getAllByText("Condomínio Solar Água").length,
-    ).toBeGreaterThan(0);
+    expect(screen.getByRole("list", { name: "Legenda do mapa" })).toBeInTheDocument();
+    expect(screen.getAllByText("Condomínio Solar Água").length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "Ver detalhes" })).toHaveAttribute(
       "href",
       "/viagens/trip-1/lugares/praia-do-amor",
@@ -56,12 +48,7 @@ describe("TripMap", () => {
   });
 
   it("ignores malformed coordinates", () => {
-    render(
-      <TripMap
-        points={[{ ...points[0], latitude: 120 }, points[1]]}
-        title="Mapa de Pipa"
-      />,
-    );
+    render(<TripMap points={[{ ...points[0], latitude: 120 }, points[1]]} title="Mapa de Pipa" />);
 
     expect(screen.queryByText("Condomínio Solar Água")).not.toBeInTheDocument();
     expect(screen.getAllByText("Praia do Amor").length).toBeGreaterThan(0);

@@ -12,6 +12,7 @@ import {
   ItineraryValidationError,
   moveActivity,
   removeActivity,
+  removeFreePeriod,
   reorderActivities,
   updateActivity,
   updateFreePeriod,
@@ -144,6 +145,30 @@ export async function updateItineraryFreePeriodAction(formData: FormData): Promi
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/roteiro`);
   redirect(`/viagens/${tripId}/roteiro?periodoLivreEditado=1`);
+}
+
+export async function removeItineraryFreePeriodAction(formData: FormData): Promise<never> {
+  const tripId = String(formData.get("tripId") ?? "").trim();
+  const freePeriodId = String(formData.get("freePeriodId") ?? "").trim();
+  const trip = await findTripById(new DrizzleTripRepository(), tripId);
+
+  if (!trip) notFound();
+
+  const { repository, itinerary } = await loadItinerary(tripId);
+  let updatedItinerary: Itinerary;
+  try {
+    updatedItinerary = removeFreePeriod(itinerary, { freePeriodId });
+  } catch (error) {
+    if (error instanceof ItineraryValidationError) {
+      redirectWithItineraryError(tripId, error);
+    }
+    throw error;
+  }
+
+  await repository.save(updatedItinerary);
+  revalidatePath(`/viagens/${tripId}`);
+  revalidatePath(`/viagens/${tripId}/roteiro`);
+  redirect(`/viagens/${tripId}/roteiro?periodoLivreRemovido=1`);
 }
 
 export async function updateItineraryActivityAction(formData: FormData): Promise<never> {

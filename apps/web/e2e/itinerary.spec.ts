@@ -108,10 +108,17 @@ test("reordena atividades dentro do mesmo período e preserva a sequência", asy
 
   await page.getByRole("link", { name: tripName }).click();
   await page.getByRole("link", { name: "Abrir roteiro" }).click();
-  await page.getByLabel("Título").fill(firstTitle);
-  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
-  await page.getByLabel("Título").fill(secondTitle);
-  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+
+  const composer = page.locator(".itinerary-form");
+  await composer.getByLabel("Título").fill(firstTitle);
+  await composer.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+  await expect(page).toHaveURL(/atividadeCriada=1$/);
+  await expect(page.getByText(firstTitle, { exact: true })).toBeVisible();
+
+  await composer.getByLabel("Título").fill(secondTitle);
+  await composer.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+  await expect(page).toHaveURL(/atividadeCriada=1$/);
+  await expect(page.getByText(secondTitle, { exact: true })).toBeVisible();
 
   const firstDay = page.locator(".itinerary-day-card").first();
   const activityTitles = firstDay.locator(".itinerary-activity-copy strong");

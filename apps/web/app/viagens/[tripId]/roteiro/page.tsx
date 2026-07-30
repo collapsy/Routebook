@@ -11,7 +11,7 @@ import {
   type Trip,
 } from "@routebook/trip-management";
 
-import { addManualActivityAction } from "./actions";
+import { addManualActivityAction, removeItineraryActivityAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -80,14 +80,14 @@ export default async function ItineraryPage({
   searchParams,
 }: {
   params: Promise<{ tripId: string }>;
-  searchParams: Promise<{ atividadeCriada?: string; erro?: string }>;
+  searchParams: Promise<{ atividadeCriada?: string; atividadeRemovida?: string; erro?: string }>;
 }) {
   const { tripId } = await params;
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
   const itinerary = await loadOrCreateItinerary(trip);
-  const { atividadeCriada, erro } = await searchParams;
+  const { atividadeCriada, atividadeRemovida, erro } = await searchParams;
   const activityCount = itinerary.days.reduce((total, day) => total + day.activities.length, 0);
 
   return (
@@ -99,6 +99,11 @@ export default async function ItineraryPage({
       {atividadeCriada === "1" ? (
         <p className="success-banner" role="status">
           Atividade adicionada ao roteiro.
+        </p>
+      ) : null}
+      {atividadeRemovida === "1" ? (
+        <p className="success-banner" role="status">
+          Atividade removida do roteiro.
         </p>
       ) : null}
       {erro ? (
@@ -215,13 +220,29 @@ export default async function ItineraryPage({
                             <span className="itinerary-activity-time">
                               {activity.startTime ?? "Livre"}
                             </span>
-                            <div>
-                              <strong>{activity.title}</strong>
-                              <small>
-                                {activity.durationMinutes
-                                  ? formatDuration(activity.durationMinutes)
-                                  : "Duração aberta"}
-                              </small>
+                            <div className="itinerary-activity-content">
+                              <div className="itinerary-activity-copy">
+                                <strong>{activity.title}</strong>
+                                <small>
+                                  {activity.durationMinutes
+                                    ? formatDuration(activity.durationMinutes)
+                                    : "Duração aberta"}
+                                </small>
+                              </div>
+                              <form
+                                action={removeItineraryActivityAction}
+                                className="itinerary-activity-actions"
+                              >
+                                <input name="tripId" type="hidden" value={tripId} />
+                                <input name="activityId" type="hidden" value={activity.id} />
+                                <button
+                                  aria-label={`Remover ${activity.title} do roteiro`}
+                                  className="itinerary-danger-action"
+                                  type="submit"
+                                >
+                                  Remover
+                                </button>
+                              </form>
                             </div>
                           </li>
                         ))}

@@ -49,7 +49,9 @@ export async function addManualActivityAction(formData: FormData): Promise<never
     });
   } catch (error) {
     if (error instanceof ItineraryValidationError) {
-      redirect(`/viagens/${tripId}/roteiro?erro=${encodeURIComponent(itineraryErrorMessage(error))}`);
+      redirect(
+        `/viagens/${tripId}/roteiro?erro=${encodeURIComponent(itineraryErrorMessage(error))}`,
+      );
     }
 
     throw error;
@@ -77,7 +79,9 @@ export async function removeItineraryActivityAction(formData: FormData): Promise
     updatedItinerary = removeActivity(itinerary, { activityId });
   } catch (error) {
     if (error instanceof ItineraryValidationError) {
-      redirect(`/viagens/${tripId}/roteiro?erro=${encodeURIComponent(itineraryErrorMessage(error))}`);
+      redirect(
+        `/viagens/${tripId}/roteiro?erro=${encodeURIComponent(itineraryErrorMessage(error))}`,
+      );
     }
 
     throw error;

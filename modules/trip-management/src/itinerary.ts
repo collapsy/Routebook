@@ -251,11 +251,16 @@ export function updateActivity(
         activities: day.activities.map((activity) => {
           if (activity.id !== activityId) return activity;
 
-          const { startTime: _startTime, durationMinutes: _durationMinutes, ...preserved } = activity;
           return {
-            ...preserved,
+            id: activity.id,
             title,
+            type: activity.type,
+            status: activity.status,
+            flexibility: activity.flexibility,
+            order: activity.order,
+            createdAt: activity.createdAt,
             updatedAt: now,
+            ...(activity.placeId !== undefined ? { placeId: activity.placeId } : {}),
             ...(input.startTime !== undefined ? { startTime: input.startTime } : {}),
             ...(input.durationMinutes !== undefined
               ? { durationMinutes: input.durationMinutes }

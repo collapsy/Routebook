@@ -5,6 +5,7 @@ async function createTripWithRecommendationContext(page: import("@playwright/tes
 
   await page.goto("/viagens/nova");
   await page.getByLabel("Nome da viagem").fill(tripName);
+  await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
   await page.getByLabel("Data de início").fill("2026-08-22");
   await page.getByLabel("Data de término").fill("2026-08-24");
   await Promise.all([

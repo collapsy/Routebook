@@ -51,6 +51,12 @@ function formatDuration(durationMinutes: number): string {
   return `${hours} h ${minutes} min`;
 }
 
+function formatDaySummary(activityCount: number, freePeriodCount: number): string {
+  const activityLabel = activityCount === 1 ? "atividade" : "atividades";
+  const freePeriodLabel = freePeriodCount === 1 ? "período livre" : "períodos livres";
+  return `${activityCount} ${activityLabel} · ${freePeriodCount} ${freePeriodLabel}`;
+}
+
 function groupByPeriod(activities: Activity[]): ItineraryPeriod[] {
   const periods: ItineraryPeriod[] = [
     { id: "morning", label: "Manhã", activities: [] },
@@ -269,17 +275,14 @@ export default async function ItineraryPage({
           const periods = groupByPeriod(day.activities);
           const targetDays = itinerary.days.filter((targetDay) => targetDay.id !== day.id);
           const itemCount = day.activities.length + day.freePeriods.length;
+          const daySummary = formatDaySummary(day.activities.length, day.freePeriods.length);
 
           return (
             <li className="itinerary-day-card" key={day.id}>
               <header>
                 <span>Dia {day.position}</span>
                 <h2>{formatDate(day.date)}</h2>
-                <small>
-                  {itemCount === 0
-                    ? "Planejamento aberto"
-                    : `${day.activities.length} ${day.activities.length === 1 ? "atividade" : "atividades"} · ${day.freePeriods.length} ${day.freePeriods.length === 1 ? "período livre" : "períodos livres"}`}
-                </small>
+                <small>{itemCount === 0 ? "Planejamento aberto" : daySummary}</small>
               </header>
 
               <FreePeriodList dayId={day.id} freePeriods={day.freePeriods} />

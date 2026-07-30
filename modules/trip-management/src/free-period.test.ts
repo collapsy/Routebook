@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { removeFreePeriod } from "./free-period-removal";
 import {
   addFreePeriod,
   createItinerary,
@@ -156,6 +157,61 @@ describe("updateFreePeriod", () => {
       expect(validationError.fieldErrors.mode).toBeDefined();
       expect(validationError.fieldErrors.startTime).toBeDefined();
       expect(validationError.fieldErrors.durationMinutes).toBeDefined();
+    }
+  });
+});
+
+describe("removeFreePeriod", () => {
+  it("remove somente o item alvo e normaliza a ordem sem mutar o roteiro original", () => {
+    const firstAt = new Date("2026-07-30T15:00:00Z");
+    const secondAt = new Date("2026-07-30T15:10:00Z");
+    const thirdAt = new Date("2026-07-30T15:20:00Z");
+    const otherDayAt = new Date("2026-07-30T15:30:00Z");
+    let itinerary = addFreePeriod(
+      createBaseItinerary(),
+      { dayDate: "2026-08-23", mode: "flexible" },
+      firstAt,
+    );
+    itinerary = addFreePeriod(
+      itinerary,
+      { dayDate: "2026-08-23", mode: "protected" },
+      secondAt,
+    );
+    itinerary = addFreePeriod(
+      itinerary,
+      { dayDate: "2026-08-23", mode: "flexible" },
+      thirdAt,
+    );
+    itinerary = addFreePeriod(
+      itinerary,
+      { dayDate: "2026-08-24", mode: "protected" },
+      otherDayAt,
+    );
+    const [first, target, third] = itinerary.days[1]!.freePeriods;
+    const otherDayPeriod = itinerary.days[2]!.freePeriods[0];
+    const removedAt = new Date("2026-07-30T16:00:00Z");
+
+    const updated = removeFreePeriod(itinerary, { freePeriodId: target!.id }, removedAt);
+
+    expect(itinerary.days[1]?.freePeriods).toHaveLength(3);
+    expect(updated.days[1]?.freePeriods.map((item) => item.id)).toEqual([first!.id, third!.id]);
+    expect(updated.days[1]?.freePeriods.map((item) => item.order)).toEqual([1, 2]);
+    expect(updated.days[1]?.freePeriods[0]?.updatedAt).toEqual(first!.updatedAt);
+    expect(updated.days[1]?.freePeriods[1]?.updatedAt).toEqual(removedAt);
+    expect(updated.days[2]?.freePeriods[0]).toBe(otherDayPeriod);
+    expect(updated.version).toBe(itinerary.version + 1);
+    expect(updated.updatedAt).toEqual(removedAt);
+  });
+
+  it("rejeita identidade vazia ou que não pertence ao roteiro", () => {
+    for (const freePeriodId of ["", "free-period-inexistente"]) {
+      try {
+        removeFreePeriod(createBaseItinerary(), { freePeriodId });
+        throw new Error("A validação deveria falhar.");
+      } catch (error) {
+        expect(error).toBeInstanceOf(ItineraryValidationError);
+        expect((error as ItineraryValidationError).fieldErrors.freePeriodId).toBeDefined();
+      }
     }
   });
 });

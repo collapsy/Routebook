@@ -86,7 +86,7 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
     name: `Abrir rota externa de ${firstPlaceName} para ${secondPlaceName}`,
   });
   await expect(routeLink).toHaveAttribute("target", "_blank");
-  await expect(routeLink).toHaveAttribute("rel", "noreferrer");
+  await expect(routeLink).toHaveAttribute("rel", "noopener noreferrer");
 
   const routeHref = await routeLink.getAttribute("href");
   expect(routeHref).toBeTruthy();

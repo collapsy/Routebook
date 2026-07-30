@@ -88,10 +88,7 @@ export default async function ItineraryPage({
 
   const itinerary = await loadOrCreateItinerary(trip);
   const { atividadeCriada, erro } = await searchParams;
-  const activityCount = itinerary.days.reduce(
-    (total, day) => total + day.activities.length,
-    0,
-  );
+  const activityCount = itinerary.days.reduce((total, day) => total + day.activities.length, 0);
 
   return (
     <section className="app-page itinerary-page">
@@ -115,8 +112,8 @@ export default async function ItineraryPage({
           <p className="product-eyebrow">Roteiro manual</p>
           <h1>{trip.name}</h1>
           <p>
-            Organize decisões confirmadas por dia. Horários e durações continuam opcionais para que o
-            roteiro possa evoluir sem criar rigidez artificial.
+            Organize decisões confirmadas por dia. Horários e durações continuam opcionais para que
+            o roteiro possa evoluir sem criar rigidez artificial.
           </p>
         </div>
         <div className="itinerary-summary" aria-label="Resumo do roteiro">
@@ -131,7 +128,9 @@ export default async function ItineraryPage({
         <div>
           <p className="product-eyebrow">Nova atividade</p>
           <h2 id="new-activity-title">Adicione uma decisão ao roteiro</h2>
-          <p>Comece apenas com um título e um dia. Complete horário e duração quando forem úteis.</p>
+          <p>
+            Comece apenas com um título e um dia. Complete horário e duração quando forem úteis.
+          </p>
         </div>
 
         <form className="trip-form itinerary-form" action={addManualActivityAction}>

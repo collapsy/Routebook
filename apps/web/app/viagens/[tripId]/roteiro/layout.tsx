@@ -39,8 +39,7 @@ export default async function ItineraryLayout({
 
   const itineraryRepository = new DrizzleItineraryRepository();
   const persistedItinerary = await itineraryRepository.findByTripId(tripId);
-  const itinerary =
-    persistedItinerary ?? createItinerary({ tripId: trip.id, period: trip.period });
+  const itinerary = persistedItinerary ?? createItinerary({ tripId: trip.id, period: trip.period });
   const destinationId = resolveDestinationId(trip.destination.name);
   const publishedPlaces = destinationId
     ? await listPublishedPlaces(new DrizzlePlaceRepository(), destinationId)

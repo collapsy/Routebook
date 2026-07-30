@@ -216,7 +216,8 @@
 
 .itinerary-danger-action,
 .itinerary-order-action,
-.itinerary-edit-disclosure summary {
+.itinerary-edit-disclosure summary,
+.itinerary-move-disclosure summary {
   background: transparent;
   border: 1px solid var(--border);
   border-radius: var(--radius-small);
@@ -233,41 +234,48 @@
   min-width: 3.5rem;
 }
 
-.itinerary-edit-disclosure summary {
+.itinerary-edit-disclosure summary,
+.itinerary-move-disclosure summary {
   align-items: center;
   display: flex;
   list-style: none;
 }
 
-.itinerary-edit-disclosure summary::-webkit-details-marker {
+.itinerary-edit-disclosure summary::-webkit-details-marker,
+.itinerary-move-disclosure summary::-webkit-details-marker {
   display: none;
 }
 
 .itinerary-danger-action:hover,
 .itinerary-order-action:hover,
-.itinerary-edit-disclosure summary:hover {
+.itinerary-edit-disclosure summary:hover,
+.itinerary-move-disclosure summary:hover {
   background: var(--surface);
   color: var(--foreground);
 }
 
 .itinerary-danger-action:focus-visible,
 .itinerary-order-action:focus-visible,
-.itinerary-edit-disclosure summary:focus-visible {
+.itinerary-edit-disclosure summary:focus-visible,
+.itinerary-move-disclosure summary:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
-.itinerary-edit-disclosure[open] {
+.itinerary-edit-disclosure[open],
+.itinerary-move-disclosure[open] {
   flex-basis: 100%;
   order: 2;
 }
 
-.itinerary-edit-disclosure[open] summary {
+.itinerary-edit-disclosure[open] summary,
+.itinerary-move-disclosure[open] summary {
   margin-bottom: 0.65rem;
   width: fit-content;
 }
 
-.itinerary-edit-form {
+.itinerary-edit-form,
+.itinerary-move-form {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-medium);
@@ -277,7 +285,8 @@
   width: min(100%, 28rem);
 }
 
-.itinerary-edit-form input {
+.itinerary-edit-form input,
+.itinerary-move-form select {
   background: var(--background);
   border: 1px solid var(--border);
   border-radius: var(--radius-small);
@@ -288,12 +297,14 @@
   width: 100%;
 }
 
-.itinerary-edit-form input:focus-visible {
+.itinerary-edit-form input:focus-visible,
+.itinerary-move-form select:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
-.itinerary-edit-form .product-button {
+.itinerary-edit-form .product-button,
+.itinerary-move-form .product-button {
   width: 100%;
 }
 
@@ -303,7 +314,8 @@
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .itinerary-activity-content:has(.itinerary-edit-disclosure[open]) {
+  .itinerary-activity-content:has(.itinerary-edit-disclosure[open]),
+  .itinerary-activity-content:has(.itinerary-move-disclosure[open]) {
     grid-template-columns: 1fr;
   }
 

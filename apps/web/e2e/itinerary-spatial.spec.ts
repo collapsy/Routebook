@@ -28,7 +28,7 @@ test("visualiza no mapa a sequência e comunica lacunas geográficas do Dia", as
   await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
   await page.getByRole("link", { name: "Abrir roteiro" }).click();
   await page.getByLabel("Dia da viagem").selectOption("2026-08-23");
-  await page.getByLabel("Título").fill("Pausa manual");
+  await page.locator("#title").fill("Pausa manual");
   await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
   await page.getByRole("link", { name: /Dia 2/i }).click();
 

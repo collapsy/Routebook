@@ -2,9 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { DrizzleTravelerProfileRepository, DrizzleTripRepository } from "@routebook/database";
+import {
+  DrizzlePlaceRepository,
+  DrizzleSavedPlaceRepository,
+  DrizzleTravelerProfileRepository,
+  DrizzleTripRepository,
+} from "@routebook/database";
+import { listPublishedPlaces } from "@routebook/place-catalog";
+import { listSavedPlaces } from "@routebook/saved-places";
 import { findTravelerProfile } from "@routebook/traveler-profile";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
+
+import { TripMap } from "../../components/trip-map";
+import type { TripMapPoint } from "../../lib/trip-map";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +48,11 @@ const transportLabels: Record<string, string> = {
   mixed: "Combinação de meios",
 };
 
+function resolveDestinationId(destinationName: string): string | null {
+  const normalized = destinationName.trim().toLocaleLowerCase("pt-BR");
+  return normalized.includes("pipa") ? "pipa-rn-br" : null;
+}
+
 function formatDate(value: string, options?: Intl.DateTimeFormatOptions): string {
   return new Intl.DateTimeFormat("pt-BR", {
     timeZone: "UTC",
@@ -59,14 +74,43 @@ export default async function TripOverviewPage({
   searchParams: Promise<{ contextUpdated?: string }>;
 }) {
   const { tripId } = await params;
-  const trip = await findTripById(new DrizzleTripRepository(), tripId);
+  const tripRepository = new DrizzleTripRepository();
+  const trip = await findTripById(tripRepository, tripId);
 
   if (!trip) notFound();
 
-  const profile = await findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId);
+  const destinationId = resolveDestinationId(trip.destination.name);
+  const [profile, publishedPlaces, savedPlaces] = await Promise.all([
+    findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
+    destinationId ? listPublishedPlaces(new DrizzlePlaceRepository(), destinationId) : [],
+    listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
+  ]);
   const { contextUpdated } = await searchParams;
   const owner = trip.participants.find((participant) => participant.role === "owner");
   const days = deriveTripDays(trip.period);
+  const savedPlaceIds = new Set(savedPlaces.map((selection) => selection.placeId));
+  const mapPoints: TripMapPoint[] = [];
+
+  if (trip.accommodation?.coordinate) {
+    mapPoints.push({
+      id: "accommodation",
+      label: trip.accommodation.name,
+      kind: "accommodation",
+      latitude: trip.accommodation.coordinate.latitude,
+      longitude: trip.accommodation.coordinate.longitude,
+    });
+  }
+
+  for (const place of publishedPlaces) {
+    mapPoints.push({
+      id: place.id,
+      label: place.name,
+      kind: savedPlaceIds.has(place.id) ? "saved-place" : "published-place",
+      latitude: place.latitude,
+      longitude: place.longitude,
+      href: `/viagens/${tripId}/lugares/${place.slug}`,
+    });
+  }
 
   return (
     <section className="app-page trip-overview-page">
@@ -118,6 +162,8 @@ export default async function TripOverviewPage({
           <dd>{owner?.displayName ?? "Owner não identificado"}</dd>
         </div>
       </dl>
+
+      <TripMap points={mapPoints} title={`Mapa de ${trip.destination.name}`} />
 
       <section className="traveler-context-summary" aria-labelledby="traveler-context-title">
         <div className="section-heading-row">

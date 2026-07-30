@@ -8,7 +8,8 @@
 }
 
 .header,
-.textualContext {
+.textualContext,
+.legSection {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-medium);
@@ -25,6 +26,7 @@
 .header p,
 .contextHeading p,
 .activityList span,
+.legList span,
 .emptyDay {
   color: var(--foreground-muted);
   line-height: 1.55;
@@ -95,7 +97,8 @@
   justify-content: space-between;
 }
 
-.notice {
+.notice,
+.estimateNotice {
   background: var(--surface-soft);
   border-left: 3px solid var(--primary);
   color: var(--foreground-muted);
@@ -104,7 +107,12 @@
   padding: 0.75rem;
 }
 
-.activityList {
+.estimateNotice {
+  border-left-color: var(--accent);
+}
+
+.activityList,
+.legList {
   display: grid;
   gap: 0.75rem;
   list-style: none;
@@ -112,15 +120,19 @@
   padding: 0;
 }
 
-.activityList li {
+.activityList li,
+.legList li {
   align-items: start;
   border: 1px solid var(--border);
   border-radius: var(--radius-small);
   display: grid;
   gap: 0.75rem;
-  grid-template-columns: auto minmax(0, 1fr);
   min-width: 0;
   padding: 0.85rem;
+}
+
+.activityList li {
+  grid-template-columns: auto minmax(0, 1fr);
 }
 
 .activityList li > div {
@@ -130,12 +142,31 @@
 }
 
 .activityList strong,
-.activityList span {
+.activityList span,
+.legList strong,
+.legList span {
   overflow-wrap: anywhere;
 }
 
 .activityList strong::after {
   content: attr(data-title);
+}
+
+.legList strong::after {
+  content: attr(data-route);
+}
+
+.legList li {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.availableLeg {
+  border-left: 4px solid var(--primary) !important;
+}
+
+.unavailableLeg {
+  background: var(--surface-soft);
+  border-left: 4px solid var(--foreground-muted) !important;
 }
 
 .sequence {
@@ -165,7 +196,8 @@
   }
 
   .header,
-  .textualContext {
+  .textualContext,
+  .legSection {
     padding: 1.5rem;
   }
 
@@ -177,5 +209,10 @@
   .daySelector {
     flex-wrap: wrap;
     overflow-x: visible;
+  }
+
+  .legList li {
+    align-items: center;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 }

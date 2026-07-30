@@ -10,6 +10,7 @@ import {
   findTripById,
   ItineraryValidationError,
   removeActivity,
+  reorderActivities,
   updateActivity,
   type Itinerary,
 } from "@routebook/trip-management";
@@ -31,6 +32,12 @@ async function loadItinerary(tripId: string): Promise<{
   const itinerary = await repository.findByTripId(tripId);
   if (!itinerary) notFound();
   return { repository, itinerary };
+}
+
+function redirectWithItineraryError(tripId: string, error: ItineraryValidationError): never {
+  redirect(
+    `/viagens/${tripId}/roteiro?erro=${encodeURIComponent(itineraryErrorMessage(error))}`,
+  );
 }
 
 export async function addManualActivityAction(formData: FormData): Promise<never> {
@@ -59,12 +66,7 @@ export async function addManualActivityAction(formData: FormData): Promise<never
       ...(durationMinutes !== undefined ? { durationMinutes } : {}),
     });
   } catch (error) {
-    if (error instanceof ItineraryValidationError) {
-      redirect(
-        `/viagens/${tripId}/roteiro?erro=${encodeURIComponent(itineraryErrorMessage(error))}`,
-      );
-    }
-
+    if (error instanceof ItineraryValidationError) redirectWithItineraryError(tripId, error);
     throw error;
   }
 
@@ -95,12 +97,7 @@ export async function updateItineraryActivityAction(formData: FormData): Promise
       ...(durationMinutes !== undefined ? { durationMinutes } : {}),
     });
   } catch (error) {
-    if (error instanceof ItineraryValidationError) {
-      redirect(
-        `/viagens/${tripId}/roteiro?erro=${encodeURIComponent(itineraryErrorMessage(error))}`,
-      );
-    }
-
+    if (error instanceof ItineraryValidationError) redirectWithItineraryError(tripId, error);
     throw error;
   }
 
@@ -108,6 +105,29 @@ export async function updateItineraryActivityAction(formData: FormData): Promise
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/roteiro`);
   redirect(`/viagens/${tripId}/roteiro?atividadeEditada=1`);
+}
+
+export async function reorderItineraryActivitiesAction(formData: FormData): Promise<never> {
+  const tripId = String(formData.get("tripId") ?? "").trim();
+  const activityId = String(formData.get("activityId") ?? "").trim();
+  const targetActivityId = String(formData.get("targetActivityId") ?? "").trim();
+  const trip = await findTripById(new DrizzleTripRepository(), tripId);
+
+  if (!trip) notFound();
+
+  const { repository, itinerary } = await loadItinerary(tripId);
+  let updatedItinerary: Itinerary;
+  try {
+    updatedItinerary = reorderActivities(itinerary, { activityId, targetActivityId });
+  } catch (error) {
+    if (error instanceof ItineraryValidationError) redirectWithItineraryError(tripId, error);
+    throw error;
+  }
+
+  await repository.save(updatedItinerary);
+  revalidatePath(`/viagens/${tripId}`);
+  revalidatePath(`/viagens/${tripId}/roteiro`);
+  redirect(`/viagens/${tripId}/roteiro?atividadeReordenada=1`);
 }
 
 export async function removeItineraryActivityAction(formData: FormData): Promise<never> {
@@ -122,12 +142,7 @@ export async function removeItineraryActivityAction(formData: FormData): Promise
   try {
     updatedItinerary = removeActivity(itinerary, { activityId });
   } catch (error) {
-    if (error instanceof ItineraryValidationError) {
-      redirect(
-        `/viagens/${tripId}/roteiro?erro=${encodeURIComponent(itineraryErrorMessage(error))}`,
-      );
-    }
-
+    if (error instanceof ItineraryValidationError) redirectWithItineraryError(tripId, error);
     throw error;
   }
 

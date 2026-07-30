@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import { TripMap } from "../../../../components/trip-map";
+import {
+  formatGeodesicDistance,
+  type ItineraryDayLegSummary,
+} from "../../../../lib/itinerary-leg-distances";
 import type { ItineraryDaySpatialContext } from "../../../../lib/itinerary-spatial-context";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 
@@ -14,6 +18,7 @@ type SpatialDay = {
   position: number;
   label: string;
   context: ItineraryDaySpatialContext;
+  legSummary: ItineraryDayLegSummary;
 };
 
 const unavailableLabels = {
@@ -64,6 +69,7 @@ export function ItinerarySpatialPanel({
   const selectedDate = useSearchParams().get("dia");
   const selectedDay = days.find((day) => day.date === selectedDate) ?? days[0]!;
   const context = selectedDay.context;
+  const { legSummary } = selectedDay;
   const points = buildMapPoints(tripId, context);
   const unavailable = context.activitySteps.filter((step) => step.status === "unavailable");
 
@@ -153,6 +159,58 @@ export function ItinerarySpatialPanel({
                 </div>
               </li>
             ))}
+          </ol>
+        )}
+      </section>
+
+      <section aria-labelledby="leg-distances-title" className={styles.legSection}>
+        <div className={styles.contextHeading}>
+          <div>
+            <p className={styles.eyebrow}>Distâncias entre etapas</p>
+            <h3 id="leg-distances-title">Deslocamentos do Dia {selectedDay.position}</h3>
+          </div>
+          {legSummary.totalMeters !== undefined ? (
+            <p>
+              Total geodésico: <strong>{formatGeodesicDistance(legSummary.totalMeters)}</strong>
+            </p>
+          ) : null}
+        </div>
+
+        <p className={styles.estimateNotice}>
+          Distâncias geodésicas em linha reta. Não representam trajeto por ruas, trânsito ou duração
+          de deslocamento. Nenhum Meio de transporte é inferido.
+        </p>
+
+        {legSummary.legs.length === 0 ? (
+          <p className={styles.emptyDay}>
+            Ainda não há dois pontos consecutivos disponíveis para formar uma etapa.
+          </p>
+        ) : (
+          <ol aria-label={`Deslocamentos do Dia ${selectedDay.position}`} className={styles.legList}>
+            {legSummary.legs.map((leg, index) => {
+              const originLabel = leg.status === "available" ? leg.origin.label : leg.originLabel;
+              const destinationLabel =
+                leg.status === "available" ? leg.destination.label : leg.destinationLabel;
+
+              return (
+                <li className={leg.status === "available" ? styles.availableLeg : styles.unavailableLeg} key={leg.id}>
+                  <strong
+                    aria-label={`Deslocamento de ${originLabel} para ${destinationLabel}`}
+                    data-route={` — de ${originLabel} para ${destinationLabel}`}
+                  >
+                    Etapa geográfica {index + 1}
+                  </strong>
+                  {leg.status === "available" ? (
+                    <span>{formatGeodesicDistance(leg.distanceMeters)}</span>
+                  ) : (
+                    <span>
+                      Distância indisponível porque existe uma lacuna geográfica entre os pontos
+                      consecutivos.
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ol>
         )}
       </section>

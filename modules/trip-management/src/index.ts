@@ -1,3 +1,4 @@
+export * from "./itinerary";
 export * from "./repository";
 export * from "./service";
 export * from "./trip";

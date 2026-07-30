@@ -77,6 +77,11 @@ export type RemoveActivityInput = {
   activityId: string;
 };
 
+export type ReorderActivitiesInput = {
+  activityId: string;
+  targetActivityId: string;
+};
+
 export type UpdateActivityInput = {
   activityId: string;
   title: string;
@@ -90,6 +95,7 @@ export type ItineraryFieldErrors = Partial<
     | "period"
     | "dayDate"
     | "activityId"
+    | "targetActivityId"
     | "title"
     | "startTime"
     | "durationMinutes"
@@ -267,6 +273,65 @@ export function updateActivity(
               : {}),
           };
         }),
+      };
+    }),
+    version: itinerary.version + 1,
+    updatedAt: now,
+  };
+}
+
+export function reorderActivities(
+  itinerary: Itinerary,
+  input: ReorderActivitiesInput,
+  now = new Date(),
+): Itinerary {
+  const activityId = input.activityId.trim();
+  const targetActivityId = input.targetActivityId.trim();
+  const sourceDay = itinerary.days.find((day) =>
+    day.activities.some((activity) => activity.id === activityId),
+  );
+  const targetDay = itinerary.days.find((day) =>
+    day.activities.some((activity) => activity.id === targetActivityId),
+  );
+  const fieldErrors: ItineraryFieldErrors = {};
+
+  if (!activityId) fieldErrors.activityId = "Informe uma atividade válida.";
+  else if (!sourceDay) fieldErrors.activityId = "A atividade não pertence a este roteiro.";
+
+  if (!targetActivityId) fieldErrors.targetActivityId = "Informe uma posição de destino válida.";
+  else if (!targetDay) {
+    fieldErrors.targetActivityId = "A atividade de destino não pertence a este roteiro.";
+  } else if (targetActivityId === activityId) {
+    fieldErrors.targetActivityId = "Selecione outra atividade como posição de destino.";
+  } else if (sourceDay && sourceDay.id !== targetDay.id) {
+    fieldErrors.targetActivityId = "As atividades devem pertencer ao mesmo dia.";
+  }
+
+  if (Object.keys(fieldErrors).length > 0 || !sourceDay || !targetDay) {
+    throw new ItineraryValidationError(fieldErrors);
+  }
+
+  const sourceActivity = sourceDay.activities.find((activity) => activity.id === activityId)!;
+  const targetActivity = sourceDay.activities.find((activity) => activity.id === targetActivityId)!;
+
+  return {
+    ...itinerary,
+    days: itinerary.days.map((day) => {
+      if (day.id !== sourceDay.id) return day;
+
+      return {
+        ...day,
+        activities: day.activities
+          .map((activity) => {
+            if (activity.id === sourceActivity.id) {
+              return { ...activity, order: targetActivity.order, updatedAt: now };
+            }
+            if (activity.id === targetActivity.id) {
+              return { ...activity, order: sourceActivity.order, updatedAt: now };
+            }
+            return activity;
+          })
+          .sort((left, right) => left.order - right.order),
       };
     }),
     version: itinerary.version + 1,

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
+import "./itinerary.css";
 import "./product-shell.css";
 import "./trip-creation.css";
 

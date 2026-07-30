@@ -5,10 +5,8 @@ import { useActionState } from "react";
 import type { Accommodation } from "@routebook/trip-management";
 
 import { updateAccommodationAction } from "@/app/viagens/[tripId]/hospedagem/actions";
-import {
-  geocodeAccommodationAction,
-  initialGeocodingState,
-} from "@/app/viagens/[tripId]/hospedagem/geocoding-actions";
+import { geocodeAccommodationAction } from "@/app/viagens/[tripId]/hospedagem/geocoding-actions";
+import { initialGeocodingState } from "@/app/viagens/[tripId]/hospedagem/geocoding-state";
 import { initialAccommodationState } from "@/app/viagens/[tripId]/hospedagem/state";
 
 function FieldError({ id, message }: { id: string; message: string | undefined }) {

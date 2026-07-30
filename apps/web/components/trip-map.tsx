@@ -67,7 +67,13 @@ function Marker({ point, bounds }: { point: TripMapPoint; bounds: TripMapBounds 
   );
 }
 
-export function TripMap({ points, title }: { points: readonly TripMapPoint[]; title: string }) {
+export function TripMap({
+  points,
+  title,
+}: {
+  points: readonly TripMapPoint[];
+  title: string;
+}) {
   const validPoints = points.filter(isValidTripMapPoint);
   const bounds = deriveTripMapBounds(validPoints);
 
@@ -77,8 +83,8 @@ export function TripMap({ points, title }: { points: readonly TripMapPoint[]; ti
         <p className={styles.eyebrow}>Contexto espacial</p>
         <h2 id="trip-map-title">Mapa ainda indisponível</h2>
         <p>
-          Informe as coordenadas da hospedagem ou aguarde a publicação de lugares com localização para
-          visualizar o mapa. As demais áreas da viagem continuam disponíveis normalmente.
+          Informe as coordenadas da hospedagem ou aguarde a publicação de lugares com localização
+          para visualizar o mapa. As demais áreas da viagem continuam disponíveis normalmente.
         </p>
       </section>
     );
@@ -95,7 +101,10 @@ export function TripMap({ points, title }: { points: readonly TripMapPoint[]; ti
         <ul aria-label="Legenda do mapa" className={styles.legend}>
           {Object.entries(kindLabels).map(([kind, label]) => (
             <li key={kind}>
-              <span aria-hidden="true" className={`${styles.legendDot} ${styles[kind]}`} />
+              <span
+                aria-hidden="true"
+                className={`${styles.legendDot} ${styles[kind]}`}
+              />
               {label}
             </li>
           ))}
@@ -133,8 +142,8 @@ export function TripMap({ points, title }: { points: readonly TripMapPoint[]; ti
       </ul>
 
       <p className={styles.attribution}>
-        Camada cartográfica por OpenStreetMap. Os marcadores representam coordenadas cadastradas e não
-        indicam rota, trânsito ou tempo de deslocamento.
+        Camada cartográfica por OpenStreetMap. Os marcadores representam coordenadas cadastradas e
+        não indicam rota, trânsito ou tempo de deslocamento.
       </p>
     </section>
   );

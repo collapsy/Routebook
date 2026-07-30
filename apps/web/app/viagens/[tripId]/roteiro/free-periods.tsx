@@ -5,6 +5,7 @@ import type { FreePeriod, Itinerary } from "@routebook/trip-management";
 import { addItineraryFreePeriodAction } from "./actions";
 import { FreePeriodEditor } from "./free-period-editor";
 import { FreePeriodFeedback } from "./free-period-feedback";
+import { FreePeriodRemover } from "./free-period-remover";
 import styles from "./free-periods.module.css";
 
 function formatDate(value: string): string {
@@ -148,6 +149,7 @@ export function FreePeriodList({
                   ? { durationMinutes: item.durationMinutes }
                   : {})}
               />
+              <FreePeriodRemover freePeriodId={item.id} />
             </div>
           </li>
         ))}

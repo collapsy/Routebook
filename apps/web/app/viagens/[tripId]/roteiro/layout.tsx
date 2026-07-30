@@ -10,6 +10,7 @@ import {
 import { listPublishedPlaces } from "@routebook/place-catalog";
 import { createItinerary, findTripById } from "@routebook/trip-management";
 
+import { deriveItineraryDayLegSummary } from "../../../../lib/itinerary-leg-distances";
 import { deriveItineraryDaySpatialContext } from "../../../../lib/itinerary-spatial-context";
 import { ItinerarySpatialPanel } from "./itinerary-spatial-panel";
 
@@ -44,17 +45,22 @@ export default async function ItineraryLayout({
   const publishedPlaces = destinationId
     ? await listPublishedPlaces(new DrizzlePlaceRepository(), destinationId)
     : [];
-  const days = itinerary.days.map((day) => ({
-    date: day.date,
-    position: day.position,
-    label: formatDayLabel(day.date),
-    context: deriveItineraryDaySpatialContext({
+  const days = itinerary.days.map((day) => {
+    const context = deriveItineraryDaySpatialContext({
       itinerary,
       dayDate: day.date,
       publishedPlaces,
       ...(trip.accommodation ? { accommodation: trip.accommodation } : {}),
-    }),
-  }));
+    });
+
+    return {
+      date: day.date,
+      position: day.position,
+      label: formatDayLabel(day.date),
+      context,
+      legSummary: deriveItineraryDayLegSummary(context),
+    };
+  });
 
   return (
     <>

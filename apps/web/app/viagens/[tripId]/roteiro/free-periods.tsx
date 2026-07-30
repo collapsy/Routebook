@@ -30,6 +30,10 @@ function freePeriodLabel(item: FreePeriod): string {
   return item.mode === "protected" ? "Período livre protegido" : "Período livre flexível";
 }
 
+function freePeriodAccessibleLabel(item: FreePeriod): string {
+  return `${freePeriodLabel(item)} ${item.startTime ? `às ${item.startTime}` : "sem horário"}`;
+}
+
 function freePeriodDescription(item: FreePeriod): string {
   const duration = item.durationMinutes ? formatDuration(item.durationMinutes) : "duração aberta";
   return item.mode === "protected"
@@ -149,7 +153,10 @@ export function FreePeriodList({
                   ? { durationMinutes: item.durationMinutes }
                   : {})}
               />
-              <FreePeriodRemover freePeriodId={item.id} />
+              <FreePeriodRemover
+                freePeriodId={item.id}
+                label={freePeriodAccessibleLabel(item)}
+              />
             </div>
           </li>
         ))}

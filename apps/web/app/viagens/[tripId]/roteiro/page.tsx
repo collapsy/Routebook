@@ -364,7 +364,8 @@ export default async function ItineraryPage({
                                         >
                                           {targetDays.map((targetDay) => (
                                             <option key={targetDay.id} value={targetDay.date}>
-                                              Dia {targetDay.position} — {formatDate(targetDay.date)}
+                                              Dia {targetDay.position} —{" "}
+                                              {formatDate(targetDay.date)}
                                             </option>
                                           ))}
                                         </select>

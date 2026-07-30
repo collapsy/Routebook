@@ -19,6 +19,8 @@ async function submitFreePeriod(
     durationMinutes?: string;
   },
 ) {
+  const existingPeriods = page.locator('ol[aria-label="Períodos livres do dia"] > li');
+  const initialCount = await existingPeriods.count();
   const form = page.locator("form").filter({
     has: page.getByRole("button", { name: "Adicionar período livre" }),
   });
@@ -28,6 +30,7 @@ async function submitFreePeriod(
   await form.getByLabel("Horário do período livre (opcional)").fill(input.startTime ?? "");
   await form.getByLabel("Duração do período livre (opcional)").fill(input.durationMinutes ?? "");
   await form.getByRole("button", { name: "Adicionar período livre" }).click();
+  await expect(existingPeriods).toHaveCount(initialCount + 1);
 }
 
 test("cria e preserva um período livre protegido", async ({ page }, testInfo) => {

@@ -229,7 +229,9 @@ export default async function TripOverviewPage({
             <p className="product-eyebrow">Estrutura temporal</p>
             <h2 id="trip-days-title">{days.length} dias de viagem</h2>
           </div>
-          <p>Os dias são derivados do período salvo e ainda não possuem atividades.</p>
+          <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
+            Abrir roteiro
+          </Link>
         </div>
 
         <ol className="trip-days-grid">
@@ -243,7 +245,7 @@ export default async function TripOverviewPage({
                   month: "long",
                 })}
               </strong>
-              <small>Planejamento ainda vazio</small>
+              <small>Organize atividades no roteiro manual</small>
             </li>
           ))}
         </ol>

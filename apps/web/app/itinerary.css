@@ -1,0 +1,221 @@
+.itinerary-page {
+  display: grid;
+  gap: 2rem;
+}
+
+.itinerary-feedback,
+.itinerary-page > .success-banner {
+  margin: 0;
+}
+
+.itinerary-hero {
+  align-items: start;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.itinerary-hero h1 {
+  font-size: clamp(2.25rem, 7vw, 4.25rem);
+  letter-spacing: -0.055em;
+  line-height: 1;
+  margin-bottom: 1rem;
+  max-width: 16ch;
+}
+
+.itinerary-hero > div:first-child > p:last-child,
+.itinerary-composer > div > p:last-child {
+  color: var(--foreground-muted);
+  line-height: 1.65;
+  max-width: 46rem;
+}
+
+.itinerary-summary {
+  align-items: baseline;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  display: grid;
+  gap: 0.15rem 0.75rem;
+  grid-template-columns: auto 1fr;
+  padding: 1.25rem;
+}
+
+.itinerary-summary strong {
+  color: var(--primary-strong);
+  font-size: 1.8rem;
+  letter-spacing: -0.04em;
+}
+
+.itinerary-summary span {
+  color: var(--foreground-muted);
+  font-weight: 700;
+}
+
+.itinerary-composer {
+  background: color-mix(in oklab, var(--surface-soft) 68%, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-large);
+  display: grid;
+  gap: 1.5rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.itinerary-composer h2 {
+  font-size: clamp(1.6rem, 4vw, 2.35rem);
+  letter-spacing: -0.04em;
+  margin-bottom: 0.75rem;
+}
+
+.itinerary-form {
+  border-radius: var(--radius-medium);
+  padding: 1.25rem;
+}
+
+.itinerary-form .form-field select {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  color: var(--foreground);
+  font: inherit;
+  min-height: 3rem;
+  padding: 0.75rem 0.9rem;
+  width: 100%;
+}
+
+.itinerary-form .form-field select:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.itinerary-days {
+  display: grid;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.itinerary-day-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-large);
+  box-shadow: 0 18px 44px color-mix(in oklab, var(--primary-strong) 6%, transparent);
+  overflow: hidden;
+}
+
+.itinerary-day-card > header {
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.25rem;
+}
+
+.itinerary-day-card > header > span {
+  color: var(--primary-strong);
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.itinerary-day-card > header h2 {
+  font-size: 1.35rem;
+  letter-spacing: -0.035em;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.itinerary-day-card > header small {
+  color: var(--foreground-muted);
+  font-weight: 650;
+}
+
+.itinerary-empty-day {
+  color: var(--foreground-muted);
+  line-height: 1.55;
+  margin: 0;
+  padding: 1.25rem;
+}
+
+.itinerary-periods {
+  display: grid;
+}
+
+.itinerary-periods > section {
+  border-top: 1px solid var(--border);
+  padding: 1.25rem;
+}
+
+.itinerary-periods > section:first-child {
+  border-top: 0;
+}
+
+.itinerary-periods h3 {
+  color: var(--foreground-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.09em;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+}
+
+.itinerary-periods ol {
+  display: grid;
+  gap: 0.65rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.itinerary-periods li {
+  align-items: start;
+  background: var(--background-subtle);
+  border-radius: var(--radius-small);
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: 4.2rem 1fr;
+  padding: 0.85rem;
+}
+
+.itinerary-activity-time {
+  color: var(--primary-strong);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.itinerary-periods li div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.itinerary-periods li strong {
+  line-height: 1.35;
+}
+
+.itinerary-periods li small {
+  color: var(--foreground-muted);
+}
+
+@media (min-width: 52rem) {
+  .itinerary-hero {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .itinerary-summary {
+    min-width: 12rem;
+  }
+
+  .itinerary-composer {
+    align-items: start;
+    grid-template-columns: minmax(16rem, 0.65fr) minmax(0, 1.35fr);
+  }
+
+  .itinerary-days {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 44rem) {
+  .itinerary-periods li {
+    grid-template-columns: 1fr;
+  }
+}

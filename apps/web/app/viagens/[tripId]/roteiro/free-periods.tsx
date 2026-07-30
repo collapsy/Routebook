@@ -153,10 +153,7 @@ export function FreePeriodList({
                   ? { durationMinutes: item.durationMinutes }
                   : {})}
               />
-              <FreePeriodRemover
-                freePeriodId={item.id}
-                label={freePeriodAccessibleLabel(item)}
-              />
+              <FreePeriodRemover freePeriodId={item.id} label={freePeriodAccessibleLabel(item)} />
             </div>
           </li>
         ))}

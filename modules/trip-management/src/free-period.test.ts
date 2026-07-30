@@ -30,11 +30,7 @@ describe("addFreePeriod", () => {
       firstAt,
     );
     const secondAt = new Date("2026-07-30T13:20:00Z");
-    const second = addFreePeriod(
-      first,
-      { dayDate: "2026-08-23", mode: "protected" },
-      secondAt,
-    );
+    const second = addFreePeriod(first, { dayDate: "2026-08-23", mode: "protected" }, secondAt);
 
     expect(original.days[1]?.freePeriods).toEqual([]);
     expect(second.days[1]?.freePeriods).toHaveLength(2);

@@ -118,6 +118,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-038 | Context Pack do RB-INC-038 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-038-recommendation-core.md](./implementation/context-packs/rb-inc-038-recommendation-core.md) |
 | RB-INC-039 | Geração Determinística e Explicável de Recommendations | Implementation Increment | Draft | 0.1.0 | [rb-inc-039-deterministic-recommendations.md](./implementation/increments/rb-inc-039-deterministic-recommendations.md) |
 | RB-CTX-039 | Context Pack do RB-INC-039 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-039-deterministic-recommendations.md](./implementation/context-packs/rb-inc-039-deterministic-recommendations.md) |
+| RB-INC-040 | Persistência e Ciclo de Vida das Recommendations | Implementation Increment | Draft | 0.1.0 | [rb-inc-040-recommendation-persistence.md](./implementation/increments/rb-inc-040-recommendation-persistence.md) |
+| RB-CTX-040 | Context Pack do RB-INC-040 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-040-recommendation-persistence.md](./implementation/context-packs/rb-inc-040-recommendation-persistence.md) |
 | RB-AI-007 | Operação e Gestão do Ciclo de Vida de Inteligência Artificial | AI Operations | Planned | 0.1.0 | [ai-operations-and-lifecycle-management.md](./ai/ai-operations-and-lifecycle-management.md) |
 | RB-API-002 | Catálogo de Contratos de API | API | Planned | 0.1.0 | [api-contract-catalog.md](./data/api-contract-catalog.md) |
 | RB-API-003 | Versionamento e Depreciação de APIs | API | Planned | 0.1.0 | [api-versioning-and-deprecation-policy.md](./data/api-versioning-and-deprecation-policy.md) |

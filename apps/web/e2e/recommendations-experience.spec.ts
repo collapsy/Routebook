@@ -17,32 +17,34 @@ async function createTripWithRecommendationContext(page: import("@playwright/tes
     page.getByRole("link", { name: tripName }).click(),
   ]);
   await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
+  const tripUrl = new URL(page.url()).pathname;
 
   await Promise.all([
     page.waitForURL(/\/contexto$/),
-    page.getByRole("link", { name: "Configurar contexto da viagem" }).click(),
+    page.getByRole("link", { name: "Configurar contexto" }).click(),
   ]);
   await page.getByRole("checkbox", { name: "Praias" }).check();
   await page.getByRole("checkbox", { name: "Natureza" }).check();
   await Promise.all([
-    page.waitForURL(/\/viagens\/[^/]+\?contextoSalvo=1$/),
+    page.waitForURL(/\/viagens\/[^/]+\?contextUpdated=1$/),
     page.getByRole("button", { name: "Salvar contexto" }).click(),
   ]);
 
   await Promise.all([
     page.waitForURL(/\/hospedagem$/),
-    page.getByRole("link", { name: "Editar hospedagem" }).click(),
+    page.getByRole("link", { name: "Informar hospedagem" }).click(),
   ]);
   await page.getByLabel("Nome da hospedagem").fill("Condomínio Solar Água");
   await page.getByLabel("Endereço").fill("Pipa, Tibau do Sul — RN");
   await page.getByLabel("Latitude").fill("-6,2302");
   await page.getByLabel("Longitude").fill("-35,0503");
   await Promise.all([
-    page.waitForURL(/\/viagens\/[^/]+\?hospedagemSalva=1$/),
+    page.waitForURL(/\/hospedagem\?saved=1$/),
     page.getByRole("button", { name: "Salvar hospedagem" }).click(),
   ]);
+  await page.goto(tripUrl);
 
-  return { tripName, tripUrl: new URL(page.url()).pathname };
+  return { tripName, tripUrl };
 }
 
 test("apresenta Recommendations explicáveis e preserva a rejeição após recarga", async ({

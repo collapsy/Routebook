@@ -1,6 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
-async function createTripAndOpenItinerary(page: import("@playwright/test").Page, tripName: string) {
+async function createTripAndOpenItinerary(page: Page, tripName: string) {
   await page.goto("/viagens/nova");
   await page.getByLabel("Nome da viagem").fill(tripName);
   await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
@@ -10,15 +10,38 @@ async function createTripAndOpenItinerary(page: import("@playwright/test").Page,
   await page.getByRole("link", { name: "Abrir roteiro" }).click();
 }
 
+async function submitFreePeriod(
+  page: Page,
+  input: {
+    dayDate: string;
+    mode: "flexible" | "protected";
+    startTime?: string;
+    durationMinutes?: string;
+  },
+) {
+  const form = page.locator("form").filter({
+    has: page.getByRole("button", { name: "Adicionar período livre" }),
+  });
+
+  await form.getByLabel("Dia do período livre").selectOption(input.dayDate);
+  await form.getByLabel("Proteção do espaço").selectOption(input.mode);
+  await form.getByLabel("Horário do período livre (opcional)").fill(input.startTime ?? "");
+  await form
+    .getByLabel("Duração do período livre (opcional)")
+    .fill(input.durationMinutes ?? "");
+  await form.getByRole("button", { name: "Adicionar período livre" }).click();
+}
+
 test("cria e preserva um período livre protegido", async ({ page }, testInfo) => {
   const tripName = `Período livre ${testInfo.project.name} ${Date.now()}`;
   await createTripAndOpenItinerary(page, tripName);
 
-  await page.getByLabel("Dia do período livre").selectOption("2026-08-23");
-  await page.getByLabel("Proteção do espaço").selectOption("protected");
-  await page.getByLabel("Horário do período livre (opcional)").fill("15:30");
-  await page.getByLabel("Duração do período livre (opcional)").fill("90");
-  await page.getByRole("button", { name: "Adicionar período livre" }).click();
+  await submitFreePeriod(page, {
+    dayDate: "2026-08-23",
+    mode: "protected",
+    startTime: "15:30",
+    durationMinutes: "90",
+  });
 
   await expect(page).toHaveURL(/periodoLivreCriado=1$/);
   await expect(page.getByRole("status")).toContainText("Período livre adicionado");
@@ -38,11 +61,12 @@ test("edita e limpa os dados temporais de um período livre", async ({ page }, t
   const tripName = `Editar período livre ${testInfo.project.name} ${Date.now()}`;
   await createTripAndOpenItinerary(page, tripName);
 
-  await page.getByLabel("Dia do período livre").selectOption("2026-08-23");
-  await page.getByLabel("Proteção do espaço").selectOption("flexible");
-  await page.getByLabel("Horário do período livre (opcional)").fill("14:00");
-  await page.getByLabel("Duração do período livre (opcional)").fill("120");
-  await page.getByRole("button", { name: "Adicionar período livre" }).click();
+  await submitFreePeriod(page, {
+    dayDate: "2026-08-23",
+    mode: "flexible",
+    startTime: "14:00",
+    durationMinutes: "120",
+  });
 
   const secondDay = page.locator(".itinerary-day-card").nth(1);
   const freePeriodItem = secondDay.getByRole("listitem").filter({
@@ -72,15 +96,16 @@ test("remove somente o período livre selecionado e preserva os demais", async (
   const tripName = `Remover período livre ${testInfo.project.name} ${Date.now()}`;
   await createTripAndOpenItinerary(page, tripName);
 
-  await page.getByLabel("Dia do período livre").selectOption("2026-08-23");
-  await page.getByLabel("Proteção do espaço").selectOption("flexible");
-  await page.getByLabel("Horário do período livre (opcional)").fill("13:00");
-  await page.getByRole("button", { name: "Adicionar período livre" }).click();
-
-  await page.getByLabel("Dia do período livre").selectOption("2026-08-23");
-  await page.getByLabel("Proteção do espaço").selectOption("protected");
-  await page.getByLabel("Horário do período livre (opcional)").fill("16:00");
-  await page.getByRole("button", { name: "Adicionar período livre" }).click();
+  await submitFreePeriod(page, {
+    dayDate: "2026-08-23",
+    mode: "flexible",
+    startTime: "13:00",
+  });
+  await submitFreePeriod(page, {
+    dayDate: "2026-08-23",
+    mode: "protected",
+    startTime: "16:00",
+  });
 
   const secondDay = page.locator(".itinerary-day-card").nth(1);
   const flexiblePeriod = secondDay.getByRole("listitem").filter({

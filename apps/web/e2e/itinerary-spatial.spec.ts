@@ -37,7 +37,11 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   await page.getByRole("button", { name: "Salvar lugar" }).click();
   await expect(page.getByRole("status")).toContainText("Lugar salvo");
   await page.getByRole("link", { name: "Visão da viagem" }).click();
-  await page.getByRole("link", { name: "Ver lugares salvos" }).click();
+  await Promise.all([
+    page.waitForURL(/\/lugares-salvos$/),
+    page.getByRole("link", { name: "Ver lugares salvos" }).click(),
+  ]);
+  await expect(page.getByRole("heading", { name: "Lugares salvos" })).toBeVisible();
 
   const savedPlacesPath = new URL(page.url()).pathname;
   const addSavedPlaceToDay = async (placeName: string) => {
@@ -57,7 +61,10 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   await addSavedPlaceToDay(firstPlaceName!);
   await addSavedPlaceToDay(secondPlaceName!);
 
-  await page.getByRole("link", { name: "Abrir roteiro" }).click();
+  await Promise.all([
+    page.waitForURL(/\/roteiro$/),
+    page.getByRole("link", { name: "Abrir roteiro" }).click(),
+  ]);
   await page.getByLabel("Dia da viagem").selectOption("2026-08-23");
   await page.locator("#title").fill("Pausa manual");
   await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();

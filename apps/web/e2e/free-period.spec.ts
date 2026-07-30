@@ -26,9 +26,7 @@ async function submitFreePeriod(
   await form.getByLabel("Dia do período livre").selectOption(input.dayDate);
   await form.getByLabel("Proteção do espaço").selectOption(input.mode);
   await form.getByLabel("Horário do período livre (opcional)").fill(input.startTime ?? "");
-  await form
-    .getByLabel("Duração do período livre (opcional)")
-    .fill(input.durationMinutes ?? "");
+  await form.getByLabel("Duração do período livre (opcional)").fill(input.durationMinutes ?? "");
   await form.getByRole("button", { name: "Adicionar período livre" }).click();
 }
 

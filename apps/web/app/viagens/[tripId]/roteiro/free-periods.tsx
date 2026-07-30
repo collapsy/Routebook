@@ -54,7 +54,7 @@ export function FreePeriodComposer({
         <input name="tripId" type="hidden" value={tripId} />
 
         <div className={styles.field}>
-          <label htmlFor="freePeriodDayDate">Dia da viagem</label>
+          <label htmlFor="freePeriodDayDate">Dia do período livre</label>
           <select
             defaultValue={itinerary.days[0]?.date}
             id="freePeriodDayDate"
@@ -78,12 +78,12 @@ export function FreePeriodComposer({
         </div>
 
         <div className={styles.field}>
-          <label htmlFor="freePeriodStartTime">Horário opcional</label>
+          <label htmlFor="freePeriodStartTime">Horário do período livre (opcional)</label>
           <input id="freePeriodStartTime" name="freePeriodStartTime" type="time" />
         </div>
 
         <div className={styles.field}>
-          <label htmlFor="freePeriodDurationMinutes">Duração opcional</label>
+          <label htmlFor="freePeriodDurationMinutes">Duração do período livre (opcional)</label>
           <input
             id="freePeriodDurationMinutes"
             min={1}

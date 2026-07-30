@@ -218,7 +218,7 @@ export function ItinerarySpatialPanel({
                           origin: leg.origin.coordinate,
                           destination: leg.destination.coordinate,
                         })}
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         target="_blank"
                       >
                         Abrir rota externa

@@ -66,11 +66,17 @@ test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ 
   await expect(page.getByRole("status")).toContainText("continua salvo");
   await expect(page.getByRole("heading", { name: placeName! })).toBeVisible();
 
-  await page.getByRole("link", { name: "Abrir roteiro" }).click();
-  await expect(page.getByText(placeName!, { exact: true })).toBeVisible();
-  await expect(page.getByText("14:15", { exact: true })).toBeVisible();
-  await expect(page.getByText("2 h", { exact: true })).toBeVisible();
+  await Promise.all([
+    page.waitForURL(/\/roteiro$/),
+    page.getByRole("link", { name: "Abrir roteiro" }).click(),
+  ]);
+  const itineraryDays = page.getByRole("list", { name: "Dias do roteiro" });
+  await expect(itineraryDays.getByText(placeName!, { exact: true })).toBeVisible();
+  await expect(itineraryDays.getByText("14:15", { exact: true })).toBeVisible();
+  await expect(itineraryDays.getByText("2 h", { exact: true })).toBeVisible();
 
   await page.reload();
-  await expect(page.getByText(placeName!, { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("list", { name: "Dias do roteiro" }).getByText(placeName!, { exact: true }),
+  ).toBeVisible();
 });

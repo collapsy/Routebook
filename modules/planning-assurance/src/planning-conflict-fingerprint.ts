@@ -46,9 +46,7 @@ export function fingerprintPlanningConflict(
       type: input.type,
       policyVersion: input.policyVersion.trim(),
       relatedDayIds: [...input.relatedDayIds].map((value) => value.trim()).sort(),
-      relatedActivityIds: [...input.relatedActivityIds]
-        .map((value) => value.trim())
-        .sort(),
+      relatedActivityIds: [...input.relatedActivityIds].map((value) => value.trim()).sort(),
       evidence: input.evidence,
     }),
   );
@@ -62,9 +60,7 @@ export function createPlanningConflictLineage(
       tripId: input.tripId.trim(),
       type: input.type,
       relatedDayIds: [...input.relatedDayIds].map((value) => value.trim()).sort(),
-      relatedActivityIds: [...input.relatedActivityIds]
-        .map((value) => value.trim())
-        .sort(),
+      relatedActivityIds: [...input.relatedActivityIds].map((value) => value.trim()).sort(),
     }),
   );
 }

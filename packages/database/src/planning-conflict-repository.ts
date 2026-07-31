@@ -63,9 +63,7 @@ function serializeContextSnapshot(
         id: activity.id,
         tripId: activity.tripId,
         dayId: activity.dayId,
-        ...(activity.scheduledDate !== undefined
-          ? { scheduledDate: activity.scheduledDate }
-          : {}),
+        ...(activity.scheduledDate !== undefined ? { scheduledDate: activity.scheduledDate } : {}),
         ...(activity.startTime !== undefined ? { startTime: activity.startTime } : {}),
         ...(activity.durationMinutes !== undefined
           ? { durationMinutes: activity.durationMinutes }
@@ -93,9 +91,7 @@ function deserializeContextSnapshot(value: unknown): PlanningConflictContextSnap
         id: activity.id,
         tripId: activity.tripId,
         dayId: activity.dayId,
-        ...(activity.scheduledDate !== undefined
-          ? { scheduledDate: activity.scheduledDate }
-          : {}),
+        ...(activity.scheduledDate !== undefined ? { scheduledDate: activity.scheduledDate } : {}),
         ...(activity.startTime !== undefined ? { startTime: activity.startTime } : {}),
         ...(activity.durationMinutes !== undefined
           ? { durationMinutes: activity.durationMinutes }
@@ -147,8 +143,7 @@ function insertValues(conflict: PlanningConflict) {
     supersededAt: conflict.supersededAt ?? null,
     supersededByPlanningConflictId: conflict.supersededByPlanningConflictId ?? null,
     createdAt: conflict.detectedAt,
-    updatedAt:
-      conflict.invalidatedAt ?? conflict.supersededAt ?? conflict.detectedAt,
+    updatedAt: conflict.invalidatedAt ?? conflict.supersededAt ?? conflict.detectedAt,
   };
 }
 
@@ -156,9 +151,7 @@ function comparePlanningConflicts(left: PlanningConflict, right: PlanningConflic
   return (
     left.type.localeCompare(right.type) ||
     left.relatedDayIds.join("|").localeCompare(right.relatedDayIds.join("|")) ||
-    left.relatedActivityIds
-      .join("|")
-      .localeCompare(right.relatedActivityIds.join("|")) ||
+    left.relatedActivityIds.join("|").localeCompare(right.relatedActivityIds.join("|")) ||
     left.contextFingerprint.localeCompare(right.contextFingerprint)
   );
 }
@@ -213,10 +206,7 @@ export async function reconcilePlanningConflictsWithDatabase(
     .select()
     .from(planningConflicts)
     .where(
-      and(
-        eq(planningConflicts.tripId, normalizedTripId),
-        eq(planningConflicts.state, "detected"),
-      ),
+      and(eq(planningConflicts.tripId, normalizedTripId), eq(planningConflicts.state, "detected")),
     )
     .orderBy(asc(planningConflicts.type), asc(planningConflicts.contextFingerprint));
   const active = activeRows.map(rehydratePlanningConflict);
@@ -236,9 +226,7 @@ export async function reconcilePlanningConflictsWithDatabase(
     current.push(conflict);
   }
 
-  const currentByLineage = new Map(
-    current.map((conflict) => [conflict.lineageKey, conflict]),
-  );
+  const currentByLineage = new Map(current.map((conflict) => [conflict.lineageKey, conflict]));
   for (const previous of active) {
     if (incomingByFingerprint.has(previous.contextFingerprint)) continue;
 
@@ -253,8 +241,7 @@ export async function reconcilePlanningConflictsWithDatabase(
         state: terminal.state,
         invalidatedAt: terminal.invalidatedAt ?? null,
         supersededAt: terminal.supersededAt ?? null,
-        supersededByPlanningConflictId:
-          terminal.supersededByPlanningConflictId ?? null,
+        supersededByPlanningConflictId: terminal.supersededByPlanningConflictId ?? null,
         updatedAt: evaluatedAt,
       })
       .where(eq(planningConflicts.id, previous.id));
@@ -264,10 +251,7 @@ export async function reconcilePlanningConflictsWithDatabase(
 }
 
 export class DrizzlePlanningConflictRepository implements PlanningConflictRepository {
-  async findByIdForTrip(
-    id: PlanningConflictId,
-    tripId: string,
-  ): Promise<PlanningConflict | null> {
+  async findByIdForTrip(id: PlanningConflictId, tripId: string): Promise<PlanningConflict | null> {
     const [row] = await getDatabase()
       .select()
       .from(planningConflicts)
@@ -301,10 +285,7 @@ export class DrizzlePlanningConflictRepository implements PlanningConflictReposi
       .select()
       .from(planningConflicts)
       .where(
-        and(
-          eq(planningConflicts.tripId, tripId.trim()),
-          eq(planningConflicts.state, "detected"),
-        ),
+        and(eq(planningConflicts.tripId, tripId.trim()), eq(planningConflicts.state, "detected")),
       )
       .orderBy(asc(planningConflicts.type), asc(planningConflicts.contextFingerprint));
     return rows.map(rehydratePlanningConflict);

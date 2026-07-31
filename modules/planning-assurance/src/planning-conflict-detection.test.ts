@@ -57,9 +57,7 @@ describe("detectPlanningConflicts", () => {
     const second = detectPlanningConflicts(context);
 
     expect(first).toEqual(second);
-    expect(first.map((conflict) => conflict.id)).toEqual(
-      second.map((conflict) => conflict.id),
-    );
+    expect(first.map((conflict) => conflict.id)).toEqual(second.map((conflict) => conflict.id));
     expect(context).toEqual(original);
   });
 
@@ -70,9 +68,7 @@ describe("detectPlanningConflicts", () => {
         activity("b", { startTime: "10:30", durationMinutes: 60 }),
       ]),
     );
-    expect(
-      partial.filter((conflict) => conflict.type === "activity-time-overlap"),
-    ).toHaveLength(1);
+    expect(partial.filter((conflict) => conflict.type === "activity-time-overlap")).toHaveLength(1);
 
     const total = detectPlanningConflicts(
       snapshot([
@@ -80,9 +76,7 @@ describe("detectPlanningConflicts", () => {
         activity("b", { startTime: "10:00", durationMinutes: 30 }),
       ]),
     );
-    expect(
-      total.filter((conflict) => conflict.type === "activity-time-overlap"),
-    ).toHaveLength(1);
+    expect(total.filter((conflict) => conflict.type === "activity-time-overlap")).toHaveLength(1);
 
     const adjacent = detectPlanningConflicts(
       snapshot([
@@ -90,9 +84,9 @@ describe("detectPlanningConflicts", () => {
         activity("b", { startTime: "10:00", durationMinutes: 60 }),
       ]),
     );
-    expect(
-      adjacent.filter((conflict) => conflict.type === "activity-time-overlap"),
-    ).toHaveLength(0);
+    expect(adjacent.filter((conflict) => conflict.type === "activity-time-overlap")).toHaveLength(
+      0,
+    );
   });
 
   it("detecta Activity fora do período e incompatível com o Dia", () => {
@@ -114,24 +108,16 @@ describe("detectPlanningConflicts", () => {
       ],
     });
 
-    expect(conflicts.map((conflict) => conflict.type)).toContain(
-      "activity-outside-trip-period",
-    );
-    expect(conflicts.map((conflict) => conflict.type)).toContain(
-      "activity-day-mismatch",
-    );
+    expect(conflicts.map((conflict) => conflict.type)).toContain("activity-outside-trip-period");
+    expect(conflicts.map((conflict) => conflict.type)).toContain("activity-day-mismatch");
   });
 
   it("detecta duração, horário e limite diário inválidos por constantes explícitas", () => {
-    const overloadedActivities = Array.from(
-      { length: MAX_DAY_ACTIVITY_COUNT + 1 },
-      (_, index) =>
-        activity(`activity-${index}`, {
-          startTime: `${String(index).padStart(2, "0")}:00`,
-          durationMinutes: Math.ceil(
-            MAX_DAY_SCHEDULED_MINUTES / MAX_DAY_ACTIVITY_COUNT,
-          ),
-        }),
+    const overloadedActivities = Array.from({ length: MAX_DAY_ACTIVITY_COUNT + 1 }, (_, index) =>
+      activity(`activity-${index}`, {
+        startTime: `${String(index).padStart(2, "0")}:00`,
+        durationMinutes: Math.ceil(MAX_DAY_SCHEDULED_MINUTES / MAX_DAY_ACTIVITY_COUNT),
+      }),
     );
     overloadedActivities[0] = activity("activity-0", {
       startTime: "25:00",
@@ -140,9 +126,7 @@ describe("detectPlanningConflicts", () => {
 
     const conflicts = detectPlanningConflicts(snapshot(overloadedActivities));
 
-    expect(conflicts.map((conflict) => conflict.type)).toContain(
-      "invalid-activity-interval",
-    );
+    expect(conflicts.map((conflict) => conflict.type)).toContain("invalid-activity-interval");
     const overloaded = conflicts.find((conflict) => conflict.type === "day-overloaded");
     expect(overloaded?.evidence[0]?.facts).toMatchObject({
       maxActivityCount: MAX_DAY_ACTIVITY_COUNT,

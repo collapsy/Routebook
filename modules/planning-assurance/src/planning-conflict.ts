@@ -24,12 +24,7 @@ export type PlanningConflictType = (typeof planningConflictTypes)[number];
 export type PlanningConflictSeverity = "warning" | "critical";
 export type PlanningConflictState = "detected" | "invalidated" | "superseded";
 export type PlanningConflictEvidenceValue =
-  | string
-  | number
-  | boolean
-  | null
-  | readonly string[]
-  | readonly number[];
+  string | number | boolean | null | readonly string[] | readonly number[];
 
 export type PlanningConflictEvidence = Readonly<{
   code: string;
@@ -163,9 +158,7 @@ function positiveInteger(value: number, field: string): number {
 }
 
 function uniqueSorted(values: readonly string[], field: string): readonly string[] {
-  const normalized = values
-    .map((value, index) => requiredText(value, `${field}.${index}`))
-    .sort();
+  const normalized = values.map((value, index) => requiredText(value, `${field}.${index}`)).sort();
   return Object.freeze([...new Set(normalized)]);
 }
 
@@ -275,9 +268,7 @@ export function normalizePlanningConflictContextSnapshot(
                   ),
                 }
               : {}),
-            ...(activity.startTime !== undefined
-              ? { startTime: activity.startTime.trim() }
-              : {}),
+            ...(activity.startTime !== undefined ? { startTime: activity.startTime.trim() } : {}),
             ...(activity.durationMinutes !== undefined
               ? { durationMinutes: activity.durationMinutes }
               : {}),
@@ -292,10 +283,7 @@ export function normalizePlanningConflictContextSnapshot(
         activities: Object.freeze(activities),
       });
     })
-    .sort(
-      (left, right) =>
-        left.date.localeCompare(right.date) || left.id.localeCompare(right.id),
-    );
+    .sort((left, right) => left.date.localeCompare(right.date) || left.id.localeCompare(right.id));
 
   return Object.freeze({
     schemaVersion: 1,
@@ -381,12 +369,18 @@ export function createPlanningConflict(input: CreatePlanningConflictInput): Plan
       state: "Um conflito detectado não pode possuir dados de encerramento.",
     });
   }
-  if (state === "invalidated" && (!invalidatedAt || supersededAt || supersededByPlanningConflictId)) {
+  if (
+    state === "invalidated" &&
+    (!invalidatedAt || supersededAt || supersededByPlanningConflictId)
+  ) {
     throw new PlanningConflictValidationError("PlanningConflict inválido.", {
       state: "Um conflito invalidado deve possuir apenas invalidatedAt.",
     });
   }
-  if (state === "superseded" && (!supersededAt || !supersededByPlanningConflictId || invalidatedAt)) {
+  if (
+    state === "superseded" &&
+    (!supersededAt || !supersededByPlanningConflictId || invalidatedAt)
+  ) {
     throw new PlanningConflictValidationError("PlanningConflict inválido.", {
       state: "Um conflito superseded deve informar instante e substituto.",
     });

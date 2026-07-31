@@ -45,10 +45,7 @@ export const planningConflicts = pgTable(
       "planning_conflicts_type_check",
       sql`${table.type} in ('activity-time-overlap', 'activity-outside-trip-period', 'activity-day-mismatch', 'invalid-activity-interval', 'day-overloaded')`,
     ),
-    check(
-      "planning_conflicts_severity_check",
-      sql`${table.severity} in ('warning', 'critical')`,
-    ),
+    check("planning_conflicts_severity_check", sql`${table.severity} in ('warning', 'critical')`),
     check(
       "planning_conflicts_state_check",
       sql`${table.state} in ('detected', 'invalidated', 'superseded')`,

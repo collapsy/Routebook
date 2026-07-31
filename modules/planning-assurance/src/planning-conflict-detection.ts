@@ -206,8 +206,7 @@ function overlapConflicts(
     .filter((value): value is ActivityInterval => value !== null)
     .sort(
       (left, right) =>
-        left.startMinutes - right.startMinutes ||
-        left.activity.id.localeCompare(right.activity.id),
+        left.startMinutes - right.startMinutes || left.activity.id.localeCompare(right.activity.id),
     );
   const conflicts: PlanningConflict[] = [];
 
@@ -299,9 +298,7 @@ function comparePlanningConflicts(left: PlanningConflict, right: PlanningConflic
     typeOrder[left.type] - typeOrder[right.type] ||
     leftDate.localeCompare(rightDate) ||
     left.relatedDayIds.join("|").localeCompare(right.relatedDayIds.join("|")) ||
-    left.relatedActivityIds
-      .join("|")
-      .localeCompare(right.relatedActivityIds.join("|")) ||
+    left.relatedActivityIds.join("|").localeCompare(right.relatedActivityIds.join("|")) ||
     left.contextFingerprint.localeCompare(right.contextFingerprint)
   );
 }

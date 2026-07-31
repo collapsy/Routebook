@@ -84,10 +84,7 @@ export async function evaluatePlanningConflicts(
                 asc(itineraryActivities.order),
                 asc(itineraryActivities.id),
               );
-      const activitiesByDay = new Map<
-        string,
-        (typeof activityRows)[number][]
-      >();
+      const activitiesByDay = new Map<string, (typeof activityRows)[number][]>();
       for (const activity of activityRows) {
         const activities = activitiesByDay.get(activity.itineraryDayId) ?? [];
         activities.push(activity);

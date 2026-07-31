@@ -102,7 +102,10 @@ export class DrizzleDecisionRepository implements DecisionRepository {
       .select()
       .from(decisions)
       .where(
-        and(eq(decisions.tripId, tripId), eq(decisions.idempotencyKey, idempotencyKey)),
+        and(
+          eq(decisions.tripId, tripId),
+          eq(decisions.idempotencyKey, idempotencyKey),
+        ),
       )
       .limit(1);
     return row ? rehydrateDecision(row) : null;

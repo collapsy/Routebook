@@ -4,7 +4,7 @@ title: Context Pack — Decisions e Ações sobre Recommendations
 description: Contexto operacional obrigatório para implementar e revisar o RB-INC-042.
 document_type: implementation-context-pack
 owner: Decision Intelligence
-status: In Progress
+status: Draft
 version: "0.1.0"
 created: "2026-07-30"
 last_updated: "2026-07-30"
@@ -37,7 +37,7 @@ Implementar decisões explícitas sobre Recommendations sem duplicação, infer�
 - issue #87;
 - Draft PR #94;
 - branch `feature/rb-inc-042-recommendation-decisions`;
-- base verde `19b15be53f4f4b8cd4e927ceeb6f0dcb1e488f99`;
+- base `main` no merge commit consolidado `fb4b46e3881a8c1adb5f30c90a815593b47f0212`;
 - incremento `RB-INC-042`.
 
 ## Contratos que devem ser reutilizados

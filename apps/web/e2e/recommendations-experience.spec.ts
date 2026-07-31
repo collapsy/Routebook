@@ -8,10 +8,7 @@ async function submitAndExpectRedirect(
   expectedUrl: RegExp,
 ) {
   const currentUrl = page.url();
-  await Promise.all([
-    page.waitForURL((url) => url.href !== currentUrl, { waitUntil: "commit" }),
-    submit(),
-  ]);
+  await Promise.all([page.waitForURL((url) => url.href !== currentUrl), submit()]);
   await expect(page).toHaveURL(expectedUrl);
 }
 

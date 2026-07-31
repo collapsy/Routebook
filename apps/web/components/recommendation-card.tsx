@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import type { RecommendationCardViewModel } from "../lib/recommendation-experience";
@@ -21,6 +23,15 @@ type ItineraryDayOption = Readonly<{
   date: string;
 }>;
 
+type RecommendationAction = (
+  formData: FormData,
+) => Promise<Readonly<{ redirectTo: string }>>;
+
+async function submitAndNavigate(action: RecommendationAction, formData: FormData): Promise<void> {
+  const result = await action(formData);
+  window.location.assign(result.redirectTo);
+}
+
 export function RecommendationCard({
   card,
   tripId,
@@ -32,9 +43,9 @@ export function RecommendationCard({
   card: RecommendationCardViewModel;
   tripId: string;
   itineraryDays: readonly ItineraryDayOption[];
-  ignoreAction: (formData: FormData) => void | Promise<void>;
-  saveAction: (formData: FormData) => void | Promise<void>;
-  addToItineraryAction: (formData: FormData) => void | Promise<void>;
+  ignoreAction: RecommendationAction;
+  saveAction: RecommendationAction;
+  addToItineraryAction: RecommendationAction;
 }) {
   const titleId = `recommendation-${card.id}`;
   const isRejected = card.status === "rejected";
@@ -121,7 +132,10 @@ export function RecommendationCard({
         </Link>
 
         {canDecide ? (
-          <form action={saveAction} aria-label={`Salvar ${card.placeName}`}>
+          <form
+            action={(formData) => submitAndNavigate(saveAction, formData)}
+            aria-label={`Salvar ${card.placeName}`}
+          >
             <input name="tripId" type="hidden" value={tripId} />
             <input name="recommendationId" type="hidden" value={card.id} />
             <input name="placeId" type="hidden" value={card.placeId} />
@@ -132,7 +146,10 @@ export function RecommendationCard({
         ) : null}
 
         {canDecide && itineraryDays.length > 0 ? (
-          <form action={addToItineraryAction} aria-label={`Adicionar ${card.placeName} ao roteiro`}>
+          <form
+            action={(formData) => submitAndNavigate(addToItineraryAction, formData)}
+            aria-label={`Adicionar ${card.placeName} ao roteiro`}
+          >
             <input name="tripId" type="hidden" value={tripId} />
             <input name="recommendationId" type="hidden" value={card.id} />
             <input name="placeId" type="hidden" value={card.placeId} />
@@ -164,7 +181,7 @@ export function RecommendationCard({
         ) : null}
 
         {card.canIgnore ? (
-          <form action={ignoreAction} aria-labelledby={titleId}>
+          <form action={(formData) => submitAndNavigate(ignoreAction, formData)} aria-labelledby={titleId}>
             <input name="tripId" type="hidden" value={tripId} />
             <input name="recommendationId" type="hidden" value={card.id} />
             <button

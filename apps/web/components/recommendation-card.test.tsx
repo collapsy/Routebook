@@ -37,9 +37,9 @@ const presentedCard: RecommendationCardViewModel = {
 };
 
 const actions = {
-  ignoreAction: vi.fn(),
-  saveAction: vi.fn(),
-  addToItineraryAction: vi.fn(),
+  ignoreAction: vi.fn(async () => ({ redirectTo: "/recomendacoes?ignorada=1" })),
+  saveAction: vi.fn(async () => ({ redirectTo: "/recomendacoes?salva=1" })),
+  addToItineraryAction: vi.fn(async () => ({ redirectTo: "/recomendacoes?adicionada=1" })),
 };
 
 function renderCard(card: RecommendationCardViewModel = presentedCard) {

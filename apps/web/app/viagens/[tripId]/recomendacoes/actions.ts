@@ -1,6 +1,3 @@
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-
 import {
   addRecommendedPlaceToItinerary,
   DrizzleRecommendationRepository,
@@ -17,6 +14,14 @@ function recommendationPath(tripId: string): string {
   return `/viagens/${tripId}/recomendacoes`;
 }
 
+export type RecommendationActionResult = Readonly<{
+  redirectTo: string;
+}>;
+
+function actionResult(redirectTo: string): RecommendationActionResult {
+  return { redirectTo };
+}
+
 function required(formData: FormData, name: string): string {
   return String(formData.get(name) ?? "").trim();
 }
@@ -28,7 +33,10 @@ function optionalPositiveInteger(formData: FormData, name: string): number | und
   return Number.isInteger(value) && value > 0 ? value : undefined;
 }
 
-function redirectServiceError(tripId: string, error: RecommendationDecisionServiceError): never {
+function serviceErrorResult(
+  tripId: string,
+  error: RecommendationDecisionServiceError,
+): RecommendationActionResult {
   const codeByError = {
     "recommendation-not-found": "recomendacao-nao-encontrada",
     "recommendation-not-eligible": "estado-incompativel",
@@ -38,17 +46,19 @@ function redirectServiceError(tripId: string, error: RecommendationDecisionServi
     "day-not-found": "dia-invalido",
     "idempotency-conflict": "conflito-idempotencia",
   } as const;
-  redirect(`${recommendationPath(tripId)}?erro=${codeByError[error.code]}`);
+  return actionResult(`${recommendationPath(tripId)}?erro=${codeByError[error.code]}`);
 }
 
-export async function saveRecommendationPlaceAction(formData: FormData): Promise<never> {
+export async function saveRecommendationPlaceAction(
+  formData: FormData,
+): Promise<RecommendationActionResult> {
   "use server";
 
   const tripId = required(formData, "tripId");
   const recommendationId = required(formData, "recommendationId");
   const placeId = required(formData, "placeId");
   if (!tripId || !recommendationId || !placeId) {
-    redirect("/viagens?erro=recomendacao-invalida");
+    return actionResult("/viagens?erro=recomendacao-invalida");
   }
 
   try {
@@ -60,18 +70,17 @@ export async function saveRecommendationPlaceAction(formData: FormData): Promise
     });
   } catch (error) {
     if (error instanceof RecommendationDecisionServiceError) {
-      redirectServiceError(tripId, error);
+      return serviceErrorResult(tripId, error);
     }
     throw error;
   }
 
-  revalidatePath(recommendationPath(tripId));
-  revalidatePath(`/viagens/${tripId}/salvos`);
-  revalidatePath(`/viagens/${tripId}`);
-  redirect(`${recommendationPath(tripId)}?salva=1`);
+  return actionResult(`${recommendationPath(tripId)}?salva=1`);
 }
 
-export async function addRecommendationToItineraryAction(formData: FormData): Promise<never> {
+export async function addRecommendationToItineraryAction(
+  formData: FormData,
+): Promise<RecommendationActionResult> {
   "use server";
 
   const tripId = required(formData, "tripId");
@@ -81,7 +90,7 @@ export async function addRecommendationToItineraryAction(formData: FormData): Pr
   const startTime = required(formData, "startTime");
   const durationMinutes = optionalPositiveInteger(formData, "durationMinutes");
   if (!tripId || !recommendationId || !placeId || !dayId) {
-    redirect(`${recommendationPath(tripId)}?erro=dia-invalido`);
+    return actionResult(`${recommendationPath(tripId)}?erro=dia-invalido`);
   }
 
   try {
@@ -96,25 +105,24 @@ export async function addRecommendationToItineraryAction(formData: FormData): Pr
     });
   } catch (error) {
     if (error instanceof RecommendationDecisionServiceError) {
-      redirectServiceError(tripId, error);
+      return serviceErrorResult(tripId, error);
     }
     throw error;
   }
 
-  revalidatePath(recommendationPath(tripId));
-  revalidatePath(`/viagens/${tripId}/roteiro`);
-  revalidatePath(`/viagens/${tripId}`);
-  redirect(`${recommendationPath(tripId)}?adicionada=1`);
+  return actionResult(`${recommendationPath(tripId)}?adicionada=1`);
 }
 
-export async function ignoreRecommendationAction(formData: FormData): Promise<never> {
+export async function ignoreRecommendationAction(
+  formData: FormData,
+): Promise<RecommendationActionResult> {
   "use server";
 
   const tripId = required(formData, "tripId");
   const rawRecommendationId = required(formData, "recommendationId");
 
   if (!tripId || !rawRecommendationId) {
-    redirect(`/viagens?erro=recomendacao-invalida`);
+    return actionResult("/viagens?erro=recomendacao-invalida");
   }
 
   const repository = new DrizzleRecommendationRepository();
@@ -122,11 +130,11 @@ export async function ignoreRecommendationAction(formData: FormData): Promise<ne
   const recommendation = await repository.findById(tripId, recommendationId);
 
   if (!recommendation) {
-    redirect(`${recommendationPath(tripId)}?erro=recomendacao-nao-encontrada`);
+    return actionResult(`${recommendationPath(tripId)}?erro=recomendacao-nao-encontrada`);
   }
 
   if (recommendation.status === "rejected") {
-    redirect(`${recommendationPath(tripId)}?ignorada=1`);
+    return actionResult(`${recommendationPath(tripId)}?ignorada=1`);
   }
 
   try {
@@ -134,12 +142,10 @@ export async function ignoreRecommendationAction(formData: FormData): Promise<ne
     await repository.save(rejected);
   } catch (error) {
     if (error instanceof RecommendationTransitionError) {
-      redirect(`${recommendationPath(tripId)}?erro=estado-incompativel`);
+      return actionResult(`${recommendationPath(tripId)}?erro=estado-incompativel`);
     }
     throw error;
   }
 
-  revalidatePath(recommendationPath(tripId));
-  revalidatePath(`/viagens/${tripId}`);
-  redirect(`${recommendationPath(tripId)}?ignorada=1`);
+  return actionResult(`${recommendationPath(tripId)}?ignorada=1`);
 }

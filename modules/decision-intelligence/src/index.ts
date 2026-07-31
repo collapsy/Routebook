@@ -43,7 +43,7 @@ export {
 export type {
   CreateRecommendationInput,
   DecisionContextSnapshot,
-  DecisionId,
+  DecisionId as RecommendationLinkedDecisionId,
   Recommendation,
   RecommendationConfidence,
   RecommendationConfidenceLevel,
@@ -58,16 +58,20 @@ export type {
   RecommendationValidity,
 } from "./recommendation";
 
-export { createDecision, DecisionValidationError } from "./decision";
+export { createDecision, createDecisionId, DecisionValidationError } from "./decision";
 export type {
   AddToItineraryDecisionOption,
   CreateDecisionInput,
   Decision,
   DecisionEffect,
+  DecisionId,
   DecisionOption,
   DecisionType,
   SavePlaceDecisionOption,
 } from "./decision";
+
+export { DecisionRepositoryError } from "./decision-repository";
+export type { DecisionRepository } from "./decision-repository";
 
 export { RecommendationRepositoryError } from "./repository";
 export type { RecommendationRepository, SaveGeneratedRecommendationMode } from "./repository";

@@ -4,7 +4,7 @@ title: Context Pack — Núcleo de Planning Conflict
 description: Contexto operacional para implementar o RB-INC-043 com domínio determinístico, persistência isolada e detecção sem mutação silenciosa.
 document_type: implementation-context-pack
 owner: Planning Assurance
-status: In Progress
+status: Draft
 version: "0.1.0"
 created: "2026-07-31"
 last_updated: "2026-07-31"

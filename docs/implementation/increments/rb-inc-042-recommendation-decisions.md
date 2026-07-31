@@ -4,7 +4,7 @@ title: Decisions e Ações sobre Recommendations
 description: Define o incremento que transforma Recommendations em decisões explícitas e efeitos canônicos atômicos e idempotentes.
 document_type: implementation-increment
 owner: Decision Intelligence
-status: In Progress
+status: Draft
 version: "0.2.0"
 created: "2026-07-30"
 last_updated: "2026-07-30"
@@ -166,4 +166,4 @@ Autenticação completa, Decision Outcome/Quality avançados, propostas automát
 
 ## 14. Branch
 
-Branch `feature/rb-inc-042-recommendation-decisions`, base `feature/rb-inc-041-recommendations-experience` no SHA verde `19b15be53f4f4b8cd4e927ceeb6f0dcb1e488f99`. A PR #94 permanece Draft e não será mesclada individualmente.
+Branch `feature/rb-inc-042-recommendation-decisions`, baseada na `main` no merge commit consolidado `fb4b46e3881a8c1adb5f30c90a815593b47f0212`. A PR #94 permanece Draft até a conclusão integral do incremento.

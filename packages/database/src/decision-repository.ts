@@ -59,6 +59,7 @@ function deserializeSnapshot(value: unknown): DecisionContextSnapshot {
   };
 }
 
+// prettier-ignore
 function rehydrateDecision(row: DecisionRow): Decision {
   return createDecision({
     id: row.id,
@@ -84,6 +85,7 @@ function isUniqueViolation(error: unknown): boolean {
   );
 }
 
+// prettier-ignore
 export class DrizzleDecisionRepository implements DecisionRepository {
   async findById(id: DecisionId): Promise<Decision | null> {
     const [row] = await getDatabase()

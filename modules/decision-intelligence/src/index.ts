@@ -58,5 +58,16 @@ export type {
   RecommendationValidity,
 } from "./recommendation";
 
+export { createDecision, DecisionValidationError } from "./decision";
+export type {
+  AddToItineraryDecisionOption,
+  CreateDecisionInput,
+  Decision,
+  DecisionEffect,
+  DecisionOption,
+  DecisionType,
+  SavePlaceDecisionOption,
+} from "./decision";
+
 export { RecommendationRepositoryError } from "./repository";
 export type { RecommendationRepository, SaveGeneratedRecommendationMode } from "./repository";

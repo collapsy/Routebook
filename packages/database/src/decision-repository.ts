@@ -1,4 +1,4 @@
-import { asc, eq, and } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 
 import {
   createDecision,
@@ -99,9 +99,7 @@ export class DrizzleDecisionRepository implements DecisionRepository {
     const [row] = await getDatabase()
       .select()
       .from(decisions)
-      .where(
-        and(eq(decisions.tripId, tripId), eq(decisions.idempotencyKey, idempotencyKey)),
-      )
+      .where(and(eq(decisions.tripId, tripId), eq(decisions.idempotencyKey, idempotencyKey)))
       .limit(1);
     return row ? rehydrateDecision(row) : null;
   }

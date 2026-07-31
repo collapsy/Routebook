@@ -45,17 +45,24 @@ async function createTripWithRecommendationContext(page: Page) {
   return { tripName, tripUrl };
 }
 
-async function openRecommendations(page: Page, tripUrl: string, tripName: string) {
+async function openRecommendations(
+  page: Page,
+  tripUrl: string,
+  tripName: string,
+) {
   await page.goto(`${tripUrl}/recomendacoes`);
   await expect(
-    page.getByRole("heading", { name: `Sugestões para ${tripName}`, exact: true }),
+    page.getByRole("heading", {
+      name: `Sugestões para ${tripName}`,
+      exact: true,
+    }),
   ).toBeVisible();
-  await expect(page.getByText(/cada mudança exige uma ação explícita/i)).toBeVisible();
+  await expect(
+    page.getByText(/cada mudança exige uma ação explícita/i),
+  ).toBeVisible();
 }
 
-test("salva uma Recommendation sem criar Activity e preserva a Decision após recarga", async ({
-  page,
-}) => {
+test("salva Recommendation sem criar Activity", async ({ page }) => {
   const { tripName, tripUrl } = await createTripWithRecommendationContext(page);
   await openRecommendations(page, tripUrl, tripName);
 
@@ -78,16 +85,18 @@ test("salva uma Recommendation sem criar Activity e preserva a Decision após re
 
   await page.goto(`${tripUrl}/lugares-salvos`);
   await expect(
-    page.getByRole("heading", { level: 2, name: "Baía dos Golfinhos", exact: true }),
+    page.getByRole("heading", {
+      level: 2,
+      name: "Baía dos Golfinhos",
+      exact: true,
+    }),
   ).toBeVisible();
 
   await page.goto(`${tripUrl}/roteiro`);
   await expect(page.getByLabel("Resumo do roteiro")).toContainText("0atividades");
 });
 
-test("adiciona uma Recommendation ao Dia escolhido e preserva a Decision após recarga", async ({
-  page,
-}) => {
+test("adiciona Recommendation ao Dia escolhido", async ({ page }) => {
   const { tripName, tripUrl } = await createTripWithRecommendationContext(page);
   await openRecommendations(page, tripUrl, tripName);
 
@@ -96,7 +105,9 @@ test("adiciona uma Recommendation ao Dia escolhido e preserva a Decision após r
     exact: true,
   });
   await expect(recommendation).toBeVisible();
-  await recommendation.getByRole("combobox", { name: "Dia" }).selectOption({ index: 1 });
+  await recommendation
+    .getByRole("combobox", { name: "Dia" })
+    .selectOption({ index: 1 });
   await recommendation.getByLabel("Horário opcional").fill("10:30");
   await recommendation.getByLabel("Duração opcional").fill("90");
   await Promise.all([
@@ -114,11 +125,13 @@ test("adiciona uma Recommendation ao Dia escolhido e preserva a Decision após r
 
   await page.goto(`${tripUrl}/roteiro`);
   await expect(
-    page.locator(".itinerary-activity-copy strong").filter({ hasText: "Chapadão de Pipa" }),
+    page
+      .locator(".itinerary-activity-copy strong")
+      .filter({ hasText: "Chapadão de Pipa" }),
   ).toBeVisible();
 });
 
-test("ignora uma Recommendation sem alterar Lugares salvos ou Roteiro", async ({ page }) => {
+test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
   const { tripName, tripUrl } = await createTripWithRecommendationContext(page);
   await openRecommendations(page, tripUrl, tripName);
 
@@ -131,12 +144,19 @@ test("ignora uma Recommendation sem alterar Lugares salvos ou Roteiro", async ({
     "Centro Gastronômico de Pipa",
   ]);
 
-  const recommendation = page.getByRole("article", { name: "Praia do Amor", exact: true });
+  const recommendation = page.getByRole("article", {
+    name: "Praia do Amor",
+    exact: true,
+  });
   await expect(
     recommendation.getByText(/categoria do Lugar corresponde a um interesse/i),
   ).toBeVisible();
-  await expect(recommendation.getByText(/^Distância da hospedagem:/)).toBeVisible();
-  await expect(recommendation.getByRole("heading", { name: /Confiança/ })).toBeVisible();
+  await expect(
+    recommendation.getByText(/^Distância da hospedagem:/),
+  ).toBeVisible();
+  await expect(
+    recommendation.getByRole("heading", { name: /Confiança/ }),
+  ).toBeVisible();
   await expect(page.getByText(/score/i)).toHaveCount(0);
   await expect(page.getByText(/\d+%/)).toHaveCount(0);
   await expect(page.getByText(/estrela/i)).toHaveCount(0);
@@ -147,14 +167,18 @@ test("ignora uma Recommendation sem alterar Lugares salvos ou Roteiro", async ({
       .getByRole("button", { name: "Ignorar recomendação de Praia do Amor" })
       .click(),
   ]);
-  await expect(page.getByRole("status").first()).toContainText("Recommendation ignorada");
+  await expect(page.getByRole("status").first()).toContainText(
+    "Recommendation ignorada",
+  );
 
   await page.reload();
   const ignoredRecommendation = page.getByRole("article", {
     name: "Praia do Amor",
     exact: true,
   });
-  await expect(ignoredRecommendation.getByText("Recomendação ignorada")).toBeVisible();
+  await expect(
+    ignoredRecommendation.getByText("Recomendação ignorada"),
+  ).toBeVisible();
   await expect(
     ignoredRecommendation.getByRole("button", {
       name: "Ignorar recomendação de Praia do Amor",
@@ -163,7 +187,10 @@ test("ignora uma Recommendation sem alterar Lugares salvos ou Roteiro", async ({
 
   await page.goto(`${tripUrl}/lugares-salvos`);
   await expect(
-    page.getByRole("heading", { name: "Você ainda não salvou nenhum lugar", exact: true }),
+    page.getByRole("heading", {
+      name: "Você ainda não salvou nenhum lugar",
+      exact: true,
+    }),
   ).toBeVisible();
 
   await page.goto(`${tripUrl}/roteiro`);

@@ -112,7 +112,7 @@ test("adiciona Recommendation ao Dia escolhido", async ({ page }) => {
   await expect(
     page
       .getByRole("article", { name: "Chapadão de Pipa", exact: true })
-      .getByText("Escolha confirmada"),
+      .getByText("Já está no roteiro"),
   ).toBeVisible();
 
   await page.goto(`${tripUrl}/roteiro`);

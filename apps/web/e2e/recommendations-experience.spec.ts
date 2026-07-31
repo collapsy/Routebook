@@ -65,7 +65,7 @@ test("salva Recommendation sem criar Activity", async ({ page }) => {
     exact: true,
   });
   await Promise.all([
-    page.waitForURL(/salva=1/),
+    page.waitForURL(/salva=1/, { waitUntil: "commit" }),
     recommendation.getByRole("button", { name: "Salvar lugar" }).click(),
   ]);
   await expect(page.getByRole("status").first()).toContainText("Lugar salvo");
@@ -103,7 +103,7 @@ test("adiciona Recommendation ao Dia escolhido", async ({ page }) => {
   await recommendation.getByLabel("Horário opcional").fill("10:30");
   await recommendation.getByLabel("Duração opcional").fill("90");
   await Promise.all([
-    page.waitForURL(/adicionada=1/),
+    page.waitForURL(/adicionada=1/, { waitUntil: "commit" }),
     recommendation.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
   ]);
   await expect(page.getByRole("status").first()).toContainText("Lugar adicionado");
@@ -148,7 +148,7 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
   await expect(page.getByText(/estrela/i)).toHaveCount(0);
 
   await Promise.all([
-    page.waitForURL(/ignorada=1/),
+    page.waitForURL(/ignorada=1/, { waitUntil: "commit" }),
     recommendation.getByRole("button", { name: "Ignorar recomendação de Praia do Amor" }).click(),
   ]);
   await expect(page.getByRole("status").first()).toContainText("Recommendation ignorada");

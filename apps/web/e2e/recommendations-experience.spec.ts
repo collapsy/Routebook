@@ -44,9 +44,7 @@ async function createTripWithRecommendationContext(page: import("@playwright/tes
   return { tripName, tripUrl };
 }
 
-test("apresenta Recommendations explicáveis e preserva a rejeição após recarga", async ({
-  page,
-}) => {
+test("persiste ignorar, salvar e adicionar Recommendations após recarga", async ({ page }) => {
   const { tripName, tripUrl } = await createTripWithRecommendationContext(page);
 
   await Promise.all([
@@ -76,9 +74,43 @@ test("apresenta Recommendations explicáveis e preserva a rejeição após recar
   await expect(page.getByText(/\d+%/)).toHaveCount(0);
   await expect(page.getByText(/estrela/i)).toHaveCount(0);
 
+  const baiaDosGolfinhos = page.getByRole("article", { name: "Baía dos Golfinhos" });
+  await Promise.all([
+    page.waitForURL(/salva=1/),
+    baiaDosGolfinhos.getByRole("button", { name: "Salvar lugar" }).click(),
+  ]);
+  await expect(page.getByRole("status").first()).toContainText("Lugar salvo");
+  await page.reload();
+  await expect(
+    page.getByRole("article", { name: "Baía dos Golfinhos" }).getByText("Escolha confirmada"),
+  ).toBeVisible();
+  await page.goto(`${tripUrl}/lugares-salvos`);
+  await expect(page.getByText("Baía dos Golfinhos", { exact: true }).first()).toBeVisible();
+
+  await page.goto(`${tripUrl}/recomendacoes`);
+  const chapadao = page.getByRole("article", { name: "Chapadão de Pipa" });
+  await chapadao.getByRole("combobox", { name: "Dia" }).selectOption({ index: 1 });
+  await chapadao.getByLabel("Horário opcional").fill("10:30");
+  await chapadao.getByLabel("Duração opcional").fill("90");
+  await Promise.all([
+    page.waitForURL(/adicionada=1/),
+    chapadao.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
+  ]);
+  await expect(page.getByRole("status").first()).toContainText("Lugar adicionado");
+  await page.reload();
+  await expect(
+    page.getByRole("article", { name: "Chapadão de Pipa" }).getByText("Escolha confirmada"),
+  ).toBeVisible();
+  await page.goto(`${tripUrl}/roteiro`);
+  await expect(page.getByText("Chapadão de Pipa", { exact: true }).first()).toBeVisible();
+
+  await page.goto(`${tripUrl}/recomendacoes`);
+  const recommendationToIgnore = page.getByRole("article", { name: "Praia do Amor" });
   await Promise.all([
     page.waitForURL(/ignorada=1/),
-    praiaDoAmor.getByRole("button", { name: "Ignorar recomendação de Praia do Amor" }).click(),
+    recommendationToIgnore
+      .getByRole("button", { name: "Ignorar recomendação de Praia do Amor" })
+      .click(),
   ]);
   await expect(page.getByRole("status").first()).toContainText("Recommendation ignorada");
 
@@ -90,10 +122,7 @@ test("apresenta Recommendations explicáveis e preserva a rejeição após recar
   ).toHaveCount(0);
 
   await page.goto(`${tripUrl}/lugares-salvos`);
-  await expect(
-    page.getByRole("heading", { name: "Você ainda não salvou nenhum lugar" }),
-  ).toBeVisible();
-
+  await expect(page.getByText("Baía dos Golfinhos", { exact: true }).first()).toBeVisible();
   await page.goto(`${tripUrl}/roteiro`);
-  await expect(page.getByLabel("Resumo do roteiro")).toContainText("0atividades");
+  await expect(page.getByText("Chapadão de Pipa", { exact: true }).first()).toBeVisible();
 });

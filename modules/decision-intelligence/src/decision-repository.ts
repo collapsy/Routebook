@@ -16,7 +16,10 @@ export class DecisionRepositoryError extends Error {
 
 export interface DecisionRepository {
   findById(id: DecisionId): Promise<Decision | null>;
-  findByIdempotencyKey(tripId: string, idempotencyKey: string): Promise<Decision | null>;
+  findByIdempotencyKey(
+    tripId: string,
+    idempotencyKey: string,
+  ): Promise<Decision | null>;
   listByTripId(tripId: string): Promise<Decision[]>;
   save(decision: Decision): Promise<Decision>;
 }

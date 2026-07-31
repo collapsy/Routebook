@@ -54,7 +54,7 @@ test("apresenta Recommendations explicáveis e preserva a rejeição após recar
     page.getByRole("link", { name: "Ver sugestões contextualizadas" }).click(),
   ]);
   await expect(page.getByRole("heading", { name: `Sugestões para ${tripName}` })).toBeVisible();
-  await expect(page.getByText(/você continua no controle de cada escolha/i)).toBeVisible();
+  await expect(page.getByText(/cada mudança exige uma ação explícita/i)).toBeVisible();
 
   const list = page.getByRole("list", { name: "Recommendations de Lugares" });
   await expect(list).toBeVisible();

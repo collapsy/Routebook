@@ -45,11 +45,7 @@ async function createTripWithRecommendationContext(page: Page) {
   return { tripName, tripUrl };
 }
 
-async function openRecommendations(
-  page: Page,
-  tripUrl: string,
-  tripName: string,
-) {
+async function openRecommendations(page: Page, tripUrl: string, tripName: string) {
   await page.goto(`${tripUrl}/recomendacoes`);
   await expect(
     page.getByRole("heading", {
@@ -57,9 +53,7 @@ async function openRecommendations(
       exact: true,
     }),
   ).toBeVisible();
-  await expect(
-    page.getByText(/cada mudança exige uma ação explícita/i),
-  ).toBeVisible();
+  await expect(page.getByText(/cada mudança exige uma ação explícita/i)).toBeVisible();
 }
 
 test("salva Recommendation sem criar Activity", async ({ page }) => {
@@ -105,9 +99,7 @@ test("adiciona Recommendation ao Dia escolhido", async ({ page }) => {
     exact: true,
   });
   await expect(recommendation).toBeVisible();
-  await recommendation
-    .getByRole("combobox", { name: "Dia" })
-    .selectOption({ index: 1 });
+  await recommendation.getByRole("combobox", { name: "Dia" }).selectOption({ index: 1 });
   await recommendation.getByLabel("Horário opcional").fill("10:30");
   await recommendation.getByLabel("Duração opcional").fill("90");
   await Promise.all([
@@ -125,9 +117,7 @@ test("adiciona Recommendation ao Dia escolhido", async ({ page }) => {
 
   await page.goto(`${tripUrl}/roteiro`);
   await expect(
-    page
-      .locator(".itinerary-activity-copy strong")
-      .filter({ hasText: "Chapadão de Pipa" }),
+    page.locator(".itinerary-activity-copy strong").filter({ hasText: "Chapadão de Pipa" }),
   ).toBeVisible();
 });
 
@@ -151,34 +141,24 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
   await expect(
     recommendation.getByText(/categoria do Lugar corresponde a um interesse/i),
   ).toBeVisible();
-  await expect(
-    recommendation.getByText(/^Distância da hospedagem:/),
-  ).toBeVisible();
-  await expect(
-    recommendation.getByRole("heading", { name: /Confiança/ }),
-  ).toBeVisible();
+  await expect(recommendation.getByText(/^Distância da hospedagem:/)).toBeVisible();
+  await expect(recommendation.getByRole("heading", { name: /Confiança/ })).toBeVisible();
   await expect(page.getByText(/score/i)).toHaveCount(0);
   await expect(page.getByText(/\d+%/)).toHaveCount(0);
   await expect(page.getByText(/estrela/i)).toHaveCount(0);
 
   await Promise.all([
     page.waitForURL(/ignorada=1/),
-    recommendation
-      .getByRole("button", { name: "Ignorar recomendação de Praia do Amor" })
-      .click(),
+    recommendation.getByRole("button", { name: "Ignorar recomendação de Praia do Amor" }).click(),
   ]);
-  await expect(page.getByRole("status").first()).toContainText(
-    "Recommendation ignorada",
-  );
+  await expect(page.getByRole("status").first()).toContainText("Recommendation ignorada");
 
   await page.reload();
   const ignoredRecommendation = page.getByRole("article", {
     name: "Praia do Amor",
     exact: true,
   });
-  await expect(
-    ignoredRecommendation.getByText("Recomendação ignorada"),
-  ).toBeVisible();
+  await expect(ignoredRecommendation.getByText("Recomendação ignorada")).toBeVisible();
   await expect(
     ignoredRecommendation.getByRole("button", {
       name: "Ignorar recomendação de Praia do Amor",

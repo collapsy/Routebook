@@ -1,9 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import type {
-  DecisionContextSnapshot,
-  RecommendationId,
-} from "./recommendation";
+import type { DecisionContextSnapshot, RecommendationId } from "./recommendation";
 
 const decisionIdBrand: unique symbol = Symbol("DecisionId");
 
@@ -23,9 +20,7 @@ export type AddToItineraryDecisionOption = Readonly<{
   durationMinutes?: number;
 }>;
 
-export type DecisionOption =
-  | SavePlaceDecisionOption
-  | AddToItineraryDecisionOption;
+export type DecisionOption = SavePlaceDecisionOption | AddToItineraryDecisionOption;
 
 export type DecisionEffect =
   | Readonly<{ type: "saved-place"; savedPlaceId: string }>
@@ -104,14 +99,9 @@ function normalizeTime(value: string): string {
   return normalized;
 }
 
-function freezeSnapshot(
-  snapshot: DecisionContextSnapshot,
-): DecisionContextSnapshot {
+function freezeSnapshot(snapshot: DecisionContextSnapshot): DecisionContextSnapshot {
   const tripId = requiredText(snapshot.tripId, "contextSnapshot.tripId");
-  const destinationId = requiredText(
-    snapshot.destinationId,
-    "contextSnapshot.destinationId",
-  );
+  const destinationId = requiredText(snapshot.destinationId, "contextSnapshot.destinationId");
   const capturedAt = validDate(snapshot.capturedAt);
 
   return Object.freeze({
@@ -159,24 +149,16 @@ function freezeOption(option: DecisionOption): DecisionOption {
     type: "add-to-itinerary",
     placeId,
     dayId: requiredText(option.dayId, "chosenOption.dayId"),
-    ...(option.startTime !== undefined
-      ? { startTime: normalizeTime(option.startTime) }
-      : {}),
+    ...(option.startTime !== undefined ? { startTime: normalizeTime(option.startTime) } : {}),
     ...(option.durationMinutes !== undefined
       ? {
-          durationMinutes: positiveInteger(
-            option.durationMinutes,
-            "chosenOption.durationMinutes",
-          ),
+          durationMinutes: positiveInteger(option.durationMinutes, "chosenOption.durationMinutes"),
         }
       : {}),
   });
 }
 
-function freezeEffect(
-  effect: DecisionEffect,
-  type: DecisionType,
-): DecisionEffect {
+function freezeEffect(effect: DecisionEffect, type: DecisionType): DecisionEffect {
   if (type === "save-place" && effect.type === "saved-place") {
     return Object.freeze({
       type: "saved-place",
@@ -191,12 +173,9 @@ function freezeEffect(
     });
   }
 
-  throw new DecisionValidationError(
-    "Efeito incompatível com o tipo da Decision.",
-    {
-      effect: "O efeito deve corresponder à opção escolhida.",
-    },
-  );
+  throw new DecisionValidationError("Efeito incompatível com o tipo da Decision.", {
+    effect: "O efeito deve corresponder à opção escolhida.",
+  });
 }
 
 export function createDecisionId(value: string = randomUUID()): DecisionId {
@@ -207,12 +186,9 @@ export function createDecision(input: CreateDecisionInput): Decision {
   const tripId = requiredText(input.tripId, "tripId");
   const contextSnapshot = freezeSnapshot(input.contextSnapshot);
   if (contextSnapshot.tripId !== tripId) {
-    throw new DecisionValidationError(
-      "Decision incompatível com o Context Snapshot.",
-      {
-        "contextSnapshot.tripId": "O snapshot deve pertencer à mesma Trip.",
-      },
-    );
+    throw new DecisionValidationError("Decision incompatível com o Context Snapshot.", {
+      "contextSnapshot.tripId": "O snapshot deve pertencer à mesma Trip.",
+    });
   }
 
   const chosenOption = freezeOption(input.chosenOption);
@@ -221,13 +197,8 @@ export function createDecision(input: CreateDecisionInput): Decision {
   return Object.freeze({
     id: createDecisionId(input.id),
     tripId,
-    ...(input.recommendationId
-      ? { recommendationId: input.recommendationId }
-      : {}),
-    actorParticipantId: requiredText(
-      input.actorParticipantId,
-      "actorParticipantId",
-    ),
+    ...(input.recommendationId ? { recommendationId: input.recommendationId } : {}),
+    actorParticipantId: requiredText(input.actorParticipantId, "actorParticipantId"),
     decidedAt: validDate(input.decidedAt),
     type,
     chosenOption,

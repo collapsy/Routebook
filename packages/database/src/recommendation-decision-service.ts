@@ -258,6 +258,7 @@ export async function addRecommendedPlaceToItinerary(
 ): Promise<RecommendationDecisionResult> {
   const recommendation = await loadEligibleRecommendation(command);
   const decidedAt = command.decidedAt ?? new Date();
+  const decidedAtIso = decidedAt.toISOString();
   const option = {
     type: "add-to-itinerary",
     placeId: command.placeId,
@@ -326,8 +327,8 @@ export async function addRecommendedPlaceToItinerary(
         COALESCE(MAX("order"), 0) + 1,
         ${command.placeId}::uuid,
         ${decision.id}::uuid,
-        ${decidedAt},
-        ${decidedAt}
+        ${decidedAtIso}::timestamptz,
+        ${decidedAtIso}::timestamptz
       FROM itinerary_activities
       WHERE itinerary_day_id = ${day.id}::uuid
     `);

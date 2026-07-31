@@ -4,8 +4,13 @@ import { notFound } from "next/navigation";
 
 import { RecommendationCard } from "@/components/recommendation-card";
 import { loadRecommendationExperience } from "@/lib/recommendation-experience";
+import { DrizzleItineraryRepository } from "@routebook/database";
 
-import { ignoreRecommendationAction } from "./actions";
+import {
+  addRecommendationToItineraryAction,
+  ignoreRecommendationAction,
+  saveRecommendationPlaceAction,
+} from "./actions";
 import styles from "./recommendations-page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +25,12 @@ const errorMessages: Readonly<Record<string, string>> = {
   "recomendacao-nao-encontrada":
     "A Recommendation não foi encontrada nesta Viagem. Atualize a lista e tente novamente.",
   "estado-incompativel":
-    "Esta Recommendation não pode mais ser ignorada porque seu estado foi atualizado.",
+    "Esta Recommendation não pode mais receber esta ação porque seu estado foi atualizado.",
+  "acao-cross-trip": "A ação foi rejeitada porque os dados não pertencem à mesma Viagem.",
+  "lugar-nao-encontrado": "O Lugar não foi encontrado ou não está publicado.",
+  "responsavel-nao-encontrado": "A Viagem não possui um participante owner persistido.",
+  "dia-invalido": "Selecione explicitamente um Dia válido desta Viagem.",
+  "conflito-idempotencia": "Esta ação já foi enviada com dados diferentes. Atualize a página.",
 };
 
 export default async function RecommendationsPage({
@@ -28,15 +38,25 @@ export default async function RecommendationsPage({
   searchParams,
 }: {
   params: Promise<{ tripId: string }>;
-  searchParams: Promise<{ ignorada?: string; erro?: string }>;
+  searchParams: Promise<{
+    ignorada?: string;
+    salva?: string;
+    adicionada?: string;
+    erro?: string;
+  }>;
 }) {
   const { tripId } = await params;
-  const { ignorada, erro } = await searchParams;
-  const experience = await loadRecommendationExperience(tripId);
+  const { ignorada, salva, adicionada, erro } = await searchParams;
+  const [experience, itinerary] = await Promise.all([
+    loadRecommendationExperience(tripId),
+    new DrizzleItineraryRepository().findByTripId(tripId),
+  ]);
 
   if (!experience) notFound();
 
   const errorMessage = erro ? errorMessages[erro] : undefined;
+  const itineraryDays =
+    itinerary?.days.map((day) => ({ id: day.id, date: day.date })) ?? [];
 
   return (
     <main className={styles.page}>
@@ -50,6 +70,18 @@ export default async function RecommendationsPage({
         </p>
       ) : null}
 
+      {salva === "1" ? (
+        <p className={styles.success} role="status">
+          Lugar salvo e escolha registrada. Nenhuma Activity foi criada automaticamente.
+        </p>
+      ) : null}
+
+      {adicionada === "1" ? (
+        <p className={styles.success} role="status">
+          Lugar adicionado ao Dia escolhido e Decision persistida com sucesso.
+        </p>
+      ) : null}
+
       {errorMessage ? (
         <p className={styles.error} role="alert">
           {errorMessage}
@@ -60,9 +92,8 @@ export default async function RecommendationsPage({
         <p className={styles.eyebrow}>Decision Intelligence determinística</p>
         <h1>Sugestões para {experience.trip.name}</h1>
         <p>
-          Estas sugestões usam somente o Contexto já informado e dados publicados no catálogo. Elas
-          não salvam Lugares nem alteram o Roteiro automaticamente: você continua no controle de
-          cada escolha.
+          Estas sugestões usam somente o Contexto já informado e dados publicados no catálogo. Cada
+          mudança exige uma ação explícita: salvar o Lugar, escolher um Dia do Roteiro ou ignorar.
         </p>
       </header>
 
@@ -128,8 +159,11 @@ export default async function RecommendationsPage({
             {experience.cards.map((card) => (
               <li key={card.id}>
                 <RecommendationCard
+                  addToItineraryAction={addRecommendationToItineraryAction}
                   card={card}
                   ignoreAction={ignoreRecommendationAction}
+                  itineraryDays={itineraryDays}
+                  saveAction={saveRecommendationPlaceAction}
                   tripId={tripId}
                 />
               </li>

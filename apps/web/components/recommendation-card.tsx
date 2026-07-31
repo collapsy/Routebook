@@ -16,17 +16,30 @@ const confidenceLabels = {
   high: "Alta",
 } as const;
 
+type ItineraryDayOption = Readonly<{
+  id: string;
+  date: string;
+}>;
+
 export function RecommendationCard({
   card,
   tripId,
+  itineraryDays,
   ignoreAction,
+  saveAction,
+  addToItineraryAction,
 }: {
   card: RecommendationCardViewModel;
   tripId: string;
+  itineraryDays: readonly ItineraryDayOption[];
   ignoreAction: (formData: FormData) => void | Promise<void>;
+  saveAction: (formData: FormData) => void | Promise<void>;
+  addToItineraryAction: (formData: FormData) => void | Promise<void>;
 }) {
   const titleId = `recommendation-${card.id}`;
   const isRejected = card.status === "rejected";
+  const isAccepted = card.status === "accepted";
+  const canDecide = card.status === "presented";
 
   return (
     <article
@@ -44,6 +57,7 @@ export function RecommendationCard({
         {card.isSaved ? <span className={styles.badge}>Lugar salvo</span> : null}
         {card.isPlanned ? <span className={styles.badge}>Já está no roteiro</span> : null}
         {isRejected ? <span className={styles.badge}>Recomendação ignorada</span> : null}
+        {isAccepted ? <span className={styles.badge}>Escolha confirmada</span> : null}
       </div>
 
       {card.geodesicDistanceLabel ? (
@@ -91,6 +105,12 @@ export function RecommendationCard({
         </p>
       ) : null}
 
+      {isAccepted ? (
+        <p className={styles.stateText} role="status">
+          Esta Recommendation já foi transformada em uma escolha explícita e persistida.
+        </p>
+      ) : null}
+
       <div className={styles.actions}>
         <Link
           aria-label={`Ver detalhes de ${card.placeName}`}
@@ -99,6 +119,49 @@ export function RecommendationCard({
         >
           Ver detalhes
         </Link>
+
+        {canDecide ? (
+          <form action={saveAction} aria-label={`Salvar ${card.placeName}`}>
+            <input name="tripId" type="hidden" value={tripId} />
+            <input name="recommendationId" type="hidden" value={card.id} />
+            <input name="placeId" type="hidden" value={card.placeId} />
+            <button className={styles.ignoreButton} type="submit">
+              Salvar lugar
+            </button>
+          </form>
+        ) : null}
+
+        {canDecide && itineraryDays.length > 0 ? (
+          <form action={addToItineraryAction} aria-label={`Adicionar ${card.placeName} ao roteiro`}>
+            <input name="tripId" type="hidden" value={tripId} />
+            <input name="recommendationId" type="hidden" value={card.id} />
+            <input name="placeId" type="hidden" value={card.placeId} />
+            <label>
+              Dia
+              <select name="dayId" required>
+                <option value="">Selecione</option>
+                {itineraryDays.map((day) => (
+                  <option key={day.id} value={day.id}>
+                    {new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeZone: "UTC" }).format(
+                      new Date(`${day.date}T00:00:00Z`),
+                    )}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Horário opcional
+              <input name="startTime" type="time" />
+            </label>
+            <label>
+              Duração opcional
+              <input min="1" name="durationMinutes" placeholder="min" type="number" />
+            </label>
+            <button className={styles.ignoreButton} type="submit">
+              Adicionar ao roteiro
+            </button>
+          </form>
+        ) : null}
 
         {card.canIgnore ? (
           <form action={ignoreAction} aria-labelledby={titleId}>

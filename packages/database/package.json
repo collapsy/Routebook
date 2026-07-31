@@ -16,6 +16,7 @@
     "@routebook/decision-intelligence": "workspace:*",
     "@routebook/geo-distance": "workspace:*",
     "@routebook/place-catalog": "workspace:*",
+    "@routebook/planning-assurance": "workspace:*",
     "@routebook/saved-places": "workspace:*",
     "@routebook/traveler-profile": "workspace:*",
     "@routebook/trip-management": "workspace:*",

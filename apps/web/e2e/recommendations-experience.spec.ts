@@ -2,6 +2,19 @@ import { expect, test, type Page } from "@playwright/test";
 
 test.setTimeout(120_000);
 
+async function submitAndExpectRedirect(
+  page: Page,
+  submit: () => Promise<void>,
+  expectedUrl: RegExp,
+) {
+  const currentUrl = page.url();
+  await Promise.all([
+    page.waitForURL((url) => url.href !== currentUrl, { waitUntil: "commit" }),
+    submit(),
+  ]);
+  await expect(page).toHaveURL(expectedUrl);
+}
+
 async function createTripWithRecommendationContext(page: Page) {
   const tripName = `Recommendations ${test.info().project.name} ${Date.now()}`;
 
@@ -64,10 +77,11 @@ test("salva Recommendation sem criar Activity", async ({ page }) => {
     name: "Baía dos Golfinhos",
     exact: true,
   });
-  await Promise.all([
-    page.waitForURL(/salva=1/, { waitUntil: "commit" }),
-    recommendation.getByRole("button", { name: "Salvar lugar" }).click(),
-  ]);
+  await submitAndExpectRedirect(
+    page,
+    () => recommendation.getByRole("button", { name: "Salvar lugar" }).click(),
+    /salva=1/,
+  );
   await expect(page.getByRole("status").first()).toContainText("Lugar salvo");
 
   await page.reload();
@@ -102,10 +116,11 @@ test("adiciona Recommendation ao Dia escolhido", async ({ page }) => {
   await recommendation.getByRole("combobox", { name: "Dia" }).selectOption({ index: 1 });
   await recommendation.getByLabel("Horário opcional").fill("10:30");
   await recommendation.getByLabel("Duração opcional").fill("90");
-  await Promise.all([
-    page.waitForURL(/adicionada=1/, { waitUntil: "commit" }),
-    recommendation.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
-  ]);
+  await submitAndExpectRedirect(
+    page,
+    () => recommendation.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
+    /adicionada=1/,
+  );
   await expect(page.getByRole("status").first()).toContainText("Lugar adicionado");
 
   await page.reload();
@@ -147,10 +162,16 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
   await expect(page.getByText(/\d+%/)).toHaveCount(0);
   await expect(page.getByText(/estrela/i)).toHaveCount(0);
 
-  await Promise.all([
-    page.waitForURL(/ignorada=1/, { waitUntil: "commit" }),
-    recommendation.getByRole("button", { name: "Ignorar recomendação de Praia do Amor" }).click(),
-  ]);
+  await submitAndExpectRedirect(
+    page,
+    () =>
+      recommendation
+        .getByRole("button", {
+          name: "Ignorar recomendação de Praia do Amor",
+        })
+        .click(),
+    /ignorada=1/,
+  );
   await expect(page.getByRole("status").first()).toContainText("Recommendation ignorada");
 
   await page.reload();

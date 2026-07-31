@@ -57,6 +57,13 @@
       "when": 1785444000000,
       "tag": "0007_create_recommendations",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1785462600000,
+      "tag": "0008_create_decisions",
+      "breakpoints": true
     }
   ]
 }

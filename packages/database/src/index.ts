@@ -15,6 +15,14 @@ export { DrizzleDecisionRepository } from "./decision-repository";
 export { DrizzleItineraryRepository } from "./itinerary-repository";
 export { DrizzlePlaceRepository } from "./place-repository";
 export { DrizzleRecommendationRepository } from "./recommendation-repository";
+export {
+  addRecommendedPlaceToItinerary,
+  RecommendationDecisionServiceError,
+  saveRecommendedPlace,
+  type AddRecommendedPlaceToItineraryCommand,
+  type RecommendationDecisionResult,
+  type SaveRecommendedPlaceCommand,
+} from "./recommendation-decision-service";
 export { DrizzleSavedPlaceRepository } from "./saved-place-repository";
 export { DrizzleTravelerProfileRepository } from "./traveler-profile-repository";
 export { DrizzleTripRepository } from "./trip-repository";

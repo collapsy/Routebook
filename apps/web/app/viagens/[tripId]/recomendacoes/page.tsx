@@ -4,8 +4,8 @@ import { notFound } from "next/navigation";
 
 import { RecommendationCard } from "@/components/recommendation-card";
 import { loadRecommendationExperience } from "@/lib/recommendation-experience";
-import { DrizzleItineraryRepository } from "@routebook/database";
-import { createItinerary } from "@routebook/trip-management";
+import { DrizzleItineraryRepository, DrizzleTripRepository } from "@routebook/database";
+import { createItinerary, findTripById } from "@routebook/trip-management";
 
 import {
   addRecommendationToItineraryAction,
@@ -48,16 +48,18 @@ export default async function RecommendationsPage({
 }) {
   const { tripId } = await params;
   const { ignorada, salva, adicionada, erro } = await searchParams;
-  const experience = await loadRecommendationExperience(tripId);
+  const trip = await findTripById(new DrizzleTripRepository(), tripId);
 
-  if (!experience) notFound();
+  if (!trip) notFound();
 
   const itineraryRepository = new DrizzleItineraryRepository();
   const itinerary =
     (await itineraryRepository.findByTripId(tripId)) ??
-    (await itineraryRepository.save(
-      createItinerary({ tripId, period: experience.trip.period }),
-    ));
+    (await itineraryRepository.save(createItinerary({ tripId, period: trip.period })));
+  const experience = await loadRecommendationExperience(tripId);
+
+  if (!experience) notFound();
+
   const errorMessage = erro ? errorMessages[erro] : undefined;
   const itineraryDays = itinerary.days.map((day) => ({ id: day.id, date: day.date }));
 

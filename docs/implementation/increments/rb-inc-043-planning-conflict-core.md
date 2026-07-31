@@ -4,7 +4,7 @@ title: Núcleo de Planning Conflict e Detecção Determinística
 description: Introduz o agregado PlanningConflict, sua detecção determinística, ciclo de vida inicial, persistência e isolamento por Viagem.
 document_type: implementation-increment
 owner: Planning Assurance
-status: In Progress
+status: Draft
 version: "0.1.0"
 created: "2026-07-31"
 last_updated: "2026-07-31"
@@ -223,7 +223,7 @@ Falha parcial deverá preservar o estado anterior.
 
 ## 13. Evidências de conclusão
 
-Este incremento somente poderá sair de `In Progress` quando a PR possuir:
+Este incremento somente poderá sair de `Draft` quando a PR possuir:
 
 - SHA final verde;
 - Documentation Validation concluída com sucesso;

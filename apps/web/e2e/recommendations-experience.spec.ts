@@ -74,7 +74,10 @@ test("persiste ignorar, salvar e adicionar Recommendations após recarga", async
   await expect(page.getByText(/\d+%/)).toHaveCount(0);
   await expect(page.getByText(/estrela/i)).toHaveCount(0);
 
-  const baiaDosGolfinhos = page.getByRole("article", { name: "Baía dos Golfinhos" });
+  const baiaDosGolfinhos = page.getByRole("article", {
+    name: "Baía dos Golfinhos",
+    exact: true,
+  });
   await Promise.all([
     page.waitForURL(/salva=1/),
     baiaDosGolfinhos.getByRole("button", { name: "Salvar lugar" }).click(),
@@ -82,7 +85,9 @@ test("persiste ignorar, salvar e adicionar Recommendations após recarga", async
   await expect(page.getByRole("status").first()).toContainText("Lugar salvo");
   await page.reload();
   await expect(
-    page.getByRole("article", { name: "Baía dos Golfinhos" }).getByText("Escolha confirmada"),
+    page
+      .getByRole("article", { name: "Baía dos Golfinhos", exact: true })
+      .getByText("Escolha confirmada"),
   ).toBeVisible();
   await page.goto(`${tripUrl}/lugares-salvos`);
   await expect(page.getByText("Baía dos Golfinhos", { exact: true }).first()).toBeVisible();

@@ -63,7 +63,9 @@ function rehydrateDecision(row: DecisionRow): Decision {
   return createDecision({
     id: row.id,
     tripId: row.tripId,
-    ...(row.recommendationId ? { recommendationId: row.recommendationId as never } : {}),
+    ...(row.recommendationId
+      ? { recommendationId: row.recommendationId as never }
+      : {}),
     actorParticipantId: row.actorParticipantId,
     decidedAt: row.decidedAt,
     chosenOption: row.chosenOption as DecisionOption,
@@ -99,7 +101,9 @@ export class DrizzleDecisionRepository implements DecisionRepository {
     const [row] = await getDatabase()
       .select()
       .from(decisions)
-      .where(and(eq(decisions.tripId, tripId), eq(decisions.idempotencyKey, idempotencyKey)))
+      .where(
+        and(eq(decisions.tripId, tripId), eq(decisions.idempotencyKey, idempotencyKey)),
+      )
       .limit(1);
     return row ? rehydrateDecision(row) : null;
   }
@@ -114,7 +118,10 @@ export class DrizzleDecisionRepository implements DecisionRepository {
   }
 
   async save(decision: Decision): Promise<Decision> {
-    const existing = await this.findByIdempotencyKey(decision.tripId, decision.idempotencyKey);
+    const existing = await this.findByIdempotencyKey(
+      decision.tripId,
+      decision.idempotencyKey,
+    );
     if (existing) {
       return existing;
     }

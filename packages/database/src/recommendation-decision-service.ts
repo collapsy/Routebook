@@ -308,6 +308,11 @@ export async function addRecommendedPlaceToItinerary(
       effect: { type: "itinerary-activity", activityId },
       idempotencyKey: command.idempotencyKey,
     });
+    await persistAcceptance(
+      transaction,
+      decision,
+      acceptRecommendation(recommendation, decision.id, decidedAt),
+    );
 
     await transaction.execute(sql`
       INSERT INTO itinerary_activities (
@@ -336,11 +341,6 @@ export async function addRecommendedPlaceToItinerary(
       .update(itineraries)
       .set({ version: sql`${itineraries.version} + 1`, updatedAt: decidedAt })
       .where(eq(itineraries.id, day.itineraryId));
-    await persistAcceptance(
-      transaction,
-      decision,
-      acceptRecommendation(recommendation, decision.id, decidedAt),
-    );
     return { decision, effectId: activityId };
   });
 }

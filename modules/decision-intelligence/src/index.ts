@@ -51,6 +51,12 @@ export type {
   RecommendationValidity,
 } from "./recommendation";
 
+export {
+  createRecommendationContextFingerprint,
+  fingerprintRecommendation,
+} from "./recommendation-fingerprint";
+export type { RecommendationContextFingerprintInput } from "./recommendation-fingerprint";
+
 export { createDecision, createDecisionId, DecisionValidationError } from "./decision";
 export type {
   AddToItineraryDecisionOption,

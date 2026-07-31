@@ -1,5 +1,6 @@
 export { closeDatabase, getDatabase } from "./client";
 export { decisions } from "./decision-schema";
+export { planningConflicts } from "./planning-conflict-schema";
 export {
   itineraries,
   itineraryActivities,
@@ -14,6 +15,15 @@ export {
 export { DrizzleDecisionRepository } from "./decision-repository";
 export { DrizzleItineraryRepository } from "./itinerary-repository";
 export { DrizzlePlaceRepository } from "./place-repository";
+export {
+  evaluatePlanningConflicts,
+  PlanningConflictEvaluationServiceError,
+  type PlanningConflictEvaluationResult,
+} from "./planning-conflict-evaluation-service";
+export {
+  DrizzlePlanningConflictRepository,
+  reconcilePlanningConflictsWithDatabase,
+} from "./planning-conflict-repository";
 export { DrizzleRecommendationRepository } from "./recommendation-repository";
 export {
   addRecommendedPlaceToItinerary,

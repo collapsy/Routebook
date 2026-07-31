@@ -1,4 +1,5 @@
 export { closeDatabase, getDatabase } from "./client";
+export { decisions } from "./decision-schema";
 export {
   itineraries,
   itineraryActivities,
@@ -10,6 +11,7 @@ export {
   travelerProfiles,
   trips,
 } from "./schema";
+export { DrizzleDecisionRepository } from "./decision-repository";
 export { DrizzleItineraryRepository } from "./itinerary-repository";
 export { DrizzlePlaceRepository } from "./place-repository";
 export { DrizzleRecommendationRepository } from "./recommendation-repository";

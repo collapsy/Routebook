@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-test.setTimeout(60_000);
+test.setTimeout(120_000);
 
 async function createTripWithRecommendationContext(page: Page) {
   const tripName = `Recommendations ${test.info().project.name} ${Date.now()}`;

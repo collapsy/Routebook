@@ -60,6 +60,7 @@ Substituir duas expectativas acopladas a detalhes internos por validações equi
 - histórico: locator exigia ordem textual não canônica;
 - roteiro: `waitForURL(..., waitUntil: "commit")` expirava em navegação suave.
 - runs empilhados `30682213332` e `30682439142`: setup longo, assertions de cinco segundos e URL de sucesso reutilizada ainda permitiam races de Server Actions.
+- run empilhado `30682700276`: jornadas extensas ainda repetiam setup de interface coberto por outros E2E e disputavam o timeout global.
 
 ## 5. Regras aplicáveis
 

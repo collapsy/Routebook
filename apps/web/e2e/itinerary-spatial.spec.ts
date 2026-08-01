@@ -1,43 +1,47 @@
 import { expect, test } from "@playwright/test";
 
+import {
+  DrizzlePlaceRepository,
+  DrizzleSavedPlaceRepository,
+  DrizzleTripRepository,
+} from "@routebook/database";
+import { createSavedPlace } from "@routebook/saved-places";
+import { createTrip } from "@routebook/trip-management";
+
 test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   page,
 }, testInfo) => {
   const tripName = `Rota externa ${testInfo.project.name} ${Date.now()}`;
+  const now = new Date();
+  const trip = createTrip(
+    {
+      name: tripName,
+      startDate: "2026-08-22",
+      endDate: "2026-08-29",
+      ownerName: "RouteBook E2E",
+    },
+    now,
+  );
+  const places = await new DrizzlePlaceRepository().listPublished({
+    destinationId: "pipa-rn-br",
+  });
+  expect(places.length).toBeGreaterThanOrEqual(2);
+  const [firstPlace, secondPlace] = places;
+  expect(firstPlace).toBeDefined();
+  expect(secondPlace).toBeDefined();
 
-  await page.goto("/viagens/nova");
-  await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
-  await page.getByRole("button", { name: "Criar viagem" }).click();
+  await new DrizzleTripRepository().create(trip);
+  const savedPlaceRepository = new DrizzleSavedPlaceRepository();
+  await savedPlaceRepository.save(
+    createSavedPlace({ tripId: trip.id, placeId: firstPlace!.id }, now),
+  );
+  await savedPlaceRepository.save(
+    createSavedPlace({ tripId: trip.id, placeId: secondPlace!.id }, now),
+  );
 
-  const tripPath = await page.getByRole("link", { name: tripName }).getAttribute("href");
-  expect(tripPath).toBeTruthy();
-  await page.goto(`${tripPath}/lugares`);
-
-  const publishedPlaces = page.getByRole("list", { name: "Lugares publicados" });
-  const firstPublishedPlace = publishedPlaces.getByRole("listitem").first();
-  const secondPublishedPlace = publishedPlaces.getByRole("listitem").nth(1);
-  await expect(firstPublishedPlace).toBeVisible();
-  await expect(secondPublishedPlace).toBeVisible();
-  const firstPlaceName = (await firstPublishedPlace.locator("strong").textContent())?.trim();
-  const secondPlaceName = (await secondPublishedPlace.locator("strong").textContent())?.trim();
-  expect(firstPlaceName).toBeTruthy();
-  expect(secondPlaceName).toBeTruthy();
-  const firstPlacePath = await firstPublishedPlace
-    .getByRole("link", { name: "Ver detalhes" })
-    .getAttribute("href");
-  const secondPlacePath = await secondPublishedPlace
-    .getByRole("link", { name: "Ver detalhes" })
-    .getAttribute("href");
-  expect(firstPlacePath).toBeTruthy();
-  expect(secondPlacePath).toBeTruthy();
-
-  await page.goto(firstPlacePath!);
-  await page.getByRole("button", { name: "Salvar lugar" }).click();
-  await expect(page.getByRole("status")).toContainText("Lugar salvo");
-  await page.goto(secondPlacePath!);
-  await page.getByRole("button", { name: "Salvar lugar" }).click();
-  await expect(page.getByRole("status")).toContainText("Lugar salvo");
+  const tripPath = `/viagens/${trip.id}`;
+  const firstPlaceName = firstPlace!.name;
+  const secondPlaceName = secondPlace!.name;
   await page.goto(`${tripPath}/lugares-salvos`);
   await expect(page.getByRole("heading", { name: "Lugares salvos", exact: true })).toBeVisible();
 

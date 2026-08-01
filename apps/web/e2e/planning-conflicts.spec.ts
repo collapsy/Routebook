@@ -1,34 +1,47 @@
 import { expect, test } from "@playwright/test";
 
+import { DrizzleItineraryRepository, DrizzleTripRepository } from "@routebook/database";
+import { addActivity, createItinerary, createTrip } from "@routebook/trip-management";
+
 test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }, testInfo) => {
   const tripName = `Conflitos ${testInfo.project.name} ${Date.now()}`;
   const firstActivity = "Café demorado";
   const secondActivity = "Passeio de barco";
+  const now = new Date();
+  const trip = createTrip(
+    {
+      name: tripName,
+      startDate: "2026-08-22",
+      endDate: "2026-08-29",
+      ownerName: "RouteBook E2E",
+    },
+    now,
+  );
+  let itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);
+  itinerary = addActivity(
+    itinerary,
+    {
+      dayDate: "2026-08-22",
+      title: firstActivity,
+      startTime: "09:00",
+      durationMinutes: 120,
+    },
+    now,
+  );
+  itinerary = addActivity(
+    itinerary,
+    {
+      dayDate: "2026-08-22",
+      title: secondActivity,
+      startTime: "10:00",
+      durationMinutes: 60,
+    },
+    now,
+  );
 
-  await page.goto("/viagens/nova");
-  await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
-  await page.getByRole("button", { name: "Criar viagem" }).click();
-
-  await page.getByRole("link", { name: tripName }).click();
-  await page.getByRole("link", { name: "Abrir roteiro" }).click();
-
-  const composer = page.locator(".itinerary-form");
-  await composer.getByLabel("Dia da viagem").selectOption("2026-08-22");
-  await composer.getByLabel("Título").fill(firstActivity);
-  await composer.getByLabel("Horário opcional").fill("09:00");
-  await composer.getByLabel("Duração opcional").fill("120");
-  await composer.getByRole("button", { name: "Adicionar ao roteiro" }).click();
-
-  await expect(page).toHaveURL(/atividadeCriada=1$/);
-  await composer.getByLabel("Dia da viagem").selectOption("2026-08-22");
-  await composer.getByLabel("Título").fill(secondActivity);
-  await composer.getByLabel("Horário opcional").fill("10:00");
-  await composer.getByLabel("Duração opcional").fill("60");
-  await composer.getByRole("button", { name: "Adicionar ao roteiro" }).click();
-
-  await expect(page).toHaveURL(/atividadeCriada=1$/);
-  await page.getByRole("link", { name: "Revisar conflitos" }).click();
+  await new DrizzleTripRepository().create(trip);
+  await new DrizzleItineraryRepository().save(itinerary);
+  await page.goto(`/viagens/${trip.id}/roteiro/revisao`);
 
   await expect(page).toHaveURL(/\/viagens\/[^/]+\/roteiro\/revisao$/);
   await expect(page.getByRole("heading", { level: 1, name: "Revisão de Conflitos" })).toBeVisible();
@@ -42,9 +55,10 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
   await page.getByRole("button", { name: /Erros 0/ }).click();
   await expect(page.getByText("Nenhum conflito desta severidade", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: /Riscos 1/ }).click();
-  await conflictList.getByRole("link", { name: /Ver dia no Roteiro/ }).click();
-
-  await expect(page).toHaveURL(/\/roteiro#[^#]+$/);
+  await Promise.all([
+    page.waitForURL(/\/roteiro#[^#]+$/),
+    conflictList.getByRole("link", { name: /Ver dia no Roteiro/ }).click(),
+  ]);
   const affectedDayId = new URL(page.url()).hash.slice(1);
   expect(affectedDayId).not.toBe("");
   const affectedDay = page.locator(`.itinerary-day-card[id="${affectedDayId}"]`);
@@ -57,9 +71,10 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
   await page
     .getByRole("checkbox", { name: /Entendo que este risco continuará no Roteiro/ })
     .check();
-  await page.getByRole("button", { name: "Confirmar e ignorar risco" }).click();
-
-  await expect(page).toHaveURL(/riscoIgnorado=1$/);
+  await Promise.all([
+    page.waitForURL(/riscoIgnorado=1$/),
+    page.getByRole("button", { name: "Confirmar e ignorar risco" }).click(),
+  ]);
   await expect(page.getByText(/Risco ignorado e Decision registrada/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "Nenhum conflito aberto" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Riscos ignorados" })).toBeVisible();
@@ -71,7 +86,10 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
   await expect(ignoredActivities).toContainText(secondActivity);
   await expect(ignoredHistory.getByText("Restaurar", { exact: true })).toHaveCount(0);
 
-  await page.getByRole("link", { name: "Voltar para o Roteiro" }).click();
+  await Promise.all([
+    page.waitForURL(/\/roteiro$/),
+    page.getByRole("link", { name: "Voltar para o Roteiro" }).click(),
+  ]);
   await expect(page.getByText(firstActivity, { exact: true })).toBeVisible();
   await expect(page.getByText(secondActivity, { exact: true })).toBeVisible();
 });

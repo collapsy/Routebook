@@ -49,6 +49,8 @@ Uma execução posterior da PR empilhada, run `30682213332`, revelou um terceiro
 
 O run `30682439142` expôs os contratos restantes: a jornada espacial limitava duas Server Actions ao timeout de cinco segundos da assertion e a jornada de reordenação reutilizava a mesma URL de sucesso, permitindo que a verificação da segunda submissão retornasse antes do novo conteúdo. A correção aguarda a URL em paralelo quando ela realmente muda e aguarda o segundo título observável quando a URL permanece igual.
 
+O run `30682700276` confirmou que jornadas extensas de mapa e revisão ainda disputavam o timeout por repetir criação e composição já cobertas em outros E2E. Esses setups passam a usar factories de domínio e repositories reais sobre o PostgreSQL efêmero da CI. A interface continua responsável por todas as ações e assertions que pertencem ao mapa e à revisão de conflito.
+
 ## 3. Resultado verificável
 
 - configuração de paralelismo Playwright permanece original;
@@ -56,6 +58,7 @@ O run `30682439142` expôs os contratos restantes: a jornada espacial limitava d
 - a navegação aguarda a URL final observável, sem exigir um evento interno de commit;
 - o setup reutiliza os `href` observáveis para evitar navegações redundantes já cobertas;
 - submissões repetidas aguardam seu próprio resultado observável, mesmo quando a URL de sucesso é idêntica;
+- jornadas extensas usam dados controlados e independentes no setup, sem repetir fluxos cobertos por outros E2E;
 - desktop Chromium e Pixel 7 continuam executados;
 - retries e timeouts não aumentam;
 - nenhuma jornada ou requisito é removido ou relaxado;

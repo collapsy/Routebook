@@ -117,7 +117,7 @@ docs/registry.md
 - [x] transição inválida não chama `save`;
 - [x] o serviço depende somente do port e das operações públicas do aggregate;
 - [x] testes unitários cobrem comandos, ausência e ordem de escrita;
-- [ ] documentação, lint, tipagem, testes e build permanecem verdes.
+- [x] documentação, lint, tipagem, testes e build permanecem verdes.
 
 ## 11. Testes obrigatórios
 
@@ -152,4 +152,11 @@ Evidências locais:
 - lint e typecheck integrais aprovados;
 - build aprovado;
 - Prettier dos arquivos alterados e `git diff --check` aprovados;
-- package database não executado localmente porque o daemon do Docker estava inativo; a regressão PostgreSQL permanece obrigatória no CI da PR acumulada.
+- package database não executado localmente porque o daemon do Docker estava inativo.
+
+Evidências da PR acumulada #115 no SHA `7d89f58`:
+
+- Documentation Validation `30685658798` aprovada com 143 documentos registrados;
+- Engineering Validation `30685658797`, tentativas 1 e 2, aprovada integralmente;
+- migrations PostgreSQL, 23 testes de Proposal Management, regressão completa, build e 46 cenários Playwright desktop/mobile aprovados;
+- nenhuma das duas tentativas exigiu retry de cenário ou gerou flaky annotation.

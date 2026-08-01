@@ -110,7 +110,7 @@ docs/registry.md
 - [x] nenhuma assertion de persistência ou feedback é removida;
 - [x] 46 cenários continuam distribuídos em desktop e mobile;
 - [x] configuração Playwright permanece inalterada;
-- [ ] duas execuções consecutivas ficam verdes sem flaky annotation;
+- [x] duas execuções consecutivas ficam verdes sem flaky annotation;
 - [x] documentação, lint, tipagem, testes e build permanecem verdes.
 
 ## 9. Testes obrigatórios
@@ -129,12 +129,12 @@ docs/registry.md
 | --- | --- | --- |
 | fixture deixar de representar estado real | Alto | usar factories de domínio e repositories Drizzle reais |
 | remover cobertura de criação | Alto | manter criação de período livre pela UI no primeiro cenário |
-| click concluir antes da navegação | Médio | assertion `toHaveURL` e conteúdo com auto-waiting |
+| click concluir antes da navegação | Médio | aguardar URL no estágio `commit` ou validar o `href` público antes de abrir o destino |
 | outra causa de flake permanecer | Médio | exigir duas matrizes consecutivas sem retry |
 
 ## 11. Rollback
 
-Reverter apenas os dois specs e a documentação. Não existe mudança de produto, migration ou efeito em produção.
+Reverter apenas os três specs e a documentação. Não existe mudança de produto, migration ou efeito em produção.
 
 ## 12. Evidências
 
@@ -147,4 +147,9 @@ Evidências locais:
 - Playwright listou 46 cenários em sete arquivos, distribuídos em desktop e mobile;
 - Prettier dos arquivos alterados e `git diff --check` aprovados.
 
-As duas execuções completas consecutivas serão registradas após os workflows da PR acumulada.
+Evidências da PR acumulada #115 no SHA `7d89f58`:
+
+- Documentation Validation `30685658798` aprovada;
+- Engineering Validation `30685658797`, tentativa 1: 46/46 cenários Playwright aprovados sem retry ou flaky annotation;
+- Engineering Validation `30685658797`, tentativa 2: 46/46 cenários Playwright aprovados sem retry ou flaky annotation;
+- nas duas tentativas, migrations PostgreSQL, lint, tipagem, testes de componente e domínio, smoke e build também foram aprovados.

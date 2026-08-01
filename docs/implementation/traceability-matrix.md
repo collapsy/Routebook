@@ -73,6 +73,7 @@ ai_context:
 | RB-INC-061 | RB-BR-PRP-004, RB-BR-PRP-008, RB-SCR-009, RB-INT-063–069 e RB-INC-057–060 | #138 | `codex/rb-inc-061-expired-review`, PR #139 | revisão histórica somente leitura da Proposal `expired` sem aplicação | validações locais verdes; run 30716155284 com migrations, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
 | RB-INC-062 | RB-BR-PRP-001, RB-BR-PRP-004, ciclo oficial, RB-DATA-001 e RB-INC-053 | #140 | `codex/rb-inc-062-reject-proposal`, PR #141 | transição pura de Proposal `ready` para `rejected` | validações locais verdes; run 30716780960 com migrations, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
 | RB-INC-063 | RB-BR-PRP-001, RB-BR-PRP-004, RB-DATA-001–002, RB-ADR-006 e RB-INC-055, RB-INC-062 | #142 | `codex/rb-inc-063-rejected-persistence`, PR #143 | migration, schema e round trip de Proposal `rejected` com snapshot preservado | validações locais verdes; run 30717630992 com migration, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
+| RB-INC-064 | RB-BR-PRP-001, RB-BR-PRP-004, ciclo oficial e RB-INC-050, RB-INC-060, RB-INC-062–063 | #144 | `codex/rb-inc-064-rejection-command`, PR #145 | comando de aplicação para rejeitar e persistir Proposal `ready` | 70 testes do módulo; run 30718348548 com migrations, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
 
 ## Evidências do RB-INC-003
 

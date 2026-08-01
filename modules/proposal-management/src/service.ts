@@ -3,6 +3,7 @@ import {
   completeItineraryProposalGeneration,
   expireItineraryProposalByTime,
   failItineraryProposalGeneration,
+  rejectItineraryProposal,
   requestItineraryProposal,
   startItineraryProposalGeneration,
   type ItineraryProposal,
@@ -51,6 +52,12 @@ export type ExpireItineraryProposalByTimeCommand = Readonly<{
   tripId: string;
   itineraryProposalId: ItineraryProposalId;
   expiredAt: Date;
+}>;
+
+export type RejectItineraryProposalCommand = Readonly<{
+  tripId: string;
+  itineraryProposalId: ItineraryProposalId;
+  rejectedAt: Date;
 }>;
 
 async function loadItineraryProposal(
@@ -125,6 +132,19 @@ export async function expireAndPersistItineraryProposalByTime(
   );
   const expired = expireItineraryProposalByTime(proposal, command.expiredAt);
   return repository.save(expired);
+}
+
+export async function rejectAndPersistItineraryProposal(
+  repository: ItineraryProposalRepository,
+  command: RejectItineraryProposalCommand,
+): Promise<ItineraryProposal> {
+  const proposal = await loadItineraryProposal(
+    repository,
+    command.tripId,
+    command.itineraryProposalId,
+  );
+  const rejected = rejectItineraryProposal(proposal, command.rejectedAt);
+  return repository.save(rejected);
 }
 
 export async function cancelAndPersistItineraryProposalGeneration(

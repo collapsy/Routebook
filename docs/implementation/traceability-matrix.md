@@ -74,6 +74,7 @@ ai_context:
 | RB-INC-062 | RB-BR-PRP-001, RB-BR-PRP-004, ciclo oficial, RB-DATA-001 e RB-INC-053 | #140 | `codex/rb-inc-062-reject-proposal`, PR #141 | transição pura de Proposal `ready` para `rejected` | validações locais verdes; run 30716780960 com migrations, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
 | RB-INC-063 | RB-BR-PRP-001, RB-BR-PRP-004, RB-DATA-001–002, RB-ADR-006 e RB-INC-055, RB-INC-062 | #142 | `codex/rb-inc-063-rejected-persistence`, PR #143 | migration, schema e round trip de Proposal `rejected` com snapshot preservado | validações locais verdes; run 30717630992 com migration, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
 | RB-INC-064 | RB-BR-PRP-001, RB-BR-PRP-004, ciclo oficial e RB-INC-050, RB-INC-060, RB-INC-062–063 | #144 | `codex/rb-inc-064-rejection-command`, PR #145 | comando de aplicação para rejeitar e persistir Proposal `ready` | 70 testes do módulo; run 30718348548 com migrations, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
+| RB-INC-065 | RB-FR-095, RB-BR-100, RB-BR-102, RB-SCR-009, RB-INT-065, RB-INT-068 e RB-INC-064 | #146 | `codex/rb-inc-065-discard-proposal-review`, PR #147 | descarte explícito da Proposal `ready` com retorno ao Roteiro preservado | 61 testes web; run 30720324642 com migrations, build e 56 E2E responsivos verdes | Pronto para integração |
 
 ## Evidências do RB-INC-003
 

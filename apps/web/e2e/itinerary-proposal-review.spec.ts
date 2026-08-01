@@ -8,6 +8,7 @@ import {
 import {
   completeItineraryProposalGeneration,
   expireItineraryProposalByTime,
+  rejectItineraryProposal,
   requestItineraryProposal,
   startItineraryProposalGeneration,
 } from "@routebook/proposal-management";
@@ -22,7 +23,7 @@ async function createProposalFixture(
   tripName: string,
   status: "ready" | "expired" = "ready",
 ): Promise<string> {
-  const requestedAt = new Date();
+  const requestedAt = new Date(Date.now() - 10_000);
   const trip = createTrip(
     {
       name: tripName,
@@ -131,9 +132,10 @@ test("revisa uma Proposal ready sem aplicá-la ao Roteiro", async ({ page }, tes
   await expect(page.getByText("Proximidade entre lugares")).toBeVisible();
   await expect(page.getByText("Horários externos não foram confirmados.")).toBeVisible();
   await expect(page.getByText(/O Roteiro atual permanece preservado/i)).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: /aceitar|aplicar|descartar|gerar novamente/i }),
-  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /aceitar|aplicar|gerar novamente/i })).toHaveCount(
+    0,
+  );
+  await expect(page.getByRole("button", { name: "Descartar proposta" })).toBeVisible();
 
   await Promise.all([
     page.waitForURL(/\/roteiro$/),
@@ -141,6 +143,61 @@ test("revisa uma Proposal ready sem aplicá-la ao Roteiro", async ({ page }, tes
   ]);
   await expect(page.getByText(confirmedActivity, { exact: true })).toBeVisible();
   await expect(page.getByText(proposedActivity, { exact: true })).toHaveCount(0);
+});
+
+test("descarta uma Proposal ready e preserva integralmente o Roteiro", async ({
+  page,
+}, testInfo) => {
+  const tripId = await createProposalFixture(
+    `Descartar proposta ${testInfo.project.name} ${Date.now()}`,
+  );
+  const itineraryRepository = new DrizzleItineraryRepository();
+  const itineraryBefore = await itineraryRepository.findByTripId(tripId);
+  await page.goto(`/viagens/${tripId}/roteiro/proposta`);
+
+  await Promise.all([
+    page.waitForURL(/\/roteiro\?propostaDescartada=1$/),
+    page.getByRole("button", { name: "Descartar proposta" }).click(),
+  ]);
+
+  await expect(page.getByRole("status")).toHaveText(
+    "Proposta descartada. Seu Roteiro atual não foi alterado.",
+  );
+  await expect(page.getByText(confirmedActivity, { exact: true })).toBeVisible();
+  await expect(page.getByText(proposedActivity, { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Ver proposta" })).toHaveCount(0);
+
+  const proposals = await new DrizzleItineraryProposalRepository().listByTripId(tripId);
+  expect(proposals).toHaveLength(1);
+  expect(proposals[0]).toMatchObject({ status: "rejected" });
+  expect(proposals[0]?.rejectedAt).toBeInstanceOf(Date);
+  expect(await itineraryRepository.findByTripId(tripId)).toEqual(itineraryBefore);
+});
+
+test("trata uma Proposal atualizada concorrentemente sem falso sucesso", async ({
+  page,
+}, testInfo) => {
+  const tripId = await createProposalFixture(
+    `Concorrência de proposta ${testInfo.project.name} ${Date.now()}`,
+  );
+  await page.goto(`/viagens/${tripId}/roteiro/proposta`);
+
+  const repository = new DrizzleItineraryProposalRepository();
+  const ready = (await repository.listByTripId(tripId)).find(({ status }) => status === "ready")!;
+  const rejectedAt = new Date(Math.max(Date.now(), ready.updatedAt.getTime()) + 1_000);
+  await repository.save(rejectItineraryProposal(ready, rejectedAt));
+
+  await Promise.all([
+    page.waitForURL(/\/roteiro\?erroProposta=estado-atualizado$/),
+    page.getByRole("button", { name: "Descartar proposta" }).click(),
+  ]);
+
+  await expect(page.locator(".itinerary-feedback")).toHaveText(
+    /foi atualizada e não pode mais ser descartada/i,
+  );
+  await expect(page.getByText(confirmedActivity, { exact: true })).toBeVisible();
+  await expect(page.getByText("Proposta descartada", { exact: false })).toHaveCount(0);
+  expect((await repository.listByTripId(tripId))[0]?.rejectedAt).toEqual(rejectedAt);
 });
 
 test("mantém a rota direta recuperável quando não existe Proposal revisável", async ({

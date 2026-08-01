@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 
 import { cleanup, render, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { ItineraryProposalReview as ReviewModel } from "../lib/itinerary-proposal-experience";
 import { ItineraryProposalReview } from "./itinerary-proposal-review";
@@ -38,11 +38,13 @@ const review: ReviewModel = {
   ],
 };
 
+const discardAction = vi.fn(async () => undefined);
+
 afterEach(cleanup);
 
 describe("ItineraryProposalReview", () => {
   it("presents reviewable content while keeping the Proposal separate from the Itinerary", () => {
-    render(<ItineraryProposalReview review={review} />);
+    render(<ItineraryProposalReview discardAction={discardAction} review={review} />);
 
     expect(screen.getByText("Sugestão — ainda não aplicada")).toBeInTheDocument();
     expect(screen.getByText(/O Roteiro atual permanece preservado/i)).toBeInTheDocument();
@@ -58,13 +60,17 @@ describe("ItineraryProposalReview", () => {
 
     expect(screen.queryByRole("button", { name: /aceitar/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /aplicar/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /descartar/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Descartar proposta" })).toBeVisible();
+    expect(document.querySelector('input[name="itineraryProposalId"]')).toHaveValue(
+      "proposal-ready",
+    );
     expect(screen.queryByRole("button", { name: /gerar novamente/i })).not.toBeInTheDocument();
   });
 
   it("shows stale context and unresolved day references honestly", () => {
     render(
       <ItineraryProposalReview
+        discardAction={discardAction}
         review={{
           ...review,
           isBasedOnCurrentItinerary: false,
@@ -87,6 +93,7 @@ describe("ItineraryProposalReview", () => {
   it("presents an expired Proposal as non-applicable historical reference", () => {
     render(
       <ItineraryProposalReview
+        discardAction={discardAction}
         review={{
           ...review,
           proposalId: "proposal-expired",
@@ -107,12 +114,13 @@ describe("ItineraryProposalReview", () => {
       "2 de ago. de 2026, 10:15",
     );
     expect(screen.getByRole("note")).toHaveTextContent("referência histórica");
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Descartar proposta" })).not.toBeInTheDocument();
   });
 
   it("keeps justifications visible when no activity change was proposed", () => {
     render(
       <ItineraryProposalReview
+        discardAction={discardAction}
         review={{ ...review, proposedChangeCount: 0, days: [], limitations: [] }}
       />,
     );

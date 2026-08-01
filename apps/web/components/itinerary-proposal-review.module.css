@@ -261,6 +261,50 @@
   text-align: center;
 }
 
+.decisionActions {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-large);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  justify-content: space-between;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.decisionActions h2 {
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  margin: 0.4rem 0 0.5rem;
+}
+
+.decisionActions p:last-child {
+  color: var(--foreground-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.discardButton {
+  background: transparent;
+  border: 1px solid color-mix(in oklab, var(--danger, #b42318) 52%, var(--border));
+  border-radius: 999px;
+  color: var(--danger, #b42318);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+}
+
+.discardButton:hover {
+  background: color-mix(in oklab, var(--danger, #b42318) 9%, var(--surface));
+}
+
+.discardButton:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--danger, #b42318) 32%, transparent);
+  outline-offset: 3px;
+}
+
 @media (min-width: 760px) {
   .summary {
     align-items: center;

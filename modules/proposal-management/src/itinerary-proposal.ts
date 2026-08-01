@@ -45,6 +45,8 @@ export type ProposedActivity = Readonly<{
 export type ProposedActivityInput = ProposedActivity;
 
 export type CompleteItineraryProposalGenerationInput = Readonly<{
+  generationMethod: string;
+  generationVersion: string;
   proposedActivities: readonly ProposedActivityInput[];
   criteria: readonly string[];
   justifications: readonly string[];
@@ -65,6 +67,8 @@ export type ItineraryProposal = Readonly<{
   requestedAt: Date;
   updatedAt: Date;
   generationStartedAt?: Date;
+  generationMethod?: string;
+  generationVersion?: string;
   proposedActivities?: readonly ProposedActivity[];
   criteria?: readonly string[];
   justifications?: readonly string[];
@@ -72,6 +76,7 @@ export type ItineraryProposal = Readonly<{
   planningConflictIds?: readonly string[];
   validUntil?: Date;
   generatedAt?: Date;
+  expiredAt?: Date;
   failedAt?: Date;
   failureCode?: string;
   cancelledAt?: Date;
@@ -328,6 +333,8 @@ export function completeItineraryProposalGeneration(
   assertStatus(proposal, ["generating"], "ready");
   const generatedAt = transitionDate(proposal, input.generatedAt);
   const validUntil = validDate(input.validUntil, "validUntil");
+  const generationMethod = requiredText(input.generationMethod, "generationMethod");
+  const generationVersion = requiredText(input.generationVersion, "generationVersion");
   if (!Array.isArray(input.proposedActivities)) {
     throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
       proposedActivities: "Informe uma coleção de Proposed Activities.",
@@ -347,6 +354,8 @@ export function completeItineraryProposalGeneration(
   return Object.freeze({
     ...proposal,
     status: "ready",
+    generationMethod,
+    generationVersion,
     proposedActivities,
     criteria,
     justifications,
@@ -355,6 +364,32 @@ export function completeItineraryProposalGeneration(
     validUntil,
     generatedAt,
     updatedAt: new Date(generatedAt.getTime()),
+  });
+}
+
+export function expireItineraryProposalByTime(
+  proposal: ItineraryProposal,
+  expiredAt: Date,
+): ItineraryProposal {
+  assertStatus(proposal, ["ready"], "expired");
+  const normalizedExpiredAt = transitionDate(proposal, expiredAt);
+  if (!proposal.validUntil) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      validUntil: "A Proposal pronta deve possuir validade temporal.",
+    });
+  }
+  const validUntil = validDate(proposal.validUntil, "validUntil");
+  if (normalizedExpiredAt.getTime() < validUntil.getTime()) {
+    throw new ItineraryProposalValidationError("A validade da Itinerary Proposal não terminou.", {
+      expiredAt: "O instante de expiração deve alcançar ou ultrapassar validUntil.",
+    });
+  }
+
+  return Object.freeze({
+    ...proposal,
+    status: "expired",
+    expiredAt: new Date(normalizedExpiredAt.getTime()),
+    updatedAt: new Date(normalizedExpiredAt.getTime()),
   });
 }
 

@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { DrizzleItineraryRepository, DrizzleTripRepository } from "@routebook/database";
+import {
+  DrizzleItineraryProposalRepository,
+  DrizzleItineraryRepository,
+  DrizzleTripRepository,
+} from "@routebook/database";
 import {
   createItinerary,
   findTripById,
@@ -19,6 +23,7 @@ import {
   updateItineraryActivityAction,
 } from "./actions";
 import { FreePeriodComposer, FreePeriodList } from "./free-periods";
+import { hasReadyItineraryProposal } from "../../../../lib/itinerary-proposal-experience";
 
 export const dynamic = "force-dynamic";
 
@@ -134,7 +139,11 @@ export default async function ItineraryPage({
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const itinerary = await loadOrCreateItinerary(trip);
+  const [itinerary, proposals] = await Promise.all([
+    loadOrCreateItinerary(trip),
+    new DrizzleItineraryProposalRepository().listByTripId(trip.id),
+  ]);
+  const hasReadyProposal = hasReadyItineraryProposal(proposals);
   const {
     atividadeCriada,
     atividadeEditada,
@@ -193,9 +202,19 @@ export default async function ItineraryPage({
         <div>
           <p className="product-eyebrow">Roteiro manual</p>
           <h1>{trip.name}</h1>
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro/revisao`}>
-            Revisar conflitos
-          </Link>
+          <div className="itinerary-hero-actions">
+            {hasReadyProposal ? (
+              <Link
+                className="product-secondary-action"
+                href={`/viagens/${tripId}/roteiro/proposta`}
+              >
+                Ver proposta
+              </Link>
+            ) : null}
+            <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro/revisao`}>
+              Revisar conflitos
+            </Link>
+          </div>
           <p>
             Organize decisões confirmadas e espaços livres por dia. Horários e durações continuam
             opcionais para que o roteiro possa evoluir sem criar rigidez artificial.

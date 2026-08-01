@@ -4,6 +4,7 @@ import {
   cancelItineraryProposalGeneration,
   completeItineraryProposalGeneration,
   createItineraryProposalId,
+  expireItineraryProposalByTime,
   failItineraryProposalGeneration,
   itineraryProposalStatuses,
   ItineraryProposalTransitionError,
@@ -33,6 +34,8 @@ function generatingProposal() {
 
 function readyContent() {
   return {
+    generationMethod: " deterministic ",
+    generationVersion: " proposal-policy-v1 ",
     proposedActivities: [
       {
         proposedActivityId: " proposed-activity-1 ",
@@ -207,6 +210,8 @@ describe("Itinerary Proposal", () => {
     expect(generating).not.toHaveProperty("proposedActivities");
     expect(ready).toMatchObject({
       status: "ready",
+      generationMethod: "deterministic",
+      generationVersion: "proposal-policy-v1",
       criteria: ["ritmo do grupo"],
       justifications: ["preserva o período protegido"],
       limitations: ["horário de funcionamento não confirmado"],
@@ -264,6 +269,8 @@ describe("Itinerary Proposal", () => {
   });
 
   it.each([
+    ["generationMethod", { generationMethod: " " }],
+    ["generationVersion", { generationVersion: " " }],
     ["criteria", { criteria: [] }],
     ["criteria.0", { criteria: [" "] }],
     ["justifications", { justifications: [] }],
@@ -351,6 +358,56 @@ describe("Itinerary Proposal", () => {
     expect(ready.validUntil?.toISOString()).toBe("2026-08-01T12:02:00.000Z");
     expect(ready.criteria).toEqual(["ritmo do grupo"]);
     expect(ready.proposedActivities?.[0]?.title).toBe("Museu de Arte");
+  });
+
+  it("expira uma Proposal ready exatamente no fim da validade e preserva o conteúdo", () => {
+    const ready = completeItineraryProposalGeneration(generatingProposal(), readyContent());
+    const expiredAt = new Date("2026-08-01T12:02:00.000Z");
+    const expired = expireItineraryProposalByTime(ready, expiredAt);
+
+    expect(expired).toMatchObject({
+      status: "expired",
+      expiredAt,
+      updatedAt: expiredAt,
+      criteria: ready.criteria,
+      justifications: ready.justifications,
+      proposedActivities: ready.proposedActivities,
+      generationMethod: ready.generationMethod,
+      generationVersion: ready.generationVersion,
+    });
+    expect(expired.expiredAt).not.toBe(expiredAt);
+    expect(expired.updatedAt).not.toBe(expired.expiredAt);
+    expect(ready.status).toBe("ready");
+    expect(ready).not.toHaveProperty("expiredAt");
+    expect(Object.isFrozen(expired)).toBe(true);
+
+    expiredAt.setUTCFullYear(2030);
+    expect(expired.expiredAt?.toISOString()).toBe("2026-08-01T12:02:00.000Z");
+  });
+
+  it("expira uma Proposal ready depois do fim da validade", () => {
+    const ready = completeItineraryProposalGeneration(generatingProposal(), readyContent());
+    const expired = expireItineraryProposalByTime(ready, new Date("2026-08-02T12:02:00.000Z"));
+
+    expect(expired.status).toBe("expired");
+    expect(expired.expiredAt?.toISOString()).toBe("2026-08-02T12:02:00.000Z");
+  });
+
+  it("rejeita expiração antes de validUntil ou com instante inválido", () => {
+    const ready = completeItineraryProposalGeneration(generatingProposal(), readyContent());
+
+    expect(() =>
+      expireItineraryProposalByTime(ready, new Date("2026-08-01T12:01:59.999Z")),
+    ).toThrowError(ItineraryProposalValidationError);
+    expect(() => expireItineraryProposalByTime(ready, new Date("invalid"))).toThrowError(
+      ItineraryProposalValidationError,
+    );
+  });
+
+  it("rejeita expiração temporal fora do estado ready", () => {
+    expect(() =>
+      expireItineraryProposalByTime(requestProposal(), new Date("2026-08-02T12:02:00.000Z")),
+    ).toThrowError(ItineraryProposalTransitionError);
   });
 
   it("registra falha técnica somente durante a geração", () => {

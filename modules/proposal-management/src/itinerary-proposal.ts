@@ -45,6 +45,8 @@ export type ProposedActivity = Readonly<{
 export type ProposedActivityInput = ProposedActivity;
 
 export type CompleteItineraryProposalGenerationInput = Readonly<{
+  generationMethod: string;
+  generationVersion: string;
   proposedActivities: readonly ProposedActivityInput[];
   criteria: readonly string[];
   justifications: readonly string[];
@@ -65,6 +67,8 @@ export type ItineraryProposal = Readonly<{
   requestedAt: Date;
   updatedAt: Date;
   generationStartedAt?: Date;
+  generationMethod?: string;
+  generationVersion?: string;
   proposedActivities?: readonly ProposedActivity[];
   criteria?: readonly string[];
   justifications?: readonly string[];
@@ -328,6 +332,8 @@ export function completeItineraryProposalGeneration(
   assertStatus(proposal, ["generating"], "ready");
   const generatedAt = transitionDate(proposal, input.generatedAt);
   const validUntil = validDate(input.validUntil, "validUntil");
+  const generationMethod = requiredText(input.generationMethod, "generationMethod");
+  const generationVersion = requiredText(input.generationVersion, "generationVersion");
   if (!Array.isArray(input.proposedActivities)) {
     throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
       proposedActivities: "Informe uma coleção de Proposed Activities.",
@@ -347,6 +353,8 @@ export function completeItineraryProposalGeneration(
   return Object.freeze({
     ...proposal,
     status: "ready",
+    generationMethod,
+    generationVersion,
     proposedActivities,
     criteria,
     justifications,

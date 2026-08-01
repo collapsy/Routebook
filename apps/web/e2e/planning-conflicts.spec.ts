@@ -40,7 +40,7 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
   await expect(conflictList.getByText(secondActivity, { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: /Erros 0/ }).click();
-  await expect(page.getByRole("status")).toContainText("Nenhum conflito desta severidade");
+  await expect(page.getByText("Nenhum conflito desta severidade", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: /Riscos 1/ }).click();
   await conflictList.getByRole("link", { name: /Ver dia no Roteiro/ }).click();
 

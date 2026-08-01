@@ -124,15 +124,15 @@ docs/registry.md
 
 ## 11. Critérios de aceite
 
-- [ ] o domínio permanece independente de Drizzle e PostgreSQL;
-- [ ] create persiste somente Proposal `requested` com referências válidas;
-- [ ] save atualiza somente Proposal existente na mesma Trip;
-- [ ] find e list isolam dados por TripId;
-- [ ] round trip preserva versões, ContextSnapshotId, status, instantes e failureCode;
-- [ ] constraints limitam status e metadados aos quatro estados em escopo;
-- [ ] exclusão da Trip ou do Itinerary remove a Proposal por cascata;
-- [ ] testes de integração cobrem sucesso e falhas de referência;
-- [ ] documentação, lint, tipagem, testes, migrations e build permanecem verdes.
+- [x] o domínio permanece independente de Drizzle e PostgreSQL;
+- [x] create persiste somente Proposal `requested` com referências válidas;
+- [x] save atualiza somente Proposal existente na mesma Trip;
+- [x] find e list isolam dados por TripId;
+- [x] round trip preserva versões, ContextSnapshotId, status, instantes e failureCode;
+- [x] constraints limitam status e metadados aos quatro estados em escopo;
+- [x] exclusão da Trip ou do Itinerary remove a Proposal por cascata;
+- [x] testes de integração cobrem sucesso e falhas de referência;
+- [x] documentação, lint, tipagem, testes, migrations e build permanecem verdes.
 
 ## 12. Testes obrigatórios
 
@@ -161,4 +161,23 @@ Reverter o adapter, o port e a migration antes de dados reais. O incremento não
 
 ## 15. Evidências
 
-Serão registradas após execução local e workflows da PR.
+SHA validado: `51fa84a33ecd49355378d2edc9c5cde576ba9593`.
+
+Evidências locais:
+
+- 139 documentos registrados e validados, com quatro avisos preexistentes;
+- 15 testes de Proposal Management aprovados;
+- todos os testes fora do package database aprovados, incluindo 46 testes do web;
+- lint e typecheck integrais aprovados;
+- build aprovado;
+- Prettier dos arquivos alterados e `git diff --check` aprovados;
+- testes PostgreSQL não executados localmente porque o daemon do Docker estava inativo.
+
+Evidências da PR:
+
+- Documentation Validation: run `30684401975`, concluído com sucesso;
+- Engineering Validation: run `30684401943`, concluído com sucesso;
+- migration `0013` aplicada em PostgreSQL;
+- 18 testes do package database aprovados, incluindo os seis testes novos do repository;
+- 46 testes Playwright aprovados em desktop e mobile, sem retry ou flaky;
+- formatação Linux, lint, tipagem, testes, smoke e build aprovados.

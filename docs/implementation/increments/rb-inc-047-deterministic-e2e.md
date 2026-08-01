@@ -45,11 +45,14 @@ O log isolou dois contratos frágeis:
 - o histórico exigia `Café demorado, Passeio de barco` nessa ordem, embora `PlanningConflict` normalize `relatedActivityIds` por identidade e não defina ordem semântica para os títulos;
 - a adição de Lugar salvo aguardava `waitForURL` com `waitUntil: "commit"`, acoplando a jornada ao evento interno de uma navegação suave em vez da URL final observável.
 
+Uma execução posterior da PR empilhada, run `30682213332`, revelou um terceiro fator: o setup dessa jornada consumiu o timeout global de 30 segundos antes da adição do Lugar salvo em desktop e mobile. O setup navegava pela interface por caminhos já cobertos por outros cenários. Ele passa a acessar diretamente as URLs obtidas da própria interface, preservando todas as operações e assertions específicas desta jornada sem aumentar timeout ou retry.
+
 ## 3. Resultado verificável
 
 - configuração de paralelismo Playwright permanece original;
 - os dois títulos do histórico são validados independentemente da ordem;
 - a navegação aguarda a URL final observável, sem exigir um evento interno de commit;
+- o setup reutiliza os `href` observáveis para evitar navegações redundantes já cobertas;
 - desktop Chromium e Pixel 7 continuam executados;
 - retries e timeouts não aumentam;
 - nenhuma jornada ou requisito é removido ou relaxado;

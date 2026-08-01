@@ -44,7 +44,7 @@ Issue: [#152](https://github.com/collapsy/Routebook/issues/152).
 
 Branch: `codex/rb-inc-068-apply-proposal-items-contract`.
 
-Pull request: pendente.
+Pull request: [#153](https://github.com/collapsy/Routebook/pull/153).
 
 ## 2. Problema
 
@@ -160,4 +160,7 @@ Evidências locais:
 - Prettier dos caminhos alterados e `git diff --check` aprovados;
 - PostgreSQL e Playwright não executados localmente porque o incremento não altera persistência ou interface; permanecem cobertos pelo CI.
 
-Evidências de CI pendentes.
+Evidências de CI:
+
+- run [30722787286](https://github.com/collapsy/Routebook/actions/runs/30722787286) validou a documentação;
+- run [30722787307](https://github.com/collapsy/Routebook/actions/runs/30722787307) aprovou formatação, documentação, lint, typecheck, migrations PostgreSQL, suíte integral, smoke do servidor, build e 56 E2E concluídos; 55 passaram diretamente e 1 passou no retry, marcado como flaky fora do recorte.

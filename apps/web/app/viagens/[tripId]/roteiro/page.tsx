@@ -23,7 +23,7 @@ import {
   updateItineraryActivityAction,
 } from "./actions";
 import { FreePeriodComposer, FreePeriodList } from "./free-periods";
-import { hasReadyItineraryProposal } from "../../../../lib/itinerary-proposal-experience";
+import { getItineraryProposalReviewStatus } from "../../../../lib/itinerary-proposal-experience";
 
 export const dynamic = "force-dynamic";
 
@@ -143,7 +143,7 @@ export default async function ItineraryPage({
     loadOrCreateItinerary(trip),
     new DrizzleItineraryProposalRepository().listByTripId(trip.id),
   ]);
-  const hasReadyProposal = hasReadyItineraryProposal(proposals);
+  const proposalReviewStatus = getItineraryProposalReviewStatus(proposals);
   const {
     atividadeCriada,
     atividadeEditada,
@@ -203,12 +203,12 @@ export default async function ItineraryPage({
           <p className="product-eyebrow">Roteiro manual</p>
           <h1>{trip.name}</h1>
           <div className="itinerary-hero-actions">
-            {hasReadyProposal ? (
+            {proposalReviewStatus ? (
               <Link
                 className="product-secondary-action"
                 href={`/viagens/${tripId}/roteiro/proposta`}
               >
-                Ver proposta
+                {proposalReviewStatus === "expired" ? "Ver proposta expirada" : "Ver proposta"}
               </Link>
             ) : null}
             <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro/revisao`}>

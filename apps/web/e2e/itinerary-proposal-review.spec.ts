@@ -7,6 +7,7 @@ import {
 } from "@routebook/database";
 import {
   completeItineraryProposalGeneration,
+  expireItineraryProposalByTime,
   requestItineraryProposal,
   startItineraryProposalGeneration,
 } from "@routebook/proposal-management";
@@ -17,7 +18,10 @@ test.setTimeout(120_000);
 const confirmedActivity = "Café já confirmado";
 const proposedActivity = "Mirante ao pôr do sol";
 
-async function createProposalFixture(tripName: string): Promise<string> {
+async function createProposalFixture(
+  tripName: string,
+  status: "ready" | "expired" = "ready",
+): Promise<string> {
   const requestedAt = new Date();
   const trip = createTrip(
     {
@@ -85,6 +89,11 @@ async function createProposalFixture(tripName: string): Promise<string> {
   await repository.create(requested);
   await repository.save(generating);
   await repository.save(ready);
+  if (status === "expired") {
+    await repository.save(
+      expireItineraryProposalByTime(ready, new Date(ready.validUntil!.getTime() + 60_000)),
+    );
+  }
   return trip.id;
 }
 
@@ -134,7 +143,7 @@ test("revisa uma Proposal ready sem aplicá-la ao Roteiro", async ({ page }, tes
   await expect(page.getByText(proposedActivity, { exact: true })).toHaveCount(0);
 });
 
-test("mantém a rota direta recuperável quando não existe Proposal ready", async ({
+test("mantém a rota direta recuperável quando não existe Proposal revisável", async ({
   page,
 }, testInfo) => {
   const tripId = await createItineraryWithoutProposal(
@@ -150,4 +159,33 @@ test("mantém a rota direta recuperável quando não existe Proposal ready", asy
     "href",
     `/viagens/${tripId}/roteiro`,
   );
+});
+
+test("consulta uma Proposal expired somente como referência histórica", async ({
+  page,
+}, testInfo) => {
+  const tripId = await createProposalFixture(
+    `Proposta expirada ${testInfo.project.name} ${Date.now()}`,
+    "expired",
+  );
+  await page.goto(`/viagens/${tripId}/roteiro`);
+
+  await expect(page.getByText(confirmedActivity, { exact: true })).toBeVisible();
+  await expect(page.getByText(proposedActivity, { exact: true })).toHaveCount(0);
+  await Promise.all([
+    page.waitForURL(/\/roteiro\/proposta$/),
+    page.getByRole("link", { name: "Ver proposta expirada" }).click(),
+  ]);
+
+  await expect(page.getByText("Proposta expirada — somente referência")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Consulte o histórico desta proposta" }),
+  ).toBeVisible();
+  await expect(page.getByText(/Esta proposta não pode mais ser aplicada/i)).toBeVisible();
+  await expect(page.getByText("Expirada em")).toBeVisible();
+  await expect(page.getByRole("heading", { name: proposedActivity })).toBeVisible();
+  await expect(page.getByText(/referência histórica/i)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /aceitar|aplicar|descartar|gerar novamente/i }),
+  ).toHaveCount(0);
 });

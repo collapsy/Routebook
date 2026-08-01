@@ -160,6 +160,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-059 | Context Pack do RB-INC-059 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-059-itinerary-proposal-expired-persistence.md](./implementation/context-packs/rb-inc-059-itinerary-proposal-expired-persistence.md) |
 | RB-INC-060 | Comando de Expiração Temporal da Itinerary Proposal | Implementation Increment | Draft | 0.1.0 | [rb-inc-060-itinerary-proposal-expiration-command.md](./implementation/increments/rb-inc-060-itinerary-proposal-expiration-command.md) |
 | RB-CTX-060 | Context Pack do RB-INC-060 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-060-itinerary-proposal-expiration-command.md](./implementation/context-packs/rb-inc-060-itinerary-proposal-expiration-command.md) |
+| RB-INC-061 | Revisão Histórica da Itinerary Proposal Expired | Implementation Increment | Draft | 0.1.0 | [rb-inc-061-itinerary-proposal-expired-review.md](./implementation/increments/rb-inc-061-itinerary-proposal-expired-review.md) |
+| RB-CTX-061 | Context Pack do RB-INC-061 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-061-itinerary-proposal-expired-review.md](./implementation/context-packs/rb-inc-061-itinerary-proposal-expired-review.md) |
 | RB-AI-007 | Operação e Gestão do Ciclo de Vida de Inteligência Artificial | AI Operations | Planned | 0.1.0 | [ai-operations-and-lifecycle-management.md](./ai/ai-operations-and-lifecycle-management.md) |
 | RB-API-002 | Catálogo de Contratos de API | API | Planned | 0.1.0 | [api-contract-catalog.md](./data/api-contract-catalog.md) |
 | RB-API-003 | Versionamento e Depreciação de APIs | API | Planned | 0.1.0 | [api-versioning-and-deprecation-policy.md](./data/api-versioning-and-deprecation-policy.md) |

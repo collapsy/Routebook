@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   completeItineraryProposalGeneration,
+  expireItineraryProposalByTime,
   requestItineraryProposal,
   startItineraryProposalGeneration,
   type ItineraryProposal,
@@ -11,7 +12,9 @@ import { addActivity, createItinerary } from "@routebook/trip-management";
 
 import {
   buildItineraryProposalReview,
+  findLatestReviewableItineraryProposal,
   findLatestReadyItineraryProposal,
+  getItineraryProposalReviewStatus,
   hasReadyItineraryProposal,
   ItineraryProposalReviewIntegrityError,
 } from "./itinerary-proposal-experience";
@@ -76,6 +79,17 @@ function createReadyProposal({
   });
 }
 
+function createExpiredProposal({
+  expiredAt,
+  ...readyOptions
+}: Parameters<typeof createReadyProposal>[0] & { expiredAt?: Date } = {}): ItineraryProposal {
+  const ready = createReadyProposal(readyOptions);
+  return expireItineraryProposalByTime(
+    ready,
+    expiredAt ?? new Date(ready.validUntil!.getTime() + 60_000),
+  );
+}
+
 describe("itinerary proposal review experience", () => {
   it("selects only the latest ready Proposal with a stable identity tie-break", () => {
     const itinerary = createReviewItinerary();
@@ -111,6 +125,59 @@ describe("itinerary proposal review experience", () => {
     } as unknown as ItineraryProposal;
 
     expect(() => findLatestReadyItineraryProposal([malformed])).toThrowError(
+      ItineraryProposalReviewIntegrityError,
+    );
+  });
+
+  it("prioritizes an active ready Proposal over newer expired history", () => {
+    const itinerary = createReviewItinerary();
+    const ready = createReadyProposal({
+      generatedAt: new Date("2026-08-01T12:02:00.000Z"),
+      id: "proposal-ready-active",
+      itinerary,
+    });
+    const expired = createExpiredProposal({
+      generatedAt: new Date("2026-08-02T12:02:00.000Z"),
+      id: "proposal-expired-newer",
+      itinerary,
+    });
+
+    expect(getItineraryProposalReviewStatus([expired, ready])).toBe("ready");
+    expect(findLatestReviewableItineraryProposal([expired, ready])?.id).toBe(ready.id);
+  });
+
+  it("selects the latest expired Proposal with a stable identity tie-break", () => {
+    const itinerary = createReviewItinerary();
+    const sameInstant = new Date("2026-08-03T12:02:00.000Z");
+    const older = createExpiredProposal({
+      expiredAt: new Date("2026-08-02T12:02:00.000Z"),
+      id: "proposal-expired-c",
+      itinerary,
+    });
+    const tiedA = createExpiredProposal({
+      expiredAt: sameInstant,
+      id: "proposal-expired-a",
+      itinerary,
+    });
+    const tiedB = createExpiredProposal({
+      expiredAt: sameInstant,
+      id: "proposal-expired-b",
+      itinerary,
+    });
+
+    expect(getItineraryProposalReviewStatus([older, tiedA])).toBe("expired");
+    expect(findLatestReviewableItineraryProposal([tiedA, older, tiedB])?.id).toBe(
+      "proposal-expired-b",
+    );
+  });
+
+  it("rejects an incomplete expired snapshot instead of hiding missing lifecycle facts", () => {
+    const malformed = {
+      ...createExpiredProposal(),
+      expiredAt: undefined,
+    } as unknown as ItineraryProposal;
+
+    expect(() => findLatestReviewableItineraryProposal([malformed])).toThrowError(
       ItineraryProposalReviewIntegrityError,
     );
   });
@@ -186,5 +253,18 @@ describe("itinerary proposal review experience", () => {
     expect(buildItineraryProposalReview({ itinerary, proposal }).isBasedOnCurrentItinerary).toBe(
       false,
     );
+  });
+
+  it("formats the expiration instant for an expired historical review", () => {
+    const itinerary = createReviewItinerary();
+    const proposal = createExpiredProposal({
+      expiredAt: new Date("2026-08-02T15:30:00.000Z"),
+      itinerary,
+    });
+
+    expect(buildItineraryProposalReview({ itinerary, proposal })).toMatchObject({
+      status: "expired",
+      expiredAtLabel: "2 de ago. de 2026, 12:30",
+    });
   });
 });

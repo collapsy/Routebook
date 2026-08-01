@@ -51,6 +51,12 @@
   padding: 0.45rem 0.75rem;
 }
 
+.summary[data-status="expired"] .status {
+  background: color-mix(in oklab, var(--accent) 12%, var(--surface));
+  border-color: color-mix(in oklab, var(--accent) 42%, var(--border));
+  color: var(--foreground);
+}
+
 .summary dl,
 .context dl,
 .activityFacts {

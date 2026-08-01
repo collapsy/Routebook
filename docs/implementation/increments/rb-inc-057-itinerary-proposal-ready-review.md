@@ -44,6 +44,8 @@ Branch: `codex/rb-inc-057-ready-review`
 
 Base empilhada: `codex/rb-inc-056-ready-command`, PR #129.
 
+Pull request acumulada: [#131](https://github.com/collapsy/Routebook/pull/131), com RB-INC-056 e RB-INC-057 sobre a branch consolidada da PR #125.
+
 ## 2. Problema
 
 O domínio e a persistência já representam conteúdo `ready`, mas ainda não existe uma superfície do produto onde o viajante consiga distinguir a sugestão do Roteiro confirmado e revisar critérios, justificativas, limitações e Proposed Activities antes de qualquer decisão.
@@ -120,16 +122,16 @@ docs/registry.md
 
 ## 9. Critérios de aceite
 
-- [ ] a seleção considera somente Proposals `ready` e escolhe a mais recente de forma estável;
-- [ ] a revisão apresenta critérios, justificativas, limitações e quantidade de conflitos conhecidos;
-- [ ] Proposed Activities são agrupadas por dia do Itinerary quando a referência existe;
-- [ ] referências desconhecidas são tratadas como indisponíveis, sem inventar dados;
-- [ ] a UI declara que a sugestão ainda não foi aplicada e que o Roteiro atual foi preservado;
-- [ ] não existem controles de aceite, edição, descarte, regeneração ou aplicação;
-- [ ] o link no Roteiro existe somente quando uma Proposal `ready` pode ser revisada;
-- [ ] rota direta sem Proposal `ready` apresenta estado vazio recuperável;
-- [ ] loading, erro, semântica, teclado e layout responsivo permanecem adequados;
-- [ ] documentação, lint, tipagem, testes, E2E e build permanecem verdes.
+- [x] a seleção considera somente Proposals `ready` e escolhe a mais recente de forma estável;
+- [x] a revisão apresenta critérios, justificativas, limitações e quantidade de conflitos conhecidos;
+- [x] Proposed Activities são agrupadas por dia do Itinerary quando a referência existe;
+- [x] referências desconhecidas são tratadas como indisponíveis, sem inventar dados;
+- [x] a UI declara que a sugestão ainda não foi aplicada e que o Roteiro atual foi preservado;
+- [x] não existem controles de aceite, edição, descarte, regeneração ou aplicação;
+- [x] o link no Roteiro existe somente quando uma Proposal `ready` pode ser revisada;
+- [x] rota direta sem Proposal `ready` apresenta estado vazio recuperável;
+- [x] loading, erro, semântica, teclado e layout responsivo permanecem adequados;
+- [x] documentação, lint, tipagem, testes, E2E e build permanecem verdes.
 
 ## 10. Testes obrigatórios
 
@@ -180,4 +182,6 @@ Reverter rota, view model, componente, testes, acesso condicional, dependência 
 - workspace: lint, typecheck e build verdes;
 - build confirmou a rota dinâmica `/viagens/[tripId]/roteiro/proposta`;
 - suíte integral, migration PostgreSQL e Playwright desktop/mobile não executados localmente porque `DATABASE_URL` não está configurada e o daemon Docker está indisponível;
-- validação PostgreSQL e Playwright: pendentes dos workflows da pull request.
+- PR #131, workflow de documentação: verde;
+- PR #131, workflow de engenharia: migration, formatação, documentação, lint, tipagem, suíte integral, smoke, build e 50 testes Playwright responsivos verdes;
+- a primeira execução E2E registrou um timeout global flutuante no retorno ao Roteiro e passou no retry; o teste foi alinhado ao timeout responsivo de 120 segundos e uma nova execução confirmou 50 testes verdes sem retry.

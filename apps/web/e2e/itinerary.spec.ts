@@ -225,17 +225,10 @@ test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ 
   await page.getByLabel("Adicionar ao dia").selectOption("2026-08-23");
   await page.getByLabel("Horário opcional").fill("14:15");
   await page.getByLabel("Duração opcional").fill("120");
-  const savedPlacesUrl = page.url();
-  const actionResponsePromise = page.waitForResponse((response) => {
-    const request = response.request();
-    return (
-      request.method() === "POST" &&
-      request.url() === savedPlacesUrl &&
-      request.headers()["next-action"] !== undefined
-    );
-  });
-  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
-  expect((await actionResponsePromise).ok()).toBe(true);
+  await Promise.all([
+    page.waitForURL(/adicionadoAoRoteiro=1$/, { waitUntil: "commit" }),
+    page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
+  ]);
   await expect(page).toHaveURL(/adicionadoAoRoteiro=1$/);
 
   await expect(page.getByRole("status")).toContainText("continua salvo");

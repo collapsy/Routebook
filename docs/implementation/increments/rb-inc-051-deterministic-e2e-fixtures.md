@@ -53,7 +53,7 @@ Uma tentativa anterior do run `30683595635` também marcou `free-period.spec.ts`
 
 A primeira execução desta correção, run `30685050223`, expôs a mesma espera por `load` na jornada de adicionar Lugar salvo ao Roteiro em `itinerary.spec.ts`. O arquivo adicional é indispensável para corrigir a causa observada sem alterar produto ou configuração.
 
-O run `30685246003` mostrou que remover somente a espera de navegação ainda permitia avançar antes da resposta da Server Action. A jornada passa a aguardar o POST identificado pelo header `next-action` e a validar sucesso antes do feedback e da URL. No histórico de conflitos, o `href` público do link é validado e aberto diretamente, sem depender do lifecycle do router.
+O run `30685246003` mostrou que remover somente a espera de navegação ainda permitia avançar antes do redirect da Server Action. O run `30685472090` confirmou que o redirect esperado não deve ser classificado pelo status HTTP como uma resposta comum de sucesso. A jornada passa a aguardar a URL no estágio `commit`, sem aguardar `load` nem inspecionar headers internos do framework. No histórico de conflitos, o `href` público do link é validado e aberto diretamente, sem depender do lifecycle do router.
 
 ## 3. Resultado verificável
 
@@ -62,7 +62,7 @@ O run `30685246003` mostrou que remover somente a espera de navegação ainda pe
 - edição começa com um período persistido e edita somente pela UI;
 - remoção começa com dois períodos persistidos e remove somente pela UI;
 - o retorno do histórico de conflitos valida URL e conteúdo observáveis sem aguardar `load`;
-- a inclusão de Lugar salvo aguarda a resposta real da Server Action antes de validar URL e conteúdo;
+- a inclusão de Lugar salvo aguarda o redirect no estágio `commit` antes de validar URL e conteúdo;
 - a abertura posterior do Roteiro e o retorno do histórico validam `href`, URL e conteúdo finais;
 - 46 cenários desktop/mobile permanecem listados;
 - timeout, retries, workers e projetos permanecem inalterados;

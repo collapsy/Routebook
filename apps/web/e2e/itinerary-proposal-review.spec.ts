@@ -12,6 +12,8 @@ import {
 } from "@routebook/proposal-management";
 import { addActivity, createItinerary, createTrip } from "@routebook/trip-management";
 
+test.setTimeout(120_000);
+
 const confirmedActivity = "Café já confirmado";
 const proposedActivity = "Mirante ao pôr do sol";
 

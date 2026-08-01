@@ -1,0 +1,190 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  completeItineraryProposalGeneration,
+  requestItineraryProposal,
+  startItineraryProposalGeneration,
+  type ItineraryProposal,
+  type ProposedActivityInput,
+} from "@routebook/proposal-management";
+import { addActivity, createItinerary } from "@routebook/trip-management";
+
+import {
+  buildItineraryProposalReview,
+  findLatestReadyItineraryProposal,
+  hasReadyItineraryProposal,
+  ItineraryProposalReviewIntegrityError,
+} from "./itinerary-proposal-experience";
+
+const requestedAt = new Date("2026-08-01T12:00:00.000Z");
+
+function createReviewItinerary() {
+  let itinerary = createItinerary(
+    {
+      tripId: "trip-review",
+      period: {
+        startDate: "2026-08-22",
+        endDate: "2026-08-23",
+        timeZone: "America/Fortaleza",
+      },
+    },
+    requestedAt,
+  );
+  itinerary = addActivity(
+    itinerary,
+    { dayDate: "2026-08-22", title: "Café já confirmado", startTime: "09:00" },
+    requestedAt,
+  );
+  return itinerary;
+}
+
+function createReadyProposal({
+  generatedAt = new Date("2026-08-01T12:02:00.000Z"),
+  id = "proposal-ready",
+  itinerary = createReviewItinerary(),
+  proposedActivities,
+}: {
+  generatedAt?: Date;
+  id?: string;
+  itinerary?: ReturnType<typeof createReviewItinerary>;
+  proposedActivities?: readonly ProposedActivityInput[];
+} = {}): ItineraryProposal {
+  const requested = requestItineraryProposal({
+    id,
+    tripId: itinerary.tripId,
+    itineraryId: itinerary.id,
+    baseTripContextVersion: 1,
+    baseItineraryVersion: itinerary.version,
+    contextSnapshotId: `context-${id}`,
+    requestedAt,
+  });
+  const generating = startItineraryProposalGeneration(
+    requested,
+    new Date("2026-08-01T12:01:00.000Z"),
+  );
+
+  return completeItineraryProposalGeneration(generating, {
+    generationMethod: "deterministic-fixture",
+    generationVersion: "1",
+    proposedActivities: proposedActivities ?? [],
+    criteria: ["Ritmo leve", "Proximidade entre lugares"],
+    justifications: ["Reduz deslocamentos entre atividades."],
+    limitations: ["Horários externos não foram confirmados."],
+    planningConflictIds: ["conflict-known"],
+    generatedAt,
+    validUntil: new Date(generatedAt.getTime() + 86_400_000),
+  });
+}
+
+describe("itinerary proposal review experience", () => {
+  it("selects only the latest ready Proposal with a stable identity tie-break", () => {
+    const itinerary = createReviewItinerary();
+    const sameInstant = new Date("2026-08-01T12:03:00.000Z");
+    const older = createReadyProposal({
+      generatedAt: new Date("2026-08-01T12:02:00.000Z"),
+      id: "proposal-c",
+      itinerary,
+    });
+    const tiedA = createReadyProposal({ generatedAt: sameInstant, id: "proposal-a", itinerary });
+    const tiedB = createReadyProposal({ generatedAt: sameInstant, id: "proposal-b", itinerary });
+    const requested = requestItineraryProposal({
+      id: "proposal-requested",
+      tripId: itinerary.tripId,
+      itineraryId: itinerary.id,
+      baseTripContextVersion: 1,
+      baseItineraryVersion: itinerary.version,
+      contextSnapshotId: "context-requested",
+      requestedAt,
+    });
+
+    expect(hasReadyItineraryProposal([requested, older, tiedA])).toBe(true);
+    expect(findLatestReadyItineraryProposal([tiedA, requested, older, tiedB])?.id).toBe(
+      "proposal-b",
+    );
+    expect(findLatestReadyItineraryProposal([requested])).toBeNull();
+  });
+
+  it("rejects an incomplete ready snapshot instead of inventing review content", () => {
+    const malformed = {
+      ...createReadyProposal(),
+      generatedAt: undefined,
+    } as unknown as ItineraryProposal;
+
+    expect(() => findLatestReadyItineraryProposal([malformed])).toThrowError(
+      ItineraryProposalReviewIntegrityError,
+    );
+  });
+
+  it("groups changes by known days and exposes unresolved references explicitly", () => {
+    const itinerary = createReviewItinerary();
+    const firstDay = itinerary.days[0]!;
+    const sourceActivity = firstDay.activities[0]!;
+    const proposal = createReadyProposal({
+      itinerary,
+      proposedActivities: [
+        {
+          proposedActivityId: "activity-add",
+          targetTripDayId: firstDay.id,
+          title: "Mirante ao pôr do sol",
+          proposedStartTime: "17:30",
+          durationMinutes: 90,
+          proposedOrder: 2,
+          operationType: "add",
+          estimatedCostAmount: 25,
+          estimatedCostCurrency: "BRL",
+          reason: "Aproveita o fim da tarde.",
+        },
+        {
+          proposedActivityId: "activity-update",
+          sourceActivityId: sourceActivity.id,
+          title: "Café sem pressa",
+          proposedOrder: 1,
+          operationType: "update",
+        },
+        {
+          proposedActivityId: "activity-unknown",
+          targetTripDayId: "day-not-in-current-itinerary",
+          title: "Referência externa",
+          operationType: "move",
+        },
+      ],
+    });
+
+    const review = buildItineraryProposalReview({ itinerary, proposal });
+
+    expect(review.proposedChangeCount).toBe(3);
+    expect(review.knownConflictCount).toBe(1);
+    expect(review.days.map(({ label }) => label)).toEqual([
+      "Dia 1 · 22 de agosto",
+      "Referência de dia indisponível",
+    ]);
+    expect(review.days[0]?.activities.map(({ id }) => id)).toEqual([
+      "activity-update",
+      "activity-add",
+    ]);
+    expect(review.days[0]?.activities[0]).toMatchObject({
+      operationLabel: "Atualizar",
+      sourceActivityTitle: "Café já confirmado",
+      timeLabel: "Horário não informado",
+    });
+    expect(review.days[0]?.activities[1]).toMatchObject({
+      durationLabel: "1 h 30 min",
+      estimatedCostLabel: "R$ 25,00",
+      operationLabel: "Adicionar",
+      timeLabel: "Horário proposto: 17:30",
+    });
+    expect(review.days[1]?.referenceAvailable).toBe(false);
+  });
+
+  it("marks a Proposal based on an older Itinerary version without applying it", () => {
+    const itinerary = createReviewItinerary();
+    const proposal = {
+      ...createReadyProposal({ itinerary }),
+      baseItineraryVersion: itinerary.version - 1,
+    } as ItineraryProposal;
+
+    expect(buildItineraryProposalReview({ itinerary, proposal }).isBasedOnCurrentItinerary).toBe(
+      false,
+    );
+  });
+});

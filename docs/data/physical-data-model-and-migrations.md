@@ -9,10 +9,10 @@ document_type: data
 owner: Data
 
 status: Published
-version: "0.1.0"
+version: "0.1.1"
 
 created: "2026-07-18"
-last_updated: null
+last_updated: "2026-08-01"
 
 authors:
 
@@ -365,6 +365,8 @@ Todo JSON relevante deverá possuir:
 * validação;
 * tamanho máximo;
 * política de evolução.
+
+Quando múltiplas colunas JSONB compõem um único snapshot do mesmo aggregate, elas podem compartilhar uma coluna relacional de versão do conteúdo. O owner, o shape e a validação de cada coluna continuam obrigatórios.
 
 ---
 
@@ -1398,7 +1400,13 @@ A aplicação deverá garantir ao menos uma Reason por Recommendation válida.
 | `base_trip_context_version` | integer      | not null |
 | `base_itinerary_version`    | integer      | not null |
 | `context_snapshot_id`       | UUID         | nullable |
-| `generation_method`         | varchar(32)  | not null |
+| `generation_method`         | varchar(64)  | nullable |
+| `generation_version`        | varchar(80)  | nullable |
+| `content_schema_version`    | integer      | nullable |
+| `criteria`                  | jsonb        | nullable |
+| `justifications`           | jsonb        | nullable |
+| `limitations`              | jsonb        | nullable |
+| `planning_conflict_ids`     | jsonb        | nullable |
 | `valid_until`               | timestamptz  | nullable |
 | `aggregate_version`         | integer      | not null |
 | `created_at`                | timestamptz  | not null |
@@ -1410,6 +1418,49 @@ A aplicação deverá garantir ao menos uma Reason por Recommendation válida.
 | `expired_at`                | timestamptz  | nullable |
 | `cancelled_at`              | timestamptz  | nullable |
 | `superseded_at`             | timestamptz  | nullable |
+
+#### Snapshot híbrido de conteúdo revisável
+
+Owner: Proposal Management.
+
+Shapes versionados por `content_schema_version`:
+
+```text
+criteria: string[]
+justifications: string[]
+limitations: string[]
+planning_conflict_ids: string[]
+```
+
+Regras:
+
+* os arrays preservam a ordem recebida do Domínio;
+* `criteria` e `justifications` possuem ao menos um texto não vazio em `ready`;
+* `limitations` e `planning_conflict_ids` podem ser arrays vazios;
+* `planning_conflict_ids` é snapshot de referências, não FK cross-context;
+* Planning Assurance permanece owner dos conflitos referenciados;
+* o adapter valida shape e textos em runtime antes de reidratar o aggregate;
+* prompt, token, secret, payload bruto de Provider e dado pessoal desnecessário não pertencem ao snapshot.
+
+#### Lifecycle físico da conclusão
+
+Para `requested`, `generating`, `failed` e `cancelled`, os campos abaixo permanecem nulos:
+
+```text
+generation_method
+generation_version
+content_schema_version
+criteria
+justifications
+limitations
+planning_conflict_ids
+generated_at
+valid_until
+```
+
+Em `ready`, todos esses campos são obrigatórios. `generation_method` e `generation_version` registram proveniência técnica independente de estado e não definem Provider canônico.
+
+As linhas de `proposed_activities` continuam normalizadas e podem estar ausentes quando a Proposal vazia possuir justificativa explícita.
 
 ---
 
@@ -1432,7 +1483,6 @@ A aplicação deverá garantir ao menos uma Reason por Recommendation válida.
 | `estimated_cost_amount`   | numeric(19,4) | nullable |
 | `estimated_cost_currency` | char(3)       | nullable |
 | `reason`                  | text          | nullable |
-| `status`                  | varchar(32)   | not null |
 
 Operation types:
 
@@ -1442,6 +1492,8 @@ move
 update
 remove
 ```
+
+Proposed Activity não possui status independente nesta versão. Seu lifecycle é determinado pela Itinerary Proposal, enquanto a seleção para aceite parcial permanece em `proposal_management.proposal_selections`.
 
 ---
 

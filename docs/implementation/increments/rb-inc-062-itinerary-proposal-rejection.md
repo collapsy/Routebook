@@ -43,7 +43,7 @@ Issue: [#140](https://github.com/collapsy/Routebook/issues/140)
 
 Branch: `codex/rb-inc-062-reject-proposal`.
 
-Pull request: pendente.
+Pull request: [#141](https://github.com/collapsy/Routebook/pull/141).
 
 ## 2. Problema
 

@@ -72,7 +72,7 @@ ai_context:
 | RB-INC-060 | RB-BR-PRP-004, RB-BR-PRP-008, ciclo oficial e RB-INC-056, RB-INC-058–059 | #136 | `codex/rb-inc-060-expiration-command`, PR #137 | comando de aplicação para expirar e persistir Proposal `ready` | 60 testes do módulo; run 30714407588 com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para integração |
 | RB-INC-061 | RB-BR-PRP-004, RB-BR-PRP-008, RB-SCR-009, RB-INT-063–069 e RB-INC-057–060 | #138 | `codex/rb-inc-061-expired-review`, PR #139 | revisão histórica somente leitura da Proposal `expired` sem aplicação | validações locais verdes; run 30716155284 com migrations, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
 | RB-INC-062 | RB-BR-PRP-001, RB-BR-PRP-004, ciclo oficial, RB-DATA-001 e RB-INC-053 | #140 | `codex/rb-inc-062-reject-proposal`, PR #141 | transição pura de Proposal `ready` para `rejected` | validações locais verdes; run 30716780960 com migrations, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
-| RB-INC-063 | RB-BR-PRP-001, RB-BR-PRP-004, RB-DATA-001–002, RB-ADR-006 e RB-INC-055, RB-INC-062 | #142 | `codex/rb-inc-063-rejected-persistence`, PR pendente | migration, schema e round trip de Proposal `rejected` com snapshot preservado | validações locais verdes; PostgreSQL e suíte integral pendentes no CI | Em execução |
+| RB-INC-063 | RB-BR-PRP-001, RB-BR-PRP-004, RB-DATA-001–002, RB-ADR-006 e RB-INC-055, RB-INC-062 | #142 | `codex/rb-inc-063-rejected-persistence`, PR #143 | migration, schema e round trip de Proposal `rejected` com snapshot preservado | validações locais verdes; run 30717630992 com migration, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
 
 ## Evidências do RB-INC-003
 

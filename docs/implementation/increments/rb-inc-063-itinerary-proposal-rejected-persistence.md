@@ -46,7 +46,7 @@ Issue: [#142](https://github.com/collapsy/Routebook/issues/142)
 
 Branch: `codex/rb-inc-063-rejected-persistence`.
 
-Pull request: pendente.
+Pull request: [#143](https://github.com/collapsy/Routebook/pull/143).
 
 ## 2. Problema
 
@@ -108,15 +108,15 @@ docs/registry.md
 
 ## 9. Critérios de aceite
 
-- [ ] Proposal `rejected` faz round trip com `rejectedAt` e `updatedAt` preservados;
-- [ ] conteúdo, referências, versões, proveniência e Proposed Activities permanecem inalterados;
-- [ ] listagem reidrata Proposals `rejected` em ordem estável;
-- [ ] constraint rejeita `rejected` incompleta ou sem `rejected_at`;
-- [ ] constraint rejeita `rejected_at` anterior a `generated_at`;
-- [ ] estados anteriores continuam válidos somente com `rejected_at` nulo;
-- [ ] migration é aditiva e mantém linhas existentes válidas;
-- [ ] nenhuma escrita altera Itinerary ou outro bounded context;
-- [ ] documentação, lint, tipagem, testes e build permanecem verdes.
+- [x] Proposal `rejected` faz round trip com `rejectedAt` e `updatedAt` preservados;
+- [x] conteúdo, referências, versões, proveniência e Proposed Activities permanecem inalterados;
+- [x] listagem reidrata Proposals `rejected` em ordem estável;
+- [x] constraint rejeita `rejected` incompleta ou sem `rejected_at`;
+- [x] constraint rejeita `rejected_at` anterior a `generated_at`;
+- [x] estados anteriores continuam válidos somente com `rejected_at` nulo;
+- [x] migration é aditiva e mantém linhas existentes válidas;
+- [x] nenhuma escrita altera Itinerary ou outro bounded context;
+- [x] documentação, lint, tipagem, testes e build permanecem verdes.
 
 ## 10. Testes obrigatórios
 
@@ -157,4 +157,11 @@ Evidências locais:
 - Prettier dos arquivos TypeScript, JSON e Markdown alterados e `git diff --check` aprovados;
 - migration e testes PostgreSQL não executados localmente porque `DATABASE_URL` não está configurada e o Docker está indisponível.
 
-Evidências de CI pendentes.
+Evidências da PR no SHA `84a2879cec59779b042a7b1b1f20b883ba97107f`:
+
+- Documentation Validation: run `30717630981`, concluído com sucesso;
+- Engineering Validation: run `30717630992`, concluído com sucesso;
+- migration `0016` aplicada em PostgreSQL;
+- testes do repository e constraints PostgreSQL aprovados dentro da suíte integral;
+- formatação Linux, documentação, lint, tipagem, smoke e build aprovados;
+- 52 testes Playwright responsivos aprovados, sem retry ou flaky.

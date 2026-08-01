@@ -26,3 +26,9 @@ packages/maps
 .github/PULL_REQUEST_TEMPLATE.md
 .github/workflows/documentation-validation.yml
 scripts/validate-docs.mjs
+
+# RB-INC-042 files are validated by TypeScript, ESLint and CI integration tests.
+apps/web/app/viagens/**/recomendacoes/page.tsx
+apps/web/components/recommendation-card.tsx
+packages/database/drizzle/meta/_journal.json
+packages/database/src/recommendation-decision-service.ts

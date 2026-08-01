@@ -19,14 +19,7 @@ export type {
 } from "./deterministic-recommendations";
 
 export {
-  createRecommendationContextFingerprint,
-  fingerprintRecommendation,
-} from "./recommendation-fingerprint";
-export type { RecommendationContextFingerprintInput } from "./recommendation-fingerprint";
-
-export {
   acceptRecommendation,
-  createDecisionId,
   createRecommendation,
   createRecommendationId,
   expireRecommendation,
@@ -43,7 +36,7 @@ export {
 export type {
   CreateRecommendationInput,
   DecisionContextSnapshot,
-  DecisionId,
+  DecisionId as RecommendationLinkedDecisionId,
   Recommendation,
   RecommendationConfidence,
   RecommendationConfidenceLevel,
@@ -57,6 +50,27 @@ export type {
   RecommendationTarget,
   RecommendationValidity,
 } from "./recommendation";
+
+export {
+  createRecommendationContextFingerprint,
+  fingerprintRecommendation,
+} from "./recommendation-fingerprint";
+export type { RecommendationContextFingerprintInput } from "./recommendation-fingerprint";
+
+export { createDecision, createDecisionId, DecisionValidationError } from "./decision";
+export type {
+  AddToItineraryDecisionOption,
+  CreateDecisionInput,
+  Decision,
+  DecisionEffect,
+  DecisionId,
+  DecisionOption,
+  DecisionType,
+  SavePlaceDecisionOption,
+} from "./decision";
+
+export { DecisionRepositoryError } from "./decision-repository";
+export type { DecisionRepository } from "./decision-repository";
 
 export { RecommendationRepositoryError } from "./repository";
 export type { RecommendationRepository, SaveGeneratedRecommendationMode } from "./repository";

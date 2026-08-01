@@ -2,61 +2,16 @@
   "version": "7",
   "dialect": "postgresql",
   "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1785274650000,
-      "tag": "0000_create_trips",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1785285000000,
-      "tag": "0001_create_traveler_profiles",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1785290400000,
-      "tag": "0002_create_places",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1785327600000,
-      "tag": "0003_create_saved_places",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1785343200000,
-      "tag": "0004_add_accommodation_coordinates",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1785378660000,
-      "tag": "0005_create_itineraries",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1785416820000,
-      "tag": "0006_create_itinerary_free_periods",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1785444000000,
-      "tag": "0007_create_recommendations",
-      "breakpoints": true
-    }
+    { "idx": 0, "version": "7", "when": 1785274650000, "tag": "0000_create_trips", "breakpoints": true },
+    { "idx": 1, "version": "7", "when": 1785285000000, "tag": "0001_create_traveler_profiles", "breakpoints": true },
+    { "idx": 2, "version": "7", "when": 1785290400000, "tag": "0002_create_places", "breakpoints": true },
+    { "idx": 3, "version": "7", "when": 1785327600000, "tag": "0003_create_saved_places", "breakpoints": true },
+    { "idx": 4, "version": "7", "when": 1785343200000, "tag": "0004_add_accommodation_coordinates", "breakpoints": true },
+    { "idx": 5, "version": "7", "when": 1785378660000, "tag": "0005_create_itineraries", "breakpoints": true },
+    { "idx": 6, "version": "7", "when": 1785416820000, "tag": "0006_create_itinerary_free_periods", "breakpoints": true },
+    { "idx": 7, "version": "7", "when": 1785444000000, "tag": "0007_create_recommendations", "breakpoints": true },
+    { "idx": 8, "version": "7", "when": 1785462600000, "tag": "0008_create_decisions", "breakpoints": true },
+    { "idx": 9, "version": "7", "when": 1785466800000, "tag": "0009_link_decisions_to_itinerary_activities", "breakpoints": true },
+    { "idx": 10, "version": "7", "when": 1785535200000, "tag": "0010_create_planning_conflicts", "breakpoints": true }
   ]
 }

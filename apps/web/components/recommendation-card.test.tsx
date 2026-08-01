@@ -36,13 +36,31 @@ const presentedCard: RecommendationCardViewModel = {
   canIgnore: true,
 };
 
+const actions = {
+  ignoreAction: vi.fn(async () => ({ redirectTo: "/recomendacoes?ignorada=1" })),
+  saveAction: vi.fn(async () => ({ redirectTo: "/recomendacoes?salva=1" })),
+  addToItineraryAction: vi.fn(async () => ({ redirectTo: "/recomendacoes?adicionada=1" })),
+};
+
+function renderCard(card: RecommendationCardViewModel = presentedCard) {
+  return render(
+    <RecommendationCard
+      {...actions}
+      card={card}
+      itineraryDays={[{ id: "day-1", date: "2026-08-22" }]}
+      tripId="trip-1"
+    />,
+  );
+}
+
 afterEach(() => {
   cleanup();
+  vi.clearAllMocks();
 });
 
 describe("RecommendationCard", () => {
   it("presents known reasons, limitations, qualitative confidence and contextual states", () => {
-    render(<RecommendationCard card={presentedCard} ignoreAction={vi.fn()} tripId="trip-1" />);
+    renderCard();
 
     expect(screen.getByRole("heading", { name: "Praia do Amor" })).toBeInTheDocument();
     expect(screen.getByText("Praia publicada no catálogo de Pipa.")).toBeInTheDocument();
@@ -59,6 +77,9 @@ describe("RecommendationCard", () => {
     expect(
       screen.getByRole("button", { name: "Ignorar recomendação de Praia do Amor" }),
     ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Salvar lugar" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Adicionar ao roteiro" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Dia" })).toBeRequired();
     expect(screen.getByRole("link", { name: "Ver detalhes de Praia do Amor" })).toHaveAttribute(
       "href",
       "/viagens/trip-1/lugares/praia-do-amor",
@@ -66,26 +87,22 @@ describe("RecommendationCard", () => {
   });
 
   it("does not expose internal score, stars or arbitrary percentages", () => {
-    render(<RecommendationCard card={presentedCard} ignoreAction={vi.fn()} tripId="trip-1" />);
+    renderCard();
 
     expect(screen.queryByText(/score/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/estrela/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/\d+%/)).not.toBeInTheDocument();
   });
 
-  it("renders rejected state without an active ignore action", () => {
-    render(
-      <RecommendationCard
-        card={{ ...presentedCard, status: "rejected", canIgnore: false }}
-        ignoreAction={vi.fn()}
-        tripId="trip-1"
-      />,
-    );
+  it("renders rejected state without decision actions", () => {
+    renderCard({ ...presentedCard, status: "rejected", canIgnore: false });
 
     expect(screen.getByText("Recomendação ignorada")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent(
       "nenhuma Preferência ou Atividade foi alterada",
     );
     expect(screen.queryByRole("button", { name: /Ignorar recomendação/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Salvar lugar" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Adicionar ao roteiro" })).not.toBeInTheDocument();
   });
 });

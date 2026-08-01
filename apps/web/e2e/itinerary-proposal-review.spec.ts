@@ -207,9 +207,14 @@ test("bloqueia identidade de Proposal inválida antes da persistência", async (
     `Identidade inválida ${testInfo.project.name} ${Date.now()}`,
   );
   await page.goto(`/viagens/${tripId}/roteiro/proposta`);
-  await page.locator('input[name="itineraryProposalId"]').evaluate((input) => {
-    (input as HTMLInputElement).value = "proposal-invalida";
+  const proposalIdInput = page.locator('input[name="itineraryProposalId"]');
+  await proposalIdInput.evaluate((input) => {
+    const replacement = input.cloneNode() as HTMLInputElement;
+    replacement.value = "proposal-invalida";
+    replacement.setAttribute("value", "proposal-invalida");
+    input.replaceWith(replacement);
   });
+  await expect(proposalIdInput).toHaveValue("proposal-invalida");
 
   await Promise.all([
     page.waitForURL(/\/roteiro\?erroProposta=referencia-invalida$/),

@@ -9,10 +9,10 @@ document_type: api
 owner: API
 
 status: Published
-version: "0.1.0"
+version: "0.1.1"
 
 created: "2026-07-18"
-last_updated: null
+last_updated: "2026-08-01"
 
 authors:
 
@@ -2653,13 +2653,15 @@ Response mínima:
   "itineraryProposalId": "...",
   "tripId": "...",
   "itineraryId": "...",
-  "status": "generated",
+  "status": "ready",
   "baseTripContextVersion": 3,
   "baseItineraryVersion": 13,
   "proposedActivities": [],
   "validUntil": "2026-07-18T22:00:00-03:00"
 }
 ```
+
+`ready` significa que a Proposta foi gerada e está pronta para revisão humana. Esse estado não implica aceitação, aplicação ou alteração do Roteiro. `generated` pode nomear o evento `ItineraryProposalGenerated` e o instante `generatedAt`, mas não é estado nem alias persistido de Itinerary Proposal.
 
 ---
 

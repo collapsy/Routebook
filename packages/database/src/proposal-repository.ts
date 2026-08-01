@@ -5,6 +5,7 @@ import {
   completeItineraryProposalGeneration,
   expireItineraryProposalByTime,
   failItineraryProposalGeneration,
+  finalizeAppliedItineraryProposalAcceptance,
   ItineraryProposalRepositoryError,
   rejectItineraryProposal,
   requestItineraryProposal,
@@ -34,7 +35,10 @@ const operationTypes: readonly ProposedActivityOperationType[] = [
 
 function hasReviewableContent(proposal: Readonly<{ status: string }>): boolean {
   return (
-    proposal.status === "ready" || proposal.status === "rejected" || proposal.status === "expired"
+    proposal.status === "ready" ||
+    proposal.status === "accepted" ||
+    proposal.status === "rejected" ||
+    proposal.status === "expired"
   );
 }
 
@@ -133,6 +137,7 @@ function rehydrateItineraryProposal(
           requireDate(row.generationStartedAt, "generationStartedAt"),
         );
       case "ready":
+      case "accepted":
       case "rejected":
       case "expired": {
         if (row.contentSchemaVersion !== 1) {
@@ -159,6 +164,12 @@ function rehydrateItineraryProposal(
           generatedAt: requireDate(row.generatedAt, "generatedAt"),
           validUntil: requireDate(row.validUntil, "validUntil"),
         });
+        if (row.status === "accepted") {
+          return finalizeAppliedItineraryProposalAcceptance(
+            ready,
+            requireDate(row.acceptedAt, "acceptedAt"),
+          );
+        }
         if (row.status === "rejected") {
           return rejectItineraryProposal(ready, requireDate(row.rejectedAt, "rejectedAt"));
         }
@@ -219,6 +230,7 @@ function valuesFor(proposal: ItineraryProposal): ItineraryProposalInsert {
     planningConflictIds: proposal.planningConflictIds ?? null,
     generatedAt: proposal.generatedAt ?? null,
     validUntil: proposal.validUntil ?? null,
+    acceptedAt: proposal.acceptedAt ?? null,
     rejectedAt: proposal.rejectedAt ?? null,
     expiredAt: proposal.expiredAt ?? null,
     failedAt: proposal.failedAt ?? null,

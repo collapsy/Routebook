@@ -42,6 +42,7 @@ export const itineraryProposals = pgTable(
     planningConflictIds: jsonb("planning_conflict_ids"),
     generatedAt: timestamp("generated_at", { withTimezone: true, mode: "date" }),
     validUntil: timestamp("valid_until", { withTimezone: true, mode: "date" }),
+    expiredAt: timestamp("expired_at", { withTimezone: true, mode: "date" }),
     failedAt: timestamp("failed_at", { withTimezone: true, mode: "date" }),
     failureCode: varchar("failure_code", { length: 160 }),
     cancelledAt: timestamp("cancelled_at", { withTimezone: true, mode: "date" }),
@@ -49,7 +50,7 @@ export const itineraryProposals = pgTable(
   (table) => [
     check(
       "itinerary_proposals_status_check",
-      sql`${table.status} in ('requested', 'generating', 'ready', 'failed', 'cancelled')`,
+      sql`${table.status} in ('requested', 'generating', 'ready', 'expired', 'failed', 'cancelled')`,
     ),
     check(
       "itinerary_proposals_versions_check",
@@ -58,17 +59,18 @@ export const itineraryProposals = pgTable(
     check(
       "itinerary_proposals_lifecycle_check",
       sql`(
-        (${table.status} = 'requested' AND ${table.generationStartedAt} IS NULL AND ${table.generationMethod} IS NULL AND ${table.generationVersion} IS NULL AND ${table.contentSchemaVersion} IS NULL AND ${table.criteria} IS NULL AND ${table.justifications} IS NULL AND ${table.limitations} IS NULL AND ${table.planningConflictIds} IS NULL AND ${table.generatedAt} IS NULL AND ${table.validUntil} IS NULL AND ${table.failedAt} IS NULL AND ${table.failureCode} IS NULL AND ${table.cancelledAt} IS NULL AND ${table.updatedAt} = ${table.requestedAt})
-        OR (${table.status} = 'generating' AND ${table.generationStartedAt} IS NOT NULL AND ${table.generationMethod} IS NULL AND ${table.generationVersion} IS NULL AND ${table.contentSchemaVersion} IS NULL AND ${table.criteria} IS NULL AND ${table.justifications} IS NULL AND ${table.limitations} IS NULL AND ${table.planningConflictIds} IS NULL AND ${table.generatedAt} IS NULL AND ${table.validUntil} IS NULL AND ${table.failedAt} IS NULL AND ${table.failureCode} IS NULL AND ${table.cancelledAt} IS NULL AND ${table.updatedAt} = ${table.generationStartedAt})
-        OR (${table.status} = 'ready' AND ${table.generationStartedAt} IS NOT NULL AND ${table.generationMethod} IS NOT NULL AND ${table.generationVersion} IS NOT NULL AND ${table.contentSchemaVersion} = 1 AND ${table.criteria} IS NOT NULL AND ${table.justifications} IS NOT NULL AND ${table.limitations} IS NOT NULL AND ${table.planningConflictIds} IS NOT NULL AND ${table.generatedAt} IS NOT NULL AND ${table.validUntil} IS NOT NULL AND ${table.failedAt} IS NULL AND ${table.failureCode} IS NULL AND ${table.cancelledAt} IS NULL AND ${table.updatedAt} = ${table.generatedAt})
-        OR (${table.status} = 'failed' AND ${table.generationStartedAt} IS NOT NULL AND ${table.generationMethod} IS NULL AND ${table.generationVersion} IS NULL AND ${table.contentSchemaVersion} IS NULL AND ${table.criteria} IS NULL AND ${table.justifications} IS NULL AND ${table.limitations} IS NULL AND ${table.planningConflictIds} IS NULL AND ${table.generatedAt} IS NULL AND ${table.validUntil} IS NULL AND ${table.failedAt} IS NOT NULL AND ${table.failureCode} IS NOT NULL AND ${table.cancelledAt} IS NULL AND ${table.updatedAt} = ${table.failedAt})
-        OR (${table.status} = 'cancelled' AND ${table.generationMethod} IS NULL AND ${table.generationVersion} IS NULL AND ${table.contentSchemaVersion} IS NULL AND ${table.criteria} IS NULL AND ${table.justifications} IS NULL AND ${table.limitations} IS NULL AND ${table.planningConflictIds} IS NULL AND ${table.generatedAt} IS NULL AND ${table.validUntil} IS NULL AND ${table.failedAt} IS NULL AND ${table.failureCode} IS NULL AND ${table.cancelledAt} IS NOT NULL AND ${table.updatedAt} = ${table.cancelledAt})
+        (${table.status} = 'requested' AND ${table.generationStartedAt} IS NULL AND ${table.generationMethod} IS NULL AND ${table.generationVersion} IS NULL AND ${table.contentSchemaVersion} IS NULL AND ${table.criteria} IS NULL AND ${table.justifications} IS NULL AND ${table.limitations} IS NULL AND ${table.planningConflictIds} IS NULL AND ${table.generatedAt} IS NULL AND ${table.validUntil} IS NULL AND ${table.expiredAt} IS NULL AND ${table.failedAt} IS NULL AND ${table.failureCode} IS NULL AND ${table.cancelledAt} IS NULL AND ${table.updatedAt} = ${table.requestedAt})
+        OR (${table.status} = 'generating' AND ${table.generationStartedAt} IS NOT NULL AND ${table.generationMethod} IS NULL AND ${table.generationVersion} IS NULL AND ${table.contentSchemaVersion} IS NULL AND ${table.criteria} IS NULL AND ${table.justifications} IS NULL AND ${table.limitations} IS NULL AND ${table.planningConflictIds} IS NULL AND ${table.generatedAt} IS NULL AND ${table.validUntil} IS NULL AND ${table.expiredAt} IS NULL AND ${table.failedAt} IS NULL AND ${table.failureCode} IS NULL AND ${table.cancelledAt} IS NULL AND ${table.updatedAt} = ${table.generationStartedAt})
+        OR (${table.status} = 'ready' AND ${table.generationStartedAt} IS NOT NULL AND ${table.generationMethod} IS NOT NULL AND ${table.generationVersion} IS NOT NULL AND ${table.contentSchemaVersion} = 1 AND ${table.criteria} IS NOT NULL AND ${table.justifications} IS NOT NULL AND ${table.limitations} IS NOT NULL AND ${table.planningConflictIds} IS NOT NULL AND ${table.generatedAt} IS NOT NULL AND ${table.validUntil} IS NOT NULL AND ${table.expiredAt} IS NULL AND ${table.failedAt} IS NULL AND ${table.failureCode} IS NULL AND ${table.cancelledAt} IS NULL AND ${table.updatedAt} = ${table.generatedAt})
+        OR (${table.status} = 'expired' AND ${table.generationStartedAt} IS NOT NULL AND ${table.generationMethod} IS NOT NULL AND ${table.generationVersion} IS NOT NULL AND ${table.contentSchemaVersion} = 1 AND ${table.criteria} IS NOT NULL AND ${table.justifications} IS NOT NULL AND ${table.limitations} IS NOT NULL AND ${table.planningConflictIds} IS NOT NULL AND ${table.generatedAt} IS NOT NULL AND ${table.validUntil} IS NOT NULL AND ${table.expiredAt} IS NOT NULL AND ${table.failedAt} IS NULL AND ${table.failureCode} IS NULL AND ${table.cancelledAt} IS NULL AND ${table.updatedAt} = ${table.expiredAt})
+        OR (${table.status} = 'failed' AND ${table.generationStartedAt} IS NOT NULL AND ${table.generationMethod} IS NULL AND ${table.generationVersion} IS NULL AND ${table.contentSchemaVersion} IS NULL AND ${table.criteria} IS NULL AND ${table.justifications} IS NULL AND ${table.limitations} IS NULL AND ${table.planningConflictIds} IS NULL AND ${table.generatedAt} IS NULL AND ${table.validUntil} IS NULL AND ${table.expiredAt} IS NULL AND ${table.failedAt} IS NOT NULL AND ${table.failureCode} IS NOT NULL AND ${table.cancelledAt} IS NULL AND ${table.updatedAt} = ${table.failedAt})
+        OR (${table.status} = 'cancelled' AND ${table.generationMethod} IS NULL AND ${table.generationVersion} IS NULL AND ${table.contentSchemaVersion} IS NULL AND ${table.criteria} IS NULL AND ${table.justifications} IS NULL AND ${table.limitations} IS NULL AND ${table.planningConflictIds} IS NULL AND ${table.generatedAt} IS NULL AND ${table.validUntil} IS NULL AND ${table.expiredAt} IS NULL AND ${table.failedAt} IS NULL AND ${table.failureCode} IS NULL AND ${table.cancelledAt} IS NOT NULL AND ${table.updatedAt} = ${table.cancelledAt})
       )`,
     ),
     check(
       "itinerary_proposals_content_shape_check",
       sql`(
-        ${table.status} <> 'ready'
+        ${table.status} NOT IN ('ready', 'expired')
         OR (
           jsonb_typeof(${table.criteria}) = 'array'
           AND jsonb_array_length(${table.criteria}) > 0
@@ -85,6 +87,7 @@ export const itineraryProposals = pgTable(
         AND (${table.generationStartedAt} IS NULL OR ${table.generationStartedAt} >= ${table.requestedAt})
         AND (${table.generatedAt} IS NULL OR ${table.generatedAt} >= ${table.generationStartedAt})
         AND (${table.validUntil} IS NULL OR ${table.validUntil} >= ${table.generatedAt})
+        AND (${table.expiredAt} IS NULL OR ${table.expiredAt} >= ${table.validUntil})
         AND (${table.failedAt} IS NULL OR ${table.failedAt} >= ${table.generationStartedAt})
         AND (${table.cancelledAt} IS NULL OR ${table.cancelledAt} >= COALESCE(${table.generationStartedAt}, ${table.requestedAt}))`,
     ),

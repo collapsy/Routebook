@@ -3,6 +3,7 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 import {
   cancelItineraryProposalGeneration,
   completeItineraryProposalGeneration,
+  expireItineraryProposalByTime,
   failItineraryProposalGeneration,
   ItineraryProposalRepositoryError,
   requestItineraryProposal,
@@ -29,6 +30,10 @@ const operationTypes: readonly ProposedActivityOperationType[] = [
   "update",
   "remove",
 ];
+
+function hasReviewableContent(proposal: Pick<ItineraryProposal, "status">): boolean {
+  return proposal.status === "ready" || proposal.status === "expired";
+}
 
 function invalidPersistence(message: string): ItineraryProposalRepositoryError {
   return new ItineraryProposalRepositoryError(message, "invalid-status");
@@ -112,7 +117,7 @@ function rehydrateItineraryProposal(
       requestedAt: row.requestedAt,
     });
 
-    if (row.status !== "ready" && activityRows.length > 0) {
+    if (row.status !== "ready" && row.status !== "expired" && activityRows.length > 0) {
       throw invalidPersistence("Uma Itinerary Proposal não pronta possui Proposed Activities.");
     }
 
@@ -124,7 +129,8 @@ function rehydrateItineraryProposal(
           requested,
           requireDate(row.generationStartedAt, "generationStartedAt"),
         );
-      case "ready": {
+      case "ready":
+      case "expired": {
         if (row.contentSchemaVersion !== 1) {
           throw invalidPersistence(
             `Versão de snapshot persistida não suportada: ${String(row.contentSchemaVersion)}.`,
@@ -134,7 +140,7 @@ function rehydrateItineraryProposal(
           requested,
           requireDate(row.generationStartedAt, "generationStartedAt"),
         );
-        return completeItineraryProposalGeneration(generating, {
+        const ready = completeItineraryProposalGeneration(generating, {
           generationMethod: requireText(row.generationMethod, "generationMethod"),
           generationVersion: requireText(row.generationVersion, "generationVersion"),
           proposedActivities: activityRows.map(mapProposedActivity),
@@ -149,6 +155,9 @@ function rehydrateItineraryProposal(
           generatedAt: requireDate(row.generatedAt, "generatedAt"),
           validUntil: requireDate(row.validUntil, "validUntil"),
         });
+        return row.status === "expired"
+          ? expireItineraryProposalByTime(ready, requireDate(row.expiredAt, "expiredAt"))
+          : ready;
       }
       case "failed": {
         const generating = startItineraryProposalGeneration(
@@ -195,13 +204,14 @@ function valuesFor(proposal: ItineraryProposal): ItineraryProposalInsert {
     generationStartedAt: proposal.generationStartedAt ?? null,
     generationMethod: proposal.generationMethod ?? null,
     generationVersion: proposal.generationVersion ?? null,
-    contentSchemaVersion: proposal.status === "ready" ? 1 : null,
+    contentSchemaVersion: hasReviewableContent(proposal) ? 1 : null,
     criteria: proposal.criteria ?? null,
     justifications: proposal.justifications ?? null,
     limitations: proposal.limitations ?? null,
     planningConflictIds: proposal.planningConflictIds ?? null,
     generatedAt: proposal.generatedAt ?? null,
     validUntil: proposal.validUntil ?? null,
+    expiredAt: proposal.expiredAt ?? null,
     failedAt: proposal.failedAt ?? null,
     failureCode: proposal.failureCode ?? null,
     cancelledAt: proposal.cancelledAt ?? null,
@@ -209,7 +219,7 @@ function valuesFor(proposal: ItineraryProposal): ItineraryProposalInsert {
 }
 
 function activityValuesFor(proposal: ItineraryProposal): ProposedActivityInsert[] {
-  if (proposal.status !== "ready") return [];
+  if (!hasReviewableContent(proposal)) return [];
   return (proposal.proposedActivities ?? []).map((activity) => ({
     id: activity.proposedActivityId,
     itineraryProposalId: proposal.id,

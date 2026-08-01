@@ -5,7 +5,7 @@ description: Introduz o agregado PlanningConflict, sua detecção determinístic
 document_type: implementation-increment
 owner: Planning Assurance
 status: Draft
-version: "0.2.0"
+version: "0.3.0"
 created: "2026-07-31"
 last_updated: "2026-07-31"
 authors:
@@ -26,7 +26,8 @@ related_documents:
   - RB-INC-042
 prerequisites:
   - RB-INC-042
-next_documents: []
+next_documents:
+  - RB-INC-044
 ai_context:
   priority: critical
   index: true

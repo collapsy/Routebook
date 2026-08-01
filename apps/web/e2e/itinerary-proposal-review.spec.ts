@@ -23,7 +23,7 @@ async function createProposalFixture(
   tripName: string,
   status: "ready" | "expired" = "ready",
 ): Promise<string> {
-  const requestedAt = new Date();
+  const requestedAt = new Date(Date.now() - 10_000);
   const trip = createTrip(
     {
       name: tripName,

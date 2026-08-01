@@ -112,4 +112,4 @@ Uma correlação ausente ou incompatível deverá falhar de forma recuperável. 
 
 ## 9. Evidências de conclusão
 
-O incremento somente poderá ser considerado pronto quando a PR acumulada possuir SHA final com Documentation Validation e Engineering Validation verdes.
+A implementação `3f0114b` foi validada na PR acumulada #105 pelos workflows Documentation Validation (`30679248776`) e Engineering Validation (`30679248768`, tentativa 2), incluindo migration, testes de integração e Playwright desktop/mobile. A primeira tentativa do workflow de engenharia não iniciou o checkout por timeout externo ao baixar a imagem PostGIS; a reexecução passou integralmente sem alteração de código.

@@ -55,7 +55,7 @@ ai_context:
 | RB-INC-043 | RB-FR-105, RB-FR-107–110, RB-BR-PCF-001–008, RB-DOM-001–004 | #96; correção #98 | `feature/rb-inc-043-planning-conflict-core`, PR #97; integração PR #94; correção PR #99 | `planning-assurance`, detecção, migrations 0010–0011, persistência e alinhamento canônico | run 30674788792; PR #99, SHA 1b45de1 | Integrado |
 | RB-INC-044 | RB-FR-105, RB-FR-107–110, RB-SCR-010, RB-UF-021, RB-INT-070–074 | #100 | `codex/rb-inc-044-planning-conflicts-experience`, PR #101 | Revisão contextual, read model, filtros e estados | runs 30677382538 e 30677382583, SHA 53f32dc | Integrado |
 | RB-INC-045 | RB-FR-111, RB-BR-PCF-002–006, RB-SCR-010, RB-INT-073 | #102 | `codex/rb-inc-045-ignore-planning-risk`, PR #103 | `IgnorePlanningRisk`, Decision explícita, estado `ignored` e confirmação acessível | runs 30678645776 e 30678645771, SHA ca26e40 | Verde em Draft |
-| RB-INC-046 | RB-BR-PCF-003, RB-BR-PCF-006, RB-SCR-010, RB-INT-073 | #104 | `codex/rb-inc-046-ignored-risk-history` | histórico auditável de riscos ignorados e Decisions correlacionadas | PR pendente | Em execução |
+| RB-INC-046 | RB-BR-PCF-003, RB-BR-PCF-006, RB-SCR-010, RB-INT-073 | #104 | `codex/rb-inc-046-ignored-risk-history`, PR #105 | histórico auditável de riscos ignorados e Decisions correlacionadas | runs 30679248776 e 30679248768 (attempt 2), SHA 3f0114b | Verde em Draft |
 
 ## Evidências do RB-INC-003
 

@@ -44,6 +44,8 @@ Branch: `codex/rb-inc-058-temporal-expiration`
 
 Base empilhada: `codex/rb-inc-057-ready-review`, PR #131.
 
+Pull request acumulada: [#133](https://github.com/collapsy/Routebook/pull/133).
+
 ## 2. Problema
 
 O estado `expired`, o instante `expiredAt` e a perda de validade temporal são canônicos, mas o aggregate ainda não oferece uma transição executável. Assim, consumidores não conseguem encerrar de forma uniforme uma Proposal pronta cuja validade terminou.
@@ -141,4 +143,4 @@ Reverter propriedade, operação, export, testes e documentação. Não há migr
 - `@routebook/proposal-management`: lint e typecheck verdes; 53 testes verdes;
 - workspace: lint, typecheck e build verdes;
 - suíte PostgreSQL e Playwright não executadas localmente porque `DATABASE_URL` não está configurada e o daemon Docker está indisponível;
-- validação integral: pendente do workflow da pull request.
+- PR #133: documentação, migration PostgreSQL, suíte integral, smoke, build e 50 testes Playwright responsivos verdes.

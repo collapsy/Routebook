@@ -49,7 +49,7 @@ O log isolou dois contratos frágeis:
 
 - configuração de paralelismo Playwright permanece original;
 - os dois títulos do histórico são validados independentemente da ordem;
-- a navegação é validada por assertion da URL final após o clique;
+- a navegação aguarda a URL final observável, sem exigir um evento interno de commit;
 - desktop Chromium e Pixel 7 continuam executados;
 - retries e timeouts não aumentam;
 - nenhuma jornada ou requisito é removido ou relaxado;
@@ -109,7 +109,7 @@ docs/registry.md
 | Risco | Impacto | Mitigação |
 | --- | --- | --- |
 | correção aceitar conteúdo ausente | Alto | manter assertions separadas para os dois títulos |
-| navegação continuar instável | Médio | usar auto-waiting da assertion de URL e preservar trace |
+| navegação continuar instável | Médio | aguardar a URL final observável e preservar trace |
 | existir outra causa de flake | Médio | exigir duas execuções completas sem retry |
 
 ## 11. Rollback

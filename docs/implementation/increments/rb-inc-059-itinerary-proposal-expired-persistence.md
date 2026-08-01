@@ -45,6 +45,8 @@ Issue: [#134](https://github.com/collapsy/Routebook/issues/134)
 
 Branch: `codex/rb-inc-059-expired-persistence`.
 
+Pull request: [#135](https://github.com/collapsy/Routebook/pull/135).
+
 ## 2. Problema
 
 O domínio já expira temporalmente uma Proposal `ready`, mas o schema físico aceita somente o ciclo até `ready`, não possui `expired_at` e o adapter não consegue salvar ou reidratar `expired`. A tentativa atual falha por constraint ou descarta o lifecycle esperado.
@@ -104,14 +106,14 @@ docs/registry.md
 
 ## 9. Critérios de aceite
 
-- [ ] Proposal `expired` faz round trip com `expiredAt` e `updatedAt` preservados;
-- [ ] conteúdo, referências, versões, proveniência e Proposed Activities permanecem inalterados;
-- [ ] listagem reidrata Proposals `expired` em ordem estável;
-- [ ] constraint rejeita `expired` incompleta, antecipada ou sem `expired_at`;
-- [ ] estados anteriores continuam válidos somente com `expired_at` nulo;
-- [ ] migration é aditiva e mantém linhas existentes válidas;
-- [ ] nenhuma escrita altera Itinerary ou outro bounded context;
-- [ ] documentação, lint, tipagem, testes e build permanecem verdes.
+- [x] Proposal `expired` faz round trip com `expiredAt` e `updatedAt` preservados;
+- [x] conteúdo, referências, versões, proveniência e Proposed Activities permanecem inalterados;
+- [x] listagem reidrata Proposals `expired` em ordem estável;
+- [x] constraint rejeita `expired` incompleta, antecipada ou sem `expired_at`;
+- [x] estados anteriores continuam válidos somente com `expired_at` nulo;
+- [x] migration é aditiva e mantém linhas existentes válidas;
+- [x] nenhuma escrita altera Itinerary ou outro bounded context;
+- [x] documentação, lint, tipagem, testes e build permanecem verdes.
 
 ## 10. Testes obrigatórios
 
@@ -148,4 +150,5 @@ A migration é aditiva. Antes da integração, branch e migration podem ser reve
 - `@routebook/database`: lint e typecheck verdes;
 - `@routebook/proposal-management`: 53 testes verdes;
 - workspace: lint, typecheck e build verdes;
-- suíte PostgreSQL não executada localmente porque `DATABASE_URL` não está configurada; migration e testes de integração permanecem obrigatórios no CI.
+- suíte PostgreSQL não executada localmente porque `DATABASE_URL` não está configurada; migration e testes de integração foram cobertos pelo CI.
+- PR #135, run `30713827362`: formatação, documentação, lint, typecheck, migration PostgreSQL, suíte de componentes e domínio, smoke, build e 50 testes Playwright responsivos verdes.

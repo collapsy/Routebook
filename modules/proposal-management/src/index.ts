@@ -33,6 +33,7 @@ export {
   expireAndPersistItineraryProposalByTime,
   failAndPersistItineraryProposalGeneration,
   ItineraryProposalApplicationError,
+  rejectAndPersistItineraryProposal,
   requestAndPersistItineraryProposal,
   startAndPersistItineraryProposalGeneration,
 } from "./service";
@@ -41,5 +42,6 @@ export type {
   CompleteItineraryProposalGenerationCommand,
   ExpireItineraryProposalByTimeCommand,
   FailItineraryProposalGenerationCommand,
+  RejectItineraryProposalCommand,
   StartItineraryProposalGenerationCommand,
 } from "./service";

@@ -18,6 +18,7 @@ import {
   expireAndPersistItineraryProposalByTime,
   failAndPersistItineraryProposalGeneration,
   ItineraryProposalApplicationError,
+  rejectAndPersistItineraryProposal,
   requestAndPersistItineraryProposal,
   startAndPersistItineraryProposalGeneration,
 } from "./service";
@@ -225,6 +226,47 @@ describe("comandos do ciclo inicial de Itinerary Proposal", () => {
     expect(repository.saveCalls).toHaveLength(1);
   });
 
+  it("rejeita e persiste uma Proposal ready exatamente em updatedAt", async () => {
+    const repository = new MemoryItineraryProposalRepository();
+    const ready = readyProposal();
+    const rejectedAt = new Date(ready.updatedAt.getTime());
+    repository.seed(ready);
+
+    const rejected = await rejectAndPersistItineraryProposal(repository, {
+      tripId: ready.tripId,
+      itineraryProposalId: ready.id,
+      rejectedAt,
+    });
+
+    expect(rejected).toMatchObject({ status: "rejected", rejectedAt, updatedAt: rejectedAt });
+    expect(rejected.proposedActivities).toBe(ready.proposedActivities);
+    expect(rejected.criteria).toBe(ready.criteria);
+    expect(rejected.generationMethod).toBe(ready.generationMethod);
+    expect(repository.saveCalls).toEqual([rejected]);
+    expect(await repository.findById(ready.tripId, ready.id)).toBe(rejected);
+  });
+
+  it("rejeita depois de updatedAt preservando integralmente o snapshot ready", async () => {
+    const repository = new MemoryItineraryProposalRepository();
+    const ready = readyProposal();
+    const rejectedAt = new Date(ready.updatedAt.getTime() + 60_000);
+    repository.seed(ready);
+
+    const rejected = await rejectAndPersistItineraryProposal(repository, {
+      tripId: ready.tripId,
+      itineraryProposalId: ready.id,
+      rejectedAt,
+    });
+
+    expect(rejected).toEqual({
+      ...ready,
+      status: "rejected",
+      rejectedAt,
+      updatedAt: rejectedAt,
+    });
+    expect(repository.saveCalls).toHaveLength(1);
+  });
+
   it("cancela uma solicitação antes do início da geração", async () => {
     const repository = new MemoryItineraryProposalRepository();
     const requested = requestedProposal();
@@ -308,6 +350,15 @@ describe("comandos do ciclo inicial de Itinerary Proposal", () => {
           tripId: "trip-1",
           itineraryProposalId,
           expiredAt: new Date("2026-08-02T12:02:00.000Z"),
+        }),
+    ],
+    [
+      "reject",
+      (repository: ItineraryProposalRepository, itineraryProposalId: ItineraryProposalId) =>
+        rejectAndPersistItineraryProposal(repository, {
+          tripId: "trip-1",
+          itineraryProposalId,
+          rejectedAt: new Date("2026-08-01T12:02:00.000Z"),
         }),
     ],
   ] as const)("rejeita Proposal ausente no comando %s", async (_, command) => {
@@ -405,6 +456,59 @@ describe("comandos do ciclo inicial de Itinerary Proposal", () => {
       }),
     ).rejects.toBeInstanceOf(ItineraryProposalValidationError);
     expect(repository.saveCalls).toEqual([]);
+    expect(await repository.findById(ready.tripId, ready.id)).toBe(ready);
+  });
+
+  it("não salva rejeição em estado incompatível", async () => {
+    const repository = new MemoryItineraryProposalRepository();
+    const requested = requestedProposal();
+    repository.seed(requested);
+
+    await expect(
+      rejectAndPersistItineraryProposal(repository, {
+        tripId: requested.tripId,
+        itineraryProposalId: requested.id,
+        rejectedAt: new Date("2026-08-01T12:02:00.000Z"),
+      }),
+    ).rejects.toBeInstanceOf(ItineraryProposalTransitionError);
+    expect(repository.saveCalls).toEqual([]);
+  });
+
+  it.each([
+    ["retroativo", new Date("2026-08-01T12:01:59.999Z")],
+    ["inválido", new Date("invalid")],
+  ])("não salva quando rejectedAt é %s", async (_, rejectedAt) => {
+    const repository = new MemoryItineraryProposalRepository();
+    const ready = readyProposal();
+    repository.seed(ready);
+
+    await expect(
+      rejectAndPersistItineraryProposal(repository, {
+        tripId: ready.tripId,
+        itineraryProposalId: ready.id,
+        rejectedAt,
+      }),
+    ).rejects.toBeInstanceOf(ItineraryProposalValidationError);
+    expect(repository.saveCalls).toEqual([]);
+    expect(await repository.findById(ready.tripId, ready.id)).toBe(ready);
+  });
+
+  it("propaga falha de persistência da rejeição sem substituir a Proposal ready", async () => {
+    const repository = new MemoryItineraryProposalRepository();
+    const ready = readyProposal();
+    const persistenceError = new Error("falha de persistência");
+    repository.seed(ready);
+    repository.saveError = persistenceError;
+
+    await expect(
+      rejectAndPersistItineraryProposal(repository, {
+        tripId: ready.tripId,
+        itineraryProposalId: ready.id,
+        rejectedAt: new Date(ready.updatedAt.getTime()),
+      }),
+    ).rejects.toBe(persistenceError);
+    expect(repository.saveCalls).toHaveLength(1);
+    expect(repository.saveCalls[0]).toMatchObject({ status: "rejected" });
     expect(await repository.findById(ready.tripId, ready.id)).toBe(ready);
   });
 

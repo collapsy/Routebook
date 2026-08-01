@@ -1,6 +1,7 @@
 export { closeDatabase, getDatabase } from "./client";
 export { decisions } from "./decision-schema";
 export { planningConflicts } from "./planning-conflict-schema";
+export { itineraryProposals } from "./proposal-schema";
 export {
   itineraries,
   itineraryActivities,
@@ -30,6 +31,7 @@ export {
   DrizzlePlanningConflictRepository,
   reconcilePlanningConflictsWithDatabase,
 } from "./planning-conflict-repository";
+export { DrizzleItineraryProposalRepository } from "./proposal-repository";
 export { DrizzleRecommendationRepository } from "./recommendation-repository";
 export {
   addRecommendedPlaceToItinerary,

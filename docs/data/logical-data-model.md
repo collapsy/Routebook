@@ -9,10 +9,10 @@ document_type: data
 owner: Data
 
 status: Published
-version: "0.1.0"
+version: "0.1.1"
 
 created: "2026-07-18"
-last_updated: null
+last_updated: "2026-08-01"
 
 authors:
 
@@ -1825,6 +1825,12 @@ baseTripContextVersion
 baseItineraryVersion
 contextSnapshotId
 generationMethod
+generationVersion
+contentSchemaVersion
+criteria
+justifications
+limitations
+planningConflictIds
 validUntil
 aggregateVersion
 createdAt
@@ -1842,6 +1848,12 @@ supersededAt
 
 * ItineraryProposalId obrigatório;
 * versões base obrigatórias;
+* `ready` exige critérios e justificativas explícitos;
+* limitações e Planning Conflict IDs conhecidos existem como coleções, ainda que vazias;
+* `generationMethod`, `generationVersion`, `generatedAt` e `validUntil` são obrigatórios em `ready`;
+* conteúdo revisável é versionado por `contentSchemaVersion`;
+* Planning Conflict IDs são referências capturadas em snapshot e não transferem ownership de Planning Assurance;
+* Proposed Activities permanecem entidades normalizadas da Proposal;
 * expirada não pode ser aplicada;
 * não altera Itinerary antes de aceite;
 * aplicação idempotente;

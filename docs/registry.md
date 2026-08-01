@@ -43,8 +43,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-ARC-003 | Arquitetura de Integrações e Portas | Architecture | Published | 0.1.0 | [integrations-and-ports.md](./architecture/integrations-and-ports.md) |
 | RB-ARC-004 | Arquitetura de Dados e Persistência | Architecture | Published | 0.1.0 | [data-and-persistence.md](./architecture/data-and-persistence.md) |
 | RB-ARC-005 | Arquitetura de IA e Agentes | Architecture | Published | 0.1.0 | [ai-and-agents.md](./architecture/ai-and-agents.md) |
-| RB-DATA-001 | Modelo Lógico de Dados | Data | Published | 0.1.0 | [logical-data-model.md](./data/logical-data-model.md) |
-| RB-DATA-002 | Modelo Físico de Dados e Estratégia de Migrations | Data | Published | 0.1.0 | [physical-data-model-and-migrations.md](./data/physical-data-model-and-migrations.md) |
+| RB-DATA-001 | Modelo Lógico de Dados | Data | Published | 0.1.1 | [logical-data-model.md](./data/logical-data-model.md) |
+| RB-DATA-002 | Modelo Físico de Dados e Estratégia de Migrations | Data | Published | 0.1.1 | [physical-data-model-and-migrations.md](./data/physical-data-model-and-migrations.md) |
 | RB-API-001 | Diretrizes e Contratos de API | API | Published | 0.1.1 | [api-guidelines-and-contracts.md](./data/api-guidelines-and-contracts.md) |
 | RB-SEC-001 | Arquitetura de Segurança e Privacidade | Security | Published | 0.1.0 | [security-and-privacy-architecture.md](./security/security-and-privacy-architecture.md) |
 | RB-OBS-001 | Observabilidade e Operação | Observability | Published | 0.1.0 | [observability-and-operations.md](./observability/observability-and-operations.md) |
@@ -146,6 +146,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-052 | Context Pack do RB-INC-052 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-052-itinerary-proposal-ready-contract.md](./implementation/context-packs/rb-inc-052-itinerary-proposal-ready-contract.md) |
 | RB-INC-053 | Conclusão Canônica de Itinerary Proposal Ready | Implementation Increment | Draft | 0.1.0 | [rb-inc-053-itinerary-proposal-ready-domain.md](./implementation/increments/rb-inc-053-itinerary-proposal-ready-domain.md) |
 | RB-CTX-053 | Context Pack do RB-INC-053 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-053-itinerary-proposal-ready-domain.md](./implementation/context-packs/rb-inc-053-itinerary-proposal-ready-domain.md) |
+| RB-INC-054 | Contrato de Dados da Itinerary Proposal Ready | Implementation Increment | Draft | 0.1.0 | [rb-inc-054-itinerary-proposal-ready-data-contract.md](./implementation/increments/rb-inc-054-itinerary-proposal-ready-data-contract.md) |
+| RB-CTX-054 | Context Pack do RB-INC-054 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-054-itinerary-proposal-ready-data-contract.md](./implementation/context-packs/rb-inc-054-itinerary-proposal-ready-data-contract.md) |
 | RB-AI-007 | Operação e Gestão do Ciclo de Vida de Inteligência Artificial | AI Operations | Planned | 0.1.0 | [ai-operations-and-lifecycle-management.md](./ai/ai-operations-and-lifecycle-management.md) |
 | RB-API-002 | Catálogo de Contratos de API | API | Planned | 0.1.0 | [api-contract-catalog.md](./data/api-contract-catalog.md) |
 | RB-API-003 | Versionamento e Depreciação de APIs | API | Planned | 0.1.0 | [api-versioning-and-deprecation-policy.md](./data/api-versioning-and-deprecation-policy.md) |

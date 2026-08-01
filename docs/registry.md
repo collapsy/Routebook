@@ -144,6 +144,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-051 | Context Pack do RB-INC-051 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-051-deterministic-e2e-fixtures.md](./implementation/context-packs/rb-inc-051-deterministic-e2e-fixtures.md) |
 | RB-INC-052 | Contrato Canônico de Itinerary Proposal Ready | Implementation Increment | Draft | 0.1.0 | [rb-inc-052-itinerary-proposal-ready-contract.md](./implementation/increments/rb-inc-052-itinerary-proposal-ready-contract.md) |
 | RB-CTX-052 | Context Pack do RB-INC-052 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-052-itinerary-proposal-ready-contract.md](./implementation/context-packs/rb-inc-052-itinerary-proposal-ready-contract.md) |
+| RB-INC-053 | Conclusão Canônica de Itinerary Proposal Ready | Implementation Increment | Draft | 0.1.0 | [rb-inc-053-itinerary-proposal-ready-domain.md](./implementation/increments/rb-inc-053-itinerary-proposal-ready-domain.md) |
+| RB-CTX-053 | Context Pack do RB-INC-053 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-053-itinerary-proposal-ready-domain.md](./implementation/context-packs/rb-inc-053-itinerary-proposal-ready-domain.md) |
 | RB-AI-007 | Operação e Gestão do Ciclo de Vida de Inteligência Artificial | AI Operations | Planned | 0.1.0 | [ai-operations-and-lifecycle-management.md](./ai/ai-operations-and-lifecycle-management.md) |
 | RB-API-002 | Catálogo de Contratos de API | API | Planned | 0.1.0 | [api-contract-catalog.md](./data/api-contract-catalog.md) |
 | RB-API-003 | Versionamento e Depreciação de APIs | API | Planned | 0.1.0 | [api-versioning-and-deprecation-policy.md](./data/api-versioning-and-deprecation-policy.md) |

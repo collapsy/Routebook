@@ -62,6 +62,7 @@ ai_context:
 | RB-INC-050 | RB-BR-PRP-002–010, RB-DOM-001–004, RB-ARC-002 | #112 | `codex/rb-inc-050-proposal-commands`, PR #113; integração acumulada PR #115 | comandos de aplicação para request, start, fail e cancel | runs 30685658798 e 30685658797 (tentativas 1 e 2), SHA 7d89f58 | Integrado |
 | RB-INC-051 | RB-QA-001, RB-CICD-001, RB-ADR-010 | #114 | `codex/rb-inc-051-deterministic-e2e-fixtures`, PR #115 | fixtures controladas e navegação observável para períodos livres, Lugar salvo e conflitos | run diagnóstico 30684760010; runs finais 30686369423 e 30686369420 (tentativas 1 e 2), SHA ca7beb8 | Integrado |
 | RB-INC-052 | RB-API-001, RB-DOM-001–004, decisão #118 | #119 | `codex/rb-inc-052-ready-contract`, PR pendente | contrato documental de Itinerary Proposal alinhado ao estado canônico `ready` | 145 documentos validados; Prettier e diff check aprovados | Em execução |
+| RB-INC-053 | RB-BR-PRP-002–010, RB-DOM-001–004, RB-DATA-001–002, decisão #118 | #121 | `codex/rb-inc-053-proposal-ready-domain`, PR pendente | conclusão de domínio `generating → ready` com conteúdo revisável | 43 testes do módulo; lint, typecheck, build, testes sem database e 147 docs aprovados | Em execução |
 
 ## Evidências do RB-INC-003
 

@@ -21,6 +21,39 @@ export const itineraryProposalStatuses = [
 
 export type ItineraryProposalStatus = (typeof itineraryProposalStatuses)[number];
 
+export const proposedActivityOperationTypes = ["add", "move", "update", "remove"] as const;
+
+export type ProposedActivityOperationType = (typeof proposedActivityOperationTypes)[number];
+
+export type ProposedActivity = Readonly<{
+  proposedActivityId: string;
+  targetTripDayId?: string;
+  sourceActivityId?: string;
+  placeId?: string;
+  title: string;
+  description?: string;
+  proposedStartTime?: string;
+  durationMinutes?: number;
+  proposedOrder?: number;
+  operationType: ProposedActivityOperationType;
+  flexibility?: string;
+  estimatedCostAmount?: number;
+  estimatedCostCurrency?: string;
+  reason?: string;
+}>;
+
+export type ProposedActivityInput = ProposedActivity;
+
+export type CompleteItineraryProposalGenerationInput = Readonly<{
+  proposedActivities: readonly ProposedActivityInput[];
+  criteria: readonly string[];
+  justifications: readonly string[];
+  limitations: readonly string[];
+  planningConflictIds: readonly string[];
+  validUntil: Date;
+  generatedAt: Date;
+}>;
+
 export type ItineraryProposal = Readonly<{
   id: ItineraryProposalId;
   tripId: string;
@@ -32,6 +65,13 @@ export type ItineraryProposal = Readonly<{
   requestedAt: Date;
   updatedAt: Date;
   generationStartedAt?: Date;
+  proposedActivities?: readonly ProposedActivity[];
+  criteria?: readonly string[];
+  justifications?: readonly string[];
+  limitations?: readonly string[];
+  planningConflictIds?: readonly string[];
+  validUntil?: Date;
+  generatedAt?: Date;
   failedAt?: Date;
   failureCode?: string;
   cancelledAt?: Date;
@@ -69,13 +109,139 @@ export class ItineraryProposalTransitionError extends Error {
 }
 
 function requiredText(value: string, field: string): string {
-  const normalized = value.trim();
+  const normalized = typeof value === "string" ? value.trim() : "";
   if (!normalized) {
     throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
       [field]: "Informe um valor não vazio.",
     });
   }
   return normalized;
+}
+
+function optionalText(value: string | undefined, field: string): string | undefined {
+  return value === undefined ? undefined : requiredText(value, field);
+}
+
+function optionalPositiveInteger(value: number | undefined, field: string): number | undefined {
+  return value === undefined ? undefined : positiveInteger(value, field);
+}
+
+function optionalNonNegativeInteger(value: number | undefined, field: string): number | undefined {
+  if (value === undefined) return undefined;
+  if (!Number.isInteger(value) || value < 0) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      [field]: "Use um inteiro maior ou igual a zero.",
+    });
+  }
+  return value;
+}
+
+function optionalNonNegativeNumber(value: number | undefined, field: string): number | undefined {
+  if (value === undefined) return undefined;
+  if (!Number.isFinite(value) || value < 0) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      [field]: "Use um número finito maior ou igual a zero.",
+    });
+  }
+  return value;
+}
+
+function optionalLocalTime(value: string | undefined, field: string): string | undefined {
+  const normalized = optionalText(value, field);
+  if (normalized === undefined) return undefined;
+  if (!/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(normalized)) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      [field]: "Use um horário local no formato HH:mm ou HH:mm:ss.",
+    });
+  }
+  return normalized;
+}
+
+function optionalCurrency(value: string | undefined, field: string): string | undefined {
+  const normalized = optionalText(value, field)?.toUpperCase();
+  if (normalized === undefined) return undefined;
+  if (!/^[A-Z]{3}$/.test(normalized)) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      [field]: "Use um código de moeda com três letras.",
+    });
+  }
+  return normalized;
+}
+
+function normalizedTexts(
+  values: readonly string[],
+  field: string,
+  requireAtLeastOne: boolean,
+): readonly string[] {
+  if (!Array.isArray(values) || (requireAtLeastOne && values.length === 0)) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      [field]: "Informe ao menos um item.",
+    });
+  }
+
+  return Object.freeze(values.map((value, index) => requiredText(value, `${field}.${index}`)));
+}
+
+function normalizeProposedActivity(
+  activity: ProposedActivityInput,
+  index: number,
+): ProposedActivity {
+  const field = `proposedActivities.${index}`;
+  if (!activity || typeof activity !== "object") {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      [field]: "Informe uma Proposed Activity válida.",
+    });
+  }
+
+  if (!proposedActivityOperationTypes.includes(activity.operationType)) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      [`${field}.operationType`]: "Use add, move, update ou remove.",
+    });
+  }
+
+  const targetTripDayId = optionalText(activity.targetTripDayId, `${field}.targetTripDayId`);
+  const sourceActivityId = optionalText(activity.sourceActivityId, `${field}.sourceActivityId`);
+  const placeId = optionalText(activity.placeId, `${field}.placeId`);
+  const description = optionalText(activity.description, `${field}.description`);
+  const proposedStartTime = optionalLocalTime(
+    activity.proposedStartTime,
+    `${field}.proposedStartTime`,
+  );
+  const durationMinutes = optionalPositiveInteger(
+    activity.durationMinutes,
+    `${field}.durationMinutes`,
+  );
+  const proposedOrder = optionalNonNegativeInteger(
+    activity.proposedOrder,
+    `${field}.proposedOrder`,
+  );
+  const flexibility = optionalText(activity.flexibility, `${field}.flexibility`);
+  const estimatedCostAmount = optionalNonNegativeNumber(
+    activity.estimatedCostAmount,
+    `${field}.estimatedCostAmount`,
+  );
+  const estimatedCostCurrency = optionalCurrency(
+    activity.estimatedCostCurrency,
+    `${field}.estimatedCostCurrency`,
+  );
+  const reason = optionalText(activity.reason, `${field}.reason`);
+
+  return Object.freeze({
+    proposedActivityId: requiredText(activity.proposedActivityId, `${field}.proposedActivityId`),
+    title: requiredText(activity.title, `${field}.title`),
+    operationType: activity.operationType,
+    ...(targetTripDayId ? { targetTripDayId } : {}),
+    ...(sourceActivityId ? { sourceActivityId } : {}),
+    ...(placeId ? { placeId } : {}),
+    ...(description ? { description } : {}),
+    ...(proposedStartTime ? { proposedStartTime } : {}),
+    ...(durationMinutes !== undefined ? { durationMinutes } : {}),
+    ...(proposedOrder !== undefined ? { proposedOrder } : {}),
+    ...(flexibility ? { flexibility } : {}),
+    ...(estimatedCostAmount !== undefined ? { estimatedCostAmount } : {}),
+    ...(estimatedCostCurrency ? { estimatedCostCurrency } : {}),
+    ...(reason ? { reason } : {}),
+  });
 }
 
 function positiveInteger(value: number, field: string): number {
@@ -152,6 +318,43 @@ export function startItineraryProposalGeneration(
     status: "generating",
     generationStartedAt,
     updatedAt: new Date(generationStartedAt.getTime()),
+  });
+}
+
+export function completeItineraryProposalGeneration(
+  proposal: ItineraryProposal,
+  input: CompleteItineraryProposalGenerationInput,
+): ItineraryProposal {
+  assertStatus(proposal, ["generating"], "ready");
+  const generatedAt = transitionDate(proposal, input.generatedAt);
+  const validUntil = validDate(input.validUntil, "validUntil");
+  if (!Array.isArray(input.proposedActivities)) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      proposedActivities: "Informe uma coleção de Proposed Activities.",
+    });
+  }
+
+  const proposedActivities = Object.freeze(input.proposedActivities.map(normalizeProposedActivity));
+  const criteria = normalizedTexts(input.criteria, "criteria", true);
+  const justifications = normalizedTexts(input.justifications, "justifications", true);
+  const limitations = normalizedTexts(input.limitations, "limitations", false);
+  const planningConflictIds = normalizedTexts(
+    input.planningConflictIds,
+    "planningConflictIds",
+    false,
+  );
+
+  return Object.freeze({
+    ...proposal,
+    status: "ready",
+    proposedActivities,
+    criteria,
+    justifications,
+    limitations,
+    planningConflictIds,
+    validUntil,
+    generatedAt,
+    updatedAt: new Date(generatedAt.getTime()),
   });
 }
 

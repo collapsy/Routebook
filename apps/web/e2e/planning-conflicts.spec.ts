@@ -45,7 +45,9 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
   await conflictList.getByRole("link", { name: /Ver dia no Roteiro/ }).click();
 
   await expect(page).toHaveURL(/\/roteiro#[^#]+$/);
-  const affectedDay = page.locator(".itinerary-day-card:target");
+  const affectedDayId = new URL(page.url()).hash.slice(1);
+  expect(affectedDayId).not.toBe("");
+  const affectedDay = page.locator(`.itinerary-day-card[id="${affectedDayId}"]`);
   await expect(affectedDay.getByText(firstActivity, { exact: true })).toBeVisible();
   await expect(affectedDay.getByText(secondActivity, { exact: true })).toBeVisible();
 });

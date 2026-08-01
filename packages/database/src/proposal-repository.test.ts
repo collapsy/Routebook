@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import {
   cancelItineraryProposalGeneration,
   completeItineraryProposalGeneration,
+  expireItineraryProposalByTime,
   failItineraryProposalGeneration,
   ItineraryProposalRepositoryError,
   requestItineraryProposal,
@@ -137,6 +138,124 @@ describe("DrizzleItineraryProposalRepository", () => {
     try {
       await repository.create(requested);
       await repository.save(ready);
+      expect(await repository.findById(fixture.trip.id, requested.id)).toEqual(ready);
+    } finally {
+      await cleanup(fixture.trip.id);
+    }
+  });
+
+  it("preserva Proposal expired, conteúdo auditável e Proposed Activities no round trip e na listagem", async () => {
+    const fixture = await createFixture();
+    const repository = new DrizzleItineraryProposalRepository();
+    const requested = buildProposal(fixture, new Date("2026-08-01T10:45:00.000Z"));
+    const ready = buildReadyProposal(requested);
+    const expiredAt = new Date(ready.validUntil!.getTime() + 60_000);
+    const expired = expireItineraryProposalByTime(ready, expiredAt);
+
+    try {
+      await repository.create(requested);
+      await repository.save(ready);
+      await repository.save(expired);
+
+      expect(await repository.findById(fixture.trip.id, requested.id)).toEqual(expired);
+      expect(await repository.listByTripId(fixture.trip.id)).toEqual([expired]);
+      const [persisted] = await getDatabase()
+        .select({
+          status: itineraryProposals.status,
+          expiredAt: itineraryProposals.expiredAt,
+          generationMethod: itineraryProposals.generationMethod,
+          generationVersion: itineraryProposals.generationVersion,
+          criteria: itineraryProposals.criteria,
+        })
+        .from(itineraryProposals)
+        .where(eq(itineraryProposals.id, requested.id));
+      expect(persisted).toEqual({
+        status: "expired",
+        expiredAt,
+        generationMethod: ready.generationMethod,
+        generationVersion: ready.generationVersion,
+        criteria: ready.criteria,
+      });
+      expect(
+        await getDatabase()
+          .select({ id: proposedActivities.id })
+          .from(proposedActivities)
+          .where(eq(proposedActivities.itineraryProposalId, requested.id)),
+      ).toHaveLength(1);
+    } finally {
+      await cleanup(fixture.trip.id);
+    }
+  });
+
+  it("rejeita persistência expired sem instante, antecipada ou com conteúdo incompleto", async () => {
+    const fixture = await createFixture();
+    const repository = new DrizzleItineraryProposalRepository();
+    const requested = buildProposal(fixture, new Date("2026-08-01T10:50:00.000Z"));
+    const ready = buildReadyProposal(requested);
+    const validUntil = ready.validUntil!;
+
+    try {
+      await repository.create(requested);
+      await repository.save(ready);
+
+      await expect(
+        getDatabase()
+          .update(itineraryProposals)
+          .set({ status: "expired", updatedAt: validUntil })
+          .where(eq(itineraryProposals.id, requested.id)),
+      ).rejects.toThrow();
+
+      const tooEarly = new Date(validUntil.getTime() - 1);
+      await expect(
+        getDatabase()
+          .update(itineraryProposals)
+          .set({ status: "expired", expiredAt: tooEarly, updatedAt: tooEarly })
+          .where(eq(itineraryProposals.id, requested.id)),
+      ).rejects.toThrow();
+
+      await expect(
+        getDatabase()
+          .update(itineraryProposals)
+          .set({ status: "expired", criteria: null, expiredAt: validUntil, updatedAt: validUntil })
+          .where(eq(itineraryProposals.id, requested.id)),
+      ).rejects.toThrow();
+
+      expect(await repository.findById(fixture.trip.id, requested.id)).toEqual(ready);
+    } finally {
+      await cleanup(fixture.trip.id);
+    }
+  });
+
+  it("reverte a transição para expired quando a persistência das Proposed Activities falha", async () => {
+    const fixture = await createFixture();
+    const repository = new DrizzleItineraryProposalRepository();
+    const requested = buildProposal(fixture, new Date("2026-08-01T10:55:00.000Z"));
+    const ready = buildReadyProposal(requested);
+    const duplicateId = randomUUID();
+    const invalidReady = buildReadyProposal(requested, [
+      {
+        proposedActivityId: duplicateId,
+        title: "Atividade duplicada",
+        proposedOrder: 0,
+        operationType: "add",
+      },
+      {
+        proposedActivityId: duplicateId,
+        title: "Outra atividade duplicada",
+        proposedOrder: 1,
+        operationType: "add",
+      },
+    ]);
+    const invalidExpired = expireItineraryProposalByTime(
+      invalidReady,
+      new Date(invalidReady.validUntil!.getTime()),
+    );
+
+    try {
+      await repository.create(requested);
+      await repository.save(ready);
+
+      await expect(repository.save(invalidExpired)).rejects.toThrow();
       expect(await repository.findById(fixture.trip.id, requested.id)).toEqual(ready);
     } finally {
       await cleanup(fixture.trip.id);

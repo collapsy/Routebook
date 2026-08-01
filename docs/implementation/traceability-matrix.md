@@ -50,7 +50,9 @@ ai_context:
 | RB-INC-038 | RB-FR-097–103, RB-BR-REC-002–011, RB-BR-DEC-002–007 | #83 | `feature/rb-inc-038-recommendation-core`, PR #88 | `modules/decision-intelligence`, Recommendation e Context Snapshot | run 30577548188, job 90989479708, SHA cc4d36d | Verde em Draft |
 | RB-INC-039 | RB-FR-097–103, RB-BR-REC-002–011 | #84 | `feature/rb-inc-039-deterministic-recommendations`, PR #89 | geração determinística, Reasons, Limitations, score e Confidence | run 30578729497, job 90993423544, SHA a6037c1 | Verde em Draft |
 | RB-INC-040 | RB-BR-REC-002–011, RB-ARC-004, RB-DATA-001, RB-DATA-002 | #85 | `feature/rb-inc-040-recommendation-persistence`, PR #90 | repository, schema, migration 0007, adapter e lifecycle | run 30580262262, job 90998461192, SHA 190ebd9 | Verde em Draft |
-| RB-INC-041 | RB-FR-097–103, RB-BR-REC-002–011, RB-UX-001–006, RB-DS-002–003 | #86 | `feature/rb-inc-041-recommendations-experience`, PR #91 | rota contextual, cards, composição e ação Ignorar | evidências pendentes do workflow definitivo | Em execução |
+| RB-INC-041 | RB-FR-097–103, RB-BR-REC-002–011, RB-UX-001–006, RB-DS-002–003 | #86 | `feature/rb-inc-041-recommendations-experience`, PR #91; integração PR #93 | rota contextual, cards, composição e ação Ignorar | run 30589831270, SHA fb4b46e | Integrado |
+| RB-INC-042 | RB-BR-REC-002–011, RB-BR-DEC-002–007, RB-DOM-001–004 | #87 | `feature/rb-inc-042-recommendation-decisions`, PR #94 | Decision persistida, salvar Lugar e adicionar ao Roteiro com aprovação explícita | run 30674788792, SHA cad3b2b | Integrado |
+| RB-INC-043 | RB-FR-105, RB-FR-107–110, RB-BR-PCF-001–008, RB-DOM-001–004 | #96; correção #98 | `feature/rb-inc-043-planning-conflict-core`, PR #97; integração PR #94 | `planning-assurance`, detecção, migration 0010, persistência e alinhamento canônico | run 30674788792, SHA cad3b2b; correção em execução | Integrado com correção em execução |
 
 ## Evidências do RB-INC-003
 

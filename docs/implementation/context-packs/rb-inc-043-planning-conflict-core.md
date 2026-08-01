@@ -5,7 +5,7 @@ description: Contexto operacional para implementar o RB-INC-043 com domínio det
 document_type: implementation-context-pack
 owner: Planning Assurance
 status: Draft
-version: "0.1.0"
+version: "0.2.0"
 created: "2026-07-31"
 last_updated: "2026-07-31"
 authors:
@@ -34,14 +34,15 @@ ai_context:
 
 ## 1. Missão
 
-Implementar o RB-INC-043 a partir do HEAD verde `09b2f86ed5be35b6e3cb77f990f97ba21e45fd44`, preservando todas as invariantes e validações existentes.
+Alinhar o RB-INC-043 integrado no HEAD verde `cad3b2b841c526701d4880b5a6dd3a85af76f314` ao vocabulário canônico de Planning Conflict, preservando todas as invariantes e validações existentes.
 
 ## 2. Fonte canônica
 
 - repositório: `collapsy/Routebook`;
-- branch: `feature/rb-inc-043-planning-conflict-core`;
-- base: `feature/rb-inc-042-recommendation-decisions`;
-- issue: `#96`;
+- branch: `codex/rb-inc-043-domain-alignment`;
+- base: `main`;
+- issue original: `#96`;
+- correção de alinhamento: `#98`;
 - incremento: `RB-INC-043`.
 
 Não trabalhar em cópias hipotéticas e não declarar alterações não aplicadas ao GitHub.
@@ -60,9 +61,12 @@ Utilizar os termos canônicos:
 - `Context Snapshot`;
 - `Evidence`;
 - `Severity`;
-- `detected`;
+- `open`;
 - `invalidated`;
 - `superseded`.
+- `error`;
+- `risk`;
+- `suggestion`.
 
 Não usar Recommendation, Warning ou Error como sinônimos de PlanningConflict.
 
@@ -134,7 +138,7 @@ PlanningConflict
   tripId: TripId
   type: PlanningConflictType
   severity: PlanningConflictSeverity
-  state: detected | invalidated | superseded
+  state: open | invalidated | superseded
   snapshot: PlanningConflictContextSnapshot
   evidence: PlanningConflictEvidence[]
   relatedDayIds: string[]
@@ -146,6 +150,8 @@ PlanningConflict
   supersededAt?: Date
   supersededBy?: PlanningConflictId
 ```
+
+`PlanningConflictDetected` é o evento que cria o agregado em estado `open`. As severidades desta fatia devem usar somente o vocabulário canônico `error | risk | suggestion`; nenhuma regra atual precisa produzir `suggestion`.
 
 ## 7. Tipos iniciais
 

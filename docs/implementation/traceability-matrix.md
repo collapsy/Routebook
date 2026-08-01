@@ -60,6 +60,7 @@ ai_context:
 | RB-INC-048 | RB-FR-087–096, RB-BR-PRP-002–010, RB-DOM-001–004, RB-ARC-002 | #108 | `codex/rb-inc-048-itinerary-proposal-request`, PR #109 | núcleo de solicitação e geração inicial de Itinerary Proposal | runs 30683233275 e 30683233272 (attempts 1 e 2), SHA 7c5d144 | Integrado |
 | RB-INC-049 | RB-BR-PRP-002–010, RB-ARC-002, RB-DATA-001–002, RB-ADR-006 | #110 | `codex/rb-inc-049-proposal-persistence`, PR #111 | port, migration 0013, adapter Drizzle e round trip do ciclo inicial | runs 30684401975 e 30684401943, SHA 51fa84a | Verde em Draft |
 | RB-INC-050 | RB-BR-PRP-002–010, RB-DOM-001–004, RB-ARC-002 | #112 | `codex/rb-inc-050-proposal-commands`, PR pendente | comandos de aplicação para request, start, fail e cancel | evidências pendentes | Em execução |
+| RB-INC-051 | RB-QA-001, RB-CICD-001, RB-ADR-010 | #114 | `codex/rb-inc-051-deterministic-e2e-fixtures`, PR pendente | fixtures controladas e navegação observável para períodos livres e conflitos | run diagnóstico 30684760010; evidências pendentes | Em execução |
 
 ## Evidências do RB-INC-003
 

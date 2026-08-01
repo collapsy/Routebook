@@ -1,13 +1,47 @@
 import { expect, test, type Page } from "@playwright/test";
 
-async function createTripAndOpenItinerary(page: Page, tripName: string) {
-  await page.goto("/viagens/nova");
-  await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
-  await page.getByRole("button", { name: "Criar viagem" }).click();
+import { DrizzleItineraryRepository, DrizzleTripRepository } from "@routebook/database";
+import { addFreePeriod, createItinerary, createTrip } from "@routebook/trip-management";
 
-  await page.getByRole("link", { name: tripName }).click();
-  await page.getByRole("link", { name: "Abrir roteiro" }).click();
+type FreePeriodFixtureInput = Readonly<{
+  mode: "flexible" | "protected";
+  startTime?: string;
+  durationMinutes?: number;
+}>;
+
+async function createFreePeriodFixture(
+  tripName: string,
+  freePeriods: readonly FreePeriodFixtureInput[] = [],
+): Promise<string> {
+  const now = new Date();
+  const trip = createTrip(
+    {
+      name: tripName,
+      startDate: "2026-08-22",
+      endDate: "2026-08-29",
+      ownerName: "RouteBook E2E",
+    },
+    now,
+  );
+  let itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);
+  for (const freePeriod of freePeriods) {
+    itinerary = addFreePeriod(
+      itinerary,
+      {
+        dayDate: "2026-08-23",
+        mode: freePeriod.mode,
+        ...(freePeriod.startTime !== undefined ? { startTime: freePeriod.startTime } : {}),
+        ...(freePeriod.durationMinutes !== undefined
+          ? { durationMinutes: freePeriod.durationMinutes }
+          : {}),
+      },
+      now,
+    );
+  }
+
+  await new DrizzleTripRepository().create(trip);
+  await new DrizzleItineraryRepository().save(itinerary);
+  return trip.id;
 }
 
 async function submitFreePeriod(
@@ -35,7 +69,8 @@ async function submitFreePeriod(
 
 test("cria e preserva um período livre protegido", async ({ page }, testInfo) => {
   const tripName = `Período livre ${testInfo.project.name} ${Date.now()}`;
-  await createTripAndOpenItinerary(page, tripName);
+  const tripId = await createFreePeriodFixture(tripName);
+  await page.goto(`/viagens/${tripId}/roteiro`);
 
   await submitFreePeriod(page, {
     dayDate: "2026-08-23",
@@ -60,14 +95,10 @@ test("cria e preserva um período livre protegido", async ({ page }, testInfo) =
 
 test("edita e limpa os dados temporais de um período livre", async ({ page }, testInfo) => {
   const tripName = `Editar período livre ${testInfo.project.name} ${Date.now()}`;
-  await createTripAndOpenItinerary(page, tripName);
-
-  await submitFreePeriod(page, {
-    dayDate: "2026-08-23",
-    mode: "flexible",
-    startTime: "14:00",
-    durationMinutes: "120",
-  });
+  const tripId = await createFreePeriodFixture(tripName, [
+    { mode: "flexible", startTime: "14:00", durationMinutes: 120 },
+  ]);
+  await page.goto(`/viagens/${tripId}/roteiro`);
 
   const secondDay = page.locator(".itinerary-day-card").nth(1);
   const freePeriodItem = secondDay.getByRole("listitem").filter({
@@ -95,18 +126,11 @@ test("remove somente o período livre selecionado e preserva os demais", async (
   page,
 }, testInfo) => {
   const tripName = `Remover período livre ${testInfo.project.name} ${Date.now()}`;
-  await createTripAndOpenItinerary(page, tripName);
-
-  await submitFreePeriod(page, {
-    dayDate: "2026-08-23",
-    mode: "flexible",
-    startTime: "13:00",
-  });
-  await submitFreePeriod(page, {
-    dayDate: "2026-08-23",
-    mode: "protected",
-    startTime: "16:00",
-  });
+  const tripId = await createFreePeriodFixture(tripName, [
+    { mode: "flexible", startTime: "13:00" },
+    { mode: "protected", startTime: "16:00" },
+  ]);
+  await page.goto(`/viagens/${tripId}/roteiro`);
 
   const secondDay = page.locator(".itinerary-day-card").nth(1);
   const flexiblePeriod = secondDay.getByRole("listitem").filter({

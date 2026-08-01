@@ -77,6 +77,7 @@ ai_context:
 | RB-INC-065 | RB-FR-095, RB-BR-100, RB-BR-102, RB-SCR-009, RB-INT-065, RB-INT-068 e RB-INC-064 | #146 | `codex/rb-inc-065-discard-proposal-review`, PR #147 | descarte explícito da Proposal `ready` com retorno ao Roteiro preservado | 61 testes web; run 30720324642 com migrations, build e 56 E2E responsivos verdes | Pronto para integração |
 | RB-INC-066 | RB-BR-PRP-001, RB-BR-PRP-004, RB-BR-PRP-006, RB-BR-PRP-008–009, ciclo oficial, RB-DATA-001 e RB-INC-053, RB-INC-058 | #148 | `codex/rb-inc-066-finalize-accepted-proposal`, PR #149 | finalização pós-aplicação de Proposal `ready` para `accepted` | 77 testes do módulo; run 30721260271 com migrations, suíte integral, build e 56 E2E responsivos verdes | Pronto para integração |
 | RB-INC-067 | RB-BR-PRP-001, RB-BR-PRP-004, RB-BR-PRP-006, RB-BR-PRP-008–009, RB-DATA-001–002, RB-ADR-006 e RB-INC-055, RB-INC-066 | #150 | `codex/rb-inc-067-accepted-persistence`, PR #151 | persistência e round trip de Proposal `accepted` | validações locais verdes; run 30721948930 com migrations, suíte integral, build e 56 E2E responsivos verdes | Pronto para integração |
+| RB-INC-068 | RB-BR-ITN-015–019, RB-BR-PRP-005–010, RB-ARC-002, RB-DATA-001–002 e RB-INC-066–067 | #152 | `codex/rb-inc-068-apply-proposal-items-contract`, PR #153 | contrato público `ApplyProposalItems` pertencente ao Itinerary Planning | 56 testes do módulo; run 30722787307 com migrations, suíte integral, build e 56 E2E concluídos | Pronto para integração |
 
 ## Evidências do RB-INC-003
 

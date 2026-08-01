@@ -132,6 +132,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-045 | Context Pack do RB-INC-045 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-045-ignore-planning-risk.md](./implementation/context-packs/rb-inc-045-ignore-planning-risk.md) |
 | RB-INC-046 | Histórico de Riscos Ignorados | Implementation Increment | Draft | 0.1.0 | [rb-inc-046-ignored-risk-history.md](./implementation/increments/rb-inc-046-ignored-risk-history.md) |
 | RB-CTX-046 | Context Pack do RB-INC-046 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-046-ignored-risk-history.md](./implementation/context-packs/rb-inc-046-ignored-risk-history.md) |
+| RB-INC-047 | Execução E2E Determinística no CI | Implementation Increment | Draft | 0.1.0 | [rb-inc-047-deterministic-e2e.md](./implementation/increments/rb-inc-047-deterministic-e2e.md) |
+| RB-CTX-047 | Context Pack do RB-INC-047 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-047-deterministic-e2e.md](./implementation/context-packs/rb-inc-047-deterministic-e2e.md) |
 | RB-AI-007 | Operação e Gestão do Ciclo de Vida de Inteligência Artificial | AI Operations | Planned | 0.1.0 | [ai-operations-and-lifecycle-management.md](./ai/ai-operations-and-lifecycle-management.md) |
 | RB-API-002 | Catálogo de Contratos de API | API | Planned | 0.1.0 | [api-contract-catalog.md](./data/api-contract-catalog.md) |
 | RB-API-003 | Versionamento e Depreciação de APIs | API | Planned | 0.1.0 | [api-versioning-and-deprecation-policy.md](./data/api-versioning-and-deprecation-policy.md) |

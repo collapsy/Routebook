@@ -9,6 +9,7 @@ import {
   expireItineraryProposalByTime,
   failItineraryProposalGeneration,
   ItineraryProposalRepositoryError,
+  rejectItineraryProposal,
   requestItineraryProposal,
   startItineraryProposalGeneration,
   type ItineraryProposal,
@@ -182,6 +183,105 @@ describe("DrizzleItineraryProposalRepository", () => {
           .from(proposedActivities)
           .where(eq(proposedActivities.itineraryProposalId, requested.id)),
       ).toHaveLength(1);
+    } finally {
+      await cleanup(fixture.trip.id);
+    }
+  });
+
+  it("preserva Proposal rejected, conteúdo auditável e Proposed Activities no round trip e na listagem", async () => {
+    const fixture = await createFixture();
+    const repository = new DrizzleItineraryProposalRepository();
+    const requested = buildProposal(fixture, new Date("2026-08-01T10:47:00.000Z"));
+    const later = buildProposal(fixture, new Date("2026-08-01T10:48:00.000Z"));
+    const ready = buildReadyProposal(requested);
+    const rejectedAt = new Date(ready.generatedAt!.getTime() + 60_000);
+    const rejected = rejectItineraryProposal(ready, rejectedAt);
+
+    try {
+      await repository.create(requested);
+      await repository.save(ready);
+      await repository.save(rejected);
+      await repository.create(later);
+
+      expect(await repository.findById(fixture.trip.id, requested.id)).toEqual(rejected);
+      expect(await repository.listByTripId(fixture.trip.id)).toEqual([rejected, later]);
+      const [persisted] = await getDatabase()
+        .select({
+          status: itineraryProposals.status,
+          rejectedAt: itineraryProposals.rejectedAt,
+          updatedAt: itineraryProposals.updatedAt,
+          generationMethod: itineraryProposals.generationMethod,
+          generationVersion: itineraryProposals.generationVersion,
+          criteria: itineraryProposals.criteria,
+          justifications: itineraryProposals.justifications,
+          limitations: itineraryProposals.limitations,
+          planningConflictIds: itineraryProposals.planningConflictIds,
+        })
+        .from(itineraryProposals)
+        .where(eq(itineraryProposals.id, requested.id));
+      expect(persisted).toEqual({
+        status: "rejected",
+        rejectedAt,
+        updatedAt: rejectedAt,
+        generationMethod: ready.generationMethod,
+        generationVersion: ready.generationVersion,
+        criteria: ready.criteria,
+        justifications: ready.justifications,
+        limitations: ready.limitations,
+        planningConflictIds: ready.planningConflictIds,
+      });
+      expect(
+        await getDatabase()
+          .select({ id: proposedActivities.id })
+          .from(proposedActivities)
+          .where(eq(proposedActivities.itineraryProposalId, requested.id)),
+      ).toHaveLength(1);
+    } finally {
+      await cleanup(fixture.trip.id);
+    }
+  });
+
+  it("rejeita persistência rejected sem instante, antecipada ou com conteúdo incompleto", async () => {
+    const fixture = await createFixture();
+    const repository = new DrizzleItineraryProposalRepository();
+    const requested = buildProposal(fixture, new Date("2026-08-01T10:49:00.000Z"));
+    const ready = buildReadyProposal(requested);
+    const rejectedAt = new Date(ready.generatedAt!.getTime() + 60_000);
+
+    try {
+      await repository.create(requested);
+      await repository.save(ready);
+
+      await expect(
+        getDatabase()
+          .update(itineraryProposals)
+          .set({ status: "rejected" })
+          .where(eq(itineraryProposals.id, requested.id)),
+      ).rejects.toThrow();
+
+      const tooEarly = new Date(ready.generatedAt!.getTime() - 1);
+      await expect(
+        getDatabase()
+          .update(itineraryProposals)
+          .set({ status: "rejected", rejectedAt: tooEarly, updatedAt: tooEarly })
+          .where(eq(itineraryProposals.id, requested.id)),
+      ).rejects.toThrow();
+
+      await expect(
+        getDatabase()
+          .update(itineraryProposals)
+          .set({ status: "rejected", criteria: null, rejectedAt, updatedAt: rejectedAt })
+          .where(eq(itineraryProposals.id, requested.id)),
+      ).rejects.toThrow();
+
+      await expect(
+        getDatabase()
+          .update(itineraryProposals)
+          .set({ rejectedAt })
+          .where(eq(itineraryProposals.id, requested.id)),
+      ).rejects.toThrow();
+
+      expect(await repository.findById(fixture.trip.id, requested.id)).toEqual(ready);
     } finally {
       await cleanup(fixture.trip.id);
     }

@@ -6,6 +6,7 @@ import {
   expireItineraryProposalByTime,
   failItineraryProposalGeneration,
   ItineraryProposalRepositoryError,
+  rejectItineraryProposal,
   requestItineraryProposal,
   startItineraryProposalGeneration,
   type ItineraryProposal,
@@ -31,8 +32,10 @@ const operationTypes: readonly ProposedActivityOperationType[] = [
   "remove",
 ];
 
-function hasReviewableContent(proposal: Pick<ItineraryProposal, "status">): boolean {
-  return proposal.status === "ready" || proposal.status === "expired";
+function hasReviewableContent(proposal: Readonly<{ status: string }>): boolean {
+  return (
+    proposal.status === "ready" || proposal.status === "rejected" || proposal.status === "expired"
+  );
 }
 
 function invalidPersistence(message: string): ItineraryProposalRepositoryError {
@@ -117,7 +120,7 @@ function rehydrateItineraryProposal(
       requestedAt: row.requestedAt,
     });
 
-    if (row.status !== "ready" && row.status !== "expired" && activityRows.length > 0) {
+    if (!hasReviewableContent(row) && activityRows.length > 0) {
       throw invalidPersistence("Uma Itinerary Proposal não pronta possui Proposed Activities.");
     }
 
@@ -130,6 +133,7 @@ function rehydrateItineraryProposal(
           requireDate(row.generationStartedAt, "generationStartedAt"),
         );
       case "ready":
+      case "rejected":
       case "expired": {
         if (row.contentSchemaVersion !== 1) {
           throw invalidPersistence(
@@ -155,9 +159,13 @@ function rehydrateItineraryProposal(
           generatedAt: requireDate(row.generatedAt, "generatedAt"),
           validUntil: requireDate(row.validUntil, "validUntil"),
         });
-        return row.status === "expired"
-          ? expireItineraryProposalByTime(ready, requireDate(row.expiredAt, "expiredAt"))
-          : ready;
+        if (row.status === "rejected") {
+          return rejectItineraryProposal(ready, requireDate(row.rejectedAt, "rejectedAt"));
+        }
+        if (row.status === "expired") {
+          return expireItineraryProposalByTime(ready, requireDate(row.expiredAt, "expiredAt"));
+        }
+        return ready;
       }
       case "failed": {
         const generating = startItineraryProposalGeneration(
@@ -211,6 +219,7 @@ function valuesFor(proposal: ItineraryProposal): ItineraryProposalInsert {
     planningConflictIds: proposal.planningConflictIds ?? null,
     generatedAt: proposal.generatedAt ?? null,
     validUntil: proposal.validUntil ?? null,
+    rejectedAt: proposal.rejectedAt ?? null,
     expiredAt: proposal.expiredAt ?? null,
     failedAt: proposal.failedAt ?? null,
     failureCode: proposal.failureCode ?? null,

@@ -3,10 +3,10 @@ import { expect, test } from "@playwright/test";
 import { DrizzleItineraryRepository, DrizzleTripRepository } from "@routebook/database";
 import { addActivity, createItinerary, createTrip } from "@routebook/trip-management";
 
-test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }, testInfo) => {
-  const tripName = `Conflitos ${testInfo.project.name} ${Date.now()}`;
-  const firstActivity = "Café demorado";
-  const secondActivity = "Passeio de barco";
+const firstActivity = "Café demorado";
+const secondActivity = "Passeio de barco";
+
+async function createConflictFixture(tripName: string): Promise<string> {
   const now = new Date();
   const trip = createTrip(
     {
@@ -41,7 +41,12 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
 
   await new DrizzleTripRepository().create(trip);
   await new DrizzleItineraryRepository().save(itinerary);
-  await page.goto(`/viagens/${trip.id}/roteiro/revisao`);
+  return trip.id;
+}
+
+test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }, testInfo) => {
+  const tripId = await createConflictFixture(`Conflitos ${testInfo.project.name} ${Date.now()}`);
+  await page.goto(`/viagens/${tripId}/roteiro/revisao`);
 
   await expect(page).toHaveURL(/\/viagens\/[^/]+\/roteiro\/revisao$/);
   await expect(page.getByRole("heading", { level: 1, name: "Revisão de Conflitos" })).toBeVisible();
@@ -59,6 +64,7 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
     page.waitForURL(/\/roteiro#[^#]+$/),
     conflictList.getByRole("link", { name: /Ver dia no Roteiro/ }).click(),
   ]);
+
   const affectedDayId = new URL(page.url()).hash.slice(1);
   expect(affectedDayId).not.toBe("");
   const affectedDay = page.locator(`.itinerary-day-card[id="${affectedDayId}"]`);
@@ -67,6 +73,15 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
 
   await page.goBack();
   await expect(page).toHaveURL(/\/viagens\/[^/]+\/roteiro\/revisao$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Revisão de Conflitos" })).toBeVisible();
+});
+
+test("ignora um risco e preserva seu histórico auditável", async ({ page }, testInfo) => {
+  const tripId = await createConflictFixture(
+    `Risco ignorado ${testInfo.project.name} ${Date.now()}`,
+  );
+  await page.goto(`/viagens/${tripId}/roteiro/revisao`);
+
   await page.getByText("Ignorar risco", { exact: true }).click();
   await page
     .getByRole("checkbox", { name: /Entendo que este risco continuará no Roteiro/ })
@@ -75,6 +90,7 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
     page.waitForURL(/riscoIgnorado=1$/),
     page.getByRole("button", { name: "Confirmar e ignorar risco" }).click(),
   ]);
+
   await expect(page.getByText(/Risco ignorado e Decision registrada/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "Nenhum conflito aberto" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Riscos ignorados" })).toBeVisible();

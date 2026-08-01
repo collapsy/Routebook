@@ -51,6 +51,8 @@ O run `30682439142` expôs os contratos restantes: a jornada espacial limitava d
 
 O run `30682700276` confirmou que jornadas extensas de mapa e revisão ainda disputavam o timeout por repetir criação e composição já cobertas em outros E2E. Esses setups passam a usar factories de domínio e repositories reais sobre o PostgreSQL efêmero da CI. A interface continua responsável por todas as ações e assertions que pertencem ao mapa e à revisão de conflito.
 
+O run `30682939424` mostrou que a separação ainda estava incompleta: mapa, reordenação e inclusão de Lugar salvo continuavam preparando parte do estado pela interface, e a revisão reunia navegação e Decision na mesma janela de 30 segundos. O setup passa a preparar integralmente o estado anterior à ação sob teste, e a revisão é dividida em dois casos independentes sem remover assertions.
+
 ## 3. Resultado verificável
 
 - configuração de paralelismo Playwright permanece original;

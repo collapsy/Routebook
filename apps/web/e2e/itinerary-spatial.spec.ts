@@ -1,12 +1,11 @@
 import { expect, test } from "@playwright/test";
 
 import {
+  DrizzleItineraryRepository,
   DrizzlePlaceRepository,
-  DrizzleSavedPlaceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
-import { createSavedPlace } from "@routebook/saved-places";
-import { createTrip } from "@routebook/trip-management";
+import { addActivity, createItinerary, createTrip } from "@routebook/trip-management";
 
 test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   page,
@@ -30,50 +29,42 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   expect(firstPlace).toBeDefined();
   expect(secondPlace).toBeDefined();
 
-  await new DrizzleTripRepository().create(trip);
-  const savedPlaceRepository = new DrizzleSavedPlaceRepository();
-  await savedPlaceRepository.save(
-    createSavedPlace({ tripId: trip.id, placeId: firstPlace!.id }, now),
+  let itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);
+  itinerary = addActivity(
+    itinerary,
+    {
+      dayDate: "2026-08-23",
+      title: firstPlace!.name,
+      type: "place-visit",
+      placeId: firstPlace!.id,
+    },
+    now,
   );
-  await savedPlaceRepository.save(
-    createSavedPlace({ tripId: trip.id, placeId: secondPlace!.id }, now),
+  itinerary = addActivity(
+    itinerary,
+    {
+      dayDate: "2026-08-23",
+      title: secondPlace!.name,
+      type: "place-visit",
+      placeId: secondPlace!.id,
+    },
+    now,
+  );
+  itinerary = addActivity(
+    itinerary,
+    {
+      dayDate: "2026-08-23",
+      title: "Pausa manual",
+    },
+    now,
   );
 
-  const tripPath = `/viagens/${trip.id}`;
+  await new DrizzleTripRepository().create(trip);
+  await new DrizzleItineraryRepository().save(itinerary);
+
   const firstPlaceName = firstPlace!.name;
   const secondPlaceName = secondPlace!.name;
-  await page.goto(`${tripPath}/lugares-salvos`);
-  await expect(page.getByRole("heading", { name: "Lugares salvos", exact: true })).toBeVisible();
-
-  const savedPlacesPath = new URL(page.url()).pathname;
-  const addSavedPlaceToDay = async (placeName: string) => {
-    await page.goto(savedPlacesPath);
-
-    const savedPlaceCard = page.locator("ul.place-catalog-grid > li").filter({
-      has: page.getByRole("heading", { name: placeName, exact: true }),
-    });
-    await expect(savedPlaceCard).toHaveCount(1);
-    await savedPlaceCard.getByLabel("Adicionar ao dia").selectOption("2026-08-23");
-    await Promise.all([
-      page.waitForURL(/adicionadoAoRoteiro=1$/),
-      savedPlaceCard.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
-    ]);
-    await expect(page.getByRole("status")).toContainText("Lugar adicionado ao roteiro");
-  };
-
-  await addSavedPlaceToDay(firstPlaceName!);
-  await addSavedPlaceToDay(secondPlaceName!);
-
-  await page.goto(`${tripPath}/roteiro`);
-  await page.getByLabel("Dia da viagem").selectOption("2026-08-23");
-  await page.locator("#title").fill("Pausa manual");
-  await Promise.all([
-    page.waitForURL(/atividadeCriada=1$/),
-    page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
-  ]);
-  await page.getByRole("link", { name: /Dia 2/i }).click();
-
-  await expect(page).toHaveURL(/dia=2026-08-23/);
+  await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-08-23`);
   await expect(page.getByRole("heading", { name: "Mapa do Dia 2" })).toBeVisible();
   await expect(
     page.getByRole("link", { name: `Atividade 1: ${firstPlaceName}. Abrir detalhes.` }),

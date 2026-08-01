@@ -33,6 +33,8 @@ function generatingProposal() {
 
 function readyContent() {
   return {
+    generationMethod: " deterministic ",
+    generationVersion: " proposal-policy-v1 ",
     proposedActivities: [
       {
         proposedActivityId: " proposed-activity-1 ",
@@ -207,6 +209,8 @@ describe("Itinerary Proposal", () => {
     expect(generating).not.toHaveProperty("proposedActivities");
     expect(ready).toMatchObject({
       status: "ready",
+      generationMethod: "deterministic",
+      generationVersion: "proposal-policy-v1",
       criteria: ["ritmo do grupo"],
       justifications: ["preserva o período protegido"],
       limitations: ["horário de funcionamento não confirmado"],
@@ -264,6 +268,8 @@ describe("Itinerary Proposal", () => {
   });
 
   it.each([
+    ["generationMethod", { generationMethod: " " }],
+    ["generationVersion", { generationVersion: " " }],
     ["criteria", { criteria: [] }],
     ["criteria.0", { criteria: [" "] }],
     ["justifications", { justifications: [] }],

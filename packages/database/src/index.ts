@@ -1,7 +1,7 @@
 export { closeDatabase, getDatabase } from "./client";
 export { decisions } from "./decision-schema";
 export { planningConflicts } from "./planning-conflict-schema";
-export { itineraryProposals } from "./proposal-schema";
+export { itineraryProposals, proposedActivities } from "./proposal-schema";
 export {
   itineraries,
   itineraryActivities,

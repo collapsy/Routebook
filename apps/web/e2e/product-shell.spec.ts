@@ -19,7 +19,7 @@ test("cria, abre e mantém uma viagem persistida", async ({ page }, testInfo) =>
   await expect(page.getByRole("status")).toContainText("Viagem criada e salva");
   await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
 
-  await page.getByRole("link", { name: "Abrir viagem" }).first().click();
+  await page.getByRole("link", { name: tripName }).click();
   await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+$/);
   await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
   await expect(page.getByRole("heading", { name: "8 dias de viagem" })).toBeVisible();
@@ -38,7 +38,7 @@ test("configura e mantém o contexto progressivo da viagem", async ({ page }, te
   await page.getByLabel("Nome da viagem").fill(tripName);
   await page.getByLabel("Responsável pela viagem").fill("Ronaldo Gentil");
   await page.getByRole("button", { name: "Criar viagem" }).click();
-  await page.getByRole("link", { name: "Abrir viagem" }).first().click();
+  await page.getByRole("link", { name: tripName }).click();
 
   await page.getByRole("link", { name: "Configurar contexto" }).click();
   await page.getByLabel("Quantidade de viajantes").fill("3");

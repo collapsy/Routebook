@@ -187,10 +187,8 @@ test("trata uma Proposal atualizada concorrentemente sem falso sucesso", async (
   const rejectedAt = new Date(Math.max(Date.now(), ready.updatedAt.getTime()) + 1_000);
   await repository.save(rejectItineraryProposal(ready, rejectedAt));
 
-  await Promise.all([
-    page.waitForURL(/\/roteiro\?erroProposta=estado-atualizado$/),
-    page.getByRole("button", { name: "Descartar proposta" }).click(),
-  ]);
+  await page.getByRole("button", { name: "Descartar proposta" }).click();
+  await expect(page).toHaveURL(/\/roteiro\?erroProposta=estado-atualizado$/);
 
   await expect(page.locator(".itinerary-feedback")).toHaveText(
     /foi atualizada e não pode mais ser descartada/i,

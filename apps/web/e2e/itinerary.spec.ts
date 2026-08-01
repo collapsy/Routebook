@@ -221,10 +221,8 @@ test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ 
   await page.getByLabel("Adicionar ao dia").selectOption("2026-08-23");
   await page.getByLabel("Horário opcional").fill("14:15");
   await page.getByLabel("Duração opcional").fill("120");
-  await Promise.all([
-    page.waitForURL(/adicionadoAoRoteiro=1$/, { waitUntil: "commit" }),
-    page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
-  ]);
+  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+  await expect(page).toHaveURL(/adicionadoAoRoteiro=1$/);
 
   await expect(page.getByRole("status")).toContainText("continua salvo");
   await expect(page.getByRole("heading", { name: placeName! })).toBeVisible();

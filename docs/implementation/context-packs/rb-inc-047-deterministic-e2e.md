@@ -1,7 +1,7 @@
 ---
 id: RB-CTX-047
 title: Context Pack do RB-INC-047
-description: Contexto mínimo para estabilizar a execução Playwright no ambiente compartilhado do CI sem reduzir cobertura ou ocultar flakiness.
+description: Contexto mínimo para corrigir contratos Playwright frágeis sem reduzir cobertura ou ocultar flakiness.
 document_type: implementation-context-pack
 owner: Quality Engineering
 status: Draft
@@ -33,13 +33,14 @@ ai_context:
 
 ## 1. Missão
 
-Serializar os E2E no CI porque o job fornece uma única aplicação e um único banco compartilhados, preservando os projetos responsivos e toda a cobertura existente.
+Substituir duas expectativas acopladas a detalhes internos por validações equivalentes de comportamento observável, sem aumentar timeout/retry ou alterar o produto.
 
 ## 2. Incremento
 
 - ID: `RB-INC-047`;
 - issue: `#106`;
 - branch: `codex/rb-inc-047-deterministic-e2e`;
+- PR: `#107`;
 - arquivo: `docs/implementation/increments/rb-inc-047-deterministic-e2e.md`.
 
 ## 3. Leitura obrigatória
@@ -51,55 +52,62 @@ Serializar os E2E no CI porque o job fornece uma única aplicação e um único 
 5. `docs/implementation/increments/rb-inc-047-deterministic-e2e.md`;
 6. `AGENTS.md`.
 
-## 4. Regras aplicáveis
+## 4. Evidência de causa
 
-- cada teste controla seus próprios dados e efeitos;
-- ambiente compartilhado não isolado não deve ser exercitado em paralelo;
-- Playwright continua responsável pelas jornadas reais e responsivas;
+- run falho: `30680751411`;
+- execução: 44 testes com um worker;
+- resultado: 41 passaram, dois flaky e um falhou;
+- histórico: locator exigia ordem textual não canônica;
+- roteiro: `waitForURL(..., waitUntil: "commit")` expirava em navegação suave.
+
+## 5. Regras aplicáveis
+
+- testar comportamento observável, não detalhe interno;
+- usar locators e assertions com auto-waiting;
 - retry automático não pode ocultar instabilidade;
 - não aumentar timeout, sleep ou retry como correção;
-- preservar traces e diagnóstico do CI.
+- preservar traces, projetos responsivos e requisitos das jornadas.
 
-## 5. Caminhos permitidos
+## 6. Caminhos permitidos
 
 ```text
-apps/web/playwright.config.ts
-apps/web/playwright.config.test.ts
+apps/web/e2e/itinerary.spec.ts
+apps/web/e2e/planning-conflicts.spec.ts
 docs/implementation/increments/rb-inc-047-deterministic-e2e.md
 docs/implementation/context-packs/rb-inc-047-deterministic-e2e.md
 docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
 
-## 6. Caminhos proibidos
+## 7. Caminhos proibidos
 
 ```text
-apps/web/e2e/**
+apps/web/playwright.config.ts
 apps/web/app/**
 apps/web/components/**
 modules/**
-packages/database/**
+packages/**
 .github/workflows/**
 ```
 
-## 7. Saídas esperadas
+## 8. Saídas esperadas
 
-- configuração CI com um worker;
-- comportamento local inalterado;
-- teste da configuração;
+- títulos do histórico validados sem ordem implícita;
+- URL final validada sem espera por evento de implementação;
+- configuração Playwright original;
 - duas execuções completas consecutivas sem flaky annotation;
 - documentação validada.
 
-## 8. Restrições
+## 9. Restrições
 
-- não remover nem relaxar assertions;
+- não remover nem relaxar requisito;
 - não aumentar retries ou timeouts;
-- não criar nova dependência;
+- não criar dependência;
 - não alterar cobertura desktop/mobile;
 - não alterar domínio, produto, banco ou workflow;
 - não declarar flakiness resolvida com apenas uma execução.
 
-## 9. Comandos
+## 10. Comandos
 
 ```bash
 pnpm --filter @routebook/web test
@@ -109,8 +117,8 @@ pnpm docs:validate
 pnpm --filter @routebook/web build
 ```
 
-O workflow Engineering Validation executará migrations, a regressão completa e Playwright com PostgreSQL real.
+O workflow Engineering Validation executará migrations, regressão e Playwright com PostgreSQL real.
 
-## 10. Escalonamento
+## 11. Escalonamento
 
-Interromper se a serialização exigir remoção de cobertura, mudança do workflow, aumento de retry/timeout ou se as execuções continuarem produzindo flakiness.
+Interromper se a correção exigir mudança de produto, remoção de cobertura, aumento de retry/timeout ou se duas execuções ainda produzirem flakiness.

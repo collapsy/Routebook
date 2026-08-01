@@ -1,7 +1,7 @@
 ---
 id: RB-INC-047
-title: Execução E2E Determinística no CI
-description: Remove a concorrência entre jornadas Playwright que compartilham uma única aplicação e banco no job de engenharia, sem ocultar flakiness com novos retries ou timeouts.
+title: Contratos E2E Determinísticos
+description: Corrige assertions Playwright acopladas à ordem de IDs canônicos e a eventos internos de navegação, sem ocultar flakiness com retries ou timeouts adicionais.
 document_type: implementation-increment
 owner: Quality Engineering
 status: Draft
@@ -30,29 +30,34 @@ ai_context:
   index: true
 ---
 
-# RB-INC-047 — Execução E2E Determinística no CI
+# RB-INC-047 — Contratos E2E Determinísticos
 
 ## 1. Objetivo
 
-Executar serialmente as jornadas Playwright no CI enquanto elas compartilharem uma única aplicação Next.js e um único PostgreSQL, eliminando a concorrência conhecida sem reduzir cobertura ou mascarar instabilidade com novos retries, sleeps ou timeouts.
+Validar as jornadas Playwright pelo comportamento observável, sem depender da ordenação interna de IDs canônicos nem de um evento de navegação específico do App Router, mantendo cobertura, timeouts e retries existentes.
 
-## 2. Problema
+## 2. Problema e diagnóstico
 
-Os workflows das PRs #103 e #105 ficaram verdes após retries de jornadas diferentes. Na execução final da PR #105, duas jornadas falharam inicialmente e passaram na repetição. A configuração atual permite concorrência contra ambiente compartilhado, contrariando a regra do `RB-CICD-001` para estado mutável comum e deixando retries ocultarem o sinal descrito no `RB-QA-001`.
+Os workflows das PRs #103 e #105 ficaram verdes após retries. A hipótese inicial de concorrência foi testada no run `30680751411` com um único worker e refutada: 41 testes passaram, dois continuaram flaky e um falhou após todos os retries.
+
+O log isolou dois contratos frágeis:
+
+- o histórico exigia `Café demorado, Passeio de barco` nessa ordem, embora `PlanningConflict` normalize `relatedActivityIds` por identidade e não defina ordem semântica para os títulos;
+- a adição de Lugar salvo aguardava `waitForURL` com `waitUntil: "commit"`, acoplando a jornada ao evento interno de uma navegação suave em vez da URL final observável.
 
 ## 3. Resultado verificável
 
-- o CI utiliza um único worker Playwright;
+- configuração de paralelismo Playwright permanece original;
+- os dois títulos do histórico são validados independentemente da ordem;
+- a navegação é validada por assertion da URL final após o clique;
 - desktop Chromium e Pixel 7 continuam executados;
-- execução local não recebe limitação adicional;
-- retries existentes não são aumentados;
-- nenhuma assertion, jornada ou timeout é removido ou relaxado;
+- retries e timeouts não aumentam;
+- nenhuma jornada ou requisito é removido ou relaxado;
 - duas execuções completas consecutivas terminam sem annotation de flaky.
 
 ## 4. Escopo
 
-- configuração Playwright;
-- teste automatizado da configuração por ambiente;
+- duas assertions E2E identificadas pelo log;
 - documentação e rastreabilidade;
 - evidências do workflow Engineering Validation.
 
@@ -61,9 +66,8 @@ Os workflows das PRs #103 e #105 ficaram verdes após retries de jornadas difere
 - comportamento de produto ou domínio;
 - banco, migrations ou dados de produção;
 - aumento de timeout, sleep ou retry;
-- remoção ou quarentena de testes;
-- infraestrutura isolada por worker;
-- novos browsers, dependências ou Providers.
+- remoção, quarentena ou serialização permanente de testes;
+- alterações em componentes, rotas, workflow, dependências ou Providers.
 
 ## 6. Context Pack
 
@@ -72,8 +76,8 @@ Os workflows das PRs #103 e #105 ficaram verdes após retries de jornadas difere
 ## 7. Caminhos permitidos
 
 ```text
-apps/web/playwright.config.ts
-apps/web/playwright.config.test.ts
+apps/web/e2e/itinerary.spec.ts
+apps/web/e2e/planning-conflicts.spec.ts
 docs/implementation/increments/rb-inc-047-deterministic-e2e.md
 docs/implementation/context-packs/rb-inc-047-deterministic-e2e.md
 docs/implementation/traceability-matrix.md
@@ -82,19 +86,16 @@ docs/registry.md
 
 ## 8. Critérios de aceite
 
-- [ ] `workers` vale `1` quando `CI` está ativo;
-- [ ] execução local mantém o número de workers gerenciado pelo Playwright;
-- [ ] os projetos desktop e mobile permanecem registrados;
-- [ ] `retries` e timeouts não aumentam;
-- [ ] nenhuma jornada ou assertion é removida;
-- [ ] teste automatizado protege a diferença CI/local;
+- [ ] nenhum teste depende da ordem dos IDs de Activities relacionadas;
+- [ ] os dois títulos continuam explicitamente validados no histórico;
+- [ ] a adição de Lugar salvo valida a URL final observável;
+- [ ] configuração, projetos, retries e timeouts do Playwright permanecem inalterados;
+- [ ] nenhuma jornada ou assertion de requisito é removida;
 - [ ] duas execuções consecutivas do workflow ficam verdes sem flaky annotation;
 - [ ] matriz e registro documental permanecem válidos.
 
 ## 9. Testes obrigatórios
 
-- teste de configuração com `CI=1`;
-- teste de configuração sem `CI`;
 - `pnpm format:check` no CI Linux;
 - `pnpm docs:validate`;
 - `pnpm lint`;
@@ -107,13 +108,13 @@ docs/registry.md
 
 | Risco | Impacto | Mitigação |
 | --- | --- | --- |
-| workflow mais lento | Médio | medir as duas execuções e manter o corte somente no CI |
-| flake possuir outra causa | Médio | exigir duas execuções sem retry e preservar traces |
-| serialização esconder dependência de ordem | Baixo | cada jornada continua criando seus próprios dados e a ordem não é fixada |
+| correção aceitar conteúdo ausente | Alto | manter assertions separadas para os dois títulos |
+| navegação continuar instável | Médio | usar auto-waiting da assertion de URL e preservar trace |
+| existir outra causa de flake | Médio | exigir duas execuções completas sem retry |
 
 ## 11. Rollback
 
-Reverter a configuração e o teste. Não existe migration, escrita de produto ou efeito em produção.
+Reverter somente as assertions e a documentação. Não existe migration, escrita de produto ou efeito em produção.
 
 ## 12. Evidências de conclusão
 

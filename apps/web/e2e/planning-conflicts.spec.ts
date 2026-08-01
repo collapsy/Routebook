@@ -66,7 +66,9 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
   const ignoredHistory = page.getByRole("list", { name: "Riscos ignorados registrados" });
   await expect(ignoredHistory.getByRole("heading", { name: "Horários sobrepostos" })).toBeVisible();
   await expect(ignoredHistory.getByText("RouteBook E2E", { exact: true })).toBeVisible();
-  await expect(ignoredHistory.getByText(/Café demorado, Passeio de barco/)).toBeVisible();
+  const ignoredActivities = ignoredHistory.locator("p").filter({ hasText: "Atividades:" });
+  await expect(ignoredActivities).toContainText(firstActivity);
+  await expect(ignoredActivities).toContainText(secondActivity);
   await expect(ignoredHistory.getByText("Restaurar", { exact: true })).toHaveCount(0);
 
   await page.getByRole("link", { name: "Voltar para o Roteiro" }).click();

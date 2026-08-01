@@ -2,6 +2,7 @@ export {
   cancelItineraryProposalGeneration,
   completeItineraryProposalGeneration,
   createItineraryProposalId,
+  expireItineraryProposalByTime,
   failItineraryProposalGeneration,
   itineraryProposalStatuses,
   ItineraryProposalTransitionError,

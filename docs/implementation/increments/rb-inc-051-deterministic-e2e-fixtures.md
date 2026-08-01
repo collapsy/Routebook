@@ -112,7 +112,7 @@ docs/registry.md
 - [x] nenhuma assertion de persistência ou feedback é removida;
 - [x] 46 cenários continuam distribuídos em desktop e mobile;
 - [x] configuração Playwright permanece inalterada;
-- [ ] duas execuções consecutivas ficam verdes sem flaky annotation;
+- [x] duas execuções consecutivas ficam verdes sem flaky annotation;
 - [x] documentação, lint, tipagem, testes e build permanecem verdes.
 
 ## 9. Testes obrigatórios
@@ -149,11 +149,9 @@ Evidências locais:
 - Playwright listou 46 cenários em sete arquivos, distribuídos em desktop e mobile;
 - Prettier dos arquivos alterados e `git diff --check` aprovados.
 
-Evidências da PR acumulada #115 no SHA `7d89f58`:
+Evidências finais da PR acumulada #115 no SHA `ca7beb8`:
 
-- Documentation Validation `30685658798` aprovada;
-- Engineering Validation `30685658797`, tentativa 1: 46/46 cenários Playwright aprovados sem retry ou flaky annotation;
-- Engineering Validation `30685658797`, tentativa 2: 46/46 cenários Playwright aprovados sem retry ou flaky annotation;
+- Documentation Validation `30686369423` aprovada;
+- Engineering Validation `30686369420`, tentativa 1: 46/46 cenários Playwright aprovados sem retry ou flaky annotation;
+- Engineering Validation `30686369420`, tentativa 2: 46/46 cenários Playwright aprovados sem retry ou flaky annotation;
 - nas duas tentativas, migrations PostgreSQL, lint, tipagem, testes de componente e domínio, smoke e build também foram aprovados.
-
-A correção adicional derivada do run `30686141233` exige um novo par de execuções limpas no SHA atualizado antes da liberação da PR.

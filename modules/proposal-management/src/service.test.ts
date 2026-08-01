@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   cancelItineraryProposalGeneration,
+  completeItineraryProposalGeneration,
   createItineraryProposalId,
   ItineraryProposalTransitionError,
   ItineraryProposalValidationError,
@@ -14,6 +15,7 @@ import type { ItineraryProposalRepository } from "./repository";
 import {
   cancelAndPersistItineraryProposalGeneration,
   completeAndPersistItineraryProposalGeneration,
+  expireAndPersistItineraryProposalByTime,
   failAndPersistItineraryProposalGeneration,
   ItineraryProposalApplicationError,
   requestAndPersistItineraryProposal,
@@ -24,6 +26,7 @@ class MemoryItineraryProposalRepository implements ItineraryProposalRepository {
   readonly createCalls: ItineraryProposal[] = [];
   readonly saveCalls: ItineraryProposal[] = [];
   readonly proposals = new Map<string, ItineraryProposal>();
+  saveError?: Error;
 
   private key(tripId: string, itineraryProposalId: ItineraryProposalId): string {
     return `${tripId}:${itineraryProposalId}`;
@@ -41,6 +44,7 @@ class MemoryItineraryProposalRepository implements ItineraryProposalRepository {
 
   async save(proposal: ItineraryProposal): Promise<ItineraryProposal> {
     this.saveCalls.push(proposal);
+    if (this.saveError) throw this.saveError;
     this.seed(proposal);
     return proposal;
   }
@@ -88,6 +92,15 @@ function completionContent() {
     generatedAt: new Date("2026-08-01T12:02:00.000Z"),
     validUntil: new Date("2026-08-02T12:02:00.000Z"),
   };
+}
+
+function readyProposal(id = "proposal-1"): ItineraryProposal {
+  const requested = requestedProposal(id);
+  const generating = startItineraryProposalGeneration(
+    requested,
+    new Date("2026-08-01T12:01:00.000Z"),
+  );
+  return completeItineraryProposalGeneration(generating, completionContent());
 }
 
 describe("comandos do ciclo inicial de Itinerary Proposal", () => {
@@ -171,6 +184,47 @@ describe("comandos do ciclo inicial de Itinerary Proposal", () => {
     expect(await repository.findById(requested.tripId, requested.id)).toBe(ready);
   });
 
+  it("expira e persiste uma Proposal ready exatamente em validUntil", async () => {
+    const repository = new MemoryItineraryProposalRepository();
+    const ready = readyProposal();
+    const expiredAt = new Date(ready.validUntil!.getTime());
+    repository.seed(ready);
+
+    const expired = await expireAndPersistItineraryProposalByTime(repository, {
+      tripId: ready.tripId,
+      itineraryProposalId: ready.id,
+      expiredAt,
+    });
+
+    expect(expired).toMatchObject({ status: "expired", expiredAt, updatedAt: expiredAt });
+    expect(expired.proposedActivities).toBe(ready.proposedActivities);
+    expect(expired.criteria).toBe(ready.criteria);
+    expect(expired.generationMethod).toBe(ready.generationMethod);
+    expect(repository.saveCalls).toEqual([expired]);
+    expect(await repository.findById(ready.tripId, ready.id)).toBe(expired);
+  });
+
+  it("expira depois de validUntil preservando integralmente o snapshot ready", async () => {
+    const repository = new MemoryItineraryProposalRepository();
+    const ready = readyProposal();
+    const expiredAt = new Date(ready.validUntil!.getTime() + 60_000);
+    repository.seed(ready);
+
+    const expired = await expireAndPersistItineraryProposalByTime(repository, {
+      tripId: ready.tripId,
+      itineraryProposalId: ready.id,
+      expiredAt,
+    });
+
+    expect(expired).toEqual({
+      ...ready,
+      status: "expired",
+      expiredAt,
+      updatedAt: expiredAt,
+    });
+    expect(repository.saveCalls).toHaveLength(1);
+  });
+
   it("cancela uma solicitação antes do início da geração", async () => {
     const repository = new MemoryItineraryProposalRepository();
     const requested = requestedProposal();
@@ -247,6 +301,15 @@ describe("comandos do ciclo inicial de Itinerary Proposal", () => {
           cancelledAt: new Date("2026-08-01T12:01:00.000Z"),
         }),
     ],
+    [
+      "expire",
+      (repository: ItineraryProposalRepository, itineraryProposalId: ItineraryProposalId) =>
+        expireAndPersistItineraryProposalByTime(repository, {
+          tripId: "trip-1",
+          itineraryProposalId,
+          expiredAt: new Date("2026-08-02T12:02:00.000Z"),
+        }),
+    ],
   ] as const)("rejeita Proposal ausente no comando %s", async (_, command) => {
     const repository = new MemoryItineraryProposalRepository();
 
@@ -309,5 +372,58 @@ describe("comandos do ciclo inicial de Itinerary Proposal", () => {
       }),
     ).rejects.toBeInstanceOf(ItineraryProposalValidationError);
     expect(repository.saveCalls).toEqual([]);
+  });
+
+  it("não salva expiração em estado incompatível", async () => {
+    const repository = new MemoryItineraryProposalRepository();
+    const requested = requestedProposal();
+    repository.seed(requested);
+
+    await expect(
+      expireAndPersistItineraryProposalByTime(repository, {
+        tripId: requested.tripId,
+        itineraryProposalId: requested.id,
+        expiredAt: new Date("2026-08-02T12:02:00.000Z"),
+      }),
+    ).rejects.toBeInstanceOf(ItineraryProposalTransitionError);
+    expect(repository.saveCalls).toEqual([]);
+  });
+
+  it.each([
+    ["antecipado", new Date("2026-08-02T12:01:59.999Z")],
+    ["inválido", new Date("invalid")],
+  ])("não salva quando expiredAt é %s", async (_, expiredAt) => {
+    const repository = new MemoryItineraryProposalRepository();
+    const ready = readyProposal();
+    repository.seed(ready);
+
+    await expect(
+      expireAndPersistItineraryProposalByTime(repository, {
+        tripId: ready.tripId,
+        itineraryProposalId: ready.id,
+        expiredAt,
+      }),
+    ).rejects.toBeInstanceOf(ItineraryProposalValidationError);
+    expect(repository.saveCalls).toEqual([]);
+    expect(await repository.findById(ready.tripId, ready.id)).toBe(ready);
+  });
+
+  it("propaga falha de persistência sem substituir a Proposal ready", async () => {
+    const repository = new MemoryItineraryProposalRepository();
+    const ready = readyProposal();
+    const persistenceError = new Error("falha de persistência");
+    repository.seed(ready);
+    repository.saveError = persistenceError;
+
+    await expect(
+      expireAndPersistItineraryProposalByTime(repository, {
+        tripId: ready.tripId,
+        itineraryProposalId: ready.id,
+        expiredAt: new Date(ready.validUntil!.getTime()),
+      }),
+    ).rejects.toBe(persistenceError);
+    expect(repository.saveCalls).toHaveLength(1);
+    expect(repository.saveCalls[0]).toMatchObject({ status: "expired" });
+    expect(await repository.findById(ready.tripId, ready.id)).toBe(ready);
   });
 });

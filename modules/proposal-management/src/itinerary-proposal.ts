@@ -76,6 +76,7 @@ export type ItineraryProposal = Readonly<{
   planningConflictIds?: readonly string[];
   validUntil?: Date;
   generatedAt?: Date;
+  acceptedAt?: Date;
   rejectedAt?: Date;
   expiredAt?: Date;
   failedAt?: Date;
@@ -406,6 +407,32 @@ export function rejectItineraryProposal(
     status: "rejected",
     rejectedAt: new Date(normalizedRejectedAt.getTime()),
     updatedAt: new Date(normalizedRejectedAt.getTime()),
+  });
+}
+
+export function finalizeAppliedItineraryProposalAcceptance(
+  proposal: ItineraryProposal,
+  acceptedAt: Date,
+): ItineraryProposal {
+  assertStatus(proposal, ["ready"], "accepted");
+  const normalizedAcceptedAt = transitionDate(proposal, acceptedAt);
+  if (!proposal.validUntil) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      validUntil: "A Proposal pronta deve possuir validade temporal.",
+    });
+  }
+  const validUntil = validDate(proposal.validUntil, "validUntil");
+  if (normalizedAcceptedAt.getTime() >= validUntil.getTime()) {
+    throw new ItineraryProposalValidationError("A Itinerary Proposal não está mais válida.", {
+      acceptedAt: "O aceite deve ser finalizado antes de validUntil.",
+    });
+  }
+
+  return Object.freeze({
+    ...proposal,
+    status: "accepted",
+    acceptedAt: new Date(normalizedAcceptedAt.getTime()),
+    updatedAt: new Date(normalizedAcceptedAt.getTime()),
   });
 }
 

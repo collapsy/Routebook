@@ -6,6 +6,7 @@ import {
   createItineraryProposalId,
   expireItineraryProposalByTime,
   failItineraryProposalGeneration,
+  finalizeAppliedItineraryProposalAcceptance,
   itineraryProposalStatuses,
   ItineraryProposalTransitionError,
   ItineraryProposalValidationError,
@@ -462,6 +463,95 @@ describe("Itinerary Proposal", () => {
     expect(() =>
       rejectItineraryProposal(rejected, new Date("2026-07-31T12:04:00.000Z")),
     ).toThrowError(ItineraryProposalTransitionError);
+  });
+
+  it("finaliza como accepted uma Proposal já aplicada e preserva o snapshot revisável", () => {
+    const ready = completeItineraryProposalGeneration(generatingProposal(), readyContent());
+    const acceptedAt = new Date("2026-07-31T12:03:00.000Z");
+    const accepted = finalizeAppliedItineraryProposalAcceptance(ready, acceptedAt);
+
+    expect(accepted).toMatchObject({
+      status: "accepted",
+      acceptedAt,
+      updatedAt: acceptedAt,
+      baseTripContextVersion: ready.baseTripContextVersion,
+      baseItineraryVersion: ready.baseItineraryVersion,
+      contextSnapshotId: ready.contextSnapshotId,
+      generationMethod: ready.generationMethod,
+      generationVersion: ready.generationVersion,
+      criteria: ready.criteria,
+      justifications: ready.justifications,
+      limitations: ready.limitations,
+      planningConflictIds: ready.planningConflictIds,
+      proposedActivities: ready.proposedActivities,
+    });
+    expect(accepted.acceptedAt).not.toBe(acceptedAt);
+    expect(accepted.updatedAt).not.toBe(accepted.acceptedAt);
+    expect(ready.status).toBe("ready");
+    expect(ready).not.toHaveProperty("acceptedAt");
+    expect(Object.isFrozen(accepted)).toBe(true);
+
+    acceptedAt.setUTCFullYear(2030);
+    expect(accepted.acceptedAt?.toISOString()).toBe("2026-07-31T12:03:00.000Z");
+  });
+
+  it("permite finalizar o aceite no mesmo instante da última atualização", () => {
+    const ready = completeItineraryProposalGeneration(generatingProposal(), readyContent());
+    const accepted = finalizeAppliedItineraryProposalAcceptance(ready, ready.updatedAt);
+
+    expect(accepted.status).toBe("accepted");
+    expect(accepted.acceptedAt).toEqual(ready.updatedAt);
+    expect(accepted.acceptedAt).not.toBe(ready.updatedAt);
+  });
+
+  it("rejeita finalização com instante anterior ou inválido", () => {
+    const ready = completeItineraryProposalGeneration(generatingProposal(), readyContent());
+
+    expect(() =>
+      finalizeAppliedItineraryProposalAcceptance(ready, new Date("2026-07-31T12:01:59.999Z")),
+    ).toThrowError(ItineraryProposalValidationError);
+    expect(() =>
+      finalizeAppliedItineraryProposalAcceptance(ready, new Date("invalid")),
+    ).toThrowError(ItineraryProposalValidationError);
+  });
+
+  it.each([
+    ["igual", "2026-08-01T12:02:00.000Z"],
+    ["posterior", "2026-08-01T12:02:00.001Z"],
+  ])("rejeita finalização %s a validUntil", (_, acceptedAt) => {
+    const ready = completeItineraryProposalGeneration(generatingProposal(), readyContent());
+
+    expect(() =>
+      finalizeAppliedItineraryProposalAcceptance(ready, new Date(acceptedAt)),
+    ).toThrowError(ItineraryProposalValidationError);
+  });
+
+  it("rejeita defensivamente Proposal ready sem validUntil", () => {
+    const ready = completeItineraryProposalGeneration(generatingProposal(), readyContent());
+    const { validUntil: omittedValidUntil, ...incomplete } = ready;
+
+    expect(omittedValidUntil).toBeInstanceOf(Date);
+
+    expect(() =>
+      finalizeAppliedItineraryProposalAcceptance(incomplete, new Date("2026-07-31T12:03:00.000Z")),
+    ).toThrowError(ItineraryProposalValidationError);
+  });
+
+  it("rejeita finalização fora de ready, inclusive após estado terminal", () => {
+    const ready = completeItineraryProposalGeneration(generatingProposal(), readyContent());
+    const rejected = rejectItineraryProposal(ready, new Date("2026-07-31T12:03:00.000Z"));
+    const expired = expireItineraryProposalByTime(ready, ready.validUntil!);
+    const accepted = finalizeAppliedItineraryProposalAcceptance(
+      ready,
+      new Date("2026-07-31T12:03:00.000Z"),
+    );
+    const attemptedAt = new Date("2026-08-02T12:02:00.000Z");
+
+    for (const proposal of [requestProposal(), rejected, expired, accepted]) {
+      expect(() => finalizeAppliedItineraryProposalAcceptance(proposal, attemptedAt)).toThrowError(
+        ItineraryProposalTransitionError,
+      );
+    }
   });
 
   it("registra falha técnica somente durante a geração", () => {

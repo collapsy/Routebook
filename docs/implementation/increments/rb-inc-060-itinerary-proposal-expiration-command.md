@@ -43,6 +43,8 @@ Issue: [#136](https://github.com/collapsy/Routebook/issues/136)
 
 Branch: `codex/rb-inc-060-expiration-command`.
 
+Pull request: [#137](https://github.com/collapsy/Routebook/pull/137).
+
 ## 2. Problema
 
 Domínio e adapter já suportam `ready → expired`, porém consumidores ainda precisariam repetir a ordem entre carregar, validar o instante, transicionar e salvar. Isso permite tratamentos divergentes para ausência, estado ou validade incompatíveis.
@@ -144,4 +146,4 @@ Reverter serviço, testes, exports e documentação. Não existe migration, depe
 - documentação: 161 documentos e 161 registros validados, com quatro avisos preexistentes;
 - `@routebook/proposal-management`: lint e typecheck verdes; 60 testes verdes;
 - workspace: lint, typecheck e build verdes;
-- migration PostgreSQL, suíte integral e Playwright responsivo: pendentes do workflow da pull request.
+- PR #137, run `30714407588`: formatação, documentação, lint, typecheck, migration PostgreSQL, suíte de componentes e domínio, smoke, build e 50 testes Playwright responsivos verdes.

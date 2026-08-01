@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildPlanningConflictReview,
+  PlanningConflictReviewIntegrityError,
   type PlanningConflictReviewSource,
 } from "./planning-conflict-experience";
 
@@ -11,6 +12,7 @@ function createConflict(
     Pick<PlanningConflictReviewSource, "id" | "type" | "severity">,
 ): PlanningConflictReviewSource {
   return {
+    tripId: "trip-1",
     state: "open",
     contextSnapshot: {
       tripStartDate: "2026-08-22",
@@ -90,9 +92,11 @@ describe("buildPlanningConflictReview", () => {
       dayLabel: "Dia 1 · 22 de agosto",
       activityTitles: ["Café na vila", "Passeio de barco"],
       itineraryHref: `/viagens/trip-1/roteiro#${day.id}`,
+      canIgnore: true,
     });
     expect(review.items[0]?.explanation).not.toContain(firstActivity.id);
     expect(review.items[0]?.explanation).not.toContain(secondActivity.id);
+    expect(review.ignoredRisks).toEqual([]);
   });
 
   it("uses only known evidence when explaining invalid intervals and overloaded days", () => {
@@ -184,5 +188,136 @@ describe("buildPlanningConflictReview", () => {
       title: "Atividade associada a outro dia",
       activityTitles: ["Café na vila"],
     });
+  });
+
+  it("composes ignored Risks with their Decision and known actor", () => {
+    const itinerary = createPlannedItinerary();
+    const day = itinerary.days[0]!;
+    const activities = day.activities;
+    const ignoredAt = new Date("2026-08-01T00:05:00.000Z");
+    const conflict = createConflict({
+      id: "conflict-ignored",
+      type: "activity-time-overlap",
+      severity: "risk",
+      state: "ignored",
+      relatedDayIds: [day.id],
+      relatedActivityIds: activities.map((activity) => activity.id),
+      ignoredAt,
+      ignoredDecisionId: "decision-ignore",
+    });
+    const openConflict = createConflict({
+      id: "conflict-open",
+      type: "activity-time-overlap",
+      severity: "risk",
+      relatedDayIds: [day.id],
+      relatedActivityIds: activities.map((activity) => activity.id),
+    });
+    const decision = {
+      id: "decision-ignore",
+      tripId: "trip-1",
+      actorParticipantId: "participant-owner",
+      decidedAt: ignoredAt,
+      type: "ignore-planning-risk",
+      chosenOption: {
+        type: "ignore-planning-risk",
+        planningConflictId: conflict.id,
+      },
+      effect: {
+        type: "planning-conflict-ignored",
+        planningConflictId: conflict.id,
+      },
+    };
+
+    const review = buildPlanningConflictReview({
+      itinerary,
+      tripId: "trip-1",
+      conflicts: [openConflict, conflict],
+      decisions: [decision],
+      participants: [{ userId: "participant-owner", displayName: "RouteBook QA" }],
+    });
+
+    expect(review.total).toBe(1);
+    expect(review.counts).toEqual({ error: 0, risk: 1, suggestion: 0 });
+    expect(review.ignoredRisks).toEqual([
+      expect.objectContaining({
+        id: conflict.id,
+        title: "Horários sobrepostos",
+        activityTitles: ["Café na vila", "Passeio de barco"],
+        dayLabel: "Dia 1 · 22 de agosto",
+        actorLabel: "RouteBook QA",
+        ignoredAtLabel: expect.stringContaining("31 de jul. de 2026"),
+      }),
+    ]);
+  });
+
+  it("omits unavailable actor names but rejects an incompatible Decision", () => {
+    const itinerary = createPlannedItinerary();
+    const ignoredAt = new Date("2026-08-01T00:05:00.000Z");
+    const conflict = createConflict({
+      id: "conflict-ignored",
+      type: "day-overloaded",
+      severity: "risk",
+      state: "ignored",
+      ignoredAt,
+      ignoredDecisionId: "decision-ignore",
+    });
+    const decision = {
+      id: "decision-ignore",
+      tripId: "trip-1",
+      actorParticipantId: "participant-removed",
+      decidedAt: ignoredAt,
+      type: "ignore-planning-risk",
+      chosenOption: {
+        type: "ignore-planning-risk",
+        planningConflictId: conflict.id,
+      },
+      effect: {
+        type: "planning-conflict-ignored",
+        planningConflictId: conflict.id,
+      },
+    };
+
+    const review = buildPlanningConflictReview({
+      itinerary,
+      tripId: "trip-1",
+      conflicts: [conflict],
+      decisions: [decision],
+    });
+    expect(review.ignoredRisks[0]).not.toHaveProperty("actorLabel");
+
+    expect(() =>
+      buildPlanningConflictReview({
+        itinerary,
+        tripId: "trip-1",
+        conflicts: [conflict],
+        decisions: [],
+      }),
+    ).toThrow(PlanningConflictReviewIntegrityError);
+
+    expect(() =>
+      buildPlanningConflictReview({
+        itinerary,
+        tripId: "trip-1",
+        conflicts: [conflict],
+        decisions: [{ ...decision, tripId: "trip-2" }],
+      }),
+    ).toThrow(PlanningConflictReviewIntegrityError);
+
+    expect(() =>
+      buildPlanningConflictReview({
+        itinerary,
+        tripId: "trip-1",
+        conflicts: [conflict],
+        decisions: [
+          {
+            ...decision,
+            chosenOption: {
+              type: "ignore-planning-risk",
+              planningConflictId: "another-conflict",
+            },
+          },
+        ],
+      }),
+    ).toThrow(PlanningConflictReviewIntegrityError);
   });
 });

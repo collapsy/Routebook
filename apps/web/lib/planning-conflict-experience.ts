@@ -7,6 +7,7 @@ type PlanningConflictEvidenceValue =
 
 export type PlanningConflictReviewSource = Readonly<{
   id: string;
+  tripId: string;
   type:
     | "activity-time-overlap"
     | "activity-outside-trip-period"
@@ -14,7 +15,7 @@ export type PlanningConflictReviewSource = Readonly<{
     | "invalid-activity-interval"
     | "day-overloaded";
   severity: PlanningConflictSeverity;
-  state: "open" | "invalidated" | "superseded";
+  state: "open" | "ignored" | "invalidated" | "superseded";
   contextSnapshot: Readonly<{
     tripStartDate: string;
     tripEndDate: string;
@@ -25,6 +26,23 @@ export type PlanningConflictReviewSource = Readonly<{
   }>[];
   relatedDayIds: readonly string[];
   relatedActivityIds: readonly string[];
+  ignoredAt?: Date;
+  ignoredDecisionId?: string;
+}>;
+
+export type PlanningRiskDecisionReviewSource = Readonly<{
+  id: string;
+  tripId: string;
+  actorParticipantId: string;
+  decidedAt: Date;
+  type: string;
+  chosenOption: Readonly<{ type: string; planningConflictId?: string }>;
+  effect: Readonly<{ type: string; planningConflictId?: string }>;
+}>;
+
+export type PlanningReviewParticipantSource = Readonly<{
+  userId: string;
+  displayName: string;
 }>;
 
 export type PlanningConflictReviewItem = Readonly<{
@@ -37,13 +55,33 @@ export type PlanningConflictReviewItem = Readonly<{
   dayLabel?: string;
   activityTitles: readonly string[];
   itineraryHref?: string;
+  canIgnore: boolean;
 }>;
 
 export type PlanningConflictReview = Readonly<{
   total: number;
   counts: Readonly<Record<PlanningConflictSeverity, number>>;
   items: readonly PlanningConflictReviewItem[];
+  ignoredRisks: readonly IgnoredPlanningRiskItem[];
 }>;
+
+export type IgnoredPlanningRiskItem = Readonly<{
+  id: string;
+  title: string;
+  explanation: string;
+  impact: string;
+  dayLabel?: string;
+  activityTitles: readonly string[];
+  ignoredAtLabel: string;
+  actorLabel?: string;
+}>;
+
+export class PlanningConflictReviewIntegrityError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PlanningConflictReviewIntegrityError";
+  }
+}
 
 const severityLabels: Readonly<
   Record<PlanningConflictSeverity, PlanningConflictReviewItem["severityLabel"]>
@@ -63,6 +101,19 @@ function formatDate(value: string): string | null {
     day: "numeric",
     month: "long",
   }).format(date);
+}
+
+function formatInstant(value: Date, timeZone: string): string {
+  if (!(value instanceof Date) || Number.isNaN(value.getTime())) {
+    throw new PlanningConflictReviewIntegrityError(
+      "O Risco ignorado não possui um instante de decisão válido.",
+    );
+  }
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone,
+  }).format(value);
 }
 
 function evidenceFact(
@@ -188,11 +239,15 @@ function describeConflict(
 
 export function buildPlanningConflictReview({
   conflicts,
+  decisions = [],
   itinerary,
+  participants = [],
   tripId,
 }: {
   conflicts: readonly PlanningConflictReviewSource[];
+  decisions?: readonly PlanningRiskDecisionReviewSource[];
   itinerary: Itinerary;
+  participants?: readonly PlanningReviewParticipantSource[];
   tripId: string;
 }): PlanningConflictReview {
   const daysById = new Map(itinerary.days.map((day) => [day.id, day]));
@@ -206,6 +261,10 @@ export function buildPlanningConflictReview({
     risk: 0,
     suggestion: 0,
   };
+  const decisionsById = new Map(decisions.map((decision) => [decision.id, decision]));
+  const participantsById = new Map(
+    participants.map((participant) => [participant.userId, participant]),
+  );
   const items = conflicts
     .filter((conflict) => conflict.state === "open")
     .map((conflict): PlanningConflictReviewItem => {
@@ -224,8 +283,56 @@ export function buildPlanningConflictReview({
         severityLabel: severityLabels[conflict.severity],
         ...description,
         activityTitles,
+        canIgnore: conflict.severity === "risk",
         ...(day && formattedDay ? { dayLabel: `Dia ${day.position} · ${formattedDay}` } : {}),
         ...(day ? { itineraryHref: `/viagens/${tripId}/roteiro#${day.id}` } : {}),
+      };
+    });
+
+  const ignoredRisks = conflicts
+    .filter((conflict) => conflict.state === "ignored")
+    .map((conflict): IgnoredPlanningRiskItem => {
+      if (conflict.tripId !== tripId || conflict.severity !== "risk") {
+        throw new PlanningConflictReviewIntegrityError(
+          "O histórico contém um Risco ignorado incompatível com esta Viagem.",
+        );
+      }
+      if (!conflict.ignoredAt || !conflict.ignoredDecisionId) {
+        throw new PlanningConflictReviewIntegrityError(
+          "O Risco ignorado não possui correlação completa com a Decision.",
+        );
+      }
+      const decision = decisionsById.get(conflict.ignoredDecisionId);
+      if (
+        !decision ||
+        decision.tripId !== tripId ||
+        decision.type !== "ignore-planning-risk" ||
+        decision.chosenOption.type !== "ignore-planning-risk" ||
+        decision.chosenOption.planningConflictId !== conflict.id ||
+        decision.effect.type !== "planning-conflict-ignored" ||
+        decision.effect.planningConflictId !== conflict.id
+      ) {
+        throw new PlanningConflictReviewIntegrityError(
+          "A Decision do Risco ignorado é ausente ou incompatível.",
+        );
+      }
+
+      const day = conflict.relatedDayIds.map((dayId) => daysById.get(dayId)).find(Boolean);
+      const activityTitles = conflict.relatedActivityIds.flatMap((activityId) => {
+        const activity = activitiesById.get(activityId);
+        return activity ? [activity.title] : [];
+      });
+      const description = describeConflict(conflict, activityTitles);
+      const formattedDay = day ? formatDate(day.date) : null;
+      const actor = participantsById.get(decision.actorParticipantId);
+
+      return {
+        id: conflict.id,
+        ...description,
+        activityTitles,
+        ignoredAtLabel: formatInstant(conflict.ignoredAt, itinerary.period.timeZone),
+        ...(actor?.displayName.trim() ? { actorLabel: actor.displayName.trim() } : {}),
+        ...(day && formattedDay ? { dayLabel: `Dia ${day.position} · ${formattedDay}` } : {}),
       };
     });
 
@@ -233,5 +340,6 @@ export function buildPlanningConflictReview({
     total: items.length,
     counts,
     items,
+    ignoredRisks,
   };
 }

@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, or } from "drizzle-orm";
 
 import {
   createPlanningConflict,
@@ -101,7 +101,7 @@ function deserializeContextSnapshot(value: unknown): PlanningConflictContextSnap
   };
 }
 
-function rehydratePlanningConflict(row: PlanningConflictRow): PlanningConflict {
+export function rehydratePlanningConflict(row: PlanningConflictRow): PlanningConflict {
   return createPlanningConflict({
     id: row.id,
     tripId: row.tripId,
@@ -116,6 +116,8 @@ function rehydratePlanningConflict(row: PlanningConflictRow): PlanningConflict {
     policyVersion: row.policyVersion,
     contextFingerprint: row.contextFingerprint,
     lineageKey: row.lineageKey,
+    ...(row.ignoredAt ? { ignoredAt: row.ignoredAt } : {}),
+    ...(row.ignoredDecisionId ? { ignoredDecisionId: row.ignoredDecisionId } : {}),
     ...(row.invalidatedAt ? { invalidatedAt: row.invalidatedAt } : {}),
     ...(row.supersededAt ? { supersededAt: row.supersededAt } : {}),
     ...(row.supersededByPlanningConflictId
@@ -139,11 +141,14 @@ function insertValues(conflict: PlanningConflict) {
     policyVersion: conflict.policyVersion,
     contextFingerprint: conflict.contextFingerprint,
     lineageKey: conflict.lineageKey,
+    ignoredAt: conflict.ignoredAt ?? null,
+    ignoredDecisionId: conflict.ignoredDecisionId ?? null,
     invalidatedAt: conflict.invalidatedAt ?? null,
     supersededAt: conflict.supersededAt ?? null,
     supersededByPlanningConflictId: conflict.supersededByPlanningConflictId ?? null,
     createdAt: conflict.detectedAt,
-    updatedAt: conflict.invalidatedAt ?? conflict.supersededAt ?? conflict.detectedAt,
+    updatedAt:
+      conflict.invalidatedAt ?? conflict.supersededAt ?? conflict.ignoredAt ?? conflict.detectedAt,
   };
 }
 
@@ -205,7 +210,12 @@ export async function reconcilePlanningConflictsWithDatabase(
   const activeRows = await database
     .select()
     .from(planningConflicts)
-    .where(and(eq(planningConflicts.tripId, normalizedTripId), eq(planningConflicts.state, "open")))
+    .where(
+      and(
+        eq(planningConflicts.tripId, normalizedTripId),
+        or(eq(planningConflicts.state, "open"), eq(planningConflicts.state, "ignored")),
+      ),
+    )
     .orderBy(asc(planningConflicts.type), asc(planningConflicts.contextFingerprint));
   const active = activeRows.map(rehydratePlanningConflict);
   const activeByFingerprint = new Map(
@@ -216,7 +226,7 @@ export async function reconcilePlanningConflictsWithDatabase(
   for (const conflict of [...detectedConflicts].sort(comparePlanningConflicts)) {
     const equivalent = activeByFingerprint.get(conflict.contextFingerprint);
     if (equivalent) {
-      current.push(equivalent);
+      if (equivalent.state === "open") current.push(equivalent);
       continue;
     }
 

@@ -22,7 +22,7 @@ export const planningConflictTypes = [
 
 export type PlanningConflictType = (typeof planningConflictTypes)[number];
 export type PlanningConflictSeverity = "error" | "risk" | "suggestion";
-export type PlanningConflictState = "open" | "invalidated" | "superseded";
+export type PlanningConflictState = "open" | "ignored" | "invalidated" | "superseded";
 export type PlanningConflictEvidenceValue =
   string | number | boolean | null | readonly string[] | readonly number[];
 
@@ -72,6 +72,8 @@ export type PlanningConflict = Readonly<{
   policyVersion: string;
   contextFingerprint: PlanningConflictFingerprint;
   lineageKey: PlanningConflictLineageKey;
+  ignoredAt?: Date;
+  ignoredDecisionId?: string;
   invalidatedAt?: Date;
   supersededAt?: Date;
   supersededByPlanningConflictId?: PlanningConflictId;
@@ -91,6 +93,8 @@ export type CreatePlanningConflictInput = Readonly<{
   policyVersion: string;
   contextFingerprint: string;
   lineageKey: string;
+  ignoredAt?: Date;
+  ignoredDecisionId?: string;
   invalidatedAt?: Date;
   supersededAt?: Date;
   supersededByPlanningConflictId?: string;
@@ -109,7 +113,7 @@ export class PlanningConflictValidationError extends Error {
 export class PlanningConflictTransitionError extends Error {
   constructor(
     message: string,
-    readonly code: "not-open" | "invalid-supersession",
+    readonly code: "not-open" | "not-risk" | "invalid-supersession",
   ) {
     super(message);
     this.name = "PlanningConflictTransitionError";
@@ -354,6 +358,10 @@ export function createPlanningConflict(input: CreatePlanningConflictInput): Plan
   }
 
   const state = input.state ?? "open";
+  const ignoredAt = input.ignoredAt ? validDate(input.ignoredAt, "ignoredAt") : undefined;
+  const ignoredDecisionId = input.ignoredDecisionId
+    ? requiredText(input.ignoredDecisionId, "ignoredDecisionId")
+    : undefined;
   const invalidatedAt = input.invalidatedAt
     ? validDate(input.invalidatedAt, "invalidatedAt")
     : undefined;
@@ -364,9 +372,33 @@ export function createPlanningConflict(input: CreatePlanningConflictInput): Plan
     ? createPlanningConflictId(input.supersededByPlanningConflictId)
     : undefined;
 
-  if (state === "open" && (invalidatedAt || supersededAt || supersededByPlanningConflictId)) {
+  if (Boolean(ignoredAt) !== Boolean(ignoredDecisionId)) {
+    throw new PlanningConflictValidationError("PlanningConflict inválido.", {
+      ignoredDecisionId: "ignoredAt e ignoredDecisionId devem ser informados juntos.",
+    });
+  }
+  if (
+    state === "open" &&
+    (ignoredAt ||
+      ignoredDecisionId ||
+      invalidatedAt ||
+      supersededAt ||
+      supersededByPlanningConflictId)
+  ) {
     throw new PlanningConflictValidationError("PlanningConflict inválido.", {
       state: "Um conflito aberto não pode possuir dados de encerramento.",
+    });
+  }
+  if (
+    state === "ignored" &&
+    (!ignoredAt ||
+      !ignoredDecisionId ||
+      invalidatedAt ||
+      supersededAt ||
+      supersededByPlanningConflictId)
+  ) {
+    throw new PlanningConflictValidationError("PlanningConflict inválido.", {
+      state: "Um risco ignorado deve informar apenas instante e Decision.",
     });
   }
   if (
@@ -400,9 +432,36 @@ export function createPlanningConflict(input: CreatePlanningConflictInput): Plan
     policyVersion: requiredText(input.policyVersion, "policyVersion"),
     contextFingerprint: createPlanningConflictFingerprint(input.contextFingerprint),
     lineageKey: createPlanningConflictLineageKey(input.lineageKey),
+    ...(ignoredAt ? { ignoredAt } : {}),
+    ...(ignoredDecisionId ? { ignoredDecisionId } : {}),
     ...(invalidatedAt ? { invalidatedAt } : {}),
     ...(supersededAt ? { supersededAt } : {}),
     ...(supersededByPlanningConflictId ? { supersededByPlanningConflictId } : {}),
+  });
+}
+
+export function ignorePlanningRisk(
+  conflict: PlanningConflict,
+  ignoredDecisionId: string,
+  ignoredAt: Date,
+): PlanningConflict {
+  if (conflict.state !== "open") {
+    throw new PlanningConflictTransitionError(
+      "Somente PlanningConflicts abertos podem ser ignorados.",
+      "not-open",
+    );
+  }
+  if (conflict.severity !== "risk") {
+    throw new PlanningConflictTransitionError(
+      "Somente PlanningConflicts de severidade risk podem ser ignorados.",
+      "not-risk",
+    );
+  }
+  return createPlanningConflict({
+    ...conflict,
+    state: "ignored",
+    ignoredAt,
+    ignoredDecisionId,
   });
 }
 
@@ -410,9 +469,9 @@ export function invalidatePlanningConflict(
   conflict: PlanningConflict,
   invalidatedAt: Date,
 ): PlanningConflict {
-  if (conflict.state !== "open") {
+  if (conflict.state !== "open" && conflict.state !== "ignored") {
     throw new PlanningConflictTransitionError(
-      "Somente PlanningConflicts abertos podem ser invalidados.",
+      "Somente PlanningConflicts ativos podem ser invalidados.",
       "not-open",
     );
   }
@@ -428,9 +487,9 @@ export function supersedePlanningConflict(
   supersededByPlanningConflictId: PlanningConflictId,
   supersededAt: Date,
 ): PlanningConflict {
-  if (conflict.state !== "open") {
+  if (conflict.state !== "open" && conflict.state !== "ignored") {
     throw new PlanningConflictTransitionError(
-      "Somente PlanningConflicts abertos podem ser superseded.",
+      "Somente PlanningConflicts ativos podem ser superseded.",
       "not-open",
     );
   }

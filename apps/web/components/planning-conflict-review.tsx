@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import type {
+  IgnoredPlanningRiskItem,
   PlanningConflictReview as PlanningConflictReviewModel,
   PlanningConflictSeverity,
 } from "../lib/planning-conflict-experience";
@@ -32,10 +33,93 @@ function conflictLabel(count: number): string {
   return count === 1 ? "1 conflito" : `${count} conflitos`;
 }
 
-export function PlanningConflictReview({ review }: { review: PlanningConflictReviewModel }) {
-  const [activeFilter, setActiveFilter] = useState<ReviewFilter>("all");
+type PlanningRiskAction = (formData: FormData) => Promise<Readonly<{ redirectTo: string }>>;
 
-  if (review.total === 0) {
+function IgnoredPlanningRiskHistory({ items }: { items: readonly IgnoredPlanningRiskItem[] }) {
+  if (items.length === 0) return null;
+
+  return (
+    <section className={styles.history} aria-labelledby="planning-review-history-title">
+      <header>
+        <div>
+          <p className={styles.eyebrow}>Histórico auditável</p>
+          <h2 id="planning-review-history-title">Riscos ignorados</h2>
+        </div>
+        <p>
+          {items.length === 1 ? "1 decisão registrada" : `${items.length} decisões registradas`}
+        </p>
+      </header>
+      <p className={styles.historyExplanation}>
+        Estes riscos foram aceitos conscientemente. As condições não foram resolvidas e continuam
+        preservadas para consulta.
+      </p>
+      <ol aria-label="Riscos ignorados registrados" className={styles.historyList}>
+        {items.map((item) => {
+          const titleId = `ignored-planning-risk-${item.id}`;
+          return (
+            <li key={item.id}>
+              <article aria-labelledby={titleId}>
+                <div className={styles.historyMeta}>
+                  <span>Risco ignorado</span>
+                  {item.dayLabel ? <span>{item.dayLabel}</span> : null}
+                </div>
+                <h3 id={titleId}>{item.title}</h3>
+                <p>{item.explanation}</p>
+                {item.activityTitles.length > 0 ? (
+                  <p>
+                    <strong>Atividades:</strong> {item.activityTitles.join(", ")}
+                  </p>
+                ) : null}
+                <p>
+                  <strong>Impacto:</strong> {item.impact}
+                </p>
+                <dl>
+                  <div>
+                    <dt>Decisão registrada</dt>
+                    <dd>{item.ignoredAtLabel}</dd>
+                  </div>
+                  <div>
+                    <dt>Autoria</dt>
+                    <dd>{item.actorLabel ?? "Participante não disponível"}</dd>
+                  </div>
+                </dl>
+              </article>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+
+export function PlanningConflictReview({
+  review,
+  tripId,
+  ignoreAction,
+}: {
+  review: PlanningConflictReviewModel;
+  tripId: string;
+  ignoreAction: PlanningRiskAction;
+}) {
+  const [activeFilter, setActiveFilter] = useState<ReviewFilter>("all");
+  const [pendingConflictId, setPendingConflictId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  async function submitIgnore(conflictId: string, formData: FormData): Promise<void> {
+    setPendingConflictId(conflictId);
+    setActionError(null);
+    try {
+      const result = await ignoreAction(formData);
+      window.location.assign(result.redirectTo);
+    } catch {
+      setPendingConflictId(null);
+      setActionError(
+        "Não foi possível confirmar esta decisão agora. Verifique sua conexão e tente novamente.",
+      );
+    }
+  }
+
+  if (review.total === 0 && review.ignoredRisks.length === 0) {
     return (
       <section className={styles.emptyState} aria-labelledby="planning-review-empty-title">
         <span aria-hidden="true">✓</span>
@@ -47,6 +131,24 @@ export function PlanningConflictReview({ review }: { review: PlanningConflictRev
           </p>
         </div>
       </section>
+    );
+  }
+
+  if (review.total === 0) {
+    return (
+      <div className={styles.review}>
+        <section className={styles.emptyState} aria-labelledby="planning-review-empty-title">
+          <span aria-hidden="true">✓</span>
+          <div>
+            <h2 id="planning-review-empty-title">Nenhum conflito aberto</h2>
+            <p>
+              A análise determinística atual não encontrou itens abertos. Os Riscos aceitos
+              conscientemente continuam registrados no histórico abaixo.
+            </p>
+          </div>
+        </section>
+        <IgnoredPlanningRiskHistory items={review.ignoredRisks} />
+      </div>
     );
   }
 
@@ -109,6 +211,12 @@ export function PlanningConflictReview({ review }: { review: PlanningConflictRev
           Exibindo {conflictLabel(visibleItems.length)}
         </p>
 
+        {actionError ? (
+          <p className={styles.actionError} role="alert">
+            {actionError}
+          </p>
+        ) : null}
+
         {visibleItems.length === 0 ? (
           <div className={styles.filteredEmpty} role="status">
             <strong>Nenhum conflito desta severidade</strong>
@@ -144,11 +252,40 @@ export function PlanningConflictReview({ review }: { review: PlanningConflictRev
                       <strong>Impacto</strong>
                       <p>{item.impact}</p>
                     </div>
-                    {item.itineraryHref ? (
-                      <Link className={styles.dayLink} href={item.itineraryHref}>
-                        Ver dia no Roteiro <span aria-hidden="true">→</span>
-                      </Link>
-                    ) : null}
+                    <div className={styles.actions}>
+                      {item.itineraryHref ? (
+                        <Link className={styles.dayLink} href={item.itineraryHref}>
+                          Ver dia no Roteiro <span aria-hidden="true">→</span>
+                        </Link>
+                      ) : null}
+                      {item.canIgnore ? (
+                        <details className={styles.ignoreConfirmation}>
+                          <summary>Ignorar risco</summary>
+                          <form action={(formData) => submitIgnore(item.id, formData)}>
+                            <input name="tripId" type="hidden" value={tripId} />
+                            <input name="planningConflictId" type="hidden" value={item.id} />
+                            <p>
+                              A condição continuará existindo no planejamento. Esta ação registra
+                              uma decisão consciente; ela não corrige nem resolve o conflito.
+                            </p>
+                            <label>
+                              <input
+                                name="confirmation"
+                                required
+                                type="checkbox"
+                                value="risk-accepted"
+                              />
+                              Entendo que este risco continuará no Roteiro.
+                            </label>
+                            <button disabled={pendingConflictId !== null} type="submit">
+                              {pendingConflictId === item.id
+                                ? "Registrando decisão…"
+                                : "Confirmar e ignorar risco"}
+                            </button>
+                          </form>
+                        </details>
+                      ) : null}
+                    </div>
                   </article>
                 </li>
               );
@@ -156,6 +293,7 @@ export function PlanningConflictReview({ review }: { review: PlanningConflictRev
           </ol>
         )}
       </section>
+      <IgnoredPlanningRiskHistory items={review.ignoredRisks} />
     </div>
   );
 }

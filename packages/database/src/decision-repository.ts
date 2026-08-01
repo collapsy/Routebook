@@ -4,7 +4,7 @@ import {
   createDecision,
   DecisionRepositoryError,
   type Decision,
-  type DecisionContextSnapshot,
+  type DecisionRecordContextSnapshot,
   type DecisionEffect,
   type DecisionId,
   type DecisionOption,
@@ -16,7 +16,7 @@ import { decisions } from "./decision-schema";
 
 type DecisionRow = typeof decisions.$inferSelect;
 
-type StoredSnapshot = Readonly<{
+type StoredRecommendationSnapshot = Readonly<{
   schemaVersion: 1;
   tripId: string;
   destinationId: string;
@@ -26,7 +26,32 @@ type StoredSnapshot = Readonly<{
   itineraryVersion?: number;
 }>;
 
-function serializeSnapshot(snapshot: DecisionContextSnapshot): StoredSnapshot {
+type StoredPlanningRiskSnapshot = Readonly<{
+  schemaVersion: 1;
+  tripId: string;
+  planningConflictId: string;
+  planningConflictContextFingerprint: string;
+  itineraryId: string;
+  itineraryVersion: number;
+  policyVersion: string;
+  capturedAt: string;
+}>;
+
+type StoredSnapshot = StoredRecommendationSnapshot | StoredPlanningRiskSnapshot;
+
+export function serializeDecisionSnapshot(snapshot: DecisionRecordContextSnapshot): StoredSnapshot {
+  if ("planningConflictId" in snapshot) {
+    return {
+      schemaVersion: 1,
+      tripId: snapshot.tripId,
+      planningConflictId: snapshot.planningConflictId,
+      planningConflictContextFingerprint: snapshot.planningConflictContextFingerprint,
+      itineraryId: snapshot.itineraryId,
+      itineraryVersion: snapshot.itineraryVersion,
+      policyVersion: snapshot.policyVersion,
+      capturedAt: snapshot.capturedAt.toISOString(),
+    };
+  }
   return {
     schemaVersion: 1,
     tripId: snapshot.tripId,
@@ -42,8 +67,20 @@ function serializeSnapshot(snapshot: DecisionContextSnapshot): StoredSnapshot {
   };
 }
 
-function deserializeSnapshot(value: unknown): DecisionContextSnapshot {
+export function deserializeDecisionSnapshot(value: unknown): DecisionRecordContextSnapshot {
   const snapshot = value as StoredSnapshot;
+  if ("planningConflictId" in snapshot) {
+    return {
+      schemaVersion: 1,
+      tripId: snapshot.tripId,
+      planningConflictId: snapshot.planningConflictId,
+      planningConflictContextFingerprint: snapshot.planningConflictContextFingerprint,
+      itineraryId: snapshot.itineraryId,
+      itineraryVersion: snapshot.itineraryVersion,
+      policyVersion: snapshot.policyVersion,
+      capturedAt: new Date(snapshot.capturedAt),
+    };
+  }
   return {
     schemaVersion: 1,
     tripId: snapshot.tripId,
@@ -60,7 +97,7 @@ function deserializeSnapshot(value: unknown): DecisionContextSnapshot {
 }
 
 // prettier-ignore
-function rehydrateDecision(row: DecisionRow): Decision {
+export function rehydrateDecision(row: DecisionRow): Decision {
   return createDecision({
     id: row.id,
     tripId: row.tripId,
@@ -70,7 +107,7 @@ function rehydrateDecision(row: DecisionRow): Decision {
     actorParticipantId: row.actorParticipantId,
     decidedAt: row.decidedAt,
     chosenOption: row.chosenOption as DecisionOption,
-    contextSnapshot: deserializeSnapshot(row.contextSnapshot),
+    contextSnapshot: deserializeDecisionSnapshot(row.contextSnapshot),
     effect: row.effect as DecisionEffect,
     idempotencyKey: row.idempotencyKey,
   });
@@ -140,7 +177,7 @@ export class DrizzleDecisionRepository implements DecisionRepository {
         decidedAt: decision.decidedAt,
         type: decision.type,
         chosenOption: decision.chosenOption,
-        contextSnapshot: serializeSnapshot(decision.contextSnapshot),
+        contextSnapshot: serializeDecisionSnapshot(decision.contextSnapshot),
         effect: decision.effect,
         idempotencyKey: decision.idempotencyKey,
         createdAt: decision.decidedAt,

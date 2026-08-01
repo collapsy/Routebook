@@ -1,4 +1,14 @@
-import { index, jsonb, pgTable, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import {
+  check,
+  index,
+  jsonb,
+  pgTable,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 export const decisions = pgTable(
   "decisions",
@@ -16,6 +26,10 @@ export const decisions = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
   },
   (table) => [
+    check(
+      "decisions_type_check",
+      sql`${table.type} in ('save-place', 'add-to-itinerary', 'ignore-planning-risk')`,
+    ),
     uniqueIndex("decisions_trip_idempotency_unique").on(table.tripId, table.idempotencyKey),
     index("decisions_trip_id_idx").on(table.tripId),
     index("decisions_recommendation_id_idx").on(table.recommendationId),

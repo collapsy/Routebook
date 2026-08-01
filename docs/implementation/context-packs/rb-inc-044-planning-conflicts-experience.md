@@ -33,7 +33,8 @@ related_documents:
   - RB-ADR-011
 prerequisites:
   - RB-INC-043
-next_documents: []
+next_documents:
+  - RB-CTX-045
 ai_context:
   priority: critical
   index: true

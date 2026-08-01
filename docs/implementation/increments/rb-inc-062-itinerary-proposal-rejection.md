@@ -149,4 +149,4 @@ Reverter propriedade, operação, export, testes e documentação. Não há migr
 - `@routebook/proposal-management`: lint e typecheck verdes; 63 testes verdes;
 - workspace: lint, typecheck e build verdes;
 - PostgreSQL e Playwright não executados localmente porque o incremento não altera adapter ou interface e o ambiente local não possui `DATABASE_URL` nem Docker; serão cobertos pelo CI;
-- PR e evidências finais de CI pendentes.
+- PR #141, run `30716780960`: formatação, documentação, lint, typecheck, migrations PostgreSQL, suíte integral, smoke, build e 52 testes Playwright responsivos verdes.

@@ -36,6 +36,7 @@ const review: ReviewModel = {
       canIgnore: true,
     },
   ],
+  ignoredRisks: [],
 };
 
 const ignoreAction = vi.fn(async () => ({ redirectTo: "/revisao?riscoIgnorado=1" }));
@@ -111,9 +112,41 @@ describe("PlanningConflictReview", () => {
   });
 
   it("explains the limits of a review with no detected conflicts", () => {
-    renderReview({ total: 0, counts: { error: 0, risk: 0, suggestion: 0 }, items: [] });
+    renderReview({
+      total: 0,
+      counts: { error: 0, risk: 0, suggestion: 0 },
+      items: [],
+      ignoredRisks: [],
+    });
 
     expect(screen.getByRole("heading", { name: "Nenhum conflito encontrado" })).toBeInTheDocument();
     expect(screen.getByText(/não garante ausência de imprevistos/i)).toBeInTheDocument();
+  });
+
+  it("keeps ignored Risks visible when there are no open conflicts", () => {
+    renderReview({
+      total: 0,
+      counts: { error: 0, risk: 0, suggestion: 0 },
+      items: [],
+      ignoredRisks: [
+        {
+          id: "conflict-ignored",
+          title: "Horários sobrepostos",
+          explanation: "Duas atividades ocupam intervalos que se sobrepõem.",
+          impact: "Os horários precisam ser revisados.",
+          dayLabel: "Dia 1 · 22 de agosto",
+          activityTitles: ["Café na vila", "Passeio de barco"],
+          ignoredAtLabel: "31 de jul. de 2026, 21:05",
+          actorLabel: "RouteBook QA",
+        },
+      ],
+    });
+
+    expect(screen.getByRole("heading", { name: "Nenhum conflito aberto" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Riscos ignorados" })).toBeInTheDocument();
+    expect(screen.getByText("RouteBook QA")).toBeInTheDocument();
+    expect(screen.getByText("31 de jul. de 2026, 21:05")).toBeInTheDocument();
+    expect(screen.queryByText("Restaurar")).not.toBeInTheDocument();
+    expect(screen.queryByText("Resolver")).not.toBeInTheDocument();
   });
 });

@@ -36,7 +36,8 @@ related_documents:
   - RB-INC-044
 prerequisites:
   - RB-INC-044
-next_documents: []
+next_documents:
+  - RB-INC-046
 ai_context:
   priority: critical
   index: true

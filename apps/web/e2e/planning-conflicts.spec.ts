@@ -61,7 +61,13 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
 
   await expect(page).toHaveURL(/riscoIgnorado=1$/);
   await expect(page.getByText(/Risco ignorado e Decision registrada/)).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Nenhum conflito encontrado" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Nenhum conflito aberto" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Riscos ignorados" })).toBeVisible();
+  const ignoredHistory = page.getByRole("list", { name: "Riscos ignorados registrados" });
+  await expect(ignoredHistory.getByRole("heading", { name: "Horários sobrepostos" })).toBeVisible();
+  await expect(ignoredHistory.getByText("RouteBook E2E", { exact: true })).toBeVisible();
+  await expect(ignoredHistory.getByText(/Café demorado, Passeio de barco/)).toBeVisible();
+  await expect(ignoredHistory.getByText("Restaurar", { exact: true })).toHaveCount(0);
 
   await page.getByRole("link", { name: "Voltar para o Roteiro" }).click();
   await expect(page.getByText(firstActivity, { exact: true })).toBeVisible();

@@ -3,7 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
+  DrizzleDecisionRepository,
   DrizzleItineraryRepository,
+  DrizzlePlanningConflictRepository,
   DrizzleTripRepository,
   evaluatePlanningConflicts,
 } from "@routebook/database";
@@ -38,9 +40,18 @@ export default async function PlanningConflictReviewPage({
     (await itineraryRepository.findByTripId(trip.id)) ??
     (await itineraryRepository.save(createItinerary({ tripId: trip.id, period: trip.period })));
   const evaluation = await evaluatePlanningConflicts(trip.id);
+  const [conflictHistory, decisions] = await Promise.all([
+    new DrizzlePlanningConflictRepository().listByTripId(trip.id),
+    new DrizzleDecisionRepository().listByTripId(trip.id),
+  ]);
   const review = buildPlanningConflictReview({
-    conflicts: evaluation.activeConflicts,
+    conflicts: [
+      ...evaluation.activeConflicts,
+      ...conflictHistory.filter((conflict) => conflict.state === "ignored"),
+    ],
+    decisions,
     itinerary,
+    participants: trip.participants,
     tripId: trip.id,
   });
   const errorMessages: Readonly<Record<string, string>> = {

@@ -1,7 +1,7 @@
 ---
 id: RB-CTX-051
 title: Context Pack do RB-INC-051
-description: Fornece o contexto mínimo para corrigir flakiness nas jornadas de período livre e conflitos com fixtures controladas.
+description: Fornece o contexto mínimo para corrigir flakiness nas jornadas de período livre, Lugar salvo e conflitos com fixtures e navegação observável.
 document_type: implementation-context-pack
 owner: Quality Engineering
 status: Draft
@@ -62,6 +62,7 @@ Focar os E2E de período livre e histórico de conflitos no comportamento observ
 | free-period | setup longo e estado concorrente com nomes prefixados | fixture sintética com domain factory e Drizzle repository |
 | free-period | duas criações sequenciais disputam a mesma URL de sucesso | persistir o estado anterior à remoção diretamente |
 | planning-conflicts | `waitForURL` aguarda lifecycle de navegação suave | click e assertions da URL/conteúdo finais |
+| itinerary | `waitForURL` aguarda `load` após Server Action e link do App Router | click e assertions da URL/conteúdo finais |
 
 ## 5. Fronteira da fixture
 

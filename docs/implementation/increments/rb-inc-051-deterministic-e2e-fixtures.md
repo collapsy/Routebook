@@ -1,7 +1,7 @@
 ---
 id: RB-INC-051
 title: Fixtures Determinísticas para Períodos Livres e Conflitos
-description: Remove setup E2E redundante e espera de navegação frágil das jornadas de período livre e histórico de conflitos sem aumentar timeout ou retry.
+description: Remove setup E2E redundante e esperas de navegação frágeis das jornadas de período livre, Lugar salvo e histórico de conflitos sem aumentar timeout ou retry.
 document_type: implementation-increment
 owner: Quality Engineering
 status: Draft
@@ -34,7 +34,7 @@ ai_context:
 
 ## 1. Objetivo
 
-Eliminar duas causas de flakiness observadas na matriz acumulada, focando cada jornada na ação de interface sob teste e validando navegação por estado observável.
+Eliminar causas recorrentes de flakiness observadas na matriz acumulada, focando cada jornada na ação de interface sob teste e validando navegação por estado observável.
 
 Issue: [#114](https://github.com/collapsy/Routebook/issues/114)
 
@@ -51,6 +51,8 @@ O Engineering run `30684760010` da PR #113 terminou verde somente após retry:
 
 Uma tentativa anterior do run `30683595635` também marcou `free-period.spec.ts` como flaky ao criar dois períodos livres sequencialmente. O arquivo repetia criação de Trip, abertura de Itinerary e composição de estado já cobertas por jornadas próprias.
 
+A primeira execução desta correção, run `30685050223`, expôs a mesma espera por `load` na jornada de adicionar Lugar salvo ao Roteiro em `itinerary.spec.ts`. O arquivo adicional é indispensável para corrigir a causa observada sem alterar produto ou configuração.
+
 ## 3. Resultado verificável
 
 - cada teste de período livre recebe Trip e Itinerary sintéticos independentes;
@@ -58,6 +60,7 @@ Uma tentativa anterior do run `30683595635` também marcou `free-period.spec.ts`
 - edição começa com um período persistido e edita somente pela UI;
 - remoção começa com dois períodos persistidos e remove somente pela UI;
 - o retorno do histórico de conflitos valida URL e conteúdo observáveis sem aguardar `load`;
+- a inclusão de Lugar salvo e a abertura posterior do Roteiro validam URL e conteúdo finais sem aguardar `load`;
 - 46 cenários desktop/mobile permanecem listados;
 - timeout, retries, workers e projetos permanecem inalterados;
 - duas execuções consecutivas terminam sem flaky annotation.
@@ -65,6 +68,7 @@ Uma tentativa anterior do run `30683595635` também marcou `free-period.spec.ts`
 ## 4. Escopo
 
 - `apps/web/e2e/free-period.spec.ts`;
+- `apps/web/e2e/itinerary.spec.ts`;
 - `apps/web/e2e/planning-conflicts.spec.ts`;
 - incremento, Context Pack, registro e rastreabilidade;
 - evidências de duas execuções consecutivas.
@@ -86,6 +90,7 @@ Uma tentativa anterior do run `30683595635` também marcou `free-period.spec.ts`
 
 ```text
 apps/web/e2e/free-period.spec.ts
+apps/web/e2e/itinerary.spec.ts
 apps/web/e2e/planning-conflicts.spec.ts
 docs/implementation/increments/rb-inc-051-deterministic-e2e-fixtures.md
 docs/implementation/context-packs/rb-inc-051-deterministic-e2e-fixtures.md

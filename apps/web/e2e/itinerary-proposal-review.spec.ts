@@ -184,7 +184,7 @@ test("consulta uma Proposal expired somente como referência histórica", async 
   await expect(page.getByText(/Esta proposta não pode mais ser aplicada/i)).toBeVisible();
   await expect(page.getByText("Expirada em")).toBeVisible();
   await expect(page.getByRole("heading", { name: proposedActivity })).toBeVisible();
-  await expect(page.getByText(/referência histórica/i)).toBeVisible();
+  await expect(page.getByRole("note")).toHaveText(/referência histórica/i);
   await expect(
     page.getByRole("button", { name: /aceitar|aplicar|descartar|gerar novamente/i }),
   ).toHaveCount(0);

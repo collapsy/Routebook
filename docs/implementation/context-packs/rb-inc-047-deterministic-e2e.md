@@ -59,6 +59,7 @@ Substituir duas expectativas acopladas a detalhes internos por validações equi
 - resultado: 41 passaram, dois flaky e um falhou;
 - histórico: locator exigia ordem textual não canônica;
 - roteiro: `waitForURL(..., waitUntil: "commit")` expirava em navegação suave.
+- runs empilhados `30682213332` e `30682439142`: setup longo, assertions de cinco segundos e URL de sucesso reutilizada ainda permitiam races de Server Actions.
 
 ## 5. Regras aplicáveis
 
@@ -72,6 +73,7 @@ Substituir duas expectativas acopladas a detalhes internos por validações equi
 
 ```text
 apps/web/e2e/itinerary.spec.ts
+apps/web/e2e/itinerary-spatial.spec.ts
 apps/web/e2e/planning-conflicts.spec.ts
 docs/implementation/increments/rb-inc-047-deterministic-e2e.md
 docs/implementation/context-packs/rb-inc-047-deterministic-e2e.md

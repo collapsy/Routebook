@@ -122,6 +122,7 @@ test("reordena atividades dentro do mesmo período e preserva a sequência", asy
 
   await composer.getByLabel("Título").fill(secondTitle);
   await composer.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+  await page.getByText(secondTitle, { exact: true }).waitFor();
   await expect(page).toHaveURL(/atividadeCriada=1$/);
   await expect(page.getByText(secondTitle, { exact: true })).toBeVisible();
 

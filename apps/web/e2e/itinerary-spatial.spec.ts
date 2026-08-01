@@ -10,8 +10,9 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
   await page.getByRole("button", { name: "Criar viagem" }).click();
 
-  await page.getByRole("link", { name: tripName }).click();
-  await page.getByRole("link", { name: "Explorar lugares" }).click();
+  const tripPath = await page.getByRole("link", { name: tripName }).getAttribute("href");
+  expect(tripPath).toBeTruthy();
+  await page.goto(`${tripPath}/lugares`);
 
   const publishedPlaces = page.getByRole("list", { name: "Lugares publicados" });
   const firstPublishedPlace = publishedPlaces.getByRole("listitem").first();
@@ -22,25 +23,22 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   const secondPlaceName = (await secondPublishedPlace.locator("strong").textContent())?.trim();
   expect(firstPlaceName).toBeTruthy();
   expect(secondPlaceName).toBeTruthy();
+  const firstPlacePath = await firstPublishedPlace
+    .getByRole("link", { name: "Ver detalhes" })
+    .getAttribute("href");
+  const secondPlacePath = await secondPublishedPlace
+    .getByRole("link", { name: "Ver detalhes" })
+    .getAttribute("href");
+  expect(firstPlacePath).toBeTruthy();
+  expect(secondPlacePath).toBeTruthy();
 
-  await firstPublishedPlace.getByRole("link", { name: "Ver detalhes" }).click();
+  await page.goto(firstPlacePath!);
   await page.getByRole("button", { name: "Salvar lugar" }).click();
   await expect(page.getByRole("status")).toContainText("Lugar salvo");
-  await page.getByRole("link", { name: "Voltar para lugares" }).click();
-
-  const secondPublishedPlaceByName = page
-    .getByRole("list", { name: "Lugares publicados" })
-    .getByRole("listitem")
-    .filter({ hasText: secondPlaceName! });
-  await expect(secondPublishedPlaceByName).toHaveCount(1);
-  await secondPublishedPlaceByName.getByRole("link", { name: "Ver detalhes" }).click();
+  await page.goto(secondPlacePath!);
   await page.getByRole("button", { name: "Salvar lugar" }).click();
   await expect(page.getByRole("status")).toContainText("Lugar salvo");
-  await page.getByRole("link", { name: "Visão da viagem" }).click();
-  await Promise.all([
-    page.waitForURL(/\/lugares-salvos$/),
-    page.getByRole("link", { name: "Ver lugares salvos" }).click(),
-  ]);
+  await page.goto(`${tripPath}/lugares-salvos`);
   await expect(page.getByRole("heading", { name: "Lugares salvos", exact: true })).toBeVisible();
 
   const savedPlacesPath = new URL(page.url()).pathname;
@@ -52,22 +50,23 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
     });
     await expect(savedPlaceCard).toHaveCount(1);
     await savedPlaceCard.getByLabel("Adicionar ao dia").selectOption("2026-08-23");
-    await savedPlaceCard.getByRole("button", { name: "Adicionar ao roteiro" }).click();
-
-    await expect(page).toHaveURL(/adicionadoAoRoteiro=1$/);
+    await Promise.all([
+      page.waitForURL(/adicionadoAoRoteiro=1$/),
+      savedPlaceCard.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
+    ]);
     await expect(page.getByRole("status")).toContainText("Lugar adicionado ao roteiro");
   };
 
   await addSavedPlaceToDay(firstPlaceName!);
   await addSavedPlaceToDay(secondPlaceName!);
 
-  await Promise.all([
-    page.waitForURL(/\/roteiro$/),
-    page.getByRole("link", { name: "Abrir roteiro" }).click(),
-  ]);
+  await page.goto(`${tripPath}/roteiro`);
   await page.getByLabel("Dia da viagem").selectOption("2026-08-23");
   await page.locator("#title").fill("Pausa manual");
-  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+  await Promise.all([
+    page.waitForURL(/atividadeCriada=1$/),
+    page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
+  ]);
   await page.getByRole("link", { name: /Dia 2/i }).click();
 
   await expect(page).toHaveURL(/dia=2026-08-23/);

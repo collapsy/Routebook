@@ -47,12 +47,15 @@ O log isolou dois contratos frágeis:
 
 Uma execução posterior da PR empilhada, run `30682213332`, revelou um terceiro fator: o setup dessa jornada consumiu o timeout global de 30 segundos antes da adição do Lugar salvo em desktop e mobile. O setup navegava pela interface por caminhos já cobertos por outros cenários. Ele passa a acessar diretamente as URLs obtidas da própria interface, preservando todas as operações e assertions específicas desta jornada sem aumentar timeout ou retry.
 
+O run `30682439142` expôs os contratos restantes: a jornada espacial limitava duas Server Actions ao timeout de cinco segundos da assertion e a jornada de reordenação reutilizava a mesma URL de sucesso, permitindo que a verificação da segunda submissão retornasse antes do novo conteúdo. A correção aguarda a URL em paralelo quando ela realmente muda e aguarda o segundo título observável quando a URL permanece igual.
+
 ## 3. Resultado verificável
 
 - configuração de paralelismo Playwright permanece original;
 - os dois títulos do histórico são validados independentemente da ordem;
 - a navegação aguarda a URL final observável, sem exigir um evento interno de commit;
 - o setup reutiliza os `href` observáveis para evitar navegações redundantes já cobertas;
+- submissões repetidas aguardam seu próprio resultado observável, mesmo quando a URL de sucesso é idêntica;
 - desktop Chromium e Pixel 7 continuam executados;
 - retries e timeouts não aumentam;
 - nenhuma jornada ou requisito é removido ou relaxado;
@@ -60,7 +63,7 @@ Uma execução posterior da PR empilhada, run `30682213332`, revelou um terceiro
 
 ## 4. Escopo
 
-- duas assertions E2E identificadas pelo log;
+- assertions e setups E2E identificados pelos logs das execuções repetidas;
 - documentação e rastreabilidade;
 - evidências do workflow Engineering Validation.
 
@@ -80,6 +83,7 @@ Uma execução posterior da PR empilhada, run `30682213332`, revelou um terceiro
 
 ```text
 apps/web/e2e/itinerary.spec.ts
+apps/web/e2e/itinerary-spatial.spec.ts
 apps/web/e2e/planning-conflicts.spec.ts
 docs/implementation/increments/rb-inc-047-deterministic-e2e.md
 docs/implementation/context-packs/rb-inc-047-deterministic-e2e.md

@@ -49,7 +49,7 @@ Issue: [#138](https://github.com/collapsy/Routebook/issues/138)
 
 Branch: `codex/rb-inc-061-expired-review`.
 
-Pull request: pendente.
+Pull request: [#139](https://github.com/collapsy/Routebook/pull/139).
 
 ## 2. Problema
 

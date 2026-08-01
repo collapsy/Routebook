@@ -120,16 +120,16 @@ docs/registry.md
 
 ## 9. Critérios de aceite
 
-- [ ] Proposal `ready` faz round trip sem perda de conteúdo ou proveniência;
-- [ ] Proposed Activities são persistidas e carregadas em ordem estável;
-- [ ] save de Proposal e itens é transacional;
-- [ ] listagem busca itens em lote;
-- [ ] JSONB inválido produz erro tipado do repository;
-- [ ] constraint rejeita `ready` incompleta;
-- [ ] estados anteriores preservam campos de conclusão nulos;
-- [ ] migration é aditiva e mantém linhas existentes válidas;
-- [ ] nenhum Provider ou bounded context externo é acoplado;
-- [ ] documentação, lint, tipagem, testes e build permanecem verdes.
+- [x] Proposal `ready` faz round trip sem perda de conteúdo ou proveniência;
+- [x] Proposed Activities são persistidas e carregadas em ordem estável;
+- [x] save de Proposal e itens é transacional;
+- [x] listagem busca itens em lote;
+- [x] JSONB inválido produz erro tipado do repository;
+- [x] constraint rejeita `ready` incompleta;
+- [x] estados anteriores preservam campos de conclusão nulos;
+- [x] migration é aditiva e mantém linhas existentes válidas;
+- [x] nenhum Provider ou bounded context externo é acoplado;
+- [x] documentação, lint, tipagem, testes e build permanecem verdes.
 
 ## 10. Testes obrigatórios
 
@@ -173,5 +173,5 @@ A migration é aditiva. Roll-forward preferencial: corrigir mapper ou constraint
 - workspace: lint, typecheck e build verdes;
 - documentação: 151 documentos e 151 registros validados, com quatro avisos preexistentes;
 - Prettier dos caminhos alterados e `git diff --check`: verdes;
-- testes de integração PostgreSQL, migration, regressão Playwright e `format:check` integral: pendentes do workflow da pull request;
+- CI da PR #127: formatação, documentação, lint, typecheck, migration PostgreSQL, testes, smoke, build e Playwright responsivo verdes;
 - teste database local não executado porque `DATABASE_URL` não está configurada e o daemon Docker está indisponível.

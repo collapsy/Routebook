@@ -64,7 +64,7 @@ ai_context:
 | RB-INC-052 | RB-API-001, RB-DOM-001–004, decisão #118 | #119 | `codex/rb-inc-052-ready-contract`, PR pendente | contrato documental de Itinerary Proposal alinhado ao estado canônico `ready` | 145 documentos validados; Prettier e diff check aprovados | Em execução |
 | RB-INC-053 | RB-BR-PRP-002–010, RB-DOM-001–004, RB-DATA-001–002, decisão #118 | #121 | `codex/rb-inc-053-proposal-ready-domain`, PR pendente | conclusão de domínio `generating → ready` com conteúdo revisável | 43 testes do módulo; lint, typecheck, build, testes sem database e 147 docs aprovados | Em execução |
 | RB-INC-054 | RB-BR-PRP-004–005, RB-DATA-001–002, RB-ADR-006, decisão #123 | #124 | `codex/rb-inc-054-ready-data-contract`, PR pendente | snapshot híbrido e proveniência do conteúdo `ready` | 149 documentos validados; Prettier e diff check aprovados | Em execução |
-| RB-INC-055 | RB-BR-PRP-002–005, RB-DATA-001–002, RB-ADR-006, decisão #123 | #126 | `codex/rb-inc-055-ready-persistence`, PR #127 | migration, schema e round trip transacional do conteúdo `ready` | validações locais verdes; PostgreSQL e E2E pendentes do CI | Em execução |
+| RB-INC-055 | RB-BR-PRP-002–005, RB-DATA-001–002, RB-ADR-006, decisão #123 | #126 | `codex/rb-inc-055-ready-persistence`, PR #127 | migration, schema e round trip transacional do conteúdo `ready` | validações locais e CI completo verdes | Pronto para revisão |
 
 ## Evidências do RB-INC-003
 

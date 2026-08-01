@@ -44,7 +44,7 @@ Issue: [#144](https://github.com/collapsy/Routebook/issues/144)
 
 Branch: `codex/rb-inc-064-rejection-command`.
 
-Pull request: pendente.
+Pull request: [#145](https://github.com/collapsy/Routebook/pull/145).
 
 ## 2. Problema
 
@@ -105,15 +105,15 @@ docs/registry.md
 
 ## 9. Critérios de aceite
 
-- [ ] comando carrega Proposal pela Trip e identidade informadas;
-- [ ] rejeição válida persiste exatamente uma Proposal `rejected`;
-- [ ] `rejectedAt`, conteúdo e proveniência chegam ao repository sem perda;
-- [ ] Proposal ausente produz erro de aplicação tipado;
-- [ ] estado incompatível não chama `save`;
-- [ ] instante retroativo ou inválido não chama `save`;
-- [ ] falha do repository não é apresentada como sucesso;
-- [ ] nenhuma infraestrutura ou bounded context externo é acoplado;
-- [ ] documentação, lint, tipagem, testes e build permanecem verdes.
+- [x] comando carrega Proposal pela Trip e identidade informadas;
+- [x] rejeição válida persiste exatamente uma Proposal `rejected`;
+- [x] `rejectedAt`, conteúdo e proveniência chegam ao repository sem perda;
+- [x] Proposal ausente produz erro de aplicação tipado;
+- [x] estado incompatível não chama `save`;
+- [x] instante retroativo ou inválido não chama `save`;
+- [x] falha do repository não é apresentada como sucesso;
+- [x] nenhuma infraestrutura ou bounded context externo é acoplado;
+- [x] documentação, lint, tipagem, testes e build permanecem verdes.
 
 ## 10. Testes obrigatórios
 
@@ -152,4 +152,10 @@ Evidências locais:
 - lint, typecheck e build integrais aprovados;
 - Prettier dos arquivos alterados e `git diff --check` aprovados.
 
-Evidências de CI pendentes.
+Evidências da PR no SHA `ffdc30c93661c08bb04dba448ac82f8df5202d48`:
+
+- Documentation Validation: run `30718348549`, concluído com sucesso;
+- Engineering Validation: run `30718348548`, concluído com sucesso;
+- migrations PostgreSQL e suíte integral de componentes e domínio aprovadas;
+- formatação Linux, documentação, lint, tipagem, smoke e build aprovados;
+- 52 testes Playwright responsivos aprovados, sem retry ou flaky.

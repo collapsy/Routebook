@@ -107,7 +107,7 @@ function invalidIntervalConflict(
   return createDetectedConflict({
     snapshot,
     type: "invalid-activity-interval",
-    severity: "critical",
+    severity: "error",
     relatedDayIds: [day.id],
     relatedActivityIds: [activity.id],
     evidence: [
@@ -138,7 +138,7 @@ function outsideTripConflict(
   return createDetectedConflict({
     snapshot,
     type: "activity-outside-trip-period",
-    severity: "critical",
+    severity: "error",
     relatedDayIds: [day.id],
     relatedActivityIds: [activity.id],
     evidence: [
@@ -168,7 +168,7 @@ function dayMismatchConflict(
   return createDetectedConflict({
     snapshot,
     type: "activity-day-mismatch",
-    severity: "warning",
+    severity: "risk",
     relatedDayIds: [day.id, activity.dayId],
     relatedActivityIds: [activity.id],
     evidence: [
@@ -223,7 +223,7 @@ function overlapConflicts(
         createDetectedConflict({
           snapshot,
           type: "activity-time-overlap",
-          severity: "warning",
+          severity: "risk",
           relatedDayIds: [day.id],
           relatedActivityIds: [left.activity.id, right.activity.id],
           evidence: [
@@ -269,7 +269,7 @@ function overloadedDayConflict(
   return createDetectedConflict({
     snapshot,
     type: "day-overloaded",
-    severity: "warning",
+    severity: "risk",
     relatedDayIds: [day.id],
     relatedActivityIds: day.activities.map((activity) => activity.id),
     evidence: [

@@ -21,8 +21,8 @@ export const planningConflictTypes = [
 ] as const;
 
 export type PlanningConflictType = (typeof planningConflictTypes)[number];
-export type PlanningConflictSeverity = "warning" | "critical";
-export type PlanningConflictState = "detected" | "invalidated" | "superseded";
+export type PlanningConflictSeverity = "error" | "risk" | "suggestion";
+export type PlanningConflictState = "open" | "invalidated" | "superseded";
 export type PlanningConflictEvidenceValue =
   string | number | boolean | null | readonly string[] | readonly number[];
 
@@ -109,7 +109,7 @@ export class PlanningConflictValidationError extends Error {
 export class PlanningConflictTransitionError extends Error {
   constructor(
     message: string,
-    readonly code: "not-detected" | "invalid-supersession",
+    readonly code: "not-open" | "invalid-supersession",
   ) {
     super(message);
     this.name = "PlanningConflictTransitionError";
@@ -347,13 +347,13 @@ export function createPlanningConflict(input: CreatePlanningConflictInput): Plan
       type: "Use um tipo canônico de PlanningConflict.",
     });
   }
-  if (input.severity !== "warning" && input.severity !== "critical") {
+  if (input.severity !== "error" && input.severity !== "risk" && input.severity !== "suggestion") {
     throw new PlanningConflictValidationError("PlanningConflict inválido.", {
-      severity: "Use warning ou critical.",
+      severity: "Use error, risk ou suggestion.",
     });
   }
 
-  const state = input.state ?? "detected";
+  const state = input.state ?? "open";
   const invalidatedAt = input.invalidatedAt
     ? validDate(input.invalidatedAt, "invalidatedAt")
     : undefined;
@@ -364,9 +364,9 @@ export function createPlanningConflict(input: CreatePlanningConflictInput): Plan
     ? createPlanningConflictId(input.supersededByPlanningConflictId)
     : undefined;
 
-  if (state === "detected" && (invalidatedAt || supersededAt || supersededByPlanningConflictId)) {
+  if (state === "open" && (invalidatedAt || supersededAt || supersededByPlanningConflictId)) {
     throw new PlanningConflictValidationError("PlanningConflict inválido.", {
-      state: "Um conflito detectado não pode possuir dados de encerramento.",
+      state: "Um conflito aberto não pode possuir dados de encerramento.",
     });
   }
   if (
@@ -410,10 +410,10 @@ export function invalidatePlanningConflict(
   conflict: PlanningConflict,
   invalidatedAt: Date,
 ): PlanningConflict {
-  if (conflict.state !== "detected") {
+  if (conflict.state !== "open") {
     throw new PlanningConflictTransitionError(
-      "Somente PlanningConflicts detectados podem ser invalidados.",
-      "not-detected",
+      "Somente PlanningConflicts abertos podem ser invalidados.",
+      "not-open",
     );
   }
   return createPlanningConflict({
@@ -428,10 +428,10 @@ export function supersedePlanningConflict(
   supersededByPlanningConflictId: PlanningConflictId,
   supersededAt: Date,
 ): PlanningConflict {
-  if (conflict.state !== "detected") {
+  if (conflict.state !== "open") {
     throw new PlanningConflictTransitionError(
-      "Somente PlanningConflicts detectados podem ser superseded.",
-      "not-detected",
+      "Somente PlanningConflicts abertos podem ser superseded.",
+      "not-open",
     );
   }
   if (conflict.id === supersededByPlanningConflictId) {

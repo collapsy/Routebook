@@ -110,6 +110,13 @@ describe("detectPlanningConflicts", () => {
 
     expect(conflicts.map((conflict) => conflict.type)).toContain("activity-outside-trip-period");
     expect(conflicts.map((conflict) => conflict.type)).toContain("activity-day-mismatch");
+    expect(
+      conflicts.find((conflict) => conflict.type === "activity-outside-trip-period"),
+    ).toMatchObject({ severity: "error", state: "open" });
+    expect(conflicts.find((conflict) => conflict.type === "activity-day-mismatch")).toMatchObject({
+      severity: "risk",
+      state: "open",
+    });
   });
 
   it("detecta duração, horário e limite diário inválidos por constantes explícitas", () => {

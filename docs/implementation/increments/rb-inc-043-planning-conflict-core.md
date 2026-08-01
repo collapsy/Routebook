@@ -5,7 +5,7 @@ description: Introduz o agregado PlanningConflict, sua detecção determinístic
 document_type: implementation-increment
 owner: Planning Assurance
 status: Draft
-version: "0.1.0"
+version: "0.2.0"
 created: "2026-07-31"
 last_updated: "2026-07-31"
 authors:
@@ -82,13 +82,23 @@ O agregado deverá conter:
 - intervalo temporal inconsistente;
 - dia excessivamente carregado por limite explícito.
 
-### 4.3 Estados
+### 4.3 Estados desta fatia
 
-- `detected`;
+- `open`;
 - `invalidated`;
 - `superseded`.
 
 Os estados `resolved` e `ignored` permanecem fora desta fatia porque exigem ação explícita do usuário e integração com Decision.
+
+O evento `PlanningConflictDetected` cria um conflito em estado `open`. Detecção é o fato ocorrido, não um estado canônico distinto.
+
+### 4.4 Severidades canônicas
+
+- `error`;
+- `risk`;
+- `suggestion`.
+
+As regras determinísticas desta fatia produzem `error` para condições estruturalmente inválidas e `risk` para condições não bloqueantes. `suggestion` é aceita pelo modelo canônico, mas nenhuma regra atual a produz.
 
 ## 5. Regras determinísticas
 

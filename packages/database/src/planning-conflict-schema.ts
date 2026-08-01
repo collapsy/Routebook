@@ -45,14 +45,17 @@ export const planningConflicts = pgTable(
       "planning_conflicts_type_check",
       sql`${table.type} in ('activity-time-overlap', 'activity-outside-trip-period', 'activity-day-mismatch', 'invalid-activity-interval', 'day-overloaded')`,
     ),
-    check("planning_conflicts_severity_check", sql`${table.severity} in ('warning', 'critical')`),
+    check(
+      "planning_conflicts_severity_check",
+      sql`${table.severity} in ('error', 'risk', 'suggestion')`,
+    ),
     check(
       "planning_conflicts_state_check",
-      sql`${table.state} in ('detected', 'invalidated', 'superseded')`,
+      sql`${table.state} in ('open', 'invalidated', 'superseded')`,
     ),
     uniqueIndex("planning_conflicts_active_equivalent_unique")
       .on(table.tripId, table.type, table.contextFingerprint)
-      .where(sql`${table.state} = 'detected'`),
+      .where(sql`${table.state} = 'open'`),
     index("planning_conflicts_trip_state_idx").on(table.tripId, table.state),
     index("planning_conflicts_trip_lineage_idx").on(table.tripId, table.lineageKey),
   ],

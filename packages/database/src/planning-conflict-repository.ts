@@ -187,7 +187,7 @@ export async function reconcilePlanningConflictsWithDatabase(
 
   const incomingByFingerprint = new Map<string, PlanningConflict>();
   for (const conflict of detectedConflicts) {
-    if (conflict.tripId !== normalizedTripId || conflict.state !== "detected") {
+    if (conflict.tripId !== normalizedTripId || conflict.state !== "open") {
       throw new PlanningConflictRepositoryError(
         "PlanningConflict incompatível com a reconciliação solicitada.",
         "cross-trip",
@@ -205,9 +205,7 @@ export async function reconcilePlanningConflictsWithDatabase(
   const activeRows = await database
     .select()
     .from(planningConflicts)
-    .where(
-      and(eq(planningConflicts.tripId, normalizedTripId), eq(planningConflicts.state, "detected")),
-    )
+    .where(and(eq(planningConflicts.tripId, normalizedTripId), eq(planningConflicts.state, "open")))
     .orderBy(asc(planningConflicts.type), asc(planningConflicts.contextFingerprint));
   const active = activeRows.map(rehydratePlanningConflict);
   const activeByFingerprint = new Map(
@@ -284,9 +282,7 @@ export class DrizzlePlanningConflictRepository implements PlanningConflictReposi
     const rows = await getDatabase()
       .select()
       .from(planningConflicts)
-      .where(
-        and(eq(planningConflicts.tripId, tripId.trim()), eq(planningConflicts.state, "detected")),
-      )
+      .where(and(eq(planningConflicts.tripId, tripId.trim()), eq(planningConflicts.state, "open")))
       .orderBy(asc(planningConflicts.type), asc(planningConflicts.contextFingerprint));
     return rows.map(rehydratePlanningConflict);
   }

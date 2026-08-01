@@ -35,7 +35,7 @@ function buildConflict() {
     id: "conflict-1",
     tripId: "trip-1",
     type: "day-overloaded",
-    severity: "warning",
+    severity: "risk",
     contextSnapshot: snapshot,
     evidence: [{ code: "day-overloaded", facts: { activityCount: 9 } }],
     relatedDayIds: ["day-1"],
@@ -56,7 +56,7 @@ describe("PlanningConflict", () => {
     expect(conflict).toMatchObject({
       id: "conflict-1",
       tripId: "trip-1",
-      state: "detected",
+      state: "open",
       relatedDayIds: ["day-1"],
     });
     expect(Object.isFrozen(conflict)).toBe(true);
@@ -86,7 +86,14 @@ describe("PlanningConflict", () => {
     );
   });
 
-  it("invalida e supersede somente conflitos detectados", () => {
+  it.each(["error", "risk", "suggestion"] as const)(
+    "aceita a severidade canÃ´nica %s",
+    (severity) => {
+      expect(createPlanningConflict({ ...buildConflict(), severity }).severity).toBe(severity);
+    },
+  );
+
+  it("invalida e supersede somente conflitos abertos", () => {
     const conflict = buildConflict();
     const changedAt = new Date("2026-07-31T18:05:00.000Z");
     const invalidated = invalidatePlanningConflict(conflict, changedAt);

@@ -1,8 +1,8 @@
 import "@testing-library/jest-dom/vitest";
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { PlanningConflictReview as ReviewModel } from "../lib/planning-conflict-experience";
 import { PlanningConflictReview } from "./planning-conflict-review";
@@ -21,6 +21,7 @@ const review: ReviewModel = {
       dayLabel: "Dia 1 · 22 de agosto",
       activityTitles: ["Café na vila"],
       itineraryHref: "/viagens/trip-1/roteiro#day-1",
+      canIgnore: false,
     },
     {
       id: "conflict-risk",
@@ -32,15 +33,28 @@ const review: ReviewModel = {
       dayLabel: "Dia 1 · 22 de agosto",
       activityTitles: ["Café na vila", "Passeio de barco"],
       itineraryHref: "/viagens/trip-1/roteiro#day-1",
+      canIgnore: true,
     },
   ],
 };
 
-afterEach(cleanup);
+const ignoreAction = vi.fn(async () => ({ redirectTo: "/revisao?riscoIgnorado=1" }));
+
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
+
+function renderReview(model: ReviewModel = review) {
+  return render(
+    <PlanningConflictReview ignoreAction={ignoreAction} review={model} tripId="trip-1" />,
+  );
+}
 
 describe("PlanningConflictReview", () => {
-  it("shows severity counts, known impact and no domain transition actions", () => {
-    render(<PlanningConflictReview review={review} />);
+  it("shows severity counts and offers Ignore Planning Risk only for risks", async () => {
+    const user = userEvent.setup();
+    renderReview();
 
     expect(screen.getByRole("heading", { name: "2 conflitos para revisar" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Horários sobrepostos" })).toBeInTheDocument();
@@ -50,12 +64,25 @@ describe("PlanningConflictReview", () => {
       "/viagens/trip-1/roteiro#day-1",
     );
     expect(screen.queryByRole("button", { name: /resolver/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /ignorar/i })).not.toBeInTheDocument();
+    const errorArticle = screen
+      .getByRole("heading", { name: "Horário ou duração inválidos" })
+      .closest("article");
+    expect(errorArticle).not.toBeNull();
+    expect(within(errorArticle!).queryByText("Ignorar risco")).not.toBeInTheDocument();
+
+    await user.click(screen.getByText("Ignorar risco"));
+    expect(
+      screen.getByText(/A condição continuará existindo no planejamento/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("checkbox", { name: /Entendo que este risco continuará/i }),
+    ).toBeRequired();
+    expect(screen.getByRole("button", { name: "Confirmar e ignorar risco" })).toBeInTheDocument();
   });
 
   it("filters results by severity and presents a contextual empty state", async () => {
     const user = userEvent.setup();
-    render(<PlanningConflictReview review={review} />);
+    renderReview();
 
     await user.click(screen.getByRole("button", { name: /Riscos 1/ }));
     expect(screen.getByRole("heading", { name: "Horários sobrepostos" })).toBeInTheDocument();
@@ -67,12 +94,24 @@ describe("PlanningConflictReview", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Nenhum conflito desta severidade");
   });
 
-  it("explains the limits of a review with no detected conflicts", () => {
-    render(
-      <PlanningConflictReview
-        review={{ total: 0, counts: { error: 0, risk: 0, suggestion: 0 }, items: [] }}
-      />,
+  it("keeps a failed confirmation recoverable and announces the error", async () => {
+    const user = userEvent.setup();
+    ignoreAction.mockRejectedValueOnce(new Error("network unavailable"));
+    renderReview();
+
+    await user.click(screen.getByText("Ignorar risco"));
+    await user.click(screen.getByRole("checkbox", { name: /Entendo que este risco continuará/i }));
+    await user.click(screen.getByRole("button", { name: "Confirmar e ignorar risco" }));
+
+    expect(ignoreAction).toHaveBeenCalledOnce();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Não foi possível confirmar esta decisão agora",
     );
+    expect(screen.getByRole("button", { name: "Confirmar e ignorar risco" })).toBeEnabled();
+  });
+
+  it("explains the limits of a review with no detected conflicts", () => {
+    renderReview({ total: 0, counts: { error: 0, risk: 0, suggestion: 0 }, items: [] });
 
     expect(screen.getByRole("heading", { name: "Nenhum conflito encontrado" })).toBeInTheDocument();
     expect(screen.getByText(/não garante ausência de imprevistos/i)).toBeInTheDocument();

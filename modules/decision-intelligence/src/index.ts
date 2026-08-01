@@ -65,7 +65,10 @@ export type {
   DecisionEffect,
   DecisionId,
   DecisionOption,
+  DecisionRecordContextSnapshot,
   DecisionType,
+  IgnorePlanningRiskDecisionOption,
+  PlanningRiskDecisionContextSnapshot,
   SavePlaceDecisionOption,
 } from "./decision";
 

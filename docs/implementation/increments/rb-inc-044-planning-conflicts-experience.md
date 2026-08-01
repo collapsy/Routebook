@@ -33,7 +33,8 @@ related_documents:
   - RB-INC-043
 prerequisites:
   - RB-INC-043
-next_documents: []
+next_documents:
+  - RB-INC-045
 ai_context:
   priority: critical
   index: true

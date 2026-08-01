@@ -12,6 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { trips } from "./schema";
+import { decisions } from "./decision-schema";
 
 export const planningConflicts = pgTable(
   "planning_conflicts",
@@ -31,6 +32,10 @@ export const planningConflicts = pgTable(
     policyVersion: varchar("policy_version", { length: 80 }).notNull(),
     contextFingerprint: varchar("context_fingerprint", { length: 64 }).notNull(),
     lineageKey: varchar("lineage_key", { length: 64 }).notNull(),
+    ignoredAt: timestamp("ignored_at", { withTimezone: true, mode: "date" }),
+    ignoredDecisionId: uuid("ignored_decision_id").references(() => decisions.id, {
+      onDelete: "restrict",
+    }),
     invalidatedAt: timestamp("invalidated_at", { withTimezone: true, mode: "date" }),
     supersededAt: timestamp("superseded_at", { withTimezone: true, mode: "date" }),
     supersededByPlanningConflictId: uuid("superseded_by_planning_conflict_id").references(
@@ -51,11 +56,23 @@ export const planningConflicts = pgTable(
     ),
     check(
       "planning_conflicts_state_check",
-      sql`${table.state} in ('open', 'invalidated', 'superseded')`,
+      sql`${table.state} in ('open', 'ignored', 'invalidated', 'superseded')`,
+    ),
+    check(
+      "planning_conflicts_lifecycle_metadata_check",
+      sql`(
+        (${table.state} = 'open' AND ${table.ignoredAt} IS NULL AND ${table.ignoredDecisionId} IS NULL AND ${table.invalidatedAt} IS NULL AND ${table.supersededAt} IS NULL AND ${table.supersededByPlanningConflictId} IS NULL)
+        OR (${table.state} = 'ignored' AND ${table.ignoredAt} IS NOT NULL AND ${table.ignoredDecisionId} IS NOT NULL AND ${table.invalidatedAt} IS NULL AND ${table.supersededAt} IS NULL AND ${table.supersededByPlanningConflictId} IS NULL)
+        OR (${table.state} = 'invalidated' AND ${table.invalidatedAt} IS NOT NULL AND ${table.supersededAt} IS NULL AND ${table.supersededByPlanningConflictId} IS NULL AND ((${table.ignoredAt} IS NULL AND ${table.ignoredDecisionId} IS NULL) OR (${table.ignoredAt} IS NOT NULL AND ${table.ignoredDecisionId} IS NOT NULL)))
+        OR (${table.state} = 'superseded' AND ${table.invalidatedAt} IS NULL AND ${table.supersededAt} IS NOT NULL AND ${table.supersededByPlanningConflictId} IS NOT NULL AND ((${table.ignoredAt} IS NULL AND ${table.ignoredDecisionId} IS NULL) OR (${table.ignoredAt} IS NOT NULL AND ${table.ignoredDecisionId} IS NOT NULL)))
+      )`,
     ),
     uniqueIndex("planning_conflicts_active_equivalent_unique")
       .on(table.tripId, table.type, table.contextFingerprint)
-      .where(sql`${table.state} = 'open'`),
+      .where(sql`${table.state} in ('open', 'ignored')`),
+    uniqueIndex("planning_conflicts_ignored_decision_unique")
+      .on(table.ignoredDecisionId)
+      .where(sql`${table.ignoredDecisionId} is not null`),
     index("planning_conflicts_trip_state_idx").on(table.tripId, table.state),
     index("planning_conflicts_trip_lineage_idx").on(table.tripId, table.lineageKey),
   ],

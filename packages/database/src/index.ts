@@ -21,6 +21,12 @@ export {
   type PlanningConflictEvaluationResult,
 } from "./planning-conflict-evaluation-service";
 export {
+  ignorePlanningRisk,
+  PlanningRiskDecisionServiceError,
+  type IgnorePlanningRiskCommand,
+  type IgnorePlanningRiskResult,
+} from "./planning-conflict-decision-service";
+export {
   DrizzlePlanningConflictRepository,
   reconcilePlanningConflictsWithDatabase,
 } from "./planning-conflict-repository";

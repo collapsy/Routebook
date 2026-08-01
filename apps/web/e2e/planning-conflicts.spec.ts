@@ -50,4 +50,20 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
   const affectedDay = page.locator(`.itinerary-day-card[id="${affectedDayId}"]`);
   await expect(affectedDay.getByText(firstActivity, { exact: true })).toBeVisible();
   await expect(affectedDay.getByText(secondActivity, { exact: true })).toBeVisible();
+
+  await page.goBack();
+  await expect(page).toHaveURL(/\/viagens\/[^/]+\/roteiro\/revisao$/);
+  await page.getByText("Ignorar risco", { exact: true }).click();
+  await page
+    .getByRole("checkbox", { name: /Entendo que este risco continuará no Roteiro/ })
+    .check();
+  await page.getByRole("button", { name: "Confirmar e ignorar risco" }).click();
+
+  await expect(page).toHaveURL(/riscoIgnorado=1$/);
+  await expect(page.getByText(/Risco ignorado e Decision registrada/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Nenhum conflito encontrado" })).toBeVisible();
+
+  await page.getByRole("link", { name: "Voltar para o Roteiro" }).click();
+  await expect(page.getByText(firstActivity, { exact: true })).toBeVisible();
+  await expect(page.getByText(secondActivity, { exact: true })).toBeVisible();
 });

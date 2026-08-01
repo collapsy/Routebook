@@ -4,6 +4,7 @@ export {
   createPlanningConflictId,
   createPlanningConflictLineageKey,
   derivePlanningConflictId,
+  ignorePlanningRisk,
   invalidatePlanningConflict,
   normalizePlanningConflictContextSnapshot,
   PlanningConflictTransitionError,

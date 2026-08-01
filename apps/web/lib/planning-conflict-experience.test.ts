@@ -90,6 +90,7 @@ describe("buildPlanningConflictReview", () => {
       dayLabel: "Dia 1 · 22 de agosto",
       activityTitles: ["Café na vila", "Passeio de barco"],
       itineraryHref: `/viagens/trip-1/roteiro#${day.id}`,
+      canIgnore: true,
     });
     expect(review.items[0]?.explanation).not.toContain(firstActivity.id);
     expect(review.items[0]?.explanation).not.toContain(secondActivity.id);

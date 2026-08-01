@@ -32,8 +32,34 @@ function conflictLabel(count: number): string {
   return count === 1 ? "1 conflito" : `${count} conflitos`;
 }
 
-export function PlanningConflictReview({ review }: { review: PlanningConflictReviewModel }) {
+type PlanningRiskAction = (formData: FormData) => Promise<Readonly<{ redirectTo: string }>>;
+
+export function PlanningConflictReview({
+  review,
+  tripId,
+  ignoreAction,
+}: {
+  review: PlanningConflictReviewModel;
+  tripId: string;
+  ignoreAction: PlanningRiskAction;
+}) {
   const [activeFilter, setActiveFilter] = useState<ReviewFilter>("all");
+  const [pendingConflictId, setPendingConflictId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  async function submitIgnore(conflictId: string, formData: FormData): Promise<void> {
+    setPendingConflictId(conflictId);
+    setActionError(null);
+    try {
+      const result = await ignoreAction(formData);
+      window.location.assign(result.redirectTo);
+    } catch {
+      setPendingConflictId(null);
+      setActionError(
+        "Não foi possível confirmar esta decisão agora. Verifique sua conexão e tente novamente.",
+      );
+    }
+  }
 
   if (review.total === 0) {
     return (
@@ -109,6 +135,12 @@ export function PlanningConflictReview({ review }: { review: PlanningConflictRev
           Exibindo {conflictLabel(visibleItems.length)}
         </p>
 
+        {actionError ? (
+          <p className={styles.actionError} role="alert">
+            {actionError}
+          </p>
+        ) : null}
+
         {visibleItems.length === 0 ? (
           <div className={styles.filteredEmpty} role="status">
             <strong>Nenhum conflito desta severidade</strong>
@@ -144,11 +176,40 @@ export function PlanningConflictReview({ review }: { review: PlanningConflictRev
                       <strong>Impacto</strong>
                       <p>{item.impact}</p>
                     </div>
-                    {item.itineraryHref ? (
-                      <Link className={styles.dayLink} href={item.itineraryHref}>
-                        Ver dia no Roteiro <span aria-hidden="true">→</span>
-                      </Link>
-                    ) : null}
+                    <div className={styles.actions}>
+                      {item.itineraryHref ? (
+                        <Link className={styles.dayLink} href={item.itineraryHref}>
+                          Ver dia no Roteiro <span aria-hidden="true">→</span>
+                        </Link>
+                      ) : null}
+                      {item.canIgnore ? (
+                        <details className={styles.ignoreConfirmation}>
+                          <summary>Ignorar risco</summary>
+                          <form action={(formData) => submitIgnore(item.id, formData)}>
+                            <input name="tripId" type="hidden" value={tripId} />
+                            <input name="planningConflictId" type="hidden" value={item.id} />
+                            <p>
+                              A condição continuará existindo no planejamento. Esta ação registra
+                              uma decisão consciente; ela não corrige nem resolve o conflito.
+                            </p>
+                            <label>
+                              <input
+                                name="confirmation"
+                                required
+                                type="checkbox"
+                                value="risk-accepted"
+                              />
+                              Entendo que este risco continuará no Roteiro.
+                            </label>
+                            <button disabled={pendingConflictId !== null} type="submit">
+                              {pendingConflictId === item.id
+                                ? "Registrando decisão…"
+                                : "Confirmar e ignorar risco"}
+                            </button>
+                          </form>
+                        </details>
+                      ) : null}
+                    </div>
                   </article>
                 </li>
               );

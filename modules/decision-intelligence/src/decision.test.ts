@@ -141,4 +141,81 @@ describe("Decision", () => {
       }),
     ).toThrow(DecisionValidationError);
   });
+
+  it("records an explicit Decision to ignore a Planning Risk", () => {
+    const decision = createDecision({
+      id: "decision-ignore-1",
+      tripId: "trip-1",
+      actorParticipantId: "participant-owner",
+      decidedAt,
+      chosenOption: {
+        type: "ignore-planning-risk",
+        planningConflictId: "conflict-1",
+      },
+      contextSnapshot: {
+        schemaVersion: 1,
+        tripId: "trip-1",
+        planningConflictId: "conflict-1",
+        planningConflictContextFingerprint: "a".repeat(64),
+        itineraryId: "itinerary-1",
+        itineraryVersion: 4,
+        policyVersion: "planning-conflict-v1",
+        capturedAt: new Date("2026-07-31T20:00:00.000Z"),
+      },
+      effect: {
+        type: "planning-conflict-ignored",
+        planningConflictId: "conflict-1",
+      },
+      idempotencyKey: "conflict-1:ignore-planning-risk",
+    });
+
+    expect(decision).toMatchObject({
+      type: "ignore-planning-risk",
+      chosenOption: { planningConflictId: "conflict-1" },
+      effect: { type: "planning-conflict-ignored", planningConflictId: "conflict-1" },
+    });
+    expect(decision).not.toHaveProperty("recommendationId");
+  });
+
+  it("rejects mismatched Planning Risk snapshots and effects", () => {
+    const planningRiskDecision = {
+      tripId: "trip-1",
+      actorParticipantId: "participant-owner",
+      decidedAt,
+      chosenOption: {
+        type: "ignore-planning-risk" as const,
+        planningConflictId: "conflict-1",
+      },
+      contextSnapshot: {
+        schemaVersion: 1 as const,
+        tripId: "trip-1",
+        planningConflictId: "conflict-2",
+        planningConflictContextFingerprint: "a".repeat(64),
+        itineraryId: "itinerary-1",
+        itineraryVersion: 4,
+        policyVersion: "planning-conflict-v1",
+        capturedAt: new Date("2026-07-31T20:00:00.000Z"),
+      },
+      effect: {
+        type: "planning-conflict-ignored" as const,
+        planningConflictId: "conflict-1",
+      },
+      idempotencyKey: "conflict-1:ignore-planning-risk",
+    };
+
+    expect(() => createDecision(planningRiskDecision)).toThrow(DecisionValidationError);
+    expect(() =>
+      createDecision({
+        ...planningRiskDecision,
+        contextSnapshot: {
+          ...planningRiskDecision.contextSnapshot,
+          planningConflictId: "conflict-1",
+        },
+        effect: {
+          type: "planning-conflict-ignored",
+          planningConflictId: "conflict-2",
+        },
+      }),
+    ).toThrow(DecisionValidationError);
+  });
 });

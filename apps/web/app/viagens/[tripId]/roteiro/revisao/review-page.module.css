@@ -51,6 +51,26 @@
   border-radius: 50%;
 }
 
+.success,
+.actionError {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 0.8rem;
+  line-height: 1.55;
+}
+
+.success {
+  border-left: 0.35rem solid #27716b;
+  background: #dceee8;
+  color: #1d5f5a;
+}
+
+.actionError {
+  border-left: 0.35rem solid #a33b32;
+  background: #fff0ed;
+  color: #762a23;
+}
+
 .loadingCard,
 .errorState {
   padding: clamp(1.25rem, 5vw, 2.25rem);

@@ -121,7 +121,10 @@
 }
 
 .filters button:focus-visible,
-.dayLink:focus-visible {
+.dayLink:focus-visible,
+.ignoreConfirmation summary:focus-visible,
+.ignoreConfirmation input:focus-visible,
+.ignoreConfirmation button:focus-visible {
   outline: 3px solid var(--color-focus, #16736b);
   outline-offset: 3px;
 }
@@ -267,6 +270,96 @@
   font-weight: 800;
   text-decoration-thickness: 0.1rem;
   text-underline-offset: 0.2rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1rem;
+  align-items: flex-start;
+  margin-top: 1.1rem;
+}
+
+.actions .dayLink {
+  margin-top: 0.6rem;
+}
+
+.ignoreConfirmation {
+  width: min(100%, 32rem);
+}
+
+.ignoreConfirmation summary {
+  width: fit-content;
+  padding: 0.58rem 0.78rem;
+  border: 1px solid #a26720;
+  border-radius: 0.7rem;
+  color: #76501e;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.ignoreConfirmation[open] summary {
+  margin-bottom: 0.75rem;
+}
+
+.ignoreConfirmation form {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, #a26720 45%, var(--color-border, #d9d1c4));
+  border-radius: 0.85rem;
+  background: #fff8e8;
+}
+
+.ignoreConfirmation form p {
+  margin: 0;
+  color: var(--color-text-muted, #6b645c);
+  line-height: 1.55;
+}
+
+.ignoreConfirmation label {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  color: var(--color-text, #2d2924);
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.ignoreConfirmation input {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+  margin-top: 0.1rem;
+  accent-color: #85521d;
+}
+
+.ignoreConfirmation button {
+  width: fit-content;
+  padding: 0.68rem 0.85rem;
+  border: 0;
+  border-radius: 0.7rem;
+  background: #76501e;
+  color: #fffdf8;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.ignoreConfirmation button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.actionError {
+  margin: 0 0 0.9rem;
+  padding: 0.8rem 0.9rem;
+  border-left: 0.3rem solid #a33b32;
+  border-radius: 0.65rem;
+  background: #fff0ed;
+  color: #762a23;
+  line-height: 1.5;
 }
 
 .emptyState,

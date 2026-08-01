@@ -5,6 +5,7 @@ import {
   createPlanningConflictFingerprint,
   createPlanningConflictId,
   createPlanningConflictLineageKey,
+  ignorePlanningRisk,
   invalidatePlanningConflict,
   PlanningConflictTransitionError,
   PlanningConflictValidationError,
@@ -93,7 +94,7 @@ describe("PlanningConflict", () => {
     },
   );
 
-  it("invalida e supersede somente conflitos abertos", () => {
+  it("invalida e supersede somente conflitos ativos", () => {
     const conflict = buildConflict();
     const changedAt = new Date("2026-07-31T18:05:00.000Z");
     const invalidated = invalidatePlanningConflict(conflict, changedAt);
@@ -113,5 +114,60 @@ describe("PlanningConflict", () => {
     expect(() => supersedePlanningConflict(conflict, conflict.id, changedAt)).toThrow(
       PlanningConflictTransitionError,
     );
+  });
+
+  it("ignora somente risco aberto e preserva a Decision no histórico", () => {
+    const conflict = buildConflict();
+    const ignoredAt = new Date("2026-07-31T18:05:00.000Z");
+    const ignored = ignorePlanningRisk(conflict, "decision-1", ignoredAt);
+
+    expect(ignored).toMatchObject({
+      state: "ignored",
+      ignoredAt,
+      ignoredDecisionId: "decision-1",
+      evidence: conflict.evidence,
+      contextSnapshot: conflict.contextSnapshot,
+    });
+    expect(() => ignorePlanningRisk(ignored, "decision-2", ignoredAt)).toThrow(
+      PlanningConflictTransitionError,
+    );
+    expect(() =>
+      ignorePlanningRisk(
+        createPlanningConflict({ ...conflict, severity: "error" }),
+        "decision-2",
+        ignoredAt,
+      ),
+    ).toThrow(PlanningConflictTransitionError);
+    expect(() =>
+      ignorePlanningRisk(
+        createPlanningConflict({ ...conflict, severity: "suggestion" }),
+        "decision-2",
+        ignoredAt,
+      ),
+    ).toThrow(PlanningConflictTransitionError);
+  });
+
+  it("preserva a correlação anterior ao invalidar ou superseder risco ignorado", () => {
+    const changedAt = new Date("2026-07-31T18:05:00.000Z");
+    const ignored = ignorePlanningRisk(buildConflict(), "decision-1", changedAt);
+    const invalidated = invalidatePlanningConflict(ignored, new Date("2026-07-31T18:10:00.000Z"));
+
+    expect(invalidated).toMatchObject({
+      state: "invalidated",
+      ignoredDecisionId: "decision-1",
+      ignoredAt: changedAt,
+    });
+
+    const replacementId = createPlanningConflictId("conflict-2");
+    const superseded = supersedePlanningConflict(
+      ignored,
+      replacementId,
+      new Date("2026-07-31T18:15:00.000Z"),
+    );
+    expect(superseded).toMatchObject({
+      state: "superseded",
+      ignoredDecisionId: "decision-1",
+      supersededByPlanningConflictId: replacementId,
+    });
   });
 });

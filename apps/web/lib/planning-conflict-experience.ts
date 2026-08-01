@@ -14,7 +14,7 @@ export type PlanningConflictReviewSource = Readonly<{
     | "invalid-activity-interval"
     | "day-overloaded";
   severity: PlanningConflictSeverity;
-  state: "open" | "invalidated" | "superseded";
+  state: "open" | "ignored" | "invalidated" | "superseded";
   contextSnapshot: Readonly<{
     tripStartDate: string;
     tripEndDate: string;
@@ -37,6 +37,7 @@ export type PlanningConflictReviewItem = Readonly<{
   dayLabel?: string;
   activityTitles: readonly string[];
   itineraryHref?: string;
+  canIgnore: boolean;
 }>;
 
 export type PlanningConflictReview = Readonly<{
@@ -224,6 +225,7 @@ export function buildPlanningConflictReview({
         severityLabel: severityLabels[conflict.severity],
         ...description,
         activityTitles,
+        canIgnore: conflict.severity === "risk",
         ...(day && formattedDay ? { dayLabel: `Dia ${day.position} · ${formattedDay}` } : {}),
         ...(day ? { itineraryHref: `/viagens/${tripId}/roteiro#${day.id}` } : {}),
       };

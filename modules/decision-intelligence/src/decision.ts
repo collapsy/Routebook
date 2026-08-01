@@ -1,11 +1,28 @@
 import { randomUUID } from "node:crypto";
 
-import type { DecisionContextSnapshot, RecommendationId } from "./recommendation";
+import type {
+  DecisionContextSnapshot as RecommendationDecisionContextSnapshot,
+  RecommendationId,
+} from "./recommendation";
 
 const decisionIdBrand: unique symbol = Symbol("DecisionId");
 
 export type DecisionId = string & { readonly [decisionIdBrand]: true };
-export type DecisionType = "save-place" | "add-to-itinerary";
+export type DecisionType = "save-place" | "add-to-itinerary" | "ignore-planning-risk";
+
+export type PlanningRiskDecisionContextSnapshot = Readonly<{
+  schemaVersion: 1;
+  tripId: string;
+  planningConflictId: string;
+  planningConflictContextFingerprint: string;
+  itineraryId: string;
+  itineraryVersion: number;
+  policyVersion: string;
+  capturedAt: Date;
+}>;
+
+export type DecisionRecordContextSnapshot =
+  RecommendationDecisionContextSnapshot | PlanningRiskDecisionContextSnapshot;
 
 export type SavePlaceDecisionOption = Readonly<{
   type: "save-place";
@@ -20,11 +37,18 @@ export type AddToItineraryDecisionOption = Readonly<{
   durationMinutes?: number;
 }>;
 
-export type DecisionOption = SavePlaceDecisionOption | AddToItineraryDecisionOption;
+export type IgnorePlanningRiskDecisionOption = Readonly<{
+  type: "ignore-planning-risk";
+  planningConflictId: string;
+}>;
+
+export type DecisionOption =
+  SavePlaceDecisionOption | AddToItineraryDecisionOption | IgnorePlanningRiskDecisionOption;
 
 export type DecisionEffect =
   | Readonly<{ type: "saved-place"; savedPlaceId: string }>
-  | Readonly<{ type: "itinerary-activity"; activityId: string }>;
+  | Readonly<{ type: "itinerary-activity"; activityId: string }>
+  | Readonly<{ type: "planning-conflict-ignored"; planningConflictId: string }>;
 
 export type Decision = Readonly<{
   id: DecisionId;
@@ -34,7 +58,7 @@ export type Decision = Readonly<{
   decidedAt: Date;
   type: DecisionType;
   chosenOption: DecisionOption;
-  contextSnapshot: DecisionContextSnapshot;
+  contextSnapshot: DecisionRecordContextSnapshot;
   effect: DecisionEffect;
   idempotencyKey: string;
 }>;
@@ -46,7 +70,7 @@ export type CreateDecisionInput = Readonly<{
   actorParticipantId: string;
   decidedAt: Date;
   chosenOption: DecisionOption;
-  contextSnapshot: DecisionContextSnapshot;
+  contextSnapshot: DecisionRecordContextSnapshot;
   effect: DecisionEffect;
   idempotencyKey: string;
 }>;
@@ -99,7 +123,9 @@ function normalizeTime(value: string): string {
   return normalized;
 }
 
-function freezeSnapshot(snapshot: DecisionContextSnapshot): DecisionContextSnapshot {
+function freezeRecommendationSnapshot(
+  snapshot: RecommendationDecisionContextSnapshot,
+): RecommendationDecisionContextSnapshot {
   const tripId = requiredText(snapshot.tripId, "contextSnapshot.tripId");
   const destinationId = requiredText(snapshot.destinationId, "contextSnapshot.destinationId");
   const capturedAt = validDate(snapshot.capturedAt);
@@ -132,7 +158,77 @@ function freezeSnapshot(snapshot: DecisionContextSnapshot): DecisionContextSnaps
   });
 }
 
+function freezePlanningRiskSnapshot(
+  snapshot: PlanningRiskDecisionContextSnapshot,
+): PlanningRiskDecisionContextSnapshot {
+  const fingerprint = requiredText(
+    snapshot.planningConflictContextFingerprint,
+    "contextSnapshot.planningConflictContextFingerprint",
+  ).toLowerCase();
+  if (!/^[a-f0-9]{64}$/.test(fingerprint)) {
+    throw new DecisionValidationError("Decision inválida.", {
+      "contextSnapshot.planningConflictContextFingerprint":
+        "Use um SHA-256 hexadecimal com 64 caracteres.",
+    });
+  }
+
+  return Object.freeze({
+    schemaVersion: 1,
+    tripId: requiredText(snapshot.tripId, "contextSnapshot.tripId"),
+    planningConflictId: requiredText(
+      snapshot.planningConflictId,
+      "contextSnapshot.planningConflictId",
+    ),
+    planningConflictContextFingerprint: fingerprint,
+    itineraryId: requiredText(snapshot.itineraryId, "contextSnapshot.itineraryId"),
+    itineraryVersion: positiveInteger(
+      snapshot.itineraryVersion,
+      "contextSnapshot.itineraryVersion",
+    ),
+    policyVersion: requiredText(snapshot.policyVersion, "contextSnapshot.policyVersion"),
+    capturedAt: validDate(snapshot.capturedAt),
+  });
+}
+
+function freezeSnapshot(
+  snapshot: DecisionRecordContextSnapshot,
+  option: DecisionOption,
+): DecisionRecordContextSnapshot {
+  if (option.type === "ignore-planning-risk") {
+    if (!("planningConflictId" in snapshot)) {
+      throw new DecisionValidationError("Decision inválida.", {
+        contextSnapshot: "Use um snapshot de PlanningConflict para ignorar um risco.",
+      });
+    }
+    const normalized = freezePlanningRiskSnapshot(snapshot);
+    if (normalized.planningConflictId !== option.planningConflictId) {
+      throw new DecisionValidationError("Decision incompatível com o Context Snapshot.", {
+        "contextSnapshot.planningConflictId":
+          "O snapshot deve referenciar o mesmo PlanningConflict escolhido.",
+      });
+    }
+    return normalized;
+  }
+
+  if ("planningConflictId" in snapshot) {
+    throw new DecisionValidationError("Decision inválida.", {
+      contextSnapshot: "Use um snapshot de Recommendation para esta escolha.",
+    });
+  }
+  return freezeRecommendationSnapshot(snapshot);
+}
+
 function freezeOption(option: DecisionOption): DecisionOption {
+  if (option.type === "ignore-planning-risk") {
+    return Object.freeze({
+      type: "ignore-planning-risk",
+      planningConflictId: requiredText(
+        option.planningConflictId,
+        "chosenOption.planningConflictId",
+      ),
+    });
+  }
+
   const placeId = requiredText(option.placeId, "chosenOption.placeId");
 
   if (option.type === "save-place") {
@@ -173,6 +269,13 @@ function freezeEffect(effect: DecisionEffect, type: DecisionType): DecisionEffec
     });
   }
 
+  if (type === "ignore-planning-risk" && effect.type === "planning-conflict-ignored") {
+    return Object.freeze({
+      type: "planning-conflict-ignored",
+      planningConflictId: requiredText(effect.planningConflictId, "effect.planningConflictId"),
+    });
+  }
+
   throw new DecisionValidationError("Efeito incompatível com o tipo da Decision.", {
     effect: "O efeito deve corresponder à opção escolhida.",
   });
@@ -184,15 +287,25 @@ export function createDecisionId(value: string = randomUUID()): DecisionId {
 
 export function createDecision(input: CreateDecisionInput): Decision {
   const tripId = requiredText(input.tripId, "tripId");
-  const contextSnapshot = freezeSnapshot(input.contextSnapshot);
+  const chosenOption = freezeOption(input.chosenOption);
+  const contextSnapshot = freezeSnapshot(input.contextSnapshot, chosenOption);
   if (contextSnapshot.tripId !== tripId) {
     throw new DecisionValidationError("Decision incompatível com o Context Snapshot.", {
       "contextSnapshot.tripId": "O snapshot deve pertencer à mesma Trip.",
     });
   }
 
-  const chosenOption = freezeOption(input.chosenOption);
   const type = chosenOption.type;
+  const effect = freezeEffect(input.effect, type);
+  if (
+    type === "ignore-planning-risk" &&
+    effect.type === "planning-conflict-ignored" &&
+    effect.planningConflictId !== chosenOption.planningConflictId
+  ) {
+    throw new DecisionValidationError("Efeito incompatível com a opção escolhida.", {
+      effect: "O efeito deve referenciar o mesmo PlanningConflict escolhido.",
+    });
+  }
 
   return Object.freeze({
     id: createDecisionId(input.id),
@@ -203,7 +316,7 @@ export function createDecision(input: CreateDecisionInput): Decision {
     type,
     chosenOption,
     contextSnapshot,
-    effect: freezeEffect(input.effect, type),
+    effect,
     idempotencyKey: requiredText(input.idempotencyKey, "idempotencyKey"),
   });
 }

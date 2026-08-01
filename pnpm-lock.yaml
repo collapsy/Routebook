@@ -29,6 +29,9 @@ importers:
       '@routebook/place-catalog':
         specifier: workspace:*
         version: link:../../modules/place-catalog
+      '@routebook/proposal-management':
+        specifier: workspace:*
+        version: link:../../modules/proposal-management
       '@routebook/saved-places':
         specifier: workspace:*
         version: link:../../modules/saved-places

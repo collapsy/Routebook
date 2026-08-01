@@ -1881,12 +1881,12 @@ flexibility
 estimatedCostAmount
 estimatedCostCurrency
 reason
-status
 ```
 
 #### Constraints
 
 * Proposed Activity não é Activity canônica;
+* seu lifecycle é determinado pela Itinerary Proposal; seleção para aceite parcial pertence a Proposal Selection;
 * sourceActivityId opcional para movimento ou alteração;
 * operationType deverá distinguir add, move, update e remove;
 * Activity fixed não poderá ser movida automaticamente;

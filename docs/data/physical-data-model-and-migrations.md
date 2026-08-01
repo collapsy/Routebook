@@ -1483,7 +1483,6 @@ As linhas de `proposed_activities` continuam normalizadas e podem estar ausentes
 | `estimated_cost_amount`   | numeric(19,4) | nullable |
 | `estimated_cost_currency` | char(3)       | nullable |
 | `reason`                  | text          | nullable |
-| `status`                  | varchar(32)   | not null |
 
 Operation types:
 
@@ -1493,6 +1492,8 @@ move
 update
 remove
 ```
+
+Proposed Activity não possui status independente nesta versão. Seu lifecycle é determinado pela Itinerary Proposal, enquanto a seleção para aceite parcial permanece em `proposal_management.proposal_selections`.
 
 ---
 

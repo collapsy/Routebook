@@ -102,7 +102,11 @@ test("ignora um risco e preserva seu histórico auditável", async ({ page }, te
   await expect(ignoredActivities).toContainText(secondActivity);
   await expect(ignoredHistory.getByText("Restaurar", { exact: true })).toHaveCount(0);
 
-  await page.getByRole("link", { name: "Voltar para o Roteiro" }).click();
+  const backToItinerary = page.getByRole("link", { name: "Voltar para o Roteiro" });
+  await expect(backToItinerary).toHaveAttribute("href", new RegExp(`/viagens/${tripId}/roteiro$`));
+  const itineraryHref = await backToItinerary.getAttribute("href");
+  expect(itineraryHref).not.toBeNull();
+  await page.goto(itineraryHref!);
   await expect(page).toHaveURL(/\/roteiro$/);
   await expect(page.getByText(firstActivity, { exact: true })).toBeVisible();
   await expect(page.getByText(secondActivity, { exact: true })).toBeVisible();

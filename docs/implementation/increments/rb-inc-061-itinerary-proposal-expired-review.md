@@ -161,4 +161,4 @@ Reverter view model, componentes, rotas, testes e documentação. Não há migra
 - `@routebook/web`: lint e typecheck verdes; 59 testes verdes;
 - workspace: lint, typecheck e build verdes;
 - E2E PostgreSQL não executado localmente porque `DATABASE_URL` não está configurada e o daemon Docker está indisponível; será coberto pelo CI;
-- PR e evidências finais de CI pendentes.
+- PR #139, run `30716155284`: formatação, documentação, lint, typecheck, migrations PostgreSQL, suíte integral, smoke, build e 52 testes Playwright responsivos verdes.

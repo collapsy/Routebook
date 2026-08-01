@@ -70,7 +70,7 @@ ai_context:
 | RB-INC-058 | RB-BR-PRP-004, RB-BR-PRP-008, ciclo oficial e RB-DATA-001 | #132 | `codex/rb-inc-058-temporal-expiration`, PR #133 | expiração temporal de Proposal `ready` no domínio | 53 testes do módulo; CI com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para revisão |
 | RB-INC-059 | RB-BR-PRP-004, RB-BR-PRP-008, RB-DATA-001–002, RB-ADR-006 e RB-INC-058 | #134 | `codex/rb-inc-059-expired-persistence`, PR #135 | migration, schema e round trip de Proposal `expired` com conteúdo preservado | validações locais verdes; run 30713827362 com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para integração |
 | RB-INC-060 | RB-BR-PRP-004, RB-BR-PRP-008, ciclo oficial e RB-INC-056, RB-INC-058–059 | #136 | `codex/rb-inc-060-expiration-command`, PR #137 | comando de aplicação para expirar e persistir Proposal `ready` | 60 testes do módulo; run 30714407588 com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para integração |
-| RB-INC-061 | RB-BR-PRP-004, RB-BR-PRP-008, RB-SCR-009, RB-INT-063–069 e RB-INC-057–060 | #138 | `codex/rb-inc-061-expired-review`, PR #139 | revisão histórica somente leitura da Proposal `expired` sem aplicação | 163 docs, 59 testes web, lint, typecheck e build locais verdes; CI pendente | Em validação |
+| RB-INC-061 | RB-BR-PRP-004, RB-BR-PRP-008, RB-SCR-009, RB-INT-063–069 e RB-INC-057–060 | #138 | `codex/rb-inc-061-expired-review`, PR #139 | revisão histórica somente leitura da Proposal `expired` sem aplicação | validações locais verdes; run 30716155284 com migrations, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
 
 ## Evidências do RB-INC-003
 

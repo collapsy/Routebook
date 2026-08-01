@@ -27,6 +27,7 @@ export type {
 } from "./repository";
 export {
   cancelAndPersistItineraryProposalGeneration,
+  completeAndPersistItineraryProposalGeneration,
   failAndPersistItineraryProposalGeneration,
   ItineraryProposalApplicationError,
   requestAndPersistItineraryProposal,
@@ -34,6 +35,7 @@ export {
 } from "./service";
 export type {
   CancelItineraryProposalGenerationCommand,
+  CompleteItineraryProposalGenerationCommand,
   FailItineraryProposalGenerationCommand,
   StartItineraryProposalGenerationCommand,
 } from "./service";

@@ -193,6 +193,9 @@ export default async function ItineraryPage({
         <div>
           <p className="product-eyebrow">Roteiro manual</p>
           <h1>{trip.name}</h1>
+          <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro/revisao`}>
+            Revisar conflitos
+          </Link>
           <p>
             Organize decisões confirmadas e espaços livres por dia. Horários e durações continuam
             opcionais para que o roteiro possa evoluir sem criar rigidez artificial.
@@ -278,7 +281,7 @@ export default async function ItineraryPage({
           const daySummary = formatDaySummary(day.activities.length, day.freePeriods.length);
 
           return (
-            <li className="itinerary-day-card" key={day.id}>
+            <li className="itinerary-day-card" id={day.id} key={day.id} tabIndex={-1}>
               <header>
                 <span>Dia {day.position}</span>
                 <h2>{formatDate(day.date)}</h2>

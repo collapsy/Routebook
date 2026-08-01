@@ -5,7 +5,7 @@ description: Contexto operacional para implementar o RB-INC-043 com domínio det
 document_type: implementation-context-pack
 owner: Planning Assurance
 status: Draft
-version: "0.2.0"
+version: "0.3.0"
 created: "2026-07-31"
 last_updated: "2026-07-31"
 authors:
@@ -24,7 +24,8 @@ related_documents:
   - RB-DEL-001
 prerequisites:
   - RB-INC-042
-next_documents: []
+next_documents:
+  - RB-CTX-044
 ai_context:
   priority: critical
   index: true

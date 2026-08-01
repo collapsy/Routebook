@@ -4,6 +4,7 @@ export {
   createItineraryProposalId,
   expireItineraryProposalByTime,
   failItineraryProposalGeneration,
+  finalizeAppliedItineraryProposalAcceptance,
   itineraryProposalStatuses,
   ItineraryProposalTransitionError,
   ItineraryProposalValidationError,

@@ -192,7 +192,7 @@ test("trata uma Proposal atualizada concorrentemente sem falso sucesso", async (
     page.getByRole("button", { name: "Descartar proposta" }).click(),
   ]);
 
-  await expect(page.getByRole("alert")).toHaveText(
+  await expect(page.locator(".itinerary-feedback")).toHaveText(
     /foi atualizada e não pode mais ser descartada/i,
   );
   await expect(page.getByText(confirmedActivity, { exact: true })).toBeVisible();
@@ -216,7 +216,9 @@ test("bloqueia identidade de Proposal inválida antes da persistência", async (
     page.getByRole("button", { name: "Descartar proposta" }).click(),
   ]);
 
-  await expect(page.getByRole("alert")).toHaveText(/referência da proposta é inválida/i);
+  await expect(page.locator(".itinerary-feedback")).toHaveText(
+    /referência da proposta é inválida/i,
+  );
   expect((await new DrizzleItineraryProposalRepository().listByTripId(tripId))[0]?.status).toBe(
     "ready",
   );

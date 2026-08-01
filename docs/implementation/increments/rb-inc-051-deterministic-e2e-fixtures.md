@@ -55,6 +55,8 @@ A primeira execução desta correção, run `30685050223`, expôs a mesma espera
 
 O run `30685246003` mostrou que remover somente a espera de navegação ainda permitia avançar antes do redirect da Server Action. O run `30685472090` confirmou que o redirect esperado não deve ser classificado pelo status HTTP como uma resposta comum de sucesso. A jornada passa a aguardar a URL no estágio `commit`, sem aguardar `load` nem inspecionar headers internos do framework. No histórico de conflitos, o `href` público do link é validado e aberto diretamente, sem depender do lifecycle do router.
 
+O run final `30686141233` demonstrou que `waitForURL`, inclusive no estágio `commit`, ainda depende do lifecycle de navegação nas Server Actions. As submissões do Roteiro passam a aguardar o POST da própria rota e, depois da resposta, mantêm as assertions independentes de URL, feedback, conteúdo e persistência. O status HTTP do redirect não é tratado como falha.
+
 ## 3. Resultado verificável
 
 - cada teste de período livre recebe Trip e Itinerary sintéticos independentes;
@@ -62,7 +64,7 @@ O run `30685246003` mostrou que remover somente a espera de navegação ainda pe
 - edição começa com um período persistido e edita somente pela UI;
 - remoção começa com dois períodos persistidos e remove somente pela UI;
 - o retorno do histórico de conflitos valida URL e conteúdo observáveis sem aguardar `load`;
-- a inclusão de Lugar salvo aguarda o redirect no estágio `commit` antes de validar URL e conteúdo;
+- as submissões do Roteiro aguardam a resposta POST observável antes de validar URL e conteúdo;
 - a abertura posterior do Roteiro e o retorno do histórico validam `href`, URL e conteúdo finais;
 - 46 cenários desktop/mobile permanecem listados;
 - timeout, retries, workers e projetos permanecem inalterados;
@@ -110,7 +112,7 @@ docs/registry.md
 - [x] nenhuma assertion de persistência ou feedback é removida;
 - [x] 46 cenários continuam distribuídos em desktop e mobile;
 - [x] configuração Playwright permanece inalterada;
-- [x] duas execuções consecutivas ficam verdes sem flaky annotation;
+- [ ] duas execuções consecutivas ficam verdes sem flaky annotation;
 - [x] documentação, lint, tipagem, testes e build permanecem verdes.
 
 ## 9. Testes obrigatórios
@@ -129,7 +131,7 @@ docs/registry.md
 | --- | --- | --- |
 | fixture deixar de representar estado real | Alto | usar factories de domínio e repositories Drizzle reais |
 | remover cobertura de criação | Alto | manter criação de período livre pela UI no primeiro cenário |
-| click concluir antes da navegação | Médio | aguardar URL no estágio `commit` ou validar o `href` público antes de abrir o destino |
+| click concluir antes da navegação | Médio | aguardar a resposta POST da submissão ou validar o `href` público antes de abrir o destino |
 | outra causa de flake permanecer | Médio | exigir duas matrizes consecutivas sem retry |
 
 ## 11. Rollback
@@ -153,3 +155,5 @@ Evidências da PR acumulada #115 no SHA `7d89f58`:
 - Engineering Validation `30685658797`, tentativa 1: 46/46 cenários Playwright aprovados sem retry ou flaky annotation;
 - Engineering Validation `30685658797`, tentativa 2: 46/46 cenários Playwright aprovados sem retry ou flaky annotation;
 - nas duas tentativas, migrations PostgreSQL, lint, tipagem, testes de componente e domínio, smoke e build também foram aprovados.
+
+A correção adicional derivada do run `30686141233` exige um novo par de execuções limpas no SHA atualizado antes da liberação da PR.

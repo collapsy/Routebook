@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 import {
   DrizzleItineraryRepository,
@@ -8,6 +8,21 @@ import {
 } from "@routebook/database";
 import { createSavedPlace } from "@routebook/saved-places";
 import { addActivity, createItinerary, createTrip } from "@routebook/trip-management";
+
+async function submitAndExpectActionRedirect(
+  page: Page,
+  submit: () => Promise<void>,
+  expectedUrl: RegExp,
+) {
+  const actionPathname = new URL(page.url()).pathname;
+  const actionResponse = page.waitForResponse((response) => {
+    const request = response.request();
+    return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
+  });
+
+  await Promise.all([actionResponse, submit()]);
+  await expect(page).toHaveURL(expectedUrl);
+}
 
 test("cria e preserva uma atividade no roteiro manual", async ({ page }, testInfo) => {
   const tripName = `Roteiro ${testInfo.project.name} ${Date.now()}`;
@@ -92,10 +107,11 @@ test("edita uma atividade preservando sua identidade no roteiro", async ({ page 
   await editForm.getByLabel("Título").fill(updatedTitle);
   await editForm.getByLabel("Horário opcional").fill("");
   await editForm.getByLabel("Duração opcional").fill("90");
-  await Promise.all([
-    page.waitForURL(/atividadeEditada=1$/),
-    editForm.getByRole("button", { name: "Salvar alterações" }).click(),
-  ]);
+  await submitAndExpectActionRedirect(
+    page,
+    () => editForm.getByRole("button", { name: "Salvar alterações" }).click(),
+    /atividadeEditada=1$/,
+  );
 
   await expect(page.getByRole("status")).toContainText("Atividade atualizada");
   await expect(page.getByText(updatedTitle, { exact: true })).toBeVisible();
@@ -135,10 +151,11 @@ test("reordena atividades dentro do mesmo período e preserva a sequência", asy
   const activityTitles = firstDay.locator(".itinerary-activity-copy strong");
   await expect(activityTitles).toHaveText([firstTitle, secondTitle]);
 
-  await Promise.all([
-    page.waitForURL(/atividadeReordenada=1$/),
-    page.getByRole("button", { name: `Subir ${secondTitle} no roteiro` }).click(),
-  ]);
+  await submitAndExpectActionRedirect(
+    page,
+    () => page.getByRole("button", { name: `Subir ${secondTitle} no roteiro` }).click(),
+    /atividadeReordenada=1$/,
+  );
   await expect(page.getByRole("status")).toContainText("Ordem das atividades atualizada");
   await expect(activityTitles).toHaveText([secondTitle, firstTitle]);
 
@@ -166,10 +183,11 @@ test("move uma atividade para outro dia e preserva seus dados", async ({ page },
   await composer.getByLabel("Título").fill(activityTitle);
   await composer.getByLabel("Horário opcional").fill("11:15");
   await composer.getByLabel("Duração opcional").fill("150");
-  await Promise.all([
-    page.waitForURL(/atividadeCriada=1$/),
-    composer.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
-  ]);
+  await submitAndExpectActionRedirect(
+    page,
+    () => composer.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
+    /atividadeCriada=1$/,
+  );
 
   const dayCards = page.locator(".itinerary-day-card");
   const firstDay = dayCards.nth(0);
@@ -180,10 +198,11 @@ test("move uma atividade para outro dia e preserva seus dados", async ({ page },
   await page.locator(`summary[aria-label="Mover ${activityTitle} para outro dia"]`).click();
   const moveForm = page.getByRole("form", { name: `Mover ${activityTitle} para outro dia` });
   await moveForm.getByLabel("Dia de destino").selectOption("2026-08-23");
-  await Promise.all([
-    page.waitForURL(/atividadeMovida=1$/),
-    moveForm.getByRole("button", { name: "Mover atividade" }).click(),
-  ]);
+  await submitAndExpectActionRedirect(
+    page,
+    () => moveForm.getByRole("button", { name: "Mover atividade" }).click(),
+    /atividadeMovida=1$/,
+  );
 
   await expect(page).toHaveURL(/atividadeMovida=1$/);
   await expect(page.getByRole("status")).toContainText("Atividade movida para outro dia");
@@ -225,11 +244,11 @@ test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ 
   await page.getByLabel("Adicionar ao dia").selectOption("2026-08-23");
   await page.getByLabel("Horário opcional").fill("14:15");
   await page.getByLabel("Duração opcional").fill("120");
-  await Promise.all([
-    page.waitForURL(/adicionadoAoRoteiro=1$/, { waitUntil: "commit" }),
-    page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
-  ]);
-  await expect(page).toHaveURL(/adicionadoAoRoteiro=1$/);
+  await submitAndExpectActionRedirect(
+    page,
+    () => page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
+    /adicionadoAoRoteiro=1$/,
+  );
 
   await expect(page.getByRole("status")).toContainText("continua salvo");
   await expect(page.getByRole("heading", { name: placeName })).toBeVisible();

@@ -62,7 +62,7 @@ Focar os E2E de período livre e histórico de conflitos no comportamento observ
 | free-period | setup longo e estado concorrente com nomes prefixados | fixture sintética com domain factory e Drizzle repository |
 | free-period | duas criações sequenciais disputam a mesma URL de sucesso | persistir o estado anterior à remoção diretamente |
 | planning-conflicts | `waitForURL` aguarda lifecycle de navegação suave | click e assertions da URL/conteúdo finais |
-| itinerary | ação pode continuar pendente após o click e antes da URL | aguardar a URL no estágio `commit` e então validar URL/conteúdo |
+| itinerary | ação pode continuar pendente após o click e antes da URL | aguardar a resposta POST da submissão e então validar URL/conteúdo |
 
 ## 5. Fronteira da fixture
 

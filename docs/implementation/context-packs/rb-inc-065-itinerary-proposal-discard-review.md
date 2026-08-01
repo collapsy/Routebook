@@ -118,6 +118,7 @@ docs/ux/**
 
 - componente oferece ação apenas em `ready`;
 - formulário envia a identidade da Proposal exibida;
+- Server Action bloqueia identidade ausente ou malformada antes do repositório;
 - E2E persiste `rejected`, registra instante e retorna ao Roteiro;
 - Roteiro e Activities permanecem idênticos;
 - Proposed Activity continua ausente do Itinerary;
@@ -127,7 +128,7 @@ docs/ux/**
 ## 10. Comandos
 
 ```bash
-pnpm exec prettier --check apps/web/app/viagens/[tripId]/roteiro/page.tsx apps/web/app/viagens/[tripId]/roteiro/proposta/actions.ts apps/web/app/viagens/[tripId]/roteiro/proposta/page.tsx apps/web/components/itinerary-proposal-review.tsx apps/web/components/itinerary-proposal-review.test.tsx apps/web/components/itinerary-proposal-review.module.css apps/web/e2e/itinerary-proposal-review.spec.ts docs/implementation/increments/rb-inc-065-itinerary-proposal-discard-review.md docs/implementation/context-packs/rb-inc-065-itinerary-proposal-discard-review.md docs/implementation/traceability-matrix.md docs/registry.md
+pnpm exec prettier --check apps/web/app/viagens/[tripId]/roteiro/page.tsx apps/web/app/viagens/[tripId]/roteiro/proposta/actions.ts apps/web/app/viagens/[tripId]/roteiro/proposta/actions.test.ts apps/web/app/viagens/[tripId]/roteiro/proposta/page.tsx apps/web/components/itinerary-proposal-review.tsx apps/web/components/itinerary-proposal-review.test.tsx apps/web/components/itinerary-proposal-review.module.css apps/web/e2e/itinerary-proposal-review.spec.ts docs/implementation/increments/rb-inc-065-itinerary-proposal-discard-review.md docs/implementation/context-packs/rb-inc-065-itinerary-proposal-discard-review.md docs/implementation/traceability-matrix.md docs/registry.md
 pnpm docs:validate
 pnpm --filter @routebook/web lint
 pnpm --filter @routebook/web typecheck

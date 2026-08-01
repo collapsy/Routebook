@@ -104,6 +104,7 @@ Não apresentar confirmação neste recorte. A revisão atual é somente leitura
 ```text
 apps/web/app/viagens/[tripId]/roteiro/page.tsx
 apps/web/app/viagens/[tripId]/roteiro/proposta/actions.ts
+apps/web/app/viagens/[tripId]/roteiro/proposta/actions.test.ts
 apps/web/app/viagens/[tripId]/roteiro/proposta/page.tsx
 apps/web/components/itinerary-proposal-review.tsx
 apps/web/components/itinerary-proposal-review.test.tsx
@@ -135,6 +136,7 @@ docs/registry.md
 - E2E desktop e mobile descarta, retorna, informa sucesso e preserva Roteiro;
 - E2E confirma status persistido `rejected` e timestamp registrado;
 - E2E de estado concorrente não escreve nem apresenta sucesso;
+- unidade da Server Action bloqueia identidade ausente ou malformada antes do repositório;
 - regressão da revisão ready, expired e estado vazio.
 
 ## 12. Riscos

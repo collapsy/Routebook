@@ -200,35 +200,6 @@ test("trata uma Proposal atualizada concorrentemente sem falso sucesso", async (
   expect((await repository.listByTripId(tripId))[0]?.rejectedAt).toEqual(rejectedAt);
 });
 
-test("bloqueia identidade de Proposal inválida antes da persistência", async ({
-  page,
-}, testInfo) => {
-  const tripId = await createProposalFixture(
-    `Identidade inválida ${testInfo.project.name} ${Date.now()}`,
-  );
-  await page.goto(`/viagens/${tripId}/roteiro/proposta`);
-  const proposalIdInput = page.locator('input[name="itineraryProposalId"]');
-  await proposalIdInput.evaluate((input) => {
-    const replacement = input.cloneNode() as HTMLInputElement;
-    replacement.value = "proposal-invalida";
-    replacement.setAttribute("value", "proposal-invalida");
-    input.replaceWith(replacement);
-  });
-  await expect(proposalIdInput).toHaveValue("proposal-invalida");
-
-  await Promise.all([
-    page.waitForURL(/\/roteiro\?erroProposta=referencia-invalida$/),
-    page.getByRole("button", { name: "Descartar proposta" }).click(),
-  ]);
-
-  await expect(page.locator(".itinerary-feedback")).toHaveText(
-    /referência da proposta é inválida/i,
-  );
-  expect((await new DrizzleItineraryProposalRepository().listByTripId(tripId))[0]?.status).toBe(
-    "ready",
-  );
-});
-
 test("mantém a rota direta recuperável quando não existe Proposal revisável", async ({
   page,
 }, testInfo) => {

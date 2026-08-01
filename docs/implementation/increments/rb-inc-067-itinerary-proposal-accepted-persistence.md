@@ -45,7 +45,7 @@ Issue: [#150](https://github.com/collapsy/Routebook/issues/150).
 
 Branch: `codex/rb-inc-067-accepted-persistence`.
 
-Pull request: pendente.
+Pull request: [#151](https://github.com/collapsy/Routebook/pull/151).
 
 ## 2. Problema
 
@@ -106,14 +106,14 @@ docs/registry.md
 
 ## 9. Critérios de aceite
 
-- [ ] Proposal `accepted` faz round trip com `acceptedAt` e `updatedAt` preservados;
-- [ ] conteúdo, referências, versões, proveniência e Proposed Activities permanecem inalterados;
-- [ ] listagem reidrata Proposals `accepted` em ordem estável;
-- [ ] constraints rejeitam `accepted` incompleta, sem `accepted_at` ou temporalmente inválida;
-- [ ] estados anteriores continuam válidos somente com `accepted_at` nulo;
-- [ ] migration é aditiva e mantém linhas existentes válidas;
-- [ ] nenhuma escrita altera Itinerary ou outro bounded context;
-- [ ] documentação, lint, tipagem, testes e build permanecem verdes.
+- [x] Proposal `accepted` faz round trip com `acceptedAt` e `updatedAt` preservados;
+- [x] conteúdo, referências, versões, proveniência e Proposed Activities permanecem inalterados;
+- [x] listagem reidrata Proposals `accepted` em ordem estável;
+- [x] constraints rejeitam `accepted` incompleta, sem `accepted_at` ou temporalmente inválida;
+- [x] estados anteriores continuam válidos somente com `accepted_at` nulo;
+- [x] migration é aditiva e mantém linhas existentes válidas;
+- [x] nenhuma escrita altera Itinerary ou outro bounded context;
+- [x] documentação, lint, tipagem, testes e build permanecem verdes.
 
 ## 10. Testes obrigatórios
 
@@ -154,4 +154,7 @@ Evidências locais:
 - Prettier dos arquivos suportados e `git diff --check` aprovados;
 - migration e testes PostgreSQL não executados localmente porque `DATABASE_URL` não está configurada e o Docker está indisponível.
 
-Evidências de CI pendentes.
+Evidências de CI:
+
+- run [30721948907](https://github.com/collapsy/Routebook/actions/runs/30721948907) validou a documentação;
+- run [30721948930](https://github.com/collapsy/Routebook/actions/runs/30721948930) aplicou as migrations no PostgreSQL e aprovou formatação, documentação, lint, typecheck, suíte integral, smoke do servidor, build e 56 testes E2E responsivos.

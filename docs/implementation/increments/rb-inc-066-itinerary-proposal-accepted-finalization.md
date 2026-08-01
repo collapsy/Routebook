@@ -44,7 +44,7 @@ Issue: [#148](https://github.com/collapsy/Routebook/issues/148).
 
 Branch: `codex/rb-inc-066-finalize-accepted-proposal`.
 
-Pull request: pendente.
+Pull request: [#149](https://github.com/collapsy/Routebook/pull/149).
 
 ## 2. Problema
 
@@ -161,4 +161,7 @@ Evidências locais:
 - build de produção do Next.js aprovado;
 - PostgreSQL e Playwright não executados localmente porque o incremento não altera adapter ou interface e o ambiente não possui `DATABASE_URL` nem Docker; serão cobertos pelo CI.
 
-Evidências de CI pendentes.
+Evidências de CI:
+
+- run de documentação `30721260255` aprovado;
+- run de engenharia `30721260271` aprovado com formatação, documentação, lint, typecheck, migrations PostgreSQL, suíte integral, smoke do servidor, build e 56 E2E responsivos.

@@ -121,7 +121,7 @@ docs/registry.md
 - [x] inputs e agregado anterior permanecem inalterados;
 - [x] o módulo não importa banco, framework ou Provider;
 - [x] testes unitários cobrem criação, validação, transições e imutabilidade;
-- [ ] documentação, lint, tipagem, testes e build permanecem verdes.
+- [x] documentação, lint, tipagem, testes e build permanecem verdes.
 
 ## 11. Testes obrigatórios
 
@@ -159,4 +159,11 @@ Evidências locais:
 - 137 documentos registrados e validados, com quatro avisos preexistentes;
 - arquivos alterados aprovados no Prettier e em `git diff --check`.
 
-PostgreSQL, formatação integral em ambiente Linux e Playwright serão registrados após os workflows da PR empilhada. Localmente, `pnpm test` não executa os 12 testes de integração sem `DATABASE_URL`, e `pnpm format:check` global encontra conversões LF/CRLF preexistentes no checkout Windows.
+Evidências da PR empilhada no SHA `7c5d144c9f5a6428a60f5b8a1a664bf301e82645`:
+
+- Documentation Validation: run `30683233275`, concluído com sucesso;
+- Engineering Validation: run `30683233272`, attempts 1 e 2 concluídos com sucesso;
+- PostgreSQL, formatação integral em Linux, lint, tipagem, testes, build e migrations aprovados;
+- Playwright em cada attempt: 46 testes aprovados em desktop e mobile, sem retry e sem annotation de flaky.
+
+Localmente, `pnpm test` não executou os 12 testes de integração sem `DATABASE_URL`, e `pnpm format:check` global encontrou conversões LF/CRLF preexistentes no checkout Windows. Ambos os limites locais foram cobertos pelo workflow Linux com PostgreSQL.

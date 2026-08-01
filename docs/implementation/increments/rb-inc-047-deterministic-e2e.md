@@ -130,8 +130,8 @@ Reverter somente as assertions e a documentação. Não existe migration, escrit
 
 ## 12. Evidências de conclusão
 
-SHA validado: `371a0002179efc1821f65aa46062e56b0247b5e6`.
+SHA validado: `7c5d144c9f5a6428a60f5b8a1a664bf301e82645`.
 
-- Documentation Validation: run `30681587659`, concluído com sucesso;
-- Engineering Validation: run `30681587692`, attempts 1 e 2 concluídos com sucesso;
-- Playwright em cada attempt: 44 testes aprovados em desktop e mobile, sem retry e sem annotation de flaky.
+- Documentation Validation: run `30683233275`, concluído com sucesso;
+- Engineering Validation: run `30683233272`, attempts 1 e 2 concluídos com sucesso;
+- Playwright em cada attempt: 46 testes aprovados em desktop e mobile, sem retry e sem annotation de flaky.

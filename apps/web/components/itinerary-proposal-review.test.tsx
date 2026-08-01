@@ -8,6 +8,7 @@ import { ItineraryProposalReview } from "./itinerary-proposal-review";
 
 const review: ReviewModel = {
   proposalId: "proposal-ready",
+  status: "ready",
   generatedAtLabel: "1 de ago. de 2026, 09:02",
   validUntilLabel: "2 de ago. de 2026, 09:02",
   isBasedOnCurrentItinerary: true,
@@ -81,6 +82,32 @@ describe("ItineraryProposalReview", () => {
 
     expect(screen.getByRole("status")).toHaveTextContent("O Roteiro mudou depois desta proposta");
     expect(screen.getByText("Informação não confirmada")).toBeInTheDocument();
+  });
+
+  it("presents an expired Proposal as non-applicable historical reference", () => {
+    render(
+      <ItineraryProposalReview
+        review={{
+          ...review,
+          proposalId: "proposal-expired",
+          status: "expired",
+          expiredAtLabel: "2 de ago. de 2026, 10:15",
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Proposta expirada — somente referência")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Consulte o histórico desta proposta" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/não pode mais ser aplicada/i)).toBeInTheDocument();
+    expect(screen.getByText("Expirada em")).toBeInTheDocument();
+    expect(screen.getByText("2 de ago. de 2026, 10:15")).toBeInTheDocument();
+    expect(screen.getByText(/A validade terminou em/)).toHaveTextContent(
+      "2 de ago. de 2026, 10:15",
+    );
+    expect(screen.getByRole("note")).toHaveTextContent("referência histórica");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
   it("keeps justifications visible when no activity change was proposed", () => {

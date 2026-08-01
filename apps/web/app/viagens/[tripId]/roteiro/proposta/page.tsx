@@ -12,7 +12,7 @@ import { findTripById } from "@routebook/trip-management";
 import { ItineraryProposalReview } from "../../../../../components/itinerary-proposal-review";
 import {
   buildItineraryProposalReview,
-  findLatestReadyItineraryProposal,
+  findLatestReviewableItineraryProposal,
   ItineraryProposalReviewIntegrityError,
 } from "../../../../../lib/itinerary-proposal-experience";
 import styles from "./proposal-page.module.css";
@@ -37,7 +37,7 @@ export default async function ItineraryProposalReviewPage({
     new DrizzleItineraryRepository().findByTripId(trip.id),
     new DrizzleItineraryProposalRepository().listByTripId(trip.id),
   ]);
-  const proposal = findLatestReadyItineraryProposal(proposals);
+  const proposal = findLatestReviewableItineraryProposal(proposals);
 
   if (!proposal) {
     return (
@@ -49,8 +49,8 @@ export default async function ItineraryProposalReviewPage({
           <p className="product-eyebrow">Proposta de Roteiro</p>
           <h1>Nenhuma proposta disponível</h1>
           <p>
-            Ainda não existe uma proposta pronta para revisão. Seu Roteiro atual continua disponível
-            e não foi alterado.
+            Ainda não existe uma proposta pronta ou expirada para revisão. Seu Roteiro atual
+            continua disponível e não foi alterado.
           </p>
           <Link className="product-secondary-action" href={`/viagens/${trip.id}/roteiro`}>
             Continuar no Roteiro
@@ -62,7 +62,7 @@ export default async function ItineraryProposalReviewPage({
 
   if (!itinerary) {
     throw new ItineraryProposalReviewIntegrityError(
-      "A Proposta pronta não possui um Roteiro correspondente.",
+      "A Proposta revisável não possui um Roteiro correspondente.",
     );
   }
 
@@ -79,8 +79,9 @@ export default async function ItineraryProposalReviewPage({
           <p className="product-eyebrow">{trip.name} · revisão separada</p>
           <h1>Proposta de Roteiro</h1>
           <p>
-            Revise critérios, limitações e mudanças sugeridas antes de qualquer decisão. Esta página
-            não aplica alterações.
+            {proposal.status === "expired"
+              ? "Consulte critérios, limitações e mudanças registradas como referência histórica. Esta página não aplica alterações."
+              : "Revise critérios, limitações e mudanças sugeridas antes de qualquer decisão. Esta página não aplica alterações."}
           </p>
         </div>
         <span>Roteiro atual preservado</span>

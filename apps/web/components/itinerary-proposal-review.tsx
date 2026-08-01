@@ -6,16 +6,35 @@ function countLabel(count: number, singular: string, plural: string): string {
 }
 
 export function ItineraryProposalReview({ review }: { review: ReviewModel }) {
+  const isExpired = review.status === "expired";
+
   return (
     <div className={styles.review}>
-      <section className={styles.summary} aria-labelledby="proposal-review-summary-title">
+      <section
+        className={styles.summary}
+        data-status={review.status}
+        aria-labelledby="proposal-review-summary-title"
+      >
         <div>
-          <span className={styles.status}>Sugestão — ainda não aplicada</span>
-          <h2 id="proposal-review-summary-title">Revise antes de alterar seu Roteiro</h2>
-          <p>
-            Criamos uma proposta com base no contexto registrado da viagem. O Roteiro atual
-            permanece preservado e nenhuma mudança abaixo foi aplicada.
-          </p>
+          <span className={styles.status}>
+            {isExpired ? "Proposta expirada — somente referência" : "Sugestão — ainda não aplicada"}
+          </span>
+          <h2 id="proposal-review-summary-title">
+            {isExpired
+              ? "Consulte o histórico desta proposta"
+              : "Revise antes de alterar seu Roteiro"}
+          </h2>
+          {isExpired ? (
+            <p>
+              A validade terminou em {review.expiredAtLabel}. Esta proposta não pode mais ser
+              aplicada. O Roteiro atual permanece preservado.
+            </p>
+          ) : (
+            <p>
+              Criamos uma proposta com base no contexto registrado da viagem. O Roteiro atual
+              permanece preservado e nenhuma mudança abaixo foi aplicada.
+            </p>
+          )}
         </div>
         <dl aria-label="Resumo da proposta">
           <div>
@@ -55,6 +74,12 @@ export function ItineraryProposalReview({ review }: { review: ReviewModel }) {
             <dt>Validade registrada</dt>
             <dd>{review.validUntilLabel}</dd>
           </div>
+          {isExpired ? (
+            <div>
+              <dt>Expirada em</dt>
+              <dd>{review.expiredAtLabel}</dd>
+            </div>
+          ) : null}
         </dl>
       </section>
 
@@ -171,7 +196,9 @@ export function ItineraryProposalReview({ review }: { review: ReviewModel }) {
       </section>
 
       <p className={styles.preservation} role="note">
-        Esta revisão é somente leitura. O Roteiro confirmado não foi alterado.
+        {isExpired
+          ? "Esta proposta expirada é somente uma referência histórica. O Roteiro confirmado não foi alterado."
+          : "Esta revisão é somente leitura. O Roteiro confirmado não foi alterado."}
       </p>
     </div>
   );

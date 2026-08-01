@@ -1,17 +1,24 @@
 export {
   cancelItineraryProposalGeneration,
+  completeItineraryProposalGeneration,
   createItineraryProposalId,
+  expireItineraryProposalByTime,
   failItineraryProposalGeneration,
   itineraryProposalStatuses,
   ItineraryProposalTransitionError,
   ItineraryProposalValidationError,
+  proposedActivityOperationTypes,
   requestItineraryProposal,
   startItineraryProposalGeneration,
 } from "./itinerary-proposal";
 export type {
+  CompleteItineraryProposalGenerationInput,
   ItineraryProposal,
   ItineraryProposalId,
   ItineraryProposalStatus,
+  ProposedActivity,
+  ProposedActivityInput,
+  ProposedActivityOperationType,
   RequestItineraryProposalInput,
 } from "./itinerary-proposal";
 export { ItineraryProposalRepositoryError } from "./repository";
@@ -21,6 +28,7 @@ export type {
 } from "./repository";
 export {
   cancelAndPersistItineraryProposalGeneration,
+  completeAndPersistItineraryProposalGeneration,
   failAndPersistItineraryProposalGeneration,
   ItineraryProposalApplicationError,
   requestAndPersistItineraryProposal,
@@ -28,6 +36,7 @@ export {
 } from "./service";
 export type {
   CancelItineraryProposalGenerationCommand,
+  CompleteItineraryProposalGenerationCommand,
   FailItineraryProposalGenerationCommand,
   StartItineraryProposalGenerationCommand,
 } from "./service";

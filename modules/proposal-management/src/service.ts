@@ -1,10 +1,12 @@
 import {
   cancelItineraryProposalGeneration,
+  completeItineraryProposalGeneration,
   failItineraryProposalGeneration,
   requestItineraryProposal,
   startItineraryProposalGeneration,
   type ItineraryProposal,
   type ItineraryProposalId,
+  type CompleteItineraryProposalGenerationInput,
   type RequestItineraryProposalInput,
 } from "./itinerary-proposal";
 import type { ItineraryProposalRepository } from "./repository";
@@ -37,6 +39,12 @@ export type CancelItineraryProposalGenerationCommand = Readonly<{
   itineraryProposalId: ItineraryProposalId;
   cancelledAt: Date;
 }>;
+
+export type CompleteItineraryProposalGenerationCommand = CompleteItineraryProposalGenerationInput &
+  Readonly<{
+    tripId: string;
+    itineraryProposalId: ItineraryProposalId;
+  }>;
 
 async function loadItineraryProposal(
   repository: ItineraryProposalRepository,
@@ -84,6 +92,19 @@ export async function failAndPersistItineraryProposalGeneration(
   );
   const failed = failItineraryProposalGeneration(proposal, command.failureCode, command.failedAt);
   return repository.save(failed);
+}
+
+export async function completeAndPersistItineraryProposalGeneration(
+  repository: ItineraryProposalRepository,
+  command: CompleteItineraryProposalGenerationCommand,
+): Promise<ItineraryProposal> {
+  const proposal = await loadItineraryProposal(
+    repository,
+    command.tripId,
+    command.itineraryProposalId,
+  );
+  const ready = completeItineraryProposalGeneration(proposal, command);
+  return repository.save(ready);
 }
 
 export async function cancelAndPersistItineraryProposalGeneration(

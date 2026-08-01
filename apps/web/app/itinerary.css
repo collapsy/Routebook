@@ -29,6 +29,13 @@
   max-width: 46rem;
 }
 
+.itinerary-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
 .itinerary-summary {
   align-items: baseline;
   background: var(--surface);

@@ -44,7 +44,7 @@ Issue: [#146](https://github.com/collapsy/Routebook/issues/146)
 
 Branch: `codex/rb-inc-065-discard-proposal-review`.
 
-Pull request: pendente.
+Pull request: [#147](https://github.com/collapsy/Routebook/pull/147).
 
 ## 2. Problema
 
@@ -118,16 +118,16 @@ docs/registry.md
 
 ## 10. Critérios de aceite
 
-- [ ] Proposal `ready` exibe ação “Descartar proposta”;
-- [ ] Proposal `expired` não exibe ação de descarte;
-- [ ] sucesso persiste `rejected` e registra `rejectedAt`;
-- [ ] sucesso retorna ao Roteiro com feedback de preservação;
-- [ ] Itinerary e Activities confirmadas permanecem inalterados;
-- [ ] Proposed Activity não é aplicada;
-- [ ] Proposal descartada deixa de oferecer link de revisão ativa;
-- [ ] ausência, input inválido e estado atualizado recebem tratamento seguro;
-- [ ] semântica, teclado e layout responsivo permanecem adequados;
-- [ ] documentação, lint, tipagem, testes, E2E e build permanecem verdes.
+- [x] Proposal `ready` exibe ação “Descartar proposta”;
+- [x] Proposal `expired` não exibe ação de descarte;
+- [x] sucesso persiste `rejected` e registra `rejectedAt`;
+- [x] sucesso retorna ao Roteiro com feedback de preservação;
+- [x] Itinerary e Activities confirmadas permanecem inalterados;
+- [x] Proposed Activity não é aplicada;
+- [x] Proposal descartada deixa de oferecer link de revisão ativa;
+- [x] ausência, input inválido e estado atualizado recebem tratamento seguro;
+- [x] semântica, teclado e layout responsivo permanecem adequados;
+- [x] documentação, lint, tipagem, testes, E2E e build permanecem verdes.
 
 ## 11. Testes obrigatórios
 
@@ -163,9 +163,13 @@ Evidências locais:
 
 - 171 documentos registrados e validados, com quatro avisos preexistentes;
 - lint e typecheck do app web aprovados;
-- 59 testes de componente e unidade do app web aprovados em 19 arquivos;
+- 61 testes de componente e unidade do app web aprovados em 20 arquivos;
 - lint, typecheck e build integrais aprovados;
 - Prettier dos arquivos alterados e `git diff --check` aprovados;
 - PostgreSQL e Playwright não executados localmente porque `DATABASE_URL` não está configurada e o Docker está indisponível.
 
-Evidências de CI pendentes.
+Evidências de CI:
+
+- run de documentação `30720324648` aprovado;
+- run de engenharia `30720324642` aprovado com formatação, documentação, lint, typecheck, migrations PostgreSQL, 61 testes web, smoke do servidor, build e 56 E2E responsivos;
+- os dois primeiros ciclos detectaram seletores ambíguos e uma manipulação de formulário incompatível com a serialização das Server Actions; a cobertura foi corrigida e reposicionada na fronteira unitária determinística antes do ciclo verde final.

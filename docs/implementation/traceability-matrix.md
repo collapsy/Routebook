@@ -57,6 +57,7 @@ ai_context:
 | RB-INC-045 | RB-FR-111, RB-BR-PCF-002–006, RB-SCR-010, RB-INT-073 | #102 | `codex/rb-inc-045-ignore-planning-risk`, PR #103; integração PR #105 | `IgnorePlanningRisk`, Decision explícita, estado `ignored` e confirmação acessível | runs 30679499852 e 30679499853, SHA 848dd96 | Integrado |
 | RB-INC-046 | RB-BR-PCF-003, RB-BR-PCF-006, RB-SCR-010, RB-INT-073 | #104 | `codex/rb-inc-046-ignored-risk-history`, PR #105 | histórico auditável de riscos ignorados e Decisions correlacionadas | runs 30679499852 e 30679499853, SHA 848dd96 | Integrado |
 | RB-INC-047 | RB-QA-001, RB-CICD-001, RB-ADR-010 | #106 | `codex/rb-inc-047-deterministic-e2e`, PR #107 | contratos E2E observáveis sem ordem interna ou evento de navegação | run diagnóstico 30680751411; runs 30681587659 e 30681587692 (attempts 1 e 2), SHA 371a000 | Verde em Draft |
+| RB-INC-048 | RB-FR-087–096, RB-BR-PRP-002–010, RB-DOM-001–004, RB-ARC-002 | #108 | `codex/rb-inc-048-itinerary-proposal-request`, PR pendente | núcleo de solicitação e geração inicial de Itinerary Proposal | evidências pendentes | Em execução |
 
 ## Evidências do RB-INC-003
 

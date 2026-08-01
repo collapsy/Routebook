@@ -10,6 +10,7 @@ import {
   ItineraryProposalTransitionError,
   ItineraryProposalValidationError,
   proposedActivityOperationTypes,
+  rejectItineraryProposal,
   requestItineraryProposal,
   startItineraryProposalGeneration,
 } from "./itinerary-proposal";
@@ -407,6 +408,59 @@ describe("Itinerary Proposal", () => {
   it("rejeita expiração temporal fora do estado ready", () => {
     expect(() =>
       expireItineraryProposalByTime(requestProposal(), new Date("2026-08-02T12:02:00.000Z")),
+    ).toThrowError(ItineraryProposalTransitionError);
+  });
+
+  it("rejeita uma Proposal ready sem alterar o conteúdo revisável", () => {
+    const ready = completeItineraryProposalGeneration(generatingProposal(), readyContent());
+    const rejectedAt = new Date(ready.updatedAt.getTime());
+    const rejected = rejectItineraryProposal(ready, rejectedAt);
+
+    expect(rejected).toMatchObject({
+      status: "rejected",
+      rejectedAt,
+      updatedAt: rejectedAt,
+      baseTripContextVersion: ready.baseTripContextVersion,
+      baseItineraryVersion: ready.baseItineraryVersion,
+      contextSnapshotId: ready.contextSnapshotId,
+      generationMethod: ready.generationMethod,
+      generationVersion: ready.generationVersion,
+      criteria: ready.criteria,
+      justifications: ready.justifications,
+      limitations: ready.limitations,
+      planningConflictIds: ready.planningConflictIds,
+      proposedActivities: ready.proposedActivities,
+    });
+    expect(rejected.rejectedAt).not.toBe(rejectedAt);
+    expect(rejected.updatedAt).not.toBe(rejected.rejectedAt);
+    expect(ready.status).toBe("ready");
+    expect(ready).not.toHaveProperty("rejectedAt");
+    expect(Object.isFrozen(rejected)).toBe(true);
+
+    rejectedAt.setUTCFullYear(2030);
+    expect(rejected.rejectedAt?.toISOString()).toBe("2026-07-31T12:02:00.000Z");
+  });
+
+  it("rejeita a rejeição com instante anterior ou inválido", () => {
+    const ready = completeItineraryProposalGeneration(generatingProposal(), readyContent());
+
+    expect(() => rejectItineraryProposal(ready, new Date("2026-07-31T12:01:59.999Z"))).toThrowError(
+      ItineraryProposalValidationError,
+    );
+    expect(() => rejectItineraryProposal(ready, new Date("invalid"))).toThrowError(
+      ItineraryProposalValidationError,
+    );
+  });
+
+  it("rejeita a transição para rejected fora do estado ready", () => {
+    expect(() =>
+      rejectItineraryProposal(requestProposal(), new Date("2026-07-31T12:02:00.000Z")),
+    ).toThrowError(ItineraryProposalTransitionError);
+
+    const ready = completeItineraryProposalGeneration(generatingProposal(), readyContent());
+    const rejected = rejectItineraryProposal(ready, new Date("2026-07-31T12:03:00.000Z"));
+    expect(() =>
+      rejectItineraryProposal(rejected, new Date("2026-07-31T12:04:00.000Z")),
     ).toThrowError(ItineraryProposalTransitionError);
   });
 

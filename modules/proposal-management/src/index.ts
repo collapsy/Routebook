@@ -8,6 +8,7 @@ export {
   ItineraryProposalTransitionError,
   ItineraryProposalValidationError,
   proposedActivityOperationTypes,
+  rejectItineraryProposal,
   requestItineraryProposal,
   startItineraryProposalGeneration,
 } from "./itinerary-proposal";

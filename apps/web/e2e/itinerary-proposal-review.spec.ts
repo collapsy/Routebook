@@ -181,6 +181,7 @@ test("trata uma Proposal atualizada concorrentemente sem falso sucesso", async (
     `Concorrência de proposta ${testInfo.project.name} ${Date.now()}`,
   );
   await page.goto(`/viagens/${tripId}/roteiro/proposta`);
+  await page.waitForLoadState("networkidle");
 
   const repository = new DrizzleItineraryProposalRepository();
   const ready = (await repository.listByTripId(tripId)).find(({ status }) => status === "ready")!;

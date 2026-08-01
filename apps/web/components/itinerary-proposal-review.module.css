@@ -1,0 +1,285 @@
+.review {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.summary,
+.context,
+.limitations,
+.justifications {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-large);
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.summary {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.summary h2,
+.context h2,
+.limitations h2,
+.justifications h2,
+.sectionHeading h2 {
+  font-size: clamp(1.45rem, 4vw, 2rem);
+  letter-spacing: -0.035em;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.summary p,
+.context p,
+.limitations p,
+.justifications p,
+.emptyChanges p,
+.staleNotice p,
+.reason p {
+  color: var(--foreground-muted);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.status {
+  background: color-mix(in oklab, var(--primary) 12%, var(--surface));
+  border: 1px solid color-mix(in oklab, var(--primary) 35%, var(--border));
+  border-radius: 999px;
+  color: var(--primary-strong);
+  display: inline-flex;
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 0.45rem 0.75rem;
+}
+
+.summary dl,
+.context dl,
+.activityFacts {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.summary dl {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.summary dl div,
+.context dl div,
+.activityFacts div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.summary dl div {
+  background: var(--surface-soft);
+  border-radius: var(--radius-medium);
+  padding: 1rem;
+}
+
+.summary dt,
+.context dt,
+.activityFacts dt {
+  color: var(--foreground-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.summary dd {
+  color: var(--primary-strong);
+  font-size: 1.8rem;
+  font-weight: 850;
+  margin: 0;
+}
+
+.context dd,
+.activityFacts dd {
+  margin: 0;
+}
+
+.staleNotice {
+  background: color-mix(in oklab, var(--accent) 10%, var(--surface));
+  border: 1px solid color-mix(in oklab, var(--accent) 36%, var(--border));
+  border-radius: var(--radius-medium);
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.25rem;
+}
+
+.context,
+.limitations,
+.justifications {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.context ul,
+.limitations ul,
+.justifications ol {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding-left: 1.35rem;
+}
+
+.context li,
+.limitations li,
+.justifications li {
+  line-height: 1.55;
+}
+
+.eyebrow {
+  color: var(--primary-strong) !important;
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sectionHeading {
+  align-items: end;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sectionHeading > p {
+  color: var(--foreground-muted);
+  font-weight: 750;
+}
+
+.days,
+.days section > ol {
+  display: grid;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.day {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-large);
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.day > section > header {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.day h3 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.day > section > header span {
+  color: var(--foreground-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.day article {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.15rem;
+}
+
+.activityHeading {
+  align-items: center;
+  display: flex;
+  gap: 0.65rem;
+}
+
+.activityHeading span {
+  background: color-mix(in oklab, var(--primary) 12%, var(--surface));
+  border-radius: 999px;
+  color: var(--primary-strong);
+  font-size: 0.75rem;
+  font-weight: 850;
+  padding: 0.3rem 0.6rem;
+}
+
+.activityHeading small {
+  color: var(--foreground-muted);
+  font-weight: 750;
+}
+
+.day h4 {
+  font-size: 1.15rem;
+  margin: 0;
+}
+
+.day article > p {
+  color: var(--foreground-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.activityFacts {
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+}
+
+.reason {
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 0.25rem;
+  padding-top: 0.85rem;
+}
+
+.emptyChanges {
+  background: var(--surface-soft);
+  border: 1px dashed color-mix(in oklab, var(--foreground-muted) 55%, var(--border));
+  border-radius: var(--radius-large);
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.5rem;
+}
+
+.preservation {
+  background: var(--foreground);
+  border-radius: var(--radius-medium);
+  color: var(--background);
+  font-weight: 750;
+  margin: 0;
+  padding: 1rem 1.25rem;
+  text-align: center;
+}
+
+@media (min-width: 760px) {
+  .summary {
+    align-items: center;
+    grid-template-columns: minmax(0, 1.5fr) minmax(15rem, 0.5fr);
+  }
+
+  .context,
+  .limitations,
+  .justifications {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 1fr);
+  }
+
+  .days {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .summary dl {
+    grid-template-columns: 1fr;
+  }
+
+  .sectionHeading,
+  .day > section > header {
+    align-items: start;
+    flex-direction: column;
+  }
+}

@@ -38,6 +38,15 @@ type ItineraryPeriod = {
   activities: Activity[];
 };
 
+const proposalErrorMessages: Readonly<Record<string, string>> = {
+  "referencia-invalida":
+    "A referência da proposta é inválida. O Roteiro atual permanece preservado.",
+  "proposta-nao-encontrada":
+    "A proposta não está mais disponível nesta Viagem. O Roteiro atual permanece preservado.",
+  "estado-atualizado":
+    "A proposta foi atualizada e não pode mais ser descartada. O Roteiro atual permanece preservado.",
+};
+
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("pt-BR", {
     timeZone: "UTC",
@@ -132,6 +141,8 @@ export default async function ItineraryPage({
     atividadeRemovida?: string;
     atividadeReordenada?: string;
     periodoLivreCriado?: string;
+    propostaDescartada?: string;
+    erroProposta?: string;
     erro?: string;
   }>;
 }) {
@@ -151,6 +162,8 @@ export default async function ItineraryPage({
     atividadeRemovida,
     atividadeReordenada,
     periodoLivreCriado,
+    propostaDescartada,
+    erroProposta,
     erro,
   } = await searchParams;
   const activityCount = itinerary.days.reduce((total, day) => total + day.activities.length, 0);
@@ -190,6 +203,16 @@ export default async function ItineraryPage({
       {periodoLivreCriado === "1" ? (
         <p className="success-banner" role="status">
           Período livre adicionado ao roteiro.
+        </p>
+      ) : null}
+      {propostaDescartada === "1" ? (
+        <p className="success-banner" role="status">
+          Proposta descartada. Seu Roteiro atual não foi alterado.
+        </p>
+      ) : null}
+      {erroProposta && proposalErrorMessages[erroProposta] ? (
+        <p className="form-error itinerary-feedback" role="alert">
+          {proposalErrorMessages[erroProposta]}
         </p>
       ) : null}
       {erro ? (

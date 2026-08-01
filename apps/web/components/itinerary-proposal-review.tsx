@@ -5,7 +5,13 @@ function countLabel(count: number, singular: string, plural: string): string {
   return `${count} ${count === 1 ? singular : plural}`;
 }
 
-export function ItineraryProposalReview({ review }: { review: ReviewModel }) {
+export function ItineraryProposalReview({
+  discardAction,
+  review,
+}: {
+  discardAction: (formData: FormData) => void | Promise<void>;
+  review: ReviewModel;
+}) {
   const isExpired = review.status === "expired";
 
   return (
@@ -200,6 +206,22 @@ export function ItineraryProposalReview({ review }: { review: ReviewModel }) {
           ? "Esta proposta expirada é somente uma referência histórica. O Roteiro confirmado não foi alterado."
           : "Esta revisão é somente leitura. O Roteiro confirmado não foi alterado."}
       </p>
+
+      {!isExpired ? (
+        <section className={styles.decisionActions} aria-labelledby="proposal-decision-title">
+          <div>
+            <p className={styles.eyebrow}>Decisão sobre esta sugestão</p>
+            <h2 id="proposal-decision-title">Não quer usar esta proposta?</h2>
+            <p>Ao descartar, seu Roteiro atual não será alterado.</p>
+          </div>
+          <form action={discardAction}>
+            <input name="itineraryProposalId" type="hidden" value={review.proposalId} />
+            <button className={styles.discardButton} type="submit">
+              Descartar proposta
+            </button>
+          </form>
+        </section>
+      ) : null}
     </div>
   );
 }

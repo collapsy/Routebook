@@ -15,6 +15,7 @@ import {
   findLatestReviewableItineraryProposal,
   ItineraryProposalReviewIntegrityError,
 } from "../../../../../lib/itinerary-proposal-experience";
+import { discardItineraryProposalAction } from "./actions";
 import styles from "./proposal-page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -67,6 +68,7 @@ export default async function ItineraryProposalReviewPage({
   }
 
   const review = buildItineraryProposalReview({ itinerary, proposal });
+  const discardAction = discardItineraryProposalAction.bind(null, trip.id);
 
   return (
     <section className={`app-page ${styles.page}`}>
@@ -87,7 +89,7 @@ export default async function ItineraryProposalReviewPage({
         <span>Roteiro atual preservado</span>
       </header>
 
-      <ItineraryProposalReview review={review} />
+      <ItineraryProposalReview discardAction={discardAction} review={review} />
     </section>
   );
 }

@@ -86,13 +86,13 @@ docs/registry.md
 
 ## 8. Critérios de aceite
 
-- [ ] nenhum teste depende da ordem dos IDs de Activities relacionadas;
-- [ ] os dois títulos continuam explicitamente validados no histórico;
-- [ ] a adição de Lugar salvo valida a URL final observável;
-- [ ] configuração, projetos, retries e timeouts do Playwright permanecem inalterados;
-- [ ] nenhuma jornada ou assertion de requisito é removida;
-- [ ] duas execuções consecutivas do workflow ficam verdes sem flaky annotation;
-- [ ] matriz e registro documental permanecem válidos.
+- [x] nenhum teste depende da ordem dos IDs de Activities relacionadas;
+- [x] os dois títulos continuam explicitamente validados no histórico;
+- [x] a adição de Lugar salvo valida a URL final observável;
+- [x] configuração, projetos, retries e timeouts do Playwright permanecem inalterados;
+- [x] nenhuma jornada ou assertion de requisito é removida;
+- [x] duas execuções consecutivas do workflow ficam verdes sem flaky annotation;
+- [x] matriz e registro documental permanecem válidos.
 
 ## 9. Testes obrigatórios
 
@@ -118,4 +118,8 @@ Reverter somente as assertions e a documentação. Não existe migration, escrit
 
 ## 12. Evidências de conclusão
 
-O incremento somente será considerado pronto após duas execuções consecutivas do SHA final com Documentation Validation e Engineering Validation verdes e sem annotation de flaky.
+SHA validado: `371a0002179efc1821f65aa46062e56b0247b5e6`.
+
+- Documentation Validation: run `30681587659`, concluído com sucesso;
+- Engineering Validation: run `30681587692`, attempts 1 e 2 concluídos com sucesso;
+- Playwright em cada attempt: 44 testes aprovados em desktop e mobile, sem retry e sem annotation de flaky.

@@ -76,6 +76,7 @@ export type ItineraryProposal = Readonly<{
   planningConflictIds?: readonly string[];
   validUntil?: Date;
   generatedAt?: Date;
+  rejectedAt?: Date;
   expiredAt?: Date;
   failedAt?: Date;
   failureCode?: string;
@@ -390,6 +391,21 @@ export function expireItineraryProposalByTime(
     status: "expired",
     expiredAt: new Date(normalizedExpiredAt.getTime()),
     updatedAt: new Date(normalizedExpiredAt.getTime()),
+  });
+}
+
+export function rejectItineraryProposal(
+  proposal: ItineraryProposal,
+  rejectedAt: Date,
+): ItineraryProposal {
+  assertStatus(proposal, ["ready"], "rejected");
+  const normalizedRejectedAt = transitionDate(proposal, rejectedAt);
+
+  return Object.freeze({
+    ...proposal,
+    status: "rejected",
+    rejectedAt: new Date(normalizedRejectedAt.getTime()),
+    updatedAt: new Date(normalizedRejectedAt.getTime()),
   });
 }
 

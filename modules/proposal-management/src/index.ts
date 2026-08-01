@@ -14,3 +14,8 @@ export type {
   ItineraryProposalStatus,
   RequestItineraryProposalInput,
 } from "./itinerary-proposal";
+export { ItineraryProposalRepositoryError } from "./repository";
+export type {
+  ItineraryProposalRepository,
+  ItineraryProposalRepositoryErrorCode,
+} from "./repository";

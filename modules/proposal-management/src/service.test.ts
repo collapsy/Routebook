@@ -4,6 +4,7 @@ import {
   cancelItineraryProposalGeneration,
   createItineraryProposalId,
   ItineraryProposalTransitionError,
+  ItineraryProposalValidationError,
   requestItineraryProposal,
   startItineraryProposalGeneration,
   type ItineraryProposal,
@@ -12,6 +13,7 @@ import {
 import type { ItineraryProposalRepository } from "./repository";
 import {
   cancelAndPersistItineraryProposalGeneration,
+  completeAndPersistItineraryProposalGeneration,
   failAndPersistItineraryProposalGeneration,
   ItineraryProposalApplicationError,
   requestAndPersistItineraryProposal,
@@ -67,6 +69,27 @@ function requestedProposal(id = "proposal-1"): ItineraryProposal {
   });
 }
 
+function completionContent() {
+  return {
+    generationMethod: " deterministic ",
+    generationVersion: " proposal-policy-v1 ",
+    proposedActivities: [
+      {
+        proposedActivityId: " proposed-activity-1 ",
+        title: " Museu de Arte ",
+        proposedOrder: 0,
+        operationType: "add" as const,
+      },
+    ],
+    criteria: [" ritmo do grupo "],
+    justifications: [" preserva o período protegido "],
+    limitations: [],
+    planningConflictIds: [" conflict-1 "],
+    generatedAt: new Date("2026-08-01T12:02:00.000Z"),
+    validUntil: new Date("2026-08-02T12:02:00.000Z"),
+  };
+}
+
 describe("comandos do ciclo inicial de Itinerary Proposal", () => {
   it("cria, normaliza e persiste uma solicitação", async () => {
     const repository = new MemoryItineraryProposalRepository();
@@ -112,6 +135,40 @@ describe("comandos do ciclo inicial de Itinerary Proposal", () => {
     expect(failed).toMatchObject({ status: "failed", failureCode: "provider-timeout" });
     expect(repository.saveCalls).toEqual([generating, failed]);
     expect(failed).toBe(repository.saveCalls[1]);
+  });
+
+  it("conclui e persiste uma Proposal ready com conteúdo e proveniência normalizados", async () => {
+    const repository = new MemoryItineraryProposalRepository();
+    const requested = requestedProposal();
+    const generating = startItineraryProposalGeneration(
+      requested,
+      new Date("2026-08-01T12:01:00.000Z"),
+    );
+    repository.seed(generating);
+
+    const ready = await completeAndPersistItineraryProposalGeneration(repository, {
+      tripId: requested.tripId,
+      itineraryProposalId: requested.id,
+      ...completionContent(),
+    });
+
+    expect(ready).toMatchObject({
+      status: "ready",
+      generationMethod: "deterministic",
+      generationVersion: "proposal-policy-v1",
+      criteria: ["ritmo do grupo"],
+      justifications: ["preserva o período protegido"],
+      planningConflictIds: ["conflict-1"],
+      proposedActivities: [
+        {
+          proposedActivityId: "proposed-activity-1",
+          title: "Museu de Arte",
+          operationType: "add",
+        },
+      ],
+    });
+    expect(repository.saveCalls).toEqual([ready]);
+    expect(await repository.findById(requested.tripId, requested.id)).toBe(ready);
   });
 
   it("cancela uma solicitação antes do início da geração", async () => {
@@ -173,6 +230,15 @@ describe("comandos do ciclo inicial de Itinerary Proposal", () => {
         }),
     ],
     [
+      "complete",
+      (repository: ItineraryProposalRepository, itineraryProposalId: ItineraryProposalId) =>
+        completeAndPersistItineraryProposalGeneration(repository, {
+          tripId: "trip-1",
+          itineraryProposalId,
+          ...completionContent(),
+        }),
+    ],
+    [
       "cancel",
       (repository: ItineraryProposalRepository, itineraryProposalId: ItineraryProposalId) =>
         cancelAndPersistItineraryProposalGeneration(repository, {
@@ -210,5 +276,38 @@ describe("comandos do ciclo inicial de Itinerary Proposal", () => {
     ).rejects.toBeInstanceOf(ItineraryProposalTransitionError);
     expect(repository.saveCalls).toEqual([]);
     expect(await repository.findById(requested.tripId, requested.id)).toEqual(cancelled);
+  });
+
+  it("não salva quando a conclusão ocorre fora de generating", async () => {
+    const repository = new MemoryItineraryProposalRepository();
+    const requested = requestedProposal();
+    repository.seed(requested);
+
+    await expect(
+      completeAndPersistItineraryProposalGeneration(repository, {
+        tripId: requested.tripId,
+        itineraryProposalId: requested.id,
+        ...completionContent(),
+      }),
+    ).rejects.toBeInstanceOf(ItineraryProposalTransitionError);
+    expect(repository.saveCalls).toEqual([]);
+  });
+
+  it("não salva quando o conteúdo de conclusão é inválido", async () => {
+    const repository = new MemoryItineraryProposalRepository();
+    const requested = requestedProposal();
+    repository.seed(
+      startItineraryProposalGeneration(requested, new Date("2026-08-01T12:01:00.000Z")),
+    );
+
+    await expect(
+      completeAndPersistItineraryProposalGeneration(repository, {
+        tripId: requested.tripId,
+        itineraryProposalId: requested.id,
+        ...completionContent(),
+        generationMethod: " ",
+      }),
+    ).rejects.toBeInstanceOf(ItineraryProposalValidationError);
+    expect(repository.saveCalls).toEqual([]);
   });
 });

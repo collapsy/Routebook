@@ -1,6 +1,7 @@
 import {
   cancelItineraryProposalGeneration,
   completeItineraryProposalGeneration,
+  expireItineraryProposalByTime,
   failItineraryProposalGeneration,
   requestItineraryProposal,
   startItineraryProposalGeneration,
@@ -45,6 +46,12 @@ export type CompleteItineraryProposalGenerationCommand = CompleteItineraryPropos
     tripId: string;
     itineraryProposalId: ItineraryProposalId;
   }>;
+
+export type ExpireItineraryProposalByTimeCommand = Readonly<{
+  tripId: string;
+  itineraryProposalId: ItineraryProposalId;
+  expiredAt: Date;
+}>;
 
 async function loadItineraryProposal(
   repository: ItineraryProposalRepository,
@@ -105,6 +112,19 @@ export async function completeAndPersistItineraryProposalGeneration(
   );
   const ready = completeItineraryProposalGeneration(proposal, command);
   return repository.save(ready);
+}
+
+export async function expireAndPersistItineraryProposalByTime(
+  repository: ItineraryProposalRepository,
+  command: ExpireItineraryProposalByTimeCommand,
+): Promise<ItineraryProposal> {
+  const proposal = await loadItineraryProposal(
+    repository,
+    command.tripId,
+    command.itineraryProposalId,
+  );
+  const expired = expireItineraryProposalByTime(proposal, command.expiredAt);
+  return repository.save(expired);
 }
 
 export async function cancelAndPersistItineraryProposalGeneration(

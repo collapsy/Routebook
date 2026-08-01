@@ -48,6 +48,8 @@ Branch: `codex/rb-inc-055-ready-persistence`
 
 Base empilhada: `codex/rb-inc-054-ready-data-contract`, PR #125.
 
+Pull request: [#127](https://github.com/collapsy/Routebook/pull/127)
+
 ## 2. Problema
 
 O Domínio conclui Proposal em `ready`, mas a tabela atual aceita apenas o ciclo inicial e não possui conteúdo, proveniência, validade ou Proposed Activities. Salvar a Proposal pronta falha na constraint e não existe round trip fiel.

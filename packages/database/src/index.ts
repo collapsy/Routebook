@@ -1,3 +1,13 @@
+export {
+  authAccounts,
+  authAccountsRelations,
+  authSessions,
+  authSessionsRelations,
+  authUsers,
+  authUsersRelations,
+  authVerifications,
+  betterAuthSchema,
+} from "./auth-schema";
 export { closeDatabase, getDatabase } from "./client";
 export { decisions } from "./decision-schema";
 export { planningConflicts } from "./planning-conflict-schema";

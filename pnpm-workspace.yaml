@@ -2,6 +2,9 @@ packages:
   - apps/*
   - modules/*
   - packages/*
+overrides:
+  # Better Auth 1.6.14 adapters require the Kysely 0.28 API surface.
+  kysely: 0.28.14
 allowBuilds:
   esbuild: true
   sharp: true

@@ -105,7 +105,7 @@ function executor(): ItineraryProposalDatabaseExecutor {
 
 function repository(proposal: ItineraryProposal | null = readyProposal()) {
   const findById = vi.fn(async () => proposal);
-  const save = vi.fn(async () => undefined);
+  const save = vi.fn(async (savedProposal: ItineraryProposal) => savedProposal);
   const value: ItineraryProposalTransactionRepository = { findById, save };
   return { value, findById, save };
 }

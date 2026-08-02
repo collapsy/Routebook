@@ -73,9 +73,16 @@ describe("Itinerary Proposal acceptance Decision", () => {
     expect(decision).not.toHaveProperty("recommendationId");
     expect(Object.isFrozen(decision)).toBe(true);
     expect(Object.isFrozen(decision.chosenOption)).toBe(true);
-    expect(Object.isFrozen(decision.chosenOption.proposedActivityIds)).toBe(true);
     expect(Object.isFrozen(decision.contextSnapshot)).toBe(true);
     expect(Object.isFrozen(decision.effect)).toBe(true);
+
+    if (decision.chosenOption.type !== "accept-itinerary-proposal") {
+      throw new Error("A Decision deveria conter a opção de aceite da Proposal.");
+    }
+    if (decision.effect.type !== "itinerary-proposal-applied") {
+      throw new Error("A Decision deveria conter o efeito de aplicação da Proposal.");
+    }
+    expect(Object.isFrozen(decision.chosenOption.proposedActivityIds)).toBe(true);
     expect(Object.isFrozen(decision.effect.appliedProposedActivityIds)).toBe(true);
   });
 

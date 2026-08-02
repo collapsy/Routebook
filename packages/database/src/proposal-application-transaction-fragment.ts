@@ -164,7 +164,10 @@ function withApplication<TApplication extends ProposalApplication>(
 
 function classifyReplay(
   record: ProposalApplicationPersistenceRecord,
-): Exclude<ReserveProposalApplicationResult, ReservedProposalApplication | ConflictingProposalApplication> {
+): Exclude<
+  ReserveProposalApplicationResult,
+  ReservedProposalApplication | ConflictingProposalApplication
+> {
   switch (record.application.status) {
     case "started":
       return Object.freeze({
@@ -188,8 +191,7 @@ export function createProposalApplicationTransactionFragment<
   TExecutor extends ProposalApplicationSqlExecutor,
 >(
   executor: TExecutor,
-  repositoryFactory: ProposalApplicationTransactionRepositoryFactory<TExecutor> =
-    createPostgresProposalApplicationRepository,
+  repositoryFactory: ProposalApplicationTransactionRepositoryFactory<TExecutor> = createPostgresProposalApplicationRepository,
 ): ProposalApplicationTransactionFragment {
   if (!executor || typeof executor.execute !== "function") {
     throw new TypeError("Informe um executor SQL transacional válido.");

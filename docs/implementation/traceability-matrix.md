@@ -93,7 +93,7 @@ ai_context:
 | RB-INC-082 | RB-DATA-002, RB-ADR-006, RB-ADR-027 e RB-INC-080–081 | #187 | `feature/rb-inc-082-persist-itinerary-proposal-decision`, PR #188 | check constraint e migration para persistir a Decision de aceite com round trip e rollback | PR #188; validação em andamento | Em validação |
 
 | RB-INC-084 | RB-ADR-027, RB-ARC-003–004, RB-DATA-002 e RB-INC-072–075, RB-INC-079, RB-INC-083 | #191 | `feature/rb-inc-084-apply-itinerary-proposal-transaction`, PR #194 | composição PostgreSQL dos quatro fragments em uma única transação física | runs 30766253051 e 30766253063; migration 0019, suíte integral, smoke, build e E2E responsivo verdes | Pronto para integração |
-| RB-INC-085 | RB-ARC-002–003, RB-DATA-002, RB-ADR-027 e RB-INC-072, RB-INC-084 | #195 | `feature/rb-inc-085-postgres-accept-itinerary-proposal-service`, PR #196 | composition root concreta, normalização antecipada e mapeamentos allowlisted de domínio e PostgreSQL | validações finais em execução | Em validação |
+| RB-INC-085 | RB-ARC-002–003, RB-DATA-002, RB-ADR-027 e RB-INC-072, RB-INC-084 | #195 | `feature/rb-inc-085-postgres-accept-itinerary-proposal-service`, PR #196 | composition root concreta, normalização antecipada e mapeamentos allowlisted de domínio e PostgreSQL | runs 30767412654 e 30767412648; suíte integral, PostgreSQL real, smoke, build e E2E responsivo verdes | Pronto para integração |
 
 ## Evidências do RB-INC-003
 

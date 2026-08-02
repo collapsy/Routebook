@@ -13,7 +13,11 @@ export {
   travelerProfiles,
   trips,
 } from "./schema";
-export { DrizzleDecisionRepository } from "./decision-repository";
+export {
+  createPostgresDecisionRepository,
+  DrizzleDecisionRepository,
+  type DecisionDatabaseExecutor,
+} from "./decision-repository";
 export {
   createPostgresItineraryRepository,
   DrizzleItineraryRepository,

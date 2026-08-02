@@ -145,7 +145,7 @@ A migration `0022_create_personal_account_ownerships.sql`:
 - [x] provisioning idempotente implementado;
 - [x] serialização concorrente implementada;
 - [x] rollback integral coberto por teste;
-- [ ] registry e rastreabilidade atualizados;
+- [x] registry e rastreabilidade atualizados;
 - [ ] validações finais do CI aprovadas.
 
 ## 11. Erros públicos
@@ -172,4 +172,4 @@ Remover a composition root, os testes, o campo opcional `ownerUserId`, o schema 
 
 ## 14. Evidências
 
-As evidências finais serão registradas após os workflows da PR #202.
+O domínio, a composition root, a migration, o Context Pack, o registry e a rastreabilidade estão consolidados. O HEAD atual executará os validadores padrão antes do registro das evidências finais.

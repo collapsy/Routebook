@@ -55,10 +55,11 @@ Até este incremento, o repositório possuía identidades de domínio em TripPar
 ## 3. Resultado verificável
 
 - Better Auth fica fixado na versão `1.6.14`;
+- Kysely fica fixado na linha compatível `0.28.14`, evitando a resolução transitiva incompatível da linha `0.29.x` no build Turbopack;
 - `auth_users`, `auth_sessions`, `auth_accounts` e `auth_verifications` são tabelas explícitas do schema Drizzle;
 - migration `0020_create_better_auth_tables.sql` cria os contratos físicos;
 - a auth instance usa o mesmo PostgreSQL e Drizzle do RouteBook;
-- IDs de autenticação são UUIDs;
+- IDs de autenticação são UUIDs com default no schema e no banco;
 - email e senha são habilitados como mecanismo inicial;
 - `/api/auth/[...all]` expõe os handlers oficiais GET e POST;
 - `getRouteBookSession` valida cookies por `auth.api.getSession` no servidor;
@@ -108,7 +109,7 @@ Mantém tokens temporários necessários aos fluxos de verificação e recupera�
 
 ## 7. Escopo
 
-- dependência Better Auth fixada;
+- dependências Better Auth e Kysely fixadas em versões compatíveis;
 - schema e migration;
 - auth instance;
 - adapter Drizzle;
@@ -135,6 +136,7 @@ Mantém tokens temporários necessários aos fluxos de verificação e recupera�
 ## 9. Critérios de aceite
 
 - [x] Better Auth fixado em versão exata;
+- [x] dependência transitiva de runtime compatível fixada;
 - [x] schema Drizzle explícito implementado;
 - [x] migration sequencial criada e registrada;
 - [x] auth instance PostgreSQL implementada;
@@ -167,6 +169,7 @@ Mantém tokens temporários necessários aos fluxos de verificação e recupera�
 | --- | --- | --- |
 | segredo de desenvolvimento usado em produção | Crítico | fail-fast no runtime de produção |
 | schema divergir do adapter | Alto | teste PostgreSQL real pelo Better Auth |
+| dependência transitiva incompatível quebrar o bundle | Alto | versões exatas de Better Auth, Drizzle e Kysely no workspace |
 | cookie bruto ser tratado como identidade confiável | Crítico | resolução exclusiva por `auth.api.getSession` |
 | autenticação ser confundida com autorização | Alto | RB-ADR-008 e fora de escopo explícito |
 | atualização não controlada da biblioteca | Alto | versão exata no manifest e lockfile |

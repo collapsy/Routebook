@@ -29,21 +29,13 @@ jobs:
       - name: Patch wrapped error assertion
         run: |
           python - <<'PY'
+          import re
           from pathlib import Path
 
           path = Path("packages/database/src/authenticated-trip-service-postgres.test.ts")
           content = path.read_text(encoding="utf-8")
-          anchor = '''function tripInput(name: string) {
-            return {
-              name,
-              startDate: "2026-08-22",
-              endDate: "2026-08-29",
-              accommodationName: "Condomínio Solar Água",
-              accommodationAddress: "Pipa, Tibau do Sul - RN",
-            };
-          }
-          '''
-          helper = anchor + '''
+
+          helper = '''
           function errorChainContains(error: unknown, expected: string): boolean {
             let current: unknown = error;
             const visited = new Set<unknown>();
@@ -58,21 +50,15 @@ jobs:
           }
           '''
           if "function errorChainContains" not in content:
-              if anchor not in content:
-                  raise SystemExit("tripInput anchor not found")
-              content = content.replace(anchor, helper, 1)
+              marker = "\n\nbeforeAll(async () => {"
+              if marker not in content:
+                  raise SystemExit("beforeAll marker not found")
+              content = content.replace(marker, "\n" + helper + marker, 1)
 
-          old = '''    try {
-              await expect(
-                createPostgresAuthenticatedTrip(
-                  { userId: rollbackUserId, trip: tripInput("Rollback autenticado") },
-                  database,
-                  now,
-                ),
-              ).rejects.toThrow("RB-INC-088 forced Trip failure");
-            } finally {
-          '''
-          new = '''    let failure: unknown;
+          pattern = re.compile(
+              r'''    try \{\n      await expect\(\n        createPostgresAuthenticatedTrip\(\n          \{ userId: rollbackUserId, trip: tripInput\("Rollback autenticado"\) \},\n          database,\n          now,\n        \),\n      \)\.rejects\.toThrow\("RB-INC-088 forced Trip failure"\);\n    \} finally \{'''
+          )
+          replacement = '''    let failure: unknown;
             try {
               await createPostgresAuthenticatedTrip(
                 { userId: rollbackUserId, trip: tripInput("Rollback autenticado") },
@@ -81,21 +67,22 @@ jobs:
               );
             } catch (error) {
               failure = error;
-            } finally {
-          '''
-          if old not in content:
-              raise SystemExit("rollback assertion anchor not found")
-          content = content.replace(old, new, 1)
+            } finally {'''
+          content, count = pattern.subn(replacement, content, count=1)
+          if count != 1:
+              raise SystemExit(f"rollback assertion replacements: {count}")
 
-          assertion_anchor = '''    const ownerships = await database
-          '''
+          marker = '''    const ownerships = await database
+              .select()
+              .from(personalAccountOwnerships)
+              .where(eq(personalAccountOwnerships.userId, rollbackUserId));'''
           assertion = '''    expect(failure).toBeInstanceOf(Error);
             expect(errorChainContains(failure, "RB-INC-088 forced Trip failure")).toBe(true);
 
-          ''' + assertion_anchor
-          if assertion_anchor not in content:
-              raise SystemExit("ownership assertion anchor not found")
-          content = content.replace(assertion_anchor, assertion, 1)
+          ''' + marker
+          if marker not in content:
+              raise SystemExit("rollback ownership marker not found")
+          content = content.replace(marker, assertion, 1)
           path.write_text(content, encoding="utf-8")
           PY
           pnpm install --frozen-lockfile

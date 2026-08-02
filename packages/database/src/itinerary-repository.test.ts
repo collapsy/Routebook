@@ -94,11 +94,11 @@ describe("DrizzleItineraryRepository", () => {
       ownerName: "RouteBook QA",
     });
     const database = getDatabase();
-    const repository = new DrizzleItineraryRepository();
     const itinerary = createItinerary({ tripId: trip.id, period: trip.period });
 
     await new DrizzleTripRepository().create(trip);
     const transaction = vi.spyOn(database, "transaction");
+    const repository = new DrizzleItineraryRepository(database);
     try {
       await repository.save(itinerary);
       expect(transaction).toHaveBeenCalledTimes(1);

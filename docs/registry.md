@@ -220,6 +220,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-085 | Context Pack do RB-INC-085 | Implementation Context | Draft | 0.1.0 | [rb-inc-085-postgres-accept-itinerary-proposal-service.md](./implementation/context-packs/rb-inc-085-postgres-accept-itinerary-proposal-service.md) |
 | RB-INC-086 | Fundação Better Auth e Sessão Server-Side | Implementation | Draft | 0.1.0 | [rb-inc-086-better-auth-session-foundation.md](./implementation/increments/rb-inc-086-better-auth-session-foundation.md) |
 | RB-CTX-086 | Context Pack do RB-INC-086 | Implementation Context | Draft | 0.1.0 | [rb-inc-086-better-auth-session-foundation.md](./implementation/context-packs/rb-inc-086-better-auth-session-foundation.md) |
+| RB-INC-087 | Account Membership e Autorização Server-Side de Trip | Implementation | Draft | 0.1.0 | [rb-inc-087-account-membership-trip-authorization.md](./implementation/increments/rb-inc-087-account-membership-trip-authorization.md) |
+| RB-CTX-087 | Context Pack do RB-INC-087 | Implementation Context | Draft | 0.1.0 | [rb-inc-087-account-membership-trip-authorization.md](./implementation/context-packs/rb-inc-087-account-membership-trip-authorization.md) |
 
 ## Status possíveis
 

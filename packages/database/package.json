@@ -15,6 +15,7 @@
   "dependencies": {
     "@routebook/decision-intelligence": "workspace:*",
     "@routebook/geo-distance": "workspace:*",
+    "@routebook/identity-access": "workspace:*",
     "@routebook/place-catalog": "workspace:*",
     "@routebook/planning-assurance": "workspace:*",
     "@routebook/proposal-management": "workspace:*",

@@ -8,7 +8,13 @@ export {
   authVerifications,
   betterAuthSchema,
 } from "./auth-schema";
+export { accountMemberships, accounts } from "./identity-schema";
 export { closeDatabase, getDatabase } from "./client";
+
+export {
+  createPostgresTripAuthorizationReader,
+  DrizzleTripAuthorizationRepository,
+} from "./trip-authorization-repository";
 export { decisions } from "./decision-schema";
 export { planningConflicts } from "./planning-conflict-schema";
 export { itineraryProposals, proposedActivities } from "./proposal-schema";

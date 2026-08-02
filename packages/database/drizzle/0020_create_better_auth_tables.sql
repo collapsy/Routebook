@@ -1,5 +1,5 @@
 CREATE TABLE "auth_users" (
-  "id" uuid PRIMARY KEY,
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "name" text NOT NULL,
   "email" text NOT NULL,
   "email_verified" boolean NOT NULL DEFAULT false,
@@ -12,7 +12,7 @@ CREATE UNIQUE INDEX "auth_users_email_unique"
   ON "auth_users" ("email");
 
 CREATE TABLE "auth_sessions" (
-  "id" uuid PRIMARY KEY,
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "expires_at" timestamp with time zone NOT NULL,
   "token" text NOT NULL,
   "created_at" timestamp with time zone NOT NULL DEFAULT now(),
@@ -30,7 +30,7 @@ CREATE INDEX "auth_sessions_expires_at_idx"
   ON "auth_sessions" ("expires_at");
 
 CREATE TABLE "auth_accounts" (
-  "id" uuid PRIMARY KEY,
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "account_id" text NOT NULL,
   "provider_id" text NOT NULL,
   "user_id" uuid NOT NULL REFERENCES "auth_users"("id") ON DELETE CASCADE,
@@ -51,7 +51,7 @@ CREATE INDEX "auth_accounts_user_id_idx"
   ON "auth_accounts" ("user_id");
 
 CREATE TABLE "auth_verifications" (
-  "id" uuid PRIMARY KEY,
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "identifier" text NOT NULL,
   "value" text NOT NULL,
   "expires_at" timestamp with time zone NOT NULL,

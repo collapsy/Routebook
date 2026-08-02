@@ -19,7 +19,6 @@ type PostgreSqlError = Readonly<{
 
 const proposalForeignKeyConstraints = new Set([
   "proposal_applications_itinerary_proposal_id_fkey",
-  "itinerary_proposals_pkey",
 ]);
 
 const itineraryForeignKeyConstraints = new Set([

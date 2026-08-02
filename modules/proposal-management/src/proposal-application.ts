@@ -234,7 +234,7 @@ function assertStarted(
   }
 }
 
-export function createProposalApplicationId(value = randomUUID()): ProposalApplicationId {
+export function createProposalApplicationId(value: string = randomUUID()): ProposalApplicationId {
   return requiredText(value, "id") as ProposalApplicationId;
 }
 

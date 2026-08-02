@@ -255,7 +255,7 @@ describe("createProposalApplicationTransactionFragment", () => {
       createProposalApplicationTransactionFragment(undefined as never, () => stored.value),
     ).toThrowError(TypeError);
     expect(() =>
-      createProposalApplicationTransactionFragment(executor(), undefined as never),
+      createProposalApplicationTransactionFragment(executor(), null as never),
     ).toThrowError(TypeError);
     expect(() =>
       createProposalApplicationTransactionFragment(executor(), () => undefined as never),

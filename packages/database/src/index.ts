@@ -57,7 +57,11 @@ export {
   type PostgresTransactionHost,
   type PostgresTransactionOperation,
 } from "./postgres-transaction-runner";
-export { DrizzleItineraryProposalRepository } from "./proposal-repository";
+export {
+  createPostgresItineraryProposalRepository,
+  DrizzleItineraryProposalRepository,
+  type ItineraryProposalDatabaseExecutor,
+} from "./proposal-repository";
 export { DrizzleRecommendationRepository } from "./recommendation-repository";
 export {
   addRecommendedPlaceToItinerary,

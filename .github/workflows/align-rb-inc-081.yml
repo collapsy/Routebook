@@ -1,0 +1,104 @@
+name: Align RB-INC-081
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-081-itinerary-proposal-acceptance-decision
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-081-itinerary-proposal-acceptance-decision
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Align documentation with compatibility adapter
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          increment = Path("docs/implementation/increments/rb-inc-081-itinerary-proposal-acceptance-decision.md")
+          text = increment.read_text()
+          text = text.replace(
+              "- decisões existentes permanecem compatíveis.",
+              "- decisões existentes permanecem compatíveis;\n- o serializer de snapshots reconhece o novo contexto sem liberar persistência física antes da migration.",
+          )
+          text = text.replace(
+              "- exports públicos;\n- documentação, registry e rastreabilidade.",
+              "- exports públicos;\n- compatibilidade de serialização e reidratação do novo snapshot;\n- documentação, registry e rastreabilidade.",
+          )
+          text = text.replace(
+              "- check constraint e migration da tabela `decisions`;\n- serialização e reidratação PostgreSQL;\n- repository ou fragment transacional;",
+              "- check constraint, migration e persistência física do novo tipo na tabela `decisions`;\n- fragment transacional de Decision;",
+          )
+          text = text.replace(
+              "modules/decision-intelligence/src/index.ts\n",
+              "modules/decision-intelligence/src/index.ts\npackages/database/src/decision-repository.ts\npackages/database/src/decision-snapshot-serialization.test.ts\n",
+          )
+          text = text.replace(
+              "- [x] exports públicos atualizados;\n- [ ] validações finais do CI aprovadas.",
+              "- [x] exports públicos atualizados;\n- [x] serializer e reidratação reconhecem o novo snapshot;\n- [ ] validações finais do CI aprovadas.",
+          )
+          text = text.replace(
+              "- effect incompatível;\n- regressão da suíte histórica de Decision.",
+              "- effect incompatível;\n- round trip do snapshot serializado;\n- regressão da suíte histórica de Decision.",
+          )
+          text = text.replace(
+              "Remover os novos membros das unions, validações, testes e exports.",
+              "Remover os novos membros das unions, validações, testes, exports e branches do serializer.",
+          )
+          increment.write_text(text)
+
+          context = Path("docs/implementation/context-packs/rb-inc-081-itinerary-proposal-acceptance-decision.md")
+          text = context.read_text()
+          text = text.replace(
+              "9. `modules/trip-management/src/proposal-application.ts`.",
+              "9. `modules/trip-management/src/proposal-application.ts`;\n10. `packages/database/src/decision-repository.ts`.",
+          )
+          text = text.replace(
+              "- não adaptar repository ou serializer;",
+              "- não alterar schema, migration ou liberar o save físico do novo tipo;",
+          )
+          text = text.replace(
+              "- effect de outro tipo;\n- suíte histórica de Decision.",
+              "- effect de outro tipo;\n- round trip do snapshot serializado;\n- suíte histórica de Decision.",
+          )
+          text = text.replace(
+              "modules/decision-intelligence/src/index.ts docs/implementation",
+              "modules/decision-intelligence/src/index.ts packages/database/src/decision-repository.ts packages/database/src/decision-snapshot-serialization.test.ts docs/implementation",
+          )
+          text = text.replace(
+              "pnpm --filter @routebook/decision-intelligence test\n",
+              "pnpm --filter @routebook/decision-intelligence test\npnpm --filter @routebook/database typecheck\npnpm --filter @routebook/database test\n",
+          )
+          context.write_text(text)
+          PY
+      - name: Apply canonical formatting
+        run: >-
+          pnpm exec prettier --write
+          modules/decision-intelligence/src/decision.ts
+          modules/decision-intelligence/src/itinerary-proposal-decision.test.ts
+          modules/decision-intelligence/src/index.ts
+          packages/database/src/decision-repository.ts
+          packages/database/src/decision-snapshot-serialization.test.ts
+          docs/implementation/increments/rb-inc-081-itinerary-proposal-acceptance-decision.md
+          docs/implementation/context-packs/rb-inc-081-itinerary-proposal-acceptance-decision.md
+      - run: git rm .github/workflows/align-rb-inc-081.yml
+      - name: Commit alignment
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add modules/decision-intelligence/src packages/database/src docs/implementation
+          git commit -m "fix(decision-intelligence): alinhar consumidores do RB-INC-081"
+          git push origin HEAD:feature/rb-inc-081-itinerary-proposal-acceptance-decision

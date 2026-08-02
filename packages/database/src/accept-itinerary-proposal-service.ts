@@ -27,9 +27,7 @@ const itineraryForeignKeyConstraints = new Set([
   "itinerary_proposals_itinerary_id_fkey",
 ]);
 
-const idempotencyUniqueConstraints = new Set([
-  "proposal_applications_proposal_idempotency_unique",
-]);
+const idempotencyUniqueConstraints = new Set(["proposal_applications_proposal_idempotency_unique"]);
 
 function publicError(
   code: ConstructorParameters<typeof AcceptItineraryProposalError>[0],
@@ -47,10 +45,7 @@ function mapApplyProposalItemsDomainError(error: ApplyProposalItemsDomainError):
       );
     case "trip-mismatch":
     case "itinerary-mismatch":
-      return publicError(
-        "itinerary-not-found",
-        "O Itinerary não pertence ao contexto solicitado.",
-      );
+      return publicError("itinerary-not-found", "O Itinerary não pertence ao contexto solicitado.");
     case "duplicate-proposed-activity-id":
     case "duplicate-source-activity-id":
     case "target-trip-day-not-found":
@@ -82,9 +77,7 @@ function postgresError(error: unknown): PostgreSqlError | null {
     if (typeof candidate.code === "string") {
       return {
         code: candidate.code,
-        ...(typeof candidate.constraint === "string"
-          ? { constraint: candidate.constraint }
-          : {}),
+        ...(typeof candidate.constraint === "string" ? { constraint: candidate.constraint } : {}),
       };
     }
     current = candidate.cause;
@@ -136,9 +129,7 @@ function withOfficialErrorMapping(
   }
 
   return Object.freeze({
-    async execute(
-      command: AcceptItineraryProposalCommand,
-    ): Promise<AcceptItineraryProposalResult> {
+    async execute(command: AcceptItineraryProposalCommand): Promise<AcceptItineraryProposalResult> {
       try {
         return await transaction.execute(command);
       } catch (error) {
@@ -149,8 +140,7 @@ function withOfficialErrorMapping(
 }
 
 export function createPostgresAcceptItineraryProposal(
-  transactionFactory: ApplyItineraryProposalTransactionFactory =
-    createPostgresApplyItineraryProposalTransaction,
+  transactionFactory: ApplyItineraryProposalTransactionFactory = createPostgresApplyItineraryProposalTransaction,
 ): AcceptItineraryProposal {
   if (typeof transactionFactory !== "function") {
     throw new TypeError("Informe uma factory de ApplyItineraryProposalTransaction válida.");

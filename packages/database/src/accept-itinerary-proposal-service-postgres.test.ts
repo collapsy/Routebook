@@ -133,16 +133,14 @@ describe("PostgreSQL AcceptItineraryProposal service", () => {
         version: current.itinerary.version + 1,
       });
       expect(
-        await new DrizzleItineraryProposalRepository().findById(
-          current.trip.id,
-          current.ready.id,
-        ),
+        await new DrizzleItineraryProposalRepository().findById(current.trip.id, current.ready.id),
       ).toMatchObject({ status: "accepted" });
       expect(
         (
-          await createPostgresProposalApplicationRepository(
-            getDatabase(),
-          ).findByIdempotencyKey(current.ready.id, current.input.idempotencyKey)
+          await createPostgresProposalApplicationRepository(getDatabase()).findByIdempotencyKey(
+            current.ready.id,
+            current.input.idempotencyKey,
+          )
         )?.application,
       ).toMatchObject({
         id: applied.proposalApplicationId,

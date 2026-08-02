@@ -129,10 +129,7 @@ describe("createPostgresAcceptItineraryProposal", () => {
   });
 
   it("preserva erros públicos já classificados", async () => {
-    const expected = new AcceptItineraryProposalError(
-      "proposal-expired",
-      "A Proposal expirou.",
-    );
+    const expected = new AcceptItineraryProposalError("proposal-expired", "A Proposal expirou.");
     const service = serviceWith(async () => {
       throw expected;
     });
@@ -181,19 +178,16 @@ describe("createPostgresAcceptItineraryProposal", () => {
     ["23503", "itinerary_proposals_pkey", "proposal-not-found"],
     ["23503", "proposal_applications_itinerary_id_fkey", "itinerary-not-found"],
     ["23503", "itinerary_proposals_itinerary_id_fkey", "itinerary-not-found"],
-  ] as const)(
-    "mapeia PostgreSQL %s/%s para %s",
-    async (code, constraint, publicCode) => {
-      const service = serviceWith(async () => {
-        throw drizzleError(code, constraint);
-      });
+  ] as const)("mapeia PostgreSQL %s/%s para %s", async (code, constraint, publicCode) => {
+    const service = serviceWith(async () => {
+      throw drizzleError(code, constraint);
+    });
 
-      await expect(service.execute(input())).rejects.toMatchObject({
-        name: "AcceptItineraryProposalError",
-        code: publicCode,
-      });
-    },
-  );
+    await expect(service.execute(input())).rejects.toMatchObject({
+      name: "AcceptItineraryProposalError",
+      code: publicCode,
+    });
+  });
 
   it("propaga erro PostgreSQL desconhecido sem conversão", async () => {
     const expected = drizzleError("23514", "unknown_constraint");

@@ -164,4 +164,5 @@ Remover a injeção, a factory, o teste adicional e os exports. Nenhuma migratio
 - Engineering Validation de código `30734294000`: aprovada;
 - typecheck aceitou o transaction executor Drizzle;
 - migrations, suíte integral, smoke, build e 56 E2E responsivos aprovados;
-- evidências definitivas de documentação serão registradas após registry e matriz sincronizados.
+- registry e matriz de rastreabilidade sincronizados com `RB-INC-076` e `RB-CTX-076`;
+- validações definitivas sobre o HEAD governado em execução.

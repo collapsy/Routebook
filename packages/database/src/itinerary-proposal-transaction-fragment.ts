@@ -26,7 +26,7 @@ export type AcceptedItineraryProposal = ItineraryProposal &
 
 export type ItineraryProposalTransactionRepository = Readonly<{
   findById(tripId: string, proposalId: string): Promise<ItineraryProposal | null>;
-  save(proposal: ItineraryProposal): Promise<void>;
+  save(proposal: ItineraryProposal): Promise<ItineraryProposal>;
 }>;
 
 export type ItineraryProposalTransactionRepositoryFactory<

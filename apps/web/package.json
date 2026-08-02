@@ -21,6 +21,7 @@
     "@routebook/traveler-profile": "workspace:*",
     "@routebook/trip-management": "workspace:*",
     "better-auth": "1.6.14",
+    "kysely": "0.28.14",
     "next": "16.2.12",
     "react": "19.2.8",
     "react-dom": "19.2.8"

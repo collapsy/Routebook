@@ -28,7 +28,7 @@ export const decisions = pgTable(
   (table) => [
     check(
       "decisions_type_check",
-      sql`${table.type} in ('save-place', 'add-to-itinerary', 'ignore-planning-risk')`,
+      sql`${table.type} in ('save-place', 'add-to-itinerary', 'ignore-planning-risk', 'accept-itinerary-proposal')`,
     ),
     uniqueIndex("decisions_trip_idempotency_unique").on(table.tripId, table.idempotencyKey),
     index("decisions_trip_id_idx").on(table.tripId),

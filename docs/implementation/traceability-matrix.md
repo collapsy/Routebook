@@ -90,6 +90,7 @@ ai_context:
 | RB-INC-079 | RB-ADR-027, RB-ARC-003–004, RB-DOM-003–004 e RB-INC-070, RB-INC-072–074, RB-INC-078 | #181 | `feature/rb-inc-079-itinerary-transaction-fragment`, PR #182 | fragment de Itinerary com leitura, validação, aplicação integral e persistência escopada | runs 30752064982 e 30752064966; 198 documentos, migrations, suíte integral, build e 56 E2E responsivos verdes | Integrado |
 | RB-INC-080 | RB-ADR-006, RB-ADR-027, RB-ARC-003–004, RB-DATA-002 e RB-INC-073–074, RB-INC-076, RB-INC-078–079 | #183 | `feature/rb-inc-080-decision-transactional-repository`, PR #184 | repository de Decision com executor escopado, idempotência preservada e rollback externo | runs 30752604088 e 30752604108; 200 documentos, migrations, suíte integral, build e 56 E2E responsivos verdes | Integrado |
 | RB-INC-081 | RB-DOM-001, RB-DOM-003–004, RB-ADR-027 e RB-INC-072, RB-INC-079–080 | #185 | `feature/rb-inc-081-itinerary-proposal-acceptance-decision`, PR #186 | Decision de aceite com option, snapshot, effect e invariantes cruzadas | runs 30753442260 e 30753442266; 202 documentos, migrations, suíte integral, build e 56 E2E responsivos verdes | Integrado |
+| RB-INC-082 | RB-DATA-002, RB-ADR-006, RB-ADR-027 e RB-INC-080–081 | #187 | `feature/rb-inc-082-persist-itinerary-proposal-decision`, PR #188 | check constraint e migration para persistir a Decision de aceite com round trip e rollback | PR #188; validação em andamento | Em validação |
 
 ## Evidências do RB-INC-003
 

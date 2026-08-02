@@ -210,6 +210,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-080 | Context Pack do RB-INC-080 | Implementation Context | Draft | 0.1.0 | [rb-inc-080-decision-transactional-repository.md](./implementation/context-packs/rb-inc-080-decision-transactional-repository.md) |
 | RB-INC-081 | Decision de Aceite de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-081-itinerary-proposal-acceptance-decision.md](./implementation/increments/rb-inc-081-itinerary-proposal-acceptance-decision.md) |
 | RB-CTX-081 | Context Pack do RB-INC-081 | Implementation Context | Draft | 0.1.0 | [rb-inc-081-itinerary-proposal-acceptance-decision.md](./implementation/context-packs/rb-inc-081-itinerary-proposal-acceptance-decision.md) |
+| RB-INC-082 | Persistência PostgreSQL da Decision de Aceite | Implementation | Draft | 0.1.0 | [rb-inc-082-persist-itinerary-proposal-decision.md](./implementation/increments/rb-inc-082-persist-itinerary-proposal-decision.md) |
+| RB-CTX-082 | Context Pack do RB-INC-082 | Implementation Context | Draft | 0.1.0 | [rb-inc-082-persist-itinerary-proposal-decision.md](./implementation/context-packs/rb-inc-082-persist-itinerary-proposal-decision.md) |
 
 ## Status possíveis
 

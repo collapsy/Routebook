@@ -9,10 +9,7 @@ const decisionIdBrand: unique symbol = Symbol("DecisionId");
 
 export type DecisionId = string & { readonly [decisionIdBrand]: true };
 export type DecisionType =
-  | "save-place"
-  | "add-to-itinerary"
-  | "ignore-planning-risk"
-  | "accept-itinerary-proposal";
+  "save-place" | "add-to-itinerary" | "ignore-planning-risk" | "accept-itinerary-proposal";
 
 export type PlanningRiskDecisionContextSnapshot = Readonly<{
   schemaVersion: 1;
@@ -179,8 +176,7 @@ function normalizeOrderedIds(values: readonly string[], field: string): readonly
 
 function sameOrderedIds(actual: readonly string[], expected: readonly string[]): boolean {
   return (
-    actual.length === expected.length &&
-    actual.every((value, index) => value === expected[index])
+    actual.length === expected.length && actual.every((value, index) => value === expected[index])
   );
 }
 

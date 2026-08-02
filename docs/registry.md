@@ -208,6 +208,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-079 | Context Pack do RB-INC-079 | Implementation Context | Draft | 0.1.0 | [rb-inc-079-itinerary-transaction-fragment.md](./implementation/context-packs/rb-inc-079-itinerary-transaction-fragment.md) |
 | RB-INC-080 | Repository Transacional de Decision | Implementation | Draft | 0.1.0 | [rb-inc-080-decision-transactional-repository.md](./implementation/increments/rb-inc-080-decision-transactional-repository.md) |
 | RB-CTX-080 | Context Pack do RB-INC-080 | Implementation Context | Draft | 0.1.0 | [rb-inc-080-decision-transactional-repository.md](./implementation/context-packs/rb-inc-080-decision-transactional-repository.md) |
+| RB-INC-081 | Decision de Aceite de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-081-itinerary-proposal-acceptance-decision.md](./implementation/increments/rb-inc-081-itinerary-proposal-acceptance-decision.md) |
+| RB-CTX-081 | Context Pack do RB-INC-081 | Implementation Context | Draft | 0.1.0 | [rb-inc-081-itinerary-proposal-acceptance-decision.md](./implementation/context-packs/rb-inc-081-itinerary-proposal-acceptance-decision.md) |
 
 ## Status possíveis
 

@@ -164,4 +164,5 @@ Remover módulo, repositories, exports, migration `0021`, coluna `trips.account_
 - a migration `0021` foi aplicada em banco limpo;
 - os testes de domínio comprovaram criação de Account pessoal, owner membership, validação de IDs e matriz de roles;
 - os testes PostgreSQL comprovaram owner autorizado, viewer negado, usuário cross-account negado, membership suspensa negada e Trip sem Account negada;
-- formatação, documentação, lint, typecheck, suíte integral, smoke, build e E2E responsivo ficaram verdes.
+- formatação, documentação, lint, typecheck, suíte integral, smoke, build e E2E responsivo ficaram verdes;
+- registry, Context Pack e matriz de rastreabilidade estão consolidados e marcam o incremento como pronto para integração.

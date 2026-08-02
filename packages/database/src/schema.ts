@@ -14,6 +14,7 @@ import {
 
 export const trips = pgTable("trips", {
   id: uuid("id").primaryKey(),
+  accountId: uuid("account_id"),
   name: varchar("name", { length: 160 }).notNull(),
   destinationName: varchar("destination_name", { length: 180 }).notNull(),
   destinationType: varchar("destination_type", { length: 32 }).notNull(),

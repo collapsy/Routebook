@@ -14,11 +14,7 @@ import { accountMemberships, accounts } from "./identity-schema";
 import { trips } from "./schema";
 
 const MEMBERSHIP_ROLES = new Set<AccountMembershipRole>(["owner", "editor", "viewer"]);
-const MEMBERSHIP_STATUSES = new Set<AccountMembershipStatus>([
-  "active",
-  "suspended",
-  "revoked",
-]);
+const MEMBERSHIP_STATUSES = new Set<AccountMembershipStatus>(["active", "suspended", "revoked"]);
 
 function membershipRole(value: string): AccountMembershipRole {
   if (!MEMBERSHIP_ROLES.has(value as AccountMembershipRole)) {
@@ -76,10 +72,7 @@ export class DrizzleTripAuthorizationRepository implements TripAuthorizationRead
       .select()
       .from(accountMemberships)
       .where(
-        and(
-          eq(accountMemberships.accountId, accountId),
-          eq(accountMemberships.userId, userId),
-        ),
+        and(eq(accountMemberships.accountId, accountId), eq(accountMemberships.userId, userId)),
       )
       .limit(1);
     const row = rows[0];

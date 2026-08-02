@@ -104,10 +104,7 @@ afterAll(async () => {
 describe("PostgreSQL Trip authorization", () => {
   it("autoriza owner ativo a aceitar Proposal", async () => {
     await expect(
-      authorizeTripAction(
-        { userId, tripId: trip.id, action: "trip:accept-proposal" },
-        repository,
-      ),
+      authorizeTripAction({ userId, tripId: trip.id, action: "trip:accept-proposal" }, repository),
     ).resolves.toMatchObject({
       userId,
       tripId: trip.id,
@@ -141,10 +138,7 @@ describe("PostgreSQL Trip authorization", () => {
       .where(eq(accountMemberships.id, ownerMembershipId));
 
     await expect(
-      authorizeTripAction(
-        { userId, tripId: trip.id, action: "trip:accept-proposal" },
-        repository,
-      ),
+      authorizeTripAction({ userId, tripId: trip.id, action: "trip:accept-proposal" }, repository),
     ).rejects.toEqual(new TripAuthorizationError("membership-inactive"));
 
     await database
@@ -157,10 +151,7 @@ describe("PostgreSQL Trip authorization", () => {
     await database.update(trips).set({ accountId: null }).where(eq(trips.id, trip.id));
 
     await expect(
-      authorizeTripAction(
-        { userId, tripId: trip.id, action: "trip:accept-proposal" },
-        repository,
-      ),
+      authorizeTripAction({ userId, tripId: trip.id, action: "trip:accept-proposal" }, repository),
     ).rejects.toEqual(new TripAuthorizationError("trip-unscoped"));
 
     await database.update(trips).set({ accountId }).where(eq(trips.id, trip.id));

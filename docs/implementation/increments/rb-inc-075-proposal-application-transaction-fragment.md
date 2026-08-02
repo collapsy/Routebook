@@ -162,7 +162,7 @@ docs/registry.md
 - [x] falha persiste failure code;
 - [x] erros do repository são propagados sem retry;
 - [x] nenhum database global é acessado;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 11. Testes obrigatórios
 
@@ -195,4 +195,15 @@ Remover o fragment, seus testes e exports. Nenhuma migration, tabela, query nova
 
 ## 14. Evidências
 
-Registry e matriz de rastreabilidade foram sincronizados com `RB-INC-075` e `RB-CTX-075`. As evidências definitivas serão registradas após a aprovação dos workflows da PR #174.
+- Documentation Validation `30733685016`: aprovada;
+- Engineering Validation `30733685015`: aprovada;
+- 192 documentos encontrados e registrados;
+- instalação congelada e formatação aprovadas;
+- lint e typecheck aprovados;
+- migrations PostgreSQL existentes aplicadas com sucesso;
+- suíte integral, incluindo os cenários do fragment, aprovada;
+- smoke do servidor de desenvolvimento aprovado;
+- build de produção aprovado;
+- 56 testes Playwright responsivos aprovados;
+- registry e matriz de rastreabilidade sincronizados com `RB-INC-075` e `RB-CTX-075`;
+- HEAD governado validado antes do registro das evidências: `56fdcf22565e6b5775a38978c89e3d4b01d3b3e2`.

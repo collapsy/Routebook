@@ -60,9 +60,7 @@ function startedRecord(
   };
 }
 
-function row(
-  override: Partial<Record<string, unknown>> = {},
-): Record<string, unknown> {
+function row(override: Partial<Record<string, unknown>> = {}): Record<string, unknown> {
   const canonicalRequest = request();
   return {
     id: ids.application,

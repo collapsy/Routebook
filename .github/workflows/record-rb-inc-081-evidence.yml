@@ -1,0 +1,59 @@
+name: Record RB-INC-081 Evidence
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-081-itinerary-proposal-acceptance-decision
+
+permissions:
+  contents: write
+
+jobs:
+  record:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-081-itinerary-proposal-acceptance-decision
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Record approved evidence
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          increment = Path("docs/implementation/increments/rb-inc-081-itinerary-proposal-acceptance-decision.md")
+          text = increment.read_text()
+          text = text.replace("- [ ] validações finais do CI aprovadas.", "- [x] validações finais do CI aprovadas.")
+          text = text.replace(
+              "As evidências serão registradas após a aprovação dos workflows da PR #186.",
+              "- Documentation Validation `30753442260`: aprovada;\n- Engineering Validation `30753442266`: aprovada;\n- 202 documentos encontrados e registrados;\n- formatação, documentação, lint e typecheck aprovados;\n- migrations PostgreSQL existentes aplicadas com sucesso;\n- suíte integral aprovada, incluindo invariantes da Decision e round trip do snapshot;\n- smoke do servidor de desenvolvimento aprovado;\n- build de produção aprovado;\n- 56 testes Playwright responsivos aprovados;\n- registry e matriz de rastreabilidade sincronizados com `RB-INC-081` e `RB-CTX-081`;\n- HEAD validado: `a309943920fc408e2908c6d0d0fd6e2ba89215db`.",
+          )
+          increment.write_text(text)
+
+          matrix = Path("docs/implementation/traceability-matrix.md")
+          text = matrix.read_text()
+          old = "| RB-INC-081 | RB-DOM-001, RB-DOM-003–004, RB-ADR-027 e RB-INC-072, RB-INC-079–080 | #185 | `feature/rb-inc-081-itinerary-proposal-acceptance-decision`, PR #186 | Decision de aceite com option, snapshot, effect e invariantes cruzadas | PR #186; validação em andamento | Em validação |"
+          new = "| RB-INC-081 | RB-DOM-001, RB-DOM-003–004, RB-ADR-027 e RB-INC-072, RB-INC-079–080 | #185 | `feature/rb-inc-081-itinerary-proposal-acceptance-decision`, PR #186 | Decision de aceite com option, snapshot, effect e invariantes cruzadas | runs 30753442260 e 30753442266; 202 documentos, migrations, suíte integral, build e 56 E2E responsivos verdes | Integrado |"
+          if old not in text:
+              raise SystemExit("Linha de rastreabilidade do RB-INC-081 não encontrada")
+          matrix.write_text(text.replace(old, new))
+          PY
+      - run: >-
+          pnpm exec prettier --write
+          docs/implementation/increments/rb-inc-081-itinerary-proposal-acceptance-decision.md
+          docs/implementation/traceability-matrix.md
+      - run: git rm .github/workflows/record-rb-inc-081-evidence.yml
+      - name: Commit evidence
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/implementation
+          git commit -m "docs(decision-intelligence): registrar evidências do RB-INC-081"
+          git push origin HEAD:feature/rb-inc-081-itinerary-proposal-acceptance-decision

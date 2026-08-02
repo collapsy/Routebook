@@ -146,7 +146,7 @@ A migration `0022_create_personal_account_ownerships.sql`:
 - [x] serialização concorrente implementada;
 - [x] rollback integral coberto por teste;
 - [x] registry e rastreabilidade atualizados;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 11. Erros públicos
 
@@ -172,4 +172,12 @@ Remover a composition root, os testes, o campo opcional `ownerUserId`, o schema 
 
 ## 14. Evidências
 
-O domínio, a composition root, a migration, o Context Pack, o registry e a rastreabilidade estão consolidados. O cenário de rollback valida a causa PostgreSQL encapsulada pelo Drizzle e comprova a ausência de Account, membership e ownership parciais após a falha. O HEAD atual executará os validadores padrão antes do registro das evidências finais.
+- HEAD funcional validado: `898aacb22f426b93265bd9afaeb8252d0c679a71`;
+- Documentation Validation: run `30771744270`, concluído com sucesso;
+- Engineering Validation: run `30771744252`, job `91559959366`, concluído com sucesso;
+- a migration `0022` foi aplicada em banco limpo;
+- os testes PostgreSQL comprovaram provisioning inicial, replay com as mesmas identidades, isolamento entre Users e rejeição de User inexistente;
+- chamadas concorrentes para o mesmo User produziram uma única Account pessoal e uma única owner membership;
+- o cenário de falha forçada na persistência da Trip validou a causa PostgreSQL encapsulada pelo Drizzle e comprovou rollback de Account, membership e ownership;
+- formatação, documentação, lint, typecheck, suíte integral, smoke, build e E2E responsivo ficaram verdes;
+- registry, Context Pack e matriz de rastreabilidade estão consolidados e marcam o incremento como pronto para integração.

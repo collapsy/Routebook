@@ -177,4 +177,4 @@ Remover Better Auth, rota, resolver, schema, migration `0020`, exports, testes e
 
 ## 13. Evidências
 
-As evidências finais serão registradas após a aprovação dos workflows de Documentation Validation e Engineering Validation no HEAD definitivo da PR #198.
+O escopo funcional, a migration `0020`, o teste PostgreSQL real, a rota Next.js, o resolver de sessão e a governança documental estão consolidados. As evidências numéricas serão registradas após a aprovação dos workflows definitivos do HEAD da PR #198.

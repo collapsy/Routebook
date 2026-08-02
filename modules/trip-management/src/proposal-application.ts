@@ -411,11 +411,7 @@ function findDay(itinerary: Itinerary, dayId: string): ItineraryDay | undefined 
   return itinerary.days.find((day) => day.id === dayId);
 }
 
-function requireTargetDay(
-  itinerary: Itinerary,
-  dayId: string,
-  itemIndex: number,
-): ItineraryDay {
+function requireTargetDay(itinerary: Itinerary, dayId: string, itemIndex: number): ItineraryDay {
   const day = findDay(itinerary, dayId);
   if (!day) {
     throw new ApplyProposalItemsDomainError(
@@ -470,9 +466,7 @@ function assertActivityCanChange(activity: Activity, itemIndex: number): void {
 function renumberActivities(day: ItineraryDay, now: Date): void {
   day.activities = day.activities.map((activity, index) => {
     const order = index + 1;
-    return activity.order === order
-      ? activity
-      : { ...activity, order, updatedAt: copyDate(now) };
+    return activity.order === order ? activity : { ...activity, order, updatedAt: copyDate(now) };
   });
 }
 
@@ -504,11 +498,7 @@ function insertActivity(
   renumberActivities(day, now);
 }
 
-function createCanonicalActivity(
-  item: AddProposalItem,
-  id: string,
-  now: Date,
-): Activity {
+function createCanonicalActivity(item: AddProposalItem, id: string, now: Date): Activity {
   return {
     id,
     title: item.title,
@@ -648,14 +638,7 @@ export function applyProposalItemsToItinerary(
   command.items.forEach((item, index) => {
     switch (item.operationType) {
       case "add":
-        applyAddItem(
-          workingItinerary,
-          item,
-          index,
-          now,
-          createActivityId,
-          reservedActivityIds,
-        );
+        applyAddItem(workingItinerary, item, index, now, createActivityId, reservedActivityIds);
         return;
       case "move":
         applyMoveItem(workingItinerary, item, index, now);

@@ -44,16 +44,17 @@ export {
 } from "./itinerary-transaction-fragment";
 export { DrizzlePlaceRepository } from "./place-repository";
 export {
-  evaluatePlanningConflicts,
-  PlanningConflictEvaluationServiceError,
-  type PlanningConflictEvaluationResult,
-} from "./planning-conflict-evaluation-service";
-export {
   ignorePlanningRisk,
   PlanningRiskDecisionServiceError,
   type IgnorePlanningRiskCommand,
   type IgnorePlanningRiskResult,
 } from "./planning-conflict-decision-service";
+export {
+  evaluatePlanningConflicts,
+  PlanningConflictEvaluationServiceError,
+  type PlanningConflictEvaluationResult,
+} from "./planning-conflict-evaluation-service";
+export { DrizzlePlanningConflictRepository } from "./planning-conflict-repository";
 export {
   createItineraryProposalTransactionFragment,
   type AcceptedItineraryProposal,

@@ -25,7 +25,10 @@ export type AcceptedItineraryProposal = ItineraryProposal &
   }>;
 
 export type ItineraryProposalTransactionRepository = Readonly<{
-  findById(tripId: string, proposalId: string): Promise<ItineraryProposal | null>;
+  findById(
+    tripId: string,
+    proposalId: string,
+  ): Promise<ItineraryProposal | null>;
   save(proposal: ItineraryProposal): Promise<void>;
 }>;
 
@@ -34,7 +37,9 @@ export type ItineraryProposalTransactionRepositoryFactory<
 > = (executor: TExecutor) => ItineraryProposalTransactionRepository;
 
 export interface ItineraryProposalTransactionFragment {
-  loadForAcceptance(command: AcceptItineraryProposalCommand): Promise<ReadyItineraryProposal>;
+  loadForAcceptance(
+    command: AcceptItineraryProposalCommand,
+  ): Promise<ReadyItineraryProposal>;
   accept(
     proposal: ReadyItineraryProposal,
     acceptedAt: Date,
@@ -48,7 +53,10 @@ function acceptanceError(
   throw new AcceptItineraryProposalError(code, message);
 }
 
-function sameOrderedIds(actual: readonly string[], expected: readonly string[]): boolean {
+function sameOrderedIds(
+  actual: readonly string[],
+  expected: readonly string[],
+): boolean {
   return (
     actual.length === expected.length &&
     actual.every((value, index) => value === expected[index])
@@ -86,7 +94,10 @@ function asReadyProposal(
     Number.isNaN(proposal.validUntil.getTime()) ||
     command.decidedAt.getTime() >= proposal.validUntil.getTime()
   ) {
-    acceptanceError("proposal-expired", "A Itinerary Proposal não está mais válida.");
+    acceptanceError(
+      "proposal-expired",
+      "A Itinerary Proposal não está mais válida.",
+    );
   }
   if (proposal.baseItineraryVersion !== command.expectedItineraryVersion) {
     acceptanceError(
@@ -131,7 +142,9 @@ export function createItineraryProposalTransactionFragment<
     throw new TypeError("Informe um executor Drizzle transacional válido.");
   }
   if (typeof repositoryFactory !== "function") {
-    throw new TypeError("Informe uma factory de repository de Itinerary Proposal válida.");
+    throw new TypeError(
+      "Informe uma factory de repository de Itinerary Proposal válida.",
+    );
   }
 
   const repository = repositoryFactory(executor);
@@ -140,7 +153,9 @@ export function createItineraryProposalTransactionFragment<
     typeof repository.findById !== "function" ||
     typeof repository.save !== "function"
   ) {
-    throw new TypeError("A factory não retornou um repository de Itinerary Proposal válido.");
+    throw new TypeError(
+      "A factory não retornou um repository de Itinerary Proposal válido.",
+    );
   }
 
   return Object.freeze({
@@ -153,7 +168,10 @@ export function createItineraryProposalTransactionFragment<
         command.itineraryProposalId,
       );
       if (!proposal) {
-        acceptanceError("proposal-not-found", "A Itinerary Proposal não foi encontrada.");
+        acceptanceError(
+          "proposal-not-found",
+          "A Itinerary Proposal não foi encontrada.",
+        );
       }
       return asReadyProposal(proposal, command);
     },
@@ -165,7 +183,10 @@ export function createItineraryProposalTransactionFragment<
       if (!proposal || typeof proposal !== "object") {
         throw new TypeError("Informe uma Itinerary Proposal ready válida.");
       }
-      const accepted = finalizeAppliedItineraryProposalAcceptance(proposal, acceptedAt);
+      const accepted = finalizeAppliedItineraryProposalAcceptance(
+        proposal,
+        acceptedAt,
+      );
       await repository.save(accepted);
       return accepted as AcceptedItineraryProposal;
     },

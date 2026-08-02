@@ -32,6 +32,12 @@ export {
   reconcilePlanningConflictsWithDatabase,
 } from "./planning-conflict-repository";
 export {
+  ItineraryProposalTransactionUnit,
+  type ItineraryProposalTransactionFragmentFactories,
+  type ItineraryProposalTransactionFragments,
+  type ItineraryProposalTransactionOperation,
+} from "./itinerary-proposal-transaction-unit";
+export {
   PostgresTransactionRunner,
   type PostgresTransactionHost,
   type PostgresTransactionOperation,

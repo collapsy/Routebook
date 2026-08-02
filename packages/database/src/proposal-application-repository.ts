@@ -437,9 +437,9 @@ export function createPostgresProposalApplicationRepository(
             ${application.expectedItineraryVersion},
             ${application.actorType},
             ${application.actorId ?? null},
-            ${application.startedAt},
-            ${application.startedAt},
-            ${application.startedAt}
+            ${application.startedAt.toISOString()},
+            ${application.startedAt.toISOString()},
+            ${application.startedAt.toISOString()}
           )
           ON CONFLICT (itinerary_proposal_id, idempotency_key) DO NOTHING
           RETURNING ${returningColumns}
@@ -490,9 +490,9 @@ export function createPostgresProposalApplicationRepository(
             resulting_itinerary_version = ${
               application.status === "succeeded" ? application.resultingItineraryVersion : null
             },
-            completed_at = ${application.completedAt},
+            completed_at = ${application.completedAt.toISOString()},
             failure_code = ${application.status === "failed" ? application.failureCode : null},
-            updated_at = ${application.completedAt}
+            updated_at = ${application.completedAt.toISOString()}
           WHERE id = ${application.id}::uuid
             AND status = 'started'
           RETURNING ${returningColumns}

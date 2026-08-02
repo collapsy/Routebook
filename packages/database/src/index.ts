@@ -14,6 +14,12 @@ export {
   trips,
 } from "./schema";
 export {
+  createApplyItineraryProposalTransaction,
+  createPostgresApplyItineraryProposalTransaction,
+  type ApplyItineraryProposalTransactionFragments,
+  type ApplyItineraryProposalTransactionUnit,
+} from "./apply-itinerary-proposal-transaction";
+export {
   createPostgresDecisionRepository,
   DrizzleDecisionRepository,
   type DecisionDatabaseExecutor,
@@ -38,20 +44,17 @@ export {
 } from "./itinerary-transaction-fragment";
 export { DrizzlePlaceRepository } from "./place-repository";
 export {
-  evaluatePlanningConflicts,
-  PlanningConflictEvaluationServiceError,
-  type PlanningConflictEvaluationResult,
-} from "./planning-conflict-evaluation-service";
-export {
   ignorePlanningRisk,
   PlanningRiskDecisionServiceError,
   type IgnorePlanningRiskCommand,
   type IgnorePlanningRiskResult,
 } from "./planning-conflict-decision-service";
 export {
-  DrizzlePlanningConflictRepository,
-  reconcilePlanningConflictsWithDatabase,
-} from "./planning-conflict-repository";
+  evaluatePlanningConflicts,
+  PlanningConflictEvaluationServiceError,
+  type PlanningConflictEvaluationResult,
+} from "./planning-conflict-evaluation-service";
+export { DrizzlePlanningConflictRepository } from "./planning-conflict-repository";
 export {
   createItineraryProposalTransactionFragment,
   type AcceptedItineraryProposal,

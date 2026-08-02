@@ -148,17 +148,31 @@ export class DrizzleItineraryRepository implements ItineraryRepository {
 
   async save(itinerary: Itinerary): Promise<Itinerary> {
     return this.withWriteExecutor(async (database) => {
-      await database.delete(itineraries).where(eq(itineraries.tripId, itinerary.tripId));
-      await database.insert(itineraries).values({
-        id: itinerary.id,
-        tripId: itinerary.tripId,
-        startDate: itinerary.period.startDate,
-        endDate: itinerary.period.endDate,
-        timeZone: itinerary.period.timeZone,
-        version: itinerary.version,
-        createdAt: itinerary.createdAt,
-        updatedAt: itinerary.updatedAt,
-      });
+      await database
+        .insert(itineraries)
+        .values({
+          id: itinerary.id,
+          tripId: itinerary.tripId,
+          startDate: itinerary.period.startDate,
+          endDate: itinerary.period.endDate,
+          timeZone: itinerary.period.timeZone,
+          version: itinerary.version,
+          createdAt: itinerary.createdAt,
+          updatedAt: itinerary.updatedAt,
+        })
+        .onConflictDoUpdate({
+          target: itineraries.id,
+          set: {
+            tripId: itinerary.tripId,
+            startDate: itinerary.period.startDate,
+            endDate: itinerary.period.endDate,
+            timeZone: itinerary.period.timeZone,
+            version: itinerary.version,
+            updatedAt: itinerary.updatedAt,
+          },
+        });
+
+      await database.delete(itineraryDays).where(eq(itineraryDays.itineraryId, itinerary.id));
 
       if (itinerary.days.length > 0) {
         await database.insert(itineraryDays).values(

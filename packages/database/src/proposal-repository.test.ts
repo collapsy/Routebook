@@ -785,10 +785,7 @@ describe("DrizzleItineraryProposalRepository", () => {
       ).rejects.toBe(rollback);
 
       expect(
-        await new DrizzleItineraryProposalRepository().findById(
-          fixture.trip.id,
-          requested.id,
-        ),
+        await new DrizzleItineraryProposalRepository().findById(fixture.trip.id, requested.id),
       ).toBeNull();
     } finally {
       await cleanup(fixture.trip.id);

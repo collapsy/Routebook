@@ -39,7 +39,9 @@ export interface PostgresProposalApplicationRepository {
   create(
     record: ProposalApplicationPersistenceRecord,
   ): Promise<CreateProposalApplicationPersistenceResult>;
-  findById(id: ProposalApplicationId | string): Promise<ProposalApplicationPersistenceRecord | null>;
+  findById(
+    id: ProposalApplicationId | string,
+  ): Promise<ProposalApplicationPersistenceRecord | null>;
   findByIdempotencyKey(
     itineraryProposalId: string,
     idempotencyKey: string,
@@ -158,8 +160,7 @@ function parseRequestPayload(value: unknown): ProposalApplicationRequestFingerpr
     itineraryProposalId: requiredText(candidate.itineraryProposalId, "request.itineraryProposalId"),
     itineraryId: requiredText(candidate.itineraryId, "request.itineraryId"),
     applicationType: requiredText(candidate.applicationType, "request.applicationType") as
-      | "full"
-      | "partial",
+      "full" | "partial",
     expectedItineraryVersion: positiveInteger(
       candidate.expectedItineraryVersion,
       "request.expectedItineraryVersion",
@@ -263,7 +264,11 @@ function rehydrateRecord(value: Record<string, unknown>): ProposalApplicationPer
     }
     application = started;
   } else if (row.status === "succeeded") {
-    if (row.completedAt === null || row.resultingItineraryVersion === null || row.failureCode !== null) {
+    if (
+      row.completedAt === null ||
+      row.resultingItineraryVersion === null ||
+      row.failureCode !== null
+    ) {
       throw new ProposalApplicationPersistenceCorruptionError(
         "Uma Proposal Application succeeded precisa de versão resultante e conclusão.",
       );
@@ -273,7 +278,11 @@ function rehydrateRecord(value: Record<string, unknown>): ProposalApplicationPer
       completedAt: validDate(row.completedAt, "completedAt"),
     });
   } else if (row.status === "failed") {
-    if (row.completedAt === null || row.failureCode === null || row.resultingItineraryVersion !== null) {
+    if (
+      row.completedAt === null ||
+      row.failureCode === null ||
+      row.resultingItineraryVersion !== null
+    ) {
       throw new ProposalApplicationPersistenceCorruptionError(
         "Uma Proposal Application failed precisa de código e conclusão sem versão resultante.",
       );

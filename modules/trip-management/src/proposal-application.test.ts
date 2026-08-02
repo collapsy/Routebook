@@ -142,12 +142,7 @@ function expectDomainError(
 
 describe("contrato ApplyProposalItems", () => {
   it("publica somente as quatro operações canônicas", () => {
-    expect(applyProposalItemOperationTypes).toEqual([
-      "add",
-      "move",
-      "update",
-      "remove",
-    ]);
+    expect(applyProposalItemOperationTypes).toEqual(["add", "move", "update", "remove"]);
   });
 
   it("normaliza as quatro variantes e preserva coleção vazia", () => {
@@ -365,9 +360,7 @@ describe("applyProposalItemsToItinerary", () => {
   it("aplica quatro operações em ordem com uma única nova versão", () => {
     const itinerary = createItineraryFixture();
     const original = structuredClone(itinerary);
-    const protectedPeriod = structuredClone(
-      itinerary.days[1]?.freePeriods[0],
-    );
+    const protectedPeriod = structuredClone(itinerary.days[1]?.freePeriods[0]);
     const command = applicationInput([
       {
         proposedActivityId: "proposed-add",
@@ -411,10 +404,7 @@ describe("applyProposalItemsToItinerary", () => {
     expect(applied.itinerary.version).toBe(5);
     expect(applied.itinerary.updatedAt).toEqual(applicationTime);
     expect(
-      applied.itinerary.days[0]?.activities.map(({ id, order }) => ({
-        id,
-        order,
-      })),
+      applied.itinerary.days[0]?.activities.map(({ id, order }) => ({ id, order })),
     ).toEqual([
       { id: "activity-new", order: 1 },
       { id: "activity-fixed", order: 2 },
@@ -431,10 +421,7 @@ describe("applyProposalItemsToItinerary", () => {
       updatedAt: applicationTime,
     });
     expect(
-      applied.itinerary.days[1]?.activities.map(({ id, order }) => ({
-        id,
-        order,
-      })),
+      applied.itinerary.days[1]?.activities.map(({ id, order }) => ({ id, order })),
     ).toEqual([
       { id: "activity-3", order: 1 },
       { id: "activity-2", order: 2 },
@@ -451,9 +438,7 @@ describe("applyProposalItemsToItinerary", () => {
       createdAt: baseTime,
       updatedAt: applicationTime,
     });
-    expect(applied.itinerary.days[1]?.freePeriods[0]).toEqual(
-      protectedPeriod,
-    );
+    expect(applied.itinerary.days[1]?.freePeriods[0]).toEqual(protectedPeriod);
     expect(applied.result).toEqual({
       itineraryId: "itinerary-1",
       resultingItineraryVersion: 5,
@@ -473,13 +458,9 @@ describe("applyProposalItemsToItinerary", () => {
 
   it("aceita coleção vazia com versão única e cópia independente", () => {
     const itinerary = createItineraryFixture();
-    const applied = applyProposalItemsToItinerary(
-      itinerary,
-      applicationInput([]),
-      {
-        now: applicationTime,
-      },
-    );
+    const applied = applyProposalItemsToItinerary(itinerary, applicationInput([]), {
+      now: applicationTime,
+    });
 
     expect(applied.itinerary).toEqual({
       ...itinerary,
@@ -505,18 +486,14 @@ describe("applyProposalItemsToItinerary", () => {
           targetOrder: 1,
         },
       ]),
-      {
-        now: applicationTime,
-      },
+      { now: applicationTime },
     );
 
     expect(
       applied.itinerary.days[0]?.activities.map((activity) => activity.id),
     ).toEqual(["activity-3", "activity-1", "activity-fixed"]);
     expect(
-      applied.itinerary.days[0]?.activities.map(
-        (activity) => activity.order,
-      ),
+      applied.itinerary.days[0]?.activities.map((activity) => activity.order),
     ).toEqual([1, 2, 3]);
   });
 
@@ -531,9 +508,7 @@ describe("applyProposalItemsToItinerary", () => {
           title: "Almoço sem horário",
         },
       ]),
-      {
-        now: applicationTime,
-      },
+      { now: applicationTime },
     );
     const activity = applied.itinerary.days[1]?.activities[0];
 
@@ -558,9 +533,7 @@ describe("applyProposalItemsToItinerary", () => {
         applyProposalItemsToItinerary(
           createItineraryFixture(),
           applicationInput([], override),
-          {
-            now: applicationTime,
-          },
+          { now: applicationTime },
         ),
       code,
     );
@@ -584,9 +557,7 @@ describe("applyProposalItemsToItinerary", () => {
               sourceActivityId: "activity-1",
             },
           ]),
-          {
-            now: applicationTime,
-          },
+          { now: applicationTime },
         ),
       "duplicate-proposed-activity-id",
       1,
@@ -611,9 +582,7 @@ describe("applyProposalItemsToItinerary", () => {
               sourceActivityId: "activity-1",
             },
           ]),
-          {
-            now: applicationTime,
-          },
+          { now: applicationTime },
         ),
       "duplicate-source-activity-id",
       1,
@@ -633,9 +602,7 @@ describe("applyProposalItemsToItinerary", () => {
               title: "Museu",
             },
           ]),
-          {
-            now: applicationTime,
-          },
+          { now: applicationTime },
         ),
       "target-trip-day-not-found",
       0,
@@ -652,9 +619,7 @@ describe("applyProposalItemsToItinerary", () => {
               sourceActivityId: "activity-inexistente",
             },
           ]),
-          {
-            now: applicationTime,
-          },
+          { now: applicationTime },
         ),
       "source-activity-not-found",
       0,
@@ -693,9 +658,7 @@ describe("applyProposalItemsToItinerary", () => {
           applyProposalItemsToItinerary(
             createItineraryFixture(),
             applicationInput([item]),
-            {
-              now: applicationTime,
-            },
+            { now: applicationTime },
           ),
         "fixed-activity-protected",
         0,
@@ -717,9 +680,7 @@ describe("applyProposalItemsToItinerary", () => {
               title: "Museu",
             },
           ]),
-          {
-            now: applicationTime,
-          },
+          { now: applicationTime },
         ),
       "target-order-out-of-range",
       0,
@@ -738,9 +699,7 @@ describe("applyProposalItemsToItinerary", () => {
               targetOrder: 3,
             },
           ]),
-          {
-            now: applicationTime,
-          },
+          { now: applicationTime },
         ),
       "target-order-out-of-range",
       0,
@@ -759,27 +718,19 @@ describe("applyProposalItemsToItinerary", () => {
 
     expectDomainError(
       () =>
-        applyProposalItemsToItinerary(
-          createItineraryFixture(),
-          command,
-          {
-            now: applicationTime,
-            createActivityId: () => " ",
-          },
-        ),
+        applyProposalItemsToItinerary(createItineraryFixture(), command, {
+          now: applicationTime,
+          createActivityId: () => " ",
+        }),
       "generated-activity-id-invalid",
       0,
     );
     expectDomainError(
       () =>
-        applyProposalItemsToItinerary(
-          createItineraryFixture(),
-          command,
-          {
-            now: applicationTime,
-            createActivityId: () => "activity-1",
-          },
-        ),
+        applyProposalItemsToItinerary(createItineraryFixture(), command, {
+          now: applicationTime,
+          createActivityId: () => "activity-1",
+        }),
       "generated-activity-id-duplicate",
       0,
     );
@@ -817,13 +768,9 @@ describe("applyProposalItemsToItinerary", () => {
   it("rejeita instante de aplicação inválido", () => {
     expectDomainError(
       () =>
-        applyProposalItemsToItinerary(
-          createItineraryFixture(),
-          applicationInput([]),
-          {
-            now: new Date("invalid"),
-          },
-        ),
+        applyProposalItemsToItinerary(createItineraryFixture(), applicationInput([]), {
+          now: new Date("invalid"),
+        }),
       "application-time-invalid",
     );
   });
@@ -864,16 +811,12 @@ describe("applyProposalItemsToItinerary", () => {
     const applied = applyProposalItemsToItinerary(
       createItineraryFixture(),
       applicationInput([]),
-      {
-        now: applicationTime,
-      },
+      { now: applicationTime },
     );
 
     expect(Object.isFrozen(applied)).toBe(true);
     expect(Object.isFrozen(applied.result)).toBe(true);
-    expect(
-      Object.isFrozen(applied.result.appliedProposedActivityIds),
-    ).toBe(true);
+    expect(Object.isFrozen(applied.result.appliedProposedActivityIds)).toBe(true);
     expect(applied).toBeTypeOf("object");
     expect(applied.result).toBeTypeOf("object");
   });
@@ -882,12 +825,8 @@ describe("applyProposalItemsToItinerary", () => {
     expect(() =>
       applyProposalItemsToItinerary(
         createItineraryFixture(),
-        applicationInput([], {
-          expectedItineraryVersion: 3,
-        }),
-        {
-          now: applicationTime,
-        },
+        applicationInput([], { expectedItineraryVersion: 3 }),
+        { now: applicationTime },
       ),
     ).toThrowError(ApplyProposalItemsDomainError);
   });

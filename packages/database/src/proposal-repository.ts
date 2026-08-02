@@ -26,6 +26,11 @@ type ItineraryProposalInsert = typeof itineraryProposals.$inferInsert;
 type ProposedActivityRow = typeof proposedActivities.$inferSelect;
 type ProposedActivityInsert = typeof proposedActivities.$inferInsert;
 
+export type ItineraryProposalDatabaseExecutor = Pick<
+  ReturnType<typeof getDatabase>,
+  "select" | "insert" | "update" | "delete"
+>;
+
 const operationTypes: readonly ProposedActivityOperationType[] = [
   "add",
   "move",
@@ -261,8 +266,10 @@ function activityValuesFor(proposal: ItineraryProposal): ProposedActivityInsert[
   }));
 }
 
-async function assertProposalReferences(proposal: ItineraryProposal): Promise<void> {
-  const database = getDatabase();
+async function assertProposalReferences(
+  proposal: ItineraryProposal,
+  database: ItineraryProposalDatabaseExecutor,
+): Promise<void> {
   const [trip] = await database
     .select({ id: trips.id })
     .from(trips)
@@ -295,6 +302,22 @@ async function assertProposalReferences(proposal: ItineraryProposal): Promise<vo
 }
 
 export class DrizzleItineraryProposalRepository implements ItineraryProposalRepository {
+  constructor(
+    private readonly database: ItineraryProposalDatabaseExecutor = getDatabase(),
+    private readonly useOwnTransaction = true,
+  ) {}
+
+  private async withWriteExecutor<TResult>(
+    operation: (database: ItineraryProposalDatabaseExecutor) => Promise<TResult>,
+  ): Promise<TResult> {
+    if (!this.useOwnTransaction) return operation(this.database);
+
+    const host = this.database as ReturnType<typeof getDatabase>;
+    if (typeof host.transaction !== "function") return operation(this.database);
+
+    return host.transaction(async (transaction) => operation(transaction));
+  }
+
   async create(proposal: ItineraryProposal): Promise<ItineraryProposal> {
     if (proposal.status !== "requested") {
       throw new ItineraryProposalRepositoryError(
@@ -302,9 +325,9 @@ export class DrizzleItineraryProposalRepository implements ItineraryProposalRepo
         "invalid-status",
       );
     }
-    await assertProposalReferences(proposal);
+    await assertProposalReferences(proposal, this.database);
 
-    const inserted = await getDatabase()
+    const inserted = await this.database
       .insert(itineraryProposals)
       .values(valuesFor(proposal))
       .onConflictDoNothing()
@@ -319,10 +342,10 @@ export class DrizzleItineraryProposalRepository implements ItineraryProposalRepo
   }
 
   async save(proposal: ItineraryProposal): Promise<ItineraryProposal> {
-    await assertProposalReferences(proposal);
+    await assertProposalReferences(proposal, this.database);
     const activityValues = activityValuesFor(proposal);
-    return getDatabase().transaction(async (transaction) => {
-      const updated = await transaction
+    return this.withWriteExecutor(async (database) => {
+      const updated = await database
         .update(itineraryProposals)
         .set(valuesFor(proposal))
         .where(
@@ -339,11 +362,11 @@ export class DrizzleItineraryProposalRepository implements ItineraryProposalRepo
         );
       }
 
-      await transaction
+      await database
         .delete(proposedActivities)
         .where(eq(proposedActivities.itineraryProposalId, proposal.id));
       if (activityValues.length > 0) {
-        await transaction.insert(proposedActivities).values(activityValues);
+        await database.insert(proposedActivities).values(activityValues);
       }
       return proposal;
     });
@@ -353,7 +376,7 @@ export class DrizzleItineraryProposalRepository implements ItineraryProposalRepo
     tripId: string,
     itineraryProposalId: ItineraryProposalId,
   ): Promise<ItineraryProposal | null> {
-    const database = getDatabase();
+    const database = this.database;
     const [row] = await database
       .select()
       .from(itineraryProposals)
@@ -371,7 +394,7 @@ export class DrizzleItineraryProposalRepository implements ItineraryProposalRepo
   }
 
   async listByTripId(tripId: string): Promise<readonly ItineraryProposal[]> {
-    const database = getDatabase();
+    const database = this.database;
     const rows = await database
       .select()
       .from(itineraryProposals)
@@ -403,4 +426,20 @@ export class DrizzleItineraryProposalRepository implements ItineraryProposalRepo
       rehydrateItineraryProposal(row, activitiesByProposal.get(row.id) ?? []),
     );
   }
+}
+
+export function createPostgresItineraryProposalRepository(
+  executor: ItineraryProposalDatabaseExecutor,
+): DrizzleItineraryProposalRepository {
+  if (
+    !executor ||
+    typeof executor.select !== "function" ||
+    typeof executor.insert !== "function" ||
+    typeof executor.update !== "function" ||
+    typeof executor.delete !== "function"
+  ) {
+    throw new TypeError("Informe um executor Drizzle transacional válido.");
+  }
+
+  return new DrizzleItineraryProposalRepository(executor, false);
 }

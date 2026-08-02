@@ -21,7 +21,10 @@ import { createItinerary, createTrip } from "@routebook/trip-management";
 import { closeDatabase, getDatabase } from "./client";
 import { DrizzleItineraryRepository } from "./itinerary-repository";
 import { itineraryProposals, proposedActivities } from "./proposal-schema";
-import { DrizzleItineraryProposalRepository } from "./proposal-repository";
+import {
+  createPostgresItineraryProposalRepository,
+  DrizzleItineraryProposalRepository,
+} from "./proposal-repository";
 import { itineraries, trips } from "./schema";
 import { DrizzleTripRepository } from "./trip-repository";
 
@@ -759,6 +762,36 @@ describe("DrizzleItineraryProposalRepository", () => {
       ).toEqual([]);
     } finally {
       await cleanup(fixture.trip.id, otherFixture.trip.id);
+    }
+  });
+
+  it("usa o executor escopado e participa do rollback da transação externa", async () => {
+    const fixture = await createFixture("Rollback do repository transacional");
+    const requested = buildProposal(fixture, new Date("2026-08-02T09:00:00.000Z"));
+    const ready = buildReadyProposal(requested);
+    const rollback = new Error("rollback externo");
+
+    try {
+      await expect(
+        getDatabase().transaction(async (transaction) => {
+          const repository = createPostgresItineraryProposalRepository(transaction);
+          await repository.create(requested);
+          await repository.save(ready);
+
+          expect(await repository.findById(fixture.trip.id, requested.id)).toEqual(ready);
+          expect(await repository.listByTripId(fixture.trip.id)).toEqual([ready]);
+          throw rollback;
+        }),
+      ).rejects.toBe(rollback);
+
+      expect(
+        await new DrizzleItineraryProposalRepository().findById(
+          fixture.trip.id,
+          requested.id,
+        ),
+      ).toBeNull();
+    } finally {
+      await cleanup(fixture.trip.id);
     }
   });
 });

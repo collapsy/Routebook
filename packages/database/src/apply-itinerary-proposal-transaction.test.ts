@@ -15,8 +15,10 @@ import {
   type ApplyItineraryProposalTransactionFragments,
   type ApplyItineraryProposalTransactionUnit,
 } from "./apply-itinerary-proposal-transaction";
-import type { AcceptedItineraryProposal, ReadyItineraryProposal } from "./itinerary-proposal-transaction-fragment";
-import type { ProposalApplicationTransactionRecord } from "./proposal-application-transaction-fragment";
+import type {
+  AcceptedItineraryProposal,
+  ReadyItineraryProposal,
+} from "./itinerary-proposal-transaction-fragment";
 
 const decidedAt = new Date("2026-08-02T20:00:00.000Z");
 
@@ -98,9 +100,12 @@ function harness(
     | "application-failed" = "reserved",
 ) {
   const currentCommand = command();
-  const { startedRecord, succeededRecord, failedRecord } = applicationRecords(currentCommand);
+  const { startedRecord, succeededRecord, failedRecord } =
+    applicationRecords(currentCommand);
   const events: string[] = [];
-  const readyProposal = { id: currentCommand.itineraryProposalId } as ReadyItineraryProposal;
+  const readyProposal = {
+    id: currentCommand.itineraryProposalId,
+  } as ReadyItineraryProposal;
   const acceptedProposal = {
     ...readyProposal,
     status: "accepted",
@@ -116,38 +121,40 @@ function harness(
   });
   const decision = { id: "decision-1" } as Decision;
 
-  const proposalApplication: ApplyItineraryProposalTransactionFragments["proposalApplication"] = {
-    reserve: vi.fn(async () => {
-      events.push("reserve");
-      switch (reservationKind) {
-        case "reserved":
-          return { kind: "reserved", record: startedRecord };
-        case "replay":
-          return { kind: "replay", record: succeededRecord };
-        case "fingerprint-conflict":
-          return { kind: "fingerprint-conflict", record: startedRecord };
-        case "application-in-progress":
-          return { kind: "application-in-progress", record: startedRecord };
-        case "application-failed":
-          return { kind: "application-failed", record: failedRecord };
-      }
-    }),
-    succeed: vi.fn(async () => {
-      events.push("succeed-application");
-      return succeededRecord;
-    }),
-    fail: vi.fn(async () => failedRecord),
-  };
-  const itineraryProposal: ApplyItineraryProposalTransactionFragments["itineraryProposal"] = {
-    loadForAcceptance: vi.fn(async () => {
-      events.push("load-proposal");
-      return readyProposal;
-    }),
-    accept: vi.fn(async () => {
-      events.push("accept-proposal");
-      return acceptedProposal;
-    }),
-  };
+  const proposalApplication: ApplyItineraryProposalTransactionFragments["proposalApplication"] =
+    {
+      reserve: vi.fn(async () => {
+        events.push("reserve");
+        switch (reservationKind) {
+          case "reserved":
+            return { kind: "reserved", record: startedRecord };
+          case "replay":
+            return { kind: "replay", record: succeededRecord };
+          case "fingerprint-conflict":
+            return { kind: "fingerprint-conflict", record: startedRecord };
+          case "application-in-progress":
+            return { kind: "application-in-progress", record: startedRecord };
+          case "application-failed":
+            return { kind: "application-failed", record: failedRecord };
+        }
+      }),
+      succeed: vi.fn(async () => {
+        events.push("succeed-application");
+        return succeededRecord;
+      }),
+      fail: vi.fn(async () => failedRecord),
+    };
+  const itineraryProposal: ApplyItineraryProposalTransactionFragments["itineraryProposal"] =
+    {
+      loadForAcceptance: vi.fn(async () => {
+        events.push("load-proposal");
+        return readyProposal;
+      }),
+      accept: vi.fn(async () => {
+        events.push("accept-proposal");
+        return acceptedProposal;
+      }),
+    };
   const itinerary: ApplyItineraryProposalTransactionFragments["itinerary"] = {
     apply: vi.fn(async () => {
       events.push("apply-itinerary");
@@ -168,7 +175,11 @@ function harness(
   });
   let transactions = 0;
   const unit: ApplyItineraryProposalTransactionUnit = {
-    async execute<TResult>(operation: (value: ApplyItineraryProposalTransactionFragments) => Promise<TResult>) {
+    async execute<TResult>(
+      operation: (
+        value: ApplyItineraryProposalTransactionFragments,
+      ) => Promise<TResult>,
+    ) {
       transactions += 1;
       return operation(fragments);
     },
@@ -236,15 +247,20 @@ describe("ApplyItineraryProposalTransaction", () => {
     ["fingerprint-conflict", "fingerprint-conflict"],
     ["application-in-progress", "application-in-progress"],
     ["application-failed", "application-failed"],
-  ] as const)("mapeia %s para o erro público %s", async (reservationKind, expectedCode) => {
-    const context = harness(reservationKind);
+  ] as const)(
+    "mapeia %s para o erro público %s",
+    async (reservationKind, expectedCode) => {
+      const context = harness(reservationKind);
 
-    await expect(context.transaction.execute(context.currentCommand)).rejects.toMatchObject({
-      name: "AcceptItineraryProposalError",
-      code: expectedCode,
-    } satisfies Partial<AcceptItineraryProposalError>);
-    expect(context.events).toEqual(["reserve"]);
-  });
+      await expect(
+        context.transaction.execute(context.currentCommand),
+      ).rejects.toMatchObject({
+        name: "AcceptItineraryProposalError",
+        code: expectedCode,
+      } satisfies Partial<AcceptItineraryProposalError>);
+      expect(context.events).toEqual(["reserve"]);
+    },
+  );
 
   it("interrompe a composição quando um fragment falha", async () => {
     const context = harness();
@@ -276,8 +292,10 @@ describe("ApplyItineraryProposalTransaction", () => {
   });
 
   it("rejeita unidade transacional inválida", () => {
-    expect(() => createApplyItineraryProposalTransaction({} as ApplyItineraryProposalTransactionUnit)).toThrow(
-      "unidade transacional",
-    );
+    expect(() =>
+      createApplyItineraryProposalTransaction(
+        {} as ApplyItineraryProposalTransactionUnit,
+      ),
+    ).toThrow("unidade transacional");
   });
 });

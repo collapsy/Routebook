@@ -32,6 +32,14 @@ export {
   reconcilePlanningConflictsWithDatabase,
 } from "./planning-conflict-repository";
 export {
+  createItineraryProposalTransactionFragment,
+  type AcceptedItineraryProposal,
+  type ItineraryProposalTransactionFragment,
+  type ItineraryProposalTransactionRepository,
+  type ItineraryProposalTransactionRepositoryFactory,
+  type ReadyItineraryProposal,
+} from "./itinerary-proposal-transaction-fragment";
+export {
   ItineraryProposalTransactionUnit,
   type ItineraryProposalTransactionFragmentFactories,
   type ItineraryProposalTransactionFragments,

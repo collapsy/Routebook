@@ -158,4 +158,4 @@ Remover módulo, repositories, exports, migration `0021`, coluna `trips.account_
 
 ## 13. Evidências
 
-O domínio, a persistência, o Context Pack, o registry e a rastreabilidade estão consolidados. As evidências dos gates serão registradas após os workflows definitivos da PR #200.
+O domínio, a persistência, o Context Pack, o registry e a rastreabilidade estão consolidados. O HEAD atual executará os validadores padrão antes do registro das evidências finais da PR #200.

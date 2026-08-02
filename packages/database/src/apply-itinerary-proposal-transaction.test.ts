@@ -58,7 +58,7 @@ function applicationRecords(currentCommand: ReturnType<typeof command>) {
     applicationType: currentCommand.applicationType,
     expectedItineraryVersion: currentCommand.expectedItineraryVersion,
     actorType: currentCommand.actorType,
-    actorId: currentCommand.actorId,
+    actorId: currentCommand.actorId!,
     proposedActivityIds: currentCommand.proposedActivityIds,
   });
   const started = startProposalApplication({
@@ -125,15 +125,15 @@ function harness(
       events.push("reserve");
       switch (reservationKind) {
         case "reserved":
-          return { kind: "reserved", record: startedRecord };
+          return { kind: "reserved", record: startedRecord } as const;
         case "replay":
-          return { kind: "replay", record: succeededRecord };
+          return { kind: "replay", record: succeededRecord } as const;
         case "fingerprint-conflict":
-          return { kind: "fingerprint-conflict", record: startedRecord };
+          return { kind: "fingerprint-conflict", record: startedRecord } as const;
         case "application-in-progress":
-          return { kind: "application-in-progress", record: startedRecord };
+          return { kind: "application-in-progress", record: startedRecord } as const;
         case "application-failed":
-          return { kind: "application-failed", record: failedRecord };
+          return { kind: "application-failed", record: failedRecord } as const;
       }
     }),
     succeed: vi.fn(async () => {

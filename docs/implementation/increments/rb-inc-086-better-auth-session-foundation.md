@@ -116,6 +116,7 @@ Mantém tokens temporários necessários aos fluxos de verificação e recupera�
 - resolver server-side;
 - testes de configuração e mapeamento;
 - teste PostgreSQL de cadastro, cookie, leitura e logout;
+- `drizzle-orm` declarado como dependência de desenvolvimento do web para limpeza precisa do fixture PostgreSQL;
 - export do schema de autenticação;
 - documentação, Context Pack, registry e rastreabilidade.
 

@@ -19,6 +19,12 @@ export {
   DrizzleItineraryRepository,
   type ItineraryDatabaseExecutor,
 } from "./itinerary-repository";
+export {
+  createItineraryTransactionFragment,
+  type ItineraryTransactionFragment,
+  type ItineraryTransactionRepository,
+  type ItineraryTransactionRepositoryFactory,
+} from "./itinerary-transaction-fragment";
 export { DrizzlePlaceRepository } from "./place-repository";
 export {
   evaluatePlanningConflicts,

@@ -7,10 +7,7 @@ import { createDecision } from "@routebook/decision-intelligence";
 import { createTrip } from "@routebook/trip-management";
 
 import { closeDatabase, getDatabase } from "./client";
-import {
-  createPostgresDecisionRepository,
-  DrizzleDecisionRepository,
-} from "./decision-repository";
+import { createPostgresDecisionRepository, DrizzleDecisionRepository } from "./decision-repository";
 import { trips } from "./schema";
 import { DrizzleTripRepository } from "./trip-repository";
 

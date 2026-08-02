@@ -212,11 +212,7 @@ export class DrizzleDecisionRepository implements DecisionRepository {
 export function createPostgresDecisionRepository(
   executor: DecisionDatabaseExecutor,
 ): DrizzleDecisionRepository {
-  if (
-    !executor ||
-    typeof executor.select !== "function" ||
-    typeof executor.insert !== "function"
-  ) {
+  if (!executor || typeof executor.select !== "function" || typeof executor.insert !== "function") {
     throw new TypeError("Informe um executor Drizzle transacional válido.");
   }
 

@@ -206,6 +206,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-078 | Context Pack do RB-INC-078 | Implementation Context | Draft | 0.1.0 | [rb-inc-078-itinerary-transactional-repository.md](./implementation/context-packs/rb-inc-078-itinerary-transactional-repository.md) |
 | RB-INC-079 | Fragment Transacional de Itinerary | Implementation | Draft | 0.1.0 | [rb-inc-079-itinerary-transaction-fragment.md](./implementation/increments/rb-inc-079-itinerary-transaction-fragment.md) |
 | RB-CTX-079 | Context Pack do RB-INC-079 | Implementation Context | Draft | 0.1.0 | [rb-inc-079-itinerary-transaction-fragment.md](./implementation/context-packs/rb-inc-079-itinerary-transaction-fragment.md) |
+| RB-INC-080 | Repository Transacional de Decision | Implementation | Draft | 0.1.0 | [rb-inc-080-decision-transactional-repository.md](./implementation/increments/rb-inc-080-decision-transactional-repository.md) |
+| RB-CTX-080 | Context Pack do RB-INC-080 | Implementation Context | Draft | 0.1.0 | [rb-inc-080-decision-transactional-repository.md](./implementation/context-packs/rb-inc-080-decision-transactional-repository.md) |
 
 ## Status possíveis
 

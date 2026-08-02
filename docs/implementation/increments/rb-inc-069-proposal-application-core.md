@@ -46,7 +46,7 @@ Issue: [#159](https://github.com/collapsy/Routebook/issues/159).
 
 Branch: `feature/rb-inc-069-proposal-application-core`.
 
-Pull request: pendente.
+Pull request: [#162](https://github.com/collapsy/Routebook/pull/162).
 
 ## 2. Contexto
 
@@ -161,7 +161,7 @@ docs/registry.md
 - [x] timeline inválida é rejeitada;
 - [x] transição a partir de estado terminal é rejeitada;
 - [x] módulo não depende de Database, Itinerary Planning ou Decision Intelligence;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 10. Testes obrigatórios
 
@@ -199,4 +199,13 @@ Remover o novo arquivo, seus testes e exports antes da introdução de consumido
 
 ## 14. Evidências
 
-Evidências serão registradas após a execução dos quality gates e dos workflows da pull request.
+- Documentation Validation `30725223887`: **success**;
+- Engineering Validation `30725223889`: **success**;
+- formatação: aprovada;
+- documentação: 180 documentos encontrados e registrados, com quatro avisos preexistentes;
+- lint e typecheck dos 12 packages: aprovados;
+- migrations PostgreSQL: aprovadas;
+- suíte de domínio e componentes: aprovada;
+- smoke do servidor de desenvolvimento: aprovado;
+- build de produção: aprovado;
+- Playwright responsivo: aprovado.

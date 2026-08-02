@@ -179,6 +179,10 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-068 | Context Pack do RB-INC-068 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-068-apply-proposal-items-contract.md](./implementation/context-packs/rb-inc-068-apply-proposal-items-contract.md) |
 | RB-INC-069 | Núcleo de Proposal Application e Fingerprint Idempotente | Implementation Increment | Draft | 0.1.0 | [rb-inc-069-proposal-application-core.md](./implementation/increments/rb-inc-069-proposal-application-core.md) |
 | RB-CTX-069 | Context Pack do RB-INC-069 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-069-proposal-application-core.md](./implementation/context-packs/rb-inc-069-proposal-application-core.md) |
+| RB-INC-070 | Aplicação Pura de Itinerary Proposal Items | Implementation Increment | Draft | 0.1.0 | [rb-inc-070-apply-proposal-items-domain.md](./implementation/increments/rb-inc-070-apply-proposal-items-domain.md) |
+| RB-CTX-070 | Context Pack do RB-INC-070 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-070-apply-proposal-items-domain.md](./implementation/context-packs/rb-inc-070-apply-proposal-items-domain.md) |
+| RB-INC-071 | Persistência de Proposal Application | Implementation Increment | Draft | 0.1.0 | [rb-inc-071-proposal-application-persistence.md](./implementation/increments/rb-inc-071-proposal-application-persistence.md) |
+| RB-CTX-071 | Context Pack do RB-INC-071 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-071-proposal-application-persistence.md](./implementation/context-packs/rb-inc-071-proposal-application-persistence.md) |
 | RB-AI-007 | Operação e Gestão do Ciclo de Vida de Inteligência Artificial | AI Operations | Planned | 0.1.0 | [ai-operations-and-lifecycle-management.md](./ai/ai-operations-and-lifecycle-management.md) |
 | RB-API-002 | Catálogo de Contratos de API | API | Planned | 0.1.0 | [api-contract-catalog.md](./data/api-contract-catalog.md) |
 | RB-API-003 | Versionamento e Depreciação de APIs | API | Planned | 0.1.0 | [api-versioning-and-deprecation-policy.md](./data/api-versioning-and-deprecation-policy.md) |

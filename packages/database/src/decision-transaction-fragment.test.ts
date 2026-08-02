@@ -23,7 +23,6 @@ function command() {
         title: "Praia do Amor",
         operationType: "add",
         flexibility: "suggested",
-        proposedOrder: 1,
       },
       {
         proposedActivityId: "proposed-2",
@@ -31,7 +30,6 @@ function command() {
         title: "Baía dos Golfinhos",
         operationType: "add",
         flexibility: "suggested",
-        proposedOrder: 2,
       },
     ],
   });

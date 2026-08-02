@@ -59,6 +59,7 @@ export type { RecommendationContextFingerprintInput } from "./recommendation-fin
 
 export { createDecision, createDecisionId, DecisionValidationError } from "./decision";
 export type {
+  AcceptItineraryProposalDecisionOption,
   AddToItineraryDecisionOption,
   CreateDecisionInput,
   Decision,
@@ -68,6 +69,8 @@ export type {
   DecisionRecordContextSnapshot,
   DecisionType,
   IgnorePlanningRiskDecisionOption,
+  ItineraryProposalAppliedDecisionEffect,
+  ItineraryProposalDecisionContextSnapshot,
   PlanningRiskDecisionContextSnapshot,
   SavePlaceDecisionOption,
 } from "./decision";

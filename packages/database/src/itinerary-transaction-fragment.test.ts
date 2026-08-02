@@ -19,16 +19,19 @@ import type { ItineraryDatabaseExecutor } from "./itinerary-repository";
 const decidedAt = new Date("2026-08-02T12:00:00.000Z");
 
 function itinerary(): Itinerary {
-  return createItinerary({
-    tripId: "trip-1",
-    period: {
-      startDate: "2026-08-22",
-      endDate: "2026-08-23",
-      timeZone: "America/Fortaleza",
+  const created = createItinerary(
+    {
+      tripId: "trip-1",
+      period: {
+        startDate: "2026-08-22",
+        endDate: "2026-08-23",
+        timeZone: "America/Fortaleza",
+      },
     },
-    id: "itinerary-1",
-    now: new Date("2026-08-02T08:00:00.000Z"),
-  });
+    new Date("2026-08-02T08:00:00.000Z"),
+  );
+
+  return { ...created, id: "itinerary-1" };
 }
 
 function command(current: Itinerary, overrides: Record<string, unknown> = {}) {

@@ -41,15 +41,14 @@ export class TripAuthorizationError extends Error {
   }
 }
 
-const ACTIONS_BY_ROLE: Readonly<Record<AccountMembershipRole, readonly TripAction[]>> =
-  Object.freeze({
-    owner: Object.freeze(["trip:view", "trip:edit", "trip:accept-proposal"]),
-    editor: Object.freeze(["trip:view", "trip:edit", "trip:accept-proposal"]),
-    viewer: Object.freeze(["trip:view"]),
-  });
+const ACTIONS_BY_ROLE = {
+  owner: ["trip:view", "trip:edit", "trip:accept-proposal"],
+  editor: ["trip:view", "trip:edit", "trip:accept-proposal"],
+  viewer: ["trip:view"],
+} as const satisfies Readonly<Record<AccountMembershipRole, readonly TripAction[]>>;
 
 export function canPerformTripAction(role: AccountMembershipRole, action: TripAction): boolean {
-  return ACTIONS_BY_ROLE[role].includes(action);
+  return (ACTIONS_BY_ROLE[role] as readonly TripAction[]).includes(action);
 }
 
 export async function authorizeTripAction(

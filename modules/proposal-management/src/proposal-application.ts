@@ -58,9 +58,7 @@ export type FailedProposalApplication = ProposalApplicationBase &
   }>;
 
 export type ProposalApplication =
-  | StartedProposalApplication
-  | SucceededProposalApplication
-  | FailedProposalApplication;
+  StartedProposalApplication | SucceededProposalApplication | FailedProposalApplication;
 
 export type StartProposalApplicationInput = ProposalApplicationRequestFingerprintInput &
   Readonly<{

@@ -6,6 +6,7 @@ import {
   canPerformTripAction,
   TripAuthorizationError,
   type TripAuthorizationReader,
+  type TripScopeLookup,
 } from "./trip-authorization";
 
 const userId = "11111111-1111-4111-8111-111111111111";
@@ -13,9 +14,13 @@ const accountId = "22222222-2222-4222-8222-222222222222";
 const membershipId = "33333333-3333-4333-8333-333333333333";
 const tripId = "44444444-4444-4444-8444-444444444444";
 
+function scope(value: TripScopeLookup): Promise<TripScopeLookup> {
+  return Promise.resolve(value);
+}
+
 function reader(overrides: Partial<TripAuthorizationReader> = {}): TripAuthorizationReader {
   return {
-    findTripScope: vi.fn(async () => ({ status: "scoped", accountId })),
+    findTripScope: vi.fn(async () => scope({ status: "scoped", accountId })),
     findMembership: vi.fn(async () =>
       createAccountMembership({
         id: membershipId,
@@ -62,8 +67,8 @@ describe("Trip authorization", () => {
   });
 
   it.each([
-    ["trip-not-found", reader({ findTripScope: vi.fn(async () => ({ status: "not-found" })) })],
-    ["trip-unscoped", reader({ findTripScope: vi.fn(async () => ({ status: "unscoped" })) })],
+    ["trip-not-found", reader({ findTripScope: vi.fn(async () => scope({ status: "not-found" })) })],
+    ["trip-unscoped", reader({ findTripScope: vi.fn(async () => scope({ status: "unscoped" })) })],
     ["membership-not-found", reader({ findMembership: vi.fn(async () => null) })],
     [
       "membership-inactive",

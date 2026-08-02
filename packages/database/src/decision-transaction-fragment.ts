@@ -60,12 +60,10 @@ function assertInput(input: PersistItineraryProposalDecisionInput): void {
   }
 }
 
-export function createDecisionTransactionFragment<
-  TExecutor extends DecisionDatabaseExecutor,
->(
+// prettier-ignore
+export function createDecisionTransactionFragment<TExecutor extends DecisionDatabaseExecutor>(
   executor: TExecutor,
-  repositoryFactory: DecisionTransactionRepositoryFactory<TExecutor> =
-    createPostgresDecisionRepository,
+  repositoryFactory: DecisionTransactionRepositoryFactory<TExecutor> = createPostgresDecisionRepository,
 ): DecisionTransactionFragment {
   if (
     !executor ||

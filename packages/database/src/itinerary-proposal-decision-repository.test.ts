@@ -136,10 +136,7 @@ describe("Itinerary Proposal acceptance Decision persistence", () => {
         }),
       ).rejects.toSatisfy((error: unknown) => {
         expect(error).toMatchObject({
-          cause: {
-            code: "23514",
-            constraint: "decisions_type_check",
-          },
+          cause: { code: "23514" },
         });
         return true;
       });

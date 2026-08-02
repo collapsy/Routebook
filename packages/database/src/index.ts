@@ -31,6 +31,11 @@ export {
   DrizzlePlanningConflictRepository,
   reconcilePlanningConflictsWithDatabase,
 } from "./planning-conflict-repository";
+export {
+  PostgresTransactionRunner,
+  type PostgresTransactionHost,
+  type PostgresTransactionOperation,
+} from "./postgres-transaction-runner";
 export { DrizzleItineraryProposalRepository } from "./proposal-repository";
 export { DrizzleRecommendationRepository } from "./recommendation-repository";
 export {

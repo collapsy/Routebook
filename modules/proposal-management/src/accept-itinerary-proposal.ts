@@ -179,7 +179,9 @@ export function createAcceptItineraryProposal(
   }
 
   return Object.freeze({
-    async execute(input) {
+    async execute(
+      input: AcceptItineraryProposalCommandInput,
+    ): Promise<AcceptItineraryProposalResult> {
       const command = createAcceptItineraryProposalCommand(input);
       return transaction.execute(command);
     },

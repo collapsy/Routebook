@@ -72,17 +72,15 @@ jobs:
           if count != 1:
               raise SystemExit(f"rollback assertion replacements: {count}")
 
-          marker = '''    const ownerships = await database
-              .select()
-              .from(personalAccountOwnerships)
-              .where(eq(personalAccountOwnerships.userId, rollbackUserId));'''
-          assertion = '''    expect(failure).toBeInstanceOf(Error);
+          marker = "    const ownerships = await database"
+          position = content.rfind(marker)
+          if position < 0:
+              raise SystemExit("rollback ownership query not found")
+          assertions = '''    expect(failure).toBeInstanceOf(Error);
             expect(errorChainContains(failure, "RB-INC-088 forced Trip failure")).toBe(true);
 
-          ''' + marker
-          if marker not in content:
-              raise SystemExit("rollback ownership marker not found")
-          content = content.replace(marker, assertion, 1)
+          '''
+          content = content[:position] + assertions + content[position:]
           path.write_text(content, encoding="utf-8")
           PY
           pnpm install --frozen-lockfile

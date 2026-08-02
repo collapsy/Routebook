@@ -51,11 +51,11 @@ ai_context:
 
 ## 1. Status da decisão
 
-**Proposed**
+**Approved**
 
-Este ADR foi preparado para revisão humana e ainda não autoriza implementação.
+A **Opção A — transação local PostgreSQL** foi aprovada explicitamente pelo responsável humano do projeto em `2026-08-01`.
 
-Para avançar a `Approved`, exige aprovação explícita dos owners afetados e do Governance Owner, conforme o RB-GOV-002. O autor agente não é approver.
+A aprovação autoriza a implementação incremental desta decisão, preservando os limites, controles e critérios de verificação definidos neste ADR.
 
 Issue de discussão: [#156](https://github.com/collapsy/Routebook/issues/156).
 
@@ -90,9 +90,9 @@ Como coordenar a aplicação integral de uma Itinerary Proposal de modo que:
 - impacto: **alto**;
 - módulos afetados: Proposal Management, Itinerary Planning, Decision Intelligence e Database;
 - dados canônicos afetados: Itinerary, Itinerary Proposal, Proposal Application e Decision;
-- reviewers necessários: owners dos módulos afetados, Architecture e Data;
-- approvers necessários: owners afetados e Governance Owner;
-- approver atual: pendente.
+- reviewers registrados: responsável humano e owner do projeto;
+- approver: Ronaldo Gentil (`collapsy`), responsável humano e owner do projeto;
+- aprovação registrada em: `2026-08-01`.
 
 ## 5. Direcionadores da decisão
 
@@ -213,7 +213,7 @@ Cada efeito é confirmado separadamente e falhas posteriores geram ações compe
 
 Baixa depois de introduzir eventos e compensações canônicas.
 
-## 8. Decisão proposta
+## 8. Decisão adotada
 
 Adotar a **Opção A — transação local PostgreSQL** enquanto Proposal Management, Itinerary Planning e Decision Intelligence compartilharem processo e banco no monólito modular.
 
@@ -221,7 +221,7 @@ A coordenação deverá ocorrer por um Application Orchestrator que depende de u
 
 O orchestrator não receberá acesso genérico aos repositories. Os aggregates continuarão independentes de Drizzle, PostgreSQL, Next.js e detalhes de transação.
 
-## 9. Fluxo proposto
+## 9. Fluxo aprovado
 
 ```mermaid
 sequenceDiagram
@@ -316,7 +316,7 @@ Erros técnicos não serão apresentados como Planning Conflict.
 | commit sem evento externo | Médio | Outbox na mesma transação quando eventos forem introduzidos |
 | extração futura de módulo | Médio | condição de revisão e adapter substituível |
 
-## 16. Plano de implementação após aprovação
+## 16. Plano de implementação
 
 1. definir fingerprint e lifecycle canônico de Proposal Application;
 2. implementar aplicação pura dos itens no Itinerary Planning;
@@ -344,7 +344,7 @@ Cada etapa deverá possuir incremento ou correção própria e caminhos permitid
 
 ## 18. Rollback e evolução
 
-Antes da implementação, rejeitar este ADR não exige rollback técnico.
+Antes da implementação, superseder esta decisão não exige rollback técnico.
 
 Depois da implementação, o rollback funcional deverá desabilitar novas aplicações e preservar fatos já confirmados. Dados canônicos aplicados não serão apagados silenciosamente.
 
@@ -373,8 +373,9 @@ Reavaliar esta decisão quando ocorrer qualquer condição:
 
 ## 21. Registro de aprovação
 
-- decisão: pendente;
-- reviewers: pendentes;
-- approver: pendente;
-- approvedAt: pendente;
-- condições adicionais: pendentes.
+- decisão: **Approved — Opção A, transação local PostgreSQL**;
+- reviewers: Ronaldo Gentil (`collapsy`), responsável humano e owner do projeto;
+- approver: Ronaldo Gentil (`collapsy`), responsável humano e owner do projeto;
+- approvedAt: `2026-08-01`;
+- condições adicionais: implementação incremental, validação obrigatória em PostgreSQL real e preservação dos limites modulares definidos neste ADR;
+- evidência: aprovação humana explícita registrada antes da implementação.

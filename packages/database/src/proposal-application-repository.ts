@@ -504,11 +504,14 @@ export function createPostgresProposalApplicationRepository(
       const existing = await findById(application.id);
       if (
         existing !== null &&
-        existing.application.status === application.status &&
         existing.application.requestFingerprint === application.requestFingerprint &&
-        (existing.application.status === "succeeded"
-          ? existing.application.resultingItineraryVersion === application.resultingItineraryVersion
-          : existing.application.failureCode === application.failureCode)
+        ((existing.application.status === "succeeded" &&
+          application.status === "succeeded" &&
+          existing.application.resultingItineraryVersion ===
+            application.resultingItineraryVersion) ||
+          (existing.application.status === "failed" &&
+            application.status === "failed" &&
+            existing.application.failureCode === application.failureCode))
       ) {
         return;
       }

@@ -124,13 +124,18 @@ describe("DrizzleItineraryRepository", () => {
     try {
       await expect(
         database.transaction(async (transaction) => {
-          const repository = createPostgresItineraryRepository(transaction);
-          const nestedTransaction = vi.spyOn(transaction as never, "transaction" as never);
+          const nestedTransaction = vi.fn();
+          const executor = {
+            select: transaction.select.bind(transaction),
+            insert: transaction.insert.bind(transaction),
+            delete: transaction.delete.bind(transaction),
+            transaction: nestedTransaction,
+          };
+          const repository = createPostgresItineraryRepository(executor);
 
           await repository.save(itinerary);
           expect(await repository.findByTripId(trip.id)).toEqual(itinerary);
           expect(nestedTransaction).not.toHaveBeenCalled();
-          nestedTransaction.mockRestore();
           throw rollback;
         }),
       ).rejects.toBe(rollback);

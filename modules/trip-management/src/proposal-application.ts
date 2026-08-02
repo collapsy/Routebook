@@ -628,8 +628,7 @@ export function applyProposalItemsToItinerary(
   validateUniqueOperationReferences(command.items);
 
   const now = validApplicationTime(options.now ?? new Date());
-  const createActivityId =
-    options.createActivityId ?? ((_item: AddProposalItem, _index: number) => randomUUID());
+  const createActivityId = options.createActivityId ?? (() => randomUUID());
   const workingItinerary = cloneItinerary(itinerary);
   const reservedActivityIds = new Set(
     workingItinerary.days.flatMap((day) => day.activities.map((activity) => activity.id)),

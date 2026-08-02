@@ -212,6 +212,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-081 | Context Pack do RB-INC-081 | Implementation Context | Draft | 0.1.0 | [rb-inc-081-itinerary-proposal-acceptance-decision.md](./implementation/context-packs/rb-inc-081-itinerary-proposal-acceptance-decision.md) |
 | RB-INC-082 | Persistência PostgreSQL da Decision de Aceite | Implementation | Draft | 0.1.0 | [rb-inc-082-persist-itinerary-proposal-decision.md](./implementation/increments/rb-inc-082-persist-itinerary-proposal-decision.md) |
 | RB-CTX-082 | Context Pack do RB-INC-082 | Implementation Context | Draft | 0.1.0 | [rb-inc-082-persist-itinerary-proposal-decision.md](./implementation/context-packs/rb-inc-082-persist-itinerary-proposal-decision.md) |
+| RB-INC-083 | Fragment Transacional de Decision de Aceite | Implementation | Draft | 0.1.0 | [rb-inc-083-itinerary-proposal-decision-transaction-fragment.md](./implementation/increments/rb-inc-083-itinerary-proposal-decision-transaction-fragment.md) |
+| RB-CTX-083 | Context Pack do RB-INC-083 | Implementation Context | Draft | 0.1.0 | [rb-inc-083-itinerary-proposal-decision-transaction-fragment.md](./implementation/context-packs/rb-inc-083-itinerary-proposal-decision-transaction-fragment.md) |
 
 ## Status possíveis
 

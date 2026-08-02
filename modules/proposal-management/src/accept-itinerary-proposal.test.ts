@@ -124,21 +124,24 @@ describe("createAcceptItineraryProposalCommand", () => {
 });
 
 describe("createAcceptItineraryProposal", () => {
-  it.each(["applied", "replay"] as const)("delega uma vez e preserva resultado %s", async (kind) => {
-    const expected = result(kind);
-    const execute = vi.fn(async () => expected);
-    const transaction: ApplyItineraryProposalTransaction = { execute };
-    const accept = createAcceptItineraryProposal(transaction);
+  it.each(["applied", "replay"] as const)(
+    "delega uma vez e preserva resultado %s",
+    async (kind) => {
+      const expected = result(kind);
+      const execute = vi.fn(async () => expected);
+      const transaction: ApplyItineraryProposalTransaction = { execute };
+      const accept = createAcceptItineraryProposal(transaction);
 
-    await expect(accept.execute(input())).resolves.toBe(expected);
-    expect(execute).toHaveBeenCalledTimes(1);
-    expect(execute).toHaveBeenCalledWith(
-      expect.objectContaining({
-        itineraryProposalId: "proposal-1",
-        requestFingerprint: expect.stringMatching(/^[0-9a-f]{64}$/),
-      }),
-    );
-  });
+      await expect(accept.execute(input())).resolves.toBe(expected);
+      expect(execute).toHaveBeenCalledTimes(1);
+      expect(execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          itineraryProposalId: "proposal-1",
+          requestFingerprint: expect.stringMatching(/^[0-9a-f]{64}$/),
+        }),
+      );
+    },
+  );
 
   it("propaga erro público do port sem convertê-lo em Planning Conflict", async () => {
     const error = new AcceptItineraryProposalError(

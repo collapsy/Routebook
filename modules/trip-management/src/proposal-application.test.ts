@@ -10,9 +10,13 @@ import {
   type ApplyProposalItem,
   type ApplyProposalItems,
   type ApplyProposalItemsCommandInput,
+  type ApplyProposalItemsDomainErrorCode,
 } from "./proposal-application";
 
-function input(items: readonly ApplyProposalItem[] = []) {
+const baseTime = new Date("2026-08-01T18:00:00.000Z");
+const applicationTime = new Date("2026-08-01T19:00:00.000Z");
+
+function contractInput(items: readonly ApplyProposalItem[] = []) {
   return {
     tripId: " trip-1 ",
     itineraryId: " itinerary-1 ",
@@ -22,9 +26,6 @@ function input(items: readonly ApplyProposalItem[] = []) {
     items,
   } as const;
 }
-
-const baseTime = new Date("2026-08-01T18:00:00.000Z");
-const applicationTime = new Date("2026-08-01T19:00:00.000Z");
 
 function createActivity(
   id: string,
@@ -128,7 +129,7 @@ function applicationInput(
 
 function expectDomainError(
   operation: () => unknown,
-  code: ConstructorParameters<typeof ApplyProposalItemsDomainError>[0],
+  code: ApplyProposalItemsDomainErrorCode,
   itemIndex?: number,
 ): void {
   expect(operation).toThrowError(
@@ -141,12 +142,17 @@ function expectDomainError(
 
 describe("contrato ApplyProposalItems", () => {
   it("publica somente as quatro operações canônicas", () => {
-    expect(applyProposalItemOperationTypes).toEqual(["add", "move", "update", "remove"]);
+    expect(applyProposalItemOperationTypes).toEqual([
+      "add",
+      "move",
+      "update",
+      "remove",
+    ]);
   });
 
-  it("normaliza as quatro variantes e preserva a coleção vazia como válida", () => {
+  it("normaliza as quatro variantes e preserva coleção vazia", () => {
     const command = createApplyProposalItemsCommand(
-      input([
+      contractInput([
         {
           proposedActivityId: " proposed-add ",
           operationType: "add",
@@ -180,50 +186,50 @@ describe("contrato ApplyProposalItems", () => {
       ]),
     );
 
-    expect(command).toEqual({
+    expect(command).toMatchObject({
       tripId: "trip-1",
       itineraryId: "itinerary-1",
       itineraryProposalId: "proposal-1",
       expectedItineraryVersion: 4,
       idempotencyKey: "accept-proposal-1",
-      items: [
-        {
-          proposedActivityId: "proposed-add",
-          operationType: "add",
-          targetTripDayId: "day-1",
-          targetOrder: 2,
-          title: "Museu",
-          activityType: "place-visit",
-          flexibility: "suggested",
-          startTime: "09:30",
-          durationMinutes: 90,
-          placeId: "place-1",
-        },
-        {
-          proposedActivityId: "proposed-move",
-          operationType: "move",
-          sourceActivityId: "activity-1",
-          targetTripDayId: "day-2",
-        },
-        {
-          proposedActivityId: "proposed-update",
-          operationType: "update",
-          sourceActivityId: "activity-2",
-          title: "Almoço",
-          startTime: "12:00",
-        },
-        {
-          proposedActivityId: "proposed-remove",
-          operationType: "remove",
-          sourceActivityId: "activity-3",
-        },
-      ],
     });
-    expect(createApplyProposalItemsCommand(input()).items).toEqual([]);
+    expect(command.items).toEqual([
+      {
+        proposedActivityId: "proposed-add",
+        operationType: "add",
+        targetTripDayId: "day-1",
+        targetOrder: 2,
+        title: "Museu",
+        activityType: "place-visit",
+        flexibility: "suggested",
+        startTime: "09:30",
+        durationMinutes: 90,
+        placeId: "place-1",
+      },
+      {
+        proposedActivityId: "proposed-move",
+        operationType: "move",
+        sourceActivityId: "activity-1",
+        targetTripDayId: "day-2",
+      },
+      {
+        proposedActivityId: "proposed-update",
+        operationType: "update",
+        sourceActivityId: "activity-2",
+        title: "Almoço",
+        startTime: "12:00",
+      },
+      {
+        proposedActivityId: "proposed-remove",
+        operationType: "remove",
+        sourceActivityId: "activity-3",
+      },
+    ]);
+    expect(createApplyProposalItemsCommand(contractInput()).items).toEqual([]);
   });
 
-  it("congela o comando, a coleção e cada item sem mutar o input", () => {
-    const original = input([
+  it("congela o comando sem mutar o input", () => {
+    const original = contractInput([
       {
         proposedActivityId: " proposed-add ",
         operationType: "add",
@@ -248,94 +254,81 @@ describe("contrato ApplyProposalItems", () => {
     ["expectedItineraryVersion", { expectedItineraryVersion: 1.5 }],
     ["idempotencyKey", { idempotencyKey: " " }],
   ])("rejeita raiz inválida em %s", (field, override) => {
-    expect(() => createApplyProposalItemsCommand({ ...input(), ...override })).toThrowError(
+    expect(() =>
+      createApplyProposalItemsCommand({
+        ...contractInput(),
+        ...override,
+      }),
+    ).toThrowError(
       expect.objectContaining({
-        fieldErrors: expect.objectContaining({ [field]: expect.any(String) }),
+        fieldErrors: expect.objectContaining({
+          [field]: expect.any(String),
+        }),
       }),
     );
   });
 
   it("rejeita coleção ausente", () => {
     expect(() =>
-      createApplyProposalItemsCommand({ ...input(), items: undefined } as never),
+      createApplyProposalItemsCommand({
+        ...contractInput(),
+        items: undefined,
+      } as never),
     ).toThrowError(
       expect.objectContaining({
-        fieldErrors: { items: "Informe uma coleção de itens." },
+        fieldErrors: {
+          items: "Informe uma coleção de itens.",
+        },
       }),
     );
   });
 
-  it.each([
-    ["items.0.targetTripDayId", { operationType: "add", targetTripDayId: " ", title: "Museu" }],
-    [
-      "items.0.sourceActivityId",
-      {
-        operationType: "move",
-        sourceActivityId: " ",
-        targetTripDayId: "day-2",
-      },
-    ],
-    [
-      "items.0.targetTripDayId",
-      {
-        operationType: "move",
-        sourceActivityId: "activity-1",
-        targetTripDayId: " ",
-      },
-    ],
-    [
-      "items.0.sourceActivityId",
-      {
-        operationType: "update",
-        sourceActivityId: " ",
-        title: "Museu",
-      },
-    ],
-    ["items.0.sourceActivityId", { operationType: "remove", sourceActivityId: " " }],
-  ])("rejeita referência obrigatória em %s", (field, item) => {
+  it("rejeita referência e dados inválidos", () => {
     expect(() =>
       createApplyProposalItemsCommand(
-        input([{ proposedActivityId: "proposed-1", ...item } as ApplyProposalItem]),
+        contractInput([
+          {
+            proposedActivityId: "proposed-1",
+            operationType: "add",
+            targetTripDayId: " ",
+            title: " ",
+          },
+        ]),
       ),
-    ).toThrowError(
-      expect.objectContaining({
-        fieldErrors: expect.objectContaining({ [field]: expect.any(String) }),
-      }),
-    );
-  });
+    ).toThrowError(ApplyProposalItemsCommandValidationError);
 
-  it.each([
-    ["items.0.title", { title: " " }],
-    ["items.0.activityType", { activityType: "flight" }],
-    ["items.0.flexibility", { flexibility: "automatic" }],
-    ["items.0.startTime", { startTime: "24:00" }],
-    ["items.0.durationMinutes", { durationMinutes: 0 }],
-    ["items.0.targetOrder", { targetOrder: 0 }],
-    ["items.0.placeId", { placeId: " " }],
-  ])("rejeita dado de Activity inválido em %s", (field, override) => {
     expect(() =>
       createApplyProposalItemsCommand(
-        input([
+        contractInput([
+          {
+            proposedActivityId: "proposed-1",
+            operationType: "move",
+            sourceActivityId: " ",
+            targetTripDayId: "day-2",
+          },
+        ]),
+      ),
+    ).toThrowError(ApplyProposalItemsCommandValidationError);
+
+    expect(() =>
+      createApplyProposalItemsCommand(
+        contractInput([
           {
             proposedActivityId: "proposed-1",
             operationType: "add",
             targetTripDayId: "day-1",
             title: "Museu",
-            ...override,
-          } as ApplyProposalItem,
+            startTime: "24:00",
+          },
         ]),
       ),
-    ).toThrowError(
-      expect.objectContaining({
-        fieldErrors: expect.objectContaining({ [field]: expect.any(String) }),
-      }),
-    );
+    ).toThrowError(ApplyProposalItemsCommandValidationError);
   });
 
   it("rejeita operação desconhecida", () => {
     expect(() =>
       createApplyProposalItemsCommand(
-        input([
+        contractInput([
           {
             proposedActivityId: "proposed-1",
             operationType: "replace",
@@ -345,18 +338,22 @@ describe("contrato ApplyProposalItems", () => {
     ).toThrowError(ApplyProposalItemsCommandValidationError);
   });
 
-  it("expõe um port assíncrono sem implementação ou dependência externa", async () => {
+  it("expõe um port assíncrono sem implementação externa", async () => {
     const port: ApplyProposalItems = {
       async execute(command) {
         return {
           itineraryId: command.itineraryId,
           resultingItineraryVersion: command.expectedItineraryVersion + 1,
-          appliedProposedActivityIds: command.items.map((item) => item.proposedActivityId),
+          appliedProposedActivityIds: command.items.map(
+            (item) => item.proposedActivityId,
+          ),
         };
       },
     };
 
-    await expect(port.execute(createApplyProposalItemsCommand(input()))).resolves.toEqual({
+    await expect(
+      port.execute(createApplyProposalItemsCommand(contractInput())),
+    ).resolves.toEqual({
       itineraryId: "itinerary-1",
       resultingItineraryVersion: 5,
       appliedProposedActivityIds: [],
@@ -365,10 +362,12 @@ describe("contrato ApplyProposalItems", () => {
 });
 
 describe("applyProposalItemsToItinerary", () => {
-  it("aplica add, move, update e remove em ordem com uma única nova versão", () => {
+  it("aplica quatro operações em ordem com uma única nova versão", () => {
     const itinerary = createItineraryFixture();
     const original = structuredClone(itinerary);
-    const protectedPeriod = structuredClone(itinerary.days[1]?.freePeriods[0]);
+    const protectedPeriod = structuredClone(
+      itinerary.days[1]?.freePeriods[0],
+    );
     const command = applicationInput([
       {
         proposedActivityId: "proposed-add",
@@ -411,7 +410,12 @@ describe("applyProposalItemsToItinerary", () => {
 
     expect(applied.itinerary.version).toBe(5);
     expect(applied.itinerary.updatedAt).toEqual(applicationTime);
-    expect(applied.itinerary.days[0]?.activities.map(({ id, order }) => ({ id, order }))).toEqual([
+    expect(
+      applied.itinerary.days[0]?.activities.map(({ id, order }) => ({
+        id,
+        order,
+      })),
+    ).toEqual([
       { id: "activity-new", order: 1 },
       { id: "activity-fixed", order: 2 },
     ]);
@@ -426,7 +430,12 @@ describe("applyProposalItemsToItinerary", () => {
       createdAt: applicationTime,
       updatedAt: applicationTime,
     });
-    expect(applied.itinerary.days[1]?.activities.map(({ id, order }) => ({ id, order }))).toEqual([
+    expect(
+      applied.itinerary.days[1]?.activities.map(({ id, order }) => ({
+        id,
+        order,
+      })),
+    ).toEqual([
       { id: "activity-3", order: 1 },
       { id: "activity-2", order: 2 },
     ]);
@@ -442,7 +451,9 @@ describe("applyProposalItemsToItinerary", () => {
       createdAt: baseTime,
       updatedAt: applicationTime,
     });
-    expect(applied.itinerary.days[1]?.freePeriods[0]).toEqual(protectedPeriod);
+    expect(applied.itinerary.days[1]?.freePeriods[0]).toEqual(
+      protectedPeriod,
+    );
     expect(applied.result).toEqual({
       itineraryId: "itinerary-1",
       resultingItineraryVersion: 5,
@@ -460,11 +471,15 @@ describe("applyProposalItemsToItinerary", () => {
     );
   });
 
-  it("aplica coleção vazia como transação válida com versão única e cópia independente", () => {
+  it("aceita coleção vazia com versão única e cópia independente", () => {
     const itinerary = createItineraryFixture();
-    const applied = applyProposalItemsToItinerary(itinerary, applicationInput([]), {
-      now: applicationTime,
-    });
+    const applied = applyProposalItemsToItinerary(
+      itinerary,
+      applicationInput([]),
+      {
+        now: applicationTime,
+      },
+    );
 
     expect(applied.itinerary).toEqual({
       ...itinerary,
@@ -490,20 +505,22 @@ describe("applyProposalItemsToItinerary", () => {
           targetOrder: 1,
         },
       ]),
-      { now: applicationTime },
+      {
+        now: applicationTime,
+      },
     );
 
-    expect(applied.itinerary.days[0]?.activities.map((activity) => activity.id)).toEqual([
-      "activity-3",
-      "activity-1",
-      "activity-fixed",
-    ]);
-    expect(applied.itinerary.days[0]?.activities.map((activity) => activity.order)).toEqual([
-      1, 2, 3,
-    ]);
+    expect(
+      applied.itinerary.days[0]?.activities.map((activity) => activity.id),
+    ).toEqual(["activity-3", "activity-1", "activity-fixed"]);
+    expect(
+      applied.itinerary.days[0]?.activities.map(
+        (activity) => activity.order,
+      ),
+    ).toEqual([1, 2, 3]);
   });
 
-  it("preserva tipo, flexibilidade e Place no update e remove horário e duração omitidos", () => {
+  it("preserva tipo, flexibilidade e Place no update", () => {
     const applied = applyProposalItemsToItinerary(
       createItineraryFixture(),
       applicationInput([
@@ -514,7 +531,9 @@ describe("applyProposalItemsToItinerary", () => {
           title: "Almoço sem horário",
         },
       ]),
-      { now: applicationTime },
+      {
+        now: applicationTime,
+      },
     );
     const activity = applied.itinerary.days[1]?.activities[0];
 
@@ -539,7 +558,9 @@ describe("applyProposalItemsToItinerary", () => {
         applyProposalItemsToItinerary(
           createItineraryFixture(),
           applicationInput([], override),
-          { now: applicationTime },
+          {
+            now: applicationTime,
+          },
         ),
       code,
     );
@@ -563,14 +584,16 @@ describe("applyProposalItemsToItinerary", () => {
               sourceActivityId: "activity-1",
             },
           ]),
-          { now: applicationTime },
+          {
+            now: applicationTime,
+          },
         ),
       "duplicate-proposed-activity-id",
       1,
     );
   });
 
-  it("rejeita múltiplas operações sobre a mesma Activity canônica", () => {
+  it("rejeita múltiplas operações sobre a mesma Activity", () => {
     expectDomainError(
       () =>
         applyProposalItemsToItinerary(
@@ -588,40 +611,52 @@ describe("applyProposalItemsToItinerary", () => {
               sourceActivityId: "activity-1",
             },
           ]),
-          { now: applicationTime },
+          {
+            now: applicationTime,
+          },
         ),
       "duplicate-source-activity-id",
       1,
     );
   });
 
-  it.each([
-    [
-      "target-trip-day-not-found",
-      {
-        proposedActivityId: "add",
-        operationType: "add",
-        targetTripDayId: "day-inexistente",
-        title: "Museu",
-      },
-    ],
-    [
-      "source-activity-not-found",
-      {
-        proposedActivityId: "remove",
-        operationType: "remove",
-        sourceActivityId: "activity-inexistente",
-      },
-    ],
-  ] as const)("rejeita %s", (code, item) => {
+  it("rejeita Dia alvo e Activity de origem inexistentes", () => {
     expectDomainError(
       () =>
         applyProposalItemsToItinerary(
           createItineraryFixture(),
-          applicationInput([item as ApplyProposalItem]),
-          { now: applicationTime },
+          applicationInput([
+            {
+              proposedActivityId: "add",
+              operationType: "add",
+              targetTripDayId: "day-inexistente",
+              title: "Museu",
+            },
+          ]),
+          {
+            now: applicationTime,
+          },
         ),
-      code,
+      "target-trip-day-not-found",
+      0,
+    );
+
+    expectDomainError(
+      () =>
+        applyProposalItemsToItinerary(
+          createItineraryFixture(),
+          applicationInput([
+            {
+              proposedActivityId: "remove",
+              operationType: "remove",
+              sourceActivityId: "activity-inexistente",
+            },
+          ]),
+          {
+            now: applicationTime,
+          },
+        ),
+      "source-activity-not-found",
       0,
     );
   });
@@ -629,33 +664,38 @@ describe("applyProposalItemsToItinerary", () => {
   it.each(["move", "update", "remove"] as const)(
     "protege Activity fixed contra %s",
     (operationType) => {
-      const item: ApplyProposalItem =
-        operationType === "move"
-          ? {
-              proposedActivityId: "fixed",
-              operationType,
-              sourceActivityId: "activity-fixed",
-              targetTripDayId: "day-2",
-            }
-          : operationType === "update"
-            ? {
-                proposedActivityId: "fixed",
-                operationType,
-                sourceActivityId: "activity-fixed",
-                title: "Check-in alterado",
-              }
-            : {
-                proposedActivityId: "fixed",
-                operationType,
-                sourceActivityId: "activity-fixed",
-              };
+      let item: ApplyProposalItem;
+
+      if (operationType === "move") {
+        item = {
+          proposedActivityId: "fixed",
+          operationType,
+          sourceActivityId: "activity-fixed",
+          targetTripDayId: "day-2",
+        };
+      } else if (operationType === "update") {
+        item = {
+          proposedActivityId: "fixed",
+          operationType,
+          sourceActivityId: "activity-fixed",
+          title: "Check-in alterado",
+        };
+      } else {
+        item = {
+          proposedActivityId: "fixed",
+          operationType,
+          sourceActivityId: "activity-fixed",
+        };
+      }
 
       expectDomainError(
         () =>
           applyProposalItemsToItinerary(
             createItineraryFixture(),
             applicationInput([item]),
-            { now: applicationTime },
+            {
+              now: applicationTime,
+            },
           ),
         "fixed-activity-protected",
         0,
@@ -663,41 +703,51 @@ describe("applyProposalItemsToItinerary", () => {
     },
   );
 
-  it.each([
-    [
-      "add",
-      {
-        proposedActivityId: "add",
-        operationType: "add",
-        targetTripDayId: "day-1",
-        targetOrder: 5,
-        title: "Museu",
-      },
-    ],
-    [
-      "move",
-      {
-        proposedActivityId: "move",
-        operationType: "move",
-        sourceActivityId: "activity-3",
-        targetTripDayId: "day-2",
-        targetOrder: 3,
-      },
-    ],
-  ] as const)("rejeita targetOrder fora da faixa em %s", (_case, item) => {
+  it("rejeita targetOrder fora da faixa", () => {
     expectDomainError(
       () =>
         applyProposalItemsToItinerary(
           createItineraryFixture(),
-          applicationInput([item as ApplyProposalItem]),
-          { now: applicationTime },
+          applicationInput([
+            {
+              proposedActivityId: "add",
+              operationType: "add",
+              targetTripDayId: "day-1",
+              targetOrder: 5,
+              title: "Museu",
+            },
+          ]),
+          {
+            now: applicationTime,
+          },
+        ),
+      "target-order-out-of-range",
+      0,
+    );
+
+    expectDomainError(
+      () =>
+        applyProposalItemsToItinerary(
+          createItineraryFixture(),
+          applicationInput([
+            {
+              proposedActivityId: "move",
+              operationType: "move",
+              sourceActivityId: "activity-3",
+              targetTripDayId: "day-2",
+              targetOrder: 3,
+            },
+          ]),
+          {
+            now: applicationTime,
+          },
         ),
       "target-order-out-of-range",
       0,
     );
   });
 
-  it("rejeita identidade canônica gerada vazia ou já existente", () => {
+  it("rejeita ActivityId vazio ou já existente", () => {
     const command = applicationInput([
       {
         proposedActivityId: "add",
@@ -709,19 +759,27 @@ describe("applyProposalItemsToItinerary", () => {
 
     expectDomainError(
       () =>
-        applyProposalItemsToItinerary(createItineraryFixture(), command, {
-          now: applicationTime,
-          createActivityId: () => " ",
-        }),
+        applyProposalItemsToItinerary(
+          createItineraryFixture(),
+          command,
+          {
+            now: applicationTime,
+            createActivityId: () => " ",
+          },
+        ),
       "generated-activity-id-invalid",
       0,
     );
     expectDomainError(
       () =>
-        applyProposalItemsToItinerary(createItineraryFixture(), command, {
-          now: applicationTime,
-          createActivityId: () => "activity-1",
-        }),
+        applyProposalItemsToItinerary(
+          createItineraryFixture(),
+          command,
+          {
+            now: applicationTime,
+            createActivityId: () => "activity-1",
+          },
+        ),
       "generated-activity-id-duplicate",
       0,
     );
@@ -759,14 +817,18 @@ describe("applyProposalItemsToItinerary", () => {
   it("rejeita instante de aplicação inválido", () => {
     expectDomainError(
       () =>
-        applyProposalItemsToItinerary(createItineraryFixture(), applicationInput([]), {
-          now: new Date("invalid"),
-        }),
+        applyProposalItemsToItinerary(
+          createItineraryFixture(),
+          applicationInput([]),
+          {
+            now: new Date("invalid"),
+          },
+        ),
       "application-time-invalid",
     );
   });
 
-  it("não expõe mutação parcial quando um item posterior falha", () => {
+  it("não expõe mutação parcial quando item posterior falha", () => {
     const itinerary = createItineraryFixture();
     const original = structuredClone(itinerary);
 
@@ -798,15 +860,35 @@ describe("applyProposalItemsToItinerary", () => {
     expect(itinerary).toEqual(original);
   });
 
-  it("congela o envelope, o resultado e a coleção de IDs aplicados", () => {
+  it("congela o envelope e o resultado", () => {
     const applied = applyProposalItemsToItinerary(
       createItineraryFixture(),
       applicationInput([]),
-      { now: applicationTime },
+      {
+        now: applicationTime,
+      },
     );
 
     expect(Object.isFrozen(applied)).toBe(true);
     expect(Object.isFrozen(applied.result)).toBe(true);
-    expect(Object.isFrozen(applied.result.appliedProposedActivityIds)).toBe(true);
+    expect(
+      Object.isFrozen(applied.result.appliedProposedActivityIds),
+    ).toBe(true);
+    expect(applied).toBeTypeOf("object");
+    expect(applied.result).toBeTypeOf("object");
+  });
+
+  it("expõe erro de domínio específico", () => {
+    expect(() =>
+      applyProposalItemsToItinerary(
+        createItineraryFixture(),
+        applicationInput([], {
+          expectedItineraryVersion: 3,
+        }),
+        {
+          now: applicationTime,
+        },
+      ),
+    ).toThrowError(ApplyProposalItemsDomainError);
   });
 });

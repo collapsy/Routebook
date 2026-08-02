@@ -92,7 +92,7 @@ ai_context:
 | RB-INC-081 | RB-DOM-001, RB-DOM-003–004, RB-ADR-027 e RB-INC-072, RB-INC-079–080 | #185 | `feature/rb-inc-081-itinerary-proposal-acceptance-decision`, PR #186 | Decision de aceite com option, snapshot, effect e invariantes cruzadas | runs 30753442260 e 30753442266; 202 documentos, migrations, suíte integral, build e 56 E2E responsivos verdes | Integrado |
 | RB-INC-082 | RB-DATA-002, RB-ADR-006, RB-ADR-027 e RB-INC-080–081 | #187 | `feature/rb-inc-082-persist-itinerary-proposal-decision`, PR #188 | check constraint e migration para persistir a Decision de aceite com round trip e rollback | PR #188; validação em andamento | Em validação |
 
-| RB-INC-084 | RB-ADR-027, RB-ARC-003–004, RB-DATA-002 e RB-INC-072–075, RB-INC-079, RB-INC-083 | #191 | `feature/rb-inc-084-apply-itinerary-proposal-transaction`, PR #194 | composição PostgreSQL dos quatro fragments em uma única transação física | validações finais em execução | Em validação |
+| RB-INC-084 | RB-ADR-027, RB-ARC-003–004, RB-DATA-002 e RB-INC-072–075, RB-INC-079, RB-INC-083 | #191 | `feature/rb-inc-084-apply-itinerary-proposal-transaction`, PR #194 | composição PostgreSQL dos quatro fragments em uma única transação física | runs 30766253051 e 30766253063; migration 0019, suíte integral, smoke, build e E2E responsivo verdes | Pronto para integração |
 
 ## Evidências do RB-INC-003
 

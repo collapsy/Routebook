@@ -3,9 +3,7 @@ import {
   type Decision,
   type RecommendationId,
 } from "@routebook/decision-intelligence";
-import type {
-  AcceptItineraryProposalCommand,
-} from "@routebook/proposal-management";
+import type { AcceptItineraryProposalCommand } from "@routebook/proposal-management";
 
 import {
   createPostgresDecisionRepository,
@@ -51,10 +49,7 @@ function assertInput(input: PersistItineraryProposalDecisionInput): void {
   }
   requiredText(input.proposalApplicationId, "proposalApplicationId");
   requiredText(input.actorParticipantId, "actorParticipantId");
-  if (
-    !Number.isInteger(input.resultingItineraryVersion) ||
-    input.resultingItineraryVersion < 1
-  ) {
+  if (!Number.isInteger(input.resultingItineraryVersion) || input.resultingItineraryVersion < 1) {
     throw new TypeError("Informe resultingItineraryVersion como inteiro positivo.");
   }
   if (!Array.isArray(input.appliedProposedActivityIds)) {

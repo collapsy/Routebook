@@ -25,20 +25,23 @@ jobs:
       - name: Preserve Decision invocation event on failure
         run: |
           python - <<'PY'
+          import re
           from pathlib import Path
 
           test = Path("packages/database/src/apply-itinerary-proposal-transaction.test.ts")
           content = test.read_text(encoding="utf-8")
-          old = '''    vi.mocked(context.fragments.decision.persist).mockRejectedValueOnce(
-                new Error("falha intencional na Decision"),
-              );'''
-          new = '''    vi.mocked(context.fragments.decision.persist).mockImplementationOnce(async () => {
+          pattern = re.compile(
+              r'\s*vi\.mocked\(context\.fragments\.decision\.persist\)\.mockRejectedValueOnce\(\s*new Error\("falha intencional na Decision"\),\s*\);'
+          )
+          replacement = '''
+              vi.mocked(context.fragments.decision.persist).mockImplementationOnce(async () => {
                 context.events.push("persist-decision");
                 throw new Error("falha intencional na Decision");
               });'''
-          if old not in content:
-              raise SystemExit("Decision failure mock block not found")
-          test.write_text(content.replace(old, new, 1), encoding="utf-8")
+          content, count = pattern.subn(replacement, content, count=1)
+          if count != 1:
+              raise SystemExit(f"Expected one Decision failure mock, found {count}")
+          test.write_text(content, encoding="utf-8")
           Path(".github/workflows/rb-inc-084-test-patch.yml").unlink()
           PY
 
@@ -50,4 +53,4 @@ jobs:
           git commit -m "fix(database): preserve Decision failure event"
           git push origin HEAD:feature/rb-inc-084-apply-itinerary-proposal-transaction
 
-# trigger
+# regex-trigger

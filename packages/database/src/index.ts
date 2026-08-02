@@ -19,6 +19,13 @@ export {
   type DecisionDatabaseExecutor,
 } from "./decision-repository";
 export {
+  createDecisionTransactionFragment,
+  type DecisionTransactionFragment,
+  type DecisionTransactionRepository,
+  type DecisionTransactionRepositoryFactory,
+  type PersistItineraryProposalDecisionInput,
+} from "./decision-transaction-fragment";
+export {
   createPostgresItineraryRepository,
   DrizzleItineraryRepository,
   type ItineraryDatabaseExecutor,

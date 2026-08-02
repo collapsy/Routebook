@@ -7,7 +7,7 @@ owner: Data and Persistence
 status: Draft
 version: "0.1.0"
 created: "2026-08-01"
-last_updated: "2026-08-01"
+last_updated: "2026-08-02"
 authors:
   - RouteBook Team
 tags:
@@ -156,7 +156,7 @@ docs/registry.md
 - [x] resultado da operação é preservado;
 - [x] falha de factory impede fragments posteriores e a operação;
 - [x] falha da operação é propagada sem retry ou compensação;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 11. Testes obrigatórios
 
@@ -190,4 +190,13 @@ Remover a unidade, seus testes e exports. Nenhuma migration, query, tabela, dado
 
 ## 14. Evidências
 
-As evidências definitivas serão registradas após a aprovação dos workflows da PR #172.
+- Documentation Validation `30732402937`: aprovada;
+- Engineering Validation `30732402941`: aprovada;
+- 190 documentos encontrados e registrados;
+- instalação congelada e formatação aprovadas;
+- lint e typecheck aprovados;
+- migrations PostgreSQL existentes aplicadas com sucesso;
+- suíte integral e smoke aprovados;
+- build de produção aprovado;
+- 56 testes Playwright responsivos aprovados;
+- HEAD validado antes do registro das evidências: `e11861d9a054b10c540dc1a778c4ad27cba3fb09`.

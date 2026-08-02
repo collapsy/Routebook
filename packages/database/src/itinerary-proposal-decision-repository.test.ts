@@ -7,10 +7,7 @@ import { createDecision } from "@routebook/decision-intelligence";
 import { createTrip } from "@routebook/trip-management";
 
 import { closeDatabase, getDatabase } from "./client";
-import {
-  createPostgresDecisionRepository,
-  DrizzleDecisionRepository,
-} from "./decision-repository";
+import { createPostgresDecisionRepository, DrizzleDecisionRepository } from "./decision-repository";
 import { decisions } from "./decision-schema";
 import { trips } from "./schema";
 import { DrizzleTripRepository } from "./trip-repository";
@@ -26,11 +23,7 @@ function trip(name: string) {
   });
 }
 
-function acceptanceDecision(
-  tripId: string,
-  idempotencyKey: string,
-  id = randomUUID(),
-) {
+function acceptanceDecision(tripId: string, idempotencyKey: string, id = randomUUID()) {
   return createDecision({
     id,
     tripId,
@@ -70,24 +63,15 @@ describe("Itinerary Proposal acceptance Decision persistence", () => {
     const currentTrip = trip("Persistência da Decision de aceite");
     const database = getDatabase();
     const repository = new DrizzleDecisionRepository();
-    const persisted = acceptanceDecision(
-      currentTrip.id,
-      `accept-proposal-${currentTrip.id}`,
-    );
-    const repeated = acceptanceDecision(
-      currentTrip.id,
-      persisted.idempotencyKey,
-    );
+    const persisted = acceptanceDecision(currentTrip.id, `accept-proposal-${currentTrip.id}`);
+    const repeated = acceptanceDecision(currentTrip.id, persisted.idempotencyKey);
 
     await new DrizzleTripRepository().create(currentTrip);
     try {
       expect(await repository.save(persisted)).toEqual(persisted);
       expect(await repository.findById(persisted.id)).toEqual(persisted);
       expect(
-        await repository.findByIdempotencyKey(
-          currentTrip.id,
-          persisted.idempotencyKey,
-        ),
+        await repository.findByIdempotencyKey(currentTrip.id, persisted.idempotencyKey),
       ).toEqual(persisted);
       expect(await repository.save(repeated)).toEqual(persisted);
       expect(await repository.listByTripId(currentTrip.id)).toEqual([persisted]);

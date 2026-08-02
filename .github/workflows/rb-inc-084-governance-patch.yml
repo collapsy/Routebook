@@ -44,15 +44,11 @@ jobs:
           matrix_text = matrix.read_text(encoding="utf-8")
           matrix_row = "| RB-INC-084 | RB-ADR-027, RB-ARC-003–004, RB-DATA-002 e RB-INC-072–075, RB-INC-079, RB-INC-083 | #191 | `feature/rb-inc-084-apply-itinerary-proposal-transaction`, PR #194 | composição PostgreSQL dos quatro fragments em uma única transação física | validações finais em execução | Em validação |\n"
           if "| RB-INC-084 |" not in matrix_text:
-              lines = matrix_text.splitlines(keepends=True)
-              insertion = None
-              for index, line in enumerate(lines):
-                  if line.startswith("| RB-INC-083 |"):
-                      insertion = index + 1
-              if insertion is None:
-                  raise SystemExit("RB-INC-083 row not found in traceability matrix")
-              lines.insert(insertion, matrix_row)
-              matrix.write_text("".join(lines), encoding="utf-8")
+              marker = "\n## Evidências do RB-INC-003\n"
+              if marker not in matrix_text:
+                  raise SystemExit("Evidence section marker not found in traceability matrix")
+              matrix_text = matrix_text.replace(marker, "\n" + matrix_row + marker, 1)
+              matrix.write_text(matrix_text, encoding="utf-8")
 
           Path(".github/workflows/rb-inc-084-governance-patch.yml").unlink()
           PY

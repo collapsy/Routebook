@@ -1,4 +1,29 @@
 export {
+  createProposalApplicationId,
+  createProposalApplicationRequestFingerprint,
+  failProposalApplication,
+  proposalApplicationRequestFingerprintSchemaVersion,
+  proposalApplicationStatuses,
+  proposalApplicationTypes,
+  ProposalApplicationTransitionError,
+  ProposalApplicationValidationError,
+  startProposalApplication,
+  succeedProposalApplication,
+} from "./proposal-application";
+export type {
+  FailedProposalApplication,
+  FailProposalApplicationInput,
+  ProposalApplication,
+  ProposalApplicationId,
+  ProposalApplicationRequestFingerprintInput,
+  ProposalApplicationStatus,
+  ProposalApplicationType,
+  StartedProposalApplication,
+  StartProposalApplicationInput,
+  SucceededProposalApplication,
+  SucceedProposalApplicationInput,
+} from "./proposal-application";
+export {
   cancelItineraryProposalGeneration,
   completeItineraryProposalGeneration,
   createItineraryProposalId,

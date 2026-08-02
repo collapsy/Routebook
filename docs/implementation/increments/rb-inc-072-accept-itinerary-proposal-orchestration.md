@@ -160,7 +160,7 @@ docs/registry.md
 - [x] orchestrator delega exatamente uma vez;
 - [x] resultados `applied` e `replay` são preservados;
 - [x] erros públicos e falhas técnicas são propagados sem conversão indevida;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 11. Testes obrigatórios
 
@@ -194,4 +194,12 @@ Remover a fronteira, seus exports e testes. Nenhuma migration, tabela, dado pers
 
 ## 14. Evidências
 
-As evidências definitivas serão registradas após a aprovação dos workflows da PR #170.
+- Documentation Validation: run `30729158226`, concluído com sucesso;
+- Engineering Validation: run `30729158215`, concluído com sucesso;
+- 186 documentos encontrados e registrados;
+- instalação congelada, formatação, lint e typecheck aprovados;
+- migrations PostgreSQL existentes aplicadas com sucesso;
+- suíte integral e smoke aprovados;
+- build de produção aprovado;
+- 56 testes Playwright responsivos aprovados;
+- HEAD validado: `2814734dc561666b65a7e5ad7ee042b4c0235b0b`.

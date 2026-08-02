@@ -1,0 +1,40 @@
+name: RB-INC-087 Format Test
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+    paths:
+      - .github/workflows/rb-inc-087-format-test.yml
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.head_ref == 'feature/rb-inc-087-account-membership-trip-authorization'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-087-account-membership-trip-authorization
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: corepack enable
+      - name: Format test
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm exec prettier --write modules/identity-access/src/trip-authorization.test.ts
+          rm .github/workflows/rb-inc-087-format-test.yml
+      - name: Commit formatting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add modules/identity-access/src/trip-authorization.test.ts .github/workflows/rb-inc-087-format-test.yml
+          git commit -m "test: apply canonical authorization fixture formatting"
+          git push origin HEAD:feature/rb-inc-087-account-membership-trip-authorization

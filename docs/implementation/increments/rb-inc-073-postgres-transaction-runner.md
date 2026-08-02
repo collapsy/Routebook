@@ -145,7 +145,7 @@ docs/registry.md
 - [x] rejeição assíncrona é propagada;
 - [x] não existe retry ou compensação;
 - [x] host e callback inválidos são rejeitados;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 11. Testes obrigatórios
 
@@ -175,4 +175,12 @@ Remover o runner, seus testes e exports. Nenhuma migration, tabela, query, dado 
 
 ## 14. Evidências
 
-As evidências definitivas serão registradas após a aprovação dos workflows da PR #171.
+- Documentation Validation: run `30729863528`, concluído com sucesso;
+- Engineering Validation: run `30729863527`, concluído com sucesso;
+- 188 documentos encontrados e registrados;
+- instalação congelada, formatação, lint e typecheck aprovados;
+- migrations PostgreSQL existentes aplicadas com sucesso;
+- suíte integral e smoke aprovados;
+- build de produção aprovado;
+- 56 testes Playwright responsivos aprovados;
+- HEAD validado: `2ba2d2a82a5ac720c20ca5520b0cc2219c5144b5`.

@@ -127,7 +127,7 @@ Todas as etapas executam dentro da mesma transação física aberta pela `Itiner
 - [x] replay e estados não executáveis mapeados;
 - [x] resposta pública preserva IDs, fingerprint, versão e atividades;
 - [x] falhas impedem finalizações posteriores;
-- [ ] atomicidade PostgreSQL comprovada por testes de integração;
+- [x] atomicidade PostgreSQL comprovada por testes de integração;
 - [ ] validações finais do CI aprovadas.
 
 ## 9. Testes obrigatórios

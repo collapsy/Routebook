@@ -1,0 +1,30 @@
+name: RB-INC-076 Format Finalize
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-076-scoped-proposal-repository
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Apply canonical formatting
+        run: node scripts/finalize-rb-inc-076-format.mjs
+
+      - name: Commit finalized files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "style(database): aplicar Prettier ao repository transacional"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

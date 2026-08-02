@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, describe, expect, it, vi } from "vitest";
 import { eq } from "drizzle-orm";
 
+import type { DecisionId } from "@routebook/decision-intelligence";
 import { createAcceptItineraryProposalCommand } from "@routebook/proposal-management";
 import { createTrip } from "@routebook/trip-management";
 
@@ -60,7 +61,7 @@ describe("Decision transaction fragment with PostgreSQL", () => {
   it("persiste e reproduz a Decision pelo executor escopado sem nested transaction", async () => {
     const currentTrip = trip("Fragment de Decision de aceite");
     const database = getDatabase();
-    const decisionId = randomUUID();
+    const decisionId = randomUUID() as DecisionId;
     const idempotencyKey = `accept-fragment-${currentTrip.id}`;
 
     await new DrizzleTripRepository().create(currentTrip);
@@ -108,7 +109,7 @@ describe("Decision transaction fragment with PostgreSQL", () => {
   it("participa do rollback externo integral", async () => {
     const currentTrip = trip("Rollback do fragment de Decision");
     const database = getDatabase();
-    const decisionId = randomUUID();
+    const decisionId = randomUUID() as DecisionId;
     const rollback = new Error("rollback intencional");
 
     await new DrizzleTripRepository().create(currentTrip);

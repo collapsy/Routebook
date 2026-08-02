@@ -121,10 +121,7 @@ describe("createItineraryProposalTransactionFragment", () => {
     const scopedExecutor = executor();
     const stored = repository();
     const repositoryFactory = vi.fn(() => stored.value);
-    const fragment = createItineraryProposalTransactionFragment(
-      scopedExecutor,
-      repositoryFactory,
-    );
+    const fragment = createItineraryProposalTransactionFragment(scopedExecutor, repositoryFactory);
     const acceptanceCommand = command();
 
     const result = await fragment.loadForAcceptance(acceptanceCommand);
@@ -139,13 +136,10 @@ describe("createItineraryProposalTransactionFragment", () => {
 
   it("retorna proposal-not-found quando o snapshot não existe", async () => {
     const stored = repository(null);
-    const fragment = createItineraryProposalTransactionFragment(
-      executor(),
-      () => stored.value,
-    );
+    const fragment = createItineraryProposalTransactionFragment(executor(), () => stored.value);
 
-    await expect(fragment.loadForAcceptance(command())).rejects.toSatisfy(
-      (error) => expectAcceptanceError(error, "proposal-not-found"),
+    await expect(fragment.loadForAcceptance(command())).rejects.toSatisfy((error) =>
+      expectAcceptanceError(error, "proposal-not-found"),
     );
   });
 
@@ -160,62 +154,45 @@ describe("createItineraryProposalTransactionFragment", () => {
       requestedAt,
     });
     const stored = repository(proposal);
-    const fragment = createItineraryProposalTransactionFragment(
-      executor(),
-      () => stored.value,
-    );
+    const fragment = createItineraryProposalTransactionFragment(executor(), () => stored.value);
 
-    await expect(fragment.loadForAcceptance(command())).rejects.toSatisfy(
-      (error) => expectAcceptanceError(error, "proposal-not-ready"),
+    await expect(fragment.loadForAcceptance(command())).rejects.toSatisfy((error) =>
+      expectAcceptanceError(error, "proposal-not-ready"),
     );
   });
 
   it("retorna proposal-expired quando o aceite alcança validUntil", async () => {
     const stored = repository();
-    const fragment = createItineraryProposalTransactionFragment(
-      executor(),
-      () => stored.value,
-    );
+    const fragment = createItineraryProposalTransactionFragment(executor(), () => stored.value);
 
-    await expect(
-      fragment.loadForAcceptance(command({ decidedAt: validUntil })),
-    ).rejects.toSatisfy((error) =>
-      expectAcceptanceError(error, "proposal-expired"),
+    await expect(fragment.loadForAcceptance(command({ decidedAt: validUntil }))).rejects.toSatisfy(
+      (error) => expectAcceptanceError(error, "proposal-expired"),
     );
   });
 
   it("retorna proposal-not-found para identidade divergente", async () => {
     const proposal = { ...readyProposal(), itineraryId: "itinerary-other" };
     const stored = repository(proposal);
-    const fragment = createItineraryProposalTransactionFragment(
-      executor(),
-      () => stored.value,
-    );
+    const fragment = createItineraryProposalTransactionFragment(executor(), () => stored.value);
 
-    await expect(fragment.loadForAcceptance(command())).rejects.toSatisfy(
-      (error) => expectAcceptanceError(error, "proposal-not-found"),
+    await expect(fragment.loadForAcceptance(command())).rejects.toSatisfy((error) =>
+      expectAcceptanceError(error, "proposal-not-found"),
     );
   });
 
   it("retorna itinerary-version-mismatch para versão-base divergente", async () => {
     const proposal = { ...readyProposal(), baseItineraryVersion: 6 };
     const stored = repository(proposal);
-    const fragment = createItineraryProposalTransactionFragment(
-      executor(),
-      () => stored.value,
-    );
+    const fragment = createItineraryProposalTransactionFragment(executor(), () => stored.value);
 
-    await expect(fragment.loadForAcceptance(command())).rejects.toSatisfy(
-      (error) => expectAcceptanceError(error, "itinerary-version-mismatch"),
+    await expect(fragment.loadForAcceptance(command())).rejects.toSatisfy((error) =>
+      expectAcceptanceError(error, "itinerary-version-mismatch"),
     );
   });
 
   it("retorna proposal-items-mismatch para coleção divergente", async () => {
     const stored = repository();
-    const fragment = createItineraryProposalTransactionFragment(
-      executor(),
-      () => stored.value,
-    );
+    const fragment = createItineraryProposalTransactionFragment(executor(), () => stored.value);
     const acceptanceCommand = command({
       items: [
         {
@@ -232,9 +209,7 @@ describe("createItineraryProposalTransactionFragment", () => {
       ],
     });
 
-    await expect(
-      fragment.loadForAcceptance(acceptanceCommand),
-    ).rejects.toSatisfy((error) =>
+    await expect(fragment.loadForAcceptance(acceptanceCommand)).rejects.toSatisfy((error) =>
       expectAcceptanceError(error, "proposal-items-mismatch"),
     );
   });
@@ -242,17 +217,12 @@ describe("createItineraryProposalTransactionFragment", () => {
   it("finaliza e persiste a Proposal accepted preservando o snapshot", async () => {
     const proposal = readyProposal();
     const stored = repository(proposal);
-    const fragment = createItineraryProposalTransactionFragment(
-      executor(),
-      () => stored.value,
-    );
+    const fragment = createItineraryProposalTransactionFragment(executor(), () => stored.value);
     const loaded = await fragment.loadForAcceptance(command());
 
     const result = await fragment.accept(loaded, decidedAt);
 
-    expect(result).toEqual(
-      finalizeAppliedItineraryProposalAcceptance(proposal, decidedAt),
-    );
+    expect(result).toEqual(finalizeAppliedItineraryProposalAcceptance(proposal, decidedAt));
     expect(result.status).toBe("accepted");
     expect(result.acceptedAt).toEqual(decidedAt);
     expect(stored.save).toHaveBeenCalledWith(result);
@@ -264,10 +234,7 @@ describe("createItineraryProposalTransactionFragment", () => {
     const saveError = new Error("save failure");
     const stored = repository();
     stored.findById.mockRejectedValueOnce(findError);
-    const fragment = createItineraryProposalTransactionFragment(
-      executor(),
-      () => stored.value,
-    );
+    const fragment = createItineraryProposalTransactionFragment(executor(), () => stored.value);
 
     await expect(fragment.loadForAcceptance(command())).rejects.toBe(findError);
     expect(stored.findById).toHaveBeenCalledTimes(1);
@@ -283,30 +250,17 @@ describe("createItineraryProposalTransactionFragment", () => {
     const stored = repository();
 
     expect(() =>
-      createItineraryProposalTransactionFragment(
-        undefined as never,
-        () => stored.value,
-      ),
+      createItineraryProposalTransactionFragment(undefined as never, () => stored.value),
     ).toThrowError(TypeError);
     expect(() =>
       createItineraryProposalTransactionFragment(executor(), null as never),
     ).toThrowError(TypeError);
     expect(() =>
-      createItineraryProposalTransactionFragment(
-        executor(),
-        () => undefined as never,
-      ),
+      createItineraryProposalTransactionFragment(executor(), () => undefined as never),
     ).toThrowError(TypeError);
 
-    const fragment = createItineraryProposalTransactionFragment(
-      executor(),
-      () => stored.value,
-    );
-    await expect(
-      fragment.loadForAcceptance(undefined as never),
-    ).rejects.toThrowError(TypeError);
-    await expect(
-      fragment.accept(undefined as never, decidedAt),
-    ).rejects.toThrowError(TypeError);
+    const fragment = createItineraryProposalTransactionFragment(executor(), () => stored.value);
+    await expect(fragment.loadForAcceptance(undefined as never)).rejects.toThrowError(TypeError);
+    await expect(fragment.accept(undefined as never, decidedAt)).rejects.toThrowError(TypeError);
   });
 });

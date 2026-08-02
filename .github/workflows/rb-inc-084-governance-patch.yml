@@ -1,0 +1,63 @@
+name: RB-INC-084 Governance Patch
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-084-apply-itinerary-proposal-transaction
+    paths:
+      - .github/workflows/rb-inc-084-governance-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-governance:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-084-apply-itinerary-proposal-transaction
+          fetch-depth: 0
+
+      - name: Patch registry and traceability
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          registry = Path("docs/registry.md")
+          registry_text = registry.read_text(encoding="utf-8")
+          registry_rows = (
+              "| RB-INC-084 | Composição PostgreSQL do Aceite Integral de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-084-apply-itinerary-proposal-transaction.md](./implementation/increments/rb-inc-084-apply-itinerary-proposal-transaction.md) |\n"
+              "| RB-CTX-084 | Context Pack do RB-INC-084 | Implementation Context | Draft | 0.1.0 | [rb-inc-084-apply-itinerary-proposal-transaction.md](./implementation/context-packs/rb-inc-084-apply-itinerary-proposal-transaction.md) |\n"
+          )
+          if "| RB-INC-084 |" not in registry_text:
+              marker = "| RB-CTX-083 | Context Pack do RB-INC-083 | Implementation Context | Draft | 0.1.0 | [rb-inc-083-itinerary-proposal-decision-transaction-fragment.md](./implementation/context-packs/rb-inc-083-itinerary-proposal-decision-transaction-fragment.md) |\n"
+              if marker not in registry_text:
+                  raise SystemExit("RB-CTX-083 marker not found in registry")
+              registry_text = registry_text.replace(marker, marker + registry_rows, 1)
+              registry.write_text(registry_text, encoding="utf-8")
+
+          matrix = Path("docs/implementation/traceability-matrix.md")
+          matrix_text = matrix.read_text(encoding="utf-8")
+          matrix_row = "| RB-INC-084 | RB-ADR-027, RB-ARC-003–004, RB-DATA-002 e RB-INC-072–075, RB-INC-079, RB-INC-083 | #191 | `feature/rb-inc-084-apply-itinerary-proposal-transaction`, PR #194 | composição PostgreSQL dos quatro fragments em uma única transação física | validações finais em execução | Em validação |\n"
+          if "| RB-INC-084 |" not in matrix_text:
+              lines = matrix_text.splitlines(keepends=True)
+              insertion = None
+              for index, line in enumerate(lines):
+                  if line.startswith("| RB-INC-083 |"):
+                      insertion = index + 1
+              if insertion is None:
+                  raise SystemExit("RB-INC-083 row not found in traceability matrix")
+              lines.insert(insertion, matrix_row)
+              matrix.write_text("".join(lines), encoding="utf-8")
+
+          Path(".github/workflows/rb-inc-084-governance-patch.yml").unlink()
+          PY
+
+      - name: Commit governance updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/registry.md docs/implementation/traceability-matrix.md .github/workflows/rb-inc-084-governance-patch.yml
+          git commit -m "docs: register RB-INC-084 governance"
+          git push origin HEAD:feature/rb-inc-084-apply-itinerary-proposal-transaction

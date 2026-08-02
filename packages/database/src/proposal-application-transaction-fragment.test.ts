@@ -51,7 +51,9 @@ function request(): ProposalApplicationRequestFingerprintInput {
   });
 }
 
-function persistenceRecord(status: ProposalApplication["status"]): ProposalApplicationPersistenceRecord {
+function persistenceRecord(
+  status: ProposalApplication["status"],
+): ProposalApplicationPersistenceRecord {
   const requestValue = request();
   const started = startProposalApplication({
     ...requestValue,
@@ -88,9 +90,7 @@ function executor(): ProposalApplicationSqlExecutor {
   };
 }
 
-function repository(
-  createResult?: CreateProposalApplicationPersistenceResult,
-): Readonly<{
+function repository(createResult?: CreateProposalApplicationPersistenceResult): Readonly<{
   value: ProposalApplicationTransactionRepository;
   create: ReturnType<typeof vi.fn>;
   saveTerminal: ReturnType<typeof vi.fn>;

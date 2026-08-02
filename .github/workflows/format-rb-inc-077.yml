@@ -1,0 +1,37 @@
+name: Format RB-INC-077
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-077-itinerary-proposal-transaction-fragment
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-077-itinerary-proposal-transaction-fragment
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: >-
+          pnpm exec prettier --write
+          packages/database/src/itinerary-proposal-transaction-fragment.ts
+          packages/database/src/itinerary-proposal-transaction-fragment.test.ts
+      - run: git rm .github/workflows/format-rb-inc-077.yml
+      - name: Commit formatted files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/database/src/itinerary-proposal-transaction-fragment.ts packages/database/src/itinerary-proposal-transaction-fragment.test.ts
+          git commit -m "style(database): aplicar Prettier ao RB-INC-077"
+          git push origin HEAD:feature/rb-inc-077-itinerary-proposal-transaction-fragment

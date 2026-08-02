@@ -57,8 +57,7 @@ export type ReplayedItineraryProposalAcceptance = Readonly<{
 }>;
 
 export type AcceptItineraryProposalResult =
-  | AppliedItineraryProposalAcceptance
-  | ReplayedItineraryProposalAcceptance;
+  AppliedItineraryProposalAcceptance | ReplayedItineraryProposalAcceptance;
 
 export const acceptItineraryProposalErrorCodes = [
   "fingerprint-conflict",
@@ -72,8 +71,7 @@ export const acceptItineraryProposalErrorCodes = [
   "application-failed",
 ] as const;
 
-export type AcceptItineraryProposalErrorCode =
-  (typeof acceptItineraryProposalErrorCodes)[number];
+export type AcceptItineraryProposalErrorCode = (typeof acceptItineraryProposalErrorCodes)[number];
 
 export class AcceptItineraryProposalValidationError extends Error {
   constructor(readonly fieldErrors: Readonly<Record<string, string>>) {

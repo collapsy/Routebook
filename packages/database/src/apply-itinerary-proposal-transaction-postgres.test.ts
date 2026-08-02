@@ -219,10 +219,7 @@ describe("ApplyItineraryProposalTransaction with PostgreSQL", () => {
         fixture.itinerary,
       );
       expect(
-        await new DrizzleItineraryProposalRepository().findById(
-          fixture.trip.id,
-          fixture.ready.id,
-        ),
+        await new DrizzleItineraryProposalRepository().findById(fixture.trip.id, fixture.ready.id),
       ).toEqual(fixture.ready);
       expect(
         await createPostgresProposalApplicationRepository(database).findByIdempotencyKey(

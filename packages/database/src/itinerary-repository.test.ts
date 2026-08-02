@@ -1,11 +1,14 @@
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 import { eq } from "drizzle-orm";
 
 import { createPlace } from "@routebook/place-catalog";
 import { addActivity, createItinerary, createTrip } from "@routebook/trip-management";
 
 import { closeDatabase, getDatabase } from "./client";
-import { DrizzleItineraryRepository } from "./itinerary-repository";
+import {
+  createPostgresItineraryRepository,
+  DrizzleItineraryRepository,
+} from "./itinerary-repository";
 import { places, trips } from "./schema";
 import { DrizzleTripRepository } from "./trip-repository";
 
@@ -81,5 +84,70 @@ describe("DrizzleItineraryRepository", () => {
       await database.delete(trips).where(eq(trips.id, trip.id));
       await database.delete(places).where(eq(places.id, place.id));
     }
+  });
+
+  it("preserva a transação própria no modo global", async () => {
+    const trip = createTrip({
+      name: "Transação própria do Itinerary",
+      startDate: "2026-08-22",
+      endDate: "2026-08-23",
+      ownerName: "RouteBook QA",
+    });
+    const database = getDatabase();
+    const repository = new DrizzleItineraryRepository();
+    const itinerary = createItinerary({ tripId: trip.id, period: trip.period });
+
+    await new DrizzleTripRepository().create(trip);
+    const transaction = vi.spyOn(database, "transaction");
+    try {
+      await repository.save(itinerary);
+      expect(transaction).toHaveBeenCalledTimes(1);
+      expect(await repository.findByTripId(trip.id)).toEqual(itinerary);
+    } finally {
+      transaction.mockRestore();
+      await database.delete(trips).where(eq(trips.id, trip.id));
+    }
+  });
+
+  it("usa o executor escopado sem nested transaction e participa do rollback externo", async () => {
+    const trip = createTrip({
+      name: "Rollback externo do Itinerary",
+      startDate: "2026-08-22",
+      endDate: "2026-08-23",
+      ownerName: "RouteBook QA",
+    });
+    const database = getDatabase();
+    const itinerary = createItinerary({ tripId: trip.id, period: trip.period });
+    const rollback = new Error("rollback intencional");
+
+    await new DrizzleTripRepository().create(trip);
+    try {
+      await expect(
+        database.transaction(async (transaction) => {
+          const repository = createPostgresItineraryRepository(transaction);
+          const nestedTransaction = vi.spyOn(transaction as never, "transaction" as never);
+
+          await repository.save(itinerary);
+          expect(await repository.findByTripId(trip.id)).toEqual(itinerary);
+          expect(nestedTransaction).not.toHaveBeenCalled();
+          nestedTransaction.mockRestore();
+          throw rollback;
+        }),
+      ).rejects.toBe(rollback);
+
+      expect(await new DrizzleItineraryRepository().findByTripId(trip.id)).toBeNull();
+    } finally {
+      await database.delete(trips).where(eq(trips.id, trip.id));
+    }
+  });
+
+  it("rejeita executor escopado inválido", () => {
+    expect(() => createPostgresItineraryRepository(undefined as never)).toThrowError(TypeError);
+    expect(() =>
+      createPostgresItineraryRepository({
+        select() {},
+        insert() {},
+      } as never),
+    ).toThrowError(TypeError);
   });
 });

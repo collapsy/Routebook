@@ -44,10 +44,7 @@ function assertCurrentItinerary(
   command: AcceptItineraryProposalCommand,
 ): void {
   if (itinerary.tripId !== command.tripId || itinerary.id !== command.itineraryId) {
-    acceptanceError(
-      "itinerary-not-found",
-      "O Itinerary não pertence ao contexto solicitado.",
-    );
+    acceptanceError("itinerary-not-found", "O Itinerary não pertence ao contexto solicitado.");
   }
   if (itinerary.version !== command.expectedItineraryVersion) {
     acceptanceError(
@@ -57,12 +54,9 @@ function assertCurrentItinerary(
   }
 }
 
-export function createItineraryTransactionFragment<
-  TExecutor extends ItineraryDatabaseExecutor,
->(
+export function createItineraryTransactionFragment<TExecutor extends ItineraryDatabaseExecutor>(
   executor: TExecutor,
-  repositoryFactory: ItineraryTransactionRepositoryFactory<TExecutor> =
-    createPostgresItineraryRepository,
+  repositoryFactory: ItineraryTransactionRepositoryFactory<TExecutor> = createPostgresItineraryRepository,
 ): ItineraryTransactionFragment {
   if (
     !executor ||
@@ -86,9 +80,7 @@ export function createItineraryTransactionFragment<
   }
 
   return Object.freeze({
-    async apply(
-      command: AcceptItineraryProposalCommand,
-    ): Promise<AppliedProposalItemsToItinerary> {
+    async apply(command: AcceptItineraryProposalCommand): Promise<AppliedProposalItemsToItinerary> {
       assertCommand(command);
       const itinerary = await repository.findByTripId(command.tripId);
       if (!itinerary) {

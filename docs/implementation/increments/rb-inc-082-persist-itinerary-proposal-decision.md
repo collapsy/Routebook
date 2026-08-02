@@ -4,8 +4,8 @@ title: Persistência PostgreSQL da Decision de Aceite
 description: Libera o tipo accept-itinerary-proposal no PostgreSQL e valida o round trip integral da Decision correspondente.
 document_type: implementation-increment
 owner: Data and Persistence
-status: Draft
-version: "0.1.0"
+status: Approved
+version: "1.0.0"
 created: "2026-08-02"
 last_updated: "2026-08-02"
 authors:
@@ -129,7 +129,7 @@ docs/registry.md
 - [x] round trip integral preserva o fato;
 - [x] replay idempotente preservado;
 - [x] rollback externo comprovado;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 10. Testes obrigatórios
 
@@ -159,4 +159,8 @@ Reverter schema, migration e journal para os três tipos anteriores. Como nenhum
 
 ## 13. Evidências
 
-As evidências serão registradas após a aprovação dos workflows da PR #188.
+- Documentation Validation: run `30761966135`, aprovado;
+- Engineering Validation: run `30761966150`, aprovado;
+- formatação, documentação, lint, typecheck e migrations aprovados;
+- 101 testes do pacote de banco aprovados, incluindo round trip, replay, executor escopado, rollback e rejeição `23514`;
+- smoke, build e E2E responsivo aprovados.

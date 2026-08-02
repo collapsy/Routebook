@@ -165,4 +165,5 @@ Remover a composition root, seus testes, export e documentos. Nenhum schema ou d
 - Engineering Validation: run `30767412648`, job `91548482913`, concluído com sucesso;
 - a suíte unitária validou normalização, resultados, allowlist de domínio, constraints conhecidas e propagação de falhas desconhecidas;
 - o teste PostgreSQL executou a composition root real, confirmou `applied`, replay idempotente e persistência de Itinerary, Proposal Application e Decision;
-- formatação, documentação, lint, typecheck, migration `0019`, suíte integral, smoke, build e E2E responsivo ficaram verdes.
+- formatação, documentação, lint, typecheck, migration `0019`, suíte integral, smoke, build e E2E responsivo ficaram verdes;
+- a matriz de rastreabilidade registra a PR #196 e os runs verdes como pronta para integração.

@@ -152,7 +152,7 @@ docs/registry.md
 - [x] retry terminal equivalente é idempotente;
 - [x] conclusão terminal divergente é rejeitada;
 - [x] domínio permanece independente de Drizzle e PostgreSQL;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 11. Testes obrigatórios
 
@@ -186,4 +186,11 @@ Remover o repository, seus testes e a migration `0018`. Caso a migration já ten
 
 ## 14. Evidências
 
-As evidências definitivas serão registradas na PR #166 após a aprovação dos workflows.
+- Documentation Validation: run `30728380253`, concluído com sucesso;
+- Engineering Validation: run `30728380244`, concluído com sucesso;
+- registry e metadados documentais validados;
+- formatação, lint e typecheck aprovados;
+- migration `0018` aplicada com sucesso no PostgreSQL/PostGIS de CI;
+- suíte integral, smoke e build de produção aprovados;
+- Playwright responsivo aprovado;
+- branch sincronizada com a `main` pelo merge commit `65678525895275abfc5e0e4a79366756c9cc72de`.

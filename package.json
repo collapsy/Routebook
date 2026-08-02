@@ -7,6 +7,11 @@
     "node": ">=24.18.0 <25",
     "pnpm": ">=11.17.0 <12"
   },
+  "pnpm": {
+    "overrides": {
+      "kysely": "0.28.14"
+    }
+  },
   "scripts": {
     "build": "turbo run build",
     "check": "pnpm format:check && pnpm docs:validate && pnpm lint && pnpm typecheck && pnpm test && pnpm build",

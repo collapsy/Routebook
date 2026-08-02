@@ -14,13 +14,11 @@ const accountId = "22222222-2222-4222-8222-222222222222";
 const membershipId = "33333333-3333-4333-8333-333333333333";
 const tripId = "44444444-4444-4444-8444-444444444444";
 
-function scope(value: TripScopeLookup): Promise<TripScopeLookup> {
-  return Promise.resolve(value);
-}
-
 function reader(overrides: Partial<TripAuthorizationReader> = {}): TripAuthorizationReader {
   return {
-    findTripScope: vi.fn(async () => scope({ status: "scoped", accountId })),
+    findTripScope: vi.fn(
+      async (): Promise<TripScopeLookup> => ({ status: "scoped", accountId }),
+    ),
     findMembership: vi.fn(async () =>
       createAccountMembership({
         id: membershipId,
@@ -42,33 +40,53 @@ describe("Trip authorization", () => {
     expect(canPerformTripAction("viewer", "trip:accept-proposal")).toBe(false);
   });
 
-  it.each(["owner", "editor"] as const)("autoriza %s ativo a aceitar Proposal", async (role) => {
-    const authorizationReader = reader({
-      findMembership: vi.fn(async () =>
-        createAccountMembership({
-          id: membershipId,
-          accountId,
-          userId,
-          role,
-        }),
-      ),
-    });
+  it.each(["owner", "editor"] as const)(
+    "autoriza %s ativo a aceitar Proposal",
+    async (role) => {
+      const authorizationReader = reader({
+        findMembership: vi.fn(async () =>
+          createAccountMembership({
+            id: membershipId,
+            accountId,
+            userId,
+            role,
+          }),
+        ),
+      });
 
-    await expect(
-      authorizeTripAction({ userId, tripId, action: "trip:accept-proposal" }, authorizationReader),
-    ).resolves.toEqual({
-      userId,
-      tripId,
-      accountId,
-      membershipId,
-      role,
-      action: "trip:accept-proposal",
-    });
-  });
+      await expect(
+        authorizeTripAction(
+          { userId, tripId, action: "trip:accept-proposal" },
+          authorizationReader,
+        ),
+      ).resolves.toEqual({
+        userId,
+        tripId,
+        accountId,
+        membershipId,
+        role,
+        action: "trip:accept-proposal",
+      });
+    },
+  );
 
   it.each([
-    ["trip-not-found", reader({ findTripScope: vi.fn(async () => scope({ status: "not-found" })) })],
-    ["trip-unscoped", reader({ findTripScope: vi.fn(async () => scope({ status: "unscoped" })) })],
+    [
+      "trip-not-found",
+      reader({
+        findTripScope: vi.fn(
+          async (): Promise<TripScopeLookup> => ({ status: "not-found" }),
+        ),
+      }),
+    ],
+    [
+      "trip-unscoped",
+      reader({
+        findTripScope: vi.fn(
+          async (): Promise<TripScopeLookup> => ({ status: "unscoped" }),
+        ),
+      }),
+    ],
     ["membership-not-found", reader({ findMembership: vi.fn(async () => null) })],
     [
       "membership-inactive",
@@ -99,7 +117,10 @@ describe("Trip authorization", () => {
     ],
   ] as const)("nega com código %s", async (code, authorizationReader) => {
     await expect(
-      authorizeTripAction({ userId, tripId, action: "trip:accept-proposal" }, authorizationReader),
+      authorizeTripAction(
+        { userId, tripId, action: "trip:accept-proposal" },
+        authorizationReader,
+      ),
     ).rejects.toEqual(new TripAuthorizationError(code));
   });
 
@@ -116,7 +137,10 @@ describe("Trip authorization", () => {
     });
 
     await expect(
-      authorizeTripAction({ userId, tripId, action: "trip:accept-proposal" }, authorizationReader),
+      authorizeTripAction(
+        { userId, tripId, action: "trip:accept-proposal" },
+        authorizationReader,
+      ),
     ).rejects.toEqual(new TripAuthorizationError("membership-not-found"));
   });
 });

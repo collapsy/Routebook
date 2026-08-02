@@ -2,6 +2,8 @@ packages:
   - apps/*
   - modules/*
   - packages/*
+overrides:
+  kysely: 0.28.14
 allowBuilds:
   esbuild: true
   sharp: true

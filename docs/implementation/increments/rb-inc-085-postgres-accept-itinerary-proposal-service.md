@@ -126,6 +126,7 @@ Qualquer outro código, constraint ou wrapper permanece inalterado.
 - [x] constraints conhecidas são identificadas por código e nome;
 - [x] falhas desconhecidas não são mascaradas;
 - [x] implementação PostgreSQL real é exercitada por teste;
+- [x] factory concreta e seu tipo são publicados por `@routebook/database`;
 - [ ] validações finais do CI aprovadas.
 
 ## 10. Testes obrigatórios

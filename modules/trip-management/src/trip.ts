@@ -3,7 +3,12 @@ import { randomUUID } from "node:crypto";
 import { createGeoCoordinate, type GeoCoordinate } from "@routebook/geo-distance";
 
 export type TripStatus =
-  "draft" | "planned" | "in-progress" | "completed" | "cancelled" | "archived";
+  | "draft"
+  | "planned"
+  | "in-progress"
+  | "completed"
+  | "cancelled"
+  | "archived";
 export type TripRole = "owner" | "editor" | "viewer";
 
 export type Destination = {
@@ -51,6 +56,7 @@ export type CreateTripInput = {
   startDate: string;
   endDate: string;
   ownerName: string;
+  ownerUserId?: string;
   accommodationName?: string;
   accommodationAddress?: string;
   accommodationLatitude?: number;
@@ -83,6 +89,9 @@ const PIPA_DESTINATION: Destination = {
   longitude: -35.0503,
   timeZone: "America/Fortaleza",
 };
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function isLocalDate(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
@@ -136,6 +145,7 @@ function createAccommodation(input: UpdateAccommodationInput): Accommodation | u
 export function createTrip(input: CreateTripInput, now = new Date()): Trip {
   const name = input.name.trim();
   const ownerName = input.ownerName.trim();
+  const ownerUserId = input.ownerUserId?.trim();
   const fieldErrors: TripFieldErrors = {};
 
   if (name.length < 3) fieldErrors.name = "Informe um nome com pelo menos 3 caracteres.";
@@ -149,6 +159,9 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
     fieldErrors.endDate = "A data final não pode ser anterior à data inicial.";
   }
   if (ownerName.length < 2) fieldErrors.ownerName = "Informe o nome do responsável pela viagem.";
+  if (ownerUserId !== undefined && !UUID_PATTERN.test(ownerUserId)) {
+    fieldErrors.ownerUserId = "Informe um identificador válido para o responsável pela viagem.";
+  }
   if (Object.keys(fieldErrors).length > 0) throw new TripValidationError(fieldErrors);
 
   const accommodation = createAccommodation({
@@ -164,7 +177,7 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
       : {}),
   });
   const owner: TripParticipant = {
-    userId: randomUUID(),
+    userId: ownerUserId ?? randomUUID(),
     displayName: ownerName,
     role: "owner",
   };

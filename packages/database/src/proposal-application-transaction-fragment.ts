@@ -210,7 +210,9 @@ export function createProposalApplicationTransactionFragment<
   }
 
   return Object.freeze({
-    async reserve(input) {
+    async reserve(
+      input: ReserveProposalApplicationInput,
+    ): Promise<ReserveProposalApplicationResult> {
       const attemptedRecord = createStartedRecord(input);
       const result = await repository.create(attemptedRecord);
 
@@ -229,14 +231,20 @@ export function createProposalApplicationTransactionFragment<
       return classifyReplay(result.record);
     },
 
-    async succeed(record, input) {
+    async succeed(
+      record: ProposalApplicationTransactionRecord<StartedProposalApplication>,
+      input: SucceedProposalApplicationInput,
+    ): Promise<ProposalApplicationTransactionRecord<SucceededProposalApplication>> {
       const application = succeedProposalApplication(record.application, input);
       const terminalRecord = withApplication(record, application);
       await repository.saveTerminal(terminalRecord);
       return terminalRecord;
     },
 
-    async fail(record, input) {
+    async fail(
+      record: ProposalApplicationTransactionRecord<StartedProposalApplication>,
+      input: FailProposalApplicationInput,
+    ): Promise<ProposalApplicationTransactionRecord<FailedProposalApplication>> {
       const application = failProposalApplication(record.application, input);
       const terminalRecord = withApplication(record, application);
       await repository.saveTerminal(terminalRecord);

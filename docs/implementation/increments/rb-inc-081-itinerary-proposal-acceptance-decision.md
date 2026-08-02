@@ -145,7 +145,7 @@ docs/registry.md
 - [x] tipos existentes preservados;
 - [x] exports públicos atualizados;
 - [x] serializer e reidratação reconhecem o novo snapshot;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 10. Testes obrigatórios
 
@@ -178,4 +178,14 @@ Remover os novos membros das unions, validações, testes, exports e branches do
 
 ## 13. Evidências
 
-As evidências serão registradas após a aprovação dos workflows da PR #186.
+- Documentation Validation `30753442260`: aprovada;
+- Engineering Validation `30753442266`: aprovada;
+- 202 documentos encontrados e registrados;
+- formatação, documentação, lint e typecheck aprovados;
+- migrations PostgreSQL existentes aplicadas com sucesso;
+- suíte integral aprovada, incluindo invariantes da Decision e round trip do snapshot;
+- smoke do servidor de desenvolvimento aprovado;
+- build de produção aprovado;
+- 56 testes Playwright responsivos aprovados;
+- registry e matriz de rastreabilidade sincronizados com `RB-INC-081` e `RB-CTX-081`;
+- HEAD validado: `a309943920fc408e2908c6d0d0fd6e2ba89215db`.

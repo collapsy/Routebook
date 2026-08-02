@@ -4,8 +4,8 @@ title: Persistência PostgreSQL da Decision de Aceite
 description: Libera o tipo accept-itinerary-proposal no PostgreSQL e valida o round trip integral da Decision correspondente.
 document_type: implementation-increment
 owner: Data and Persistence
-status: Approved
-version: "1.0.0"
+status: Draft
+version: "0.1.0"
 created: "2026-08-02"
 last_updated: "2026-08-02"
 authors:

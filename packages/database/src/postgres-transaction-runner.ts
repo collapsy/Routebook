@@ -1,7 +1,5 @@
 export interface PostgresTransactionHost<TExecutor> {
-  transaction<TResult>(
-    operation: (executor: TExecutor) => Promise<TResult>,
-  ): Promise<TResult>;
+  transaction<TResult>(operation: (executor: TExecutor) => Promise<TResult>): Promise<TResult>;
 }
 
 export type PostgresTransactionOperation<TExecutor, TResult> = (

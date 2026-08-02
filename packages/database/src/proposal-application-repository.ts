@@ -328,7 +328,7 @@ const returningColumns = sql`
 `;
 
 function validateRecord(record: ProposalApplicationPersistenceRecord): void {
-  const tripId = requiredText(record.tripId, "tripId");
+  requiredText(record.tripId, "tripId");
   const itineraryId = requiredText(record.itineraryId, "itineraryId");
   const fingerprint = createProposalApplicationRequestFingerprint(record.request);
 

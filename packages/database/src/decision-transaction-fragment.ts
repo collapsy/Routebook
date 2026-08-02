@@ -60,9 +60,12 @@ function assertInput(input: PersistItineraryProposalDecisionInput): void {
   }
 }
 
-export function createDecisionTransactionFragment<TExecutor extends DecisionDatabaseExecutor>(
+export function createDecisionTransactionFragment<
+  TExecutor extends DecisionDatabaseExecutor,
+>(
   executor: TExecutor,
-  repositoryFactory: DecisionTransactionRepositoryFactory<TExecutor> = createPostgresDecisionRepository,
+  repositoryFactory: DecisionTransactionRepositoryFactory<TExecutor> =
+    createPostgresDecisionRepository,
 ): DecisionTransactionFragment {
   if (
     !executor ||
@@ -91,7 +94,10 @@ export function createDecisionTransactionFragment<TExecutor extends DecisionData
         ...(input.recommendationId !== undefined
           ? { recommendationId: input.recommendationId }
           : {}),
-        actorParticipantId: requiredText(input.actorParticipantId, "actorParticipantId"),
+        actorParticipantId: requiredText(
+          input.actorParticipantId,
+          "actorParticipantId",
+        ),
         decidedAt: command.decidedAt,
         chosenOption: {
           type: "accept-itinerary-proposal",

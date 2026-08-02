@@ -4,10 +4,10 @@ import {
   createDecision,
   DecisionRepositoryError,
   type Decision,
-  type DecisionRecordContextSnapshot,
   type DecisionEffect,
   type DecisionId,
   type DecisionOption,
+  type DecisionRecordContextSnapshot,
   type DecisionRepository,
 } from "@routebook/decision-intelligence";
 
@@ -15,6 +15,8 @@ import { getDatabase } from "./client";
 import { decisions } from "./decision-schema";
 
 type DecisionRow = typeof decisions.$inferSelect;
+
+export type DecisionDatabaseExecutor = Pick<ReturnType<typeof getDatabase>, "select" | "insert">;
 
 type StoredRecommendationSnapshot = Readonly<{
   schemaVersion: 1;
@@ -124,8 +126,10 @@ function isUniqueViolation(error: unknown): boolean {
 
 // prettier-ignore
 export class DrizzleDecisionRepository implements DecisionRepository {
+  constructor(private readonly database: DecisionDatabaseExecutor = getDatabase()) {}
+
   async findById(id: DecisionId): Promise<Decision | null> {
-    const [row] = await getDatabase()
+    const [row] = await this.database
       .select()
       .from(decisions)
       .where(eq(decisions.id, id))
@@ -137,7 +141,7 @@ export class DrizzleDecisionRepository implements DecisionRepository {
     tripId: string,
     idempotencyKey: string,
   ): Promise<Decision | null> {
-    const [row] = await getDatabase()
+    const [row] = await this.database
       .select()
       .from(decisions)
       .where(
@@ -151,7 +155,7 @@ export class DrizzleDecisionRepository implements DecisionRepository {
   }
 
   async listByTripId(tripId: string): Promise<Decision[]> {
-    const rows = await getDatabase()
+    const rows = await this.database
       .select()
       .from(decisions)
       .where(eq(decisions.tripId, tripId))
@@ -169,7 +173,7 @@ export class DrizzleDecisionRepository implements DecisionRepository {
     }
 
     try {
-      await getDatabase().insert(decisions).values({
+      await this.database.insert(decisions).values({
         id: decision.id,
         tripId: decision.tripId,
         recommendationId: decision.recommendationId ?? null,
@@ -203,4 +207,18 @@ export class DrizzleDecisionRepository implements DecisionRepository {
       );
     }
   }
+}
+
+export function createPostgresDecisionRepository(
+  executor: DecisionDatabaseExecutor,
+): DrizzleDecisionRepository {
+  if (
+    !executor ||
+    typeof executor.select !== "function" ||
+    typeof executor.insert !== "function"
+  ) {
+    throw new TypeError("Informe um executor Drizzle transacional válido.");
+  }
+
+  return new DrizzleDecisionRepository(executor);
 }

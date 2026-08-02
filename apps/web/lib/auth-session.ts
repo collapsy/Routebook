@@ -19,10 +19,13 @@ export type RouteBookSessionContext = Readonly<{
   }>;
 }>;
 
+export type RouteBookSessionReader = Pick<typeof auth.api, "getSession">;
+
 export async function getRouteBookSession(
   requestHeaders: Headers = await headers(),
+  reader: RouteBookSessionReader = auth.api,
 ): Promise<RouteBookSessionContext | null> {
-  const current = await auth.api.getSession({ headers: requestHeaders });
+  const current = await reader.getSession({ headers: requestHeaders });
   if (!current) return null;
 
   return Object.freeze({

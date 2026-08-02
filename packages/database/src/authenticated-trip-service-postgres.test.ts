@@ -31,6 +31,19 @@ function tripInput(name: string) {
   };
 }
 
+function errorChainContains(error: unknown, expected: string): boolean {
+  let current: unknown = error;
+  const visited = new Set<unknown>();
+
+  while (current instanceof Error && !visited.has(current)) {
+    visited.add(current);
+    if (current.message.includes(expected)) return true;
+    current = current.cause;
+  }
+
+  return false;
+}
+
 beforeAll(async () => {
   await database.insert(authUsers).values([
     {
@@ -206,20 +219,24 @@ describe("createPostgresAuthenticatedTrip", () => {
     `),
     );
 
+    let failure: unknown;
     try {
-      await expect(
-        createPostgresAuthenticatedTrip(
-          { userId: rollbackUserId, trip: tripInput("Rollback autenticado") },
-          database,
-          now,
-        ),
-      ).rejects.toThrow("RB-INC-088 forced Trip failure");
+      await createPostgresAuthenticatedTrip(
+        { userId: rollbackUserId, trip: tripInput("Rollback autenticado") },
+        database,
+        now,
+      );
+    } catch (error) {
+      failure = error;
     } finally {
       await database.execute(
         sql.raw("DROP TRIGGER IF EXISTS rb_inc_088_reject_trip_trigger ON trips"),
       );
       await database.execute(sql.raw("DROP FUNCTION IF EXISTS rb_inc_088_reject_trip()"));
     }
+
+    expect(failure).toBeInstanceOf(Error);
+    expect(errorChainContains(failure, "RB-INC-088 forced Trip failure")).toBe(true);
 
     const ownerships = await database
       .select()

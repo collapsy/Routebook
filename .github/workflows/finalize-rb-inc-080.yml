@@ -1,0 +1,69 @@
+name: Finalize RB-INC-080
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-080-decision-transactional-repository
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-080-decision-transactional-repository
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Update governance indexes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          registry = Path("docs/registry.md")
+          text = registry.read_text()
+          if "| RB-INC-080 |" not in text:
+              rows = [
+                  "| RB-INC-080 | Repository Transacional de Decision | Implementation | Draft | 0.1.0 | [rb-inc-080-decision-transactional-repository.md](./implementation/increments/rb-inc-080-decision-transactional-repository.md) |",
+                  "| RB-CTX-080 | Context Pack do RB-INC-080 | Implementation Context | Draft | 0.1.0 | [rb-inc-080-decision-transactional-repository.md](./implementation/context-packs/rb-inc-080-decision-transactional-repository.md) |",
+              ]
+              lines = text.splitlines()
+              index = max(i for i, line in enumerate(lines) if line.startswith("| RB-")) + 1
+              lines[index:index] = rows
+              registry.write_text("\n".join(lines) + "\n")
+
+          matrix = Path("docs/implementation/traceability-matrix.md")
+          text = matrix.read_text()
+          if "| RB-INC-080 |" not in text:
+              row = "| RB-INC-080 | RB-ADR-006, RB-ADR-027, RB-ARC-003–004, RB-DATA-002 e RB-INC-073–074, RB-INC-076, RB-INC-078–079 | #183 | `feature/rb-inc-080-decision-transactional-repository`, PR #184 | repository de Decision com executor escopado, idempotência preservada e rollback externo | PR #184; validação em andamento | Em validação |"
+              lines = text.splitlines()
+              indexes = [i for i, line in enumerate(lines) if line.startswith("| RB-INC-")]
+              lines.insert((max(indexes) + 1) if indexes else len(lines), row)
+              matrix.write_text("\n".join(lines) + "\n")
+          PY
+      - name: Apply canonical formatting
+        run: >-
+          pnpm exec prettier --write
+          packages/database/src/decision-repository.ts
+          packages/database/src/decision-repository.test.ts
+          packages/database/src/index.ts
+          docs/implementation/increments/rb-inc-080-decision-transactional-repository.md
+          docs/implementation/context-packs/rb-inc-080-decision-transactional-repository.md
+          docs/implementation/traceability-matrix.md
+          docs/registry.md
+      - run: git rm .github/workflows/finalize-rb-inc-080.yml
+      - name: Commit governance and formatting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/database/src docs/implementation docs/registry.md
+          git commit -m "docs(database): concluir governança do RB-INC-080"
+          git push origin HEAD:feature/rb-inc-080-decision-transactional-repository

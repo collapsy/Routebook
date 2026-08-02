@@ -254,9 +254,10 @@ describe("ApplyItineraryProposalTransaction", () => {
 
   it("interrompe a composição quando um fragment falha", async () => {
     const context = harness();
-    vi.mocked(context.fragments.decision.persist).mockRejectedValueOnce(
-      new Error("falha intencional na Decision"),
-    );
+    vi.mocked(context.fragments.decision.persist).mockImplementationOnce(async () => {
+      context.events.push("persist-decision");
+      throw new Error("falha intencional na Decision");
+    });
 
     await expect(context.transaction.execute(context.currentCommand)).rejects.toThrow(
       "falha intencional na Decision",

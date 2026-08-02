@@ -96,6 +96,7 @@ ai_context:
 | RB-INC-085 | RB-ARC-002–003, RB-DATA-002, RB-ADR-027 e RB-INC-072, RB-INC-084 | #195 | `feature/rb-inc-085-postgres-accept-itinerary-proposal-service`, PR #196 | composition root concreta, normalização antecipada e mapeamentos allowlisted de domínio e PostgreSQL | runs 30767412654 e 30767412648; suíte integral, PostgreSQL real, smoke, build e E2E responsivo verdes | Pronto para integração |
 | RB-INC-086 | RB-SEC-001, RB-DATA-001–002, RB-ADR-007–008 e RB-INC-085 | #197 | `feature/rb-inc-086-better-auth-session-foundation`, PR #198 | Better Auth 1.6.14, schema e migration 0020, rota Next.js e resolução server-side de sessão | runs 30769434778 e 30769434775; migration 0020, PostgreSQL real, smoke, build Turbopack e E2E responsivo verdes | Pronto para integração |
 | RB-INC-087 | RB-SEC-001, RB-DATA-001–002, RB-ADR-007–008 e RB-INC-085–086 | #199 | `feature/rb-inc-087-account-membership-trip-authorization`, PR #200 | Account, Membership, matriz deny-by-default e autorização PostgreSQL de Trip | runs 30770613047 e 30770613051; migration 0021, PostgreSQL real, smoke, build e E2E responsivo verdes | Pronto para integração |
+| RB-INC-088 | RB-DATA-001–002, RB-ADR-007–008 e RB-INC-086–087 | #201 | `feature/rb-inc-088-personal-account-authenticated-trip`, PR #202 | vínculo pessoal um-para-um, provisioning idempotente e criação transacional de Trip escopada | runs 30771744270 e 30771744252; migration 0022, replay, concorrência, rollback, PostgreSQL real, smoke, build e E2E verdes | Pronto para integração |
 
 ## Evidências do RB-INC-003
 

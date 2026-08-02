@@ -8,8 +8,15 @@ export {
   authVerifications,
   betterAuthSchema,
 } from "./auth-schema";
-export { accountMemberships, accounts } from "./identity-schema";
+export { accountMemberships, accounts, personalAccountOwnerships } from "./identity-schema";
 export { closeDatabase, getDatabase } from "./client";
+
+export {
+  AuthenticatedTripCreationError,
+  createPostgresAuthenticatedTrip,
+  type CreateAuthenticatedTripInput,
+  type CreateAuthenticatedTripResult,
+} from "./authenticated-trip-service";
 
 export {
   createPostgresTripAuthorizationReader,

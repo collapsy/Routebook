@@ -222,6 +222,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-086 | Context Pack do RB-INC-086 | Implementation Context | Draft | 0.1.0 | [rb-inc-086-better-auth-session-foundation.md](./implementation/context-packs/rb-inc-086-better-auth-session-foundation.md) |
 | RB-INC-087 | Account Membership e Autorização Server-Side de Trip | Implementation | Draft | 0.1.0 | [rb-inc-087-account-membership-trip-authorization.md](./implementation/increments/rb-inc-087-account-membership-trip-authorization.md) |
 | RB-CTX-087 | Context Pack do RB-INC-087 | Implementation Context | Draft | 0.1.0 | [rb-inc-087-account-membership-trip-authorization.md](./implementation/context-packs/rb-inc-087-account-membership-trip-authorization.md) |
+| RB-INC-088 | Provisionamento Idempotente de Account Pessoal e Trip Escopada | Implementation | Draft | 0.1.0 | [rb-inc-088-personal-account-authenticated-trip.md](./implementation/increments/rb-inc-088-personal-account-authenticated-trip.md) |
+| RB-CTX-088 | Context Pack do RB-INC-088 | Implementation Context | Draft | 0.1.0 | [rb-inc-088-personal-account-authenticated-trip.md](./implementation/context-packs/rb-inc-088-personal-account-authenticated-trip.md) |
 
 ## Status possíveis
 

@@ -31,3 +31,17 @@ export const accountMemberships = pgTable(
     index("account_memberships_account_status_idx").on(table.accountId, table.status),
   ],
 );
+
+export const personalAccountOwnerships = pgTable(
+  "personal_account_ownerships",
+  {
+    userId: uuid("user_id")
+      .primaryKey()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    accountId: uuid("account_id")
+      .notNull()
+      .references(() => accounts.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex("personal_account_ownerships_account_id_unique").on(table.accountId)],
+);

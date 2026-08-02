@@ -138,7 +138,7 @@ docs/registry.md
 - [x] repository não abre nested transaction;
 - [x] rollback externo remove a Decision;
 - [x] export público foi atualizado;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 10. Testes obrigatórios
 
@@ -168,4 +168,14 @@ Remover a injeção, a factory, os testes adicionais e os exports. Nenhuma migra
 
 ## 13. Evidências
 
-As evidências serão registradas após a aprovação dos workflows da PR #184.
+- Documentation Validation `30752604088`: aprovada;
+- Engineering Validation `30752604108`: aprovada;
+- 200 documentos encontrados e registrados;
+- formatação, documentação, lint e typecheck aprovados;
+- migrations PostgreSQL existentes aplicadas com sucesso;
+- suíte integral aprovada, incluindo persistência global, idempotência, executor escopado e rollback da Decision;
+- smoke do servidor de desenvolvimento aprovado;
+- build de produção aprovado;
+- 56 testes Playwright responsivos aprovados;
+- registry e matriz de rastreabilidade sincronizados com `RB-INC-080` e `RB-CTX-080`;
+- HEAD validado: `d6725c3e78fba276fd8cc8216ed895febd7eec05`.

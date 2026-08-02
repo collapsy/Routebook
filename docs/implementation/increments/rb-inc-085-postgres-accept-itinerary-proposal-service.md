@@ -127,7 +127,7 @@ Qualquer outro código, constraint ou wrapper permanece inalterado.
 - [x] falhas desconhecidas não são mascaradas;
 - [x] implementação PostgreSQL real é exercitada por teste;
 - [x] factory concreta e seu tipo são publicados por `@routebook/database`;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 10. Testes obrigatórios
 
@@ -160,4 +160,9 @@ Remover a composition root, seus testes, export e documentos. Nenhum schema ou d
 
 ## 13. Evidências
 
-As evidências finais serão registradas após a aprovação dos workflows de Documentation Validation e Engineering Validation no HEAD definitivo da PR #196.
+- HEAD funcional validado: `b3432727529623783419fed0ce2c0d6c63dc8164`;
+- Documentation Validation: run `30767412654`, concluído com sucesso;
+- Engineering Validation: run `30767412648`, job `91548482913`, concluído com sucesso;
+- a suíte unitária validou normalização, resultados, allowlist de domínio, constraints conhecidas e propagação de falhas desconhecidas;
+- o teste PostgreSQL executou a composition root real, confirmou `applied`, replay idempotente e persistência de Itinerary, Proposal Application e Decision;
+- formatação, documentação, lint, typecheck, migration `0019`, suíte integral, smoke, build e E2E responsivo ficaram verdes.

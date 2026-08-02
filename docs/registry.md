@@ -189,6 +189,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-073 | Context Pack do RB-INC-073 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-073-postgres-transaction-runner.md](./implementation/context-packs/rb-inc-073-postgres-transaction-runner.md) |
 | RB-INC-074 | Unidade Transacional de Itinerary Proposal | Implementation Increment | Draft | 0.1.0 | [rb-inc-074-itinerary-proposal-transaction-unit.md](./implementation/increments/rb-inc-074-itinerary-proposal-transaction-unit.md) |
 | RB-CTX-074 | Context Pack do RB-INC-074 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-074-itinerary-proposal-transaction-unit.md](./implementation/context-packs/rb-inc-074-itinerary-proposal-transaction-unit.md) |
+| RB-INC-075 | Fragment Transacional de Proposal Application | Implementation Increment | Draft | 0.1.0 | [rb-inc-075-proposal-application-transaction-fragment.md](./implementation/increments/rb-inc-075-proposal-application-transaction-fragment.md) |
+| RB-CTX-075 | Context Pack do RB-INC-075 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-075-proposal-application-transaction-fragment.md](./implementation/context-packs/rb-inc-075-proposal-application-transaction-fragment.md) |
 | RB-AI-007 | Operação e Gestão do Ciclo de Vida de Inteligência Artificial | AI Operations | Planned | 0.1.0 | [ai-operations-and-lifecycle-management.md](./ai/ai-operations-and-lifecycle-management.md) |
 | RB-API-002 | Catálogo de Contratos de API | API | Planned | 0.1.0 | [api-contract-catalog.md](./data/api-contract-catalog.md) |
 | RB-API-003 | Versionamento e Depreciação de APIs | API | Planned | 0.1.0 | [api-versioning-and-deprecation-policy.md](./data/api-versioning-and-deprecation-policy.md) |

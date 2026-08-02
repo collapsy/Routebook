@@ -38,6 +38,21 @@ export {
   type ItineraryProposalTransactionOperation,
 } from "./itinerary-proposal-transaction-unit";
 export {
+  createProposalApplicationTransactionFragment,
+  ProposalApplicationTransactionFragmentValidationError,
+  type ConflictingProposalApplication,
+  type InProgressProposalApplication,
+  type PreviouslyFailedProposalApplication,
+  type ProposalApplicationTransactionFragment,
+  type ProposalApplicationTransactionRecord,
+  type ProposalApplicationTransactionRepository,
+  type ProposalApplicationTransactionRepositoryFactory,
+  type ReplayedProposalApplication,
+  type ReservedProposalApplication,
+  type ReserveProposalApplicationInput,
+  type ReserveProposalApplicationResult,
+} from "./proposal-application-transaction-fragment";
+export {
   PostgresTransactionRunner,
   type PostgresTransactionHost,
   type PostgresTransactionOperation,

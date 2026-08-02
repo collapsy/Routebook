@@ -47,9 +47,7 @@ describe("PostgresTransactionRunner", () => {
   });
 
   it("preserva o tipo genérico do resultado", async () => {
-    const runner = new PostgresTransactionRunner(
-      createHost({ scope: "transaction" }),
-    );
+    const runner = new PostgresTransactionRunner(createHost({ scope: "transaction" }));
 
     const result = await runner.execute(async () => 42 as const);
 
@@ -62,9 +60,7 @@ describe("PostgresTransactionRunner", () => {
     const operation = vi.fn(() => {
       throw error;
     });
-    const runner = new PostgresTransactionRunner(
-      createHost({ scope: "transaction" }, transaction),
-    );
+    const runner = new PostgresTransactionRunner(createHost({ scope: "transaction" }, transaction));
 
     await expect(runner.execute(operation)).rejects.toBe(error);
     expect(transaction).toHaveBeenCalledTimes(1);
@@ -77,9 +73,7 @@ describe("PostgresTransactionRunner", () => {
     const operation = vi.fn(async () => {
       throw error;
     });
-    const runner = new PostgresTransactionRunner(
-      createHost({ scope: "transaction" }, transaction),
-    );
+    const runner = new PostgresTransactionRunner(createHost({ scope: "transaction" }, transaction));
 
     await expect(runner.execute(operation)).rejects.toBe(error);
     expect(transaction).toHaveBeenCalledTimes(1);
@@ -87,23 +81,15 @@ describe("PostgresTransactionRunner", () => {
   });
 
   it("rejeita host sem transaction", () => {
-    expect(
-      () => new PostgresTransactionRunner(undefined as never),
-    ).toThrowError(TypeError);
-    expect(
-      () => new PostgresTransactionRunner({} as never),
-    ).toThrowError(TypeError);
+    expect(() => new PostgresTransactionRunner(undefined as never)).toThrowError(TypeError);
+    expect(() => new PostgresTransactionRunner({} as never)).toThrowError(TypeError);
   });
 
   it("rejeita callback ausente antes de abrir a transação", async () => {
     const transaction = vi.fn();
-    const runner = new PostgresTransactionRunner(
-      createHost({ scope: "transaction" }, transaction),
-    );
+    const runner = new PostgresTransactionRunner(createHost({ scope: "transaction" }, transaction));
 
-    await expect(runner.execute(undefined as never)).rejects.toThrowError(
-      TypeError,
-    );
+    await expect(runner.execute(undefined as never)).rejects.toThrowError(TypeError);
     expect(transaction).not.toHaveBeenCalled();
   });
 });

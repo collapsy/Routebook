@@ -20,6 +20,7 @@
     { "idx": 15, "version": "7", "when": 1785560400000, "tag": "0015_persist_expired_itinerary_proposals", "breakpoints": true },
     { "idx": 16, "version": "7", "when": 1785564000000, "tag": "0016_persist_rejected_itinerary_proposals", "breakpoints": true },
     { "idx": 17, "version": "7", "when": 1785567600000, "tag": "0017_persist_accepted_itinerary_proposals", "breakpoints": true },
-    { "idx": 18, "version": "7", "when": 1785683700000, "tag": "0018_persist_itinerary_proposal_acceptance_decisions", "breakpoints": true }
+    { "idx": 18, "version": "7", "when": 1785683700000, "tag": "0018_persist_itinerary_proposal_acceptance_decisions", "breakpoints": true },
+    { "idx": 19, "version": "7", "when": 1785700800000, "tag": "0019_create_proposal_applications", "breakpoints": true }
   ]
 }

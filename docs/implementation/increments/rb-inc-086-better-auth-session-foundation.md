@@ -188,4 +188,5 @@ Remover Better Auth, rota, resolver, schema, migration `0020`, exports, testes e
 - a migration `0020` foi aplicada em banco limpo;
 - a suíte PostgreSQL comprovou cadastro por email e senha, emissão de cookie, leitura server-side, logout, revogação e rejeição de cookie inválido;
 - o override de Kysely no `pnpm-workspace.yaml` eliminou as instâncias divergentes de Drizzle;
-- formatação, documentação, lint, typecheck, testes, smoke, build Turbopack e E2E responsivo ficaram verdes.
+- formatação, documentação, lint, typecheck, testes, smoke, build Turbopack e E2E responsivo ficaram verdes;
+- registry, Context Pack e matriz de rastreabilidade estão consolidados e marcam o incremento como pronto para integração.

@@ -20,7 +20,7 @@ import { DrizzleTripAuthorizationRepository } from "./trip-authorization-reposit
 
 const database = getDatabase();
 const repository = new DrizzleTripAuthorizationRepository(database);
-const tripRepository = new DrizzleTripRepository(database);
+const tripRepository = new DrizzleTripRepository();
 const userId = randomUUID();
 const viewerUserId = randomUUID();
 const outsiderUserId = randomUUID();
@@ -88,7 +88,7 @@ beforeAll(async () => {
       now,
     ),
   );
-  await tripRepository.save(trip);
+  await tripRepository.create(trip);
   await database.update(trips).set({ accountId }).where(eq(trips.id, trip.id));
 });
 

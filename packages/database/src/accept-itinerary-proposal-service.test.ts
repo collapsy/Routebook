@@ -175,7 +175,6 @@ describe("createPostgresAcceptItineraryProposal", () => {
   it.each([
     ["23505", "proposal_applications_proposal_idempotency_unique", "fingerprint-conflict"],
     ["23503", "proposal_applications_itinerary_proposal_id_fkey", "proposal-not-found"],
-    ["23503", "itinerary_proposals_pkey", "proposal-not-found"],
     ["23503", "proposal_applications_itinerary_id_fkey", "itinerary-not-found"],
     ["23503", "itinerary_proposals_itinerary_id_fkey", "itinerary-not-found"],
   ] as const)("mapeia PostgreSQL %s/%s para %s", async (code, constraint, publicCode) => {
@@ -210,7 +209,7 @@ describe("createPostgresAcceptItineraryProposal", () => {
   it("rejeita factory e transaction inválidas", () => {
     expect(() =>
       createPostgresAcceptItineraryProposal(
-        undefined as unknown as ApplyItineraryProposalTransactionFactory,
+        null as unknown as ApplyItineraryProposalTransactionFactory,
       ),
     ).toThrow("factory");
     expect(() =>

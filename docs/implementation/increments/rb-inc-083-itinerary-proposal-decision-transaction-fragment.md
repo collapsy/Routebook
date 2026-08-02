@@ -137,7 +137,7 @@ docs/registry.md
 - [x] replay idempotente é preservado;
 - [x] divergências falham antes do write;
 - [x] rollback externo integral é comprovado;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 10. Testes obrigatórios
 
@@ -169,4 +169,9 @@ Remover o fragment, seus exports, testes e documentos. Nenhuma migration ou tran
 
 ## 13. Evidências
 
-As evidências finais serão registradas após a aprovação dos workflows de Documentation Validation e Engineering Validation no HEAD definitivo da PR #190.
+- Documentation Validation: run `30763744728`, aprovado;
+- Engineering Validation: run `30763744727`, aprovado;
+- formatação, documentação, lint, typecheck e migrations aprovados;
+- suíte integral de componentes e domínio aprovada, incluindo os testes unitários e PostgreSQL do fragment;
+- persistência, replay idempotente, executor escopado e rollback externo comprovados;
+- smoke, build e E2E responsivo aprovados.

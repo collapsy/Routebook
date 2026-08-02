@@ -339,16 +339,12 @@ describe("contrato ApplyProposalItems", () => {
         return {
           itineraryId: command.itineraryId,
           resultingItineraryVersion: command.expectedItineraryVersion + 1,
-          appliedProposedActivityIds: command.items.map(
-            (item) => item.proposedActivityId,
-          ),
+          appliedProposedActivityIds: command.items.map((item) => item.proposedActivityId),
         };
       },
     };
 
-    await expect(
-      port.execute(createApplyProposalItemsCommand(contractInput())),
-    ).resolves.toEqual({
+    await expect(port.execute(createApplyProposalItemsCommand(contractInput()))).resolves.toEqual({
       itineraryId: "itinerary-1",
       resultingItineraryVersion: 5,
       appliedProposedActivityIds: [],
@@ -403,9 +399,7 @@ describe("applyProposalItemsToItinerary", () => {
 
     expect(applied.itinerary.version).toBe(5);
     expect(applied.itinerary.updatedAt).toEqual(applicationTime);
-    expect(
-      applied.itinerary.days[0]?.activities.map(({ id, order }) => ({ id, order })),
-    ).toEqual([
+    expect(applied.itinerary.days[0]?.activities.map(({ id, order }) => ({ id, order }))).toEqual([
       { id: "activity-new", order: 1 },
       { id: "activity-fixed", order: 2 },
     ]);
@@ -420,9 +414,7 @@ describe("applyProposalItemsToItinerary", () => {
       createdAt: applicationTime,
       updatedAt: applicationTime,
     });
-    expect(
-      applied.itinerary.days[1]?.activities.map(({ id, order }) => ({ id, order })),
-    ).toEqual([
+    expect(applied.itinerary.days[1]?.activities.map(({ id, order }) => ({ id, order }))).toEqual([
       { id: "activity-3", order: 1 },
       { id: "activity-2", order: 2 },
     ]);
@@ -451,9 +443,7 @@ describe("applyProposalItemsToItinerary", () => {
     });
     expect(itinerary).toEqual(original);
     expect(applied.itinerary).not.toBe(itinerary);
-    expect(applied.itinerary.days[1]?.freePeriods[0]).not.toBe(
-      itinerary.days[1]?.freePeriods[0],
-    );
+    expect(applied.itinerary.days[1]?.freePeriods[0]).not.toBe(itinerary.days[1]?.freePeriods[0]);
   });
 
   it("aceita coleção vazia com versão única e cópia independente", () => {
@@ -468,9 +458,7 @@ describe("applyProposalItemsToItinerary", () => {
       updatedAt: applicationTime,
     });
     expect(applied.itinerary.days).not.toBe(itinerary.days);
-    expect(applied.itinerary.days[1]?.freePeriods[0]).not.toBe(
-      itinerary.days[1]?.freePeriods[0],
-    );
+    expect(applied.itinerary.days[1]?.freePeriods[0]).not.toBe(itinerary.days[1]?.freePeriods[0]);
     expect(applied.result.appliedProposedActivityIds).toEqual([]);
   });
 
@@ -489,12 +477,14 @@ describe("applyProposalItemsToItinerary", () => {
       { now: applicationTime },
     );
 
-    expect(
-      applied.itinerary.days[0]?.activities.map((activity) => activity.id),
-    ).toEqual(["activity-3", "activity-1", "activity-fixed"]);
-    expect(
-      applied.itinerary.days[0]?.activities.map((activity) => activity.order),
-    ).toEqual([1, 2, 3]);
+    expect(applied.itinerary.days[0]?.activities.map((activity) => activity.id)).toEqual([
+      "activity-3",
+      "activity-1",
+      "activity-fixed",
+    ]);
+    expect(applied.itinerary.days[0]?.activities.map((activity) => activity.order)).toEqual([
+      1, 2, 3,
+    ]);
   });
 
   it("preserva tipo, flexibilidade e Place no update", () => {
@@ -530,11 +520,9 @@ describe("applyProposalItemsToItinerary", () => {
   ] as const)("rejeita %s antes de aplicar itens", (code, override) => {
     expectDomainError(
       () =>
-        applyProposalItemsToItinerary(
-          createItineraryFixture(),
-          applicationInput([], override),
-          { now: applicationTime },
-        ),
+        applyProposalItemsToItinerary(createItineraryFixture(), applicationInput([], override), {
+          now: applicationTime,
+        }),
       code,
     );
   });
@@ -655,11 +643,9 @@ describe("applyProposalItemsToItinerary", () => {
 
       expectDomainError(
         () =>
-          applyProposalItemsToItinerary(
-            createItineraryFixture(),
-            applicationInput([item]),
-            { now: applicationTime },
-          ),
+          applyProposalItemsToItinerary(createItineraryFixture(), applicationInput([item]), {
+            now: applicationTime,
+          }),
         "fixed-activity-protected",
         0,
       );
@@ -808,11 +794,9 @@ describe("applyProposalItemsToItinerary", () => {
   });
 
   it("congela o envelope e o resultado", () => {
-    const applied = applyProposalItemsToItinerary(
-      createItineraryFixture(),
-      applicationInput([]),
-      { now: applicationTime },
-    );
+    const applied = applyProposalItemsToItinerary(createItineraryFixture(), applicationInput([]), {
+      now: applicationTime,
+    });
 
     expect(Object.isFrozen(applied)).toBe(true);
     expect(Object.isFrozen(applied.result)).toBe(true);

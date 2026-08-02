@@ -216,6 +216,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-083 | Context Pack do RB-INC-083 | Implementation Context | Draft | 0.1.0 | [rb-inc-083-itinerary-proposal-decision-transaction-fragment.md](./implementation/context-packs/rb-inc-083-itinerary-proposal-decision-transaction-fragment.md) |
 | RB-INC-084 | Composição PostgreSQL do Aceite Integral de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-084-apply-itinerary-proposal-transaction.md](./implementation/increments/rb-inc-084-apply-itinerary-proposal-transaction.md) |
 | RB-CTX-084 | Context Pack do RB-INC-084 | Implementation Context | Draft | 0.1.0 | [rb-inc-084-apply-itinerary-proposal-transaction.md](./implementation/context-packs/rb-inc-084-apply-itinerary-proposal-transaction.md) |
+| RB-INC-085 | Integração Concreta do AcceptItineraryProposal | Implementation | Draft | 0.1.0 | [rb-inc-085-postgres-accept-itinerary-proposal-service.md](./implementation/increments/rb-inc-085-postgres-accept-itinerary-proposal-service.md) |
+| RB-CTX-085 | Context Pack do RB-INC-085 | Implementation Context | Draft | 0.1.0 | [rb-inc-085-postgres-accept-itinerary-proposal-service.md](./implementation/context-packs/rb-inc-085-postgres-accept-itinerary-proposal-service.md) |
 
 ## Status possíveis
 

@@ -14,6 +14,10 @@ export {
   trips,
 } from "./schema";
 export {
+  createPostgresAcceptItineraryProposal,
+  type ApplyItineraryProposalTransactionFactory,
+} from "./accept-itinerary-proposal-service";
+export {
   createApplyItineraryProposalTransaction,
   createPostgresApplyItineraryProposalTransaction,
   type ApplyItineraryProposalTransactionFragments,

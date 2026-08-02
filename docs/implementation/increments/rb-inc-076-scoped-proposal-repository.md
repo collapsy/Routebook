@@ -133,7 +133,7 @@ docs/registry.md
 - [x] falha posterior provoca rollback integral dos writes;
 - [x] o modo global mantém sua transação própria;
 - [x] os testes existentes permanecem verdes;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 10. Testes obrigatórios
 
@@ -161,8 +161,15 @@ Remover a injeção, a factory, o teste adicional e os exports. Nenhuma migratio
 
 ## 13. Evidências
 
-- Engineering Validation de código `30734294000`: aprovada;
-- typecheck aceitou o transaction executor Drizzle;
-- migrations, suíte integral, smoke, build e 56 E2E responsivos aprovados;
+- Documentation Validation `30734507036`: aprovada;
+- Engineering Validation `30734507054`: aprovada;
+- 194 documentos encontrados e registrados;
+- instalação congelada, formatação, lint e typecheck aprovados;
+- o transaction executor do Drizzle satisfaz o contrato estrutural sem casts externos;
+- migrations PostgreSQL existentes aplicadas com sucesso;
+- suíte integral aprovada, incluindo visibilidade transacional e rollback externo de Proposal e Proposed Activities;
+- smoke do servidor de desenvolvimento aprovado;
+- build de produção aprovado;
+- 56 testes Playwright responsivos aprovados;
 - registry e matriz de rastreabilidade sincronizados com `RB-INC-076` e `RB-CTX-076`;
-- validações definitivas sobre o HEAD governado em execução.
+- HEAD governado validado antes do registro das evidências: `286dba987ba396f643353d182ff0bd09da721ebd`.

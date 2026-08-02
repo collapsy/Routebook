@@ -139,7 +139,7 @@ Trips existentes permanecem sem Account até um incremento explícito de migraç
 - [x] schema e migration `0021` criados;
 - [x] reader PostgreSQL implementado;
 - [x] testes unitários e PostgreSQL implementados;
-- [ ] registry e rastreabilidade atualizados;
+- [x] registry e rastreabilidade atualizados;
 - [ ] validações finais do CI aprovadas.
 
 ## 11. Riscos
@@ -158,4 +158,4 @@ Remover módulo, repositories, exports, migration `0021`, coluna `trips.account_
 
 ## 13. Evidências
 
-As evidências finais serão registradas após os workflows da PR #200.
+O domínio, a persistência, o Context Pack, o registry e a rastreabilidade estão consolidados. As evidências dos gates serão registradas após os workflows definitivos da PR #200.

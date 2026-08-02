@@ -147,7 +147,7 @@ Mantém tokens temporários necessários aos fluxos de verificação e recupera�
 - [x] `.env.example` não contém segredo real;
 - [x] testes unitários de configuração e sessão implementados;
 - [x] teste PostgreSQL real implementado;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 10. Testes obrigatórios
 
@@ -182,4 +182,10 @@ Remover Better Auth, rota, resolver, schema, migration `0020`, exports, testes e
 
 ## 13. Evidências
 
-O escopo funcional, a migration `0020`, o teste PostgreSQL real, a rota Next.js, o resolver de sessão e a governança documental estão consolidados. As evidências numéricas serão registradas após a aprovação dos workflows definitivos do HEAD da PR #198.
+- HEAD funcional validado: `f4e8278380dcdb5a316bd01c0a9bcbb25833b490`;
+- Documentation Validation: run `30769434778`, concluído com sucesso;
+- Engineering Validation: run `30769434775`, job `91553846726`, concluído com sucesso;
+- a migration `0020` foi aplicada em banco limpo;
+- a suíte PostgreSQL comprovou cadastro por email e senha, emissão de cookie, leitura server-side, logout, revogação e rejeição de cookie inválido;
+- o override de Kysely no `pnpm-workspace.yaml` eliminou as instâncias divergentes de Drizzle;
+- formatação, documentação, lint, typecheck, testes, smoke, build Turbopack e E2E responsivo ficaram verdes.

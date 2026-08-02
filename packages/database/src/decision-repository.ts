@@ -39,9 +39,33 @@ type StoredPlanningRiskSnapshot = Readonly<{
   capturedAt: string;
 }>;
 
-type StoredSnapshot = StoredRecommendationSnapshot | StoredPlanningRiskSnapshot;
+type StoredItineraryProposalSnapshot = Readonly<{
+  schemaVersion: 1;
+  tripId: string;
+  itineraryId: string;
+  itineraryProposalId: string;
+  baseItineraryVersion: number;
+  requestFingerprint: string;
+  capturedAt: string;
+}>;
+
+type StoredSnapshot =
+  | StoredRecommendationSnapshot
+  | StoredPlanningRiskSnapshot
+  | StoredItineraryProposalSnapshot;
 
 export function serializeDecisionSnapshot(snapshot: DecisionRecordContextSnapshot): StoredSnapshot {
+  if ("itineraryProposalId" in snapshot) {
+    return {
+      schemaVersion: 1,
+      tripId: snapshot.tripId,
+      itineraryId: snapshot.itineraryId,
+      itineraryProposalId: snapshot.itineraryProposalId,
+      baseItineraryVersion: snapshot.baseItineraryVersion,
+      requestFingerprint: snapshot.requestFingerprint,
+      capturedAt: snapshot.capturedAt.toISOString(),
+    };
+  }
   if ("planningConflictId" in snapshot) {
     return {
       schemaVersion: 1,
@@ -71,6 +95,17 @@ export function serializeDecisionSnapshot(snapshot: DecisionRecordContextSnapsho
 
 export function deserializeDecisionSnapshot(value: unknown): DecisionRecordContextSnapshot {
   const snapshot = value as StoredSnapshot;
+  if ("itineraryProposalId" in snapshot) {
+    return {
+      schemaVersion: 1,
+      tripId: snapshot.tripId,
+      itineraryId: snapshot.itineraryId,
+      itineraryProposalId: snapshot.itineraryProposalId,
+      baseItineraryVersion: snapshot.baseItineraryVersion,
+      requestFingerprint: snapshot.requestFingerprint,
+      capturedAt: new Date(snapshot.capturedAt),
+    };
+  }
   if ("planningConflictId" in snapshot) {
     return {
       schemaVersion: 1,

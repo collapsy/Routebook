@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import {
-  getRouteBookSession,
-  type RouteBookSessionReader,
-} from "./auth-session";
+import { getRouteBookSession, type RouteBookSessionReader } from "./auth-session";
 
 const requestHeaders = new Headers({ cookie: "routebook-session=test" });
 

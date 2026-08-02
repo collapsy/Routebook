@@ -3,12 +3,7 @@ import { randomUUID } from "node:crypto";
 import { createGeoCoordinate, type GeoCoordinate } from "@routebook/geo-distance";
 
 export type TripStatus =
-  | "draft"
-  | "planned"
-  | "in-progress"
-  | "completed"
-  | "cancelled"
-  | "archived";
+  "draft" | "planned" | "in-progress" | "completed" | "cancelled" | "archived";
 export type TripRole = "owner" | "editor" | "viewer";
 
 export type Destination = {
@@ -90,8 +85,7 @@ const PIPA_DESTINATION: Destination = {
   timeZone: "America/Fortaleza",
 };
 
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function isLocalDate(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));

@@ -1,19 +1,11 @@
 import { and, eq } from "drizzle-orm";
 
 import { createPersonalAccount } from "@routebook/identity-access";
-import {
-  createTrip,
-  type CreateTripInput,
-  type Trip,
-} from "@routebook/trip-management";
+import { createTrip, type CreateTripInput, type Trip } from "@routebook/trip-management";
 
 import { authUsers } from "./auth-schema";
 import { getDatabase } from "./client";
-import {
-  accountMemberships,
-  accounts,
-  personalAccountOwnerships,
-} from "./identity-schema";
+import { accountMemberships, accounts, personalAccountOwnerships } from "./identity-schema";
 import { trips } from "./schema";
 
 export type CreateAuthenticatedTripInput = Readonly<{

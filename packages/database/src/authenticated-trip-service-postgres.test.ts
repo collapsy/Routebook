@@ -9,11 +9,7 @@ import {
   createPostgresAuthenticatedTrip,
 } from "./authenticated-trip-service";
 import { closeDatabase, getDatabase } from "./client";
-import {
-  accountMemberships,
-  accounts,
-  personalAccountOwnerships,
-} from "./identity-schema";
+import { accountMemberships, accounts, personalAccountOwnerships } from "./identity-schema";
 import { trips } from "./schema";
 
 const database = getDatabase();
@@ -81,7 +77,9 @@ afterAll(async () => {
   }
   await database
     .delete(authUsers)
-    .where(inArray(authUsers.id, [primaryUserId, secondaryUserId, concurrentUserId, rollbackUserId]));
+    .where(
+      inArray(authUsers.id, [primaryUserId, secondaryUserId, concurrentUserId, rollbackUserId]),
+    );
   await closeDatabase();
 });
 
@@ -168,10 +166,7 @@ describe("createPostgresAuthenticatedTrip", () => {
     createdTripIds.push(first.trip.id, second.trip.id);
     createdAccountIds.add(first.accountId);
 
-    expect([first.personalAccount, second.personalAccount].sort()).toEqual([
-      "created",
-      "existing",
-    ]);
+    expect([first.personalAccount, second.personalAccount].sort()).toEqual(["created", "existing"]);
     expect(second.accountId).toBe(first.accountId);
     expect(second.membershipId).toBe(first.membershipId);
 
@@ -188,7 +183,8 @@ describe("createPostgresAuthenticatedTrip", () => {
   });
 
   it("reverte o provisionamento quando a persistência da Trip falha", async () => {
-    await database.execute(sql.raw(`
+    await database.execute(
+      sql.raw(`
       CREATE OR REPLACE FUNCTION rb_inc_088_reject_trip()
       RETURNS trigger
       LANGUAGE plpgsql
@@ -200,12 +196,15 @@ describe("createPostgresAuthenticatedTrip", () => {
         RETURN NEW;
       END;
       $$
-    `));
-    await database.execute(sql.raw(`
+    `),
+    );
+    await database.execute(
+      sql.raw(`
       CREATE TRIGGER rb_inc_088_reject_trip_trigger
       BEFORE INSERT ON trips
       FOR EACH ROW EXECUTE FUNCTION rb_inc_088_reject_trip()
-    `));
+    `),
+    );
 
     try {
       await expect(

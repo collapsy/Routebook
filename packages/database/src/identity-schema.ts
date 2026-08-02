@@ -43,7 +43,5 @@ export const personalAccountOwnerships = pgTable(
       .references(() => accounts.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
   },
-  (table) => [
-    uniqueIndex("personal_account_ownerships_account_id_unique").on(table.accountId),
-  ],
+  (table) => [uniqueIndex("personal_account_ownerships_account_id_unique").on(table.accountId)],
 );

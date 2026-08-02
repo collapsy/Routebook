@@ -51,9 +51,7 @@ describe("Better Auth with PostgreSQL", () => {
         email,
         emailVerified: false,
       });
-      await expect(
-        getRouteBookSession(requestHeaders, currentAuth.api),
-      ).resolves.toMatchObject({
+      await expect(getRouteBookSession(requestHeaders, currentAuth.api)).resolves.toMatchObject({
         user: {
           id: signedUp.response.user.id,
           name: "RouteBook QA",
@@ -67,9 +65,7 @@ describe("Better Auth with PostgreSQL", () => {
       });
 
       await currentAuth.api.signOut({ headers: requestHeaders });
-      await expect(
-        getRouteBookSession(requestHeaders, currentAuth.api),
-      ).resolves.toBeNull();
+      await expect(getRouteBookSession(requestHeaders, currentAuth.api)).resolves.toBeNull();
     } finally {
       await database.delete(authUsers).where(eq(authUsers.email, email));
     }
@@ -82,9 +78,7 @@ describe("Better Auth with PostgreSQL", () => {
       baseURL: "http://localhost:3000",
     });
 
-    await expect(
-      getRouteBookSession(new Headers(), currentAuth.api),
-    ).resolves.toBeNull();
+    await expect(getRouteBookSession(new Headers(), currentAuth.api)).resolves.toBeNull();
     await expect(
       getRouteBookSession(
         new Headers({ cookie: "better-auth.session_token=invalid" }),

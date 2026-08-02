@@ -218,6 +218,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-084 | Context Pack do RB-INC-084 | Implementation Context | Draft | 0.1.0 | [rb-inc-084-apply-itinerary-proposal-transaction.md](./implementation/context-packs/rb-inc-084-apply-itinerary-proposal-transaction.md) |
 | RB-INC-085 | Integração Concreta do AcceptItineraryProposal | Implementation | Draft | 0.1.0 | [rb-inc-085-postgres-accept-itinerary-proposal-service.md](./implementation/increments/rb-inc-085-postgres-accept-itinerary-proposal-service.md) |
 | RB-CTX-085 | Context Pack do RB-INC-085 | Implementation Context | Draft | 0.1.0 | [rb-inc-085-postgres-accept-itinerary-proposal-service.md](./implementation/context-packs/rb-inc-085-postgres-accept-itinerary-proposal-service.md) |
+| RB-INC-086 | Fundação Better Auth e Sessão Server-Side | Implementation | Draft | 0.1.0 | [rb-inc-086-better-auth-session-foundation.md](./implementation/increments/rb-inc-086-better-auth-session-foundation.md) |
+| RB-CTX-086 | Context Pack do RB-INC-086 | Implementation Context | Draft | 0.1.0 | [rb-inc-086-better-auth-session-foundation.md](./implementation/context-packs/rb-inc-086-better-auth-session-foundation.md) |
 
 ## Status possíveis
 

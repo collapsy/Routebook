@@ -137,7 +137,7 @@ docs/registry.md
 - [x] aggregate resultante é persistido exatamente uma vez;
 - [x] falhas técnicas são propagadas sem retry;
 - [x] export público foi atualizado;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 10. Testes obrigatórios
 
@@ -167,4 +167,14 @@ Remover o fragment, seus testes e exports. Nenhuma migration ou transformação 
 
 ## 13. Evidências
 
-As evidências serão registradas após a aprovação dos workflows da PR #182.
+- Documentation Validation `30752064982`: aprovada;
+- Engineering Validation `30752064966`: aprovada;
+- 198 documentos encontrados e registrados;
+- formatação, documentação, lint e typecheck aprovados;
+- migrations PostgreSQL existentes aplicadas com sucesso;
+- suíte integral aprovada, incluindo os sete cenários do fragment;
+- smoke do servidor de desenvolvimento aprovado;
+- build de produção aprovado;
+- 56 testes Playwright responsivos aprovados;
+- registry e matriz de rastreabilidade sincronizados com `RB-INC-079` e `RB-CTX-079`;
+- HEAD validado: `ca9e6c8c739dbbad11d9b59a782c32cb813411c2`.

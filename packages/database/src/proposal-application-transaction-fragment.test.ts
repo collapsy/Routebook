@@ -99,7 +99,7 @@ function repository(createResult?: CreateProposalApplicationPersistenceResult): 
     async (record: ProposalApplicationPersistenceRecord) =>
       createResult ?? ({ kind: "created", record } as const),
   );
-  const saveTerminal = vi.fn(async (_record: ProposalApplicationPersistenceRecord) => undefined);
+  const saveTerminal = vi.fn(async () => undefined);
 
   return {
     value: { create, saveTerminal },

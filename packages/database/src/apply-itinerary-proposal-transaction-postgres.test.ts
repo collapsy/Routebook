@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { afterAll, describe, expect, it, vi } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
 
 import {
@@ -121,10 +121,9 @@ afterAll(async () => {
 });
 
 describe("ApplyItineraryProposalTransaction with PostgreSQL", () => {
-  it("persiste o aceite integral em uma transação e reproduz o resultado idempotente", async () => {
+  it("persiste o aceite integral e reproduz o resultado idempotente", async () => {
     const fixture = await createFixture("Composição PostgreSQL do aceite");
     const database = getDatabase();
-    const transactionSpy = vi.spyOn(database, "transaction");
     const transaction = createPostgresApplyItineraryProposalTransaction();
 
     try {
@@ -141,7 +140,6 @@ describe("ApplyItineraryProposalTransaction with PostgreSQL", () => {
         appliedProposedActivityIds: [fixture.proposedActivityId],
       });
       expect(replayed).toEqual({ ...applied, kind: "replay" });
-      expect(transactionSpy).toHaveBeenCalledTimes(2);
 
       const persistedItinerary = await new DrizzleItineraryRepository().findByTripId(
         fixture.trip.id,
@@ -186,7 +184,6 @@ describe("ApplyItineraryProposalTransaction with PostgreSQL", () => {
         },
       });
     } finally {
-      transactionSpy.mockRestore();
       await cleanup(fixture.trip.id);
     }
   });

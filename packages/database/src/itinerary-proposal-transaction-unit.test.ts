@@ -5,14 +5,9 @@ import { PostgresTransactionRunner } from "./postgres-transaction-runner";
 
 type Executor = Readonly<{ scope: "transaction" }>;
 
-function createRunner(
-  executor: Executor,
-  onTransaction?: () => void,
-) {
+function createRunner(executor: Executor, onTransaction?: () => void) {
   return new PostgresTransactionRunner<Executor>({
-    async transaction<TResult>(
-      operation: (value: Executor) => Promise<TResult>,
-    ) {
+    async transaction<TResult>(operation: (value: Executor) => Promise<TResult>) {
       onTransaction?.();
       return operation(executor);
     },
@@ -87,10 +82,7 @@ describe("ItineraryProposalTransactionUnit", () => {
   it("entrega contexto congelado com as identidades produzidas pelas factories", async () => {
     const executor = { scope: "transaction" } as const;
     const { factories, values } = createFragments(executor);
-    const unit = new ItineraryProposalTransactionUnit(
-      createRunner(executor),
-      factories,
-    );
+    const unit = new ItineraryProposalTransactionUnit(createRunner(executor), factories);
 
     await unit.execute(async (fragments) => {
       expect(Object.isFrozen(fragments)).toBe(true);
@@ -104,10 +96,7 @@ describe("ItineraryProposalTransactionUnit", () => {
   it("preserva identidade e tipo do resultado da operação", async () => {
     const executor = { scope: "transaction" } as const;
     const { factories } = createFragments(executor);
-    const unit = new ItineraryProposalTransactionUnit(
-      createRunner(executor),
-      factories,
-    );
+    const unit = new ItineraryProposalTransactionUnit(createRunner(executor), factories);
     const result = { applied: true } as const;
 
     await expect(unit.execute(async () => result)).resolves.toBe(result);
@@ -164,31 +153,29 @@ describe("ItineraryProposalTransactionUnit", () => {
     const executor = { scope: "transaction" } as const;
     const { factories } = createFragments(executor);
 
-    expect(
-      () => new ItineraryProposalTransactionUnit(undefined as never, factories),
-    ).toThrowError(TypeError);
-    expect(
-      () => new ItineraryProposalTransactionUnit({} as never, factories),
-    ).toThrowError(TypeError);
+    expect(() => new ItineraryProposalTransactionUnit(undefined as never, factories)).toThrowError(
+      TypeError,
+    );
+    expect(() => new ItineraryProposalTransactionUnit({} as never, factories)).toThrowError(
+      TypeError,
+    );
   });
 
-  it.each([
-    "proposalApplication",
-    "itineraryProposal",
-    "itinerary",
-    "decision",
-  ] as const)("rejeita factory ausente: %s", (name) => {
-    const executor = { scope: "transaction" } as const;
-    const { factories } = createFragments(executor);
+  it.each(["proposalApplication", "itineraryProposal", "itinerary", "decision"] as const)(
+    "rejeita factory ausente: %s",
+    (name) => {
+      const executor = { scope: "transaction" } as const;
+      const { factories } = createFragments(executor);
 
-    expect(
-      () =>
-        new ItineraryProposalTransactionUnit(createRunner(executor), {
-          ...factories,
-          [name]: undefined,
-        } as never),
-    ).toThrowError(TypeError);
-  });
+      expect(
+        () =>
+          new ItineraryProposalTransactionUnit(createRunner(executor), {
+            ...factories,
+            [name]: undefined,
+          } as never),
+      ).toThrowError(TypeError);
+    },
+  );
 
   it("rejeita operação ausente antes de abrir transação", async () => {
     const executor = { scope: "transaction" } as const;
@@ -199,9 +186,7 @@ describe("ItineraryProposalTransactionUnit", () => {
       factories,
     );
 
-    await expect(unit.execute(undefined as never)).rejects.toThrowError(
-      TypeError,
-    );
+    await expect(unit.execute(undefined as never)).rejects.toThrowError(TypeError);
     expect(transaction).not.toHaveBeenCalled();
   });
 });

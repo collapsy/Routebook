@@ -49,7 +49,10 @@ function assertInput(input: PersistItineraryProposalDecisionInput): void {
   }
   requiredText(input.proposalApplicationId, "proposalApplicationId");
   requiredText(input.actorParticipantId, "actorParticipantId");
-  if (!Number.isInteger(input.resultingItineraryVersion) || input.resultingItineraryVersion < 1) {
+  if (
+    !Number.isInteger(input.resultingItineraryVersion) ||
+    input.resultingItineraryVersion < 1
+  ) {
     throw new TypeError("Informe resultingItineraryVersion como inteiro positivo.");
   }
   if (!Array.isArray(input.appliedProposedActivityIds)) {
@@ -61,7 +64,11 @@ export function createDecisionTransactionFragment<TExecutor extends DecisionData
   executor: TExecutor,
   repositoryFactory: DecisionTransactionRepositoryFactory<TExecutor> = createPostgresDecisionRepository,
 ): DecisionTransactionFragment {
-  if (!executor || typeof executor.select !== "function" || typeof executor.insert !== "function") {
+  if (
+    !executor ||
+    typeof executor.select !== "function" ||
+    typeof executor.insert !== "function"
+  ) {
     throw new TypeError("Informe um executor Drizzle transacional válido.");
   }
   if (typeof repositoryFactory !== "function") {

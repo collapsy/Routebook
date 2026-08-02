@@ -136,8 +136,10 @@ describe("Itinerary Proposal acceptance Decision persistence", () => {
         }),
       ).rejects.toSatisfy((error: unknown) => {
         expect(error).toMatchObject({
-          name: "DrizzleQueryError",
-          cause: { code: "23514" },
+          cause: {
+            code: "23514",
+            constraint: "decisions_type_check",
+          },
         });
         return true;
       });

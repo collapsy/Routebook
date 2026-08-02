@@ -3,7 +3,9 @@ import {
   type Decision,
   type RecommendationId,
 } from "@routebook/decision-intelligence";
-import type { AcceptItineraryProposalCommand } from "@routebook/proposal-management";
+import type {
+  AcceptItineraryProposalCommand,
+} from "@routebook/proposal-management";
 
 import {
   createPostgresDecisionRepository,
@@ -82,7 +84,9 @@ export function createDecisionTransactionFragment<TExecutor extends DecisionData
   }
 
   return Object.freeze({
-    async persist(input: PersistItineraryProposalDecisionInput): Promise<Decision> {
+    async persist(
+      input: PersistItineraryProposalDecisionInput,
+    ): Promise<Decision> {
       assertInput(input);
       const { command } = input;
 

@@ -128,7 +128,7 @@ Todas as etapas executam dentro da mesma transação física aberta pela `Itiner
 - [x] resposta pública preserva IDs, fingerprint, versão e atividades;
 - [x] falhas impedem finalizações posteriores;
 - [x] atomicidade PostgreSQL comprovada por testes de integração;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 9. Testes obrigatórios
 
@@ -162,4 +162,13 @@ Remover o adapter, os exports, testes e documentos do incremento. Não há migra
 
 ## 12. Evidências
 
-As evidências finais serão registradas após a aprovação dos workflows de Documentation Validation e Engineering Validation no HEAD definitivo da PR #194.
+- HEAD funcional validado: `4e1a2b6596a7d1054920211a07d9cef41ba98bdd`;
+- Documentation Validation: run `30766253051`, concluído com sucesso;
+- Engineering Validation: run `30766253063`, job `91545409225`, concluído com sucesso;
+- 208 documentos encontrados e registrados pelo validador;
+- migration corretiva `0019_create_proposal_applications.sql` aplicada em banco PostgreSQL limpo;
+- testes unitários cobrem ordem, resultado `applied`, replay e estados não executáveis;
+- testes PostgreSQL comprovam commit integral, replay idempotente e rollback externo;
+- a serialização ISO 8601 dos timestamps da Proposal Application foi validada no adapter;
+- o repository de Itinerary passou a preservar o registro pai e reconstruir apenas os filhos, evitando cascata sobre Itinerary Proposal;
+- formatação, documentação, lint, typecheck, migrations, suíte integral, smoke, build e E2E responsivo ficaram verdes.

@@ -140,7 +140,7 @@ Trips existentes permanecem sem Account até um incremento explícito de migraç
 - [x] reader PostgreSQL implementado;
 - [x] testes unitários e PostgreSQL implementados;
 - [x] registry e rastreabilidade atualizados;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 11. Riscos
 
@@ -158,4 +158,10 @@ Remover módulo, repositories, exports, migration `0021`, coluna `trips.account_
 
 ## 13. Evidências
 
-O domínio, a persistência, o Context Pack, o registry e a rastreabilidade estão consolidados. O HEAD atual executará os validadores padrão antes do registro das evidências finais da PR #200.
+- HEAD funcional validado: `4d5283702e9caabbb79e416cee73804a54c575e9`;
+- Documentation Validation: run `30770613047`, concluído com sucesso;
+- Engineering Validation: run `30770613051`, job `91556998468`, concluído com sucesso;
+- a migration `0021` foi aplicada em banco limpo;
+- os testes de domínio comprovaram criação de Account pessoal, owner membership, validação de IDs e matriz de roles;
+- os testes PostgreSQL comprovaram owner autorizado, viewer negado, usuário cross-account negado, membership suspensa negada e Trip sem Account negada;
+- formatação, documentação, lint, typecheck, suíte integral, smoke, build e E2E responsivo ficaram verdes.

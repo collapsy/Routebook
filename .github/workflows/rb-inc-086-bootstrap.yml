@@ -55,8 +55,7 @@ jobs:
             'apps/web/app/api/auth/[...all]/route.ts' \
             packages/database/src/auth-schema.ts \
             packages/database/src/index.ts \
-            packages/database/drizzle/meta/_journal.json \
-            .env.example
+            packages/database/drizzle/meta/_journal.json
           rm .github/workflows/rb-inc-086-bootstrap.yml
       - name: Commit bootstrap
         run: |
@@ -65,3 +64,5 @@ jobs:
           git add apps/web/package.json pnpm-lock.yaml apps/web/lib/auth.ts apps/web/lib/auth-session.ts 'apps/web/app/api/auth/[...all]/route.ts' packages/database/src/auth-schema.ts packages/database/src/index.ts packages/database/drizzle/meta/_journal.json .env.example .github/workflows/rb-inc-086-bootstrap.yml
           git commit -m "build: bootstrap Better Auth foundation"
           git push origin HEAD:feature/rb-inc-086-better-auth-session-foundation
+
+# retry without env formatting

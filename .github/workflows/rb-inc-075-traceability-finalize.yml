@@ -1,0 +1,30 @@
+name: RB-INC-075 Traceability Finalize
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-075-proposal-application-transaction-fragment
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Finalize traceability
+        run: node scripts/finalize-rb-inc-075-traceability.mjs
+
+      - name: Commit finalized traceability
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "docs: finalizar rastreabilidade do RB-INC-075"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

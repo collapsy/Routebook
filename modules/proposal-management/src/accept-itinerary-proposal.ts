@@ -3,7 +3,7 @@ import {
   type ApplyProposalItem,
   type ApplyProposalItemsCommand,
   type ApplyProposalItemsCommandInput,
-} from "@routebook/trip-management";
+} from "../../trip-management/src/index";
 
 import {
   createProposalApplicationRequestFingerprint,

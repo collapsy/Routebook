@@ -172,4 +172,4 @@ Remover a composition root, os testes, o campo opcional `ownerUserId`, o schema 
 
 ## 14. Evidências
 
-O domínio, a composition root, a migration, o Context Pack, o registry e a rastreabilidade estão consolidados. O HEAD atual executará os validadores padrão antes do registro das evidências finais.
+O domínio, a composition root, a migration, o Context Pack, o registry e a rastreabilidade estão consolidados. O cenário de rollback valida a causa PostgreSQL encapsulada pelo Drizzle e comprova a ausência de Account, membership e ownership parciais após a falha. O HEAD atual executará os validadores padrão antes do registro das evidências finais.

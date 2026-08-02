@@ -16,6 +16,11 @@ type ItineraryDayRow = typeof itineraryDays.$inferSelect;
 type ItineraryActivityRow = typeof itineraryActivities.$inferSelect;
 type ItineraryFreePeriodRow = typeof itineraryFreePeriods.$inferSelect;
 
+export type ItineraryDatabaseExecutor = Pick<
+  ReturnType<typeof getDatabase>,
+  "select" | "insert" | "delete"
+>;
+
 function mapActivity(row: ItineraryActivityRow): Activity {
   return {
     id: row.id,
@@ -89,8 +94,24 @@ function mapItinerary(
 }
 
 export class DrizzleItineraryRepository implements ItineraryRepository {
+  constructor(
+    private readonly database: ItineraryDatabaseExecutor = getDatabase(),
+    private readonly useOwnTransaction = true,
+  ) {}
+
+  private async withWriteExecutor<TResult>(
+    operation: (database: ItineraryDatabaseExecutor) => Promise<TResult>,
+  ): Promise<TResult> {
+    if (!this.useOwnTransaction) return operation(this.database);
+
+    const host = this.database as ReturnType<typeof getDatabase>;
+    if (typeof host.transaction !== "function") return operation(this.database);
+
+    return host.transaction(async (transaction) => operation(transaction));
+  }
+
   async findByTripId(tripId: string): Promise<Itinerary | null> {
-    const database = getDatabase();
+    const database = this.database;
     const [itineraryRow] = await database
       .select()
       .from(itineraries)
@@ -126,9 +147,9 @@ export class DrizzleItineraryRepository implements ItineraryRepository {
   }
 
   async save(itinerary: Itinerary): Promise<Itinerary> {
-    await getDatabase().transaction(async (transaction) => {
-      await transaction.delete(itineraries).where(eq(itineraries.tripId, itinerary.tripId));
-      await transaction.insert(itineraries).values({
+    return this.withWriteExecutor(async (database) => {
+      await database.delete(itineraries).where(eq(itineraries.tripId, itinerary.tripId));
+      await database.insert(itineraries).values({
         id: itinerary.id,
         tripId: itinerary.tripId,
         startDate: itinerary.period.startDate,
@@ -140,7 +161,7 @@ export class DrizzleItineraryRepository implements ItineraryRepository {
       });
 
       if (itinerary.days.length > 0) {
-        await transaction.insert(itineraryDays).values(
+        await database.insert(itineraryDays).values(
           itinerary.days.map((day) => ({
             id: day.id,
             itineraryId: itinerary.id,
@@ -180,13 +201,28 @@ export class DrizzleItineraryRepository implements ItineraryRepository {
       );
 
       if (activities.length > 0) {
-        await transaction.insert(itineraryActivities).values(activities);
+        await database.insert(itineraryActivities).values(activities);
       }
       if (freePeriods.length > 0) {
-        await transaction.insert(itineraryFreePeriods).values(freePeriods);
+        await database.insert(itineraryFreePeriods).values(freePeriods);
       }
-    });
 
-    return itinerary;
+      return itinerary;
+    });
   }
+}
+
+export function createPostgresItineraryRepository(
+  executor: ItineraryDatabaseExecutor,
+): DrizzleItineraryRepository {
+  if (
+    !executor ||
+    typeof executor.select !== "function" ||
+    typeof executor.insert !== "function" ||
+    typeof executor.delete !== "function"
+  ) {
+    throw new TypeError("Informe um executor Drizzle transacional válido.");
+  }
+
+  return new DrizzleItineraryRepository(executor, false);
 }

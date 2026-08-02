@@ -14,7 +14,11 @@ export {
   trips,
 } from "./schema";
 export { DrizzleDecisionRepository } from "./decision-repository";
-export { DrizzleItineraryRepository } from "./itinerary-repository";
+export {
+  createPostgresItineraryRepository,
+  DrizzleItineraryRepository,
+  type ItineraryDatabaseExecutor,
+} from "./itinerary-repository";
 export { DrizzlePlaceRepository } from "./place-repository";
 export {
   evaluatePlanningConflicts,

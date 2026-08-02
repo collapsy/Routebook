@@ -86,6 +86,7 @@ ai_context:
 | RB-INC-074 | RB-ADR-027, RB-ARC-003–004, RB-DATA-002 e RB-INC-072–073 | #169 | `feature/rb-inc-074-itinerary-proposal-transaction-unit`, PR #172 | unidade transacional genérica, quatro factories escopadas e contexto congelado | runs 30732551083 e 30732551085; 190 documentos, migrations, suíte integral, build e 56 E2E responsivos verdes | Integrado |
 | RB-INC-075 | RB-ADR-027, RB-ARC-003–004, RB-DATA-002 e RB-INC-069, RB-INC-071, RB-INC-073–074 | #173 | `feature/rb-inc-075-proposal-application-transaction-fragment`, PR #174 | fragment de reserva idempotente e conclusão terminal de Proposal Application sobre executor escopado | runs 30733685016 e 30733685015; 192 documentos, migrations, suíte integral, build e 56 E2E responsivos verdes | Integrado |
 | RB-INC-076 | RB-ADR-006, RB-ADR-027, RB-ARC-003–004, RB-DATA-002 e RB-INC-055, RB-INC-067, RB-INC-073–075 | #175 | `feature/rb-inc-076-scoped-proposal-repository`, PR #176 | executor Drizzle injetado, modo global preservado e rollback externo sem nested transaction | código validado em run 30734294000; documentação e evidências finais em execução | Em execução |
+| RB-INC-078 | RB-ADR-006, RB-ADR-027, RB-ARC-003–004, RB-DATA-002 e RB-INC-070, RB-INC-073–077 | #179 | `feature/rb-inc-078-itinerary-transactional-repository`, PR #180 | repository de Itinerary com executor escopado, modo global preservado e rollback externo | runs 30751388318 e 30751388307; 196 documentos, migrations, suíte integral, build e 56 E2E responsivos verdes | Integrado |
 
 ## Evidências do RB-INC-003
 

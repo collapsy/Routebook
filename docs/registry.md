@@ -202,6 +202,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-QA-004 | Plano de Testes de Resiliência Operacional e Recuperação | Quality | Planned | 0.1.0 | [operational-resilience-and-recovery-test-plan.md](./quality/operational-resilience-and-recovery-test-plan.md) |
 | RB-INT-001 | Catálogo de Integrações e Providers | Integrations | Planned | 0.1.0 | [integration-catalog.md](./integrations/integration-catalog.md) |
 | RB-SRE-002 | Objetivos de Nível de Serviço e Error Budgets | Reliability | Planned | 0.1.0 | [service-level-objectives-and-error-budgets.md](./reliability/service-level-objectives-and-error-budgets.md) |
+| RB-INC-078 | Repository Transacional de Itinerary | Implementation | Draft | 0.1.0 | [rb-inc-078-itinerary-transactional-repository.md](./implementation/increments/rb-inc-078-itinerary-transactional-repository.md) |
+| RB-CTX-078 | Context Pack do RB-INC-078 | Implementation Context | Draft | 0.1.0 | [rb-inc-078-itinerary-transactional-repository.md](./implementation/context-packs/rb-inc-078-itinerary-transactional-repository.md) |
 
 ## Status possíveis
 

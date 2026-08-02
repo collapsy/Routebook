@@ -96,8 +96,7 @@ describe("Proposal Application", () => {
     ).toThrowError(
       expect.objectContaining({
         fieldErrors: {
-          "proposedActivityIds.1":
-            "Não repita o Proposed Activity ID já informado na posição 0.",
+          "proposedActivityIds.1": "Não repita o Proposed Activity ID já informado na posição 0.",
         },
       }),
     );
@@ -246,9 +245,7 @@ describe("Proposal Application", () => {
 
   it("expõe erros específicos de validação", () => {
     expect(() =>
-      createProposalApplicationRequestFingerprint(
-        requestInput({ expectedItineraryVersion: -1 }),
-      ),
+      createProposalApplicationRequestFingerprint(requestInput({ expectedItineraryVersion: -1 })),
     ).toThrowError(ProposalApplicationValidationError);
   });
 });

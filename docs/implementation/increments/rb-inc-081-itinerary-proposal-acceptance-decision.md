@@ -63,7 +63,8 @@ O modelo implementado até o RB-INC-080 suportava apenas salvar Lugar, adicionar
 - effect contém Proposal Application, Itinerary, versão resultante e IDs aplicados;
 - estruturas e coleções são imutáveis;
 - option, snapshot e effect são validados como um único fato consistente;
-- decisões existentes permanecem compatíveis.
+- decisões existentes permanecem compatíveis;
+- o serializer de snapshots reconhece o novo contexto sem liberar persistência física antes da migration.
 
 ## 4. Contrato canônico
 
@@ -108,13 +109,13 @@ Decision
 - validações cruzadas;
 - testes de domínio;
 - exports públicos;
+- compatibilidade de serialização e reidratação do novo snapshot;
 - documentação, registry e rastreabilidade.
 
 ## 7. Fora de escopo
 
-- check constraint e migration da tabela `decisions`;
-- serialização e reidratação PostgreSQL;
-- repository ou fragment transacional;
+- check constraint, migration e persistência física do novo tipo na tabela `decisions`;
+- fragment transacional de Decision;
 - composição do port de aceite;
 - Server Action, autorização ou UI.
 
@@ -124,6 +125,8 @@ Decision
 modules/decision-intelligence/src/decision.ts
 modules/decision-intelligence/src/itinerary-proposal-decision.test.ts
 modules/decision-intelligence/src/index.ts
+packages/database/src/decision-repository.ts
+packages/database/src/decision-snapshot-serialization.test.ts
 docs/implementation/increments/rb-inc-081-itinerary-proposal-acceptance-decision.md
 docs/implementation/context-packs/rb-inc-081-itinerary-proposal-acceptance-decision.md
 docs/implementation/traceability-matrix.md
@@ -141,6 +144,7 @@ docs/registry.md
 - [x] IDs escolhidos e aplicados comparados em ordem;
 - [x] tipos existentes preservados;
 - [x] exports públicos atualizados;
+- [x] serializer e reidratação reconhecem o novo snapshot;
 - [ ] validações finais do CI aprovadas.
 
 ## 10. Testes obrigatórios
@@ -155,6 +159,7 @@ docs/registry.md
 - IDs reordenados ou duplicados;
 - fingerprint inválido;
 - effect incompatível;
+- round trip do snapshot serializado;
 - regressão da suíte histórica de Decision.
 
 ## 11. Riscos
@@ -169,7 +174,7 @@ docs/registry.md
 
 ## 12. Rollback
 
-Remover os novos membros das unions, validações, testes e exports. Nenhum dado ou migration é alterado neste incremento.
+Remover os novos membros das unions, validações, testes, exports e branches do serializer. Nenhum dado ou migration é alterado neste incremento.
 
 ## 13. Evidências
 

@@ -2,10 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { ItineraryProposalDecisionContextSnapshot } from "@routebook/decision-intelligence";
 
-import {
-  deserializeDecisionSnapshot,
-  serializeDecisionSnapshot,
-} from "./decision-repository";
+import { deserializeDecisionSnapshot, serializeDecisionSnapshot } from "./decision-repository";
 
 const capturedAt = new Date("2026-08-02T15:00:00.000Z");
 

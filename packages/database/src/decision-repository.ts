@@ -50,9 +50,7 @@ type StoredItineraryProposalSnapshot = Readonly<{
 }>;
 
 type StoredSnapshot =
-  | StoredRecommendationSnapshot
-  | StoredPlanningRiskSnapshot
-  | StoredItineraryProposalSnapshot;
+  StoredRecommendationSnapshot | StoredPlanningRiskSnapshot | StoredItineraryProposalSnapshot;
 
 export function serializeDecisionSnapshot(snapshot: DecisionRecordContextSnapshot): StoredSnapshot {
   if ("itineraryProposalId" in snapshot) {

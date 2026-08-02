@@ -62,7 +62,8 @@ Adicionar ao aggregate Decision a representação canônica do aceite integral d
 6. `modules/decision-intelligence/src/decision.ts`;
 7. `modules/decision-intelligence/src/decision.test.ts`;
 8. `modules/proposal-management/src/accept-itinerary-proposal.ts`;
-9. `modules/trip-management/src/proposal-application.ts`.
+9. `modules/trip-management/src/proposal-application.ts`;
+10. `packages/database/src/decision-repository.ts`.
 
 ## 4. Contrato operacional
 
@@ -96,7 +97,7 @@ createDecision(input)
 
 - não alterar `decision-schema.ts`;
 - não criar migration;
-- não adaptar repository ou serializer;
+- não alterar schema, migration ou liberar o save físico do novo tipo;
 - não implementar Decision fragment;
 - não importar Proposal Management ou Itinerary Planning no domínio de Decision Intelligence;
 - não compor o aceite integral;
@@ -123,16 +124,19 @@ createDecision(input)
 - IDs escolhidos duplicados;
 - fingerprint inválido;
 - effect de outro tipo;
+- round trip do snapshot serializado;
 - suíte histórica de Decision.
 
 ## 9. Comandos
 
 ```bash
-pnpm exec prettier --check modules/decision-intelligence/src/decision.ts modules/decision-intelligence/src/itinerary-proposal-decision.test.ts modules/decision-intelligence/src/index.ts docs/implementation/increments/rb-inc-081-itinerary-proposal-acceptance-decision.md docs/implementation/context-packs/rb-inc-081-itinerary-proposal-acceptance-decision.md docs/implementation/traceability-matrix.md docs/registry.md
+pnpm exec prettier --check modules/decision-intelligence/src/decision.ts modules/decision-intelligence/src/itinerary-proposal-decision.test.ts modules/decision-intelligence/src/index.ts packages/database/src/decision-repository.ts packages/database/src/decision-snapshot-serialization.test.ts docs/implementation/increments/rb-inc-081-itinerary-proposal-acceptance-decision.md docs/implementation/context-packs/rb-inc-081-itinerary-proposal-acceptance-decision.md docs/implementation/traceability-matrix.md docs/registry.md
 pnpm docs:validate
 pnpm --filter @routebook/decision-intelligence lint
 pnpm --filter @routebook/decision-intelligence typecheck
 pnpm --filter @routebook/decision-intelligence test
+pnpm --filter @routebook/database typecheck
+pnpm --filter @routebook/database test
 pnpm lint
 pnpm typecheck
 pnpm test

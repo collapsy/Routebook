@@ -1,4 +1,21 @@
 export {
+  acceptItineraryProposalErrorCodes,
+  AcceptItineraryProposalError,
+  AcceptItineraryProposalValidationError,
+  createAcceptItineraryProposal,
+  createAcceptItineraryProposalCommand,
+} from "./accept-itinerary-proposal";
+export type {
+  AcceptItineraryProposal,
+  AcceptItineraryProposalCommand,
+  AcceptItineraryProposalCommandInput,
+  AcceptItineraryProposalErrorCode,
+  AcceptItineraryProposalResult,
+  AppliedItineraryProposalAcceptance,
+  ApplyItineraryProposalTransaction,
+  ReplayedItineraryProposalAcceptance,
+} from "./accept-itinerary-proposal";
+export {
   createProposalApplicationId,
   createProposalApplicationRequestFingerprint,
   failProposalApplication,

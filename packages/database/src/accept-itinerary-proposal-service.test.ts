@@ -2,12 +2,14 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   AcceptItineraryProposalError,
-  AcceptItineraryProposalValidationError,
   type AcceptItineraryProposalCommand,
   type AcceptItineraryProposalResult,
   type ApplyItineraryProposalTransaction,
 } from "@routebook/proposal-management";
-import { ApplyProposalItemsDomainError } from "@routebook/trip-management";
+import {
+  ApplyProposalItemsCommandValidationError,
+  ApplyProposalItemsDomainError,
+} from "@routebook/trip-management";
 
 import {
   createPostgresAcceptItineraryProposal,
@@ -123,7 +125,7 @@ describe("createPostgresAcceptItineraryProposal", () => {
     const service = serviceWith(execute);
 
     await expect(service.execute({ ...input(), tripId: "" })).rejects.toBeInstanceOf(
-      AcceptItineraryProposalValidationError,
+      ApplyProposalItemsCommandValidationError,
     );
     expect(execute).not.toHaveBeenCalled();
   });

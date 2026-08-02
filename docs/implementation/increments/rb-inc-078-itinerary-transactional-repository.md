@@ -135,7 +135,7 @@ docs/registry.md
 - [x] rollback externo remove todos os writes do Itinerary;
 - [x] executor inválido é rejeitado;
 - [x] exports públicos foram atualizados;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 10. Testes obrigatórios
 
@@ -163,4 +163,14 @@ Remover a injeção, a factory, os testes adicionais e os exports. Nenhuma migra
 
 ## 13. Evidências
 
-As evidências serão registradas após a aprovação dos workflows da PR #180.
+- Documentation Validation `30751388318`: aprovada;
+- Engineering Validation `30751388307`: aprovada;
+- 196 documentos encontrados e registrados;
+- instalação congelada, formatação, documentação, lint e typecheck aprovados;
+- migrations PostgreSQL existentes aplicadas com sucesso;
+- suíte integral aprovada, incluindo modo global, executor escopado, ausência de nested transaction e rollback externo;
+- smoke do servidor de desenvolvimento aprovado;
+- build de produção aprovado;
+- 56 testes Playwright responsivos aprovados;
+- registry e matriz de rastreabilidade sincronizados com `RB-INC-078` e `RB-CTX-078`;
+- HEAD validado: `0c93ce331e1e1bad89eca9d7e41f03d9394944de`.

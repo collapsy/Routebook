@@ -195,4 +195,4 @@ Remover o fragment, seus testes e exports. Nenhuma migration, tabela, query nova
 
 ## 14. Evidências
 
-As evidências definitivas serão registradas após a aprovação dos workflows da PR #174.
+Registry e matriz de rastreabilidade foram sincronizados com `RB-INC-075` e `RB-CTX-075`. As evidências definitivas serão registradas após a aprovação dos workflows da PR #174.

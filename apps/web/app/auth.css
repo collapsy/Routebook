@@ -1,0 +1,147 @@
+.auth-page {
+  align-items: center;
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in oklab, var(--primary) 16%, transparent),
+      transparent 34rem
+    ),
+    var(--background);
+  display: flex;
+  min-height: 100vh;
+  padding: clamp(1rem, 4vw, 3rem);
+}
+
+.auth-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-large);
+  box-shadow: 0 28px 80px color-mix(in oklab, var(--primary-strong) 12%, transparent);
+  margin: auto;
+  max-width: 32rem;
+  padding: clamp(1.4rem, 4vw, 2.5rem);
+  width: 100%;
+}
+
+.auth-brand {
+  align-items: center;
+  color: var(--foreground);
+  display: inline-flex;
+  font-size: 1.05rem;
+  font-weight: 850;
+  gap: 0.65rem;
+  text-decoration: none;
+}
+
+.auth-heading {
+  margin: 2rem 0 1.5rem;
+}
+
+.auth-heading h1 {
+  font-size: clamp(2rem, 7vw, 3rem);
+  letter-spacing: -0.05em;
+  margin: 0.35rem 0 0.75rem;
+}
+
+.auth-heading > p:last-child {
+  color: var(--foreground-muted);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.auth-form {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.auth-form .form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.auth-form label {
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.auth-form input {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  color: var(--foreground);
+  font: inherit;
+  min-height: 3rem;
+  padding: 0.75rem 0.9rem;
+}
+
+.auth-form input:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.auth-form input[aria-invalid="true"] {
+  border-color: var(--danger, #b42318);
+}
+
+.auth-actions {
+  align-items: center;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.35rem;
+  padding-top: 1.25rem;
+}
+
+.auth-actions p {
+  color: var(--foreground-muted);
+  font-size: 0.9rem;
+  margin: 0;
+  text-align: center;
+}
+
+.auth-actions a {
+  color: var(--primary-strong);
+  font-weight: 800;
+}
+
+.auth-submit {
+  border: 0;
+  cursor: pointer;
+  justify-content: center;
+  width: 100%;
+}
+
+.auth-submit:disabled {
+  cursor: progress;
+  opacity: 0.65;
+}
+
+.app-session {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.app-session-user {
+  color: var(--foreground-muted);
+  font-size: 0.82rem;
+  font-weight: 750;
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-sign-out {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+@media (max-width: 44rem) {
+  .app-session-user {
+    display: none;
+  }
+}

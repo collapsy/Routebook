@@ -48,13 +48,13 @@ Issue: [#205](https://github.com/collapsy/Routebook/issues/205).
 
 Branch: `feature/rb-inc-090-authenticated-trip-workspace`.
 
-Pull request: a registrar após a criação.
+Pull request: [#206](https://github.com/collapsy/Routebook/pull/206).
 
 ## 2. Contexto
 
-RB-INC-086 a RB-INC-089 publicaram autenticação, autorização de Trip, Account pessoal, criação autenticada e a experiência de cadastro, entrada e saída. A interface de Trips ainda usa o repositório legado global e permite que o navegador informe o owner da nova Trip.
+RB-INC-086 a RB-INC-089 publicaram autenticação, autorização de Trip, Account pessoal, criação autenticada e a experiência de cadastro, entrada e saída. A interface de Trips ainda usava o repositório legado global e permitia que o navegador informasse o owner da nova Trip.
 
-Este incremento conecta essas fundações à jornada já existente sem alterar invariantes de domínio nem introduzir novos Providers.
+Este incremento conecta essas fundações à jornada existente sem alterar invariantes de domínio nem introduzir novos Providers.
 
 ## 3. Resultado verificável
 
@@ -118,16 +118,16 @@ flowchart TD
 
 ## 8. Critérios de aceite
 
-- [ ] sessão obrigatória em `/viagens`;
-- [ ] sessão obrigatória em `/viagens/nova`;
-- [ ] coleção isolada por Account Membership ativa;
-- [ ] Trips legadas sem Account excluídas;
-- [ ] criação autenticada implementada;
-- [ ] owner removido do formulário;
-- [ ] layout de Trip protegido por `trip:view`;
-- [ ] isolamento entre Users coberto em PostgreSQL;
-- [ ] jornada autenticada coberta em E2E;
-- [ ] registry e rastreabilidade atualizados;
+- [x] sessão obrigatória em `/viagens`;
+- [x] sessão obrigatória em `/viagens/nova`;
+- [x] coleção isolada por Account Membership ativa;
+- [x] Trips legadas sem Account excluídas;
+- [x] criação autenticada implementada;
+- [x] owner removido do formulário;
+- [x] layout de Trip protegido por `trip:view`;
+- [x] isolamento entre Users coberto em PostgreSQL;
+- [ ] jornada autenticada aprovada no E2E;
+- [x] registry e rastreabilidade atualizados;
 - [ ] validações finais do CI aprovadas.
 
 ## 9. Riscos
@@ -146,4 +146,9 @@ Restaurar a listagem e criação legadas, remover o guard de layout e a query es
 
 ## 11. Evidências
 
-As evidências serão registradas após a execução dos validadores e do E2E no HEAD final da PR.
+- query PostgreSQL de coleção escopada publicada em `packages/database/src/authenticated-trip-query.ts`;
+- criação autenticada reutiliza a composition root transacional do RB-INC-088;
+- guard de leitura centralizado em `apps/web/app/viagens/[tripId]/layout.tsx`;
+- testes PostgreSQL cobrem isolamento, membership e Account inativas e Trip sem Account;
+- teste E2E cobre redirecionamento anônimo, criação autenticada e tentativa de acesso por outro User;
+- HEAD funcional em validação: `d45e5c7e20855210837612c8244654ebf9b8c950`.

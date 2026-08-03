@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
-import type { TripAuthorizationReader } from "@routebook/identity-access";
+import type {
+  AccountMembership,
+  TripAuthorizationReader,
+  TripScopeLookup,
+} from "@routebook/identity-access";
 
 import type { RouteBookSessionReader } from "./auth-session";
 import { resolveTripRouteAccess } from "./trip-route-access";
@@ -48,10 +52,10 @@ function authorizationReader(
   const membership = options.membership ?? "active";
 
   return {
-    findTripScope: vi.fn(async () =>
+    findTripScope: vi.fn(async (): Promise<TripScopeLookup> =>
       scope === "scoped" ? { status: "scoped", accountId: "account-1" } : { status: scope },
     ),
-    findMembership: vi.fn(async () =>
+    findMembership: vi.fn(async (): Promise<AccountMembership | null> =>
       membership === "active"
         ? {
             id: "membership-1",
@@ -129,7 +133,7 @@ describe("resolveTripRouteAccess", () => {
       findTripScope: vi.fn(async () => {
         throw new Error("database unavailable");
       }),
-      findMembership: vi.fn(),
+      findMembership: vi.fn(async () => null),
     };
 
     await expect(

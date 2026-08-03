@@ -35,7 +35,9 @@ test("cria Trip autenticada e impede leitura por outro User", async ({ page }, t
   await tripLink.click();
   await expect(page).toHaveURL(new RegExp(`${tripHref}$`));
   await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
-  await expect(page.getByText("Owner RB-INC-090", { exact: true })).toBeVisible();
+  await expect(
+    page.locator("#conteudo-principal").getByText("Owner RB-INC-090", { exact: true }),
+  ).toBeVisible();
 
   await page.getByRole("button", { name: "Sair" }).click();
   await expect(page).toHaveURL(/\/$/);

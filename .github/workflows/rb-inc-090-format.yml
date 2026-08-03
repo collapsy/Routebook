@@ -1,0 +1,56 @@
+name: RB-INC-090 Format
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-090-authenticated-trip-workspace
+    paths:
+      - ".github/workflows/rb-inc-090-format.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-090-authenticated-trip-workspace
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Format increment files
+        run: >-
+          pnpm exec prettier --write
+          apps/web/components/trip-form.tsx
+          apps/web/lib/trip-route-access.test.ts
+          apps/web/lib/trip-route-access.ts
+          packages/database/src/authenticated-trip-query-postgres.test.ts
+          packages/database/src/authenticated-trip-query.ts
+
+      - name: Commit formatted files and remove workflow
+        shell: bash
+        run: |
+          rm .github/workflows/rb-inc-090-format.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/components/trip-form.tsx \
+            apps/web/lib/trip-route-access.test.ts \
+            apps/web/lib/trip-route-access.ts \
+            packages/database/src/authenticated-trip-query-postgres.test.ts \
+            packages/database/src/authenticated-trip-query.ts \
+            .github/workflows/rb-inc-090-format.yml
+          git commit -m "style: format RB-INC-090 files"
+          git push origin HEAD:feature/rb-inc-090-authenticated-trip-workspace

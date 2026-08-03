@@ -128,4 +128,7 @@ jobs:
         run: pnpm --filter @routebook/web exec playwright install --with-deps chromium
 
       - name: Run responsive persistence tests
+        env:
+          BETTER_AUTH_SECRET: routebook-ci-e2e-secret-key-2026-08-02
+          BETTER_AUTH_URL: http://127.0.0.1:3000
         run: pnpm test:e2e

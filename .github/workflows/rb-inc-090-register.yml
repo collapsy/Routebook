@@ -1,0 +1,55 @@
+name: RB-INC-090 Register
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-090-authenticated-trip-workspace
+    paths:
+      - ".github/workflows/rb-inc-090-register.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-090-authenticated-trip-workspace
+
+      - name: Update registry and traceability
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          registry = Path("docs/registry.md")
+          registry_text = registry.read_text()
+          registry_marker = "| RB-CTX-089 | Context Pack do RB-INC-089 | Implementation Context | Draft | 0.1.0 | [rb-inc-089-server-auth-experience.md](./implementation/context-packs/rb-inc-089-server-auth-experience.md) |"
+          registry_rows = "\n| RB-INC-090 | Workspace Autenticado e Isolado de Trips | Implementation | Draft | 0.1.0 | [rb-inc-090-authenticated-trip-workspace.md](./implementation/increments/rb-inc-090-authenticated-trip-workspace.md) |\n| RB-CTX-090 | Context Pack do RB-INC-090 | Implementation Context | Draft | 0.1.0 | [rb-inc-090-authenticated-trip-workspace.md](./implementation/context-packs/rb-inc-090-authenticated-trip-workspace.md) |"
+          if "| RB-INC-090 |" not in registry_text:
+              if registry_marker not in registry_text:
+                  raise SystemExit("registry marker not found")
+              registry.write_text(registry_text.replace(registry_marker, registry_marker + registry_rows))
+
+          matrix = Path("docs/implementation/traceability-matrix.md")
+          matrix_text = matrix.read_text()
+          matrix_marker = "| RB-INC-089 | RB-SEC-001, RB-ADR-007 e RB-INC-086–088 | #203 | `feature/rb-inc-089-server-auth-experience`, PR #204 | páginas e Server Actions de cadastro, entrada e saída, retorno seguro e sessão no App Shell | validações funcionais em execução | Em validação |"
+          matrix_row = "\n| RB-INC-090 | RB-SEC-001, RB-ADR-007–008 e RB-INC-086–089 | #205 | `feature/rb-inc-090-authenticated-trip-workspace`, PR #206 | coleção e criação autenticadas, isolamento por Account e guard `trip:view` nas páginas de Trip | testes PostgreSQL e E2E em validação | Em validação |"
+          if "| RB-INC-090 |" not in matrix_text:
+              if matrix_marker not in matrix_text:
+                  raise SystemExit("matrix marker not found")
+              matrix.write_text(matrix_text.replace(matrix_marker, matrix_marker + matrix_row))
+          PY
+
+      - name: Remove workflow and commit
+        shell: bash
+        run: |
+          rm .github/workflows/rb-inc-090-register.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/registry.md docs/implementation/traceability-matrix.md .github/workflows/rb-inc-090-register.yml
+          git commit -m "docs: register RB-INC-090"
+          git push origin HEAD:feature/rb-inc-090-authenticated-trip-workspace

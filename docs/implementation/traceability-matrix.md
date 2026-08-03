@@ -99,6 +99,7 @@ ai_context:
 | RB-INC-088 | RB-DATA-001–002, RB-ADR-007–008 e RB-INC-086–087 | #201 | `feature/rb-inc-088-personal-account-authenticated-trip`, PR #202 | vínculo pessoal um-para-um, provisioning idempotente e criação transacional de Trip escopada | runs 30771744270 e 30771744252; migration 0022, replay, concorrência, rollback, PostgreSQL real, smoke, build e E2E verdes | Pronto para integração |
 
 | RB-INC-089 | RB-SEC-001, RB-ADR-007 e RB-INC-086–088 | #203 | `feature/rb-inc-089-server-auth-experience`, PR #204 | páginas e Server Actions de cadastro, entrada e saída, retorno seguro e sessão no App Shell | validações funcionais em execução | Em validação |
+| RB-INC-090 | RB-SEC-001, RB-ADR-007–008 e RB-INC-086–089 | #205 | `feature/rb-inc-090-authenticated-trip-workspace`, PR #206 | coleção e criação autenticadas, isolamento por Account e guard `trip:view` nas páginas de Trip | testes PostgreSQL e E2E em validação | Em validação |
 
 ## Evidências do RB-INC-003
 

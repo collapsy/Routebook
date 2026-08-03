@@ -54,11 +54,6 @@ export async function signInAction(
 }
 
 export async function signOutAction(): Promise<void> {
-  try {
-    await experience.signOut(await headers());
-  } catch (error) {
-    console.error("Falha técnica ao sair", error);
-  }
-
+  await experience.signOut(await headers());
   redirect("/");
 }

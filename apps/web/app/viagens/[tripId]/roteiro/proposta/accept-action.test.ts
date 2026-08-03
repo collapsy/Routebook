@@ -8,18 +8,21 @@ const acceptanceMocks = vi.hoisted(() => ({
 const databaseMocks = vi.hoisted(() => ({
   accept: { execute: vi.fn() },
   acceptFactory: vi.fn(),
-  itineraryRepository: vi.fn(),
-  proposalRepository: vi.fn(),
-  tripRepository: vi.fn(),
 }));
 const accessMocks = vi.hoisted(() => ({ resolve: vi.fn() }));
 
 vi.mock("next/cache", () => ({ revalidatePath: cacheMocks.revalidatePath }));
 vi.mock("@routebook/database", () => ({
   createPostgresAcceptItineraryProposal: databaseMocks.acceptFactory,
-  DrizzleItineraryProposalRepository: databaseMocks.proposalRepository,
-  DrizzleItineraryRepository: databaseMocks.itineraryRepository,
-  DrizzleTripRepository: databaseMocks.tripRepository,
+  DrizzleItineraryProposalRepository: class {
+    findById = vi.fn();
+  },
+  DrizzleItineraryRepository: class {
+    findByTripId = vi.fn();
+  },
+  DrizzleTripRepository: class {
+    findById = vi.fn();
+  },
 }));
 vi.mock("@/lib/itinerary-proposal-acceptance", () => ({
   acceptItineraryProposalActionError: acceptanceMocks.error,
@@ -58,9 +61,6 @@ describe("acceptItineraryProposalAction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     databaseMocks.acceptFactory.mockReturnValue(databaseMocks.accept);
-    databaseMocks.tripRepository.mockImplementation(() => ({ findById: vi.fn() }));
-    databaseMocks.itineraryRepository.mockImplementation(() => ({ findByTripId: vi.fn() }));
-    databaseMocks.proposalRepository.mockImplementation(() => ({ findById: vi.fn() }));
   });
 
   it("delega o payload mínimo e revalida somente após sucesso", async () => {

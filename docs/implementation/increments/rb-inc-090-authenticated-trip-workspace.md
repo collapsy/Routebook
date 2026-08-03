@@ -151,4 +151,5 @@ Restaurar a listagem e criação legadas, remover o guard de layout e a query es
 - guard de leitura centralizado em `apps/web/app/viagens/[tripId]/layout.tsx`;
 - testes PostgreSQL cobrem isolamento, membership e Account inativas e Trip sem Account;
 - teste E2E cobre redirecionamento anônimo, criação autenticada e tentativa de acesso por outro User;
-- HEAD funcional em validação: `d45e5c7e20855210837612c8244654ebf9b8c950`.
+- dependência interna `@routebook/identity-access` declarada explicitamente no app web e lockfile sincronizado;
+- HEAD funcional em validação: `51e63760e518ef68423152653906e4eaee717276`.

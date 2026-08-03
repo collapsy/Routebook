@@ -1,19 +1,20 @@
 import { expect, test } from "@playwright/test";
 
-import { DrizzleItineraryRepository, DrizzleTripRepository } from "@routebook/database";
-import { addActivity, createItinerary, createTrip } from "@routebook/trip-management";
+import { DrizzleItineraryRepository } from "@routebook/database";
+import { addActivity, createItinerary } from "@routebook/trip-management";
+
+import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
 const firstActivity = "Café demorado";
 const secondActivity = "Passeio de barco";
 
 async function createConflictFixture(tripName: string): Promise<string> {
   const now = new Date();
-  const trip = createTrip(
+  const { trip } = await createAuthenticatedE2ETrip(
     {
       name: tripName,
       startDate: "2026-08-22",
       endDate: "2026-08-29",
-      ownerName: "RouteBook E2E",
     },
     now,
   );
@@ -39,7 +40,6 @@ async function createConflictFixture(tripName: string): Promise<string> {
     now,
   );
 
-  await new DrizzleTripRepository().create(trip);
   await new DrizzleItineraryRepository().save(itinerary);
   return trip.id;
 }

@@ -17,6 +17,7 @@ export {
   type CreateAuthenticatedTripInput,
   type CreateAuthenticatedTripResult,
 } from "./authenticated-trip-service";
+export { listPostgresAuthorizedTrips } from "./authenticated-trip-query";
 
 export {
   createPostgresTripAuthorizationReader,

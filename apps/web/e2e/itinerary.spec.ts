@@ -4,10 +4,11 @@ import {
   DrizzleItineraryRepository,
   DrizzlePlaceRepository,
   DrizzleSavedPlaceRepository,
-  DrizzleTripRepository,
 } from "@routebook/database";
 import { createSavedPlace } from "@routebook/saved-places";
-import { addActivity, createItinerary, createTrip } from "@routebook/trip-management";
+import { addActivity, createItinerary } from "@routebook/trip-management";
+
+import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
 async function submitAndExpectActionRedirect(
   page: Page,
@@ -29,7 +30,6 @@ test("cria e preserva uma atividade no roteiro manual", async ({ page }, testInf
 
   await page.goto("/viagens/nova");
   await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
   await page.getByRole("button", { name: "Criar viagem" }).click();
 
   await expect(page).toHaveURL(/\/viagens\?created=1$/);
@@ -63,7 +63,6 @@ test("remove uma atividade do roteiro e preserva a remoção", async ({ page }, 
 
   await page.goto("/viagens/nova");
   await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
   await page.getByRole("button", { name: "Criar viagem" }).click();
 
   await page.getByRole("link", { name: tripName }).click();
@@ -89,7 +88,6 @@ test("edita uma atividade preservando sua identidade no roteiro", async ({ page 
 
   await page.goto("/viagens/nova");
   await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
   await page.getByRole("button", { name: "Criar viagem" }).click();
 
   await page.getByRole("link", { name: tripName }).click();
@@ -131,19 +129,17 @@ test("reordena atividades dentro do mesmo período e preserva a sequência", asy
   const firstTitle = "Primeira decisão";
   const secondTitle = "Segunda decisão";
   const now = new Date();
-  const trip = createTrip(
+  const { trip } = await createAuthenticatedE2ETrip(
     {
       name: tripName,
       startDate: "2026-08-22",
       endDate: "2026-08-29",
-      ownerName: "RouteBook E2E",
     },
     now,
   );
   let itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);
   itinerary = addActivity(itinerary, { dayDate: "2026-08-22", title: firstTitle }, now);
   itinerary = addActivity(itinerary, { dayDate: "2026-08-22", title: secondTitle }, now);
-  await new DrizzleTripRepository().create(trip);
   await new DrizzleItineraryRepository().save(itinerary);
   await page.goto(`/viagens/${trip.id}/roteiro`);
 
@@ -172,7 +168,6 @@ test("move uma atividade para outro dia e preserva seus dados", async ({ page },
 
   await page.goto("/viagens/nova");
   await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
   await page.getByRole("button", { name: "Criar viagem" }).click();
 
   await page.getByRole("link", { name: tripName }).click();
@@ -220,12 +215,11 @@ test("move uma atividade para outro dia e preserva seus dados", async ({ page },
 test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ page }, testInfo) => {
   const tripName = `Lugar no roteiro ${testInfo.project.name} ${Date.now()}`;
   const now = new Date();
-  const trip = createTrip(
+  const { trip } = await createAuthenticatedE2ETrip(
     {
       name: tripName,
       startDate: "2026-08-22",
       endDate: "2026-08-29",
-      ownerName: "RouteBook E2E",
     },
     now,
   );
@@ -233,7 +227,6 @@ test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ 
     destinationId: "pipa-rn-br",
   });
   expect(place).toBeDefined();
-  await new DrizzleTripRepository().create(trip);
   await new DrizzleSavedPlaceRepository().save(
     createSavedPlace({ tripId: trip.id, placeId: place!.id }, now),
   );

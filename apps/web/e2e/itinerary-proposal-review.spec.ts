@@ -3,7 +3,6 @@ import { expect, test } from "@playwright/test";
 import {
   DrizzleItineraryProposalRepository,
   DrizzleItineraryRepository,
-  DrizzleTripRepository,
 } from "@routebook/database";
 import {
   completeItineraryProposalGeneration,
@@ -12,7 +11,9 @@ import {
   requestItineraryProposal,
   startItineraryProposalGeneration,
 } from "@routebook/proposal-management";
-import { addActivity, createItinerary, createTrip } from "@routebook/trip-management";
+import { addActivity, createItinerary } from "@routebook/trip-management";
+
+import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
 test.setTimeout(120_000);
 
@@ -24,12 +25,11 @@ async function createProposalFixture(
   status: "ready" | "expired" = "ready",
 ): Promise<string> {
   const requestedAt = new Date(Date.now() - 10_000);
-  const trip = createTrip(
+  const { trip } = await createAuthenticatedE2ETrip(
     {
       name: tripName,
       startDate: "2026-08-22",
       endDate: "2026-08-23",
-      ownerName: "RouteBook E2E",
     },
     requestedAt,
   );
@@ -45,7 +45,6 @@ async function createProposalFixture(
     requestedAt,
   );
 
-  await new DrizzleTripRepository().create(trip);
   await new DrizzleItineraryRepository().save(itinerary);
 
   const repository = new DrizzleItineraryProposalRepository();
@@ -100,17 +99,15 @@ async function createProposalFixture(
 
 async function createItineraryWithoutProposal(tripName: string): Promise<string> {
   const now = new Date();
-  const trip = createTrip(
+  const { trip } = await createAuthenticatedE2ETrip(
     {
       name: tripName,
       startDate: "2026-08-22",
       endDate: "2026-08-23",
-      ownerName: "RouteBook E2E",
     },
     now,
   );
   const itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);
-  await new DrizzleTripRepository().create(trip);
   await new DrizzleItineraryRepository().save(itinerary);
   return trip.id;
 }

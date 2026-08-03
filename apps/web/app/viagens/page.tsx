@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-import { DrizzleTripRepository } from "@routebook/database";
-import { listTrips } from "@routebook/trip-management";
+import { listPostgresAuthorizedTrips } from "@routebook/database";
 
 import { EmptyTripsState } from "@/components/empty-trips-state";
 import { TripCard } from "@/components/trip-card";
+import { getRouteBookSession } from "@/lib/auth-session";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,10 @@ export default async function TripsPage({
 }: {
   searchParams: Promise<{ created?: string }>;
 }) {
-  const trips = await listTrips(new DrizzleTripRepository());
+  const session = await getRouteBookSession();
+  if (!session) redirect("/entrar?next=%2Fviagens");
+
+  const trips = await listPostgresAuthorizedTrips(session.user.id);
   const { created } = await searchParams;
 
   return (

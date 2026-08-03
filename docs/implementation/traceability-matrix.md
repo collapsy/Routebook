@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: "2026-08-02"
+last_updated: "2026-08-03"
 authors:
   - RouteBook Team
 tags:
@@ -69,7 +69,7 @@ ai_context:
 | RB-INC-057 | RB-SCR-009, RB-INT-063–069, RB-WF-MOB-025, RB-WF-DESK-009, RB-INC-055, RB-INC-056 | #130 | `codex/rb-inc-057-ready-review`, PR #131 | revisão somente leitura da Proposal `ready` sem aplicar ao Roteiro | validações locais verdes; CI com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para revisão |
 | RB-INC-058 | RB-BR-PRP-004, RB-BR-PRP-008, ciclo oficial e RB-DATA-001 | #132 | `codex/rb-inc-058-temporal-expiration`, PR #133 | expiração temporal de Proposal `ready` no domínio | 53 testes do módulo; CI com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para revisão |
 | RB-INC-059 | RB-BR-PRP-004, RB-BR-PRP-008, RB-DATA-001–002, RB-ADR-006 e RB-INC-058 | #134 | `codex/rb-inc-059-expired-persistence`, PR #135 | migration, schema e round trip de Proposal `expired` com conteúdo preservado | validações locais verdes; run 30713827362 com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para integração |
-| RB-INC-060 | RB-BR-PRP-004, RB-BR-PRP-008, ciclo oficial e RB-INC-056, RB-INC-058–059 | #136 | `codex/rb-inc-060-expiration-command`, PR #137 | comando de aplicação para expirar e persistir Proposal `ready` | 60 testes do módulo; run 30714407588 com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para integração |
+| RB-INC-060 | RB-BR-PRP-004, RB-BR-PRP-008, ciclo oficial e RB-INC-056, RB-INC-058–059 | #136 | `codex/rb-inc-060-expiration-command`, PR #137 | comando de aplicação para expirar e persistir Proposal `ready` | 60 testes do módulo; run 30714407588 com migrations, suíte integral, build e 50 E2E responsivos verdes | Pronto para integração |
 | RB-INC-061 | RB-BR-PRP-004, RB-BR-PRP-008, RB-SCR-009, RB-INT-063–069 e RB-INC-057–060 | #138 | `codex/rb-inc-061-expired-review`, PR #139 | revisão histórica somente leitura da Proposal `expired` sem aplicação | validações locais verdes; run 30716155284 com migrations, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
 | RB-INC-062 | RB-BR-PRP-001, RB-BR-PRP-004, ciclo oficial, RB-DATA-001 e RB-INC-053 | #140 | `codex/rb-inc-062-reject-proposal`, PR #141 | transição pura de Proposal `ready` para `rejected` | validações locais verdes; run 30716780960 com migrations, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
 | RB-INC-063 | RB-BR-PRP-001, RB-BR-PRP-004, RB-DATA-001–002, RB-ADR-006 e RB-INC-055, RB-INC-062 | #142 | `codex/rb-inc-063-rejected-persistence`, PR #143 | migration, schema e round trip de Proposal `rejected` com snapshot preservado | validações locais verdes; run 30717630992 com migration, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
@@ -99,13 +99,14 @@ ai_context:
 | RB-INC-088 | RB-DATA-001–002, RB-ADR-007–008 e RB-INC-086–087 | #201 | `feature/rb-inc-088-personal-account-authenticated-trip`, PR #202 | vínculo pessoal um-para-um, provisioning idempotente e criação transacional de Trip escopada | runs 30771744270 e 30771744252; migration 0022, replay, concorrência, rollback, PostgreSQL real, smoke, build e E2E verdes | Pronto para integração |
 
 | RB-INC-089 | RB-SEC-001, RB-ADR-007 e RB-INC-086–088 | #203 | `feature/rb-inc-089-server-auth-experience`, PR #204 | páginas e Server Actions de cadastro, entrada e saída, retorno seguro e sessão no App Shell | validações funcionais em execução | Em validação |
+| RB-INC-090 | RB-SEC-001, RB-ADR-007–008 e RB-INC-086–089 | #205 | `feature/rb-inc-090-authenticated-trip-workspace`, PR #206 | coleção e criação autenticadas, isolamento por Account e guard `trip:view` nas páginas de Trip | runs 30860363214 e 30860363218, job 91840790462, SHA d2e5a83; 220 documentos, migrations, 507 testes, smoke, build e 65 E2E responsivos verdes | Pronto para integração |
 
 ## Evidências do RB-INC-003
 
 | Evidência | Localização/resultado |
 | --- | --- |
 | definição publicada | `docs/implementation/increments/rb-inc-003-trip-creation.md`, versão `1.0.0` |
-| agregado e invariantes | `modules/trip-management/src/trip.ts` |
+| agregado e invariantes | `modules/trip-management/src/trip.ts` e `src/service.ts` |
 | porta de repositório | `modules/trip-management/src/repository.ts` |
 | schema e adapter | `packages/database/src/schema.ts` e `src/trip-repository.ts` |
 | migration | `packages/database/drizzle/0000_create_trips.sql`, aplicada em PostGIS 17 |

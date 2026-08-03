@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { TripForm } from "@/components/trip-form";
+import { getRouteBookSession } from "@/lib/auth-session";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Criar viagem — RouteBook",
   description: "Crie uma viagem canônica para Pipa no RouteBook.",
 };
 
-export default function NewTripPage() {
+export default async function NewTripPage() {
+  const session = await getRouteBookSession();
+  if (!session) redirect("/entrar?next=%2Fviagens%2Fnova");
+
   return (
     <section className="preparation-page">
       <Link className="back-link" href="/viagens">

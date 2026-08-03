@@ -227,6 +227,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-089 | Experiência Server-side de Cadastro, Entrada e Saída | Implementation | Draft | 0.1.0 | [rb-inc-089-server-auth-experience.md](./implementation/increments/rb-inc-089-server-auth-experience.md) |
 | RB-CTX-089 | Context Pack do RB-INC-089 | Implementation Context | Draft | 0.1.0 | [rb-inc-089-server-auth-experience.md](./implementation/context-packs/rb-inc-089-server-auth-experience.md) |
+| RB-INC-090 | Workspace Autenticado e Isolado de Trips | Implementation | Draft | 0.1.0 | [rb-inc-090-authenticated-trip-workspace.md](./implementation/increments/rb-inc-090-authenticated-trip-workspace.md) |
+| RB-CTX-090 | Context Pack do RB-INC-090 | Implementation Context | Draft | 0.1.0 | [rb-inc-090-authenticated-trip-workspace.md](./implementation/context-packs/rb-inc-090-authenticated-trip-workspace.md) |
 
 ## Status possíveis
 

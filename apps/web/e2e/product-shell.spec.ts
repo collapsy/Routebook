@@ -12,7 +12,6 @@ test("cria, abre e mantém uma viagem persistida", async ({ page }, testInfo) =>
 
   await page.goto("/viagens/nova");
   await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByLabel("Responsável pela viagem").fill("Ronaldo Gentil");
   await page.getByRole("button", { name: "Criar viagem" }).click();
 
   await expect(page).toHaveURL(/\/viagens\?created=1$/);
@@ -36,7 +35,6 @@ test("configura e mantém o contexto progressivo da viagem", async ({ page }, te
 
   await page.goto("/viagens/nova");
   await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByLabel("Responsável pela viagem").fill("Ronaldo Gentil");
   await page.getByRole("button", { name: "Criar viagem" }).click();
   await page.getByRole("link", { name: tripName }).click();
 
@@ -66,7 +64,6 @@ test("configura e mantém o contexto progressivo da viagem", async ({ page }, te
 
 test("apresenta erro quando o período é invertido", async ({ page }) => {
   await page.goto("/viagens/nova");
-  await page.getByLabel("Responsável pela viagem").fill("Ronaldo Gentil");
   await page.getByLabel("Data de início").fill("2026-08-29");
   await page.getByLabel("Data de término").fill("2026-08-22");
   await page.getByRole("button", { name: "Criar viagem" }).click();
@@ -77,9 +74,7 @@ test("apresenta erro quando o período é invertido", async ({ page }) => {
 
 test("trata TripId inexistente e mantém a navegação global", async ({ page }) => {
   await page.goto("/viagens/00000000-0000-0000-0000-000000000000");
-  await expect(
-    page.getByRole("heading", { name: "Este TripId não está disponível." }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Essa página saiu do roteiro." })).toBeVisible();
   await page.getByRole("link", { name: "Voltar para Minhas viagens" }).click();
   await expect(page).toHaveURL(/\/viagens$/);
 

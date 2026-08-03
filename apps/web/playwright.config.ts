@@ -1,9 +1,15 @@
+import path from "node:path";
+
 import { defineConfig, devices } from "@playwright/test";
+
+const authFile = path.join(process.cwd(), "playwright/.auth/user.json");
+const anonymousSpecs = /(?:auth|authenticated-trips)\.spec\.ts/;
 
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
+  maxFailures: process.env.CI ? 1 : 0,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
@@ -12,11 +18,35 @@ export default defineConfig({
   },
   projects: [
     {
+      name: "setup",
+      testMatch: /.*\.setup\.ts/,
+    },
+    {
       name: "desktop-chromium",
-      use: { ...devices["Desktop Chrome"] },
+      dependencies: ["setup"],
+      testIgnore: anonymousSpecs,
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: authFile,
+      },
     },
     {
       name: "mobile-chromium",
+      dependencies: ["setup"],
+      testIgnore: anonymousSpecs,
+      use: {
+        ...devices["Pixel 7"],
+        storageState: authFile,
+      },
+    },
+    {
+      name: "desktop-anonymous",
+      testMatch: anonymousSpecs,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "mobile-anonymous",
+      testMatch: anonymousSpecs,
       use: { ...devices["Pixel 7"] },
     },
   ],

@@ -1,19 +1,20 @@
 import { expect, test } from "@playwright/test";
 
-import { DrizzleItineraryRepository, DrizzleTripRepository } from "@routebook/database";
-import { addActivity, createItinerary, createTrip } from "@routebook/trip-management";
+import { DrizzleItineraryRepository } from "@routebook/database";
+import { addActivity, createItinerary } from "@routebook/trip-management";
+
+import { createAuthenticatedE2ETrip, getE2EWorkspaceIdentity } from "./support/authenticated-trip";
 
 const firstActivity = "Café demorado";
 const secondActivity = "Passeio de barco";
 
 async function createConflictFixture(tripName: string): Promise<string> {
   const now = new Date();
-  const trip = createTrip(
+  const { trip } = await createAuthenticatedE2ETrip(
     {
       name: tripName,
       startDate: "2026-08-22",
       endDate: "2026-08-29",
-      ownerName: "RouteBook E2E",
     },
     now,
   );
@@ -39,7 +40,6 @@ async function createConflictFixture(tripName: string): Promise<string> {
     now,
   );
 
-  await new DrizzleTripRepository().create(trip);
   await new DrizzleItineraryRepository().save(itinerary);
   return trip.id;
 }
@@ -80,6 +80,7 @@ test("ignora um risco e preserva seu histórico auditável", async ({ page }, te
   const tripId = await createConflictFixture(
     `Risco ignorado ${testInfo.project.name} ${Date.now()}`,
   );
+  const workspace = await getE2EWorkspaceIdentity();
   await page.goto(`/viagens/${tripId}/roteiro/revisao`);
 
   await page.getByText("Ignorar risco", { exact: true }).click();
@@ -96,7 +97,7 @@ test("ignora um risco e preserva seu histórico auditável", async ({ page }, te
   await expect(page.getByRole("heading", { name: "Riscos ignorados" })).toBeVisible();
   const ignoredHistory = page.getByRole("list", { name: "Riscos ignorados registrados" });
   await expect(ignoredHistory.getByRole("heading", { name: "Horários sobrepostos" })).toBeVisible();
-  await expect(ignoredHistory.getByText("RouteBook E2E", { exact: true })).toBeVisible();
+  await expect(ignoredHistory.getByText(workspace.name, { exact: true })).toBeVisible();
   const ignoredActivities = ignoredHistory.locator("p").filter({ hasText: "Atividades:" });
   await expect(ignoredActivities).toContainText(firstActivity);
   await expect(ignoredActivities).toContainText(secondActivity);

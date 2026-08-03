@@ -3,10 +3,7 @@ import { expect, test } from "@playwright/test";
 import { DrizzleItineraryRepository } from "@routebook/database";
 import { addActivity, createItinerary } from "@routebook/trip-management";
 
-import {
-  createAuthenticatedE2ETrip,
-  getE2EWorkspaceIdentity,
-} from "./support/authenticated-trip";
+import { createAuthenticatedE2ETrip, getE2EWorkspaceIdentity } from "./support/authenticated-trip";
 
 const firstActivity = "Café demorado";
 const secondActivity = "Passeio de barco";

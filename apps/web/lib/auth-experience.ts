@@ -22,13 +22,15 @@ export type RouteBookAuthApi = Readonly<{
 }>;
 
 export type AuthOperationResult =
-  | Readonly<{ ok: true }>
-  | Readonly<{ ok: false; state: AuthActionState }>;
+  Readonly<{ ok: true }> | Readonly<{ ok: false; state: AuthActionState }>;
 
 const DEFAULT_RETURN_PATH = "/viagens";
 const ALLOWED_RETURN_ROOT = "/viagens";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const KNOWN_SIGN_UP_CODES = new Set(["USER_ALREADY_EXISTS", "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL"]);
+const KNOWN_SIGN_UP_CODES = new Set([
+  "USER_ALREADY_EXISTS",
+  "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL",
+]);
 const KNOWN_SIGN_IN_CODES = new Set(["INVALID_EMAIL_OR_PASSWORD", "INVALID_PASSWORD"]);
 
 function normalizedText(value: unknown): string {
@@ -60,14 +62,17 @@ export function resolveSafeReturnPath(value: unknown): string {
   try {
     const parsed = new URL(candidate, "https://routebook.local");
     const allowed =
-      parsed.pathname === ALLOWED_RETURN_ROOT || parsed.pathname.startsWith(`${ALLOWED_RETURN_ROOT}/`);
+      parsed.pathname === ALLOWED_RETURN_ROOT ||
+      parsed.pathname.startsWith(`${ALLOWED_RETURN_ROOT}/`);
     return allowed ? `${parsed.pathname}${parsed.search}${parsed.hash}` : DEFAULT_RETURN_PATH;
   } catch {
     return DEFAULT_RETURN_PATH;
   }
 }
 
-export function signUpCredentialsFromForm(formData: FormData):
+export function signUpCredentialsFromForm(
+  formData: FormData,
+):
   | Readonly<{ ok: true; credentials: SignUpCredentials }>
   | Readonly<{ ok: false; state: AuthActionState }> {
   const name = normalizedText(formData.get("name")).replace(/\s+/g, " ");
@@ -91,7 +96,9 @@ export function signUpCredentialsFromForm(formData: FormData):
   return { ok: true, credentials: { name, email, password } };
 }
 
-export function signInCredentialsFromForm(formData: FormData):
+export function signInCredentialsFromForm(
+  formData: FormData,
+):
   | Readonly<{ ok: true; credentials: AuthCredentials }>
   | Readonly<{ ok: false; state: AuthActionState }> {
   const email = normalizedText(formData.get("email")).toLowerCase();

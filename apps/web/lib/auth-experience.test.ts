@@ -27,7 +27,11 @@ describe("authentication input", () => {
   it("normaliza cadastro válido", () => {
     expect(
       signUpCredentialsFromForm(
-        form({ name: "  Ronaldo   Gentil  ", email: " RONALDO@EXAMPLE.COM ", password: "12345678" }),
+        form({
+          name: "  Ronaldo   Gentil  ",
+          email: " RONALDO@EXAMPLE.COM ",
+          password: "12345678",
+        }),
       ),
     ).toEqual({
       ok: true,
@@ -42,7 +46,9 @@ describe("authentication input", () => {
   it("rejeita cadastro inválido sem chamar infraestrutura", async () => {
     const currentApi = api();
     const experience = createAuthExperience(currentApi);
-    const result = await experience.signUp(form({ name: "R", email: "invalido", password: "curta" }));
+    const result = await experience.signUp(
+      form({ name: "R", email: "invalido", password: "curta" }),
+    );
 
     expect(result).toMatchObject({
       ok: false,

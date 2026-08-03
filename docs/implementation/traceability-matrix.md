@@ -98,6 +98,8 @@ ai_context:
 | RB-INC-087 | RB-SEC-001, RB-DATA-001–002, RB-ADR-007–008 e RB-INC-085–086 | #199 | `feature/rb-inc-087-account-membership-trip-authorization`, PR #200 | Account, Membership, matriz deny-by-default e autorização PostgreSQL de Trip | runs 30770613047 e 30770613051; migration 0021, PostgreSQL real, smoke, build e E2E responsivo verdes | Pronto para integração |
 | RB-INC-088 | RB-DATA-001–002, RB-ADR-007–008 e RB-INC-086–087 | #201 | `feature/rb-inc-088-personal-account-authenticated-trip`, PR #202 | vínculo pessoal um-para-um, provisioning idempotente e criação transacional de Trip escopada | runs 30771744270 e 30771744252; migration 0022, replay, concorrência, rollback, PostgreSQL real, smoke, build e E2E verdes | Pronto para integração |
 
+| RB-INC-089 | RB-SEC-001, RB-ADR-007 e RB-INC-086–088 | #203 | `feature/rb-inc-089-server-auth-experience`, PR #204 | páginas e Server Actions de cadastro, entrada e saída, retorno seguro e sessão no App Shell | validações funcionais em execução | Em validação |
+
 ## Evidências do RB-INC-003
 
 | Evidência | Localização/resultado |

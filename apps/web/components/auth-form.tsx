@@ -105,7 +105,13 @@ export function AuthForm({ mode, nextPath, action }: AuthFormProps) {
         <SubmitButton mode={mode} />
         <p>
           {isSignUp ? "Já possui uma conta?" : "Ainda não possui uma conta?"}{" "}
-          <Link href={isSignUp ? `/entrar?next=${encodeURIComponent(nextPath)}` : `/criar-conta?next=${encodeURIComponent(nextPath)}`}>
+          <Link
+            href={
+              isSignUp
+                ? `/entrar?next=${encodeURIComponent(nextPath)}`
+                : `/criar-conta?next=${encodeURIComponent(nextPath)}`
+            }
+          >
             {isSignUp ? "Entrar" : "Criar conta"}
           </Link>
         </p>

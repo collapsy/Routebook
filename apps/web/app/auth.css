@@ -1,7 +1,11 @@
 .auth-page {
   align-items: center;
   background:
-    radial-gradient(circle at top left, color-mix(in oklab, var(--primary) 16%, transparent), transparent 34rem),
+    radial-gradient(
+      circle at top left,
+      color-mix(in oklab, var(--primary) 16%, transparent),
+      transparent 34rem
+    ),
     var(--background);
   display: flex;
   min-height: 100vh;

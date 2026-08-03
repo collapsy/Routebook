@@ -123,7 +123,7 @@ flowchart TD
 - [x] App Shell reflete a sessão;
 - [x] E2E de cadastro, logout e login criado;
 - [ ] testes PostgreSQL e E2E aprovados no CI;
-- [ ] registry e rastreabilidade atualizados;
+- [x] registry e rastreabilidade atualizados;
 - [ ] validações finais do CI aprovadas.
 
 ## 9. Riscos
@@ -143,4 +143,4 @@ Remover páginas, ações, componentes, estilos e testes do incremento. A funda�
 
 ## 11. Evidências
 
-O código inicial, os testes unitários, o E2E e a documentação foram publicados na PR #204. Os runs finais serão registrados após a validação do exato HEAD de merge.
+O código, os testes unitários, o E2E, o Context Pack, o registry e a rastreabilidade estão consolidados na PR #204. O HEAD atual executa os validadores padrão antes do registro das evidências finais.

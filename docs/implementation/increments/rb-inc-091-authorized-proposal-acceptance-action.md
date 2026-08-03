@@ -155,8 +155,8 @@ O `tripId` é vinculado pela rota. Nenhum campo de ator ou coleção de itens é
 - [x] códigos oficiais são preservados;
 - [x] revalidação ocorre somente após sucesso;
 - [x] testes unitários cobrem autorização, validação, mapeamento, sucesso e replay;
-- [ ] registry e matriz de rastreabilidade atualizados;
-- [ ] CI integral aprovado.
+- [x] registry e matriz de rastreabilidade atualizados;
+- [x] CI integral aprovado.
 
 ## 9. Riscos e mitigação
 
@@ -178,4 +178,7 @@ Remover `accept-action.ts`, o adapter `itinerary-proposal-acceptance.ts` e seus 
 - implementação: `apps/web/app/viagens/[tripId]/roteiro/proposta/accept-action.ts`;
 - contrato e adapter: `apps/web/lib/itinerary-proposal-acceptance.ts`;
 - testes: `accept-action.test.ts` e `itinerary-proposal-acceptance.test.ts`;
-- CI: em validação na PR #208.
+- SHA funcional validado: `526ce2273c4c4bdd0cd50efa9698b35fb78a5612`;
+- Documentation Validation: run `30863272217`, job `91849613784`, concluído com sucesso;
+- Engineering Validation: run `30863272221`, job `91849613822`, concluído com sucesso;
+- gates aprovados: frozen install, Prettier, documentação, lint, typecheck, migrations, testes de domínio, componentes e PostgreSQL, smoke, build e E2E responsivo.

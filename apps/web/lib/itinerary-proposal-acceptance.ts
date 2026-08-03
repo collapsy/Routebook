@@ -3,7 +3,6 @@ import {
   AcceptItineraryProposalValidationError,
   createItineraryProposalId,
   type AcceptItineraryProposal,
-  type AcceptItineraryProposalErrorCode,
   type ItineraryProposal,
   type ItineraryProposalRepository,
   type ProposedActivity,
@@ -79,7 +78,8 @@ export type AcceptItineraryProposalActionDependencies = Readonly<{
   now?: () => Date;
 }>;
 
-const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const uuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const allowedFlexibilities = new Set(["fixed", "flexible", "suggested"]);
 
 const messages: Readonly<Record<AcceptItineraryProposalActionErrorCode, string>> = {
@@ -151,7 +151,9 @@ function requiredText(value: string | undefined): string {
   return normalized;
 }
 
-function optionalFlexibility(value: string | undefined): "fixed" | "flexible" | "suggested" | undefined {
+function optionalFlexibility(
+  value: string | undefined,
+): "fixed" | "flexible" | "suggested" | undefined {
   if (value === undefined) return undefined;
   const normalized = value.trim();
   if (!allowedFlexibilities.has(normalized)) throw new ProposalItemsMappingError();
@@ -229,8 +231,10 @@ export function mapProposedActivitiesToApplyItems(
   );
 }
 
-function officialErrorState(error: AcceptItineraryProposalError): AcceptItineraryProposalActionState {
-  return acceptItineraryProposalActionError(error.code as AcceptItineraryProposalErrorCode);
+function officialErrorState(
+  error: AcceptItineraryProposalError,
+): AcceptItineraryProposalActionState {
+  return acceptItineraryProposalActionError(error.code as AcceptItineraryProposalActionErrorCode);
 }
 
 function proposalStatusError(
@@ -273,7 +277,9 @@ export async function executeAcceptItineraryProposalAction(
 
   const trip = await dependencies.tripRepository.findById(request.tripId);
   if (!trip) return acceptItineraryProposalActionError("not-found");
-  const actor = trip.participants.find((participant) => participant.userId === access.context.userId);
+  const actor = trip.participants.find(
+    (participant) => participant.userId === access.context.userId,
+  );
   if (!actor) return acceptItineraryProposalActionError("not-found");
 
   const proposal = await dependencies.proposalRepository.findById(

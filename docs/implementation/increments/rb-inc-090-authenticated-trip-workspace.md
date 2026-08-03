@@ -126,9 +126,9 @@ flowchart TD
 - [x] owner removido do formulário;
 - [x] layout de Trip protegido por `trip:view`;
 - [x] isolamento entre Users coberto em PostgreSQL;
-- [ ] jornada autenticada aprovada no E2E;
+- [x] jornada autenticada aprovada no E2E;
 - [x] registry e rastreabilidade atualizados;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 9. Riscos
 
@@ -152,4 +152,7 @@ Restaurar a listagem e criação legadas, remover o guard de layout e a query es
 - testes PostgreSQL cobrem isolamento, membership e Account inativas e Trip sem Account;
 - teste E2E cobre redirecionamento anônimo, criação autenticada e tentativa de acesso por outro User;
 - dependência interna `@routebook/identity-access` declarada explicitamente no app web e lockfile sincronizado;
-- HEAD funcional em validação: `51e63760e518ef68423152653906e4eaee717276`.
+- SHA funcional validado: `d2e5a83303eced942393c7577063fcda6c9a0ad5`;
+- Documentation Validation: run `30860363218`, concluído com sucesso;
+- Engineering Validation: run `30860363214`, job `91840790462`, concluído com sucesso;
+- gates aprovados: frozen install, Prettier, documentação, lint, typecheck, migrations, 507 testes de domínio/componentes/PostgreSQL, smoke, build e 65 E2E em desktop Chromium e Pixel 7.

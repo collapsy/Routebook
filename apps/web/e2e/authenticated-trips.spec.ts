@@ -50,6 +50,7 @@ test("cria Trip autenticada e impede leitura por outro User", async ({ page }, t
   await expect(page).toHaveURL(/\/viagens$/);
   await expect(page.getByText(tripName, { exact: true })).toHaveCount(0);
 
-  const forbiddenResponse = await page.goto(tripHref!);
-  expect(forbiddenResponse?.status()).toBe(404);
+  await page.goto(tripHref!);
+  await expect(page.getByRole("heading", { name: "Essa página saiu do roteiro." })).toBeVisible();
+  await expect(page.getByText(tripName, { exact: true })).toHaveCount(0);
 });

@@ -1,11 +1,16 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { signOutAction } from "@/app/auth-actions";
+import { getRouteBookSession } from "@/lib/auth-session";
+
 type AppShellProps = Readonly<{
   children: ReactNode;
 }>;
 
-export function AppShell({ children }: AppShellProps) {
+export async function AppShell({ children }: AppShellProps) {
+  const session = await getRouteBookSession();
+
   return (
     <div className="app-surface">
       <a className="skip-link" href="#conteudo-principal">
@@ -28,6 +33,22 @@ export function AppShell({ children }: AppShellProps) {
             <Link className="app-nav-link" href="/#proposito">
               Sobre o projeto
             </Link>
+            {session ? (
+              <div className="app-session">
+                <span className="app-session-user" title={session.user.name}>
+                  {session.user.name}
+                </span>
+                <form action={signOutAction}>
+                  <button className="app-nav-link app-sign-out" type="submit">
+                    Sair
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <Link className="app-nav-link" href="/entrar?next=%2Fviagens">
+                Entrar
+              </Link>
+            )}
           </nav>
         </div>
       </header>

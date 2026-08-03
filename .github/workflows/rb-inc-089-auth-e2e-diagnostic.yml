@@ -1,0 +1,52 @@
+name: RB-INC-089 Auth E2E Diagnostic
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+    paths:
+      - .github/workflows/rb-inc-089-auth-e2e-diagnostic.yml
+
+permissions:
+  contents: read
+
+jobs:
+  auth-e2e:
+    if: github.head_ref == 'feature/rb-inc-089-server-auth-experience'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: routebook
+          POSTGRES_USER: routebook
+          POSTGRES_PASSWORD: routebook
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U routebook -d routebook"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      CI: true
+      DATABASE_URL: postgresql://routebook:routebook@127.0.0.1:5432/routebook
+      BETTER_AUTH_SECRET: routebook-ci-secret-key-with-more-than-32-characters
+      BETTER_AUTH_URL: http://127.0.0.1:3000
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-089-server-auth-experience
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:migrate
+      - run: pnpm --filter @routebook/web exec playwright install --with-deps chromium
+      - name: Run auth E2E serially
+        run: pnpm --filter @routebook/web exec playwright test e2e/auth.spec.ts --project=desktop-chromium --workers=1 --retries=0 --reporter=line

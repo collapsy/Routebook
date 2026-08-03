@@ -82,25 +82,37 @@ const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const allowedFlexibilities = new Set(["fixed", "flexible", "suggested"]);
 
-const messages: Readonly<Record<AcceptItineraryProposalActionErrorCode, string>> = {
+type ActionMessages = Readonly<
+  Record<AcceptItineraryProposalActionErrorCode, string>
+>;
+
+const messages: ActionMessages = {
   unauthenticated: "Entre no RouteBook para aceitar esta proposta.",
   "not-found": "A viagem ou a proposta não está disponível para este usuário.",
   "invalid-request": "Os dados enviados para aceitar a proposta são inválidos.",
-  "fingerprint-conflict": "Esta tentativa de aceite diverge de uma solicitação anterior.",
+  "fingerprint-conflict":
+    "Esta tentativa de aceite diverge de uma solicitação anterior.",
   "proposal-not-found": "A proposta de roteiro não foi encontrada.",
   "proposal-not-ready": "A proposta não está pronta para ser aceita.",
   "proposal-expired": "A validade desta proposta terminou.",
-  "proposal-items-mismatch": "As mudanças da proposta não correspondem ao conteúdo persistido.",
+  "proposal-items-mismatch":
+    "As mudanças da proposta não correspondem ao conteúdo persistido.",
   "itinerary-not-found": "O roteiro associado à proposta não foi encontrado.",
-  "itinerary-version-mismatch": "O roteiro mudou desde a geração desta proposta.",
-  "application-in-progress": "O aceite desta proposta já está em processamento.",
-  "application-failed": "Uma tentativa anterior de aplicar esta proposta terminou com falha.",
-  "technical-error": "Não foi possível aceitar a proposta agora. Tente novamente.",
+  "itinerary-version-mismatch":
+    "O roteiro mudou desde a geração desta proposta.",
+  "application-in-progress":
+    "O aceite desta proposta já está em processamento.",
+  "application-failed":
+    "Uma tentativa anterior de aplicar esta proposta terminou com falha.",
+  "technical-error":
+    "Não foi possível aceitar a proposta agora. Tente novamente.",
 };
 
 class ProposalItemsMappingError extends Error {
   constructor() {
-    super("As Proposed Activities não podem ser convertidas no contrato de aplicação.");
+    super(
+      "As Proposed Activities não podem ser convertidas no contrato de aplicação.",
+    );
     this.name = "ProposalItemsMappingError";
   }
 }
@@ -156,7 +168,9 @@ function optionalFlexibility(
 ): "fixed" | "flexible" | "suggested" | undefined {
   if (value === undefined) return undefined;
   const normalized = value.trim();
-  if (!allowedFlexibilities.has(normalized)) throw new ProposalItemsMappingError();
+  if (!allowedFlexibilities.has(normalized)) {
+    throw new ProposalItemsMappingError();
+  }
   return normalized as "fixed" | "flexible" | "suggested";
 }
 
@@ -172,6 +186,8 @@ function optionalStartTime(value: string | undefined): string | undefined {
 function activityDraft(activity: ProposedActivity) {
   const flexibility = optionalFlexibility(activity.flexibility);
   const startTime = optionalStartTime(activity.proposedStartTime);
+  const placeId =
+    activity.placeId === undefined ? undefined : requiredText(activity.placeId);
 
   return {
     title: requiredText(activity.title),
@@ -180,12 +196,14 @@ function activityDraft(activity: ProposedActivity) {
     ...(activity.durationMinutes !== undefined
       ? { durationMinutes: activity.durationMinutes }
       : {}),
-    ...(activity.placeId !== undefined ? { placeId: requiredText(activity.placeId) } : {}),
+    ...(placeId !== undefined ? { placeId } : {}),
   } as const;
 }
 
 function targetOrder(activity: ProposedActivity): number | undefined {
-  return activity.proposedOrder === undefined ? undefined : activity.proposedOrder + 1;
+  return activity.proposedOrder === undefined
+    ? undefined
+    : activity.proposedOrder + 1;
 }
 
 export function mapProposedActivitiesToApplyItems(
@@ -234,7 +252,8 @@ export function mapProposedActivitiesToApplyItems(
 function officialErrorState(
   error: AcceptItineraryProposalError,
 ): AcceptItineraryProposalActionState {
-  return acceptItineraryProposalActionError(error.code as AcceptItineraryProposalActionErrorCode);
+  const code = error.code as AcceptItineraryProposalActionErrorCode;
+  return acceptItineraryProposalActionError(code);
 }
 
 function proposalStatusError(
@@ -298,7 +317,9 @@ export async function executeAcceptItineraryProposalAction(
     return acceptItineraryProposalActionError("proposal-items-mismatch");
   }
 
-  const itinerary = await dependencies.itineraryRepository.findByTripId(request.tripId);
+  const itinerary = await dependencies.itineraryRepository.findByTripId(
+    request.tripId,
+  );
   if (!itinerary || itinerary.id !== proposal.itineraryId) {
     return acceptItineraryProposalActionError("itinerary-not-found");
   }
@@ -329,10 +350,14 @@ export async function executeAcceptItineraryProposalAction(
       decisionId: result.decisionId,
       requestFingerprint: result.requestFingerprint,
       resultingItineraryVersion: result.resultingItineraryVersion,
-      appliedProposedActivityIds: Object.freeze([...result.appliedProposedActivityIds]),
+      appliedProposedActivityIds: Object.freeze([
+        ...result.appliedProposedActivityIds,
+      ]),
     });
   } catch (error) {
-    if (error instanceof AcceptItineraryProposalError) return officialErrorState(error);
+    if (error instanceof AcceptItineraryProposalError) {
+      return officialErrorState(error);
+    }
     if (
       error instanceof AcceptItineraryProposalValidationError ||
       error instanceof ProposalItemsMappingError

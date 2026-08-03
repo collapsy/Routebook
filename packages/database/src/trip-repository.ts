@@ -6,9 +6,9 @@ import type { Trip, TripParticipant, TripRepository } from "@routebook/trip-mana
 import { getDatabase } from "./client";
 import { trips } from "./schema";
 
-type TripRow = typeof trips.$inferSelect;
+export type TripRow = typeof trips.$inferSelect;
 
-function mapTrip(row: TripRow): Trip {
+export function mapTripRow(row: TripRow): Trip {
   const accommodationCoordinate =
     row.accommodationLatitude !== null && row.accommodationLongitude !== null
       ? createGeoCoordinate({
@@ -93,11 +93,11 @@ export class DrizzleTripRepository implements TripRepository {
 
   async list(): Promise<Trip[]> {
     const rows = await getDatabase().select().from(trips).orderBy(desc(trips.createdAt));
-    return rows.map(mapTrip);
+    return rows.map(mapTripRow);
   }
 
   async findById(tripId: string): Promise<Trip | null> {
     const [row] = await getDatabase().select().from(trips).where(eq(trips.id, tripId)).limit(1);
-    return row ? mapTrip(row) : null;
+    return row ? mapTripRow(row) : null;
   }
 }

@@ -66,12 +66,7 @@ beforeAll(async () => {
     now,
   );
 
-  createdTripIds.push(
-    active.trip.id,
-    other.trip.id,
-    suspended.trip.id,
-    inactiveAccount.trip.id,
-  );
+  createdTripIds.push(active.trip.id, other.trip.id, suspended.trip.id, inactiveAccount.trip.id);
   createdAccountIds.push(
     active.accountId,
     other.accountId,

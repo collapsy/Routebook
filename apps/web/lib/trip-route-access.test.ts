@@ -38,10 +38,12 @@ function sessionReader(userId: string | null): RouteBookSessionReader {
   } as unknown as RouteBookSessionReader;
 }
 
-function authorizationReader(options: {
-  scope?: "not-found" | "unscoped" | "scoped";
-  membership?: "missing" | "active";
-} = {}): TripAuthorizationReader {
+function authorizationReader(
+  options: {
+    scope?: "not-found" | "unscoped" | "scoped";
+    membership?: "missing" | "active";
+  } = {},
+): TripAuthorizationReader {
   const scope = options.scope ?? "scoped";
   const membership = options.membership ?? "active";
 

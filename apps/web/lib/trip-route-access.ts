@@ -7,10 +7,7 @@ import {
 } from "@routebook/identity-access";
 import { createPostgresTripAuthorizationReader } from "@routebook/database";
 
-import {
-  getRouteBookSession,
-  type RouteBookSessionReader,
-} from "./auth-session";
+import { getRouteBookSession, type RouteBookSessionReader } from "./auth-session";
 
 export type TripRouteAccessResult =
   | Readonly<{ status: "unauthenticated" }>

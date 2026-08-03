@@ -14,10 +14,7 @@ export async function listPostgresAuthorizedTrips(
   const rows = await database
     .select({ trip: trips })
     .from(trips)
-    .innerJoin(
-      accounts,
-      and(eq(trips.accountId, accounts.id), eq(accounts.status, "active")),
-    )
+    .innerJoin(accounts, and(eq(trips.accountId, accounts.id), eq(accounts.status, "active")))
     .innerJoin(
       accountMemberships,
       and(

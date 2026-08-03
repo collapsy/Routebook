@@ -97,7 +97,10 @@ export function TripForm() {
         <button className="product-button" disabled={pending} type="submit">
           {pending ? "Criando viagem…" : "Criar viagem"}
         </button>
-        <p>O responsável é definido pela conta autenticada. Nenhum roteiro será criado automaticamente.</p>
+        <p>
+          O responsável é definido pela conta autenticada. Nenhum roteiro será criado
+          automaticamente.
+        </p>
       </div>
     </form>
   );

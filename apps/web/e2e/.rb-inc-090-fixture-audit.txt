@@ -1,9 +1,0 @@
-=== DrizzleTripRepository ===
-=== createTrip ===
-apps/web/e2e/recommendations-experience.spec.ts:15:async function createTripWithRecommendationContext(page: Page) {
-apps/web/e2e/recommendations-experience.spec.ts:70:  const { tripName, tripUrl } = await createTripWithRecommendationContext(page);
-apps/web/e2e/recommendations-experience.spec.ts:105:  const { tripName, tripUrl } = await createTripWithRecommendationContext(page);
-apps/web/e2e/recommendations-experience.spec.ts:137:  const { tripName, tripUrl } = await createTripWithRecommendationContext(page);
-=== owner field ===
-apps/web/e2e/recommendations-experience.spec.ts:20:  await page.getByLabel("Responsável pela viagem").fill("RouteBook E2E");
-apps/web/e2e/authenticated-trips.spec.ts:25:  await expect(page.getByLabel("Responsável pela viagem")).toHaveCount(0);

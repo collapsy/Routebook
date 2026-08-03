@@ -269,9 +269,9 @@ describe("executeAcceptItineraryProposalAction", () => {
   it("bloqueia visitante anônimo antes de consultar agregados", async () => {
     const findTrip = vi.fn();
     const deps = dependencies({
-      resolveAccess: vi.fn(
-        async (): Promise<TripRouteAccessResult> => ({ status: "unauthenticated" }),
-      ),
+      resolveAccess: vi.fn(async (): Promise<TripRouteAccessResult> => ({
+        status: "unauthenticated",
+      })),
       tripRepository: { findById: findTrip },
     });
 
@@ -285,9 +285,7 @@ describe("executeAcceptItineraryProposalAction", () => {
   it("normaliza negação de autorização sem consultar a Proposal", async () => {
     const findProposal = vi.fn();
     const deps = dependencies({
-      resolveAccess: vi.fn(
-        async (): Promise<TripRouteAccessResult> => ({ status: "not-found" }),
-      ),
+      resolveAccess: vi.fn(async (): Promise<TripRouteAccessResult> => ({ status: "not-found" })),
       proposalRepository: { findById: findProposal },
     });
 

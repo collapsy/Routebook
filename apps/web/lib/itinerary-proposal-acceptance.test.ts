@@ -5,6 +5,7 @@ import {
   createItineraryProposalId,
   type AcceptItineraryProposal,
   type ItineraryProposal,
+  type ProposedActivity,
 } from "@routebook/proposal-management";
 import type { Itinerary, Trip } from "@routebook/trip-management";
 
@@ -22,10 +23,13 @@ const accountId = "55555555-5555-4555-8555-555555555555";
 const membershipId = "66666666-6666-4666-8666-666666666666";
 const dayId = "77777777-7777-4777-8777-777777777777";
 const sourceActivityId = "88888888-8888-4888-8888-888888888888";
+const updateActivityId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const decidedAt = new Date("2026-08-03T20:00:00.000Z");
 const validUntil = new Date("2026-08-04T20:00:00.000Z");
 
-function trip(participants: Trip["participants"] = [{ userId, displayName: "Ronaldo", role: "owner" }]): Trip {
+function trip(
+  participants: Trip["participants"] = [{ userId, displayName: "Ronaldo", role: "owner" }],
+): Trip {
   return {
     id: tripId,
     name: "Pipa",
@@ -74,8 +78,45 @@ function itinerary(version = 4): Itinerary {
   };
 }
 
+function proposedActivities(): readonly ProposedActivity[] {
+  return [
+    {
+      proposedActivityId: "proposed-add",
+      operationType: "add",
+      targetTripDayId: dayId,
+      title: "Praia do Amor",
+      proposedStartTime: "09:30:00",
+      durationMinutes: 120,
+      proposedOrder: 0,
+      flexibility: "suggested",
+    },
+    {
+      proposedActivityId: "proposed-move",
+      operationType: "move",
+      sourceActivityId,
+      targetTripDayId: dayId,
+      title: "Mover almoço",
+      proposedOrder: 1,
+    },
+    {
+      proposedActivityId: "proposed-update",
+      operationType: "update",
+      sourceActivityId: updateActivityId,
+      title: "Almoço atualizado",
+      proposedStartTime: "13:00",
+    },
+    {
+      proposedActivityId: "proposed-remove",
+      operationType: "remove",
+      sourceActivityId: "99999999-9999-4999-8999-999999999999",
+      title: "Remover atividade",
+    },
+  ];
+}
+
 function proposal(
   override: Partial<ItineraryProposal> = {},
+  includeProposedActivities = true,
 ): ItineraryProposal {
   return {
     id: createItineraryProposalId(proposalId),
@@ -90,39 +131,7 @@ function proposal(
     generationStartedAt: decidedAt,
     generationMethod: "deterministic",
     generationVersion: "1",
-    proposedActivities: [
-      {
-        proposedActivityId: "proposed-add",
-        operationType: "add",
-        targetTripDayId: dayId,
-        title: "Praia do Amor",
-        proposedStartTime: "09:30:00",
-        durationMinutes: 120,
-        proposedOrder: 0,
-        flexibility: "suggested",
-      },
-      {
-        proposedActivityId: "proposed-move",
-        operationType: "move",
-        sourceActivityId,
-        targetTripDayId: dayId,
-        title: "Mover almoço",
-        proposedOrder: 1,
-      },
-      {
-        proposedActivityId: "proposed-update",
-        operationType: "update",
-        sourceActivityId,
-        title: "Almoço atualizado",
-        proposedStartTime: "13:00",
-      },
-      {
-        proposedActivityId: "proposed-remove",
-        operationType: "remove",
-        sourceActivityId: "99999999-9999-4999-8999-999999999999",
-        title: "Remover atividade",
-      },
-    ],
+    ...(includeProposedActivities ? { proposedActivities: proposedActivities() } : {}),
     criteria: ["tempo"],
     justifications: ["melhor sequência"],
     limitations: [],
@@ -191,7 +200,7 @@ function input() {
 
 describe("mapProposedActivitiesToApplyItems", () => {
   it("converte operações persistidas no contrato canônico de aplicação", () => {
-    expect(mapProposedActivitiesToApplyItems(proposal().proposedActivities ?? [])).toEqual([
+    expect(mapProposedActivitiesToApplyItems(proposedActivities())).toEqual([
       {
         proposedActivityId: "proposed-add",
         operationType: "add",
@@ -212,7 +221,7 @@ describe("mapProposedActivitiesToApplyItems", () => {
       {
         proposedActivityId: "proposed-update",
         operationType: "update",
-        sourceActivityId,
+        sourceActivityId: updateActivityId,
         title: "Almoço atualizado",
         startTime: "13:00",
       },
@@ -299,7 +308,7 @@ describe("executeAcceptItineraryProposalAction", () => {
   it.each([
     ["proposal-not-ready", proposal({ status: "generating" })],
     ["proposal-expired", proposal({ status: "expired" })],
-    ["proposal-items-mismatch", proposal({ proposedActivities: undefined })],
+    ["proposal-items-mismatch", proposal({}, false)],
   ] as const)("mapeia estado autoritativo para %s", async (code, persistedProposal) => {
     const deps = dependencies({
       proposalRepository: { findById: vi.fn(async () => persistedProposal) },

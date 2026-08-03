@@ -1,0 +1,131 @@
+name: RB-INC-090 Migrate E2E
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-090-authenticated-trip-workspace
+    paths:
+      - ".github/workflows/rb-inc-090-migrate-e2e.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-090-authenticated-trip-workspace
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Migrate known legacy fixtures
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          proposal = Path("apps/web/e2e/itinerary-proposal-review.spec.ts")
+          text = proposal.read_text()
+          text = text.replace("  DrizzleTripRepository,\n", "")
+          text = text.replace(
+              'import { addActivity, createItinerary, createTrip } from "@routebook/trip-management";\n',
+              'import { addActivity, createItinerary } from "@routebook/trip-management";\n\nimport { createAuthenticatedE2ETrip } from "./support/authenticated-trip";\n',
+          )
+          text, count = re.subn(
+              r'  const trip = createTrip\(\n    \{\n      name: tripName,\n      startDate: "2026-08-22",\n      endDate: "2026-08-23",\n      ownerName: "RouteBook E2E",\n    \},\n    (requestedAt|now),\n  \);',
+              lambda match: (
+                  '  const { trip } = await createAuthenticatedE2ETrip(\n'
+                  '    {\n'
+                  '      name: tripName,\n'
+                  '      startDate: "2026-08-22",\n'
+                  '      endDate: "2026-08-23",\n'
+                  '    },\n'
+                  f'    {match.group(1)},\n'
+                  '  );'
+              ),
+              text,
+          )
+          if count != 2:
+              raise SystemExit(f"expected 2 proposal Trip replacements, got {count}")
+          text = text.replace("  await new DrizzleTripRepository().create(trip);\n", "")
+          proposal.write_text(text)
+
+          itinerary = Path("apps/web/e2e/itinerary.spec.ts")
+          text = itinerary.read_text()
+          text = text.replace("  DrizzleTripRepository,\n", "")
+          text = text.replace(
+              'import { addActivity, createItinerary, createTrip } from "@routebook/trip-management";\n',
+              'import { addActivity, createItinerary } from "@routebook/trip-management";\n\nimport { createAuthenticatedE2ETrip } from "./support/authenticated-trip";\n',
+          )
+          text = re.sub(
+              r'^  await page\.getByLabel\("Responsável pela viagem"\)\.fill\("RouteBook E2E"\);\n',
+              "",
+              text,
+              flags=re.MULTILINE,
+          )
+          text, count = re.subn(
+              r'  const trip = createTrip\(\n    \{\n      name: tripName,\n      startDate: "2026-08-22",\n      endDate: "2026-08-29",\n      ownerName: "RouteBook E2E",\n    \},\n    now,\n  \);',
+              '  const { trip } = await createAuthenticatedE2ETrip(\n'
+              '    {\n'
+              '      name: tripName,\n'
+              '      startDate: "2026-08-22",\n'
+              '      endDate: "2026-08-29",\n'
+              '    },\n'
+              '    now,\n'
+              '  );',
+              text,
+          )
+          if count != 2:
+              raise SystemExit(f"expected 2 itinerary Trip replacements, got {count}")
+          text = text.replace("  await new DrizzleTripRepository().create(trip);\n", "")
+          itinerary.write_text(text)
+          PY
+
+      - name: Format migrated fixtures
+        run: >-
+          pnpm exec prettier --write
+          apps/web/e2e/auth.setup.ts
+          apps/web/e2e/authenticated-trips.spec.ts
+          apps/web/e2e/free-period.spec.ts
+          apps/web/e2e/itinerary-proposal-review.spec.ts
+          apps/web/e2e/itinerary-spatial.spec.ts
+          apps/web/e2e/itinerary.spec.ts
+          apps/web/e2e/planning-conflicts.spec.ts
+          apps/web/e2e/support/authenticated-trip.ts
+
+      - name: Record residual fixture audit
+        shell: bash
+        run: |
+          {
+            echo "=== DrizzleTripRepository ==="
+            grep -R -n "DrizzleTripRepository" apps/web/e2e || true
+            echo "=== createTrip ==="
+            grep -R -n "createTrip" apps/web/e2e || true
+            echo "=== owner field ==="
+            grep -R -n "Responsável pela viagem\|ownerName" apps/web/e2e || true
+          } > apps/web/e2e/.rb-inc-090-fixture-audit.txt
+          cat apps/web/e2e/.rb-inc-090-fixture-audit.txt
+
+      - name: Remove workflow and commit
+        shell: bash
+        run: |
+          rm .github/workflows/rb-inc-090-migrate-e2e.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/e2e .github/workflows/rb-inc-090-migrate-e2e.yml
+          git commit -m "test: migrate authenticated E2E Trip fixtures"
+          git push origin HEAD:feature/rb-inc-090-authenticated-trip-workspace

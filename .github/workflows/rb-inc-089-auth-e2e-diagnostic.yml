@@ -49,5 +49,5 @@ jobs:
       - run: pnpm db:migrate
       - run: pnpm build
       - run: pnpm --filter @routebook/web exec playwright install --with-deps chromium
-      - name: Run auth E2E serially
-        run: pnpm --filter @routebook/web exec playwright test e2e/auth.spec.ts --project=desktop-chromium --workers=1 --retries=0 --reporter=line
+      - name: Run mobile auth E2E serially
+        run: pnpm --filter @routebook/web exec playwright test e2e/auth.spec.ts --project=mobile-chromium --workers=1 --retries=0 --reporter=line

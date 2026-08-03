@@ -14,6 +14,7 @@ import {
   mapProposedActivitiesToApplyItems,
   type AcceptItineraryProposalActionDependencies,
 } from "./itinerary-proposal-acceptance";
+import type { TripRouteAccessResult } from "./trip-route-access";
 
 const tripId = "11111111-1111-4111-8111-111111111111";
 const proposalId = "22222222-2222-4222-8222-222222222222";
@@ -161,6 +162,18 @@ function success(kind: "applied" | "replay") {
   } as const;
 }
 
+const authorizedAccess: TripRouteAccessResult = {
+  status: "authorized",
+  context: {
+    userId,
+    tripId,
+    accountId,
+    membershipId,
+    role: "owner",
+    action: "trip:accept-proposal",
+  },
+};
+
 function dependencies(
   override: Partial<AcceptItineraryProposalActionDependencies> = {},
 ): AcceptItineraryProposalActionDependencies {
@@ -169,17 +182,7 @@ function dependencies(
   };
 
   return {
-    resolveAccess: vi.fn(async () => ({
-      status: "authorized",
-      context: {
-        userId,
-        tripId,
-        accountId,
-        membershipId,
-        role: "owner",
-        action: "trip:accept-proposal",
-      },
-    })),
+    resolveAccess: vi.fn(async (): Promise<TripRouteAccessResult> => authorizedAccess),
     tripRepository: { findById: vi.fn(async () => trip()) },
     itineraryRepository: { findByTripId: vi.fn(async () => itinerary()) },
     proposalRepository: { findById: vi.fn(async () => proposal()) },
@@ -266,7 +269,9 @@ describe("executeAcceptItineraryProposalAction", () => {
   it("bloqueia visitante anônimo antes de consultar agregados", async () => {
     const findTrip = vi.fn();
     const deps = dependencies({
-      resolveAccess: vi.fn(async () => ({ status: "unauthenticated" })),
+      resolveAccess: vi.fn(
+        async (): Promise<TripRouteAccessResult> => ({ status: "unauthenticated" }),
+      ),
       tripRepository: { findById: findTrip },
     });
 
@@ -280,7 +285,9 @@ describe("executeAcceptItineraryProposalAction", () => {
   it("normaliza negação de autorização sem consultar a Proposal", async () => {
     const findProposal = vi.fn();
     const deps = dependencies({
-      resolveAccess: vi.fn(async () => ({ status: "not-found" })),
+      resolveAccess: vi.fn(
+        async (): Promise<TripRouteAccessResult> => ({ status: "not-found" }),
+      ),
       proposalRepository: { findById: findProposal },
     });
 
@@ -360,7 +367,7 @@ describe("executeAcceptItineraryProposalAction", () => {
   });
 
   it("rejeita payload inválido antes da autorização", async () => {
-    const resolveAccess = vi.fn();
+    const resolveAccess: AcceptItineraryProposalActionDependencies["resolveAccess"] = vi.fn();
     const deps = dependencies({ resolveAccess });
 
     await expect(

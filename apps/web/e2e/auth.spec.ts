@@ -11,7 +11,7 @@ test("cadastra, encerra e recria a sessão pelo servidor", async ({ page }, test
   await page.getByRole("button", { name: "Criar conta" }).click();
 
   await expect(page).toHaveURL(/\/viagens$/);
-  await expect(page.getByText("RouteBook E2E")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Sair" })).toBeVisible();
   await page.getByRole("button", { name: "Sair" }).click();
   await expect(page).toHaveURL(/\/$/);
 

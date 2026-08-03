@@ -73,19 +73,6 @@ export function TripForm() {
         <FieldError message={state.fieldErrors.endDate} />
       </div>
 
-      <div className="form-field form-field-wide">
-        <label htmlFor="ownerName">Responsável pela viagem</label>
-        <input
-          aria-invalid={Boolean(state.fieldErrors.ownerName)}
-          autoComplete="name"
-          id="ownerName"
-          name="ownerName"
-          placeholder="Nome do owner inicial"
-          required
-        />
-        <FieldError message={state.fieldErrors.ownerName} />
-      </div>
-
       <div className="form-field">
         <label htmlFor="accommodationName">Hospedagem opcional</label>
         <input
@@ -110,7 +97,7 @@ export function TripForm() {
         <button className="product-button" disabled={pending} type="submit">
           {pending ? "Criando viagem…" : "Criar viagem"}
         </button>
-        <p>Nenhuma preferência, roteiro ou recomendação será criada automaticamente.</p>
+        <p>O responsável é definido pela conta autenticada. Nenhum roteiro será criado automaticamente.</p>
       </div>
     </form>
   );

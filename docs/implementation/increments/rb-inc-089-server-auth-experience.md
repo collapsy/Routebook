@@ -7,7 +7,7 @@ owner: Identity and Access
 status: Draft
 version: "0.1.0"
 created: "2026-08-02"
-last_updated: "2026-08-02"
+last_updated: "2026-08-03"
 authors:
   - RouteBook Team
 tags:
@@ -122,9 +122,9 @@ flowchart TD
 - [x] erros conhecidos mapeados;
 - [x] App Shell reflete a sessão;
 - [x] E2E de cadastro, logout e login criado;
-- [ ] testes PostgreSQL e E2E aprovados no CI;
+- [x] testes PostgreSQL e E2E aprovados no CI;
 - [x] registry e rastreabilidade atualizados;
-- [ ] validações finais do CI aprovadas.
+- [x] validações finais do CI aprovadas.
 
 ## 9. Riscos
 
@@ -143,4 +143,11 @@ Remover páginas, ações, componentes, estilos e testes do incremento. A funda�
 
 ## 11. Evidências
 
-O código, os testes unitários, o E2E, o Context Pack, o registry e a rastreabilidade estão consolidados na PR #204. O HEAD atual executa os validadores padrão antes do registro das evidências finais.
+- HEAD funcional validado: `1199e9f0f5fab20bb824b68114d1af62e7369952`;
+- Documentation Validation: run `30781490193`, concluído com sucesso;
+- Engineering Validation: run `30781490190`, job `91586923474`, concluído com sucesso;
+- o ambiente E2E do servidor de produção declara `BETTER_AUTH_SECRET` e `BETTER_AUTH_URL` compatíveis com o endereço local do Playwright;
+- os testes PostgreSQL da experiência de autenticação foram aprovados;
+- o E2E comprovou cadastro, propagação da sessão, logout, novo login e descarte de destino externo nos projetos desktop e mobile;
+- formatação, documentação, lint, typecheck, migrations, suíte integral, smoke, build e instalação do Chromium ficaram verdes;
+- registry, Context Pack e matriz de rastreabilidade estão consolidados e marcam o incremento como pronto para integração.

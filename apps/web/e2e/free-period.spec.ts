@@ -1,7 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { DrizzleItineraryRepository, DrizzleTripRepository } from "@routebook/database";
-import { addFreePeriod, createItinerary, createTrip } from "@routebook/trip-management";
+import { DrizzleItineraryRepository } from "@routebook/database";
+import { addFreePeriod, createItinerary } from "@routebook/trip-management";
+
+import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
 type FreePeriodFixtureInput = Readonly<{
   mode: "flexible" | "protected";
@@ -14,12 +16,11 @@ async function createFreePeriodFixture(
   freePeriods: readonly FreePeriodFixtureInput[] = [],
 ): Promise<string> {
   const now = new Date();
-  const trip = createTrip(
+  const { trip } = await createAuthenticatedE2ETrip(
     {
       name: tripName,
       startDate: "2026-08-22",
       endDate: "2026-08-29",
-      ownerName: "RouteBook E2E",
     },
     now,
   );
@@ -39,7 +40,6 @@ async function createFreePeriodFixture(
     );
   }
 
-  await new DrizzleTripRepository().create(trip);
   await new DrizzleItineraryRepository().save(itinerary);
   return trip.id;
 }

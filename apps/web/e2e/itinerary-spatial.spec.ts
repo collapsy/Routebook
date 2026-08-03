@@ -1,23 +1,20 @@
 import { expect, test } from "@playwright/test";
 
-import {
-  DrizzleItineraryRepository,
-  DrizzlePlaceRepository,
-  DrizzleTripRepository,
-} from "@routebook/database";
-import { addActivity, createItinerary, createTrip } from "@routebook/trip-management";
+import { DrizzleItineraryRepository, DrizzlePlaceRepository } from "@routebook/database";
+import { addActivity, createItinerary } from "@routebook/trip-management";
+
+import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
 test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   page,
 }, testInfo) => {
   const tripName = `Rota externa ${testInfo.project.name} ${Date.now()}`;
   const now = new Date();
-  const trip = createTrip(
+  const { trip } = await createAuthenticatedE2ETrip(
     {
       name: tripName,
       startDate: "2026-08-22",
       endDate: "2026-08-29",
-      ownerName: "RouteBook E2E",
     },
     now,
   );
@@ -59,7 +56,6 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
     now,
   );
 
-  await new DrizzleTripRepository().create(trip);
   await new DrizzleItineraryRepository().save(itinerary);
 
   const firstPlaceName = firstPlace!.name;

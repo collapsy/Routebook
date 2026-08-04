@@ -7,7 +7,7 @@ import {
   initialAcceptItineraryProposalActionState,
   type AcceptItineraryProposalActionState,
 } from "../lib/itinerary-proposal-acceptance";
-import styles from "./itinerary-proposal-review.module.css";
+import styles from "./itinerary-proposal-decision-actions.module.css";
 
 type AcceptAction = (
   state: AcceptItineraryProposalActionState,

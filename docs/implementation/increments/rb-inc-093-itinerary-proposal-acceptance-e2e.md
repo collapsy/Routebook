@@ -46,7 +46,7 @@ Issue: #211.
 
 Branch: `feature/rb-inc-093-itinerary-proposal-acceptance-e2e`.
 
-Pull request: pendente.
+Pull request: #212.
 
 ## 2. Contexto
 

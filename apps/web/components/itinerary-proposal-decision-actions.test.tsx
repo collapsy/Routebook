@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { AcceptItineraryProposalActionState } from "../lib/itinerary-proposal-acceptance";
@@ -56,7 +56,14 @@ describe("ItineraryProposalDecisionActions", () => {
   it("exige confirmação e envia somente o contrato mínimo", () => {
     render(<ItineraryProposalDecisionActions {...props} />);
 
-    expect(screen.getByText("Aceitar proposta")).toBeVisible();
+    const disclosure = screen.getByText("Aceitar proposta");
+    expect(disclosure).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Confirmar e aceitar proposta" }),
+    ).not.toBeVisible();
+
+    fireEvent.click(disclosure);
+
     expect(screen.getByRole("button", { name: "Confirmar e aceitar proposta" })).toBeVisible();
     expect(screen.getByRole("checkbox", { name: /atualizará o Roteiro/i })).toBeRequired();
     expect(document.querySelector('input[name="itineraryProposalId"]')).toHaveValue(

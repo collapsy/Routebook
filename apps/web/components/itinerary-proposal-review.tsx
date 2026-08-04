@@ -15,6 +15,7 @@ type AcceptAction = (
 export function ItineraryProposalReview({
   acceptAction,
   canAccept,
+  canDecide,
   discardAction,
   expectedItineraryVersion,
   idempotencyKey,
@@ -23,6 +24,7 @@ export function ItineraryProposalReview({
 }: {
   acceptAction: AcceptAction;
   canAccept: boolean;
+  canDecide: boolean;
   discardAction: (formData: FormData) => void | Promise<void>;
   expectedItineraryVersion: number;
   idempotencyKey: string;
@@ -228,6 +230,7 @@ export function ItineraryProposalReview({
         <ItineraryProposalDecisionActions
           acceptAction={acceptAction}
           canAccept={canAccept && review.isBasedOnCurrentItinerary}
+          canDecide={canDecide}
           discardAction={discardAction}
           expectedItineraryVersion={expectedItineraryVersion}
           idempotencyKey={idempotencyKey}

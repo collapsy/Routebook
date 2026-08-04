@@ -1,7 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import {
+  type FormEvent,
+  useActionState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+  useTransition,
+} from "react";
 
 import { acceptItineraryProposalAction } from "../app/viagens/[tripId]/roteiro/proposta/accept-action";
 import { initialAcceptItineraryProposalActionState } from "../lib/itinerary-proposal-acceptance";
@@ -32,18 +41,29 @@ export function ItineraryProposalDecisionActions({
 }) {
   const router = useRouter();
   const acceptAction = useMemo(() => acceptItineraryProposalAction.bind(null, tripId), [tripId]);
-  const [state, submitAccept, acceptPending] = useActionState(
+  const [state, dispatchAccept, actionPending] = useActionState(
     acceptAction,
     initialAcceptItineraryProposalActionState,
   );
+  const [transitionPending, startAcceptTransition] = useTransition();
   const hydrated = useSyncExternalStore(
     subscribeToHydration,
     () => true,
     () => false,
   );
   const [discardPending, setDiscardPending] = useState(false);
+  const acceptPending = actionPending || transitionPending;
   const decisionPending = acceptPending || discardPending;
   const decisionDisabled = !hydrated || decisionPending;
+
+  const submitAccept = useCallback(
+    (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      startAcceptTransition(() => dispatchAccept(formData));
+    },
+    [dispatchAccept],
+  );
 
   useEffect(() => {
     if (state.status !== "success") return;
@@ -83,7 +103,7 @@ export function ItineraryProposalDecisionActions({
         {canAccept ? (
           <details className={styles.acceptConfirmation}>
             <summary>Aceitar proposta</summary>
-            <form action={submitAccept}>
+            <form onSubmit={submitAccept}>
               <input name="itineraryProposalId" type="hidden" value={proposalId} />
               <input
                 name="expectedItineraryVersion"

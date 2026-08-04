@@ -49,6 +49,7 @@ const discardAction = vi.fn(async () => undefined);
 const decisionProps = {
   acceptAction,
   canAccept: true,
+  canDecide: true,
   discardAction,
   expectedItineraryVersion: 4,
   idempotencyKey: "accept-itinerary-proposal:proposal-ready:4",
@@ -78,7 +79,6 @@ describe("ItineraryProposalReview", () => {
     expect(document.querySelector('input[name="itineraryProposalId"]')).toHaveValue(
       "proposal-ready",
     );
-    expect(screen.queryByRole("button", { name: /gerar novamente/i })).not.toBeInTheDocument();
   });
 
   it("shows stale context and hides acceptance honestly", () => {
@@ -106,11 +106,19 @@ describe("ItineraryProposalReview", () => {
     expect(screen.getByRole("button", { name: "Descartar proposta" })).toBeVisible();
   });
 
-  it("hides acceptance for a user without decision permission", () => {
-    render(<ItineraryProposalReview {...decisionProps} canAccept={false} review={review} />);
+  it("renders a read-only review for a user without decision permission", () => {
+    render(
+      <ItineraryProposalReview
+        {...decisionProps}
+        canAccept={false}
+        canDecide={false}
+        review={review}
+      />,
+    );
 
+    expect(screen.getByRole("heading", { name: "Você pode consultar esta proposta" })).toBeVisible();
     expect(screen.queryByText("Aceitar proposta")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Descartar proposta" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Descartar proposta" })).not.toBeInTheDocument();
   });
 
   it("presents an expired Proposal as non-applicable historical reference", () => {

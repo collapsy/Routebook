@@ -30,83 +30,73 @@ jobs:
           const path = "apps/web/e2e/itinerary-proposal-review.spec.ts";
           let source = fs.readFileSync(path, "utf8");
 
-          const openHelper = `async function openAcceptance(page: Page, tripId: string): Promise<void> {
-            await page.goto(\`/viagens/\${tripId}/roteiro/proposta\`);
-            await page.getByText("Aceitar proposta", { exact: true }).click();
-            await page.getByRole("checkbox", { name: /atualizará o Roteiro/i }).check();
-          }`.replace(/^          /gm, "");
-
+          const openHelper = 'async function openAcceptance(page: Page, tripId: string): Promise<void> {\n  await page.goto(`/viagens/${tripId}/roteiro/proposta`);\n  await page.getByText("Aceitar proposta", { exact: true }).click();\n  await page.getByRole("checkbox", { name: /atualizará o Roteiro/i }).check();\n}';
           const helpers = `${openHelper}
 
-          async function submitAcceptance(
-            page: Page,
-            tripId: string,
-            kind: "applied" | "replay",
-          ): Promise<void> {
-            const expectedPath = \`/viagens/\${tripId}/roteiro?propostaAceita=\${kind}\`;
-            await page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
+async function submitAcceptance(
+  page: Page,
+  tripId: string,
+  kind: "applied" | "replay",
+): Promise<void> {
+  const expectedPath = \`/viagens/\${tripId}/roteiro?propostaAceita=\${kind}\`;
+  await page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
 
-            await expect
-              .poll(
-                async () => {
-                  const currentUrl = new URL(page.url());
-                  if (\`\${currentUrl.pathname}\${currentUrl.search}\` === expectedPath) {
-                    return expectedPath;
-                  }
+  await expect
+    .poll(
+      async () => {
+        const currentUrl = new URL(page.url());
+        if (\`\${currentUrl.pathname}\${currentUrl.search}\` === expectedPath) {
+          return expectedPath;
+        }
 
-                  const alert = page.getByRole("alert");
-                  if (await alert.isVisible().catch(() => false)) {
-                    return \`alert:\${await alert.textContent()}\`;
-                  }
+        const alert = page.getByRole("alert");
+        if (await alert.isVisible().catch(() => false)) {
+          return \`alert:\${await alert.textContent()}\`;
+        }
 
-                  const status = page.getByRole("status");
-                  if (await status.isVisible().catch(() => false)) {
-                    return \`status:\${await status.textContent()}\`;
-                  }
+        const status = page.getByRole("status");
+        if (await status.isVisible().catch(() => false)) {
+          return \`status:\${await status.textContent()}\`;
+        }
 
-                  if (
-                    await page
-                      .getByText("Aplicando a proposta e atualizando o Roteiro…")
-                      .isVisible()
-                      .catch(() => false)
-                  ) {
-                    return "pending";
-                  }
+        if (
+          await page
+            .getByText("Aplicando a proposta e atualizando o Roteiro…")
+            .isVisible()
+            .catch(() => false)
+        ) {
+          return "pending";
+        }
 
-                  return \`url:\${currentUrl.pathname}\${currentUrl.search}\`;
-                },
-                { timeout: 15_000 },
-              )
-              .toBe(expectedPath);
-          }`.replace(/^          /gm, "");
+        return \`url:\${currentUrl.pathname}\${currentUrl.search}\`;
+      },
+      { timeout: 15_000 },
+    )
+    .toBe(expectedPath);
+}`;
 
-          const firstSubmission = `  await Promise.all([
-            page.waitForURL(/\\/roteiro\\?propostaAceita=applied$/),
-            page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
-          ]);`.replace(/^          /gm, "");
-
-          const concurrentSubmissions = `    await Promise.all([
-              page.waitForURL(/\\/roteiro\\?propostaAceita=applied$/),
-              page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
-            ]);
-            await Promise.all([
-              replayPage.waitForURL(/\\/roteiro\\?propostaAceita=replay$/),
-              replayPage.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
-            ]);`.replace(/^            /gm, "");
+          const appliedBlock = '  await Promise.all([\n    page.waitForURL(/\\/roteiro\\?propostaAceita=applied$/),\n    page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),\n  ]);';
+          const replayBlock = '    await Promise.all([\n      replayPage.waitForURL(/\\/roteiro\\?propostaAceita=replay$/),\n      replayPage.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),\n    ]);';
 
           if (!source.includes(openHelper)) throw new Error("openAcceptance helper marker not found");
-          if (!source.includes(firstSubmission)) throw new Error("first submission marker not found");
-          if (!source.includes(concurrentSubmissions)) {
-            throw new Error("concurrent submission marker not found");
+          if (source.split(appliedBlock).length - 1 !== 2) {
+            throw new Error("expected exactly two applied submission blocks");
           }
+          if (!source.includes(replayBlock)) throw new Error("replay submission marker not found");
 
-          source = source
-            .replace(openHelper, helpers)
-            .replace(firstSubmission, '  await submitAcceptance(page, fixture.tripId, "applied");')
-            .replace(
-              concurrentSubmissions,
-              '    await submitAcceptance(page, fixture.tripId, "applied");\n    await submitAcceptance(replayPage, fixture.tripId, "replay");',
-            );
+          source = source.replace(openHelper, helpers);
+          source = source.replace(
+            appliedBlock,
+            '  await submitAcceptance(page, fixture.tripId, "applied");',
+          );
+          source = source.replace(
+            appliedBlock,
+            '    await submitAcceptance(page, fixture.tripId, "applied");',
+          );
+          source = source.replace(
+            replayBlock,
+            '    await submitAcceptance(replayPage, fixture.tripId, "replay");',
+          );
           fs.writeFileSync(path, source);
           NODE
 

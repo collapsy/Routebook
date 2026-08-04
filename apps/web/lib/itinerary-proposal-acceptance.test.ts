@@ -325,6 +325,23 @@ describe("executeAcceptItineraryProposalAction", () => {
     });
   });
 
+  it("encaminha Proposal accepted à reserva idempotente mesmo após a versão avançar", async () => {
+    const execute = vi.fn(async () => success("replay"));
+    const deps = dependencies({
+      proposalRepository: {
+        findById: vi.fn(async () => proposal({ status: "accepted", acceptedAt: decidedAt })),
+      },
+      itineraryRepository: { findByTripId: vi.fn(async () => itinerary(5)) },
+      acceptItineraryProposal: { execute },
+    });
+
+    await expect(executeAcceptItineraryProposalAction(input(), deps)).resolves.toEqual({
+      status: "success",
+      ...success("replay"),
+    });
+    expect(execute).toHaveBeenCalledOnce();
+  });
+
   it("detecta versão concorrente antes da transação", async () => {
     const execute = vi.fn();
     const deps = dependencies({

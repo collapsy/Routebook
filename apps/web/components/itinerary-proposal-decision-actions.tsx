@@ -19,6 +19,7 @@ type DiscardAction = (formData: FormData) => void | Promise<void>;
 export function ItineraryProposalDecisionActions({
   acceptAction,
   canAccept,
+  canDecide,
   discardAction,
   expectedItineraryVersion,
   idempotencyKey,
@@ -27,6 +28,7 @@ export function ItineraryProposalDecisionActions({
 }: {
   acceptAction: AcceptAction;
   canAccept: boolean;
+  canDecide: boolean;
   discardAction: DiscardAction;
   expectedItineraryVersion: number;
   idempotencyKey: string;
@@ -47,6 +49,18 @@ export function ItineraryProposalDecisionActions({
     router.refresh();
   }, [itineraryHref, router, state]);
 
+  if (!canDecide) {
+    return (
+      <section className={styles.decisionActions} aria-labelledby="proposal-decision-title">
+        <div className={styles.decisionCopy}>
+          <p className={styles.eyebrow}>Revisão somente leitura</p>
+          <h2 id="proposal-decision-title">Você pode consultar esta proposta</h2>
+          <p>Somente participantes com permissão de decisão podem aceitar ou descartar a proposta.</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className={styles.decisionActions} aria-labelledby="proposal-decision-title">
       <div className={styles.decisionCopy}>
@@ -57,7 +71,7 @@ export function ItineraryProposalDecisionActions({
         <p>
           {canAccept
             ? "Revise a confirmação antes de substituir o estado atual do Roteiro pelas mudanças propostas."
-            : "Ao descartar, seu Roteiro atual não será alterado."}
+            : "Esta proposta não pode mais ser aplicada ao estado atual. Ao descartar, o Roteiro não será alterado."}
         </p>
       </div>
 

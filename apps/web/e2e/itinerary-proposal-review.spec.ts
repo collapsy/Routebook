@@ -1,8 +1,11 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import { sql } from "drizzle-orm";
 
 import {
+  DrizzleDecisionRepository,
   DrizzleItineraryProposalRepository,
   DrizzleItineraryRepository,
+  getDatabase,
 } from "@routebook/database";
 import {
   completeItineraryProposalGeneration,
@@ -20,10 +23,28 @@ test.setTimeout(120_000);
 const confirmedActivity = "Café já confirmado";
 const proposedActivity = "Mirante ao pôr do sol";
 
+type ProposalFixture = Readonly<{
+  tripId: string;
+  itineraryId: string;
+  proposalId: string;
+  proposedActivityId: string;
+  baseItineraryVersion: number;
+  idempotencyKey: string;
+}>;
+
+function resultRows(result: unknown): readonly Record<string, unknown>[] {
+  if (Array.isArray(result)) return result as readonly Record<string, unknown>[];
+  if (result && typeof result === "object" && "rows" in result) {
+    const rows = (result as { rows?: unknown }).rows;
+    if (Array.isArray(rows)) return rows as readonly Record<string, unknown>[];
+  }
+  return [];
+}
+
 async function createProposalFixture(
   tripName: string,
   status: "ready" | "expired" = "ready",
-): Promise<string> {
+): Promise<ProposalFixture> {
   const requestedAt = new Date(Date.now() - 10_000);
   const { trip } = await createAuthenticatedE2ETrip(
     {
@@ -47,6 +68,7 @@ async function createProposalFixture(
 
   await new DrizzleItineraryRepository().save(itinerary);
 
+  const proposedActivityId = crypto.randomUUID();
   const repository = new DrizzleItineraryProposalRepository();
   const requested = requestItineraryProposal({
     tripId: trip.id,
@@ -64,7 +86,7 @@ async function createProposalFixture(
     generationVersion: "1",
     proposedActivities: [
       {
-        proposedActivityId: crypto.randomUUID(),
+        proposedActivityId,
         targetTripDayId: itinerary.days[0]!.id,
         title: proposedActivity,
         description: "Uma pausa com vista antes do jantar.",
@@ -94,7 +116,15 @@ async function createProposalFixture(
       expireItineraryProposalByTime(ready, new Date(ready.validUntil!.getTime() + 60_000)),
     );
   }
-  return trip.id;
+
+  return Object.freeze({
+    tripId: trip.id,
+    itineraryId: itinerary.id,
+    proposalId: ready.id,
+    proposedActivityId,
+    baseItineraryVersion: itinerary.version,
+    idempotencyKey: `accept-itinerary-proposal:${ready.id}:${itinerary.version}`,
+  });
 }
 
 async function createItineraryWithoutProposal(tripName: string): Promise<string> {
@@ -112,8 +142,208 @@ async function createItineraryWithoutProposal(tripName: string): Promise<string>
   return trip.id;
 }
 
+async function openAcceptance(page: Page, tripId: string): Promise<void> {
+  await page.goto(`/viagens/${tripId}/roteiro/proposta`);
+  await page.getByText("Aceitar proposta", { exact: true }).click();
+  await page.getByRole("checkbox", { name: /atualizará o Roteiro/i }).check();
+}
+
+async function proposalApplicationRows(
+  fixture: ProposalFixture,
+): Promise<readonly Record<string, unknown>[]> {
+  return resultRows(
+    await getDatabase().execute(sql`
+      SELECT
+        id::text AS "id",
+        status,
+        request_fingerprint AS "requestFingerprint",
+        resulting_itinerary_version AS "resultingItineraryVersion"
+      FROM proposal_applications
+      WHERE itinerary_proposal_id = ${fixture.proposalId}::uuid
+        AND idempotency_key = ${fixture.idempotencyKey}
+      ORDER BY created_at, id
+    `),
+  );
+}
+
+test("aceita uma Proposal ready da UI ao PostgreSQL e preserva o resultado após reload", async ({
+  page,
+}, testInfo) => {
+  const fixture = await createProposalFixture(
+    `Aceite integral ${testInfo.project.name} ${Date.now()}`,
+  );
+
+  await openAcceptance(page, fixture.tripId);
+  await Promise.all([
+    page.waitForURL(/\/roteiro\?propostaAceita=applied$/),
+    page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
+  ]);
+
+  await expect(page.getByRole("status")).toHaveText(
+    "Proposta aceita. O Roteiro foi atualizado com as mudanças confirmadas.",
+  );
+  await expect(page.getByText(proposedActivity, { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ver proposta" })).toHaveCount(0);
+
+  const itinerary = await new DrizzleItineraryRepository().findByTripId(fixture.tripId);
+  expect(itinerary).toMatchObject({
+    id: fixture.itineraryId,
+    version: fixture.baseItineraryVersion + 1,
+  });
+  expect(
+    itinerary?.days.flatMap(({ activities }) => activities).find(({ title }) => title === proposedActivity),
+  ).toMatchObject({
+    title: proposedActivity,
+    startTime: "17:30",
+    durationMinutes: 90,
+  });
+
+  const proposal = await new DrizzleItineraryProposalRepository().findById(
+    fixture.tripId,
+    fixture.proposalId,
+  );
+  expect(proposal).toMatchObject({ status: "accepted" });
+  expect(proposal?.acceptedAt).toBeInstanceOf(Date);
+
+  const applications = await proposalApplicationRows(fixture);
+  expect(applications).toHaveLength(1);
+  expect(applications[0]).toMatchObject({
+    status: "succeeded",
+    resultingItineraryVersion: fixture.baseItineraryVersion + 1,
+  });
+
+  const decision = await new DrizzleDecisionRepository().findByIdempotencyKey(
+    fixture.tripId,
+    fixture.idempotencyKey,
+  );
+  expect(decision).toMatchObject({
+    tripId: fixture.tripId,
+    type: "accept-itinerary-proposal",
+    idempotencyKey: fixture.idempotencyKey,
+    contextSnapshot: {
+      itineraryId: fixture.itineraryId,
+      itineraryProposalId: fixture.proposalId,
+      baseItineraryVersion: fixture.baseItineraryVersion,
+    },
+    effect: {
+      proposalApplicationId: applications[0]?.id,
+      resultingItineraryVersion: fixture.baseItineraryVersion + 1,
+      appliedProposedActivityIds: [fixture.proposedActivityId],
+    },
+  });
+
+  await page.reload();
+  await expect(page.getByText(proposedActivity, { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ver proposta" })).toHaveCount(0);
+});
+
+test("reproduz o aceite concorrente e rejeita chave nova sem duplicar efeitos", async ({
+  context,
+  page,
+}, testInfo) => {
+  const fixture = await createProposalFixture(
+    `Replay integral ${testInfo.project.name} ${Date.now()}`,
+  );
+  const replayPage = await context.newPage();
+  const conflictingPage = await context.newPage();
+
+  try {
+    await openAcceptance(page, fixture.tripId);
+    await openAcceptance(replayPage, fixture.tripId);
+    await openAcceptance(conflictingPage, fixture.tripId);
+
+    await Promise.all([
+      page.waitForURL(/\/roteiro\?propostaAceita=applied$/),
+      page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
+    ]);
+    await Promise.all([
+      replayPage.waitForURL(/\/roteiro\?propostaAceita=replay$/),
+      replayPage.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
+    ]);
+
+    await expect(replayPage.getByRole("status")).toHaveText(
+      "Esta proposta já havia sido aceita. O Roteiro atualizado foi carregado.",
+    );
+
+    await conflictingPage.locator('input[name="idempotencyKey"]').evaluate((input) => {
+      (input as HTMLInputElement).value = `${(input as HTMLInputElement).value}:nova`;
+    });
+    await conflictingPage.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
+    await expect(conflictingPage.getByRole("alert")).toHaveText(
+      "A proposta não está pronta para ser aceita.",
+    );
+
+    const itinerary = await new DrizzleItineraryRepository().findByTripId(fixture.tripId);
+    expect(itinerary?.version).toBe(fixture.baseItineraryVersion + 1);
+    expect(
+      itinerary?.days
+        .flatMap(({ activities }) => activities)
+        .filter(({ title }) => title === proposedActivity),
+    ).toHaveLength(1);
+
+    expect(await proposalApplicationRows(fixture)).toHaveLength(1);
+    expect(
+      (await new DrizzleDecisionRepository().listByTripId(fixture.tripId)).filter(
+        ({ idempotencyKey }) => idempotencyKey === fixture.idempotencyKey,
+      ),
+    ).toHaveLength(1);
+    expect(
+      await new DrizzleItineraryProposalRepository().findById(
+        fixture.tripId,
+        fixture.proposalId,
+      ),
+    ).toMatchObject({ status: "accepted" });
+  } finally {
+    await replayPage.close();
+    await conflictingPage.close();
+  }
+});
+
+test("mantém versão concorrente como erro recuperável sem persistir aceite", async ({
+  page,
+}, testInfo) => {
+  const fixture = await createProposalFixture(
+    `Versão concorrente ${testInfo.project.name} ${Date.now()}`,
+  );
+  await openAcceptance(page, fixture.tripId);
+
+  const itineraryRepository = new DrizzleItineraryRepository();
+  const current = await itineraryRepository.findByTripId(fixture.tripId);
+  expect(current).not.toBeNull();
+  const changed = addActivity(
+    current!,
+    {
+      dayDate: "2026-08-22",
+      title: "Alteração concorrente",
+      startTime: "12:00",
+      durationMinutes: 30,
+    },
+    new Date(),
+  );
+  await itineraryRepository.save(changed);
+
+  await page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
+  await expect(page.getByRole("alert")).toHaveText(
+    "O roteiro mudou desde a geração desta proposta.",
+  );
+
+  expect(await proposalApplicationRows(fixture)).toHaveLength(0);
+  expect(
+    await new DrizzleDecisionRepository().findByIdempotencyKey(
+      fixture.tripId,
+      fixture.idempotencyKey,
+    ),
+  ).toBeNull();
+  expect(
+    await new DrizzleItineraryProposalRepository().findById(
+      fixture.tripId,
+      fixture.proposalId,
+    ),
+  ).toMatchObject({ status: "ready" });
+});
+
 test("revisa uma Proposal ready sem aplicá-la ao Roteiro", async ({ page }, testInfo) => {
-  const tripId = await createProposalFixture(`Proposta ${testInfo.project.name} ${Date.now()}`);
+  const { tripId } = await createProposalFixture(`Proposta ${testInfo.project.name} ${Date.now()}`);
   await page.goto(`/viagens/${tripId}/roteiro`);
 
   await expect(page.getByText(confirmedActivity, { exact: true })).toBeVisible();
@@ -129,9 +359,8 @@ test("revisa uma Proposal ready sem aplicá-la ao Roteiro", async ({ page }, tes
   await expect(page.getByText("Proximidade entre lugares")).toBeVisible();
   await expect(page.getByText("Horários externos não foram confirmados.")).toBeVisible();
   await expect(page.getByText(/O Roteiro atual permanece preservado/i)).toBeVisible();
-  await expect(page.getByRole("button", { name: /aceitar|aplicar|gerar novamente/i })).toHaveCount(
-    0,
-  );
+  await expect(page.getByRole("button", { name: /aplicar|gerar novamente/i })).toHaveCount(0);
+  await expect(page.getByText("Aceitar proposta", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Descartar proposta" })).toBeVisible();
 
   await Promise.all([
@@ -145,7 +374,7 @@ test("revisa uma Proposal ready sem aplicá-la ao Roteiro", async ({ page }, tes
 test("descarta uma Proposal ready e preserva integralmente o Roteiro", async ({
   page,
 }, testInfo) => {
-  const tripId = await createProposalFixture(
+  const { tripId } = await createProposalFixture(
     `Descartar proposta ${testInfo.project.name} ${Date.now()}`,
   );
   const itineraryRepository = new DrizzleItineraryRepository();
@@ -174,7 +403,7 @@ test("descarta uma Proposal ready e preserva integralmente o Roteiro", async ({
 test("trata uma Proposal atualizada concorrentemente sem falso sucesso", async ({
   page,
 }, testInfo) => {
-  const tripId = await createProposalFixture(
+  const { tripId } = await createProposalFixture(
     `Concorrência de proposta ${testInfo.project.name} ${Date.now()}`,
   );
   await page.goto(`/viagens/${tripId}/roteiro/proposta`);
@@ -217,7 +446,7 @@ test("mantém a rota direta recuperável quando não existe Proposal revisável"
 test("consulta uma Proposal expired somente como referência histórica", async ({
   page,
 }, testInfo) => {
-  const tripId = await createProposalFixture(
+  const { tripId } = await createProposalFixture(
     `Proposta expirada ${testInfo.project.name} ${Date.now()}`,
     "expired",
   );

@@ -1,48 +1,51 @@
-name: RB-INC-093 Type Contract Patch
+name: Documentation Validation
 
 on:
   pull_request:
     paths:
+      - "README.md"
+      - "AGENTS.md"
+      - "CONTRIBUTING.md"
+      - "docs/**"
+      - "scripts/validate-docs.mjs"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - ".github/workflows/documentation-validation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "README.md"
+      - "AGENTS.md"
+      - "CONTRIBUTING.md"
+      - "docs/**"
+      - "scripts/validate-docs.mjs"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
       - ".github/workflows/documentation-validation.yml"
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: documentation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  apply-type-contract:
-    name: Apply branded Proposal ID type
-    if: github.event.pull_request.head.repo.full_name == github.repository
+  validate-documentation:
+    name: Validate documentation
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
     steps:
-      - name: Checkout pull request branch
+      - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0
+          node-version: 22
+          package-manager-cache: false
 
-      - name: Patch type and restore workflow
-        shell: bash
-        run: |
-          node <<'NODE'
-          const fs = require("node:fs");
-          const path = "apps/web/e2e/itinerary-proposal-review.spec.ts";
-          let source = fs.readFileSync(path, "utf8");
-          const importMarker = '  startItineraryProposalGeneration,\n} from "@routebook/proposal-management";';
-          const typedImport = '  startItineraryProposalGeneration,\n  type ItineraryProposalId,\n} from "@routebook/proposal-management";';
-          const fieldMarker = "  proposalId: string;";
-          const typedField = "  proposalId: ItineraryProposalId;";
-          if (!source.includes(importMarker)) throw new Error("Proposal import marker not found");
-          if (!source.includes(fieldMarker)) throw new Error("Proposal fixture field marker not found");
-          source = source.replace(importMarker, typedImport).replace(fieldMarker, typedField);
-          fs.writeFileSync(path, source);
-          NODE
-
-          git fetch origin main
-          git checkout origin/main -- .github/workflows/documentation-validation.yml
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/e2e/itinerary-proposal-review.spec.ts .github/workflows/documentation-validation.yml
-          git commit -m "test: preserve branded Itinerary Proposal ID in E2E fixture"
-          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+      - name: Validate documentation registry and metadata
+        run: node scripts/validate-docs.mjs

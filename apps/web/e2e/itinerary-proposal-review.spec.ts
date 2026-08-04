@@ -13,6 +13,7 @@ import {
   rejectItineraryProposal,
   requestItineraryProposal,
   startItineraryProposalGeneration,
+  type ItineraryProposalId,
 } from "@routebook/proposal-management";
 import { addActivity, createItinerary } from "@routebook/trip-management";
 
@@ -26,7 +27,7 @@ const proposedActivity = "Mirante ao pôr do sol";
 type ProposalFixture = Readonly<{
   tripId: string;
   itineraryId: string;
-  proposalId: string;
+  proposalId: ItineraryProposalId;
   proposedActivityId: string;
   baseItineraryVersion: number;
   idempotencyKey: string;

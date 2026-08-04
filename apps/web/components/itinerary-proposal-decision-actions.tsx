@@ -40,8 +40,14 @@ export function ItineraryProposalDecisionActions({
     acceptAction,
     initialAcceptItineraryProposalActionState,
   );
+  const [hydrated, setHydrated] = useState(false);
   const [discardPending, setDiscardPending] = useState(false);
   const decisionPending = acceptPending || discardPending;
+  const decisionDisabled = !hydrated || decisionPending;
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
     if (state.status !== "success") return;
@@ -95,7 +101,7 @@ export function ItineraryProposalDecisionActions({
               </p>
               <label>
                 <input
-                  disabled={decisionPending}
+                  disabled={decisionDisabled}
                   name="confirmation"
                   required
                   type="checkbox"
@@ -103,7 +109,7 @@ export function ItineraryProposalDecisionActions({
                 />
                 Entendo que esta ação atualizará o Roteiro.
               </label>
-              <button className={styles.acceptButton} disabled={decisionPending} type="submit">
+              <button className={styles.acceptButton} disabled={decisionDisabled} type="submit">
                 {acceptPending ? "Aplicando proposta…" : "Confirmar e aceitar proposta"}
               </button>
             </form>
@@ -112,7 +118,7 @@ export function ItineraryProposalDecisionActions({
 
         <form action={discardAction} onSubmit={() => setDiscardPending(true)}>
           <input name="itineraryProposalId" type="hidden" value={proposalId} />
-          <button className={styles.discardButton} disabled={decisionPending} type="submit">
+          <button className={styles.discardButton} disabled={decisionDisabled} type="submit">
             {discardPending ? "Descartando proposta…" : "Descartar proposta"}
           </button>
         </form>

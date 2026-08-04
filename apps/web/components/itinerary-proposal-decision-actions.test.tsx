@@ -67,7 +67,7 @@ describe("ItineraryProposalDecisionActions", () => {
     expect(document.querySelector('input[name="itineraryProposalId"]')).toHaveValue(
       "proposal-ready",
     );
-    expect(document.querySelector('input[name="expectedItineraryVersion"]')).toHaveValue(4);
+    expect(document.querySelector('input[name="expectedItineraryVersion"]')).toHaveValue("4");
     expect(document.querySelector('input[name="idempotencyKey"]')).toHaveValue(
       "accept-itinerary-proposal:proposal-ready:4",
     );

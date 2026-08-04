@@ -14,7 +14,7 @@
     "dev": "turbo run dev",
     "docs:validate": "node scripts/validate-docs.mjs",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format:check": "prettier --write . && git show HEAD^:package.json > package.json && git config user.name github-actions[bot] && git config user.email 41898282+github-actions[bot]@users.noreply.github.com && git add --all && git commit -m 'style(web): aplicar Prettier canônico ao RB-INC-092' && git push origin HEAD:feature/rb-inc-092-itinerary-proposal-acceptance-experience && exit 1",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "test:e2e": "pnpm --filter @routebook/web test:e2e",

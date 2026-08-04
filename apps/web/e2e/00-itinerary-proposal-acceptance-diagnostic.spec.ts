@@ -82,11 +82,6 @@ test("diagnostica o estado real retornado pelo aceite integral", async ({ page }
   await repository.save(generating);
   await repository.save(ready);
 
-  const actionRequests: string[] = [];
-  page.on("request", (request) => {
-    if (request.method() === "POST") actionRequests.push(request.url());
-  });
-
   await page.goto(`/viagens/${trip.id}/roteiro/proposta`);
   await page.getByText("Aceitar proposta", { exact: true }).click();
   const checkbox = page.getByRole("checkbox", { name: /atualizará o Roteiro/i });
@@ -115,7 +110,29 @@ test("diagnostica o estado real retornado pelo aceite integral", async ({ page }
     };
   });
 
+  const postResponsePromise = page.waitForResponse(
+    (response) => response.request().method() === "POST",
+    { timeout: 10_000 },
+  );
   await button.click();
+  const postResponse = await postResponsePromise;
+  const postRequest = postResponse.request();
+  const responseBody = await postResponse
+    .text()
+    .then((body) => body.slice(0, 2_000))
+    .catch((error: unknown) => `unavailable:${String(error)}`);
+  const networkState = {
+    request: {
+      url: postRequest.url(),
+      headers: await postRequest.allHeaders(),
+      postData: postRequest.postData()?.slice(0, 1_000) ?? null,
+    },
+    response: {
+      status: postResponse.status(),
+      headers: await postResponse.allHeaders(),
+      body: responseBody,
+    },
+  };
 
   const expectedPath = `/viagens/${trip.id}/roteiro?propostaAceita=applied`;
   await expect
@@ -156,7 +173,7 @@ test("diagnostica o estado real retornado pelo aceite integral", async ({ page }
           initialFormState,
           currentFormState,
           submitCount,
-          actionRequests,
+          networkState,
         });
       },
       { timeout: 12_000 },

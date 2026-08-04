@@ -108,9 +108,8 @@ test("diagnostica o estado real retornado pelo aceite integral", async ({ page }
       invalidNames: Array.from(form.elements)
         .filter((field) => field instanceof HTMLInputElement && !field.checkValidity())
         .map((field) => (field as HTMLInputElement).name),
-      confirmationChecked: (
-        form.elements.namedItem("confirmation") as HTMLInputElement | null
-      )?.checked,
+      confirmationChecked: (form.elements.namedItem("confirmation") as HTMLInputElement | null)
+        ?.checked,
       buttonDisabled: (form.querySelector('button[type="submit"]') as HTMLButtonElement | null)
         ?.disabled,
     };

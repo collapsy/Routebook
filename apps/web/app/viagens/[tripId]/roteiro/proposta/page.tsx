@@ -73,7 +73,7 @@ export default async function ItineraryProposalReviewPage({
   const review = buildItineraryProposalReview({ itinerary, proposal });
   const acceptAction = acceptItineraryProposalAction.bind(null, trip.id);
   const discardAction = discardItineraryProposalAction.bind(null, trip.id);
-  const canAccept = acceptanceAccess.status === "authorized";
+  const canDecide = acceptanceAccess.status === "authorized";
   const idempotencyKey = `accept-itinerary-proposal:${proposal.id}:${proposal.baseItineraryVersion}`;
   const itineraryHref = `/viagens/${trip.id}/roteiro`;
 
@@ -98,7 +98,8 @@ export default async function ItineraryProposalReviewPage({
 
       <ItineraryProposalReview
         acceptAction={acceptAction}
-        canAccept={canAccept}
+        canAccept={canDecide}
+        canDecide={canDecide}
         discardAction={discardAction}
         expectedItineraryVersion={proposal.baseItineraryVersion}
         idempotencyKey={idempotencyKey}

@@ -1,15 +1,32 @@
+import type { AcceptItineraryProposalActionState } from "../lib/itinerary-proposal-acceptance";
 import type { ItineraryProposalReview as ReviewModel } from "../lib/itinerary-proposal-experience";
+import { ItineraryProposalDecisionActions } from "./itinerary-proposal-decision-actions";
 import styles from "./itinerary-proposal-review.module.css";
 
 function countLabel(count: number, singular: string, plural: string): string {
   return `${count} ${count === 1 ? singular : plural}`;
 }
 
+type AcceptAction = (
+  state: AcceptItineraryProposalActionState,
+  formData: FormData,
+) => Promise<AcceptItineraryProposalActionState>;
+
 export function ItineraryProposalReview({
+  acceptAction,
+  canAccept,
   discardAction,
+  expectedItineraryVersion,
+  idempotencyKey,
+  itineraryHref,
   review,
 }: {
+  acceptAction: AcceptAction;
+  canAccept: boolean;
   discardAction: (formData: FormData) => void | Promise<void>;
+  expectedItineraryVersion: number;
+  idempotencyKey: string;
+  itineraryHref: string;
   review: ReviewModel;
 }) {
   const isExpired = review.status === "expired";
@@ -204,23 +221,19 @@ export function ItineraryProposalReview({
       <p className={styles.preservation} role="note">
         {isExpired
           ? "Esta proposta expirada é somente uma referência histórica. O Roteiro confirmado não foi alterado."
-          : "Esta revisão é somente leitura. O Roteiro confirmado não foi alterado."}
+          : "Esta proposta ainda não alterou o Roteiro. Uma confirmação explícita é necessária para aplicar as mudanças."}
       </p>
 
       {!isExpired ? (
-        <section className={styles.decisionActions} aria-labelledby="proposal-decision-title">
-          <div>
-            <p className={styles.eyebrow}>Decisão sobre esta sugestão</p>
-            <h2 id="proposal-decision-title">Não quer usar esta proposta?</h2>
-            <p>Ao descartar, seu Roteiro atual não será alterado.</p>
-          </div>
-          <form action={discardAction}>
-            <input name="itineraryProposalId" type="hidden" value={review.proposalId} />
-            <button className={styles.discardButton} type="submit">
-              Descartar proposta
-            </button>
-          </form>
-        </section>
+        <ItineraryProposalDecisionActions
+          acceptAction={acceptAction}
+          canAccept={canAccept && review.isBasedOnCurrentItinerary}
+          discardAction={discardAction}
+          expectedItineraryVersion={expectedItineraryVersion}
+          idempotencyKey={idempotencyKey}
+          itineraryHref={itineraryHref}
+          proposalId={review.proposalId}
+        />
       ) : null}
     </div>
   );

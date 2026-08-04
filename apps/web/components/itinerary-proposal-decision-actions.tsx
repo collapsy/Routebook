@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useState, useSyncExternalStore } from "react";
 
 import {
   initialAcceptItineraryProposalActionState,
@@ -15,6 +15,8 @@ type AcceptAction = (
 ) => Promise<AcceptItineraryProposalActionState>;
 
 type DiscardAction = (formData: FormData) => void | Promise<void>;
+
+const subscribeToHydration = () => () => undefined;
 
 export function ItineraryProposalDecisionActions({
   acceptAction,
@@ -40,14 +42,14 @@ export function ItineraryProposalDecisionActions({
     acceptAction,
     initialAcceptItineraryProposalActionState,
   );
-  const [hydrated, setHydrated] = useState(false);
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    () => true,
+    () => false,
+  );
   const [discardPending, setDiscardPending] = useState(false);
   const decisionPending = acceptPending || discardPending;
   const decisionDisabled = !hydrated || decisionPending;
-
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
 
   useEffect(() => {
     if (state.status !== "success") return;

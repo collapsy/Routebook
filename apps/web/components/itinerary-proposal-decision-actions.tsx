@@ -31,10 +31,7 @@ export function ItineraryProposalDecisionActions({
   tripId: string;
 }) {
   const router = useRouter();
-  const acceptAction = useMemo(
-    () => acceptItineraryProposalAction.bind(null, tripId),
-    [tripId],
-  );
+  const acceptAction = useMemo(() => acceptItineraryProposalAction.bind(null, tripId), [tripId]);
   const [state, submitAccept, acceptPending] = useActionState(
     acceptAction,
     initialAcceptItineraryProposalActionState,

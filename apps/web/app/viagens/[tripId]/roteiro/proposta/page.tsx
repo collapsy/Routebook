@@ -16,7 +16,6 @@ import {
   ItineraryProposalReviewIntegrityError,
 } from "../../../../../lib/itinerary-proposal-experience";
 import { resolveTripRouteAccess } from "../../../../../lib/trip-route-access";
-import { acceptItineraryProposalAction } from "./accept-action";
 import { discardItineraryProposalAction } from "./actions";
 import styles from "./proposal-page.module.css";
 
@@ -71,7 +70,6 @@ export default async function ItineraryProposalReviewPage({
   }
 
   const review = buildItineraryProposalReview({ itinerary, proposal });
-  const acceptAction = acceptItineraryProposalAction.bind(null, trip.id);
   const discardAction = discardItineraryProposalAction.bind(null, trip.id);
   const canDecide = acceptanceAccess.status === "authorized";
   const idempotencyKey = `accept-itinerary-proposal:${proposal.id}:${proposal.baseItineraryVersion}`;
@@ -97,7 +95,6 @@ export default async function ItineraryProposalReviewPage({
       </header>
 
       <ItineraryProposalReview
-        acceptAction={acceptAction}
         canAccept={canDecide}
         canDecide={canDecide}
         discardAction={discardAction}
@@ -105,6 +102,7 @@ export default async function ItineraryProposalReviewPage({
         idempotencyKey={idempotencyKey}
         itineraryHref={itineraryHref}
         review={review}
+        tripId={trip.id}
       />
     </section>
   );

@@ -1,4 +1,3 @@
-import type { AcceptItineraryProposalActionState } from "../lib/itinerary-proposal-acceptance";
 import type { ItineraryProposalReview as ReviewModel } from "../lib/itinerary-proposal-experience";
 import { ItineraryProposalDecisionActions } from "./itinerary-proposal-decision-actions";
 import styles from "./itinerary-proposal-review.module.css";
@@ -7,13 +6,7 @@ function countLabel(count: number, singular: string, plural: string): string {
   return `${count} ${count === 1 ? singular : plural}`;
 }
 
-type AcceptAction = (
-  state: AcceptItineraryProposalActionState,
-  formData: FormData,
-) => Promise<AcceptItineraryProposalActionState>;
-
 export function ItineraryProposalReview({
-  acceptAction,
   canAccept,
   canDecide,
   discardAction,
@@ -21,8 +14,8 @@ export function ItineraryProposalReview({
   idempotencyKey,
   itineraryHref,
   review,
+  tripId,
 }: {
-  acceptAction: AcceptAction;
   canAccept: boolean;
   canDecide: boolean;
   discardAction: (formData: FormData) => void | Promise<void>;
@@ -30,6 +23,7 @@ export function ItineraryProposalReview({
   idempotencyKey: string;
   itineraryHref: string;
   review: ReviewModel;
+  tripId: string;
 }) {
   const isExpired = review.status === "expired";
 
@@ -228,7 +222,6 @@ export function ItineraryProposalReview({
 
       {!isExpired ? (
         <ItineraryProposalDecisionActions
-          acceptAction={acceptAction}
           canAccept={canAccept && review.isBasedOnCurrentItinerary}
           canDecide={canDecide}
           discardAction={discardAction}
@@ -236,6 +229,7 @@ export function ItineraryProposalReview({
           idempotencyKey={idempotencyKey}
           itineraryHref={itineraryHref}
           proposalId={review.proposalId}
+          tripId={tripId}
         />
       ) : null}
     </div>

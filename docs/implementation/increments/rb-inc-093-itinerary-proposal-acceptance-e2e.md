@@ -76,7 +76,8 @@ A fronteira web pode encaminhar uma Proposal `accepted` somente como candidata a
 - a versão atual do Itinerary não bloqueia a tentativa antes da reserva idempotente;
 - a transação decide entre `replay`, conflito de fingerprint ou `proposal-not-ready`;
 - uma chave nova não reaplica a Proposal;
-- Proposal `ready` mantém todas as validações atuais de validade e versão concorrente.
+- Proposal `ready` mantém todas as validações atuais de validade e versão concorrente;
+- fixtures E2E preservam o tipo nominal `ItineraryProposalId` ao consultar repositories.
 
 ## 5. Escopo
 

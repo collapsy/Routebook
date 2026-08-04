@@ -1,25 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState, useSyncExternalStore } from "react";
+import { useActionState, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
-import {
-  initialAcceptItineraryProposalActionState,
-  type AcceptItineraryProposalActionState,
-} from "../lib/itinerary-proposal-acceptance";
+import { acceptItineraryProposalAction } from "../app/viagens/[tripId]/roteiro/proposta/accept-action";
+import { initialAcceptItineraryProposalActionState } from "../lib/itinerary-proposal-acceptance";
 import styles from "./itinerary-proposal-decision-actions.module.css";
-
-type AcceptAction = (
-  state: AcceptItineraryProposalActionState,
-  formData: FormData,
-) => Promise<AcceptItineraryProposalActionState>;
 
 type DiscardAction = (formData: FormData) => void | Promise<void>;
 
 const subscribeToHydration = () => () => undefined;
 
 export function ItineraryProposalDecisionActions({
-  acceptAction,
   canAccept,
   canDecide,
   discardAction,
@@ -27,8 +19,8 @@ export function ItineraryProposalDecisionActions({
   idempotencyKey,
   itineraryHref,
   proposalId,
+  tripId,
 }: {
-  acceptAction: AcceptAction;
   canAccept: boolean;
   canDecide: boolean;
   discardAction: DiscardAction;
@@ -36,8 +28,13 @@ export function ItineraryProposalDecisionActions({
   idempotencyKey: string;
   itineraryHref: string;
   proposalId: string;
+  tripId: string;
 }) {
   const router = useRouter();
+  const acceptAction = useMemo(
+    () => acceptItineraryProposalAction.bind(null, tripId),
+    [tripId],
+  );
   const [state, submitAccept, acceptPending] = useActionState(
     acceptAction,
     initialAcceptItineraryProposalActionState,

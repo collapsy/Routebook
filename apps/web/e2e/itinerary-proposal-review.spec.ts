@@ -191,7 +191,9 @@ test("aceita uma Proposal ready da UI ao PostgreSQL e preserva o resultado após
     version: fixture.baseItineraryVersion + 1,
   });
   expect(
-    itinerary?.days.flatMap(({ activities }) => activities).find(({ title }) => title === proposedActivity),
+    itinerary?.days
+      .flatMap(({ activities }) => activities)
+      .find(({ title }) => title === proposedActivity),
   ).toMatchObject({
     title: proposedActivity,
     startTime: "17:30",
@@ -288,10 +290,7 @@ test("reproduz o aceite concorrente e rejeita chave nova sem duplicar efeitos", 
       ),
     ).toHaveLength(1);
     expect(
-      await new DrizzleItineraryProposalRepository().findById(
-        fixture.tripId,
-        fixture.proposalId,
-      ),
+      await new DrizzleItineraryProposalRepository().findById(fixture.tripId, fixture.proposalId),
     ).toMatchObject({ status: "accepted" });
   } finally {
     await replayPage.close();
@@ -335,10 +334,7 @@ test("mantém versão concorrente como erro recuperável sem persistir aceite", 
     ),
   ).toBeNull();
   expect(
-    await new DrizzleItineraryProposalRepository().findById(
-      fixture.tripId,
-      fixture.proposalId,
-    ),
+    await new DrizzleItineraryProposalRepository().findById(fixture.tripId, fixture.proposalId),
   ).toMatchObject({ status: "ready" });
 });
 

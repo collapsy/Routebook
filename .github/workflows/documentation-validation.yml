@@ -1,66 +1,51 @@
-name: RB-INC-093 Governance Bootstrap
+name: Documentation Validation
 
 on:
   pull_request:
     paths:
+      - "README.md"
+      - "AGENTS.md"
+      - "CONTRIBUTING.md"
+      - "docs/**"
+      - "scripts/validate-docs.mjs"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - ".github/workflows/documentation-validation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "README.md"
+      - "AGENTS.md"
+      - "CONTRIBUTING.md"
+      - "docs/**"
+      - "scripts/validate-docs.mjs"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
       - ".github/workflows/documentation-validation.yml"
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: documentation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  bootstrap-governance:
-    name: Format and register RB-INC-093
-    if: github.event.pull_request.head.repo.full_name == github.repository
+  validate-documentation:
+    name: Validate documentation
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
 
     steps:
-      - name: Checkout pull request branch
+      - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24.18.0
+          node-version: 22
           package-manager-cache: false
 
-      - name: Enable Corepack and install dependencies
-        run: |
-          corepack enable
-          pnpm install --frozen-lockfile
-
-      - name: Format, register and restore workflow
-        shell: bash
-        run: |
-          node <<'NODE'
-          const fs = require("node:fs");
-          const path = "docs/registry.md";
-          const marker = "| RB-CTX-092 | Context Pack do RB-INC-092 | Implementation Context | Draft | 0.1.0 | [rb-inc-092-itinerary-proposal-acceptance-experience.md](./implementation/context-packs/rb-inc-092-itinerary-proposal-acceptance-experience.md) |";
-          const rows = `${marker}\n| RB-INC-093 | Integração E2E do Aceite Integral de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-093-itinerary-proposal-acceptance-e2e.md](./implementation/increments/rb-inc-093-itinerary-proposal-acceptance-e2e.md) |\n| RB-CTX-093 | Context Pack do RB-INC-093 | Implementation Context | Draft | 0.1.0 | [rb-inc-093-itinerary-proposal-acceptance-e2e.md](./implementation/context-packs/rb-inc-093-itinerary-proposal-acceptance-e2e.md) |`;
-          let registry = fs.readFileSync(path, "utf8");
-          if (!registry.includes("| RB-INC-093 |")) {
-            if (!registry.includes(marker)) throw new Error("RB-CTX-092 registry marker not found");
-            registry = registry.replace(marker, rows);
-            fs.writeFileSync(path, registry);
-          }
-          NODE
-
-          pnpm exec prettier --write \
-            apps/web/e2e/itinerary-proposal-review.spec.ts \
-            apps/web/lib/itinerary-proposal-acceptance.ts \
-            apps/web/lib/itinerary-proposal-acceptance.test.ts \
-            docs/implementation/increments/rb-inc-093-itinerary-proposal-acceptance-e2e.md \
-            docs/implementation/context-packs/rb-inc-093-itinerary-proposal-acceptance-e2e.md \
-            docs/registry.md
-
-          git fetch origin main
-          git checkout origin/main -- .github/workflows/documentation-validation.yml
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/e2e/itinerary-proposal-review.spec.ts apps/web/lib/itinerary-proposal-acceptance.ts apps/web/lib/itinerary-proposal-acceptance.test.ts docs/implementation/increments/rb-inc-093-itinerary-proposal-acceptance-e2e.md docs/implementation/context-packs/rb-inc-093-itinerary-proposal-acceptance-e2e.md docs/registry.md .github/workflows/documentation-validation.yml
-          git commit -m "build: format and register RB-INC-093"
-          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+      - name: Validate documentation registry and metadata
+        run: node scripts/validate-docs.mjs

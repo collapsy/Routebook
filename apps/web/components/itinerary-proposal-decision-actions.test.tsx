@@ -81,12 +81,8 @@ describe("ItineraryProposalDecisionActions", () => {
     expect(document.querySelector('input[name="idempotencyKey"]')).toHaveValue(
       "accept-itinerary-proposal:proposal-ready:4",
     );
-    expect(
-      document.querySelector('input[name="actorId"]'),
-    ).not.toBeInTheDocument();
-    expect(
-      document.querySelector('input[name="items"]'),
-    ).not.toBeInTheDocument();
+    expect(document.querySelector('input[name="actorId"]')).not.toBeInTheDocument();
+    expect(document.querySelector('input[name="items"]')).not.toBeInTheDocument();
   });
 
   it("oculta todas as decisões quando o usuário não possui permissão", () => {

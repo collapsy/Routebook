@@ -3,9 +3,7 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type {
-  AcceptItineraryProposalActionState,
-} from "../lib/itinerary-proposal-acceptance";
+import type { AcceptItineraryProposalActionState } from "../lib/itinerary-proposal-acceptance";
 
 const routerMocks = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn() }));
 const actionStateMocks = vi.hoisted(() => ({
@@ -60,60 +58,38 @@ describe("ItineraryProposalDecisionActions", () => {
 
     const disclosure = screen.getByText("Aceitar proposta");
     expect(disclosure).toBeVisible();
-    expect(
-      screen.getByRole("button", { name: "Confirmar e aceitar proposta" }),
-    ).not.toBeVisible();
+    expect(screen.getByRole("button", { name: "Confirmar e aceitar proposta" })).not.toBeVisible();
 
     fireEvent.click(disclosure);
 
-    expect(
-      screen.getByRole("button", { name: "Confirmar e aceitar proposta" }),
-    ).toBeVisible();
-    expect(
-      screen.getByRole("checkbox", { name: /atualizará o Roteiro/i }),
-    ).toBeRequired();
-    expect(
-      document.querySelector('input[name="itineraryProposalId"]'),
-    ).toHaveValue("proposal-ready");
-    expect(
-      document.querySelector('input[name="expectedItineraryVersion"]'),
-    ).toHaveValue(4);
+    expect(screen.getByRole("button", { name: "Confirmar e aceitar proposta" })).toBeVisible();
+    expect(screen.getByRole("checkbox", { name: /atualizará o Roteiro/i })).toBeRequired();
+    expect(document.querySelector('input[name="itineraryProposalId"]')).toHaveValue(
+      "proposal-ready",
+    );
+    expect(document.querySelector('input[name="expectedItineraryVersion"]')).toHaveValue(4);
     expect(document.querySelector('input[name="idempotencyKey"]')).toHaveValue(
       "accept-itinerary-proposal:proposal-ready:4",
     );
-    expect(
-      document.querySelector('input[name="actorId"]'),
-    ).not.toBeInTheDocument();
-    expect(
-      document.querySelector('input[name="items"]'),
-    ).not.toBeInTheDocument();
+    expect(document.querySelector('input[name="actorId"]')).not.toBeInTheDocument();
+    expect(document.querySelector('input[name="items"]')).not.toBeInTheDocument();
   });
 
   it("oculta todas as decisões quando o usuário não possui permissão", () => {
-    render(
-      <ItineraryProposalDecisionActions
-        {...props}
-        canAccept={false}
-        canDecide={false}
-      />,
-    );
+    render(<ItineraryProposalDecisionActions {...props} canAccept={false} canDecide={false} />);
 
     expect(
       screen.getByRole("heading", { name: "Você pode consultar esta proposta" }),
     ).toBeVisible();
     expect(screen.queryByText("Aceitar proposta")).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Descartar proposta" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Descartar proposta" })).not.toBeInTheDocument();
   });
 
   it("mantém o descarte quando a proposta ficou obsoleta para um decisor", () => {
     render(<ItineraryProposalDecisionActions {...props} canAccept={false} />);
 
     expect(screen.queryByText("Aceitar proposta")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Descartar proposta" }),
-    ).toBeVisible();
+    expect(screen.getByRole("button", { name: "Descartar proposta" })).toBeVisible();
   });
 
   it("bloqueia decisões concorrentes e anuncia o processamento", () => {
@@ -121,15 +97,9 @@ describe("ItineraryProposalDecisionActions", () => {
 
     render(<ItineraryProposalDecisionActions {...props} />);
 
-    expect(
-      screen.getByRole("button", { name: "Aplicando proposta…" }),
-    ).toBeDisabled();
-    expect(
-      screen.getByRole("button", { name: "Descartar proposta" }),
-    ).toBeDisabled();
-    expect(
-      screen.getByText("Aplicando a proposta e atualizando o Roteiro…"),
-    ).toBeVisible();
+    expect(screen.getByRole("button", { name: "Aplicando proposta…" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Descartar proposta" })).toBeDisabled();
+    expect(screen.getByText("Aplicando a proposta e atualizando o Roteiro…")).toBeVisible();
   });
 
   it("apresenta erro recuperável sem navegar", () => {

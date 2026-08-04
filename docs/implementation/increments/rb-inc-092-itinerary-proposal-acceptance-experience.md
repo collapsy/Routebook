@@ -162,7 +162,7 @@ Remover o componente de decisões, restaurar a seção de descarte anterior, ret
 - autorização: `apps/web/app/viagens/[tripId]/roteiro/proposta/actions.ts`;
 - confirmação: `apps/web/app/viagens/[tripId]/roteiro/page.tsx`;
 - testes: 540 testes de domínio, componentes e PostgreSQL aprovados;
-- E2E: 65 cenários responsivos executados, com 64 aprovados diretamente e 1 aprovado após retry;
+- E2E: 65 cenários Playwright responsivos executados, com 64 aprovados diretamente e 1 aprovado após retry;
 - Engineering Validation: run `30869999535`, job `91869867843`, SHA `76cda7553119a920134cbf4f48c7c9d8617bc099`;
 - Documentation Validation: run `30869999538`, SHA `76cda7553119a920134cbf4f48c7c9d8617bc099`;
 - gates confirmados: format, documentação, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo.

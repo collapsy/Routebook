@@ -3,9 +3,7 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type {
-  AcceptItineraryProposalActionState,
-} from "../lib/itinerary-proposal-acceptance";
+import type { AcceptItineraryProposalActionState } from "../lib/itinerary-proposal-acceptance";
 
 const routerMocks = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn() }));
 const actionStateMocks = vi.hoisted(() => ({

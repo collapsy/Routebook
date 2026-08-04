@@ -31,70 +31,26 @@ jobs:
           function replace(path, before, after) {
             const source = fs.readFileSync(path, "utf8");
             if (!source.includes(before)) {
-              throw new Error(`Patch marker not found in ${path}`);
+              throw new Error(`Patch marker not found in ${path}: ${before.slice(0, 80)}`);
             }
             fs.writeFileSync(path, source.replace(before, after));
           }
 
           replace(
             "apps/web/lib/itinerary-proposal-acceptance.ts",
-            `function proposalStatusError(
-              proposal: ItineraryProposal,
-              now: Date,
-            ): AcceptItineraryProposalActionState | null {
-              if (proposal.status === "expired") {
-                return acceptItineraryProposalActionError("proposal-expired");
-              }
-              if (proposal.status !== "ready") {
-                return acceptItineraryProposalActionError("proposal-not-ready");
-              }
-              if (
-                !(proposal.validUntil instanceof Date) ||
-                Number.isNaN(proposal.validUntil.getTime()) ||
-                now.getTime() >= proposal.validUntil.getTime()
-              ) {
-                return acceptItineraryProposalActionError("proposal-expired");
-              }
-              return null;
-            }`.replace(/^            /gm, ""),
-            `function proposalStatusError(
-              proposal: ItineraryProposal,
-              now: Date,
-            ): AcceptItineraryProposalActionState | null {
-              if (proposal.status === "accepted") return null;
-              if (proposal.status === "expired") {
-                return acceptItineraryProposalActionError("proposal-expired");
-              }
-              if (proposal.status !== "ready") {
-                return acceptItineraryProposalActionError("proposal-not-ready");
-              }
-              if (
-                !(proposal.validUntil instanceof Date) ||
-                Number.isNaN(proposal.validUntil.getTime()) ||
-                now.getTime() >= proposal.validUntil.getTime()
-              ) {
-                return acceptItineraryProposalActionError("proposal-expired");
-              }
-              return null;
-            }`.replace(/^            /gm, ""),
+            '  if (proposal.status === "expired") {\n    return acceptItineraryProposalActionError("proposal-expired");\n  }',
+            '  if (proposal.status === "accepted") return null;\n  if (proposal.status === "expired") {\n    return acceptItineraryProposalActionError("proposal-expired");\n  }',
           );
 
           replace(
             "apps/web/lib/itinerary-proposal-acceptance.ts",
-            `  if (itinerary.version !== request.expectedItineraryVersion) {
-                return acceptItineraryProposalActionError("itinerary-version-mismatch");
-              }`.replace(/^              /gm, ""),
-            `  if (
-                proposal.status === "ready" &&
-                itinerary.version !== request.expectedItineraryVersion
-              ) {
-                return acceptItineraryProposalActionError("itinerary-version-mismatch");
-              }`.replace(/^              /gm, ""),
+            '  if (itinerary.version !== request.expectedItineraryVersion) {\n    return acceptItineraryProposalActionError("itinerary-version-mismatch");\n  }',
+            '  if (\n    proposal.status === "ready" &&\n    itinerary.version !== request.expectedItineraryVersion\n  ) {\n    return acceptItineraryProposalActionError("itinerary-version-mismatch");\n  }',
           );
 
           replace(
             "apps/web/lib/itinerary-proposal-acceptance.test.ts",
-            `  it("detecta versão concorrente antes da transação", async () => {`,
+            '  it("detecta versão concorrente antes da transação", async () => {',
             `  it("encaminha Proposal accepted à reserva idempotente mesmo após a versão avançar", async () => {
               const execute = vi.fn(async () => success("replay"));
               const deps = dependencies({

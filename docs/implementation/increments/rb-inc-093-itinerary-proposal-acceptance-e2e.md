@@ -115,4 +115,4 @@ A fronteira web pode encaminhar uma Proposal `accepted` somente como candidata a
 
 ## 8. Evidências
 
-Pendentes dos commits e workflows finais.
+Validação E2E real em andamento na PR #212; runs finais serão registrados após todos os gates verdes.

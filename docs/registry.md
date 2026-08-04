@@ -231,6 +231,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-090 | Context Pack do RB-INC-090 | Implementation Context | Draft | 0.1.0 | [rb-inc-090-authenticated-trip-workspace.md](./implementation/context-packs/rb-inc-090-authenticated-trip-workspace.md) |
 | RB-INC-091 | Server Action Autorizada para Aceitar Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-091-authorized-proposal-acceptance-action.md](./implementation/increments/rb-inc-091-authorized-proposal-acceptance-action.md) |
 | RB-CTX-091 | Context Pack do RB-INC-091 | Implementation Context | Draft | 0.1.0 | [rb-inc-091-authorized-proposal-acceptance-action.md](./implementation/context-packs/rb-inc-091-authorized-proposal-acceptance-action.md) |
+| RB-INC-092 | Experiência de Aceite da Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-092-itinerary-proposal-acceptance-experience.md](./implementation/increments/rb-inc-092-itinerary-proposal-acceptance-experience.md) |
+| RB-CTX-092 | Context Pack do RB-INC-092 | Implementation Context | Draft | 0.1.0 | [rb-inc-092-itinerary-proposal-acceptance-experience.md](./implementation/context-packs/rb-inc-092-itinerary-proposal-acceptance-experience.md) |
 
 ## Status possíveis
 

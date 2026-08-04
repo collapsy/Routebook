@@ -102,6 +102,8 @@ ai_context:
 | RB-INC-090 | RB-SEC-001, RB-ADR-007–008 e RB-INC-086–089 | #205 | `feature/rb-inc-090-authenticated-trip-workspace`, PR #206 | coleção e criação autenticadas, isolamento por Account e guard `trip:view` nas páginas de Trip | runs 30860363214 e 30860363218, job 91840790462, SHA d2e5a83; 220 documentos, migrations, 507 testes, smoke, build e 65 E2E responsivos verdes | Pronto para integração |
 | RB-INC-091 | RB-SEC-001, RB-ADR-007–008, RB-ADR-027 e RB-INC-085, RB-INC-087, RB-INC-090 | #207 | `feature/rb-inc-091-authorized-proposal-acceptance-action`, PR #208 | Server Action autorizada, ator e itens derivados de dados autoritativos, mapeamento `applied` e `replay` | runs 30863272217 e 30863272221, job 91849613822, SHA 526ce22; migrations, testes de domínio, componentes e PostgreSQL, smoke, build e E2E responsivo verdes | Pronto para integração |
 
+| RB-INC-092 | RB-UX-004–006, RB-DS-002–003, RB-SEC-001, RB-ADR-007–008, RB-ADR-027 e RB-INC-091 | #209 | `feature/rb-inc-092-itinerary-proposal-acceptance-experience`, PR #210 | experiência autorizada de aceite, confirmação explícita, bloqueio de decisões concorrentes e feedback `applied`/`replay` | runs 30869999535 e 30869999538, job 91869867843, SHA 76cda755; 224 documentos, migrations, 540 testes, smoke, build e 65 E2E responsivos executados | Pronto para integração |
+
 ## Evidências do RB-INC-003
 
 | Evidência | Localização/resultado |

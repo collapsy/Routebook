@@ -141,6 +141,7 @@ export default async function ItineraryPage({
     atividadeRemovida?: string;
     atividadeReordenada?: string;
     periodoLivreCriado?: string;
+    propostaAceita?: string;
     propostaDescartada?: string;
     erroProposta?: string;
     erro?: string;
@@ -162,6 +163,7 @@ export default async function ItineraryPage({
     atividadeRemovida,
     atividadeReordenada,
     periodoLivreCriado,
+    propostaAceita,
     propostaDescartada,
     erroProposta,
     erro,
@@ -203,6 +205,13 @@ export default async function ItineraryPage({
       {periodoLivreCriado === "1" ? (
         <p className="success-banner" role="status">
           Período livre adicionado ao roteiro.
+        </p>
+      ) : null}
+      {propostaAceita === "applied" || propostaAceita === "replay" ? (
+        <p className="success-banner" role="status">
+          {propostaAceita === "replay"
+            ? "Esta proposta já havia sido aceita. O Roteiro atualizado foi carregado."
+            : "Proposta aceita. O Roteiro foi atualizado com as mudanças confirmadas."}
         </p>
       ) : null}
       {propostaDescartada === "1" ? (

@@ -1,0 +1,162 @@
+.decisionActions {
+  align-items: start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-large);
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.decisionCopy h2 {
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  margin: 0.4rem 0 0.5rem;
+}
+
+.decisionCopy p:last-child,
+.acceptConfirmation p,
+.actionFeedback p {
+  color: var(--foreground-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--primary-strong) !important;
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.decisionControls {
+  align-items: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.acceptConfirmation {
+  min-width: min(100%, 24rem);
+}
+
+.acceptConfirmation summary {
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 999px;
+  color: var(--primary-foreground);
+  cursor: pointer;
+  font-weight: 850;
+  list-style: none;
+  min-height: 2.75rem;
+  padding: 0.75rem 1.1rem;
+  text-align: center;
+}
+
+.acceptConfirmation summary::-webkit-details-marker {
+  display: none;
+}
+
+.acceptConfirmation[open] {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  padding: 1rem;
+}
+
+.acceptConfirmation[open] summary {
+  margin-bottom: 1rem;
+}
+
+.acceptConfirmation form {
+  display: grid;
+  gap: 1rem;
+}
+
+.acceptConfirmation label {
+  align-items: start;
+  display: flex;
+  gap: 0.65rem;
+  line-height: 1.45;
+}
+
+.acceptConfirmation input[type="checkbox"] {
+  margin-top: 0.2rem;
+}
+
+.acceptButton,
+.discardButton {
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+}
+
+.acceptButton {
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  color: var(--primary-foreground);
+}
+
+.discardButton {
+  background: transparent;
+  border: 1px solid color-mix(in oklab, var(--danger, #b42318) 52%, var(--border));
+  color: var(--danger, #b42318);
+}
+
+.acceptButton:disabled,
+.discardButton:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.acceptButton:focus-visible,
+.acceptConfirmation summary:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--primary) 32%, transparent);
+  outline-offset: 3px;
+}
+
+.discardButton:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--danger, #b42318) 9%, var(--surface));
+}
+
+.discardButton:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--danger, #b42318) 32%, transparent);
+  outline-offset: 3px;
+}
+
+.actionFeedback:empty {
+  display: none;
+}
+
+.actionFeedback [role="alert"] {
+  color: var(--danger, #b42318);
+  font-weight: 750;
+}
+
+.actionFeedback [role="status"] {
+  color: var(--primary-strong);
+  font-weight: 750;
+}
+
+@media (min-width: 760px) {
+  .decisionActions {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, auto);
+  }
+
+  .actionFeedback {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 520px) {
+  .decisionControls,
+  .decisionControls > form,
+  .acceptConfirmation,
+  .acceptButton,
+  .discardButton {
+    width: 100%;
+  }
+}

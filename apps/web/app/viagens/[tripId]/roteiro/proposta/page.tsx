@@ -15,6 +15,8 @@ import {
   findLatestReviewableItineraryProposal,
   ItineraryProposalReviewIntegrityError,
 } from "../../../../../lib/itinerary-proposal-experience";
+import { resolveTripRouteAccess } from "../../../../../lib/trip-route-access";
+import { acceptItineraryProposalAction } from "./accept-action";
 import { discardItineraryProposalAction } from "./actions";
 import styles from "./proposal-page.module.css";
 
@@ -34,9 +36,10 @@ export default async function ItineraryProposalReviewPage({
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const [itinerary, proposals] = await Promise.all([
+  const [itinerary, proposals, acceptanceAccess] = await Promise.all([
     new DrizzleItineraryRepository().findByTripId(trip.id),
     new DrizzleItineraryProposalRepository().listByTripId(trip.id),
+    resolveTripRouteAccess({ tripId: trip.id, action: "trip:accept-proposal" }),
   ]);
   const proposal = findLatestReviewableItineraryProposal(proposals);
 
@@ -68,11 +71,15 @@ export default async function ItineraryProposalReviewPage({
   }
 
   const review = buildItineraryProposalReview({ itinerary, proposal });
+  const acceptAction = acceptItineraryProposalAction.bind(null, trip.id);
   const discardAction = discardItineraryProposalAction.bind(null, trip.id);
+  const canDecide = acceptanceAccess.status === "authorized";
+  const idempotencyKey = `accept-itinerary-proposal:${proposal.id}:${proposal.baseItineraryVersion}`;
+  const itineraryHref = `/viagens/${trip.id}/roteiro`;
 
   return (
     <section className={`app-page ${styles.page}`}>
-      <Link className="back-link" href={`/viagens/${trip.id}/roteiro`}>
+      <Link className="back-link" href={itineraryHref}>
         ← Voltar para o Roteiro
       </Link>
 
@@ -83,13 +90,22 @@ export default async function ItineraryProposalReviewPage({
           <p>
             {proposal.status === "expired"
               ? "Consulte critérios, limitações e mudanças registradas como referência histórica. Esta página não aplica alterações."
-              : "Revise critérios, limitações e mudanças sugeridas antes de qualquer decisão. Esta página não aplica alterações."}
+              : "Revise critérios, limitações e mudanças sugeridas. Qualquer aplicação exige confirmação explícita."}
           </p>
         </div>
         <span>Roteiro atual preservado</span>
       </header>
 
-      <ItineraryProposalReview discardAction={discardAction} review={review} />
+      <ItineraryProposalReview
+        acceptAction={acceptAction}
+        canAccept={canDecide}
+        canDecide={canDecide}
+        discardAction={discardAction}
+        expectedItineraryVersion={proposal.baseItineraryVersion}
+        idempotencyKey={idempotencyKey}
+        itineraryHref={itineraryHref}
+        review={review}
+      />
     </section>
   );
 }

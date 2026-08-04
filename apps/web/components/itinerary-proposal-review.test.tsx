@@ -3,6 +3,7 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import type { AcceptItineraryProposalActionState } from "../lib/itinerary-proposal-acceptance";
 import type { ItineraryProposalReview as ReviewModel } from "../lib/itinerary-proposal-experience";
 import { ItineraryProposalReview } from "./itinerary-proposal-review";
 
@@ -38,13 +39,27 @@ const review: ReviewModel = {
   ],
 };
 
+const acceptAction = vi.fn(
+  async (
+    state: AcceptItineraryProposalActionState,
+  ): Promise<AcceptItineraryProposalActionState> => state,
+);
 const discardAction = vi.fn(async () => undefined);
+
+const decisionProps = {
+  acceptAction,
+  canAccept: true,
+  discardAction,
+  expectedItineraryVersion: 4,
+  idempotencyKey: "accept-itinerary-proposal:proposal-ready:4",
+  itineraryHref: "/viagens/trip-1/roteiro",
+} as const;
 
 afterEach(cleanup);
 
 describe("ItineraryProposalReview", () => {
   it("presents reviewable content while keeping the Proposal separate from the Itinerary", () => {
-    render(<ItineraryProposalReview discardAction={discardAction} review={review} />);
+    render(<ItineraryProposalReview {...decisionProps} review={review} />);
 
     expect(screen.getByText("Sugestão — ainda não aplicada")).toBeInTheDocument();
     expect(screen.getByText(/O Roteiro atual permanece preservado/i)).toBeInTheDocument();
@@ -56,10 +71,9 @@ describe("ItineraryProposalReview", () => {
     expect(within(changes).getByRole("heading", { name: "Dia 1 · 22 de agosto" })).toBeVisible();
     expect(within(changes).getByRole("heading", { name: "Mirante ao pôr do sol" })).toBeVisible();
     expect(screen.getByText("Aproveita o fim da tarde.")).toBeInTheDocument();
-    expect(screen.getByText(/somente leitura/i)).toBeInTheDocument();
+    expect(screen.getByText(/confirmação explícita/i)).toBeInTheDocument();
 
-    expect(screen.queryByRole("button", { name: /aceitar/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /aplicar/i })).not.toBeInTheDocument();
+    expect(screen.getByText("Aceitar proposta")).toBeVisible();
     expect(screen.getByRole("button", { name: "Descartar proposta" })).toBeVisible();
     expect(document.querySelector('input[name="itineraryProposalId"]')).toHaveValue(
       "proposal-ready",
@@ -67,10 +81,10 @@ describe("ItineraryProposalReview", () => {
     expect(screen.queryByRole("button", { name: /gerar novamente/i })).not.toBeInTheDocument();
   });
 
-  it("shows stale context and unresolved day references honestly", () => {
+  it("shows stale context and hides acceptance honestly", () => {
     render(
       <ItineraryProposalReview
-        discardAction={discardAction}
+        {...decisionProps}
         review={{
           ...review,
           isBasedOnCurrentItinerary: false,
@@ -88,12 +102,21 @@ describe("ItineraryProposalReview", () => {
 
     expect(screen.getByRole("status")).toHaveTextContent("O Roteiro mudou depois desta proposta");
     expect(screen.getByText("Informação não confirmada")).toBeInTheDocument();
+    expect(screen.queryByText("Aceitar proposta")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Descartar proposta" })).toBeVisible();
+  });
+
+  it("hides acceptance for a user without decision permission", () => {
+    render(<ItineraryProposalReview {...decisionProps} canAccept={false} review={review} />);
+
+    expect(screen.queryByText("Aceitar proposta")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Descartar proposta" })).toBeVisible();
   });
 
   it("presents an expired Proposal as non-applicable historical reference", () => {
     render(
       <ItineraryProposalReview
-        discardAction={discardAction}
+        {...decisionProps}
         review={{
           ...review,
           proposalId: "proposal-expired",
@@ -115,12 +138,13 @@ describe("ItineraryProposalReview", () => {
     );
     expect(screen.getByRole("note")).toHaveTextContent("referência histórica");
     expect(screen.queryByRole("button", { name: "Descartar proposta" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Aceitar proposta")).not.toBeInTheDocument();
   });
 
   it("keeps justifications visible when no activity change was proposed", () => {
     render(
       <ItineraryProposalReview
-        discardAction={discardAction}
+        {...decisionProps}
         review={{ ...review, proposedChangeCount: 0, days: [], limitations: [] }}
       />,
     );

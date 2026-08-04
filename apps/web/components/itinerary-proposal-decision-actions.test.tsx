@@ -20,7 +20,11 @@ vi.mock("react", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react")>();
   return {
     ...actual,
-    useActionState: () => [actionStateMocks.state, actionStateMocks.submit, actionStateMocks.pending],
+    useActionState: () => [
+      actionStateMocks.state,
+      actionStateMocks.submit,
+      actionStateMocks.pending,
+    ],
   };
 });
 
@@ -69,7 +73,9 @@ describe("ItineraryProposalDecisionActions", () => {
   it("oculta todas as decisões quando o usuário não possui permissão", () => {
     render(<ItineraryProposalDecisionActions {...props} canAccept={false} canDecide={false} />);
 
-    expect(screen.getByRole("heading", { name: "Você pode consultar esta proposta" })).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Você pode consultar esta proposta" }),
+    ).toBeVisible();
     expect(screen.queryByText("Aceitar proposta")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Descartar proposta" })).not.toBeInTheDocument();
   });

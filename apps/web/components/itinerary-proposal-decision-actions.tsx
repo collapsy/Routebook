@@ -55,7 +55,9 @@ export function ItineraryProposalDecisionActions({
         <div className={styles.decisionCopy}>
           <p className={styles.eyebrow}>Revisão somente leitura</p>
           <h2 id="proposal-decision-title">Você pode consultar esta proposta</h2>
-          <p>Somente participantes com permissão de decisão podem aceitar ou descartar a proposta.</p>
+          <p>
+            Somente participantes com permissão de decisão podem aceitar ou descartar a proposta.
+          </p>
         </div>
       </section>
     );
@@ -88,8 +90,8 @@ export function ItineraryProposalDecisionActions({
               />
               <input name="idempotencyKey" type="hidden" value={idempotencyKey} />
               <p>
-                As mudanças serão aplicadas ao Roteiro em uma única decisão. Em caso de repetição,
-                o RouteBook reutilizará o resultado já persistido.
+                As mudanças serão aplicadas ao Roteiro em uma única decisão. Em caso de repetição, o
+                RouteBook reutilizará o resultado já persistido.
               </p>
               <label>
                 <input

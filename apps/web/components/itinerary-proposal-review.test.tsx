@@ -40,9 +40,8 @@ const review: ReviewModel = {
 };
 
 const acceptAction = vi.fn(
-  async (
-    state: AcceptItineraryProposalActionState,
-  ): Promise<AcceptItineraryProposalActionState> => state,
+  async (state: AcceptItineraryProposalActionState): Promise<AcceptItineraryProposalActionState> =>
+    state,
 );
 const discardAction = vi.fn(async () => undefined);
 
@@ -116,7 +115,9 @@ describe("ItineraryProposalReview", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "Você pode consultar esta proposta" })).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Você pode consultar esta proposta" }),
+    ).toBeVisible();
     expect(screen.queryByText("Aceitar proposta")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Descartar proposta" })).not.toBeInTheDocument();
   });

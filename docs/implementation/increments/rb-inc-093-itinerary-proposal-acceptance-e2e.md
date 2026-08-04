@@ -7,7 +7,7 @@ owner: Quality Engineering
 status: Draft
 version: "0.1.0"
 created: "2026-08-03"
-last_updated: "2026-08-03"
+last_updated: "2026-08-04"
 authors:
   - RouteBook Team
 tags:
@@ -77,7 +77,8 @@ A fronteira web pode encaminhar uma Proposal `accepted` somente como candidata a
 - a transação decide entre `replay`, conflito de fingerprint ou `proposal-not-ready`;
 - uma chave nova não reaplica a Proposal;
 - Proposal `ready` mantém todas as validações atuais de validade e versão concorrente;
-- fixtures E2E preservam o tipo nominal `ItineraryProposalId` ao consultar repositories.
+- fixtures E2E preservam o tipo nominal `ItineraryProposalId` ao consultar repositories;
+- a Server Action de aceite é importada e vinculada diretamente na fronteira client-side que usa `useActionState`, preservando sua referência serializável sem atravessar uma cadeia intermediária de props.
 
 ## 5. Escopo
 

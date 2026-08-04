@@ -32,6 +32,7 @@ const discardAction = vi.fn();
 const props = {
   acceptAction,
   canAccept: true,
+  canDecide: true,
   discardAction,
   expectedItineraryVersion: 4,
   idempotencyKey: "accept-itinerary-proposal:proposal-ready:4",
@@ -65,7 +66,15 @@ describe("ItineraryProposalDecisionActions", () => {
     expect(document.querySelector('input[name="items"]')).not.toBeInTheDocument();
   });
 
-  it("oculta o aceite quando o usuário não possui permissão", () => {
+  it("oculta todas as decisões quando o usuário não possui permissão", () => {
+    render(<ItineraryProposalDecisionActions {...props} canAccept={false} canDecide={false} />);
+
+    expect(screen.getByRole("heading", { name: "Você pode consultar esta proposta" })).toBeVisible();
+    expect(screen.queryByText("Aceitar proposta")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Descartar proposta" })).not.toBeInTheDocument();
+  });
+
+  it("mantém o descarte quando a proposta ficou obsoleta para um decisor", () => {
     render(<ItineraryProposalDecisionActions {...props} canAccept={false} />);
 
     expect(screen.queryByText("Aceitar proposta")).not.toBeInTheDocument();

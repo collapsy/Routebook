@@ -5,6 +5,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { AcceptItineraryProposalActionState } from "../lib/itinerary-proposal-acceptance";
 import type { ItineraryProposalReview as ReviewModel } from "../lib/itinerary-proposal-experience";
+
+const routerMocks = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn() }));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => routerMocks,
+}));
+
 import { ItineraryProposalReview } from "./itinerary-proposal-review";
 
 const review: ReviewModel = {

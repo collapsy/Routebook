@@ -82,10 +82,41 @@ test("diagnostica o estado real retornado pelo aceite integral", async ({ page }
   await repository.save(generating);
   await repository.save(ready);
 
+  const actionRequests: string[] = [];
+  page.on("request", (request) => {
+    if (request.method() === "POST") actionRequests.push(request.url());
+  });
+
   await page.goto(`/viagens/${trip.id}/roteiro/proposta`);
   await page.getByText("Aceitar proposta", { exact: true }).click();
-  await page.getByRole("checkbox", { name: /atualizará o Roteiro/i }).check();
-  await page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
+  const checkbox = page.getByRole("checkbox", { name: /atualizará o Roteiro/i });
+  const button = page.getByRole("button", { name: "Confirmar e aceitar proposta" });
+  const acceptForm = page.locator("form").filter({ has: button });
+  await checkbox.check();
+
+  const initialFormState = await acceptForm.evaluate((element) => {
+    const form = element as HTMLFormElement;
+    const diagnosticWindow = window as typeof window & { __acceptSubmitCount?: number };
+    diagnosticWindow.__acceptSubmitCount = 0;
+    form.addEventListener("submit", () => {
+      diagnosticWindow.__acceptSubmitCount = (diagnosticWindow.__acceptSubmitCount ?? 0) + 1;
+    });
+    return {
+      action: form.getAttribute("action"),
+      method: form.method,
+      valid: form.checkValidity(),
+      invalidNames: Array.from(form.elements)
+        .filter((field) => field instanceof HTMLInputElement && !field.checkValidity())
+        .map((field) => (field as HTMLInputElement).name),
+      confirmationChecked: (
+        form.elements.namedItem("confirmation") as HTMLInputElement | null
+      )?.checked,
+      buttonDisabled: (form.querySelector('button[type="submit"]') as HTMLButtonElement | null)
+        ?.disabled,
+    };
+  });
+
+  await button.click();
 
   const expectedPath = `/viagens/${trip.id}/roteiro?propostaAceita=applied`;
   await expect
@@ -104,16 +135,30 @@ test("diagnostica o estado real retornado pelo aceite integral", async ({ page }
           return `status:${await status.textContent()}`;
         }
 
-        if (
-          await page
-            .getByText("Aplicando a proposta e atualizando o Roteiro…")
-            .isVisible()
-            .catch(() => false)
-        ) {
-          return "pending";
-        }
+        const submitCount = await page.evaluate(
+          () =>
+            (window as typeof window & { __acceptSubmitCount?: number }).__acceptSubmitCount ?? 0,
+        );
+        const currentFormState = await acceptForm.evaluate((element) => {
+          const form = element as HTMLFormElement;
+          return {
+            valid: form.checkValidity(),
+            confirmationChecked: (
+              form.elements.namedItem("confirmation") as HTMLInputElement | null
+            )?.checked,
+            buttonDisabled: (
+              form.querySelector('button[type="submit"]') as HTMLButtonElement | null
+            )?.disabled,
+          };
+        });
 
-        return `url:${currentUrl.pathname}${currentUrl.search}`;
+        return JSON.stringify({
+          url: `${currentUrl.pathname}${currentUrl.search}`,
+          initialFormState,
+          currentFormState,
+          submitCount,
+          actionRequests,
+        });
       },
       { timeout: 12_000 },
     )

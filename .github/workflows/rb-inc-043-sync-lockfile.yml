@@ -1,42 +1,52 @@
-name: RB-INC-043 Lockfile Sync
+name: RB-INC-093 Traceability Closeout
 
 on:
   push:
     branches:
-      - feature/rb-inc-043-planning-conflict-core
+      - feature/rb-inc-093-itinerary-proposal-acceptance-e2e
 
 permissions:
   contents: write
 
 jobs:
-  sync-lockfile:
+  update-traceability:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
         uses: actions/checkout@v6
         with:
-          ref: feature/rb-inc-043-planning-conflict-core
+          ref: feature/rb-inc-093-itinerary-proposal-acceptance-e2e
+          fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: .node-version
-          package-manager-cache: false
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Regenerate lockfile
-        run: pnpm install --lockfile-only --no-frozen-lockfile
-
-      - name: Commit synchronized lockfile
+      - name: Update traceability matrix
         run: |
-          if git diff --quiet -- pnpm-lock.yaml; then
-            exit 0
-          fi
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("docs/implementation/traceability-matrix.md")
+          text = path.read_text()
+          anchor = "| RB-INC-092 | RB-UX-004–006, RB-DS-002–003, RB-SEC-001, RB-ADR-007–008, RB-ADR-027 e RB-INC-091 | #209 | `feature/rb-inc-092-itinerary-proposal-acceptance-experience`, PR #210 | experiência autorizada de aceite, confirmação explícita, bloqueio de decisões concorrentes e feedback `applied`/`replay` | runs 30869999535 e 30869999538, job 91869867843, SHA 76cda755; 224 documentos, migrations, 540 testes, smoke, build e 65 E2E responsivos executados | Pronto para integração |"
+          row = "| RB-INC-093 | RB-QA-001, RB-CICD-001, RB-SEC-001, RB-ADR-007–008, RB-ADR-027 e RB-INC-084–085, RB-INC-091–092 | #211 | `feature/rb-inc-093-itinerary-proposal-acceptance-e2e`, PR #212 | aceite integral UI–PostgreSQL, replay idempotente, redirecionamento autoritativo e validação de persistência | runs 30970192016 e 30970192009, job 92192651639, SHA d7ef177; 226 documentos, migrations, 541 testes, smoke, build e Playwright responsivo verdes | Pronto para integração |"
+
+          if row in text:
+              raise SystemExit("RB-INC-093 already present")
+          if text.count(anchor) != 1:
+              raise SystemExit("expected one RB-INC-092 anchor")
+
+          path.write_text(text.replace(anchor, f"{anchor}\n\n{row}"))
+          PY
+
+      - name: Restore canonical workflow
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- .github/workflows/rb-inc-043-sync-lockfile.yml
+
+      - name: Commit traceability closeout
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pnpm-lock.yaml
-          git commit -m "chore(rb-inc-043): update pnpm lockfile"
-          git push origin HEAD:feature/rb-inc-043-planning-conflict-core
+          git add docs/implementation/traceability-matrix.md \
+            .github/workflows/rb-inc-043-sync-lockfile.yml
+          git commit -m "docs(rb-inc-093): update traceability matrix"
+          git push origin HEAD:feature/rb-inc-093-itinerary-proposal-acceptance-e2e

@@ -78,6 +78,7 @@ A fronteira web pode encaminhar uma Proposal `accepted` somente como candidata a
 - uma chave nova não reaplica a Proposal;
 - Proposal `ready` mantém todas as validações atuais de validade e versão concorrente;
 - fixtures E2E preservam o tipo nominal `ItineraryProposalId` ao consultar repositories;
+- fixtures de aceite usam o vocabulário canônico de flexibilidade e `proposedOrder` zero-based compatível com a posição de aplicação;
 - a Server Action de aceite é importada e vinculada diretamente na fronteira client-side que usa `useActionState`, preservando sua referência serializável sem atravessar uma cadeia intermediária de props.
 
 ## 5. Escopo

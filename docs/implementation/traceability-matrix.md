@@ -104,6 +104,8 @@ ai_context:
 
 | RB-INC-092 | RB-UX-004–006, RB-DS-002–003, RB-SEC-001, RB-ADR-007–008, RB-ADR-027 e RB-INC-091 | #209 | `feature/rb-inc-092-itinerary-proposal-acceptance-experience`, PR #210 | experiência autorizada de aceite, confirmação explícita, bloqueio de decisões concorrentes e feedback `applied`/`replay` | runs 30869999535 e 30869999538, job 91869867843, SHA 76cda755; 224 documentos, migrations, 540 testes, smoke, build e 65 E2E responsivos executados | Pronto para integração |
 
+| RB-INC-093 | RB-QA-001, RB-CICD-001, RB-SEC-001, RB-ADR-007–008, RB-ADR-027 e RB-INC-084–085, RB-INC-091–092 | #211 | `feature/rb-inc-093-itinerary-proposal-acceptance-e2e`, PR #212 | aceite integral UI–PostgreSQL, replay idempotente, redirecionamento autoritativo e validação de persistência | runs 30970192016 e 30970192009, job 92192651639, SHA d7ef177; 226 documentos, migrations, 541 testes, smoke, build e Playwright responsivo verdes | Pronto para integração |
+
 ## Evidências do RB-INC-003
 
 | Evidência | Localização/resultado |

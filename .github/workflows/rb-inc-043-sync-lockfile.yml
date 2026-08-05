@@ -1,22 +1,23 @@
-name: RB-INC-043 Lockfile Sync
+name: RB-INC-093 E2E Alert Locator Repair
 
 on:
   push:
     branches:
-      - feature/rb-inc-043-planning-conflict-core
+      - feature/rb-inc-093-itinerary-proposal-acceptance-e2e
 
 permissions:
   contents: write
 
 jobs:
-  sync-lockfile:
+  repair-alert-locators:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
         uses: actions/checkout@v6
         with:
-          ref: feature/rb-inc-043-planning-conflict-core
+          ref: feature/rb-inc-093-itinerary-proposal-acceptance-e2e
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -27,16 +28,50 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Regenerate lockfile
-        run: pnpm install --lockfile-only --no-frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Commit synchronized lockfile
+      - name: Repair exact error locators
         run: |
-          if git diff --quiet -- pnpm-lock.yaml; then
-            exit 0
-          fi
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("apps/web/e2e/itinerary-proposal-review.spec.ts")
+          text = path.read_text()
+          replacements = {
+              '''    await expect(conflictingPage.getByRole("alert")).toHaveText(
+              "A proposta não está pronta para ser aceita.",
+            );''': '''    await expect(
+              conflictingPage.getByText("A proposta não está pronta para ser aceita.", {
+                exact: true,
+              }),
+            ).toBeVisible();''',
+              '''  await expect(page.getByRole("alert")).toHaveText(
+            "O roteiro mudou desde a geração desta proposta.",
+          );''': '''  await expect(
+            page.getByText("O roteiro mudou desde a geração desta proposta.", { exact: true }),
+          ).toBeVisible();''',
+          }
+
+          for before, after in replacements.items():
+              if text.count(before) != 1:
+                  raise SystemExit(f"expected one exact locator block: {before!r}")
+              text = text.replace(before, after)
+
+          path.write_text(text)
+          PY
+          pnpm exec prettier --write apps/web/e2e/itinerary-proposal-review.spec.ts
+
+      - name: Restore canonical workflow
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- .github/workflows/rb-inc-043-sync-lockfile.yml
+
+      - name: Commit repaired locators
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pnpm-lock.yaml
-          git commit -m "chore(rb-inc-043): update pnpm lockfile"
-          git push origin HEAD:feature/rb-inc-043-planning-conflict-core
+          git add apps/web/e2e/itinerary-proposal-review.spec.ts \
+            .github/workflows/rb-inc-043-sync-lockfile.yml
+          git commit -m "test(rb-inc-093): disambiguate Next.js alert locators"
+          git push origin HEAD:feature/rb-inc-093-itinerary-proposal-acceptance-e2e

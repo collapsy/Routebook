@@ -71,8 +71,7 @@ describe("DeterministicItineraryProposalGenerator", () => {
     expect(result.generatedAt).not.toBe(generatedAt);
     expect(result.validUntil).toEqual(
       new Date(
-        generatedAt.getTime() +
-          DETERMINISTIC_ITINERARY_PROPOSAL_VALIDITY_HOURS * 60 * 60 * 1_000,
+        generatedAt.getTime() + DETERMINISTIC_ITINERARY_PROPOSAL_VALIDITY_HOURS * 60 * 60 * 1_000,
       ),
     );
     expect(result.planningConflictIds).toEqual([]);
@@ -109,9 +108,9 @@ describe("DeterministicItineraryProposalGenerator", () => {
         proposedOrder: 2,
       }),
     ]);
-    expect(result.proposedActivities.every((activity) => activity.proposedStartTime === undefined)).toBe(
-      true,
-    );
+    expect(
+      result.proposedActivities.every((activity) => activity.proposedStartTime === undefined),
+    ).toBe(true);
     expect(result.limitations).toContain(
       `Candidatos sem duração conhecida receberam a estimativa padrão de ${DEFAULT_DETERMINISTIC_ACTIVITY_DURATION_MINUTES} minutos.`,
     );
@@ -250,7 +249,9 @@ describe("DeterministicItineraryProposalGenerator", () => {
       ),
     ).rejects.toMatchObject({ code: "invalid-candidate" });
 
-    await expect(generator.generate(input({ generatedAt: new Date("invalid") }))).rejects.toMatchObject({
+    await expect(
+      generator.generate(input({ generatedAt: new Date("invalid") })),
+    ).rejects.toMatchObject({
       code: "invalid-generated-at",
     });
 

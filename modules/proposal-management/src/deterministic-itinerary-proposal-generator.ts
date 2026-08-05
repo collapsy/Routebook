@@ -1,4 +1,7 @@
-import type { CompleteItineraryProposalGenerationInput, ProposedActivityInput } from "./itinerary-proposal";
+import type {
+  CompleteItineraryProposalGenerationInput,
+  ProposedActivityInput,
+} from "./itinerary-proposal";
 
 export const DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_METHOD =
   "deterministic-candidate-balancing";
@@ -34,7 +37,9 @@ export type GenerateItineraryProposalInput = Readonly<{
 }>;
 
 export interface ItineraryProposalGenerationPort {
-  generate(input: GenerateItineraryProposalInput): Promise<CompleteItineraryProposalGenerationInput>;
+  generate(
+    input: GenerateItineraryProposalInput,
+  ): Promise<CompleteItineraryProposalGenerationInput>;
 }
 
 export type DeterministicItineraryProposalGenerationErrorCode =
@@ -196,7 +201,8 @@ function normalizedDays(
 
   return Object.freeze(
     [...normalized].sort(
-      (left, right) => left.date.localeCompare(right.date) || left.tripDayId.localeCompare(right.tripDayId),
+      (left, right) =>
+        left.date.localeCompare(right.date) || left.tripDayId.localeCompare(right.tripDayId),
     ),
   );
 }
@@ -232,7 +238,8 @@ function nextDay(
 ): ItineraryProposalGenerationDay {
   return days.reduce((selected, candidate) => {
     const selectedCount = activityCounts.get(selected.tripDayId) ?? selected.existingActivityCount;
-    const candidateCount = activityCounts.get(candidate.tripDayId) ?? candidate.existingActivityCount;
+    const candidateCount =
+      activityCounts.get(candidate.tripDayId) ?? candidate.existingActivityCount;
     return candidateCount < selectedCount ? candidate : selected;
   });
 }

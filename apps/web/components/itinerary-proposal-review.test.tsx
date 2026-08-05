@@ -3,13 +3,17 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { AcceptItineraryProposalActionState } from "../lib/itinerary-proposal-acceptance";
 import type { ItineraryProposalReview as ReviewModel } from "../lib/itinerary-proposal-experience";
 
 const routerMocks = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn() }));
+const acceptanceMocks = vi.hoisted(() => ({ accept: vi.fn() }));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => routerMocks,
+}));
+
+vi.mock("../app/viagens/[tripId]/roteiro/proposta/accept-action", () => ({
+  acceptItineraryProposalAction: acceptanceMocks.accept,
 }));
 
 import { ItineraryProposalReview } from "./itinerary-proposal-review";
@@ -46,20 +50,16 @@ const review: ReviewModel = {
   ],
 };
 
-const acceptAction = vi.fn(
-  async (state: AcceptItineraryProposalActionState): Promise<AcceptItineraryProposalActionState> =>
-    state,
-);
 const discardAction = vi.fn(async () => undefined);
 
 const decisionProps = {
-  acceptAction,
   canAccept: true,
   canDecide: true,
   discardAction,
   expectedItineraryVersion: 4,
   idempotencyKey: "accept-itinerary-proposal:proposal-ready:4",
   itineraryHref: "/viagens/trip-1/roteiro",
+  tripId: "trip-1",
 } as const;
 
 afterEach(cleanup);

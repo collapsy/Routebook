@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const cacheMocks = vi.hoisted(() => ({ revalidatePath: vi.fn() }));
+const navigationMocks = vi.hoisted(() => ({
+  redirect: vi.fn(() => {
+    throw new Error("NEXT_REDIRECT");
+  }),
+}));
 const acceptanceMocks = vi.hoisted(() => ({
   execute: vi.fn(),
   error: vi.fn((code: string) => ({ status: "error", code, message: code })),
@@ -12,6 +17,7 @@ const databaseMocks = vi.hoisted(() => ({
 const accessMocks = vi.hoisted(() => ({ resolve: vi.fn() }));
 
 vi.mock("next/cache", () => ({ revalidatePath: cacheMocks.revalidatePath }));
+vi.mock("next/navigation", () => ({ redirect: navigationMocks.redirect }));
 vi.mock("@routebook/database", () => ({
   createPostgresAcceptItineraryProposal: databaseMocks.acceptFactory,
   DrizzleItineraryProposalRepository: class {
@@ -63,12 +69,12 @@ describe("acceptItineraryProposalAction", () => {
     databaseMocks.acceptFactory.mockReturnValue(databaseMocks.accept);
   });
 
-  it("delega o payload mínimo e revalida somente após sucesso", async () => {
+  it("delega o payload mínimo, revalida e redireciona após sucesso", async () => {
     acceptanceMocks.execute.mockResolvedValue(success);
 
     await expect(
       acceptItineraryProposalAction(tripId, { status: "idle" }, formData()),
-    ).resolves.toBe(success);
+    ).rejects.toThrow("NEXT_REDIRECT");
 
     expect(acceptanceMocks.execute).toHaveBeenCalledWith(
       {
@@ -84,13 +90,13 @@ describe("acceptItineraryProposalAction", () => {
     );
     expect(cacheMocks.revalidatePath).toHaveBeenNthCalledWith(1, `/viagens/${tripId}`);
     expect(cacheMocks.revalidatePath).toHaveBeenNthCalledWith(2, `/viagens/${tripId}/roteiro`);
-    expect(cacheMocks.revalidatePath).toHaveBeenNthCalledWith(
-      3,
-      `/viagens/${tripId}/roteiro/proposta`,
+    expect(cacheMocks.revalidatePath).toHaveBeenCalledTimes(2);
+    expect(navigationMocks.redirect).toHaveBeenCalledWith(
+      `/viagens/${tripId}/roteiro?propostaAceita=applied`,
     );
   });
 
-  it("preserva erro recuperável sem invalidar caches", async () => {
+  it("preserva erro recuperável sem invalidar caches ou navegar", async () => {
     const error = {
       status: "error",
       code: "proposal-expired",
@@ -102,9 +108,10 @@ describe("acceptItineraryProposalAction", () => {
       acceptItineraryProposalAction(tripId, { status: "idle" }, formData()),
     ).resolves.toBe(error);
     expect(cacheMocks.revalidatePath).not.toHaveBeenCalled();
+    expect(navigationMocks.redirect).not.toHaveBeenCalled();
   });
 
-  it("normaliza falha técnica desconhecida", async () => {
+  it("normaliza falha técnica desconhecida sem navegar", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     acceptanceMocks.execute.mockRejectedValue(new Error("database unavailable"));
 
@@ -113,6 +120,7 @@ describe("acceptItineraryProposalAction", () => {
     ).resolves.toEqual({ status: "error", code: "technical-error", message: "technical-error" });
     expect(acceptanceMocks.error).toHaveBeenCalledWith("technical-error");
     expect(cacheMocks.revalidatePath).not.toHaveBeenCalled();
+    expect(navigationMocks.redirect).not.toHaveBeenCalled();
     consoleError.mockRestore();
   });
 });

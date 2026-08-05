@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AcceptItineraryProposalActionState } from "../lib/itinerary-proposal-acceptance";
 
 const routerMocks = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn() }));
+const acceptanceMocks = vi.hoisted(() => ({ accept: vi.fn() }));
 const actionStateMocks = vi.hoisted(() => ({
   state: { status: "idle" } as AcceptItineraryProposalActionState,
   pending: false,
@@ -14,6 +15,10 @@ const actionStateMocks = vi.hoisted(() => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => routerMocks,
+}));
+
+vi.mock("../app/viagens/[tripId]/roteiro/proposta/accept-action", () => ({
+  acceptItineraryProposalAction: acceptanceMocks.accept,
 }));
 
 vi.mock("react", async (importOriginal) => {
@@ -30,11 +35,9 @@ vi.mock("react", async (importOriginal) => {
 
 import { ItineraryProposalDecisionActions } from "./itinerary-proposal-decision-actions";
 
-const acceptAction = vi.fn();
 const discardAction = vi.fn();
 
 const props = {
-  acceptAction,
   canAccept: true,
   canDecide: true,
   discardAction,
@@ -42,6 +45,7 @@ const props = {
   idempotencyKey: "accept-itinerary-proposal:proposal-ready:4",
   itineraryHref: "/viagens/trip-1/roteiro",
   proposalId: "proposal-ready",
+  tripId: "trip-1",
 } as const;
 
 beforeEach(() => {

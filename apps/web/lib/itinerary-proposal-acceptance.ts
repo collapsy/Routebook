@@ -242,6 +242,7 @@ function proposalStatusError(
   proposal: ItineraryProposal,
   now: Date,
 ): AcceptItineraryProposalActionState | null {
+  if (proposal.status === "accepted") return null;
   if (proposal.status === "expired") {
     return acceptItineraryProposalActionError("proposal-expired");
   }
@@ -303,7 +304,7 @@ export async function executeAcceptItineraryProposalAction(
   if (!itinerary || itinerary.id !== proposal.itineraryId) {
     return acceptItineraryProposalActionError("itinerary-not-found");
   }
-  if (itinerary.version !== request.expectedItineraryVersion) {
+  if (proposal.status === "ready" && itinerary.version !== request.expectedItineraryVersion) {
     return acceptItineraryProposalActionError("itinerary-version-mismatch");
   }
 

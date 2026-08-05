@@ -1,23 +1,26 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
-
 import {
-  initialAcceptItineraryProposalActionState,
-  type AcceptItineraryProposalActionState,
-} from "../lib/itinerary-proposal-acceptance";
-import styles from "./itinerary-proposal-decision-actions.module.css";
+  type FormEvent,
+  useActionState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+  useTransition,
+} from "react";
 
-type AcceptAction = (
-  state: AcceptItineraryProposalActionState,
-  formData: FormData,
-) => Promise<AcceptItineraryProposalActionState>;
+import { acceptItineraryProposalAction } from "../app/viagens/[tripId]/roteiro/proposta/accept-action";
+import { initialAcceptItineraryProposalActionState } from "../lib/itinerary-proposal-acceptance";
+import styles from "./itinerary-proposal-decision-actions.module.css";
 
 type DiscardAction = (formData: FormData) => void | Promise<void>;
 
+const subscribeToHydration = () => () => undefined;
+
 export function ItineraryProposalDecisionActions({
-  acceptAction,
   canAccept,
   canDecide,
   discardAction,
@@ -25,8 +28,8 @@ export function ItineraryProposalDecisionActions({
   idempotencyKey,
   itineraryHref,
   proposalId,
+  tripId,
 }: {
-  acceptAction: AcceptAction;
   canAccept: boolean;
   canDecide: boolean;
   discardAction: DiscardAction;
@@ -34,14 +37,33 @@ export function ItineraryProposalDecisionActions({
   idempotencyKey: string;
   itineraryHref: string;
   proposalId: string;
+  tripId: string;
 }) {
   const router = useRouter();
-  const [state, submitAccept, acceptPending] = useActionState(
+  const acceptAction = useMemo(() => acceptItineraryProposalAction.bind(null, tripId), [tripId]);
+  const [state, dispatchAccept, actionPending] = useActionState(
     acceptAction,
     initialAcceptItineraryProposalActionState,
   );
+  const [transitionPending, startAcceptTransition] = useTransition();
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    () => true,
+    () => false,
+  );
   const [discardPending, setDiscardPending] = useState(false);
+  const acceptPending = actionPending || transitionPending;
   const decisionPending = acceptPending || discardPending;
+  const decisionDisabled = !hydrated || decisionPending;
+
+  const submitAccept = useCallback(
+    (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      startAcceptTransition(() => dispatchAccept(formData));
+    },
+    [dispatchAccept],
+  );
 
   useEffect(() => {
     if (state.status !== "success") return;
@@ -81,7 +103,7 @@ export function ItineraryProposalDecisionActions({
         {canAccept ? (
           <details className={styles.acceptConfirmation}>
             <summary>Aceitar proposta</summary>
-            <form action={submitAccept}>
+            <form onSubmit={submitAccept}>
               <input name="itineraryProposalId" type="hidden" value={proposalId} />
               <input
                 name="expectedItineraryVersion"
@@ -95,7 +117,7 @@ export function ItineraryProposalDecisionActions({
               </p>
               <label>
                 <input
-                  disabled={decisionPending}
+                  disabled={decisionDisabled}
                   name="confirmation"
                   required
                   type="checkbox"
@@ -103,7 +125,7 @@ export function ItineraryProposalDecisionActions({
                 />
                 Entendo que esta ação atualizará o Roteiro.
               </label>
-              <button className={styles.acceptButton} disabled={decisionPending} type="submit">
+              <button className={styles.acceptButton} disabled={decisionDisabled} type="submit">
                 {acceptPending ? "Aplicando proposta…" : "Confirmar e aceitar proposta"}
               </button>
             </form>
@@ -112,7 +134,7 @@ export function ItineraryProposalDecisionActions({
 
         <form action={discardAction} onSubmit={() => setDiscardPending(true)}>
           <input name="itineraryProposalId" type="hidden" value={proposalId} />
-          <button className={styles.discardButton} disabled={decisionPending} type="submit">
+          <button className={styles.discardButton} disabled={decisionDisabled} type="submit">
             {discardPending ? "Descartando proposta…" : "Descartar proposta"}
           </button>
         </form>

@@ -1,42 +1,64 @@
-name: RB-INC-043 Lockfile Sync
+name: RB-INC-093 Action Response Diagnostic
 
 on:
   push:
     branches:
-      - feature/rb-inc-043-planning-conflict-core
+      - feature/rb-inc-093-itinerary-proposal-acceptance-e2e
 
 permissions:
   contents: write
 
 jobs:
-  sync-lockfile:
+  instrument-action-response:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
         uses: actions/checkout@v6
         with:
-          ref: feature/rb-inc-043-planning-conflict-core
+          ref: feature/rb-inc-093-itinerary-proposal-acceptance-e2e
+          fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: .node-version
-          package-manager-cache: false
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Regenerate lockfile
-        run: pnpm install --lockfile-only --no-frozen-lockfile
-
-      - name: Commit synchronized lockfile
+      - name: Instrument first acceptance scenario
         run: |
-          if git diff --quiet -- pnpm-lock.yaml; then
-            exit 0
-          fi
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("apps/web/e2e/itinerary-proposal-review.spec.ts")
+          text = path.read_text()
+          before = '''  await openAcceptance(page, fixture.tripId);
+  await Promise.all([
+    page.waitForURL(/\\/roteiro\\?propostaAceita=applied$/),
+    page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
+  ]);
+'''
+          after = '''  await openAcceptance(page, fixture.tripId);
+  const actionResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === "POST" &&
+      Boolean(response.request().headers()["next-action"]),
+  );
+  await page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
+  const actionResponse = await actionResponsePromise;
+  const actionResponseBody = await actionResponse.text();
+  console.log("RB_INC_093_ACTION_RESPONSE", actionResponseBody);
+  await page.waitForURL(/\\/roteiro\\?propostaAceita=applied$/, { timeout: 15_000 });
+'''
+          if text.count(before) != 1:
+              raise SystemExit("expected one happy-path acceptance block")
+          path.write_text(text.replace(before, after))
+          PY
+
+      - name: Restore canonical workflow
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- .github/workflows/rb-inc-043-sync-lockfile.yml
+
+      - name: Commit diagnostic instrumentation
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pnpm-lock.yaml
-          git commit -m "chore(rb-inc-043): update pnpm lockfile"
-          git push origin HEAD:feature/rb-inc-043-planning-conflict-core
+          git add apps/web/e2e/itinerary-proposal-review.spec.ts \
+            .github/workflows/rb-inc-043-sync-lockfile.yml
+          git commit -m "test(rb-inc-093): expose Server Action response"
+          git push origin HEAD:feature/rb-inc-093-itinerary-proposal-acceptance-e2e

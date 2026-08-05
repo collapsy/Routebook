@@ -45,7 +45,6 @@ export async function acceptItineraryProposalAction(
     if (state.status === "success") {
       revalidatePath(`/viagens/${tripId}`);
       revalidatePath(itineraryPath(tripId));
-      revalidatePath(`${itineraryPath(tripId)}/proposta`);
     }
 
     return state;

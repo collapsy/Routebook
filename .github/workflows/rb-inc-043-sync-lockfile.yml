@@ -35,28 +35,33 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path("apps/web/e2e/itinerary-proposal-review.spec.ts")
           text = path.read_text()
-          replacements = {
-              '''    await expect(conflictingPage.getByRole("alert")).toHaveText(
-              "A proposta não está pronta para ser aceita.",
-            );''': '''    await expect(
-              conflictingPage.getByText("A proposta não está pronta para ser aceita.", {
-                exact: true,
-              }),
-            ).toBeVisible();''',
-              '''  await expect(page.getByRole("alert")).toHaveText(
-            "O roteiro mudou desde a geração desta proposta.",
-          );''': '''  await expect(
-            page.getByText("O roteiro mudou desde a geração desta proposta.", { exact: true }),
-          ).toBeVisible();''',
-          }
+          replacements = [
+              (
+                  r'''    await expect\(conflictingPage\.getByRole\("alert"\)\)\.toHaveText\(\s*"A proposta não está pronta para ser aceita\."\s*,\s*\);''',
+                  '''    await expect(
+                      conflictingPage.getByText("A proposta não está pronta para ser aceita.", {
+                        exact: true,
+                      }),
+                    ).toBeVisible();''',
+              ),
+              (
+                  r'''  await expect\(page\.getByRole\("alert"\)\)\.toHaveText\(\s*"O roteiro mudou desde a geração desta proposta\."\s*,\s*\);''',
+                  '''  await expect(
+                      page.getByText("O roteiro mudou desde a geração desta proposta.", {
+                        exact: true,
+                      }),
+                    ).toBeVisible();''',
+              ),
+          ]
 
-          for before, after in replacements.items():
-              if text.count(before) != 1:
-                  raise SystemExit(f"expected one exact locator block: {before!r}")
-              text = text.replace(before, after)
+          for pattern, replacement in replacements:
+              text, count = re.subn(pattern, replacement, text, count=1)
+              if count != 1:
+                  raise SystemExit(f"expected one locator matching {pattern!r}, found {count}")
 
           path.write_text(text)
           PY

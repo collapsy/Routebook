@@ -63,7 +63,7 @@ describe("acceptItineraryProposalAction", () => {
     databaseMocks.acceptFactory.mockReturnValue(databaseMocks.accept);
   });
 
-  it("delega o payload mínimo e revalida somente após sucesso", async () => {
+  it("delega o payload mínimo e preserva a fronteira cliente até a navegação", async () => {
     acceptanceMocks.execute.mockResolvedValue(success);
 
     await expect(
@@ -84,10 +84,7 @@ describe("acceptItineraryProposalAction", () => {
     );
     expect(cacheMocks.revalidatePath).toHaveBeenNthCalledWith(1, `/viagens/${tripId}`);
     expect(cacheMocks.revalidatePath).toHaveBeenNthCalledWith(2, `/viagens/${tripId}/roteiro`);
-    expect(cacheMocks.revalidatePath).toHaveBeenNthCalledWith(
-      3,
-      `/viagens/${tripId}/roteiro/proposta`,
-    );
+    expect(cacheMocks.revalidatePath).toHaveBeenCalledTimes(2);
   });
 
   it("preserva erro recuperável sem invalidar caches", async () => {

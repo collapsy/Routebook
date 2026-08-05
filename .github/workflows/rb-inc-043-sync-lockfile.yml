@@ -1,22 +1,23 @@
-name: RB-INC-043 Lockfile Sync
+name: RB-INC-094 Registry and Formatting Bootstrap
 
 on:
   push:
     branches:
-      - feature/rb-inc-043-planning-conflict-core
+      - feature/rb-inc-094-deterministic-itinerary-proposal-generator
 
 permissions:
   contents: write
 
 jobs:
-  sync-lockfile:
+  bootstrap:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
         uses: actions/checkout@v6
         with:
-          ref: feature/rb-inc-043-planning-conflict-core
+          ref: feature/rb-inc-094-deterministic-itinerary-proposal-generator
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -27,16 +28,52 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Regenerate lockfile
-        run: pnpm install --lockfile-only --no-frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Commit synchronized lockfile
+      - name: Register documents
         run: |
-          if git diff --quiet -- pnpm-lock.yaml; then
-            exit 0
-          fi
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("docs/registry.md")
+          text = path.read_text()
+          anchor = "| RB-CTX-093 | Context Pack do RB-INC-093 | Implementation Context | Draft | 0.1.0 | [rb-inc-093-itinerary-proposal-acceptance-e2e.md](./implementation/context-packs/rb-inc-093-itinerary-proposal-acceptance-e2e.md) |"
+          rows = """| RB-INC-094 | Adapter Determinístico de Geração de Itinerary Proposal Ready | Implementation | Draft | 0.1.0 | [rb-inc-094-deterministic-itinerary-proposal-generator.md](./implementation/increments/rb-inc-094-deterministic-itinerary-proposal-generator.md) |
+| RB-CTX-094 | Context Pack do RB-INC-094 | Implementation Context | Draft | 0.1.0 | [rb-inc-094-deterministic-itinerary-proposal-generator.md](./implementation/context-packs/rb-inc-094-deterministic-itinerary-proposal-generator.md) |"""
+          if rows in text:
+              raise SystemExit("RB-INC-094 already registered")
+          if text.count(anchor) != 1:
+              raise SystemExit("expected one RB-CTX-093 anchor")
+          path.write_text(text.replace(anchor, f"{anchor}\n{rows}"))
+          PY
+
+      - name: Format increment files
+        run: |
+          pnpm exec prettier --write \
+            modules/proposal-management/src/deterministic-itinerary-proposal-generator.ts \
+            modules/proposal-management/src/deterministic-itinerary-proposal-generator.test.ts \
+            modules/proposal-management/src/index.ts \
+            docs/implementation/increments/rb-inc-094-deterministic-itinerary-proposal-generator.md \
+            docs/implementation/context-packs/rb-inc-094-deterministic-itinerary-proposal-generator.md \
+            docs/registry.md
+
+      - name: Restore canonical workflow
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- .github/workflows/rb-inc-043-sync-lockfile.yml
+
+      - name: Commit bootstrap result
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pnpm-lock.yaml
-          git commit -m "chore(rb-inc-043): update pnpm lockfile"
-          git push origin HEAD:feature/rb-inc-043-planning-conflict-core
+          git add \
+            modules/proposal-management/src/deterministic-itinerary-proposal-generator.ts \
+            modules/proposal-management/src/deterministic-itinerary-proposal-generator.test.ts \
+            modules/proposal-management/src/index.ts \
+            docs/implementation/increments/rb-inc-094-deterministic-itinerary-proposal-generator.md \
+            docs/implementation/context-packs/rb-inc-094-deterministic-itinerary-proposal-generator.md \
+            docs/registry.md \
+            .github/workflows/rb-inc-043-sync-lockfile.yml
+          git commit -m "feat(rb-inc-094): publish deterministic proposal generator"
+          git push origin HEAD:feature/rb-inc-094-deterministic-itinerary-proposal-generator

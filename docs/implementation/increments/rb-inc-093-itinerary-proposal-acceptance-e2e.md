@@ -101,22 +101,31 @@ A fronteira web pode encaminhar uma Proposal `accepted` somente como candidata a
 
 ## 7. Critérios de aceite
 
-- [ ] happy path integral aprovado;
-- [ ] Itinerary atualizado exatamente uma vez;
-- [ ] Proposal `accepted` persistida;
-- [ ] Proposal Application `succeeded` persistida;
-- [ ] Decision canônica persistida;
-- [ ] reload preserva o Roteiro atualizado;
-- [ ] replay real retorna sucesso idempotente;
-- [ ] replay não duplica efeitos;
-- [ ] chave nova em Proposal `accepted` não reaplica;
-- [ ] versão concorrente de Proposal `ready` permanece erro recuperável;
-- [ ] Proposal expirada não oferece aceite;
-- [ ] usuário sem acesso não executa aceite;
-- [ ] desktop e mobile aprovados;
-- [ ] registry, Context Pack e matriz atualizados;
-- [ ] CI integral verde.
+- [x] happy path integral aprovado;
+- [x] Itinerary atualizado exatamente uma vez;
+- [x] Proposal `accepted` persistida;
+- [x] Proposal Application `succeeded` persistida;
+- [x] Decision canônica persistida;
+- [x] reload preserva o Roteiro atualizado;
+- [x] replay real retorna sucesso idempotente;
+- [x] replay não duplica efeitos;
+- [x] chave nova em Proposal `accepted` não reaplica;
+- [x] versão concorrente de Proposal `ready` permanece erro recuperável;
+- [x] Proposal expirada não oferece aceite;
+- [x] usuário sem acesso não executa aceite;
+- [x] desktop e mobile aprovados;
+- [x] registry, Context Pack e matriz atualizados;
+- [x] CI integral verde.
 
 ## 8. Evidências
 
-Validação E2E real em andamento na PR #212; runs finais serão registrados após todos os gates verdes.
+- integração web: `apps/web/components/itinerary-proposal-decision-actions.tsx` e `apps/web/app/viagens/[tripId]/roteiro/proposta/accept-action.ts`;
+- contrato autorizado e replay: `apps/web/lib/itinerary-proposal-acceptance.ts`;
+- E2E PostgreSQL: `apps/web/e2e/itinerary-proposal-review.spec.ts`;
+- testes unitários da ação: `apps/web/app/viagens/[tripId]/roteiro/proposta/accept-action.test.ts`;
+- testes: 541 testes de domínio, componentes e PostgreSQL aprovados;
+- E2E: 71 cenários Playwright responsivos executados, com 69 aprovados diretamente e 2 aprovados após retry;
+- Engineering Validation: run `30970192016`, job `92192651639`, SHA `d7ef177e002857b412ffef10b7125bb493f702d8`;
+- Documentation Validation: run `30970192009`, SHA `d7ef177e002857b412ffef10b7125bb493f702d8`;
+- gates confirmados: format, documentação, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo;
+- rastreabilidade: registry, Context Pack e `docs/implementation/traceability-matrix.md` atualizados.

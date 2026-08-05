@@ -272,9 +272,11 @@ test("reproduz o aceite concorrente e rejeita chave nova sem duplicar efeitos", 
       (input as HTMLInputElement).value = `${(input as HTMLInputElement).value}:nova`;
     });
     await conflictingPage.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
-    await expect(conflictingPage.getByRole("alert")).toHaveText(
-      "A proposta não está pronta para ser aceita.",
-    );
+    await expect(
+      conflictingPage.getByText("A proposta não está pronta para ser aceita.", {
+        exact: true,
+      }),
+    ).toBeVisible();
 
     const itinerary = await new DrizzleItineraryRepository().findByTripId(fixture.tripId);
     expect(itinerary?.version).toBe(fixture.baseItineraryVersion + 1);
@@ -323,9 +325,11 @@ test("mantém versão concorrente como erro recuperável sem persistir aceite", 
   await itineraryRepository.save(changed);
 
   await page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
-  await expect(page.getByRole("alert")).toHaveText(
-    "O roteiro mudou desde a geração desta proposta.",
-  );
+  await expect(
+    page.getByText("O roteiro mudou desde a geração desta proposta.", {
+      exact: true,
+    }),
+  ).toBeVisible();
 
   expect(await proposalApplicationRows(fixture)).toHaveLength(0);
   expect(

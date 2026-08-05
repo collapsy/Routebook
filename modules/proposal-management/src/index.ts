@@ -16,6 +16,21 @@ export type {
   ReplayedItineraryProposalAcceptance,
 } from "./accept-itinerary-proposal";
 export {
+  DEFAULT_DETERMINISTIC_ACTIVITY_DURATION_MINUTES,
+  DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_METHOD,
+  DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_VERSION,
+  DETERMINISTIC_ITINERARY_PROPOSAL_VALIDITY_HOURS,
+  DeterministicItineraryProposalGenerationError,
+  DeterministicItineraryProposalGenerator,
+} from "./deterministic-itinerary-proposal-generator";
+export type {
+  DeterministicItineraryProposalGenerationErrorCode,
+  GenerateItineraryProposalInput,
+  ItineraryProposalGenerationCandidate,
+  ItineraryProposalGenerationDay,
+  ItineraryProposalGenerationPort,
+} from "./deterministic-itinerary-proposal-generator";
+export {
   createProposalApplicationId,
   createProposalApplicationRequestFingerprint,
   failProposalApplication,

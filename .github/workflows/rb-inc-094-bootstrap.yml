@@ -1,0 +1,45 @@
+name: RB-INC-094 Bootstrap
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-094-deterministic-itinerary-proposal-generator
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-094-deterministic-itinerary-proposal-generator
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply registry and formatting bootstrap
+        run: node scripts/rb-inc-094-bootstrap.mjs
+
+      - name: Remove temporary bootstrap files
+        run: rm scripts/rb-inc-094-bootstrap.mjs .github/workflows/rb-inc-094-bootstrap.yml
+
+      - name: Commit bootstrap result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(rb-inc-094): publish deterministic proposal generator"
+          git push origin HEAD:feature/rb-inc-094-deterministic-itinerary-proposal-generator

@@ -7,7 +7,7 @@ owner: Proposal Management
 status: Draft
 version: "0.1.0"
 created: "2026-08-04"
-last_updated: "2026-08-04"
+last_updated: "2026-08-05"
 authors:
   - RouteBook Team
 tags:
@@ -40,6 +40,8 @@ Publicar uma porta interna de geração e um adapter determinístico simplificad
 Issue: #213.
 
 Branch: `feature/rb-inc-094-deterministic-itinerary-proposal-generator`.
+
+Pull request: #214.
 
 ## 2. Contexto
 
@@ -101,23 +103,32 @@ Dado um conjunto de Dias e candidatos normalizados, o adapter produz sempre uma 
 
 ## 7. Critérios de aceite
 
-- [ ] porta usa somente contratos internos;
-- [ ] adapter não possui dependência externa ou I/O;
-- [ ] mesma entrada e factories determinísticas produzem saída equivalente;
-- [ ] Dias são ordenados canonicamente;
-- [ ] candidatos são balanceados de forma estável;
-- [ ] ordem recebida dos candidatos é preservada;
-- [ ] `proposedOrder` permanece válido para aplicação posterior;
-- [ ] duração conhecida é preservada;
-- [ ] duração padrão é identificada nas limitações;
-- [ ] nenhum horário é inventado;
-- [ ] ausência de candidatos produz Proposal vazia e explicada;
-- [ ] ausência de Dias e duplicidades são rejeitadas com códigos estáveis;
-- [ ] entradas permanecem imutáveis;
-- [ ] saída conclui o lifecycle canônico em `ready`;
-- [ ] exports, registry, Context Pack e matriz estão atualizados;
-- [ ] CI integral está verde.
+- [x] porta usa somente contratos internos;
+- [x] adapter não possui dependência externa ou I/O;
+- [x] mesma entrada e factories determinísticas produzem saída equivalente;
+- [x] Dias são ordenados canonicamente;
+- [x] candidatos são balanceados de forma estável;
+- [x] ordem recebida dos candidatos é preservada;
+- [x] `proposedOrder` permanece válido para aplicação posterior;
+- [x] duração conhecida é preservada;
+- [x] duração padrão é identificada nas limitações;
+- [x] nenhum horário é inventado;
+- [x] ausência de candidatos produz Proposal vazia e explicada;
+- [x] ausência de Dias e duplicidades são rejeitadas com códigos estáveis;
+- [x] entradas permanecem imutáveis;
+- [x] saída conclui o lifecycle canônico em `ready`;
+- [x] exports, registry, Context Pack e matriz estão atualizados;
+- [x] CI integral está verde.
 
 ## 8. Evidências
 
-Implementação e validação em andamento na Draft PR do RB-INC-094. Os runs finais serão registrados após todos os gates verdes.
+- porta e adapter: `modules/proposal-management/src/deterministic-itinerary-proposal-generator.ts`;
+- exports públicos: `modules/proposal-management/src/index.ts`;
+- testes unitários: `modules/proposal-management/src/deterministic-itinerary-proposal-generator.test.ts`;
+- cobertura do adapter: 9 testes aprovados;
+- suíte total: 550 testes de domínio, componentes e PostgreSQL aprovados;
+- E2E: 71 cenários Playwright responsivos aprovados;
+- Engineering Validation: run `30971905853`, job `92197885245`, SHA `9eb79c4574ada6ed926751d4de0dced459027b6b`;
+- Documentation Validation: run `30971905850`, SHA `9eb79c4574ada6ed926751d4de0dced459027b6b`;
+- gates confirmados: format, documentação, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo;
+- governança: registry, Context Pack e matriz de rastreabilidade atualizados.

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import {
   createPostgresAcceptItineraryProposal,
@@ -25,8 +26,10 @@ export async function acceptItineraryProposalAction(
   _state: AcceptItineraryProposalActionState,
   formData: FormData,
 ): Promise<AcceptItineraryProposalActionState> {
+  let state: AcceptItineraryProposalActionState;
+
   try {
-    const state = await executeAcceptItineraryProposalAction(
+    state = await executeAcceptItineraryProposalAction(
       {
         tripId,
         itineraryProposalId: String(formData.get("itineraryProposalId") ?? ""),
@@ -41,15 +44,16 @@ export async function acceptItineraryProposalAction(
         acceptItineraryProposal: createPostgresAcceptItineraryProposal(),
       },
     );
-
-    if (state.status === "success") {
-      revalidatePath(`/viagens/${tripId}`);
-      revalidatePath(itineraryPath(tripId));
-    }
-
-    return state;
   } catch (error) {
     console.error("Falha técnica ao aceitar Itinerary Proposal", error);
     return acceptItineraryProposalActionError("technical-error");
   }
+
+  if (state.status === "success") {
+    revalidatePath(`/viagens/${tripId}`);
+    revalidatePath(itineraryPath(tripId));
+    redirect(`${itineraryPath(tripId)}?propostaAceita=${state.kind}`);
+  }
+
+  return state;
 }

@@ -31,6 +31,14 @@ export type {
   ItineraryProposalGenerationPort,
 } from "./deterministic-itinerary-proposal-generator";
 export {
+  generateAndPersistItineraryProposal,
+  INVALID_ITINERARY_PROPOSAL_GENERATION_OUTPUT_FAILURE_CODE,
+  ITINERARY_PROPOSAL_GENERATION_FAILURE_CODE_PREFIX,
+  toItineraryProposalGenerationFailureCode,
+  UNKNOWN_ITINERARY_PROPOSAL_GENERATION_FAILURE_CODE,
+} from "./itinerary-proposal-generation-service";
+export type { GenerateAndPersistItineraryProposalCommand } from "./itinerary-proposal-generation-service";
+export {
   createProposalApplicationId,
   createProposalApplicationRequestFingerprint,
   failProposalApplication,

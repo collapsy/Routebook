@@ -103,5 +103,6 @@ O RB-INC-097 passou a depender de uma porta abstrata para carregar o contexto de
 - exports: `packages/database/src/index.ts`;
 - schema reutilizado: `packages/database/src/schema.ts`;
 - nenhuma migration criada;
+- formatação canônica aplicada pelo workflow `Format RB-INC-077`, run `31123628228`;
 - issue: #221;
 - Draft PR: #222.

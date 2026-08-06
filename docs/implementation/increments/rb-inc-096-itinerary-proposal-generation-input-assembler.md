@@ -4,8 +4,8 @@ title: Assembler Determinístico de Entrada para Geração de Itinerary Proposal
 description: Normaliza snapshots autoritativos de Itinerary, Recommendations e Places para a porta determinística de geração.
 document_type: implementation-increment
 owner: Proposal Management
-status: Ready
-version: "1.0.0"
+status: Draft
+version: "0.1.0"
 created: "2026-08-05"
 last_updated: "2026-08-05"
 authors:

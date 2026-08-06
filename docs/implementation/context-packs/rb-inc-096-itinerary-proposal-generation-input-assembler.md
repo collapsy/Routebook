@@ -4,8 +4,8 @@ title: Context Pack do RB-INC-096
 description: Contexto mínimo para manutenção e evolução do assembler determinístico de entrada da geração de Itinerary Proposal.
 document_type: implementation-context-pack
 owner: Proposal Management
-status: Ready
-version: "1.0.0"
+status: Draft
+version: "0.1.0"
 created: "2026-08-05"
 last_updated: "2026-08-05"
 authors:

@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: "2026-08-03"
+last_updated: "2026-08-05"
 authors:
   - RouteBook Team
 tags:
@@ -105,6 +105,8 @@ ai_context:
 | RB-INC-092 | RB-UX-004–006, RB-DS-002–003, RB-SEC-001, RB-ADR-007–008, RB-ADR-027 e RB-INC-091 | #209 | `feature/rb-inc-092-itinerary-proposal-acceptance-experience`, PR #210 | experiência autorizada de aceite, confirmação explícita, bloqueio de decisões concorrentes e feedback `applied`/`replay` | runs 30869999535 e 30869999538, job 91869867843, SHA 76cda755; 224 documentos, migrations, 540 testes, smoke, build e 65 E2E responsivos executados | Pronto para integração |
 
 | RB-INC-093 | RB-QA-001, RB-CICD-001, RB-SEC-001, RB-ADR-007–008, RB-ADR-027 e RB-INC-084–085, RB-INC-091–092 | #211 | `feature/rb-inc-093-itinerary-proposal-acceptance-e2e`, PR #212 | aceite integral UI–PostgreSQL, replay idempotente, redirecionamento autoritativo e validação de persistência | runs 30970192016 e 30970192009, job 92192651639, SHA d7ef177; 226 documentos, migrations, 541 testes, smoke, build e Playwright responsivo verdes | Pronto para integração |
+
+| RB-INC-094 | RB-UC-022, RB-FR-087–096, RB-ARC-003, decisão #118 e RB-INC-052–057, RB-INC-093 | #213 | `feature/rb-inc-094-deterministic-itinerary-proposal-generator`, PR #214 | porta interna, contratos normalizados e adapter puro com ordenação canônica, balanceamento, append, duração padrão explícita, validade e lifecycle `ready` | 228 documentos registrados; 10 testes do adapter implementados; runs, job, SHA, suíte total, smoke, build e Playwright responsivo pendentes do CI definitivo | Em validação |
 
 ## Evidências do RB-INC-003
 

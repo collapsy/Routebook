@@ -241,6 +241,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-095 | Orquestração do Lifecycle de Geração de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-095-itinerary-proposal-generation-orchestration.md](./implementation/increments/rb-inc-095-itinerary-proposal-generation-orchestration.md) |
 | RB-CTX-095 | Context Pack do RB-INC-095 | Implementation Context | Draft | 0.1.0 | [rb-inc-095-itinerary-proposal-generation-orchestration.md](./implementation/context-packs/rb-inc-095-itinerary-proposal-generation-orchestration.md) |
 
+| RB-INC-096 | Assembler Determinístico de Entrada para Geração de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-096-itinerary-proposal-generation-input-assembler.md](./implementation/increments/rb-inc-096-itinerary-proposal-generation-input-assembler.md) |
+| RB-CTX-096 | Context Pack do RB-INC-096 | Implementation Context | Draft | 0.1.0 | [rb-inc-096-itinerary-proposal-generation-input-assembler.md](./implementation/context-packs/rb-inc-096-itinerary-proposal-generation-input-assembler.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

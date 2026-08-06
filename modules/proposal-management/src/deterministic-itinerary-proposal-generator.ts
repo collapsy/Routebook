@@ -49,7 +49,9 @@ export type DeterministicItineraryProposalGenerationErrorCode =
   | "duplicate-candidate"
   | "invalid-candidate"
   | "invalid-generated-at"
-  | "invalid-proposed-activity-id";
+  | "invalid-validity"
+  | "invalid-proposed-activity-id"
+  | "duplicate-proposed-activity-id";
 
 export class DeterministicItineraryProposalGenerationError extends Error {
   constructor(
@@ -79,13 +81,31 @@ function normalizedOptionalText(
   return value === undefined ? undefined : requiredText(value, code, message);
 }
 
-function normalizeDay(day: ItineraryProposalGenerationDay): ItineraryProposalGenerationDay {
-  const tripDayId = requiredText(day?.tripDayId, "invalid-day", "Informe um TripDayId válido.");
-  const date = requiredText(day?.date, "invalid-day", "Informe uma data válida para o Dia.");
+function compareCanonicalText(left: string, right: string): number {
+  if (left === right) return 0;
+  return left < right ? -1 : 1;
+}
 
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+function isValidIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+function normalizeDay(day: ItineraryProposalGenerationDay): ItineraryProposalGenerationDay {
+  if (!day || typeof day !== "object") {
     throw new DeterministicItineraryProposalGenerationError(
-      "Use uma data no formato YYYY-MM-DD.",
+      "Informe um Dia válido.",
+      "invalid-day",
+    );
+  }
+
+  const tripDayId = requiredText(day.tripDayId, "invalid-day", "Informe um TripDayId válido.");
+  const date = requiredText(day.date, "invalid-day", "Informe uma data válida para o Dia.");
+
+  if (!isValidIsoDate(date)) {
+    throw new DeterministicItineraryProposalGenerationError(
+      "Use uma data existente no formato YYYY-MM-DD.",
       "invalid-day",
     );
   }
@@ -103,13 +123,20 @@ function normalizeDay(day: ItineraryProposalGenerationDay): ItineraryProposalGen
 function normalizeCandidate(
   candidate: ItineraryProposalGenerationCandidate,
 ): ItineraryProposalGenerationCandidate {
+  if (!candidate || typeof candidate !== "object") {
+    throw new DeterministicItineraryProposalGenerationError(
+      "Informe um candidato válido.",
+      "invalid-candidate",
+    );
+  }
+
   const candidateId = requiredText(
-    candidate?.candidateId,
+    candidate.candidateId,
     "invalid-candidate",
     "Informe um CandidateId válido.",
   );
   const title = requiredText(
-    candidate?.title,
+    candidate.title,
     "invalid-candidate",
     "Informe um título para o candidato.",
   );
@@ -202,7 +229,8 @@ function normalizedDays(
   return Object.freeze(
     [...normalized].sort(
       (left, right) =>
-        left.date.localeCompare(right.date) || left.tripDayId.localeCompare(right.tripDayId),
+        compareCanonicalText(left.date, right.date) ||
+        compareCanonicalText(left.tripDayId, right.tripDayId),
     ),
   );
 }
@@ -279,11 +307,19 @@ export class DeterministicItineraryProposalGenerator implements ItineraryProposa
       );
     }
 
+    if (typeof input.createProposedActivityId !== "function") {
+      throw new DeterministicItineraryProposalGenerationError(
+        "Informe uma factory de ProposedActivityId válida.",
+        "invalid-proposed-activity-id",
+      );
+    }
+
     const days = normalizedDays(input.days);
     const candidates = normalizedCandidates(input.candidates);
     const activityCounts = new Map(
       days.map((day) => [day.tripDayId, day.existingActivityCount] as const),
     );
+    const proposedActivityIds = new Set<string>();
     const proposedActivities: ProposedActivityInput[] = [];
 
     candidates.forEach((candidate, index) => {
@@ -294,6 +330,14 @@ export class DeterministicItineraryProposalGenerator implements ItineraryProposa
         "invalid-proposed-activity-id",
         "A factory deve produzir um ProposedActivityId válido.",
       );
+
+      if (proposedActivityIds.has(proposedActivityId)) {
+        throw new DeterministicItineraryProposalGenerationError(
+          "A factory deve produzir ProposedActivityIds únicos.",
+          "duplicate-proposed-activity-id",
+        );
+      }
+      proposedActivityIds.add(proposedActivityId);
 
       proposedActivities.push(
         Object.freeze({
@@ -324,12 +368,19 @@ export class DeterministicItineraryProposalGenerator implements ItineraryProposa
       generatedAt.getTime() + DETERMINISTIC_ITINERARY_PROPOSAL_VALIDITY_HOURS * 60 * 60 * 1_000,
     );
 
+    if (!Number.isFinite(validUntil.getTime())) {
+      throw new DeterministicItineraryProposalGenerationError(
+        "A validade derivada para a Proposal é inválida.",
+        "invalid-validity",
+      );
+    }
+
     return Object.freeze({
       generationMethod: DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_METHOD,
       generationVersion: DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_VERSION,
       proposedActivities: Object.freeze(proposedActivities),
       criteria: Object.freeze([
-        "Candidatos recebidos em ordem canônica.",
+        "Candidatos preservados na ordem recebida.",
         "Distribuição balanceada pela quantidade de Atividades de cada Dia.",
         "Novas Atividades anexadas após o conteúdo existente.",
       ]),

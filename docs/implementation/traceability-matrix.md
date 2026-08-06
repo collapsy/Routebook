@@ -159,6 +159,30 @@ ai_context:
 | resumo | `apps/web/app/viagens/[tripId]/page.tsx` |
 | testes | `modules/traveler-profile/src/profile.test.ts` e `apps/web/e2e/product-shell.spec.ts` |
 
+## Evidências do RB-INC-097
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-097-authoritative-itinerary-proposal-generation.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-097-authoritative-itinerary-proposal-generation.md` |
+| composição autoritativa | `modules/proposal-management/src/authoritative-itinerary-proposal-generation.ts` |
+| exports | `modules/proposal-management/src/index.ts` |
+| rastreabilidade | issue #219 e PR #220 |
+| CI | Engineering Validation `31067491527`, job `92508196343` |
+| integração | merge commit `8c8cce11d894feadd1f23a8d78c503642651628d` |
+
+## Evidências previstas do RB-INC-098
+
+| Evidência | Localização |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-098-postgres-authoritative-itinerary-proposal-context.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-098-postgres-authoritative-itinerary-proposal-context.md` |
+| adapter PostgreSQL | `packages/database/src/authoritative-itinerary-proposal-generation-context.ts` |
+| testes de integração | `packages/database/src/authoritative-itinerary-proposal-generation-context-postgres.test.ts` |
+| exports | `packages/database/src/index.ts` |
+| rastreabilidade | issue #221 e PR #222 |
+| schema | reutilização de `packages/database/src/schema.ts`, sem migration |
+
 ## Cadeia mínima
 
 ```text

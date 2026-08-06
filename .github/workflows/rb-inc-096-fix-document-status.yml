@@ -1,0 +1,51 @@
+name: RB-INC-096 Fix Document Status
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-096-itinerary-proposal-generation-input-assembler
+    paths:
+      - .github/workflows/rb-inc-096-fix-document-status.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/rb-inc-096-itinerary-proposal-generation-input-assembler
+      - name: Restore canonical draft metadata
+        shell: python
+        run: |
+          from pathlib import Path
+
+          for path in [
+              Path("docs/implementation/increments/rb-inc-096-itinerary-proposal-generation-input-assembler.md"),
+              Path("docs/implementation/context-packs/rb-inc-096-itinerary-proposal-generation-input-assembler.md"),
+          ]:
+              text = path.read_text()
+              text = text.replace("status: Ready", "status: Draft", 1)
+              text = text.replace('version: "1.0.0"', 'version: "0.1.0"', 1)
+              path.write_text(text)
+
+          registry = Path("docs/registry.md")
+          text = registry.read_text()
+          text = text.replace(
+              "| RB-INC-096 | Assembler Determinístico de Entrada para Geração de Itinerary Proposal | Implementation | Ready | 1.0.0 |",
+              "| RB-INC-096 | Assembler Determinístico de Entrada para Geração de Itinerary Proposal | Implementation | Draft | 0.1.0 |",
+          )
+          text = text.replace(
+              "| RB-CTX-096 | Context Pack do RB-INC-096 | Implementation Context | Ready | 1.0.0 |",
+              "| RB-CTX-096 | Context Pack do RB-INC-096 | Implementation Context | Draft | 0.1.0 |",
+          )
+          registry.write_text(text)
+      - name: Commit correction
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/implementation/increments/rb-inc-096-itinerary-proposal-generation-input-assembler.md docs/implementation/context-packs/rb-inc-096-itinerary-proposal-generation-input-assembler.md docs/registry.md
+          git commit -m "docs(implementation): restore canonical RB-INC-096 status"
+          git push

@@ -126,7 +126,7 @@ Dadas as informações autoritativas da solicitação e uma entrada de geração
 - exports: `modules/proposal-management/src/index.ts`;
 - cobertura implementada: 10 testes de sucesso, lifecycle, falhas, persistência e imutabilidade;
 - Increment, Context Pack, registry e matriz publicados na branch;
-- SHA da implementação validada: `3000435aaf93dc9b32deb99e361fc7d6825c1190`;
+- SHA da implementação validada antes do fechamento documental: `3000435aaf93dc9b32deb99e361fc7d6825c1190`;
 - Engineering Validation: run `31061951949`, job `92491556471`;
 - Documentation Validation: run `31061951910`, job `92491556370`;
 - 230 documentos registrados;

@@ -42,8 +42,7 @@ export type GenerateAuthoritativeItineraryProposalCommand = Readonly<{
 }>;
 
 export type AuthoritativeItineraryProposalGenerationErrorCode =
-  | "invalid-trip-id"
-  | "context-trip-mismatch";
+  "invalid-trip-id" | "context-trip-mismatch";
 
 export class AuthoritativeItineraryProposalGenerationError extends Error {
   constructor(

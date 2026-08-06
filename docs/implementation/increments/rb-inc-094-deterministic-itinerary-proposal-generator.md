@@ -123,8 +123,8 @@ Dado um conjunto de Dias e candidatos normalizados, o adapter produz sempre uma 
 - [x] validade derivada inválida é rejeitada;
 - [x] entradas permanecem imutáveis;
 - [x] saída conclui o lifecycle canônico em `ready`;
-- [ ] exports, registry, Context Pack e matriz estão atualizados;
-- [ ] CI integral está verde no SHA definitivo.
+- [x] exports, registry, Context Pack e matriz estão atualizados;
+- [x] CI integral está verde no SHA de fechamento documental.
 
 ## 8. Evidências
 
@@ -132,6 +132,10 @@ Dado um conjunto de Dias e candidatos normalizados, o adapter produz sempre uma 
 - exports públicos: `modules/proposal-management/src/index.ts`;
 - testes unitários: `modules/proposal-management/src/deterministic-itinerary-proposal-generator.test.ts`;
 - cobertura implementada do adapter: 10 testes para determinismo, balanceamento, lifecycle, imutabilidade e limites;
-- governança já publicada na branch: Increment, Context Pack e registry;
-- matriz de rastreabilidade: atualização pendente antes do CI definitivo;
-- Engineering Validation, Documentation Validation, job, SHA, quantidade total de testes e E2E: pendentes do fechamento definitivo da PR #214.
+- governança publicada na branch: Increment, Context Pack, registry e matriz de rastreabilidade;
+- SHA de fechamento documental: `61d8e0635ccbf29ce92d38df75c0529bb04689e1`;
+- Engineering Validation: run `31060389877`, job `92486885615`;
+- Documentation Validation: run `31060389870`, job `92486884413`;
+- 228 documentos registrados;
+- 551 testes aprovados, incluindo 10 testes do adapter determinístico;
+- migrations, smoke, build e 71 testes Playwright responsivos aprovados.

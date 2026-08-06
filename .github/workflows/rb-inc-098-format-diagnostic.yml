@@ -1,6 +1,7 @@
 name: RB-INC-098 Format Diagnostic
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - feature/rb-inc-098-postgres-authoritative-itinerary-proposal-context

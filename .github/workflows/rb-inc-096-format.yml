@@ -20,7 +20,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24.18.0
-          cache: pnpm
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec prettier --write modules/proposal-management/src/index.ts modules/proposal-management/src/itinerary-proposal-generation-input-assembler.ts modules/proposal-management/src/itinerary-proposal-generation-input-assembler.test.ts docs/implementation/increments/rb-inc-096-itinerary-proposal-generation-input-assembler.md docs/implementation/context-packs/rb-inc-096-itinerary-proposal-generation-input-assembler.md docs/implementation/traceability-matrix.md docs/registry.md

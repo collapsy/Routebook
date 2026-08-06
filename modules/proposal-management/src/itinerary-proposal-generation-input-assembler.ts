@@ -178,7 +178,10 @@ function normalizePlaces(
   const byId = new Map<string, ItineraryProposalSourcePlace>();
   for (const source of places) {
     if (!source || typeof source !== "object") {
-      throw new ItineraryProposalGenerationInputAssemblyError("Informe um Place válido.", "invalid-place");
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Informe um Place válido.",
+        "invalid-place",
+      );
     }
     const placeId = requiredText(source.placeId, "invalid-place", "Informe um PlaceId válido.");
     const title = requiredText(source.title, "invalid-place", "Informe um título para o Place.");
@@ -339,13 +342,19 @@ function normalizeCandidates(
       validFrom.getTime() <= asOf.getTime() &&
       (expiresAt === undefined || asOf.getTime() < expiresAt.getTime())
     ) {
-      eligible.push({ recommendationId, placeId, score: source.score, ...(reason ? { reason } : {}) });
+      eligible.push({
+        recommendationId,
+        placeId,
+        score: source.score,
+        ...(reason ? { reason } : {}),
+      });
     }
   }
 
   eligible.sort(
     (left, right) =>
-      right.score - left.score || compareCanonicalText(left.recommendationId, right.recommendationId),
+      right.score - left.score ||
+      compareCanonicalText(left.recommendationId, right.recommendationId),
   );
 
   return Object.freeze(
@@ -362,9 +371,7 @@ function normalizeCandidates(
         placeId: place.placeId,
         title: place.title,
         ...(place.description ? { description: place.description } : {}),
-        ...(place.durationMinutes !== undefined
-          ? { durationMinutes: place.durationMinutes }
-          : {}),
+        ...(place.durationMinutes !== undefined ? { durationMinutes: place.durationMinutes } : {}),
         ...(recommendation.reason ? { reason: recommendation.reason } : {}),
         ...(place.estimatedCostAmount !== undefined
           ? { estimatedCostAmount: place.estimatedCostAmount }
@@ -388,11 +395,6 @@ export function assembleItineraryProposalGenerationInput(
     "Informe um TripId válido.",
   );
   const placesById = normalizePlaces(input?.places);
-  const candidates = normalizeCandidates(
-    tripId,
-    input?.recommendations,
-    placesById,
-    asOf,
-  );
+  const candidates = normalizeCandidates(tripId, input?.recommendations, placesById, asOf);
   return Object.freeze({ days, candidates });
 }

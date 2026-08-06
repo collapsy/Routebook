@@ -107,6 +107,7 @@ ai_context:
 | RB-INC-093 | RB-QA-001, RB-CICD-001, RB-SEC-001, RB-ADR-007–008, RB-ADR-027 e RB-INC-084–085, RB-INC-091–092 | #211 | `feature/rb-inc-093-itinerary-proposal-acceptance-e2e`, PR #212 | aceite integral UI–PostgreSQL, replay idempotente, redirecionamento autoritativo e validação de persistência | runs 30970192016 e 30970192009, job 92192651639, SHA d7ef177; 226 documentos, migrations, 541 testes, smoke, build e Playwright responsivo verdes | Pronto para integração |
 
 | RB-INC-094 | RB-UC-022, RB-FR-087–096, RB-ARC-003, decisão #118 e RB-INC-052–057, RB-INC-093 | #213 | `feature/rb-inc-094-deterministic-itinerary-proposal-generator`, PR #214 | porta interna, contratos normalizados e adapter puro com ordenação canônica, balanceamento, append, duração padrão explícita, validade e lifecycle `ready` | runs 31060389877 e 31060389870, jobs 92486885615 e 92486884413, SHA 61d8e063; 228 documentos, migrations, 551 testes, smoke, build e 71 Playwright responsivos verdes | Pronto para integração |
+| RB-INC-095 | RB-UC-022, RB-FR-087–094, RB-ARC-003, decisão #118 e RB-INC-048–056, RB-INC-094 | #215 | `feature/rb-inc-095-itinerary-proposal-generation-orchestration`, PR #216 | application service interno que persiste `requested → generating → ready | failed` por repository e porta injetados | runs 31061951949 e 31061951910, jobs 92491556471 e 92491556370, SHA 3000435a; 230 documentos, migrations, 561 testes, smoke, build e 71 Playwright responsivos verdes | Pronto para integração |
 
 ## Evidências do RB-INC-003
 

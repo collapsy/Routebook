@@ -94,7 +94,7 @@ O RB-INC-097 passou a depender de uma porta abstrata para carregar o contexto de
 - [x] o adapter não replica regras do assembler;
 - [x] testes de integração exercitam o PostgreSQL real do CI;
 - [ ] CI integral aprovado no mesmo SHA;
-- [ ] registry, Context Pack e matriz atualizados.
+- [x] registry, Context Pack e matriz atualizados.
 
 ## 7. Evidências
 

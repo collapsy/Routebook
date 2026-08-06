@@ -16,6 +16,17 @@ export type {
   ReplayedItineraryProposalAcceptance,
 } from "./accept-itinerary-proposal";
 export {
+  AuthoritativeItineraryProposalGenerationError,
+  generateAuthoritativeItineraryProposal,
+} from "./authoritative-itinerary-proposal-generation";
+export type {
+  AuthoritativeItineraryProposalGenerationContext,
+  AuthoritativeItineraryProposalGenerationContextPort,
+  AuthoritativeItineraryProposalGenerationErrorCode,
+  GenerateAuthoritativeItineraryProposalCommand,
+  LoadAuthoritativeItineraryProposalGenerationContextInput,
+} from "./authoritative-itinerary-proposal-generation";
+export {
   DEFAULT_DETERMINISTIC_ACTIVITY_DURATION_MINUTES,
   DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_METHOD,
   DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_VERSION,

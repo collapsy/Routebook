@@ -310,10 +310,18 @@ describe("generateAndPersistItineraryProposal", () => {
     const repository = new MemoryItineraryProposalRepository();
     const port = new ControlledGenerationPort([], completionContent());
     const input = command();
-    const before = structuredClone(input);
+    const requestBefore = structuredClone(input.request);
+    const daysBefore = structuredClone(input.generation.days);
+    const candidatesBefore = structuredClone(input.generation.candidates);
+    const generatedAtBefore = new Date(input.generation.generatedAt.getTime());
+    const factoryBefore = input.generation.createProposedActivityId;
 
     await generateAndPersistItineraryProposal(repository, port, input);
 
-    expect(input).toEqual(before);
+    expect(input.request).toEqual(requestBefore);
+    expect(input.generation.days).toEqual(daysBefore);
+    expect(input.generation.candidates).toEqual(candidatesBefore);
+    expect(input.generation.generatedAt).toEqual(generatedAtBefore);
+    expect(input.generation.createProposedActivityId).toBe(factoryBefore);
   });
 });

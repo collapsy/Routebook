@@ -47,7 +47,7 @@ Issue: #215.
 
 Branch: `feature/rb-inc-095-itinerary-proposal-generation-orchestration`.
 
-Pull request: pendente.
+Pull request: #216.
 
 ## 2. Contexto
 
@@ -105,20 +105,25 @@ Dadas as informações autoritativas da solicitação e uma entrada de geração
 
 ## 7. Critérios de aceite
 
-- [ ] serviço usa somente contratos internos;
-- [ ] repository e porta são injetados;
-- [ ] Proposal é persistida em `requested`, `generating` e `ready` na ordem canônica;
-- [ ] porta é invocada exatamente uma vez;
-- [ ] saída da porta conclui e persiste a Proposal em `ready`;
-- [ ] falha conhecida da porta persiste `failed` com código estável;
-- [ ] falha desconhecida usa fallback estável;
-- [ ] falha de repository é propagada sem conversão indevida;
-- [ ] entradas e dependências não são mutadas;
-- [ ] nenhum efeito é aplicado ao Itinerary;
-- [ ] não existem dependências de web, banco, Drizzle, HTTP, Provider ou ambiente;
-- [ ] exports, registry, Context Pack e matriz estão atualizados;
+- [x] serviço usa somente contratos internos;
+- [x] repository e porta são injetados;
+- [x] Proposal é persistida em `requested`, `generating` e `ready` na ordem canônica;
+- [x] porta é invocada exatamente uma vez;
+- [x] saída da porta conclui e persiste a Proposal em `ready`;
+- [x] falha conhecida da porta persiste `failed` com código estável;
+- [x] falha desconhecida usa fallback estável;
+- [x] falha de repository é propagada sem conversão indevida;
+- [x] entradas e dependências não são mutadas;
+- [x] nenhum efeito é aplicado ao Itinerary;
+- [x] não existem dependências de web, banco, Drizzle, HTTP, Provider ou ambiente;
+- [x] exports, registry, Context Pack e matriz estão atualizados;
 - [ ] CI integral está verde no SHA definitivo.
 
 ## 8. Evidências
 
-Pendentes da implementação e validação da Draft PR.
+- application service: `modules/proposal-management/src/itinerary-proposal-generation-service.ts`;
+- testes: `modules/proposal-management/src/itinerary-proposal-generation-service.test.ts`;
+- exports: `modules/proposal-management/src/index.ts`;
+- cobertura implementada: 10 testes de sucesso, lifecycle, falhas, persistência e imutabilidade;
+- Increment, Context Pack, registry e matriz publicados na branch;
+- runs, jobs, SHA definitivo, quantidade total de documentos, testes e E2E: pendentes do fechamento da PR #216.

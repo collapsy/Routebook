@@ -1,0 +1,32 @@
+name: RB-INC-096 Format
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-096-itinerary-proposal-generation-input-assembler
+    paths:
+      - .github/workflows/rb-inc-096-format.yml
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/rb-inc-096-itinerary-proposal-generation-input-assembler
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: pnpm
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prettier --write modules/proposal-management/src/index.ts modules/proposal-management/src/itinerary-proposal-generation-input-assembler.ts modules/proposal-management/src/itinerary-proposal-generation-input-assembler.test.ts docs/implementation/increments/rb-inc-096-itinerary-proposal-generation-input-assembler.md docs/implementation/context-packs/rb-inc-096-itinerary-proposal-generation-input-assembler.md docs/implementation/traceability-matrix.md docs/registry.md
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add modules/proposal-management/src/index.ts modules/proposal-management/src/itinerary-proposal-generation-input-assembler.ts modules/proposal-management/src/itinerary-proposal-generation-input-assembler.test.ts docs/implementation/increments/rb-inc-096-itinerary-proposal-generation-input-assembler.md docs/implementation/context-packs/rb-inc-096-itinerary-proposal-generation-input-assembler.md docs/implementation/traceability-matrix.md docs/registry.md
+          git commit -m "style(rb-inc-096): apply canonical formatting"
+          git push

@@ -31,6 +31,21 @@ export type {
   ItineraryProposalGenerationPort,
 } from "./deterministic-itinerary-proposal-generator";
 export {
+  assembleItineraryProposalGenerationInput,
+  eligibleItineraryProposalRecommendationStatuses,
+  ItineraryProposalGenerationInputAssemblyError,
+} from "./itinerary-proposal-generation-input-assembler";
+export type {
+  AssembleItineraryProposalGenerationInput,
+  AssembledItineraryProposalGenerationInput,
+  EligibleItineraryProposalRecommendationStatus,
+  ItineraryProposalGenerationInputAssemblyErrorCode,
+  ItineraryProposalSourceDay,
+  ItineraryProposalSourceItinerary,
+  ItineraryProposalSourcePlace,
+  ItineraryProposalSourceRecommendation,
+} from "./itinerary-proposal-generation-input-assembler";
+export {
   generateAndPersistItineraryProposal,
   INVALID_ITINERARY_PROPOSAL_GENERATION_OUTPUT_FAILURE_CODE,
   ITINERARY_PROPOSAL_GENERATION_FAILURE_CODE_PREFIX,

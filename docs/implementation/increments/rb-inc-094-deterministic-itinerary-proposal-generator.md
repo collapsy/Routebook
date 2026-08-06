@@ -53,7 +53,7 @@ A decisão registrada na issue #118 determinou que a geração deve ser exposta 
 
 Dado um conjunto de Dias e candidatos normalizados, o adapter produz sempre uma saída equivalente e revisável:
 
-- Dias ordenados canonicamente por data e identificador;
+- Dias ordenados canonicamente por data e identificador, sem dependência de locale;
 - candidatos preservados na ordem recebida;
 - distribuição estável para o Dia menos carregado;
 - novas Proposed Activities anexadas após as Atividades existentes;
@@ -69,12 +69,16 @@ Dado um conjunto de Dias e candidatos normalizados, o adapter produz sempre uma 
 - `ItineraryProposalGenerationPort` recebe somente contratos internos.
 - O adapter não importa banco, HTTP client, SDK, módulo web ou Provider.
 - Datas e IDs são fornecidos pela chamada; não existe relógio ou UUID global oculto.
+- Datas de Dia precisam existir no calendário civil e usar `YYYY-MM-DD`.
+- A ordenação usa comparação lexicográfica estável de data e identificador, sem `localeCompare`.
 - O balanceamento considera a quantidade atual de Atividades e as atribuições feitas durante a geração.
 - Empates mantêm a ordem canônica dos Dias.
 - `proposedOrder` é zero-based e representa append após o conteúdo já existente.
 - `proposedStartTime` permanece ausente.
 - `flexibility` é `flexible`.
 - Candidatos sem duração usam 90 minutos e geram limitação explícita.
+- ProposedActivityIds são produzidos por factory injetada e precisam ser não vazios e únicos.
+- A validade é derivada em 24 horas e overflow temporal é rejeitado com código estável.
 - Geração sem candidatos é válida, vazia e explicada.
 - Ausência de Dias, duplicidades e valores inválidos produzem erros estáveis.
 - Nenhuma entrada recebida pode ser mutada.
@@ -106,7 +110,7 @@ Dado um conjunto de Dias e candidatos normalizados, o adapter produz sempre uma 
 - [x] porta usa somente contratos internos;
 - [x] adapter não possui dependência externa ou I/O;
 - [x] mesma entrada e factories determinísticas produzem saída equivalente;
-- [x] Dias são ordenados canonicamente;
+- [x] Dias são ordenados canonicamente sem dependência de locale;
 - [x] candidatos são balanceados de forma estável;
 - [x] ordem recebida dos candidatos é preservada;
 - [x] `proposedOrder` permanece válido para aplicação posterior;
@@ -114,21 +118,20 @@ Dado um conjunto de Dias e candidatos normalizados, o adapter produz sempre uma 
 - [x] duração padrão é identificada nas limitações;
 - [x] nenhum horário é inventado;
 - [x] ausência de candidatos produz Proposal vazia e explicada;
-- [x] ausência de Dias e duplicidades são rejeitadas com códigos estáveis;
+- [x] ausência de Dias, datas inexistentes e duplicidades são rejeitadas com códigos estáveis;
+- [x] ProposedActivityIds vazios ou duplicados são rejeitados;
+- [x] validade derivada inválida é rejeitada;
 - [x] entradas permanecem imutáveis;
 - [x] saída conclui o lifecycle canônico em `ready`;
-- [x] exports, registry, Context Pack e matriz estão atualizados;
-- [x] CI integral está verde.
+- [ ] exports, registry, Context Pack e matriz estão atualizados;
+- [ ] CI integral está verde no SHA definitivo.
 
 ## 8. Evidências
 
 - porta e adapter: `modules/proposal-management/src/deterministic-itinerary-proposal-generator.ts`;
 - exports públicos: `modules/proposal-management/src/index.ts`;
 - testes unitários: `modules/proposal-management/src/deterministic-itinerary-proposal-generator.test.ts`;
-- cobertura do adapter: 9 testes aprovados;
-- suíte total: 550 testes de domínio, componentes e PostgreSQL aprovados;
-- E2E: 71 cenários Playwright responsivos aprovados;
-- Engineering Validation: run `30971905853`, job `92197885245`, SHA `9eb79c4574ada6ed926751d4de0dced459027b6b`;
-- Documentation Validation: run `30971905850`, SHA `9eb79c4574ada6ed926751d4de0dced459027b6b`;
-- gates confirmados: format, documentação, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo;
-- governança: registry, Context Pack e matriz de rastreabilidade atualizados.
+- cobertura implementada do adapter: 10 testes para determinismo, balanceamento, lifecycle, imutabilidade e limites;
+- governança já publicada na branch: Increment, Context Pack e registry;
+- matriz de rastreabilidade: atualização pendente antes do CI definitivo;
+- Engineering Validation, Documentation Validation, job, SHA, quantidade total de testes e E2E: pendentes do fechamento definitivo da PR #214.

@@ -15,11 +15,10 @@ import {
 import type { ItineraryProposal } from "./itinerary-proposal";
 import type { ItineraryProposalRepository } from "./repository";
 
-export type LoadAuthoritativeItineraryProposalGenerationContextInput =
-  Readonly<{
-    tripId: string;
-    asOf: Date;
-  }>;
+export type LoadAuthoritativeItineraryProposalGenerationContextInput = Readonly<{
+  tripId: string;
+  asOf: Date;
+}>;
 
 export type AuthoritativeItineraryProposalGenerationContext = Readonly<{
   itinerary: ItineraryProposalSourceItinerary;

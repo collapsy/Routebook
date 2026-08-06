@@ -40,8 +40,7 @@ export class PostgresAuthoritativeItineraryProposalGenerationContextError extend
   }
 }
 
-const uuidPattern =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function requireTripId(value: string): string {
   const normalized = typeof value === "string" ? value.trim() : "";
@@ -213,9 +212,7 @@ async function loadContext(
   });
 }
 
-export class PostgresAuthoritativeItineraryProposalGenerationContextPort
-  implements AuthoritativeItineraryProposalGenerationContextPort
-{
+export class PostgresAuthoritativeItineraryProposalGenerationContextPort implements AuthoritativeItineraryProposalGenerationContextPort {
   constructor(private readonly database: Database = getDatabase()) {}
 
   async load(

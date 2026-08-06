@@ -60,11 +60,13 @@ function tripRow(id: string, name: string) {
 }
 
 beforeAll(async () => {
-  await database.insert(trips).values([
-    tripRow(tripId, "Viagem com contexto"),
-    tripRow(tripWithoutItineraryId, "Viagem sem itinerary"),
-    tripRow(tripWithoutDaysId, "Viagem sem dias"),
-  ]);
+  await database
+    .insert(trips)
+    .values([
+      tripRow(tripId, "Viagem com contexto"),
+      tripRow(tripWithoutItineraryId, "Viagem sem itinerary"),
+      tripRow(tripWithoutDaysId, "Viagem sem dias"),
+    ]);
   await database.insert(places).values([
     {
       id: secondPlaceId,
@@ -143,9 +145,7 @@ beforeAll(async () => {
       status: "generated",
       contextSnapshot: { schemaVersion: 1, tripId },
       contextFingerprint: "b".repeat(64),
-      reasons: [
-        { code: "scenic", message: "Boa opção para o segundo dia.", evidence: {} },
-      ],
+      reasons: [{ code: "scenic", message: "Boa opção para o segundo dia.", evidence: {} }],
       limitations: [],
       score: 0.8,
       confidenceLevel: "high",
@@ -170,9 +170,7 @@ beforeAll(async () => {
       status: "presented",
       contextSnapshot: { schemaVersion: 1, tripId },
       contextFingerprint: "a".repeat(64),
-      reasons: [
-        { code: "wildlife", message: "Chance de observar golfinhos.", evidence: {} },
-      ],
+      reasons: [{ code: "wildlife", message: "Chance de observar golfinhos.", evidence: {} }],
       limitations: [],
       score: 0.9,
       confidenceLevel: "high",
@@ -220,10 +218,9 @@ describe("PostgresAuthoritativeItineraryProposalGenerationContextPort", () => {
         },
       ],
     });
-    expect(context.recommendations.map((recommendation) => recommendation.recommendationId)).toEqual([
-      firstRecommendationId,
-      secondRecommendationId,
-    ]);
+    expect(
+      context.recommendations.map((recommendation) => recommendation.recommendationId),
+    ).toEqual([firstRecommendationId, secondRecommendationId]);
     expect(context.recommendations[0]).toMatchObject({
       tripId,
       placeId: firstPlaceId,

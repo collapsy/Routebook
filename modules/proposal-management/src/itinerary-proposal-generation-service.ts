@@ -16,8 +16,7 @@ import {
   startAndPersistItineraryProposalGeneration,
 } from "./service";
 
-export const ITINERARY_PROPOSAL_GENERATION_FAILURE_CODE_PREFIX =
-  "itinerary-proposal-generation";
+export const ITINERARY_PROPOSAL_GENERATION_FAILURE_CODE_PREFIX = "itinerary-proposal-generation";
 export const UNKNOWN_ITINERARY_PROPOSAL_GENERATION_FAILURE_CODE =
   "itinerary-proposal-generation-failed";
 export const INVALID_ITINERARY_PROPOSAL_GENERATION_OUTPUT_FAILURE_CODE =

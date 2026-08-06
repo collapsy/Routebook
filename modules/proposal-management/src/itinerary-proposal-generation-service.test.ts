@@ -162,12 +162,7 @@ describe("generateAndPersistItineraryProposal", () => {
       status: "ready",
       generationMethod: "controlled",
     });
-    expect(history).toEqual([
-      "create:requested",
-      "save:generating",
-      "generate",
-      "save:ready",
-    ]);
+    expect(history).toEqual(["create:requested", "save:generating", "generate", "save:ready"]);
     expect(port.calls).toEqual([input.generation]);
     expect(repository.createCalls).toHaveLength(1);
     expect(repository.saveCalls.map((proposal) => proposal.status)).toEqual([
@@ -213,12 +208,7 @@ describe("generateAndPersistItineraryProposal", () => {
       failureCode: "itinerary-proposal-generation-invalid-day",
       failedAt: new Date("2026-08-05T12:03:00.000Z"),
     });
-    expect(history).toEqual([
-      "create:requested",
-      "save:generating",
-      "generate",
-      "save:failed",
-    ]);
+    expect(history).toEqual(["create:requested", "save:generating", "generate", "save:failed"]);
   });
 
   it("usa fallback estável para falha desconhecida da porta", async () => {
@@ -258,9 +248,9 @@ describe("generateAndPersistItineraryProposal", () => {
     repository.createError = new Error("create unavailable");
     const port = new ControlledGenerationPort([], completionContent());
 
-    await expect(
-      generateAndPersistItineraryProposal(repository, port, command()),
-    ).rejects.toThrow("create unavailable");
+    await expect(generateAndPersistItineraryProposal(repository, port, command())).rejects.toThrow(
+      "create unavailable",
+    );
     expect(port.calls).toEqual([]);
     expect(repository.saveCalls).toEqual([]);
   });
@@ -270,9 +260,9 @@ describe("generateAndPersistItineraryProposal", () => {
     repository.saveErrors.set("generating", new Error("generating unavailable"));
     const port = new ControlledGenerationPort([], completionContent());
 
-    await expect(
-      generateAndPersistItineraryProposal(repository, port, command()),
-    ).rejects.toThrow("generating unavailable");
+    await expect(generateAndPersistItineraryProposal(repository, port, command())).rejects.toThrow(
+      "generating unavailable",
+    );
     expect(port.calls).toEqual([]);
     expect(repository.saveCalls.map((proposal) => proposal.status)).toEqual(["generating"]);
   });
@@ -282,9 +272,9 @@ describe("generateAndPersistItineraryProposal", () => {
     repository.saveErrors.set("ready", new Error("ready unavailable"));
     const port = new ControlledGenerationPort([], completionContent());
 
-    await expect(
-      generateAndPersistItineraryProposal(repository, port, command()),
-    ).rejects.toThrow("ready unavailable");
+    await expect(generateAndPersistItineraryProposal(repository, port, command())).rejects.toThrow(
+      "ready unavailable",
+    );
     expect(port.calls).toHaveLength(1);
     expect(repository.saveCalls.map((proposal) => proposal.status)).toEqual([
       "generating",

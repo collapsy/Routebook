@@ -63,7 +63,9 @@ export {
   toItineraryProposalGenerationFailureCode,
   UNKNOWN_ITINERARY_PROPOSAL_GENERATION_FAILURE_CODE,
 } from "./itinerary-proposal-generation-service";
-export type { GenerateAndPersistItineraryProposalCommand } from "./itinerary-proposal-generation-service";
+export type {
+  GenerateAndPersistItineraryProposalCommand,
+} from "./itinerary-proposal-generation-service";
 export {
   createProposalApplicationId,
   createProposalApplicationRequestFingerprint,

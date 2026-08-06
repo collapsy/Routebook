@@ -4,6 +4,7 @@ import type {
 } from "./deterministic-itinerary-proposal-generator";
 import {
   ItineraryProposalValidationError,
+  type CompleteItineraryProposalGenerationInput,
   type ItineraryProposal,
   type RequestItineraryProposalInput,
 } from "./itinerary-proposal";
@@ -69,7 +70,7 @@ export async function generateAndPersistItineraryProposal(
     startedAt: command.startedAt,
   });
 
-  let generatedContent;
+  let generatedContent: CompleteItineraryProposalGenerationInput;
   try {
     generatedContent = await generationPort.generate(command.generation);
   } catch (error) {

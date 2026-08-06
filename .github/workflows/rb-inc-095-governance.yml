@@ -1,0 +1,84 @@
+name: RB-INC-095 Temporary Governance
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-095-itinerary-proposal-generation-orchestration
+
+permissions:
+  contents: write
+
+jobs:
+  governance:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-095-itinerary-proposal-generation-orchestration
+          fetch-depth: 0
+
+      - name: Update governance
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          registry_path = Path("docs/registry.md")
+          registry = registry_path.read_text()
+          marker = "\n## Status possíveis"
+          entries = (
+              "\n| RB-INC-095 | Orquestração do Lifecycle de Geração de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-095-itinerary-proposal-generation-orchestration.md](./implementation/increments/rb-inc-095-itinerary-proposal-generation-orchestration.md) |\n"
+              "| RB-CTX-095 | Context Pack do RB-INC-095 | Implementation Context | Draft | 0.1.0 | [rb-inc-095-itinerary-proposal-generation-orchestration.md](./implementation/context-packs/rb-inc-095-itinerary-proposal-generation-orchestration.md) |\n"
+          )
+          if "| RB-INC-095 |" not in registry:
+              if marker not in registry:
+                  raise SystemExit("Marcador do registry não encontrado")
+              registry = registry.replace(marker, entries + marker, 1)
+              registry_path.write_text(registry)
+
+          matrix_path = Path("docs/implementation/traceability-matrix.md")
+          matrix = matrix_path.read_text()
+          if "| RB-INC-095 |" not in matrix:
+              lines = matrix.splitlines()
+              index = next(i for i, line in enumerate(lines) if line.startswith("| RB-INC-094 |"))
+              lines.insert(
+                  index + 1,
+                  "| RB-INC-095 | RB-UC-022, RB-FR-087–094, RB-ARC-003, decisão #118 e RB-INC-048–056, RB-INC-094 | #215 | `feature/rb-inc-095-itinerary-proposal-generation-orchestration`, PR #216 | application service interno que persiste `requested → generating → ready | failed` por repository e porta injetados | 10 testes do serviço implementados; CI definitivo pendente | Em validação |",
+              )
+              matrix_path.write_text("\n".join(lines) + "\n")
+
+          increment_path = Path("docs/implementation/increments/rb-inc-095-itinerary-proposal-generation-orchestration.md")
+          increment = increment_path.read_text()
+          increment = increment.replace("Pull request: pendente.", "Pull request: #216.")
+          for criterion in [
+              "serviço usa somente contratos internos",
+              "repository e porta são injetados",
+              "Proposal é persistida em `requested`, `generating` e `ready` na ordem canônica",
+              "porta é invocada exatamente uma vez",
+              "saída da porta conclui e persiste a Proposal em `ready`",
+              "falha conhecida da porta persiste `failed` com código estável",
+              "falha desconhecida usa fallback estável",
+              "falha de repository é propagada sem conversão indevida",
+              "entradas e dependências não são mutadas",
+              "nenhum efeito é aplicado ao Itinerary",
+              "não existem dependências de web, banco, Drizzle, HTTP, Provider ou ambiente",
+              "exports, registry, Context Pack e matriz estão atualizados",
+          ]:
+              increment = increment.replace(f"- [ ] {criterion};", f"- [x] {criterion};")
+          increment = increment.replace(
+              "## 8. Evidências\n\nPendentes da implementação e validação da Draft PR.",
+              "## 8. Evidências\n\n- application service: `modules/proposal-management/src/itinerary-proposal-generation-service.ts`;\n- testes: `modules/proposal-management/src/itinerary-proposal-generation-service.test.ts`;\n- exports: `modules/proposal-management/src/index.ts`;\n- cobertura implementada: 10 testes de sucesso, lifecycle, falhas, persistência e imutabilidade;\n- Increment, Context Pack, registry e matriz publicados na branch;\n- runs, jobs, SHA definitivo, quantidade total de documentos, testes e E2E: pendentes do fechamento da PR #216.",
+          )
+          increment_path.write_text(increment)
+
+          Path(".github/workflows/rb-inc-095-governance.yml").unlink()
+          PY
+
+      - name: Commit governance
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "docs(rb-inc-095): registrar governança do incremento"
+          git push origin HEAD:feature/rb-inc-095-itinerary-proposal-generation-orchestration

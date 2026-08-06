@@ -117,7 +117,7 @@ Dadas as informações autoritativas da solicitação e uma entrada de geração
 - [x] nenhum efeito é aplicado ao Itinerary;
 - [x] não existem dependências de web, banco, Drizzle, HTTP, Provider ou ambiente;
 - [x] exports, registry, Context Pack e matriz estão atualizados;
-- [ ] CI integral está verde no SHA definitivo.
+- [x] CI integral está verde no SHA de implementação validada.
 
 ## 8. Evidências
 
@@ -126,4 +126,10 @@ Dadas as informações autoritativas da solicitação e uma entrada de geração
 - exports: `modules/proposal-management/src/index.ts`;
 - cobertura implementada: 10 testes de sucesso, lifecycle, falhas, persistência e imutabilidade;
 - Increment, Context Pack, registry e matriz publicados na branch;
-- runs, jobs, SHA definitivo, quantidade total de documentos, testes e E2E: pendentes do fechamento da PR #216.
+- SHA da implementação validada: `3000435aaf93dc9b32deb99e361fc7d6825c1190`;
+- Engineering Validation: run `31061951949`, job `92491556471`;
+- Documentation Validation: run `31061951910`, job `92491556370`;
+- 230 documentos registrados;
+- 561 testes aprovados, incluindo 10 testes do application service;
+- migrations, smoke e build aprovados;
+- 71 testes Playwright responsivos aprovados.

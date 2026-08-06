@@ -4,8 +4,8 @@ title: Context Pack do RB-INC-096
 description: Contexto mínimo para manutenção e evolução do assembler determinístico de entrada da geração de Itinerary Proposal.
 document_type: implementation-context-pack
 owner: Proposal Management
-status: Draft
-version: "0.1.0"
+status: Ready
+version: "1.0.0"
 created: "2026-08-05"
 last_updated: "2026-08-05"
 authors:
@@ -85,4 +85,7 @@ Uma composição produtiva deve carregar Itinerary, Recommendations e Places aut
 - issue: #217;
 - PR: #218;
 - branch: `feature/rb-inc-096-itinerary-proposal-generation-input-assembler`;
-- CI final: pendente.
+- SHA validado: `e2d3cd94a3a56c944c5cac51a65f2183bc9b84b0`;
+- Documentation Validation: run `31065745508`, job `92502975148`;
+- Engineering Validation: run `31065745496`, job `92502974835`;
+- 232 documentos, 573 testes e 71 testes Playwright responsivos aprovados.

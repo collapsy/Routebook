@@ -4,8 +4,8 @@ title: Assembler Determinístico de Entrada para Geração de Itinerary Proposal
 description: Normaliza snapshots autoritativos de Itinerary, Recommendations e Places para a porta determinística de geração.
 document_type: implementation-increment
 owner: Proposal Management
-status: Draft
-version: "0.1.0"
+status: Ready
+version: "1.0.0"
 created: "2026-08-05"
 last_updated: "2026-08-05"
 authors:
@@ -97,7 +97,7 @@ Dado um Itinerary, Recommendations e metadados de Places já carregados por uma 
 - [x] entradas não são mutadas;
 - [x] não existem dependências de web, banco, Drizzle, HTTP, Provider ou ambiente;
 - [x] exports, registry, Context Pack e matriz estão atualizados;
-- [ ] CI integral está verde no SHA definitivo.
+- [x] CI integral está verde no SHA validado.
 
 ## 7. Evidências
 
@@ -106,6 +106,10 @@ Dado um Itinerary, Recommendations e metadados de Places já carregados por uma 
 - exports: `modules/proposal-management/src/index.ts`;
 - cobertura implementada: 12 testes de ordenação, elegibilidade, mapeamento, determinismo, imutabilidade e falhas;
 - Increment, Context Pack, registry e matriz publicados na branch;
-- SHA definitivo: pendente;
-- Engineering Validation: pendente;
-- Documentation Validation: pendente;
+- SHA validado: `e2d3cd94a3a56c944c5cac51a65f2183bc9b84b0`;
+- Engineering Validation: run `31065745496`, job `92502974835`;
+- Documentation Validation: run `31065745508`, job `92502975148`;
+- 232 documentos registrados;
+- 573 testes aprovados, incluindo os 12 testes do assembler;
+- migrations, smoke e build aprovados;
+- 71 testes Playwright responsivos aprovados.

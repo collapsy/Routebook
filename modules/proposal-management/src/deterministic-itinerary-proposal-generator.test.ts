@@ -116,11 +116,11 @@ describe("DeterministicItineraryProposalGenerator", () => {
     );
   });
 
-  it("usa a ordem canônica dos Dias como desempate sem depender da ordem de entrada", async () => {
+  it("usa a ordem canônica dos Dias como desempate sem depender de locale ou ordem de entrada", async () => {
     const generator = new DeterministicItineraryProposalGenerator();
     const days = [
-      { tripDayId: "day-b", date: "2026-08-23", existingActivityCount: 0 },
       { tripDayId: "day-a", date: "2026-08-22", existingActivityCount: 0 },
+      { tripDayId: "day-Z", date: "2026-08-22", existingActivityCount: 0 },
     ] as const;
 
     const result = await generator.generate(
@@ -131,8 +131,8 @@ describe("DeterministicItineraryProposalGenerator", () => {
     );
 
     expect(result.proposedActivities.map((activity) => activity.targetTripDayId)).toEqual([
+      "day-Z",
       "day-a",
-      "day-b",
     ]);
   });
 
@@ -232,7 +232,15 @@ describe("DeterministicItineraryProposalGenerator", () => {
     ).rejects.toMatchObject({ code: "duplicate-candidate" });
   });
 
-  it("rejeita duração, custo, data e ProposedActivityId inválidos com códigos estáveis", async () => {
+  it("rejeita ProposedActivityIds duplicados produzidos pela factory", async () => {
+    const generator = new DeterministicItineraryProposalGenerator();
+
+    await expect(
+      generator.generate(input({ createProposedActivityId: () => "proposed-duplicate" })),
+    ).rejects.toMatchObject({ code: "duplicate-proposed-activity-id" });
+  });
+
+  it("rejeita duração, custo, data, validade e ProposedActivityId inválidos com códigos estáveis", async () => {
     const generator = new DeterministicItineraryProposalGenerator();
 
     await expect(
@@ -250,10 +258,24 @@ describe("DeterministicItineraryProposalGenerator", () => {
     ).rejects.toMatchObject({ code: "invalid-candidate" });
 
     await expect(
+      generator.generate(
+        input({
+          days: [
+            { tripDayId: "day-invalid", date: "2026-02-30", existingActivityCount: 0 },
+          ],
+        }),
+      ),
+    ).rejects.toMatchObject({ code: "invalid-day" });
+
+    await expect(
       generator.generate(input({ generatedAt: new Date("invalid") })),
     ).rejects.toMatchObject({
       code: "invalid-generated-at",
     });
+
+    await expect(
+      generator.generate(input({ generatedAt: new Date(8_640_000_000_000_000 - 1) })),
+    ).rejects.toMatchObject({ code: "invalid-validity" });
 
     await expect(
       generator.generate(input({ createProposedActivityId: () => " " })),

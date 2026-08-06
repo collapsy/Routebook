@@ -1,0 +1,77 @@
+name: RB-INC-096 Closeout
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-096-itinerary-proposal-generation-input-assembler
+    paths:
+      - .github/workflows/rb-inc-096-closeout.yml
+
+permissions:
+  contents: write
+
+jobs:
+  closeout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/rb-inc-096-itinerary-proposal-generation-input-assembler
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Record final evidence
+        shell: python
+        run: |
+          from pathlib import Path
+
+          increment = Path("docs/implementation/increments/rb-inc-096-itinerary-proposal-generation-input-assembler.md")
+          text = increment.read_text()
+          text = text.replace("status: Draft", "status: Ready", 1)
+          text = text.replace('version: "0.1.0"', 'version: "1.0.0"', 1)
+          text = text.replace("- [ ] CI integral está verde no SHA definitivo.", "- [x] CI integral está verde no SHA validado.")
+          text = text.replace(
+              "- SHA definitivo: pendente;\n- Engineering Validation: pendente;\n- Documentation Validation: pendente;",
+              "- SHA validado: `e2d3cd94a3a56c944c5cac51a65f2183bc9b84b0`;\n- Engineering Validation: run `31065745496`, job `92502974835`;\n- Documentation Validation: run `31065745508`, job `92502975148`;\n- 232 documentos registrados;\n- 573 testes aprovados, incluindo os 12 testes do assembler;\n- migrations, smoke e build aprovados;\n- 71 testes Playwright responsivos aprovados.",
+          )
+          increment.write_text(text)
+
+          context = Path("docs/implementation/context-packs/rb-inc-096-itinerary-proposal-generation-input-assembler.md")
+          text = context.read_text()
+          text = text.replace("status: Draft", "status: Ready", 1)
+          text = text.replace('version: "0.1.0"', 'version: "1.0.0"', 1)
+          text = text.replace(
+              "- CI final: pendente.",
+              "- SHA validado: `e2d3cd94a3a56c944c5cac51a65f2183bc9b84b0`;\n- Documentation Validation: run `31065745508`, job `92502975148`;\n- Engineering Validation: run `31065745496`, job `92502974835`;\n- 232 documentos, 573 testes e 71 testes Playwright responsivos aprovados.",
+          )
+          context.write_text(text)
+
+          registry = Path("docs/registry.md")
+          text = registry.read_text()
+          text = text.replace(
+              "| RB-INC-096 | Assembler Determinístico de Entrada para Geração de Itinerary Proposal | Implementation | Draft | 0.1.0 |",
+              "| RB-INC-096 | Assembler Determinístico de Entrada para Geração de Itinerary Proposal | Implementation | Ready | 1.0.0 |",
+          )
+          text = text.replace(
+              "| RB-CTX-096 | Context Pack do RB-INC-096 | Implementation Context | Draft | 0.1.0 |",
+              "| RB-CTX-096 | Context Pack do RB-INC-096 | Implementation Context | Ready | 1.0.0 |",
+          )
+          registry.write_text(text)
+
+          matrix = Path("docs/implementation/traceability-matrix.md")
+          text = matrix.read_text()
+          old = "| RB-INC-096 | RB-UC-022, RB-FR-087–096, RB-ARC-003 e RB-INC-094–095 | #217 | `feature/rb-inc-096-itinerary-proposal-generation-input-assembler`, PR #218 | assembler puro de snapshots autoritativos de Itinerary, Recommendations e Places para Dias e candidatos normalizados | CI final pendente | Em validação |"
+          new = "| RB-INC-096 | RB-UC-022, RB-FR-087–096, RB-ARC-003 e RB-INC-094–095 | #217 | `feature/rb-inc-096-itinerary-proposal-generation-input-assembler`, PR #218 | assembler puro de snapshots autoritativos de Itinerary, Recommendations e Places para Dias e candidatos normalizados | SHA `e2d3cd94a3a56c944c5cac51a65f2183bc9b84b0`; Engineering run `31065745496`, job `92502974835`; Documentation run `31065745508`, job `92502975148`; 232 documentos; 573 testes; migrations, smoke e build aprovados; 71 Playwright responsivos | Pronto para integração |"
+          if old not in text:
+              raise SystemExit("RB-INC-096 traceability row not found")
+          matrix.write_text(text.replace(old, new))
+      - run: pnpm exec prettier --write docs/implementation/increments/rb-inc-096-itinerary-proposal-generation-input-assembler.md docs/implementation/context-packs/rb-inc-096-itinerary-proposal-generation-input-assembler.md docs/implementation/traceability-matrix.md docs/registry.md
+      - name: Commit closeout
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/implementation/increments/rb-inc-096-itinerary-proposal-generation-input-assembler.md docs/implementation/context-packs/rb-inc-096-itinerary-proposal-generation-input-assembler.md docs/implementation/traceability-matrix.md docs/registry.md
+          git commit -m "docs(implementation): close RB-INC-096 governance"
+          git push

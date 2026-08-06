@@ -260,9 +260,7 @@ describe("DeterministicItineraryProposalGenerator", () => {
     await expect(
       generator.generate(
         input({
-          days: [
-            { tripDayId: "day-invalid", date: "2026-02-30", existingActivityCount: 0 },
-          ],
+          days: [{ tripDayId: "day-invalid", date: "2026-02-30", existingActivityCount: 0 }],
         }),
       ),
     ).rejects.toMatchObject({ code: "invalid-day" });

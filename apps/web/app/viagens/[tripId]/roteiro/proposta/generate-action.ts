@@ -22,7 +22,6 @@ function proposalPath(tripId: string): string {
 
 export async function generateItineraryProposalAction(
   tripId: string,
-  _state: GenerateItineraryProposalActionState,
 ): Promise<GenerateItineraryProposalActionState> {
   let state: GenerateItineraryProposalActionState;
 

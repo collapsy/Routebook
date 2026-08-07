@@ -252,6 +252,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-099 | Context Pack do RB-INC-099 | Implementation Context | Draft | 0.1.0 | [rb-inc-099-authoritative-itinerary-proposal-service.md](./implementation/context-packs/rb-inc-099-authoritative-itinerary-proposal-service.md) |
 | RB-INC-100 | Server Action Autorizada para Gerar Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-100-authorized-itinerary-proposal-generation-action.md](./implementation/increments/rb-inc-100-authorized-itinerary-proposal-generation-action.md) |
 | RB-CTX-100 | Context Pack do RB-INC-100 | Implementation Context | Draft | 0.1.0 | [rb-inc-100-authorized-itinerary-proposal-generation-action.md](./implementation/context-packs/rb-inc-100-authorized-itinerary-proposal-generation-action.md) |
+| RB-INC-101 | Experiência Autorizada de Geração de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-101-authorized-itinerary-proposal-generation-experience.md](./implementation/increments/rb-inc-101-authorized-itinerary-proposal-generation-experience.md) |
+| RB-CTX-101 | Context Pack do RB-INC-101 | Implementation Context | Draft | 0.1.0 | [rb-inc-101-authorized-itinerary-proposal-generation-experience.md](./implementation/context-packs/rb-inc-101-authorized-itinerary-proposal-generation-experience.md) |
 
 ## Status possíveis
 

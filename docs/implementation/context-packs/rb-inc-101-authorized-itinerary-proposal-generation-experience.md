@@ -52,14 +52,21 @@ Preservar as fronteiras entre experiência, autorização e geração autoritati
 6. sucesso termina na experiência de revisão da Proposal persistida;
 7. aceite e descarte continuam decisões separadas da geração.
 
-## Arquivos de partida
+## Implementação consolidada
 
-- `apps/web/app/viagens/[tripId]/roteiro/proposta/page.tsx`
-- `apps/web/app/viagens/[tripId]/roteiro/proposta/generate-action.ts`
-- `apps/web/app/viagens/[tripId]/roteiro/proposta/proposal-page.module.css`
-- `apps/web/components/itinerary-proposal-review.tsx`
-- `apps/web/lib/trip-route-access.ts`
+- `apps/web/app/viagens/[tripId]/roteiro/proposta/page.tsx` resolve disponibilidade da affordance com `trip:edit`;
+- `apps/web/components/itinerary-proposal-generation-control.tsx` contém a interação explícita, pending, bloqueio contra repetição e feedback acessível;
+- `apps/web/app/viagens/[tripId]/roteiro/proposta/generate-action.ts` permanece a fronteira de mutação reutilizada;
+- o fluxo existente de `itinerary-proposal-review.tsx` permanece separado para revisão, aceite e descarte.
+
+## Evidências
+
+- PR #230;
+- SHA funcional validado: `90b6708a16d6f0e7abdcd7bee3ac95b59bff122e`;
+- Documentation Validation #892 / run `31214526440`: success;
+- Engineering Validation #1253 / run `31214526534`: success;
+- nova validação é obrigatória no HEAD final após a consolidação documental.
 
 ## Estado
 
-Issue #229 aberta e branch `feature/rb-inc-101-authorized-itinerary-proposal-generation-experience` criada a partir da `main` pós-RB-INC-100.
+Issue #229 aberta e PR #230 permanece Draft enquanto a matriz de rastreabilidade e as evidências finais são consolidadas antes do merge.

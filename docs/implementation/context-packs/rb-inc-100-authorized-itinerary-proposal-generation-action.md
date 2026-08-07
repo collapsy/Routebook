@@ -64,8 +64,8 @@ Preservar as decisões e invariantes necessárias para expor a geração autorit
 
 ## Estado de validação
 
-A implementação está em Draft PR #228. Evidências definitivas devem ser registradas somente quando Documentation Validation e Engineering Validation passarem no mesmo HEAD final.
+A implementação está na Draft PR #228. O HEAD `709a9cbc319b581914a9e82199d12402dcb09347` passou Documentation Validation #885, run `31206406827`, e Engineering Validation #1246, run `31206407309`, no mesmo SHA. A consolidação documental final deve produzir uma nova execução verde dos dois workflows no mesmo HEAD antes de marcar a PR como Ready e integrar.
 
 ## Próxima lacuna
 
-Após esta fronteira estar integrada, a próxima lacuna deve ser identificada a partir da experiência de revisão/geração existente, sem antecipar UI neste incremento nem criar política paralela de autorização.
+Após esta fronteira estar integrada, a próxima lacuna deve ser identificada a partir da experiência de revisão/geração existente, sem antecipar política paralela de autorização.

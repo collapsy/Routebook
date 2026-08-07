@@ -7,7 +7,7 @@ owner: Proposal Management
 status: Draft
 version: "0.1.0"
 created: "2026-08-06"
-last_updated: "2026-08-06"
+last_updated: "2026-08-07"
 authors:
   - RouteBook Team
 tags:
@@ -80,6 +80,8 @@ Compor o adapter de contexto, o repository PostgreSQL de Itinerary Proposal e o 
 ## Validação
 
 - issue: #221;
-- Draft PR: #222;
+- PR: #222;
 - branch: `feature/rb-inc-098-postgres-authoritative-itinerary-proposal-context`;
-- CI integral ainda deve ser registrado no SHA final da PR.
+- Engineering Validation aprovado no SHA `7f249a2e84cd1b0fb1eac1444b812302a5587a13`, run `31124313490`;
+- Documentation Validation aprovado no SHA `7f249a2e84cd1b0fb1eac1444b812302a5587a13`, run `31124313476`;
+- evidências canônicas atualizadas em 2026-08-07; após esta atualização documental, os gates devem ser revalidados no novo HEAD antes do merge.

@@ -30,7 +30,8 @@ prerequisites:
   - RB-INC-096
   - RB-INC-097
   - RB-INC-098
-next_documents: []
+next_documents:
+  - RB-INC-100
 ai_context:
   priority: critical
   index: true
@@ -46,21 +47,23 @@ Issue: #223.
 
 Branch: `feature/rb-inc-099-authoritative-itinerary-proposal-service`.
 
+PR: #224.
+
 ## 2. Contexto
 
-O RB-INC-098 concluiu a infraestrutura concreta necessária para carregar o contexto autoritativo. A próxima lacuna canônica é materializar a composição das dependências já existentes sem mover autorização, UI ou regras de negócio para a infraestrutura.
+O RB-INC-098 concluiu a infraestrutura concreta necessária para carregar o contexto autoritativo. A lacuna do RB-INC-099 foi materializar a composição das dependências já existentes sem mover autorização, UI ou regras de negócio para a infraestrutura.
 
-## 3. Resultado esperado
+## 3. Resultado entregue
 
-- expor uma composição concreta para geração autoritativa de Itinerary Proposal;
-- reutilizar o adapter PostgreSQL do RB-INC-098;
-- reutilizar o repository PostgreSQL já existente para Itinerary Proposal;
-- reutilizar o generator determinístico e o lifecycle do Proposal Management;
-- manter relógio, IDs e dependências explícitas;
-- preservar erros estáveis e boundaries arquiteturais;
-- cobrir a composição com testes de integração.
+- composição concreta para geração autoritativa de Itinerary Proposal;
+- reutilização do adapter PostgreSQL do RB-INC-098;
+- reutilização do repository PostgreSQL existente para Itinerary Proposal;
+- reutilização do generator determinístico e do lifecycle do Proposal Management;
+- relógio, IDs e dependências não determinísticas mantidos explícitos;
+- erros estáveis e boundaries arquiteturais preservados;
+- composição coberta por teste PostgreSQL de integração.
 
-## 4. Escopo
+## 4. Escopo concluído
 
 - composição concreta de dependências;
 - contrato de serviço para fronteiras autorizadas;
@@ -82,5 +85,13 @@ O RB-INC-098 concluiu a infraestrutura concreta necessária para carregar o cont
 - [x] dependências não determinísticas permanecem explícitas;
 - [x] erros são estáveis e testáveis;
 - [x] testes de integração cobrem o fluxo concreto;
-- [x] CI integral passou no SHA `4fdba3e42f7791faf840042ea39b77b66741fc67` antes da consolidação documental final;
-- [ ] registry, Context Pack, matriz de rastreabilidade e evidências finais estão sincronizados no mesmo SHA final.
+- [x] registry e Context Pack utilizam os IDs canônicos `RB-INC-099` e `RB-CTX-099`;
+- [x] Documentation Validation e Engineering Validation passaram no mesmo HEAD final `dcb2e46d18948d1a49f81c527af219796144b7d4`;
+- [x] Documentation Validation #859, run `31200795096`, passou no HEAD final;
+- [x] Engineering Validation #1220, run `31200795135`, passou no HEAD final com format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo;
+- [x] PR #224 foi integrada por squash merge e fechou a issue #223;
+- [x] a `main` resultante avançou para `6c13f614c4a649f1c2ae1234bef32af7b83aab9d`.
+
+## 7. Continuidade
+
+A lacuna canônica seguinte foi aberta como RB-INC-100 / issue #226 / PR #228: expor este serviço por uma fronteira server-side autenticada e autorizada da aplicação, preservando a separação entre autorização, infraestrutura e Proposal Management.

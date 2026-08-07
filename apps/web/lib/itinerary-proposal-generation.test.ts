@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createItineraryProposalId, type ItineraryProposal } from "@routebook/proposal-management";
+import {
+  createItineraryProposalId,
+  type ItineraryProposal,
+} from "@routebook/proposal-management";
 import type { Itinerary, Trip } from "@routebook/trip-management";
 
 import { executeGenerateItineraryProposalAction } from "./itinerary-proposal-generation";
@@ -21,7 +24,11 @@ const trip = {
     longitude: -35.0503,
     timeZone: "America/Fortaleza",
   },
-  period: { startDate: "2026-08-22", endDate: "2026-08-29", timeZone: "America/Fortaleza" },
+  period: {
+    startDate: "2026-08-22",
+    endDate: "2026-08-29",
+    timeZone: "America/Fortaleza",
+  },
   status: "planned",
   participants: [],
   contextVersion: 8,
@@ -87,7 +94,9 @@ describe("executeGenerateItineraryProposalAction", () => {
   it("não consulta dados nem gera quando não há sessão", async () => {
     const dependencies = deps();
     dependencies.resolveAccess.mockResolvedValue({ status: "unauthenticated" });
-    await expect(executeGenerateItineraryProposalAction({ tripId }, dependencies)).resolves.toMatchObject({
+    await expect(
+      executeGenerateItineraryProposalAction({ tripId }, dependencies),
+    ).resolves.toMatchObject({
       status: "error",
       code: "unauthenticated",
     });
@@ -97,7 +106,9 @@ describe("executeGenerateItineraryProposalAction", () => {
 
   it("usa trip:edit e deriva versões do estado autoritativo", async () => {
     const dependencies = deps();
-    await expect(executeGenerateItineraryProposalAction({ tripId }, dependencies)).resolves.toEqual({
+    await expect(
+      executeGenerateItineraryProposalAction({ tripId }, dependencies),
+    ).resolves.toEqual({
       status: "success",
       tripId,
       itineraryId,
@@ -124,7 +135,9 @@ describe("executeGenerateItineraryProposalAction", () => {
   it("não executa geração sem Itinerary autoritativo", async () => {
     const dependencies = deps();
     dependencies.itineraryRepository.findByTripId.mockResolvedValue(null);
-    await expect(executeGenerateItineraryProposalAction({ tripId }, dependencies)).resolves.toMatchObject({
+    await expect(
+      executeGenerateItineraryProposalAction({ tripId }, dependencies),
+    ).resolves.toMatchObject({
       status: "error",
       code: "itinerary-not-found",
     });

@@ -4,8 +4,8 @@ title: Context Pack do RB-INC-101 — Experiência autorizada de geração de It
 description: Contexto operacional para conectar a geração server-side à experiência de Proposta de Roteiro.
 document_type: implementation-context
 owner: Engineering
-status: Ready
-version: "1.0.0"
+status: Draft
+version: "0.1.0"
 created: "2026-08-07"
 last_updated: "2026-08-07"
 authors:

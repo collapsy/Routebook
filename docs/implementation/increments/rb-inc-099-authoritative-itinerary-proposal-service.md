@@ -82,5 +82,15 @@ O RB-INC-098 concluiu a infraestrutura concreta necessária para carregar o cont
 - [x] dependências não determinísticas permanecem explícitas;
 - [x] erros são estáveis e testáveis;
 - [x] testes de integração cobrem o fluxo concreto;
-- [x] CI integral passou no SHA `4fdba3e42f7791faf840042ea39b77b66741fc67` antes da consolidação documental final;
-- [ ] registry, Context Pack, matriz de rastreabilidade e evidências finais estão sincronizados no mesmo SHA final.
+- [x] registry, Context Pack e matriz de rastreabilidade estão sincronizados com `RB-INC-099` e `RB-CTX-099`;
+- [x] Engineering Validation e Documentation Validation são gates obrigatórios no mesmo HEAD antes do merge.
+
+## 7. Evidências de validação
+
+No SHA de governança `dcb2e46d18948d1a49f81c527af219796144b7d4`, passaram no mesmo HEAD:
+
+- Documentation Validation run `31200795096`, job `92940013836`;
+- Engineering Validation run `31200795135`, job `92940085355`;
+- format, validação documental, lint, typecheck, migrations, suíte de testes, smoke, build e Playwright responsivo.
+
+Qualquer commit posterior deve repetir os dois workflows no novo HEAD antes de marcar a PR como Ready ou fazer merge.

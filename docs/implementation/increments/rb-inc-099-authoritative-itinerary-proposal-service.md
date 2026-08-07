@@ -1,5 +1,4 @@
 ---
-id: RB-INC-099
 title: Serviço Concreto de Geração Autoritativa de Itinerary Proposal
 description: Compõe o contexto PostgreSQL, o repository PostgreSQL e o generator determinístico em um serviço concreto para fronteiras autorizadas da aplicação.
 document_type: implementation-increment

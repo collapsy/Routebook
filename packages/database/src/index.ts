@@ -16,6 +16,10 @@ export {
   PostgresAuthoritativeItineraryProposalGenerationContextPort,
   type PostgresAuthoritativeItineraryProposalGenerationContextErrorCode,
 } from "./authoritative-itinerary-proposal-generation-context";
+export {
+  createPostgresAuthoritativeItineraryProposalGenerationService,
+  type PostgresAuthoritativeItineraryProposalGenerationService,
+} from "./authoritative-itinerary-proposal-generation-service";
 
 export {
   AuthenticatedTripCreationError,

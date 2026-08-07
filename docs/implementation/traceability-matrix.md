@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: "2026-08-05"
+last_updated: "2026-08-07"
 authors:
   - RouteBook Team
 tags:
@@ -109,7 +109,7 @@ ai_context:
 | RB-INC-094 | RB-UC-022, RB-FR-087–096, RB-ARC-003, decisão #118 e RB-INC-052–057, RB-INC-093 | #213 | `feature/rb-inc-094-deterministic-itinerary-proposal-generator`, PR #214 | porta interna, contratos normalizados e adapter puro com ordenação canônica, balanceamento, append, duração padrão explícita, validade e lifecycle `ready` | runs 31060389877 e 31060389870, jobs 92486885615 e 92486884413, SHA 61d8e063; 228 documentos, migrations, 551 testes, smoke, build e 71 Playwright responsivos verdes | Pronto para integração |
 | RB-INC-095 | RB-UC-022, RB-FR-087–094, RB-ARC-003, decisão #118 e RB-INC-048–056, RB-INC-094 | #215 | `feature/rb-inc-095-itinerary-proposal-generation-orchestration`, PR #216 | application service interno que persiste `requested → generating → ready | failed` por repository e porta injetados | runs 31061951949 e 31061951910, jobs 92491556471 e 92491556370, SHA 3000435a; 230 documentos, migrations, 561 testes, smoke, build e 71 Playwright responsivos verdes | Pronto para integração |
 | RB-INC-096 | RB-UC-022, RB-FR-087–096, RB-ARC-003 e RB-INC-094–095 | #217 | `feature/rb-inc-096-itinerary-proposal-generation-input-assembler`, PR #218 | assembler puro de snapshots autoritativos de Itinerary, Recommendations e Places para Dias e candidatos normalizados | SHA `e2d3cd94a3a56c944c5cac51a65f2183bc9b84b0`; Engineering run `31065745496`, job `92502974835`; Documentation run `31065745508`, job `92502975148`; 232 documentos; 573 testes; migrations, smoke e build aprovados; 71 Playwright responsivos | Pronto para integração |
-
+| RB-INC-099 | RB-PRD-005–006, RB-ARC-003–004 e RB-INC-094–098 | #223 | `feature/rb-inc-099-authoritative-itinerary-proposal-service`, PR #224 | composition root PostgreSQL, contexto autoritativo, repository de Proposal, generator determinístico, exports e teste PostgreSQL completo | SHA `4fdba3e42f7791faf840042ea39b77b66741fc67`; Documentation run `31199721638`; Engineering run `31199721963`; format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright verdes antes da consolidação documental final | Em validação final |
 
 ## Evidências do RB-INC-003
 
@@ -182,6 +182,20 @@ ai_context:
 | exports | `packages/database/src/index.ts` |
 | rastreabilidade | issue #221 e PR #222 |
 | schema | reutilização de `packages/database/src/schema.ts`, sem migration |
+
+## Evidências do RB-INC-099
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-099-authoritative-itinerary-proposal-service.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-099-authoritative-itinerary-proposal-service.md` |
+| serviço concreto | `packages/database/src/authoritative-itinerary-proposal-generation-service.ts` |
+| integração PostgreSQL | `packages/database/src/authoritative-itinerary-proposal-generation-service-postgres.test.ts` |
+| exports | `packages/database/src/index.ts` |
+| rastreabilidade | issue #223 e PR #224 |
+| migration | nenhuma nova migration; contratos de dados existentes reutilizados |
+| CI pré-consolidação | Documentation `31199721638` e Engineering `31199721963`, SHA `4fdba3e42f7791faf840042ea39b77b66741fc67` |
+| CI final | deve apontar para o SHA final após registry e documentação canônica |
 
 ## Cadeia mínima
 

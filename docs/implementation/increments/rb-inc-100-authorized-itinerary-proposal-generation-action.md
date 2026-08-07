@@ -1,5 +1,4 @@
 ---
-id: RB-INC-100
 title: Server Action Autorizada para Gerar Itinerary Proposal
 description: Expõe a geração autoritativa de Itinerary Proposal por uma fronteira server-side autenticada e autorizada da aplicação web.
 document_type: implementation-increment

@@ -58,9 +58,7 @@ describe("generateItineraryProposalAction", () => {
   it("delega, revalida e redireciona somente após sucesso", async () => {
     generationMocks.execute.mockResolvedValue(success);
 
-    await expect(generateItineraryProposalAction(tripId, { status: "idle" })).rejects.toThrow(
-      "NEXT_REDIRECT",
-    );
+    await expect(generateItineraryProposalAction(tripId)).rejects.toThrow("NEXT_REDIRECT");
 
     expect(generationMocks.execute).toHaveBeenCalledWith(
       { tripId },
@@ -79,7 +77,7 @@ describe("generateItineraryProposalAction", () => {
     const error = { status: "error", code: "not-found", message: "not-found" } as const;
     generationMocks.execute.mockResolvedValue(error);
 
-    await expect(generateItineraryProposalAction(tripId, { status: "idle" })).resolves.toBe(error);
+    await expect(generateItineraryProposalAction(tripId)).resolves.toBe(error);
     expect(cacheMocks.revalidatePath).not.toHaveBeenCalled();
     expect(navigationMocks.redirect).not.toHaveBeenCalled();
   });
@@ -88,7 +86,7 @@ describe("generateItineraryProposalAction", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     generationMocks.execute.mockRejectedValue(new Error("database unavailable"));
 
-    await expect(generateItineraryProposalAction(tripId, { status: "idle" })).resolves.toEqual({
+    await expect(generateItineraryProposalAction(tripId)).resolves.toEqual({
       status: "error",
       code: "technical-error",
       message: "technical-error",

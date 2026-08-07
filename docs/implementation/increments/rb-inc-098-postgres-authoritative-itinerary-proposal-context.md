@@ -7,7 +7,7 @@ owner: Proposal Management
 status: Draft
 version: "0.1.0"
 created: "2026-08-06"
-last_updated: "2026-08-06"
+last_updated: "2026-08-07"
 authors:
   - RouteBook Team
 tags:
@@ -93,7 +93,7 @@ O RB-INC-097 passou a depender de uma porta abstrata para carregar o contexto de
 - [x] a leitura usa snapshot transacional consistente;
 - [x] o adapter não replica regras do assembler;
 - [x] testes de integração exercitam o PostgreSQL real do CI;
-- [ ] CI integral aprovado no mesmo SHA;
+- [x] CI integral aprovado no mesmo SHA;
 - [x] registry, Context Pack e matriz atualizados.
 
 ## 7. Evidências
@@ -104,5 +104,7 @@ O RB-INC-097 passou a depender de uma porta abstrata para carregar o contexto de
 - schema reutilizado: `packages/database/src/schema.ts`;
 - nenhuma migration criada;
 - formatação canônica aplicada pelo workflow `Format RB-INC-077`, run `31123628228`;
+- Engineering Validation aprovado no SHA `7f249a2e84cd1b0fb1eac1444b812302a5587a13`, run `31124313490`;
+- Documentation Validation aprovado no SHA `7f249a2e84cd1b0fb1eac1444b812302a5587a13`, run `31124313476`;
 - issue: #221;
-- Draft PR: #222.
+- PR: #222.

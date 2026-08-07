@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createItineraryProposalId, type ItineraryProposal } from "@routebook/proposal-management";
+import {
+  createItineraryProposalId,
+  type ItineraryProposal,
+} from "@routebook/proposal-management";
 import type { Itinerary, Trip } from "@routebook/trip-management";
 
 import { executeGenerateItineraryProposalAction } from "./itinerary-proposal-generation";
@@ -103,16 +106,16 @@ describe("executeGenerateItineraryProposalAction", () => {
 
   it("usa trip:edit e deriva versões do estado autoritativo", async () => {
     const dependencies = deps();
-    await expect(executeGenerateItineraryProposalAction({ tripId }, dependencies)).resolves.toEqual(
-      {
-        status: "success",
-        tripId,
-        itineraryId,
-        itineraryProposalId: proposalId,
-        baseTripContextVersion: 8,
-        baseItineraryVersion: 12,
-      },
-    );
+    await expect(
+      executeGenerateItineraryProposalAction({ tripId }, dependencies),
+    ).resolves.toEqual({
+      status: "success",
+      tripId,
+      itineraryId,
+      itineraryProposalId: proposalId,
+      baseTripContextVersion: 8,
+      baseItineraryVersion: 12,
+    });
     expect(dependencies.resolveAccess).toHaveBeenCalledWith({
       tripId,
       action: "trip:edit",

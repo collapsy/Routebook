@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import {
-  createItineraryProposalId,
-  type ItineraryProposal,
-} from "@routebook/proposal-management";
+import { createItineraryProposalId, type ItineraryProposal } from "@routebook/proposal-management";
 import type { Itinerary, Trip } from "@routebook/trip-management";
 
 import { executeGenerateItineraryProposalAction } from "./itinerary-proposal-generation";

@@ -1,5 +1,4 @@
 ---
-id: RB-CTX-099
 title: Context Pack do RB-INC-099 — Serviço concreto de geração autoritativa de Itinerary Proposal
 description: Contexto operacional e evidências canônicas do serviço concreto que compõe geração autoritativa de Itinerary Proposal sobre PostgreSQL.
 document_type: implementation-context

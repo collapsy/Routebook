@@ -248,6 +248,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-097 | Context Pack do RB-INC-097 | Implementation Context | Draft | 0.1.0 | [rb-inc-097-authoritative-itinerary-proposal-generation.md](./implementation/context-packs/rb-inc-097-authoritative-itinerary-proposal-generation.md) |
 | RB-INC-098 | Adapter PostgreSQL do Contexto Autoritativo de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-098-postgres-authoritative-itinerary-proposal-context.md](./implementation/increments/rb-inc-098-postgres-authoritative-itinerary-proposal-context.md) |
 | RB-CTX-098 | Context Pack do RB-INC-098 | Implementation Context | Draft | 0.1.0 | [rb-inc-098-postgres-authoritative-itinerary-proposal-context.md](./implementation/context-packs/rb-inc-098-postgres-authoritative-itinerary-proposal-context.md) |
+| RB-INC-099 | Serviço Concreto de Geração Autoritativa de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-099-authoritative-itinerary-proposal-service.md](./implementation/increments/rb-inc-099-authoritative-itinerary-proposal-service.md) |
+| RB-CTX-099 | Context Pack do RB-INC-099 | Implementation Context | Draft | 0.1.0 | [rb-inc-099-authoritative-itinerary-proposal-service.md](./implementation/context-packs/rb-inc-099-authoritative-itinerary-proposal-service.md) |
 
 ## Status possíveis
 

@@ -149,7 +149,7 @@ describe("createPostgresAuthoritativeItineraryProposalGenerationService", () => 
 
     const persisted = await new DrizzleItineraryProposalRepository(database).findById(
       tripId,
-      proposalId,
+      result.id,
     );
     expect(persisted).toEqual(result);
   });

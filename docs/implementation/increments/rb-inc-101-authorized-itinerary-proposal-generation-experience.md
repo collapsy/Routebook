@@ -4,8 +4,8 @@ title: Experiência Autorizada de Geração de Itinerary Proposal
 description: Conecta a Server Action autorizada de geração à experiência web de Proposta de Roteiro.
 document_type: implementation-increment
 owner: Experience
-status: Ready
-version: "1.0.0"
+status: Draft
+version: "0.1.0"
 created: "2026-08-07"
 last_updated: "2026-08-07"
 authors:

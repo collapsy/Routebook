@@ -68,13 +68,13 @@ A composição não deve duplicar regras de elegibilidade, lifecycle, validaçã
 
 ## Evidências
 
-No SHA `4fdba3e42f7791faf840042ea39b77b66741fc67`, antes da consolidação documental final, passaram:
+No SHA de governança `dcb2e46d18948d1a49f81c527af219796144b7d4`, passaram no mesmo HEAD:
 
-- Documentation Validation run `31199721638`;
-- Engineering Validation run `31199721963`;
+- Documentation Validation run `31200795096`, job `92940013836`;
+- Engineering Validation run `31200795135`, job `92940085355`;
 - format, docs, lint, typecheck, migrations, suíte de testes, smoke, build e Playwright responsivo.
 
-As evidências definitivas devem apontar para o SHA final que também contém registry e matriz sincronizados.
+O merge permanece condicionado a ambos os workflows verdes no HEAD efetivamente marcado como Ready, de modo que qualquer alteração posterior de documentação ou código invalida a evidência anterior até nova execução.
 
 ## Próxima lacuna canônica
 

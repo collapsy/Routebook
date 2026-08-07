@@ -6,9 +6,7 @@ import {
 } from "@routebook/proposal-management";
 import type { Itinerary, Trip } from "@routebook/trip-management";
 
-import {
-  executeGenerateItineraryProposalAction,
-} from "./itinerary-proposal-generation";
+import { executeGenerateItineraryProposalAction } from "./itinerary-proposal-generation";
 
 const tripId = "11111111-1111-4111-8111-111111111111";
 const itineraryId = "22222222-2222-4222-8222-222222222222";

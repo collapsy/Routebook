@@ -1,4 +1,5 @@
 ---
+id: RB-INC-100
 title: Server Action Autorizada para Gerar Itinerary Proposal
 description: Expõe a geração autoritativa de Itinerary Proposal por uma fronteira server-side autenticada e autorizada da aplicação web.
 document_type: implementation-increment
@@ -41,6 +42,8 @@ Expor o serviço concreto de geração autoritativa concluído no RB-INC-099 por
 Issue: #226.
 
 Branch: `feature/rb-inc-100-authorized-itinerary-proposal-generation-action`.
+
+PR: #228.
 
 ## 2. Decisão de autorização
 

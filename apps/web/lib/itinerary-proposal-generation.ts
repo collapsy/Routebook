@@ -1,4 +1,9 @@
-import type { ItineraryProposal } from "@routebook/proposal-management";
+import { randomUUID } from "node:crypto";
+
+import type {
+  GenerateAuthoritativeItineraryProposalCommand,
+  ItineraryProposal,
+} from "@routebook/proposal-management";
 import type { ItineraryRepository, TripRepository } from "@routebook/trip-management";
 
 import type { TripRouteAccessResult } from "./trip-route-access";
@@ -45,22 +50,7 @@ type TripAccessResolver = (input: {
 }) => Promise<TripRouteAccessResult>;
 
 type GenerationService = Readonly<{
-  generate(command: {
-    request: {
-      id: string;
-      tripId: string;
-      itineraryId: string;
-      baseTripContextVersion: number;
-      baseItineraryVersion: number;
-      contextSnapshotId: string;
-      requestedAt: Date;
-    };
-    startedAt: Date;
-    failedAt: Date;
-    asOf: Date;
-    generatedAt: Date;
-    createProposedActivityId: (_candidate: unknown, index: number) => string;
-  }): Promise<ItineraryProposal>;
+  generate(command: GenerateAuthoritativeItineraryProposalCommand): Promise<ItineraryProposal>;
 }>;
 
 export type GenerateItineraryProposalActionDependencies = Readonly<{
@@ -70,7 +60,7 @@ export type GenerateItineraryProposalActionDependencies = Readonly<{
   generationService: GenerationService;
   now?: () => Date;
   createItineraryProposalId?: () => string;
-  createProposedActivityId?: (_candidate: unknown, index: number) => string;
+  createProposedActivityId?: GenerateAuthoritativeItineraryProposalCommand["createProposedActivityId"];
 }>;
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -130,13 +120,12 @@ export async function executeGenerateItineraryProposalAction(
     throw new Error("GenerateItineraryProposalAction received an invalid clock value.");
   }
 
-  const proposalId = dependencies.createItineraryProposalId?.() ?? crypto.randomUUID();
+  const proposalId = dependencies.createItineraryProposalId?.() ?? randomUUID();
   if (!uuidPattern.test(proposalId)) {
     throw new Error("GenerateItineraryProposalAction generated an invalid proposal id.");
   }
 
-  const createProposedActivityId =
-    dependencies.createProposedActivityId ?? (() => crypto.randomUUID());
+  const createProposedActivityId = dependencies.createProposedActivityId ?? (() => randomUUID());
 
   const proposal = await dependencies.generationService.generate({
     request: {

@@ -45,7 +45,9 @@ export async function generateItineraryProposalAction(
     revalidatePath(`/viagens/${tripId}`);
     revalidatePath(`/viagens/${tripId}/roteiro`);
     revalidatePath(proposalPath(tripId));
-    redirect(`${proposalPath(tripId)}?propostaGerada=${encodeURIComponent(state.itineraryProposalId)}`);
+    redirect(
+      `${proposalPath(tripId)}?propostaGerada=${encodeURIComponent(state.itineraryProposalId)}`,
+    );
   }
 
   return state;

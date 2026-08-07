@@ -49,7 +49,7 @@ PR: #228.
 
 A geração altera o estado de planejamento da Trip ao criar e evoluir uma Itinerary Proposal, portanto reutiliza a permissão canônica existente `trip:edit`. Este incremento não amplia a matriz de roles nem cria uma permissão paralela específica sem necessidade de produto comprovada.
 
-## 3. Escopo
+## 3. Escopo concluído
 
 - caso de uso de fronteira testável separado da Server Action do Next.js;
 - resolução de sessão e autorização via `resolveTripRouteAccess`;
@@ -71,14 +71,18 @@ A geração altera o estado de planejamento da Trip ao criar e evoluir uma Itine
 
 ## 5. Critérios de aceite
 
-- [ ] usuário não autenticado não executa geração;
-- [ ] acesso negado permanece indistinguível de recurso inexistente;
-- [ ] Trip e Itinerary são lidos de fontes autoritativas;
-- [ ] versões e IDs do comando não são aceitos do cliente;
-- [ ] `trip:edit` é a autorização canônica reutilizada;
-- [ ] serviço concreto do RB-INC-099 é reutilizado;
-- [ ] IDs e relógio permanecem injetáveis em testes;
-- [ ] falhas oficiais são mapeadas para códigos estáveis;
-- [ ] sucesso revalida o estado relevante e permite navegação;
-- [ ] CI integral passa no mesmo SHA;
-- [ ] registry, Context Pack e matriz de rastreabilidade são atualizados.
+- [x] usuário não autenticado não executa geração;
+- [x] acesso negado permanece indistinguível de recurso inexistente;
+- [x] Trip e Itinerary são lidos de fontes autoritativas;
+- [x] versões e IDs do comando não são aceitos do cliente;
+- [x] `trip:edit` é a autorização canônica reutilizada;
+- [x] serviço concreto do RB-INC-099 é reutilizado;
+- [x] IDs e relógio permanecem injetáveis em testes;
+- [x] falhas oficiais são mapeadas para códigos estáveis;
+- [x] sucesso revalida o estado relevante e permite navegação;
+- [x] registry, Context Pack e matriz de rastreabilidade estão sincronizados;
+- [x] Documentation Validation #885 e Engineering Validation #1246 passaram no mesmo HEAD `709a9cbc319b581914a9e82199d12402dcb09347` antes da consolidação documental final.
+
+## 6. Evidência de qualidade
+
+O HEAD `709a9cbc319b581914a9e82199d12402dcb09347` passou Documentation Validation run `31206406827` e Engineering Validation run `31206407309`. O merge permanece condicionado a uma nova execução verde de ambos os workflows no mesmo HEAD produzido pela consolidação final da governança.

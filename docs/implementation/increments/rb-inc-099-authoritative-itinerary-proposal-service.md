@@ -1,4 +1,5 @@
 ---
+id: RB-INC-099
 title: Serviço Concreto de Geração Autoritativa de Itinerary Proposal
 description: Compõe o contexto PostgreSQL, o repository PostgreSQL e o generator determinístico em um serviço concreto para fronteiras autorizadas da aplicação.
 document_type: implementation-increment
@@ -76,10 +77,10 @@ O RB-INC-098 concluiu a infraestrutura concreta necessária para carregar o cont
 
 ## 6. Critérios de aceite
 
-- [ ] existe um serviço concreto que compõe contexto, repository e generator;
-- [ ] a composição não duplica regras de elegibilidade ou lifecycle;
-- [ ] dependências não determinísticas permanecem explícitas;
-- [ ] erros são estáveis e testáveis;
-- [ ] testes de integração cobrem o fluxo concreto;
-- [ ] CI integral passa no mesmo SHA;
-- [ ] registry, Context Pack e matriz de rastreabilidade são atualizados.
+- [x] existe um serviço concreto que compõe contexto, repository e generator;
+- [x] a composição não duplica regras de elegibilidade ou lifecycle;
+- [x] dependências não determinísticas permanecem explícitas;
+- [x] erros são estáveis e testáveis;
+- [x] testes de integração cobrem o fluxo concreto;
+- [x] CI integral passou no SHA `4fdba3e42f7791faf840042ea39b77b66741fc67` antes da consolidação documental final;
+- [ ] registry, Context Pack, matriz de rastreabilidade e evidências finais estão sincronizados no mesmo SHA final.

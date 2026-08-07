@@ -9,6 +9,7 @@ import {
 } from "@routebook/database";
 import { findTripById } from "@routebook/trip-management";
 
+import { ItineraryProposalGenerationControl } from "../../../../../components/itinerary-proposal-generation-control";
 import { ItineraryProposalReview } from "../../../../../components/itinerary-proposal-review";
 import {
   buildItineraryProposalReview,
@@ -17,6 +18,7 @@ import {
 } from "../../../../../lib/itinerary-proposal-experience";
 import { resolveTripRouteAccess } from "../../../../../lib/trip-route-access";
 import { discardItineraryProposalAction } from "./actions";
+import { generateItineraryProposalAction } from "./generate-action";
 import styles from "./proposal-page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -35,14 +37,18 @@ export default async function ItineraryProposalReviewPage({
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const [itinerary, proposals, acceptanceAccess] = await Promise.all([
+  const [itinerary, proposals, acceptanceAccess, generationAccess] = await Promise.all([
     new DrizzleItineraryRepository().findByTripId(trip.id),
     new DrizzleItineraryProposalRepository().listByTripId(trip.id),
     resolveTripRouteAccess({ tripId: trip.id, action: "trip:accept-proposal" }),
+    resolveTripRouteAccess({ tripId: trip.id, action: "trip:edit" }),
   ]);
   const proposal = findLatestReviewableItineraryProposal(proposals);
 
   if (!proposal) {
+    const canGenerate = generationAccess.status === "authorized";
+    const generateAction = generateItineraryProposalAction.bind(null, trip.id);
+
     return (
       <section className={`app-page ${styles.page}`}>
         <Link className="back-link" href={`/viagens/${trip.id}/roteiro`}>
@@ -55,6 +61,7 @@ export default async function ItineraryProposalReviewPage({
             Ainda não existe uma proposta pronta ou expirada para revisão. Seu Roteiro atual
             continua disponível e não foi alterado.
           </p>
+          {canGenerate ? <ItineraryProposalGenerationControl action={generateAction} /> : null}
           <Link className="product-secondary-action" href={`/viagens/${trip.id}/roteiro`}>
             Continuar no Roteiro
           </Link>

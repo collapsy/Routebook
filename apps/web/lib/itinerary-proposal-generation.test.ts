@@ -6,7 +6,9 @@ import {
 } from "@routebook/proposal-management";
 import type { Itinerary, Trip } from "@routebook/trip-management";
 
-import { executeGenerateItineraryProposalAction } from "./itinerary-proposal-generation";
+import {
+  executeGenerateItineraryProposalAction,
+} from "./itinerary-proposal-generation";
 
 const tripId = "11111111-1111-4111-8111-111111111111";
 const itineraryId = "22222222-2222-4222-8222-222222222222";
@@ -86,7 +88,10 @@ describe("executeGenerateItineraryProposalAction", () => {
   it("falha antes da autorização quando TripId é inválido", async () => {
     const dependencies = deps();
     await expect(
-      executeGenerateItineraryProposalAction({ tripId: "invalid" }, dependencies),
+      executeGenerateItineraryProposalAction(
+        { tripId: "invalid" },
+        dependencies,
+      ),
     ).resolves.toMatchObject({ status: "error", code: "invalid-request" });
     expect(dependencies.resolveAccess).not.toHaveBeenCalled();
   });
@@ -116,7 +121,10 @@ describe("executeGenerateItineraryProposalAction", () => {
       baseTripContextVersion: 8,
       baseItineraryVersion: 12,
     });
-    expect(dependencies.resolveAccess).toHaveBeenCalledWith({ tripId, action: "trip:edit" });
+    expect(dependencies.resolveAccess).toHaveBeenCalledWith({
+      tripId,
+      action: "trip:edit",
+    });
     expect(dependencies.generationService.generate).toHaveBeenCalledWith(
       expect.objectContaining({
         request: expect.objectContaining({

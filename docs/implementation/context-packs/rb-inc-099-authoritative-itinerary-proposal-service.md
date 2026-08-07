@@ -23,9 +23,11 @@ related_documents:
   - RB-INC-096
   - RB-INC-097
   - RB-INC-098
+  - RB-INC-100
 prerequisites:
   - RB-INC-098
-next_documents: []
+next_documents:
+  - RB-INC-100
 ai_context:
   priority: high
   index: true
@@ -37,7 +39,7 @@ ai_context:
 
 Preservar o contexto necessário para evoluir a geração autoritativa após o RB-INC-099 sem reabrir decisões já consolidadas nos incrementos RB-INC-094 a RB-INC-098.
 
-## Estado canônico esperado
+## Estado canônico
 
 O pacote `@routebook/database` expõe uma fronteira concreta de geração que compõe:
 
@@ -46,7 +48,7 @@ O pacote `@routebook/database` expõe uma fronteira concreta de geração que co
 - `DeterministicItineraryProposalGenerator` para geração reproduzível;
 - `generateAuthoritativeItineraryProposal` como orquestrador canônico de domínio/aplicação.
 
-A composição não deve duplicar regras de elegibilidade, lifecycle, validação de output ou classificação de falhas. Valores não determinísticos continuam explícitos no comando: instantes e factory de `ProposedActivityId`.
+A composição não duplica regras de elegibilidade, lifecycle, validação de output ou classificação de falhas. Valores não determinísticos continuam explícitos no comando: instantes e factory de `ProposedActivityId`.
 
 ## Arquivos centrais
 
@@ -65,17 +67,20 @@ A composição não deve duplicar regras de elegibilidade, lifecycle, validaçã
 4. `asOf`, `startedAt`, `failedAt`, `generatedAt` e `createProposedActivityId` são fornecidos explicitamente pelo chamador.
 5. Erros estáveis dos componentes canônicos não devem ser mascarados pela composição concreta.
 6. A persistência da Proposal e de suas Proposed Activities continua centralizada no repository existente.
+7. Autenticação e autorização pertencem à fronteira da aplicação, não a este serviço.
 
-## Evidências
+## Evidências definitivas
 
-No SHA `4fdba3e42f7791faf840042ea39b77b66741fc67`, antes da consolidação documental final, passaram:
+HEAD final da PR #224: `dcb2e46d18948d1a49f81c527af219796144b7d4`.
 
-- Documentation Validation run `31199721638`;
-- Engineering Validation run `31199721963`;
+No mesmo HEAD final passaram:
+
+- Documentation Validation #859, run `31200795096`;
+- Engineering Validation #1220, run `31200795135`;
 - format, docs, lint, typecheck, migrations, suíte de testes, smoke, build e Playwright responsivo.
 
-As evidências definitivas devem apontar para o SHA final que também contém registry e matriz sincronizados.
+A PR #224 foi integrada por squash merge. A issue #223 foi fechada e a `main` resultante avançou para `6c13f614c4a649f1c2ae1234bef32af7b83aab9d`.
 
 ## Próxima lacuna canônica
 
-Após a composição concreta, a próxima lacuna é expor a geração para um ator autenticado/autorizado na fronteira da aplicação, reutilizando a autorização server-side já existente e sem acoplar autorização ao domínio de geração nem introduzir uma segunda política de lifecycle.
+A continuidade foi materializada como RB-INC-100, issue #226 e Draft PR #228: expor a geração para um ator autenticado/autorizado na fronteira server-side da aplicação, reutilizando `resolveTripRouteAccess` e a permissão `trip:edit`, sem acoplar autorização ao domínio de geração nem introduzir uma segunda política de lifecycle.

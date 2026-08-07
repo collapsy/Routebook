@@ -109,7 +109,8 @@ ai_context:
 | RB-INC-094 | RB-UC-022, RB-FR-087–096, RB-ARC-003, decisão #118 e RB-INC-052–057, RB-INC-093 | #213 | `feature/rb-inc-094-deterministic-itinerary-proposal-generator`, PR #214 | porta interna, contratos normalizados e adapter puro com ordenação canônica, balanceamento, append, duração padrão explícita, validade e lifecycle `ready` | runs 31060389877 e 31060389870, jobs 92486885615 e 92486884413, SHA 61d8e063; 228 documentos, migrations, 551 testes, smoke, build e 71 Playwright responsivos verdes | Pronto para integração |
 | RB-INC-095 | RB-UC-022, RB-FR-087–094, RB-ARC-003, decisão #118 e RB-INC-048–056, RB-INC-094 | #215 | `feature/rb-inc-095-itinerary-proposal-generation-orchestration`, PR #216 | application service interno que persiste `requested → generating → ready | failed` por repository e porta injetados | runs 31061951949 e 31061951910, jobs 92491556471 e 92491556370, SHA 3000435a; 230 documentos, migrations, 561 testes, smoke, build e 71 Playwright responsivos verdes | Pronto para integração |
 | RB-INC-096 | RB-UC-022, RB-FR-087–096, RB-ARC-003 e RB-INC-094–095 | #217 | `feature/rb-inc-096-itinerary-proposal-generation-input-assembler`, PR #218 | assembler puro de snapshots autoritativos de Itinerary, Recommendations e Places para Dias e candidatos normalizados | SHA `e2d3cd94a3a56c944c5cac51a65f2183bc9b84b0`; Engineering run `31065745496`, job `92502974835`; Documentation run `31065745508`, job `92502975148`; 232 documentos; 573 testes; migrations, smoke e build aprovados; 71 Playwright responsivos | Pronto para integração |
-| RB-INC-099 | RB-PRD-005–006, RB-ARC-003–004 e RB-INC-094–098 | #223 | `feature/rb-inc-099-authoritative-itinerary-proposal-service`, PR #224 | composition root PostgreSQL, contexto autoritativo, repository de Proposal, generator determinístico, exports e teste PostgreSQL completo | SHA `4fdba3e42f7791faf840042ea39b77b66741fc67`; Documentation run `31199721638`; Engineering run `31199721963`; format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright verdes antes da consolidação documental final | Em validação final |
+| RB-INC-099 | RB-PRD-005–006, RB-ARC-003–004 e RB-INC-094–098 | #223 | `feature/rb-inc-099-authoritative-itinerary-proposal-service`, PR #224 | composition root PostgreSQL, contexto autoritativo, repository de Proposal, generator determinístico, exports e teste PostgreSQL completo | HEAD final `dcb2e46d18948d1a49f81c527af219796144b7d4`; Documentation #859 run `31200795096`; Engineering #1220 run `31200795135`; format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright verdes; merge `6c13f614c4a649f1c2ae1234bef32af7b83aab9d` | Integrado |
+| RB-INC-100 | RB-SEC-001, RB-ADR-007–008, RB-ARC-003 e RB-INC-087, RB-INC-090, RB-INC-099 | #226 | `feature/rb-inc-100-authorized-itinerary-proposal-generation-action`, Draft PR #228 | caso de uso server-side, `trip:edit`, Trip/Itinerary autoritativos, serviço PostgreSQL do RB-INC-099 e Server Action | CI final pendente no HEAD atual da Draft PR #228 | Em validação |
 
 ## Evidências do RB-INC-003
 
@@ -194,8 +195,23 @@ ai_context:
 | exports | `packages/database/src/index.ts` |
 | rastreabilidade | issue #223 e PR #224 |
 | migration | nenhuma nova migration; contratos de dados existentes reutilizados |
-| CI pré-consolidação | Documentation `31199721638` e Engineering `31199721963`, SHA `4fdba3e42f7791faf840042ea39b77b66741fc67` |
-| CI final | deve apontar para o SHA final após registry e documentação canônica |
+| HEAD final | `dcb2e46d18948d1a49f81c527af219796144b7d4` |
+| Documentation Validation | #859, run `31200795096`, success |
+| Engineering Validation | #1220, run `31200795135`, success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo |
+| integração | squash merge `6c13f614c4a649f1c2ae1234bef32af7b83aab9d`; issue #223 fechada |
+
+## Evidências previstas do RB-INC-100
+
+| Evidência | Localização |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-100-authorized-itinerary-proposal-generation-action.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-100-authorized-itinerary-proposal-generation-action.md` |
+| caso de uso | `apps/web/lib/itinerary-proposal-generation.ts` |
+| Server Action | `apps/web/app/viagens/[tripId]/roteiro/proposta/generate-action.ts` |
+| testes | `apps/web/lib/itinerary-proposal-generation.test.ts` e `apps/web/app/viagens/[tripId]/roteiro/proposta/generate-action.test.ts` |
+| rastreabilidade | issue #226 e Draft PR #228 |
+| autorização | `resolveTripRouteAccess` com `trip:edit` |
+| composição concreta | `createPostgresAuthoritativeItineraryProposalGenerationService` do RB-INC-099 |
 
 ## Cadeia mínima
 

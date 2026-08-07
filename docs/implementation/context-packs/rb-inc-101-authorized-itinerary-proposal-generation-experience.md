@@ -4,8 +4,8 @@ title: Context Pack do RB-INC-101 — Experiência autorizada de geração de It
 description: Contexto operacional para conectar a geração server-side à experiência de Proposta de Roteiro.
 document_type: implementation-context
 owner: Engineering
-status: Draft
-version: "0.1.0"
+status: Ready
+version: "1.0.0"
 created: "2026-08-07"
 last_updated: "2026-08-07"
 authors:
@@ -62,11 +62,12 @@ Preservar as fronteiras entre experiência, autorização e geração autoritati
 ## Evidências
 
 - PR #230;
-- SHA funcional validado: `90b6708a16d6f0e7abdcd7bee3ac95b59bff122e`;
-- Documentation Validation #892 / run `31214526440`: success;
-- Engineering Validation #1253 / run `31214526534`: success;
-- nova validação é obrigatória no HEAD final após a consolidação documental.
+- SHA funcional validado: `4e0370900849e3db33c02cfedd4a48c9cabc22a8`;
+- Documentation Validation #894 / run `31218649387`: success;
+- Engineering Validation #1255 / run `31218649337`: success;
+- format, documentação, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo passaram no mesmo SHA;
+- o HEAD final de governança deve repetir os dois workflows verdes antes do merge.
 
 ## Estado
 
-Issue #229 aberta e PR #230 permanece Draft enquanto a matriz de rastreabilidade e as evidências finais são consolidadas antes do merge.
+Implementação, registry, Context Pack e critérios funcionais estão consolidados. A PR #230 pode ser promovida somente após a matriz de rastreabilidade estar sincronizada e Documentation Validation + Engineering Validation passarem no mesmo HEAD final.

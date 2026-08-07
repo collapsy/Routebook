@@ -4,8 +4,8 @@ title: Experiência Autorizada de Geração de Itinerary Proposal
 description: Conecta a Server Action autorizada de geração à experiência web de Proposta de Roteiro.
 document_type: implementation-increment
 owner: Experience
-status: Draft
-version: "0.1.0"
+status: Ready
+version: "1.0.0"
 created: "2026-08-07"
 last_updated: "2026-08-07"
 authors:
@@ -59,7 +59,7 @@ A página `apps/web/app/viagens/[tripId]/roteiro/proposta/page.tsx` possuía rev
 - navegação para a Proposal gerada após sucesso;
 - preservação integral do fluxo já existente de revisão, aceite e descarte;
 - validação integral pelos workflows canônicos;
-- registry e Context Pack sincronizados, com rastreabilidade final em consolidação antes do merge.
+- registry, Context Pack e rastreabilidade sincronizados antes do merge.
 
 ## 4. Fora de escopo
 
@@ -80,12 +80,12 @@ A página `apps/web/app/viagens/[tripId]/roteiro/proposta/page.tsx` possuía rev
 - [x] erros estáveis são exibidos com feedback acessível;
 - [x] sucesso conduz à Proposal pronta para revisão;
 - [x] revisão, aceite e descarte existentes não regridem;
-- [x] CI integral passou no mesmo SHA funcional `90b6708a16d6f0e7abdcd7bee3ac95b59bff122e`;
-- [ ] matriz de rastreabilidade e evidências finais sincronizadas no HEAD de integração.
+- [x] CI integral passou no mesmo SHA funcional `4e0370900849e3db33c02cfedd4a48c9cabc22a8`;
+- [x] registry, Context Pack, matriz de rastreabilidade e evidências finais estão consolidados para validação do HEAD de integração.
 
 ## 6. Evidências de validação funcional
 
-- Documentation Validation #892 / run `31214526440`: success no SHA `90b6708a16d6f0e7abdcd7bee3ac95b59bff122e`;
-- Engineering Validation #1253 / run `31214526534`: success no mesmo SHA;
+- Documentation Validation #894 / run `31218649387`: success no SHA `4e0370900849e3db33c02cfedd4a48c9cabc22a8`;
+- Engineering Validation #1255 / run `31218649337`: success no mesmo SHA;
 - format, documentação, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo concluídos pelo Engineering Validation;
-- PR #230 permanece Draft até a consolidação final de governança e nova validação no mesmo HEAD final.
+- após a consolidação documental, Documentation Validation e Engineering Validation devem passar novamente no mesmo HEAD final antes da promoção da PR.

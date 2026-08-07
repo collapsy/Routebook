@@ -10,6 +10,12 @@ export {
 } from "./auth-schema";
 export { accountMemberships, accounts, personalAccountOwnerships } from "./identity-schema";
 export { closeDatabase, getDatabase } from "./client";
+export {
+  createPostgresAuthoritativeItineraryProposalGenerationContextPort,
+  PostgresAuthoritativeItineraryProposalGenerationContextError,
+  PostgresAuthoritativeItineraryProposalGenerationContextPort,
+  type PostgresAuthoritativeItineraryProposalGenerationContextErrorCode,
+} from "./authoritative-itinerary-proposal-generation-context";
 
 export {
   AuthenticatedTripCreationError,

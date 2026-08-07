@@ -83,10 +83,7 @@ describe("executeGenerateItineraryProposalAction", () => {
   it("falha antes da autorização quando TripId é inválido", async () => {
     const dependencies = deps();
     await expect(
-      executeGenerateItineraryProposalAction(
-        { tripId: "invalid" },
-        dependencies,
-      ),
+      executeGenerateItineraryProposalAction({ tripId: "invalid" }, dependencies),
     ).resolves.toMatchObject({ status: "error", code: "invalid-request" });
     expect(dependencies.resolveAccess).not.toHaveBeenCalled();
   });
@@ -106,16 +103,16 @@ describe("executeGenerateItineraryProposalAction", () => {
 
   it("usa trip:edit e deriva versões do estado autoritativo", async () => {
     const dependencies = deps();
-    await expect(
-      executeGenerateItineraryProposalAction({ tripId }, dependencies),
-    ).resolves.toEqual({
-      status: "success",
-      tripId,
-      itineraryId,
-      itineraryProposalId: proposalId,
-      baseTripContextVersion: 8,
-      baseItineraryVersion: 12,
-    });
+    await expect(executeGenerateItineraryProposalAction({ tripId }, dependencies)).resolves.toEqual(
+      {
+        status: "success",
+        tripId,
+        itineraryId,
+        itineraryProposalId: proposalId,
+        baseTripContextVersion: 8,
+        baseItineraryVersion: 12,
+      },
+    );
     expect(dependencies.resolveAccess).toHaveBeenCalledWith({
       tripId,
       action: "trip:edit",

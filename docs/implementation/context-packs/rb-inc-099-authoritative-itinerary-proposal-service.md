@@ -1,4 +1,5 @@
 ---
+id: RB-CTX-099
 title: Context Pack do RB-INC-099 — Serviço concreto de geração autoritativa de Itinerary Proposal
 description: Contexto operacional e evidências canônicas do serviço concreto que compõe geração autoritativa de Itinerary Proposal sobre PostgreSQL.
 document_type: implementation-context
@@ -6,7 +7,7 @@ owner: Engineering
 status: Draft
 version: "0.1.0"
 created: "2026-08-07"
-last_updated: null
+last_updated: "2026-08-07"
 authors:
   - RouteBook Team
 tags:
@@ -50,6 +51,7 @@ A composição não deve duplicar regras de elegibilidade, lifecycle, validaçã
 ## Arquivos centrais
 
 - `packages/database/src/authoritative-itinerary-proposal-generation-service.ts`
+- `packages/database/src/authoritative-itinerary-proposal-generation-service-postgres.test.ts`
 - `packages/database/src/authoritative-itinerary-proposal-generation-context.ts`
 - `packages/database/src/proposal-repository.ts`
 - `modules/proposal-management/src/authoritative-itinerary-proposal-generation.ts`
@@ -66,8 +68,14 @@ A composição não deve duplicar regras de elegibilidade, lifecycle, validaçã
 
 ## Evidências
 
-As evidências finais de CI devem ser registradas no RB-INC-099 somente depois de Engineering Validation e Documentation Validation passarem no mesmo SHA.
+No SHA `4fdba3e42f7791faf840042ea39b77b66741fc67`, antes da consolidação documental final, passaram:
+
+- Documentation Validation run `31199721638`;
+- Engineering Validation run `31199721963`;
+- format, docs, lint, typecheck, migrations, suíte de testes, smoke, build e Playwright responsivo.
+
+As evidências definitivas devem apontar para o SHA final que também contém registry e matriz sincronizados.
 
 ## Próxima lacuna canônica
 
-Após a composição concreta, a próxima lacuna deve ser determinada a partir da fronteira autorizada da aplicação: expor a geração para um ator autenticado/autorizado sem acoplar autorização ao domínio de geração e sem introduzir uma segunda política de lifecycle.
+Após a composição concreta, a próxima lacuna é expor a geração para um ator autenticado/autorizado na fronteira da aplicação, reutilizando a autorização server-side já existente e sem acoplar autorização ao domínio de geração nem introduzir uma segunda política de lifecycle.

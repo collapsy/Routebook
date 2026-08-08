@@ -1,4 +1,13 @@
 export {
+  editItineraryProposalProposedActivity,
+  ItineraryProposalProposedActivityEditError,
+} from "./edit-itinerary-proposal";
+export type {
+  EditableItineraryProposalProposedActivityChanges,
+  EditItineraryProposalProposedActivityInput,
+  ItineraryProposalProposedActivityEditErrorCode,
+} from "./edit-itinerary-proposal";
+export {
   acceptItineraryProposalErrorCodes,
   AcceptItineraryProposalError,
   AcceptItineraryProposalValidationError,

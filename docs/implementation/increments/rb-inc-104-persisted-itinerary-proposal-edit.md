@@ -114,7 +114,7 @@ Campos `TIME` persistidos podem ser reidratados como `HH:mm:ss` mesmo quando o c
 - [x] API pública exportada por `@routebook/proposal-management`;
 - [x] Engineering Validation técnico aprovado antes da promoção documental;
 - [ ] Documentation Validation e Engineering Validation aprovados no mesmo HEAD final;
-- [ ] registry, Context Pack e matriz de rastreabilidade sincronizados.
+- [x] registry, Context Pack e matriz de rastreabilidade sincronizados.
 
 ## 7. Evidências
 

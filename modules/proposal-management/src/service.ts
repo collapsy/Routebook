@@ -1,4 +1,8 @@
 import {
+  editItineraryProposalProposedActivity,
+  type EditableItineraryProposalProposedActivityChanges,
+} from "./edit-itinerary-proposal";
+import {
   cancelItineraryProposalGeneration,
   completeItineraryProposalGeneration,
   expireItineraryProposalByTime,
@@ -58,6 +62,14 @@ export type RejectItineraryProposalCommand = Readonly<{
   tripId: string;
   itineraryProposalId: ItineraryProposalId;
   rejectedAt: Date;
+}>;
+
+export type EditAndPersistItineraryProposalProposedActivityCommand = Readonly<{
+  tripId: string;
+  itineraryProposalId: ItineraryProposalId;
+  proposedActivityId: string;
+  changes: EditableItineraryProposalProposedActivityChanges;
+  editedAt: Date;
 }>;
 
 async function loadItineraryProposal(
@@ -158,4 +170,21 @@ export async function cancelAndPersistItineraryProposalGeneration(
   );
   const cancelled = cancelItineraryProposalGeneration(proposal, command.cancelledAt);
   return repository.save(cancelled);
+}
+
+export async function editAndPersistItineraryProposalProposedActivity(
+  repository: ItineraryProposalRepository,
+  command: EditAndPersistItineraryProposalProposedActivityCommand,
+): Promise<ItineraryProposal> {
+  const proposal = await loadItineraryProposal(
+    repository,
+    command.tripId,
+    command.itineraryProposalId,
+  );
+  const edited = editItineraryProposalProposedActivity(proposal, {
+    proposedActivityId: command.proposedActivityId,
+    changes: command.changes,
+    editedAt: command.editedAt,
+  });
+  return repository.save(edited);
 }

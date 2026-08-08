@@ -121,7 +121,7 @@ describe("edição persistida de Itinerary Proposal no PostgreSQL", () => {
             proposedActivityId: fixture.proposedActivityId,
             title: "Praia do Amor ao entardecer",
             description: "Visita ajustada e persistida",
-            proposedStartTime: "16:30",
+            proposedStartTime: "16:30:00",
             durationMinutes: 120,
             proposedOrder: 2,
             flexibility: "fixed",
@@ -160,6 +160,9 @@ describe("edição persistida de Itinerary Proposal no PostgreSQL", () => {
     const fixture = await createReadyFixture();
 
     try {
+      const persistedBefore = await fixture.repository.findById(fixture.trip.id, fixture.ready.id);
+      expect(persistedBefore).not.toBeNull();
+
       await expect(
         editAndPersistItineraryProposalProposedActivity(fixture.repository, {
           tripId: fixture.trip.id,
@@ -171,7 +174,7 @@ describe("edição persistida de Itinerary Proposal no PostgreSQL", () => {
       ).rejects.toBeInstanceOf(Error);
 
       expect(await fixture.repository.findById(fixture.trip.id, fixture.ready.id)).toEqual(
-        fixture.ready,
+        persistedBefore,
       );
     } finally {
       await cleanup(fixture.trip.id);

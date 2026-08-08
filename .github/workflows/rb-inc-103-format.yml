@@ -1,0 +1,35 @@
+name: RB-INC-103 Format
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-103-edit-itinerary-proposal-activity
+    paths:
+      - ".github/workflows/rb-inc-103-format.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-103-edit-itinerary-proposal-activity
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Format RB-INC-103 core
+        run: pnpm exec prettier --write modules/proposal-management/src/edit-itinerary-proposal.ts
+      - name: Commit canonical formatting and remove helper
+        run: |
+          git config user.name "collapsy"
+          git config user.email "38116052+collapsy@users.noreply.github.com"
+          git add modules/proposal-management/src/edit-itinerary-proposal.ts
+          git rm .github/workflows/rb-inc-103-format.yml
+          git commit -m "style(rb-inc-103): apply canonical formatting"
+          git push

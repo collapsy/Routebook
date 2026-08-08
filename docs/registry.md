@@ -256,6 +256,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-101 | Context Pack do RB-INC-101 | Implementation Context | Draft | 0.1.0 | [rb-inc-101-authorized-itinerary-proposal-generation-experience.md](./implementation/context-packs/rb-inc-101-authorized-itinerary-proposal-generation-experience.md) |
 | RB-INC-102 | Integração E2E da Geração Autorizada de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-102-authorized-itinerary-proposal-generation-e2e.md](./implementation/increments/rb-inc-102-authorized-itinerary-proposal-generation-e2e.md) |
 | RB-CTX-102 | Context Pack do RB-INC-102 | Implementation Context | Draft | 0.1.0 | [rb-inc-102-authorized-itinerary-proposal-generation-e2e.md](./implementation/context-packs/rb-inc-102-authorized-itinerary-proposal-generation-e2e.md) |
+| RB-INC-103 | Núcleo de Edição de Proposed Activity em Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-103-edit-itinerary-proposal-activity.md](./implementation/increments/rb-inc-103-edit-itinerary-proposal-activity.md) |
+| RB-CTX-103 | Context Pack do RB-INC-103 | Implementation Context | Draft | 0.1.0 | [rb-inc-103-edit-itinerary-proposal-activity.md](./implementation/context-packs/rb-inc-103-edit-itinerary-proposal-activity.md) |
 
 ## Status possíveis
 

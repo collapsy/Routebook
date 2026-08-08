@@ -116,7 +116,7 @@ A função recebe e retorna exclusivamente `ItineraryProposal`. Nenhum repositor
 - [x] `updatedAt` não pode retroceder;
 - [x] API pública exportada por `@routebook/proposal-management`;
 - [x] format, lint, typecheck, migrations e testes de domínio validados no ciclo de implementação;
-- [ ] Documentation Validation e Engineering Validation aprovados no mesmo HEAD final;
+- [x] Documentation Validation e Engineering Validation aprovados no mesmo SHA de promoção pré-final;
 - [x] registry, Context Pack e matriz de rastreabilidade sincronizados.
 
 ## 7. Evidências
@@ -126,9 +126,13 @@ A função recebe e retorna exclusivamente `ItineraryProposal`. Nenhum repositor
 - exports: `modules/proposal-management/src/index.ts`;
 - requisito de produto: `RB-FR-094` em `docs/product/functional-requirements.md`;
 - interação: `RB-INT-065` em `docs/ux/interaction-specifications.md`;
-- validação técnica pré-governança: Engineering Validation #1274 / run `31254665420`, com format, docs, lint, typecheck, migrations e testes de domínio aprovados antes da promoção documental;
+- SHA de promoção validado: `2644441b9558fbda74f2cc8257e943dcadccab8f`;
+- Documentation Validation #912 / run `31254831772`: success;
+- Engineering Validation #1279 / run `31254831771`: success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo;
 - issue: #235;
 - Draft PR: #236.
+
+O commit documental final deve repetir os dois gates canônicos antes do merge, sem novas alterações posteriores.
 
 ## 8. Próximo recorte esperado
 

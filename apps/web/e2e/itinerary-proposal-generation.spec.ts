@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 import {
   DrizzleItineraryProposalRepository,
@@ -7,6 +7,7 @@ import {
   places,
   recommendations,
 } from "@routebook/database";
+import type { ItineraryProposalId } from "@routebook/proposal-management";
 import { createItinerary } from "@routebook/trip-management";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
@@ -91,7 +92,10 @@ async function createGenerationFixture(
   return Object.freeze({ tripId: trip.id, placeId, placeTitle });
 }
 
-async function generateProposalFromEmptyState(page: Parameters<typeof test>[0]["page"], tripId: string) {
+async function generateProposalFromEmptyState(
+  page: Page,
+  tripId: string,
+): Promise<ItineraryProposalId> {
   await page.goto(`/viagens/${tripId}/roteiro/proposta`);
   await expect(page.getByRole("heading", { name: "Nenhuma proposta disponível" })).toBeVisible();
 
@@ -102,7 +106,7 @@ async function generateProposalFromEmptyState(page: Parameters<typeof test>[0]["
 
   const proposalId = new URL(page.url()).searchParams.get("propostaGerada");
   expect(proposalId).toMatch(/^[0-9a-f-]{36}$/i);
-  return proposalId!;
+  return proposalId as ItineraryProposalId;
 }
 
 test("gera uma Proposal ready da UI ao PostgreSQL sem alterar o Itinerary", async ({

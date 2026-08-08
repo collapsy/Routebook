@@ -1,0 +1,55 @@
+name: RB-INC-104 Rehydrate Sync
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-104-persisted-itinerary-proposal-edit
+    paths:
+      - ".github/workflows/rb-inc-104-rehydrate-sync.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-104-persisted-itinerary-proposal-edit
+      - name: Preserve persisted ready updatedAt
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path("packages/database/src/proposal-repository.ts")
+          content = path.read_text()
+          old = '''        if (row.status === "expired") {
+          return expireItineraryProposalByTime(ready, requireDate(row.expiredAt, "expiredAt"));
+        }
+        return ready;
+'''
+          new = '''        if (row.status === "expired") {
+          return expireItineraryProposalByTime(ready, requireDate(row.expiredAt, "expiredAt"));
+        }
+        if (row.updatedAt.getTime() < ready.updatedAt.getTime()) {
+          throw invalidPersistence(
+            "A Itinerary Proposal pronta possui updatedAt anterior a generatedAt.",
+          );
+        }
+        return Object.freeze({
+          ...ready,
+          updatedAt: new Date(row.updatedAt.getTime()),
+        });
+'''
+          if old not in content:
+              raise SystemExit("ready rehydration anchor not found")
+          path.write_text(content.replace(old, new, 1))
+      - name: Commit canonical rehydration and remove helper
+        run: |
+          git config user.name "collapsy"
+          git config user.email "38116052+collapsy@users.noreply.github.com"
+          git add packages/database/src/proposal-repository.ts
+          git rm .github/workflows/rb-inc-104-rehydrate-sync.yml
+          git commit -m "fix(rb-inc-104): preserve persisted ready proposal update time"
+          git push

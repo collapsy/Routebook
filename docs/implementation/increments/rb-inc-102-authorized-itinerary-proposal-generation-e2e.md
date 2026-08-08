@@ -83,7 +83,7 @@ Os incrementos RB-INC-099 a RB-INC-101 concluíram, respectivamente, a composiç
 - [x] ausência de Recommendation elegível produz Proposal `ready` sem mudanças;
 - [x] a limitação de ausência de candidatos permanece visível na revisão;
 - [ ] Documentation Validation e Engineering Validation aprovados no mesmo HEAD final;
-- [ ] registry, Context Pack e matriz de rastreabilidade sincronizados.
+- [x] registry, Context Pack e matriz de rastreabilidade sincronizados.
 
 ## 6. Evidências
 

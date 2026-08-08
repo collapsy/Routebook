@@ -146,7 +146,9 @@ function editActivity(
       ? activity.targetTripDayId
       : requiredText(changes.targetTripDayId, "changes.targetTripDayId");
   const title =
-    changes.title === undefined ? activity.title : requiredText(changes.title, "changes.title");
+    changes.title === undefined
+      ? activity.title
+      : requiredText(changes.title, "changes.title");
   const description = optionalTextChange(
     activity.description,
     changes.description,

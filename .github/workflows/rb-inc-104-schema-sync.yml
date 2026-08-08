@@ -1,0 +1,53 @@
+name: RB-INC-104 Schema Sync
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-104-persisted-itinerary-proposal-edit
+    paths:
+      - ".github/workflows/rb-inc-104-schema-sync.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-104-persisted-itinerary-proposal-edit
+      - name: Synchronize schema and migration journal
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          schema_path = Path("packages/database/src/proposal-schema.ts")
+          schema = schema_path.read_text()
+          old = "${table.cancelledAt} IS NULL AND ${table.updatedAt} = ${table.generatedAt})"
+          new = "${table.cancelledAt} IS NULL AND ${table.updatedAt} >= ${table.generatedAt})"
+          if old not in schema:
+              raise SystemExit("ready lifecycle constraint anchor not found")
+          schema = schema.replace(old, new, 1)
+          schema_path.write_text(schema)
+
+          journal_path = Path("packages/database/drizzle/meta/_journal.json")
+          journal = json.loads(journal_path.read_text())
+          if not any(entry["tag"] == "0023_allow_ready_itinerary_proposal_edits" for entry in journal["entries"]):
+              journal["entries"].append({
+                  "idx": 23,
+                  "version": "7",
+                  "when": 1786185900000,
+                  "tag": "0023_allow_ready_itinerary_proposal_edits",
+                  "breakpoints": True,
+              })
+          journal_path.write_text(json.dumps(journal, indent=2) + "\n")
+      - name: Commit canonical schema synchronization and remove helper
+        run: |
+          git config user.name "collapsy"
+          git config user.email "38116052+collapsy@users.noreply.github.com"
+          git add packages/database/src/proposal-schema.ts packages/database/drizzle/meta/_journal.json
+          git rm .github/workflows/rb-inc-104-schema-sync.yml
+          git commit -m "db(rb-inc-104): synchronize editable ready proposal lifecycle"
+          git push

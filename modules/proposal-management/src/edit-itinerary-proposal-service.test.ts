@@ -32,10 +32,7 @@ class ControlledItineraryProposalRepository implements ItineraryProposalReposito
     tripId: string,
     itineraryProposalId: ItineraryProposalId,
   ): Promise<ItineraryProposal | null> {
-    if (
-      this.current?.tripId === tripId &&
-      this.current.id === itineraryProposalId
-    ) {
+    if (this.current?.tripId === tripId && this.current.id === itineraryProposalId) {
       return this.current;
     }
     return null;
@@ -174,15 +171,16 @@ describe("editAndPersistItineraryProposalProposedActivity", () => {
   it.each([
     [
       "Proposal não ready",
-      () => requestItineraryProposal({
-        id: "proposal-requested-edit",
-        tripId: "trip-edit-service-1",
-        itineraryId: "itinerary-edit-service-1",
-        baseTripContextVersion: 1,
-        baseItineraryVersion: 1,
-        contextSnapshotId: "snapshot-requested-edit",
-        requestedAt: new Date("2026-08-08T12:00:00.000Z"),
-      }),
+      () =>
+        requestItineraryProposal({
+          id: "proposal-requested-edit",
+          tripId: "trip-edit-service-1",
+          itineraryId: "itinerary-edit-service-1",
+          baseTripContextVersion: 1,
+          baseItineraryVersion: 1,
+          contextSnapshotId: "snapshot-requested-edit",
+          requestedAt: new Date("2026-08-08T12:00:00.000Z"),
+        }),
       "proposed-edit-service-1",
       { title: "Novo título" },
     ],

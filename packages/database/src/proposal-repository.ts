@@ -181,7 +181,15 @@ function rehydrateItineraryProposal(
         if (row.status === "expired") {
           return expireItineraryProposalByTime(ready, requireDate(row.expiredAt, "expiredAt"));
         }
-        return ready;
+        if (row.updatedAt.getTime() < ready.updatedAt.getTime()) {
+          throw invalidPersistence(
+            "A Itinerary Proposal pronta possui updatedAt anterior a generatedAt.",
+          );
+        }
+        return Object.freeze({
+          ...ready,
+          updatedAt: new Date(row.updatedAt.getTime()),
+        });
       }
       case "failed": {
         const generating = startItineraryProposalGeneration(

@@ -82,7 +82,7 @@ Os incrementos RB-INC-099 a RB-INC-101 concluíram, respectivamente, a composiç
 - [x] o Itinerary permanece idêntico antes e depois da geração;
 - [x] ausência de Recommendation elegível produz Proposal `ready` sem mudanças;
 - [x] a limitação de ausência de candidatos permanece visível na revisão;
-- [ ] Documentation Validation e Engineering Validation aprovados no mesmo HEAD final;
+- [x] Documentation Validation e Engineering Validation aprovados no mesmo SHA funcional e de governança pré-promoção;
 - [x] registry, Context Pack e matriz de rastreabilidade sincronizados.
 
 ## 6. Evidências
@@ -93,5 +93,10 @@ Os incrementos RB-INC-099 a RB-INC-101 concluíram, respectivamente, a composiç
 - Server Action: `apps/web/app/viagens/[tripId]/roteiro/proposta/generate-action.ts`;
 - repository de Proposal: `packages/database/src/proposal-repository.ts`;
 - composition root: `packages/database/src/authoritative-itinerary-proposal-generation-service.ts`;
+- SHA validado: `915b41c2c823c74531631cbefdca3cc6361225e2`;
+- Documentation Validation #905 / run `31253807085`: success;
+- Engineering Validation #1267 / run `31253807071`: success em format, documentação, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo;
 - issue: #231;
 - Draft PR: #234.
+
+O commit documental de promoção deve repetir os dois gates canônicos antes do merge.

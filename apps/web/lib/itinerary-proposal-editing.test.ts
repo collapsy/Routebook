@@ -189,10 +189,7 @@ describe("executeEditItineraryProposalAction", () => {
       new ItineraryProposalProposedActivityEditError("atividade", "proposed-activity-not-found"),
       "proposed-activity-not-found",
     ],
-    [
-      new ItineraryProposalValidationError("inválida", { title: "inválido" }),
-      "invalid-request",
-    ],
+    [new ItineraryProposalValidationError("inválida", { title: "inválido" }), "invalid-request"],
   ] as const)("traduz erro conhecido para %s", async (error, code) => {
     const deps = dependencies({ editProposal: vi.fn().mockRejectedValue(error) });
 

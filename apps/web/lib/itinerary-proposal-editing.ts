@@ -248,7 +248,8 @@ export async function executeEditItineraryProposalAction(
       return editItineraryProposalActionError("technical-error");
     }
 
-    const editProposal = dependencies.editProposal ?? editAndPersistItineraryProposalProposedActivity;
+    const editProposal =
+      dependencies.editProposal ?? editAndPersistItineraryProposalProposedActivity;
     const proposal = await editProposal(dependencies.repository, {
       tripId,
       itineraryProposalId,

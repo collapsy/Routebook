@@ -63,9 +63,9 @@ describe("editItineraryProposalAction", () => {
   it("delega o payload web, usa o repository PostgreSQL e revalida somente após sucesso", async () => {
     editingMocks.execute.mockResolvedValue(success);
 
-    await expect(
-      editItineraryProposalAction(tripId, { status: "idle" }, formData()),
-    ).resolves.toBe(success);
+    await expect(editItineraryProposalAction(tripId, { status: "idle" }, formData())).resolves.toBe(
+      success,
+    );
 
     expect(editingMocks.execute).toHaveBeenCalledWith(
       {
@@ -119,9 +119,9 @@ describe("editItineraryProposalAction", () => {
     } as const;
     editingMocks.execute.mockResolvedValue(error);
 
-    await expect(
-      editItineraryProposalAction(tripId, { status: "idle" }, formData()),
-    ).resolves.toBe(error);
+    await expect(editItineraryProposalAction(tripId, { status: "idle" }, formData())).resolves.toBe(
+      error,
+    );
     expect(cacheMocks.revalidatePath).not.toHaveBeenCalled();
   });
 

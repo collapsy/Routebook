@@ -117,7 +117,7 @@ A função recebe e retorna exclusivamente `ItineraryProposal`. Nenhum repositor
 - [x] API pública exportada por `@routebook/proposal-management`;
 - [x] format, lint, typecheck, migrations e testes de domínio validados no ciclo de implementação;
 - [ ] Documentation Validation e Engineering Validation aprovados no mesmo HEAD final;
-- [ ] registry, Context Pack e matriz de rastreabilidade sincronizados.
+- [x] registry, Context Pack e matriz de rastreabilidade sincronizados.
 
 ## 7. Evidências
 
@@ -126,6 +126,7 @@ A função recebe e retorna exclusivamente `ItineraryProposal`. Nenhum repositor
 - exports: `modules/proposal-management/src/index.ts`;
 - requisito de produto: `RB-FR-094` em `docs/product/functional-requirements.md`;
 - interação: `RB-INT-065` em `docs/ux/interaction-specifications.md`;
+- validação técnica pré-governança: Engineering Validation #1274 / run `31254665420`, com format, docs, lint, typecheck, migrations e testes de domínio aprovados antes da promoção documental;
 - issue: #235;
 - Draft PR: #236.
 

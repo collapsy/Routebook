@@ -131,6 +131,7 @@ export type {
 export {
   cancelAndPersistItineraryProposalGeneration,
   completeAndPersistItineraryProposalGeneration,
+  editAndPersistItineraryProposalProposedActivity,
   expireAndPersistItineraryProposalByTime,
   failAndPersistItineraryProposalGeneration,
   ItineraryProposalApplicationError,
@@ -141,6 +142,7 @@ export {
 export type {
   CancelItineraryProposalGenerationCommand,
   CompleteItineraryProposalGenerationCommand,
+  EditAndPersistItineraryProposalProposedActivityCommand,
   ExpireItineraryProposalByTimeCommand,
   FailItineraryProposalGenerationCommand,
   RejectItineraryProposalCommand,

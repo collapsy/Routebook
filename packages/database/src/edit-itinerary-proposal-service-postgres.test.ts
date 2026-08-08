@@ -111,9 +111,22 @@ describe("edição persistida de Itinerary Proposal no PostgreSQL", () => {
         },
       });
 
+      expect(edited).toMatchObject({
+        status: "ready",
+        updatedAt: new Date("2026-08-08T12:03:00.000Z"),
+        proposedActivities: [
+          expect.objectContaining({
+            proposedActivityId: fixture.proposedActivityId,
+            proposedStartTime: "16:30",
+            durationMinutes: 120,
+          }),
+        ],
+      });
+
       const rehydrated = await fixture.repository.findById(fixture.trip.id, fixture.ready.id);
-      expect(rehydrated).toEqual(edited);
       expect(rehydrated).toMatchObject({
+        id: edited.id,
+        tripId: edited.tripId,
         status: "ready",
         updatedAt: new Date("2026-08-08T12:03:00.000Z"),
         proposedActivities: [

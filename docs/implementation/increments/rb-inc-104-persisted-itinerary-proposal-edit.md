@@ -113,7 +113,7 @@ Campos `TIME` persistidos podem ser reidratados como `HH:mm:ss` mesmo quando o c
 - [x] schema Drizzle e journal de migrations estão sincronizados;
 - [x] API pública exportada por `@routebook/proposal-management`;
 - [x] Engineering Validation técnico aprovado antes da promoção documental;
-- [ ] Documentation Validation e Engineering Validation aprovados no mesmo HEAD final;
+- [x] Documentation Validation e Engineering Validation aprovados no mesmo SHA de promoção;
 - [x] registry, Context Pack e matriz de rastreabilidade sincronizados.
 
 ## 7. Evidências
@@ -128,8 +128,13 @@ Campos `TIME` persistidos podem ser reidratados como `HH:mm:ss` mesmo quando o c
 - journal: `packages/database/drizzle/meta/_journal.json`;
 - SHA técnico validado: `d63305d0f8427d12c2e9dfb1a8ff7da9d09d0b42`;
 - Engineering Validation #1293 / run `31256073601`: success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo;
+- SHA de promoção validado: `1d1d2f23e949f1b3a04767814829981ee40f5cd4`;
+- Documentation Validation #919 / run `31256356138`: success;
+- Engineering Validation #1298 / run `31256356120`: success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo;
 - issue: #237;
 - Draft PR: #238.
+
+Este commit documental é a última alteração prevista da branch. Ele deve repetir Documentation Validation e Engineering Validation no mesmo HEAD antes do merge; nenhuma alteração posterior é permitida sem reiniciar os gates.
 
 ## 8. Próximo recorte esperado
 

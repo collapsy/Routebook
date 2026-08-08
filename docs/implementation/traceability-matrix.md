@@ -234,6 +234,19 @@ ai_context:
 | Engineering Validation | #1255, run `31218649337`, success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo |
 | gate final | repetir Documentation Validation e Engineering Validation no mesmo HEAD final de governança antes do merge |
 
+## Evidências previstas do RB-INC-102
+
+| Evidência | Localização |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-102-authorized-itinerary-proposal-generation-e2e.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-102-authorized-itinerary-proposal-generation-e2e.md` |
+| E2E de geração | `apps/web/e2e/itinerary-proposal-generation.spec.ts` |
+| experiência | `apps/web/app/viagens/[tripId]/roteiro/proposta/page.tsx` |
+| Server Action | `apps/web/app/viagens/[tripId]/roteiro/proposta/generate-action.ts` |
+| persistência | `packages/database/src/proposal-repository.ts` |
+| rastreabilidade | issue #231 e PR #234 |
+| migration | nenhuma nova migration; contratos existentes reutilizados |
+
 ## Cadeia mínima
 
 ```text

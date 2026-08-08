@@ -247,6 +247,20 @@ ai_context:
 | rastreabilidade | issue #231 e PR #234 |
 | migration | nenhuma nova migration; contratos existentes reutilizados |
 
+## Evidências previstas do RB-INC-103
+
+| Evidência | Localização |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-103-edit-itinerary-proposal-activity.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-103-edit-itinerary-proposal-activity.md` |
+| núcleo de edição | `modules/proposal-management/src/edit-itinerary-proposal.ts` |
+| testes de domínio | `modules/proposal-management/src/edit-itinerary-proposal.test.ts` |
+| exports públicos | `modules/proposal-management/src/index.ts` |
+| requisito de produto | `RB-FR-094` |
+| interação | `RB-INT-065` |
+| rastreabilidade | issue #235 e PR #236 |
+| migration | nenhuma nova migration; domínio sem alteração de schema |
+
 ## Cadeia mínima
 
 ```text

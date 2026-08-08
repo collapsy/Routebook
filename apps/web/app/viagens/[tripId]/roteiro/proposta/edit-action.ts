@@ -17,8 +17,7 @@ function requiredFormText(formData: FormData, field: string): string {
   return typeof value === "string" ? value : "";
 }
 
-function optionalFormText(formData: FormData, field: string): string | null | undefined {
-  if (!formData.has(field)) return undefined;
+function presentFormText(formData: FormData, field: string): string | null {
   const value = formData.get(field);
   return typeof value === "string" ? value : null;
 }
@@ -33,25 +32,25 @@ function actionInput(tripId: string, formData: FormData): EditItineraryProposalA
       : {}),
     ...(formData.has("title") ? { title: requiredFormText(formData, "title") } : {}),
     ...(formData.has("description")
-      ? { description: optionalFormText(formData, "description") }
+      ? { description: presentFormText(formData, "description") }
       : {}),
     ...(formData.has("proposedStartTime")
-      ? { proposedStartTime: optionalFormText(formData, "proposedStartTime") }
+      ? { proposedStartTime: presentFormText(formData, "proposedStartTime") }
       : {}),
     ...(formData.has("durationMinutes")
-      ? { durationMinutes: optionalFormText(formData, "durationMinutes") }
+      ? { durationMinutes: presentFormText(formData, "durationMinutes") }
       : {}),
     ...(formData.has("proposedOrder")
-      ? { proposedOrder: optionalFormText(formData, "proposedOrder") }
+      ? { proposedOrder: presentFormText(formData, "proposedOrder") }
       : {}),
     ...(formData.has("flexibility")
-      ? { flexibility: optionalFormText(formData, "flexibility") }
+      ? { flexibility: presentFormText(formData, "flexibility") }
       : {}),
     ...(formData.has("estimatedCostAmount")
-      ? { estimatedCostAmount: optionalFormText(formData, "estimatedCostAmount") }
+      ? { estimatedCostAmount: presentFormText(formData, "estimatedCostAmount") }
       : {}),
     ...(formData.has("estimatedCostCurrency")
-      ? { estimatedCostCurrency: optionalFormText(formData, "estimatedCostCurrency") }
+      ? { estimatedCostCurrency: presentFormText(formData, "estimatedCostCurrency") }
       : {}),
   };
 }

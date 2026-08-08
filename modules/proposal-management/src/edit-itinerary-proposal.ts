@@ -5,8 +5,7 @@ import {
 } from "./itinerary-proposal";
 
 export type ItineraryProposalProposedActivityEditErrorCode =
-  | "proposal-not-ready"
-  | "proposed-activity-not-found";
+  "proposal-not-ready" | "proposed-activity-not-found";
 
 export class ItineraryProposalProposedActivityEditError extends Error {
   constructor(
@@ -146,9 +145,7 @@ function editActivity(
       ? activity.targetTripDayId
       : requiredText(changes.targetTripDayId, "changes.targetTripDayId");
   const title =
-    changes.title === undefined
-      ? activity.title
-      : requiredText(changes.title, "changes.title");
+    changes.title === undefined ? activity.title : requiredText(changes.title, "changes.title");
   const description = optionalTextChange(
     activity.description,
     changes.description,
@@ -236,7 +233,9 @@ export function editItineraryProposalProposedActivity(
 
   const editedActivity = editActivity(proposedActivities[targetIndex]!, input.changes);
   const nextActivities = Object.freeze(
-    proposedActivities.map((activity, index) => (index === targetIndex ? editedActivity : activity)),
+    proposedActivities.map((activity, index) =>
+      index === targetIndex ? editedActivity : activity,
+    ),
   );
 
   return Object.freeze({

@@ -1,0 +1,35 @@
+name: RB-INC-104 Format
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-104-persisted-itinerary-proposal-edit
+    paths:
+      - ".github/workflows/rb-inc-104-format.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-104-persisted-itinerary-proposal-edit
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Format RB-INC-104 test
+        run: pnpm exec prettier --write modules/proposal-management/src/edit-itinerary-proposal-service.test.ts
+      - name: Commit canonical formatting and remove helper
+        run: |
+          git config user.name "collapsy"
+          git config user.email "38116052+collapsy@users.noreply.github.com"
+          git add modules/proposal-management/src/edit-itinerary-proposal-service.test.ts
+          git rm .github/workflows/rb-inc-104-format.yml
+          git commit -m "style(rb-inc-104): apply canonical test formatting"
+          git push

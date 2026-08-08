@@ -172,6 +172,9 @@ export async function cancelAndPersistItineraryProposalGeneration(
   return repository.save(cancelled);
 }
 
+/**
+ * Recarrega a representação atual da Proposal antes de aplicar e persistir uma edição validada.
+ */
 export async function editAndPersistItineraryProposalProposedActivity(
   repository: ItineraryProposalRepository,
   command: EditAndPersistItineraryProposalProposedActivityCommand,

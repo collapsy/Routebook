@@ -30,12 +30,13 @@ const authorizedAccess = {
 
 function input(
   overrides: Partial<EditItineraryProposalActionInput> = {},
+  includeDefaultTitle = true,
 ): EditItineraryProposalActionInput {
   return {
     tripId,
     itineraryProposalId: proposalId,
     proposedActivityId: activityId,
-    title: "Praia do Amor ao entardecer",
+    ...(includeDefaultTitle ? { title: "Praia do Amor ao entardecer" } : {}),
     ...overrides,
   };
 }
@@ -74,7 +75,7 @@ describe("executeEditItineraryProposalAction", () => {
       executeEditItineraryProposalAction(input({ title: "   " }), deps),
     ).resolves.toEqual(editItineraryProposalActionError("invalid-request"));
     await expect(
-      executeEditItineraryProposalAction(input({ durationMinutes: "0", title: undefined }), deps),
+      executeEditItineraryProposalAction(input({ durationMinutes: "0" }, false), deps),
     ).resolves.toEqual(editItineraryProposalActionError("invalid-request"));
 
     expect(resolveAccess).not.toHaveBeenCalled();
@@ -150,16 +151,18 @@ describe("executeEditItineraryProposalAction", () => {
     const deps = dependencies({ editProposal });
 
     await executeEditItineraryProposalAction(
-      input({
-        title: undefined,
-        description: "",
-        proposedStartTime: null,
-        durationMinutes: "",
-        proposedOrder: null,
-        flexibility: " ",
-        estimatedCostAmount: null,
-        estimatedCostCurrency: "",
-      }),
+      input(
+        {
+          description: "",
+          proposedStartTime: null,
+          durationMinutes: "",
+          proposedOrder: null,
+          flexibility: " ",
+          estimatedCostAmount: null,
+          estimatedCostCurrency: "",
+        },
+        false,
+      ),
       deps,
     );
 

@@ -258,6 +258,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-102 | Context Pack do RB-INC-102 | Implementation Context | Draft | 0.1.0 | [rb-inc-102-authorized-itinerary-proposal-generation-e2e.md](./implementation/context-packs/rb-inc-102-authorized-itinerary-proposal-generation-e2e.md) |
 | RB-INC-103 | Núcleo de Edição de Proposed Activity em Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-103-edit-itinerary-proposal-activity.md](./implementation/increments/rb-inc-103-edit-itinerary-proposal-activity.md) |
 | RB-CTX-103 | Context Pack do RB-INC-103 | Implementation Context | Draft | 0.1.0 | [rb-inc-103-edit-itinerary-proposal-activity.md](./implementation/context-packs/rb-inc-103-edit-itinerary-proposal-activity.md) |
+| RB-INC-104 | Serviço de Aplicação para Edição Persistida de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-104-persisted-itinerary-proposal-edit.md](./implementation/increments/rb-inc-104-persisted-itinerary-proposal-edit.md) |
+| RB-CTX-104 | Context Pack do RB-INC-104 | Implementation Context | Draft | 0.1.0 | [rb-inc-104-persisted-itinerary-proposal-edit.md](./implementation/context-packs/rb-inc-104-persisted-itinerary-proposal-edit.md) |
 
 ## Status possíveis
 

@@ -162,6 +162,13 @@
       "when": 1785714600000,
       "tag": "0022_create_personal_account_ownerships",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1786185900000,
+      "tag": "0023_allow_ready_itinerary_proposal_edits",
+      "breakpoints": true
     }
   ]
 }

@@ -261,6 +261,21 @@ ai_context:
 | rastreabilidade | issue #235 e PR #236 |
 | migration | nenhuma nova migration; domínio sem alteração de schema |
 
+## Evidências previstas do RB-INC-104
+
+| Evidência | Localização |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-104-persisted-itinerary-proposal-edit.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-104-persisted-itinerary-proposal-edit.md` |
+| application service | `modules/proposal-management/src/service.ts` |
+| testes do service | `modules/proposal-management/src/edit-itinerary-proposal-service.test.ts` |
+| integração PostgreSQL | `packages/database/src/edit-itinerary-proposal-service-postgres.test.ts` |
+| repository | `packages/database/src/proposal-repository.ts` |
+| schema de Proposal | `packages/database/src/proposal-schema.ts` |
+| migration | `packages/database/drizzle/0023_allow_ready_itinerary_proposal_edits.sql` |
+| journal de migrations | `packages/database/drizzle/meta/_journal.json` |
+| rastreabilidade | issue #237 e PR #238 |
+
 ## Cadeia mínima
 
 ```text

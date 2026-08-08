@@ -1,4 +1,5 @@
 import {
+  createItineraryProposalId,
   editAndPersistItineraryProposalProposedActivity,
   ItineraryProposalApplicationError,
   ItineraryProposalProposedActivityEditError,
@@ -164,13 +165,13 @@ function parseChanges(
 
   if (input.durationMinutes !== undefined) {
     const durationMinutes = positiveInteger(input.durationMinutes);
-    if (typeof durationMinutes === "number" && Number.isNaN(durationMinutes)) return null;
+    if (durationMinutes === undefined || Number.isNaN(durationMinutes)) return null;
     changes.durationMinutes = durationMinutes;
   }
 
   if (input.proposedOrder !== undefined) {
     const proposedOrder = nonNegativeInteger(input.proposedOrder);
-    if (typeof proposedOrder === "number" && Number.isNaN(proposedOrder)) return null;
+    if (proposedOrder === undefined || Number.isNaN(proposedOrder)) return null;
     changes.proposedOrder = proposedOrder;
   }
 
@@ -180,7 +181,7 @@ function parseChanges(
 
   if (input.estimatedCostAmount !== undefined) {
     const estimatedCostAmount = nonNegativeNumber(input.estimatedCostAmount);
-    if (typeof estimatedCostAmount === "number" && Number.isNaN(estimatedCostAmount)) return null;
+    if (estimatedCostAmount === undefined || Number.isNaN(estimatedCostAmount)) return null;
     changes.estimatedCostAmount = estimatedCostAmount;
   }
 
@@ -216,6 +217,9 @@ function mapKnownError(error: unknown): EditItineraryProposalActionState | null 
   return null;
 }
 
+/**
+ * Valida e autoriza o payload web antes de delegar a única escrita ao application service canônico.
+ */
 export async function executeEditItineraryProposalAction(
   input: EditItineraryProposalActionInput,
   dependencies: EditItineraryProposalActionDependencies,
@@ -252,7 +256,7 @@ export async function executeEditItineraryProposalAction(
       dependencies.editProposal ?? editAndPersistItineraryProposalProposedActivity;
     const proposal = await editProposal(dependencies.repository, {
       tripId,
-      itineraryProposalId,
+      itineraryProposalId: createItineraryProposalId(itineraryProposalId),
       proposedActivityId,
       changes,
       editedAt: new Date(editedAt.getTime()),

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   editItineraryProposalProposedActivity,
   ItineraryProposalProposedActivityEditError,
+  type ItineraryProposalProposedActivityEditErrorCode,
 } from "./edit-itinerary-proposal";
 import {
   completeItineraryProposalGeneration,
@@ -65,6 +66,34 @@ function createReadyProposal(): ItineraryProposal {
     validUntil: new Date("2026-08-09T10:02:00.000Z"),
     generatedAt: new Date("2026-08-08T10:02:00.000Z"),
   });
+}
+
+function captureError(operation: () => unknown): unknown {
+  try {
+    operation();
+    return undefined;
+  } catch (error) {
+    return error;
+  }
+}
+
+function expectEditError(
+  operation: () => unknown,
+  code: ItineraryProposalProposedActivityEditErrorCode,
+): void {
+  const error = captureError(operation);
+  expect(error).toBeInstanceOf(ItineraryProposalProposedActivityEditError);
+  expect(error).toMatchObject({
+    name: "ItineraryProposalProposedActivityEditError",
+    code,
+  });
+}
+
+function expectValidationField(operation: () => unknown, field: string): void {
+  const error = captureError(operation);
+  expect(error).toBeInstanceOf(ItineraryProposalValidationError);
+  const fieldErrors = (error as ItineraryProposalValidationError).fieldErrors;
+  expect(fieldErrors[field]).toEqual(expect.any(String));
 }
 
 describe("editItineraryProposalProposedActivity", () => {
@@ -152,34 +181,28 @@ describe("editItineraryProposalProposedActivity", () => {
       requestedAt: new Date("2026-08-08T10:00:00.000Z"),
     });
 
-    expect(() =>
-      editItineraryProposalProposedActivity(requested, {
-        proposedActivityId: "proposed-activity-1",
-        editedAt: new Date("2026-08-08T10:01:00.000Z"),
-        changes: { title: "Novo título" },
-      }),
-    ).toThrowError(
-      expect.objectContaining({
-        name: "ItineraryProposalProposedActivityEditError",
-        code: "proposal-not-ready",
-      }),
+    expectEditError(
+      () =>
+        editItineraryProposalProposedActivity(requested, {
+          proposedActivityId: "proposed-activity-1",
+          editedAt: new Date("2026-08-08T10:01:00.000Z"),
+          changes: { title: "Novo título" },
+        }),
+      "proposal-not-ready",
     );
   });
 
   it("rejeita Proposed Activity que não pertence à Proposal", () => {
     const proposal = createReadyProposal();
 
-    expect(() =>
-      editItineraryProposalProposedActivity(proposal, {
-        proposedActivityId: "inexistente",
-        editedAt: new Date("2026-08-08T10:03:00.000Z"),
-        changes: { title: "Novo título" },
-      }),
-    ).toThrowError(
-      expect.objectContaining({
-        name: "ItineraryProposalProposedActivityEditError",
-        code: "proposed-activity-not-found",
-      }),
+    expectEditError(
+      () =>
+        editItineraryProposalProposedActivity(proposal, {
+          proposedActivityId: "inexistente",
+          editedAt: new Date("2026-08-08T10:03:00.000Z"),
+          changes: { title: "Novo título" },
+        }),
+      "proposed-activity-not-found",
     );
   });
 
@@ -193,51 +216,38 @@ describe("editItineraryProposalProposedActivity", () => {
   ] as const)("rejeita alteração inválida em %s", (changes, field) => {
     const proposal = createReadyProposal();
 
-    expect(() =>
-      editItineraryProposalProposedActivity(proposal, {
-        proposedActivityId: "proposed-activity-1",
-        editedAt: new Date("2026-08-08T10:03:00.000Z"),
-        changes,
-      }),
-    ).toThrowError(ItineraryProposalValidationError);
-
-    try {
-      editItineraryProposalProposedActivity(proposal, {
-        proposedActivityId: "proposed-activity-1",
-        editedAt: new Date("2026-08-08T10:03:00.000Z"),
-        changes,
-      });
-    } catch (error) {
-      expect(error).toBeInstanceOf(ItineraryProposalValidationError);
-      expect((error as ItineraryProposalValidationError).fieldErrors).toHaveProperty(field);
-    }
+    expectValidationField(
+      () =>
+        editItineraryProposalProposedActivity(proposal, {
+          proposedActivityId: "proposed-activity-1",
+          editedAt: new Date("2026-08-08T10:03:00.000Z"),
+          changes,
+        }),
+      field,
+    );
   });
 
   it("rejeita edição sem mudanças e instante anterior ao updatedAt", () => {
     const proposal = createReadyProposal();
 
-    expect(() =>
-      editItineraryProposalProposedActivity(proposal, {
-        proposedActivityId: "proposed-activity-1",
-        editedAt: new Date("2026-08-08T10:03:00.000Z"),
-        changes: {},
-      }),
-    ).toThrowError(
-      expect.objectContaining({
-        fieldErrors: expect.objectContaining({ changes: expect.any(String) }),
-      }),
+    expectValidationField(
+      () =>
+        editItineraryProposalProposedActivity(proposal, {
+          proposedActivityId: "proposed-activity-1",
+          editedAt: new Date("2026-08-08T10:03:00.000Z"),
+          changes: {},
+        }),
+      "changes",
     );
 
-    expect(() =>
-      editItineraryProposalProposedActivity(proposal, {
-        proposedActivityId: "proposed-activity-1",
-        editedAt: new Date("2026-08-08T10:01:59.999Z"),
-        changes: { title: "Novo título" },
-      }),
-    ).toThrowError(
-      expect.objectContaining({
-        fieldErrors: expect.objectContaining({ editedAt: expect.any(String) }),
-      }),
+    expectValidationField(
+      () =>
+        editItineraryProposalProposedActivity(proposal, {
+          proposedActivityId: "proposed-activity-1",
+          editedAt: new Date("2026-08-08T10:01:59.999Z"),
+          changes: { title: "Novo título" },
+        }),
+      "editedAt",
     );
   });
 

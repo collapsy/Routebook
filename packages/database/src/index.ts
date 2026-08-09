@@ -37,6 +37,17 @@ export { decisions } from "./decision-schema";
 export { planningConflicts } from "./planning-conflict-schema";
 export { itineraryProposals, proposedActivities } from "./proposal-schema";
 export {
+  itineraries,
+  itineraryActivities,
+  itineraryDays,
+  itineraryFreePeriods,
+  places,
+  recommendations,
+  savedPlaces,
+  travelerProfiles,
+  trips,
+} from "./schema";
+export {
   createPostgresAcceptItineraryProposal,
   type ApplyItineraryProposalTransactionFactory,
 } from "./accept-itinerary-proposal-service";

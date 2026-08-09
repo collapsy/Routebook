@@ -14,6 +14,8 @@ import {
   type ProposedActivity,
 } from "./itinerary-proposal";
 
+export const partialItineraryProposalAcceptanceApplicationType = "partial" as const;
+
 export const partialItineraryProposalAcceptanceErrorCodes = [
   "proposal-not-ready",
   "proposal-expired",
@@ -53,7 +55,7 @@ export type AcceptItineraryProposalPartiallyCommandInput = Readonly<{
 
 export type AcceptItineraryProposalPartiallyCommand = ApplyProposalItemsCommand &
   Readonly<{
-    applicationType: "partial";
+    applicationType: typeof partialItineraryProposalAcceptanceApplicationType;
     actorType: string;
     actorId?: string;
     decidedAt: Date;
@@ -271,7 +273,7 @@ export function createAcceptItineraryProposalPartiallyCommand(
   const requestFingerprint = createProposalApplicationRequestFingerprint({
     itineraryProposalId: applyCommand.itineraryProposalId,
     itineraryId: applyCommand.itineraryId,
-    applicationType: "partial",
+    applicationType: partialItineraryProposalAcceptanceApplicationType,
     expectedItineraryVersion: applyCommand.expectedItineraryVersion,
     actorType,
     ...(actorId !== undefined ? { actorId } : {}),
@@ -280,7 +282,7 @@ export function createAcceptItineraryProposalPartiallyCommand(
 
   return Object.freeze({
     ...applyCommand,
-    applicationType: "partial",
+    applicationType: partialItineraryProposalAcceptanceApplicationType,
     actorType,
     ...(actorId !== undefined ? { actorId } : {}),
     decidedAt,

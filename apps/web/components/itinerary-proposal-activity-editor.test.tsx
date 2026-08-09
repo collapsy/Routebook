@@ -73,6 +73,8 @@ const props = {
   tripId: "trip-1",
 } as const;
 
+const editLabel = "Editar sugestão: Mirante ao pôr do sol";
+
 beforeEach(() => {
   actionStateMocks.state = { status: "idle" };
   actionStateMocks.pending = false;
@@ -85,7 +87,7 @@ describe("ItineraryProposalActivityEditor", () => {
   it("pré-preenche add com os valores atuais e preserva os identificadores server-side", () => {
     render(<ItineraryProposalActivityEditor {...props} activity={activity()} />);
 
-    fireEvent.click(screen.getByText("Editar sugestão"));
+    fireEvent.click(screen.getByText(editLabel));
 
     expect(document.querySelector('input[name="itineraryProposalId"]')).toHaveValue(
       "proposal-ready",
@@ -127,7 +129,7 @@ describe("ItineraryProposalActivityEditor", () => {
       />,
     );
 
-    fireEvent.click(screen.getByText("Editar sugestão"));
+    fireEvent.click(screen.getByText(editLabel));
 
     expect(screen.getByRole("combobox", { name: "Dia proposto" })).toHaveValue("day-2");
     expect(screen.queryByRole("textbox", { name: "Título" })).not.toBeInTheDocument();
@@ -142,14 +144,14 @@ describe("ItineraryProposalActivityEditor", () => {
       />,
     );
 
-    expect(screen.queryByText("Editar sugestão")).not.toBeInTheDocument();
+    expect(screen.queryByText(editLabel)).not.toBeInTheDocument();
   });
 
   it("bloqueia o envio enquanto salva e anuncia o processamento", () => {
     actionStateMocks.pending = true;
 
     render(<ItineraryProposalActivityEditor {...props} activity={activity()} />);
-    fireEvent.click(screen.getByText("Editar sugestão"));
+    fireEvent.click(screen.getByText(editLabel));
 
     expect(screen.getByRole("button", { name: "Salvando edição…" })).toBeDisabled();
     expect(screen.getByText("Salvando a edição na proposta…")).toBeVisible();
@@ -163,7 +165,7 @@ describe("ItineraryProposalActivityEditor", () => {
     };
 
     render(<ItineraryProposalActivityEditor {...props} activity={activity()} />);
-    fireEvent.click(screen.getByText("Editar sugestão"));
+    fireEvent.click(screen.getByText(editLabel));
 
     expect(screen.getByRole("alert")).toHaveTextContent(
       "A proposta de roteiro não pode mais ser editada.",
@@ -181,7 +183,7 @@ describe("ItineraryProposalActivityEditor", () => {
     };
 
     render(<ItineraryProposalActivityEditor {...props} activity={activity()} />);
-    fireEvent.click(screen.getByText("Editar sugestão"));
+    fireEvent.click(screen.getByText(editLabel));
 
     expect(screen.getByRole("status")).toHaveTextContent(
       "O Roteiro confirmado ainda não foi alterado",

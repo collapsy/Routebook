@@ -169,6 +169,13 @@
       "when": 1786185900000,
       "tag": "0023_allow_ready_itinerary_proposal_edits",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1786301600000,
+      "tag": "0024_persist_partially_accepted_itinerary_proposals",
+      "breakpoints": true
     }
   ]
 }

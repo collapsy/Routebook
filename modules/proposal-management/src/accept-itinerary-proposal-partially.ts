@@ -17,8 +17,15 @@ import {
 export const partialItineraryProposalAcceptanceApplicationType = "partial" as const;
 
 export const partialItineraryProposalAcceptanceErrorCodes = [
+  "fingerprint-conflict",
+  "proposal-not-found",
   "proposal-not-ready",
   "proposal-expired",
+  "proposal-items-mismatch",
+  "itinerary-not-found",
+  "itinerary-version-mismatch",
+  "application-in-progress",
+  "application-failed",
   "selection-empty",
   "duplicate-selection",
   "unknown-proposed-activity",
@@ -92,6 +99,18 @@ export type ReplayedPartialItineraryProposalAcceptance = Readonly<{
 
 export type AcceptItineraryProposalPartiallyResult =
   AppliedPartialItineraryProposalAcceptance | ReplayedPartialItineraryProposalAcceptance;
+
+export interface ApplyPartialItineraryProposalTransaction {
+  execute(
+    command: AcceptItineraryProposalPartiallyCommand,
+  ): Promise<AcceptItineraryProposalPartiallyResult>;
+}
+
+export interface AcceptItineraryProposalPartially {
+  execute(
+    input: AcceptItineraryProposalPartiallyCommandInput,
+  ): Promise<AcceptItineraryProposalPartiallyResult>;
+}
 
 function requiredText(value: string, field: string): string {
   const normalized = typeof value === "string" ? value.trim() : "";
@@ -289,6 +308,23 @@ export function createAcceptItineraryProposalPartiallyCommand(
     requestFingerprint,
     proposedActivityIds,
     remainingProposedActivityIds,
+  });
+}
+
+export function createAcceptItineraryProposalPartially(
+  transaction: ApplyPartialItineraryProposalTransaction,
+): AcceptItineraryProposalPartially {
+  if (!transaction || typeof transaction.execute !== "function") {
+    throw new TypeError("Informe um port ApplyPartialItineraryProposalTransaction válido.");
+  }
+
+  return Object.freeze({
+    async execute(
+      input: AcceptItineraryProposalPartiallyCommandInput,
+    ): Promise<AcceptItineraryProposalPartiallyResult> {
+      const command = createAcceptItineraryProposalPartiallyCommand(input);
+      return transaction.execute(command);
+    },
   });
 }
 

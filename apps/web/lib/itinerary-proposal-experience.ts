@@ -5,11 +5,29 @@ import type {
 } from "@routebook/proposal-management";
 import type { Itinerary, ItineraryDay } from "@routebook/trip-management";
 
+export type ItineraryProposalReviewDayOption = Readonly<{
+  id: string;
+  label: string;
+}>;
+
+export type ItineraryProposalReviewActivityEditValues = Readonly<{
+  targetTripDayId?: string;
+  title: string;
+  description: string;
+  proposedStartTime: string;
+  durationMinutes: string;
+  flexibility: string;
+  estimatedCostAmount: string;
+  estimatedCostCurrency: string;
+}>;
+
 export type ItineraryProposalReviewActivity = Readonly<{
   id: string;
   title: string;
+  operationType: ProposedActivityOperationType;
   operationLabel: "Adicionar" | "Mover" | "Atualizar" | "Remover";
   timeLabel: string;
+  editValues: ItineraryProposalReviewActivityEditValues;
   description?: string;
   durationLabel?: string;
   estimatedCostLabel?: string;
@@ -36,6 +54,7 @@ type ItineraryProposalReviewBase = Readonly<{
   criteria: readonly string[];
   justifications: readonly string[];
   limitations: readonly string[];
+  dayOptions: readonly ItineraryProposalReviewDayOption[];
   days: readonly ItineraryProposalReviewDay[];
 }>;
 
@@ -120,6 +139,10 @@ function formatDay(value: string): string {
   }).format(new Date(`${value}T00:00:00Z`));
 }
 
+function dayLabel(day: ItineraryDay): string {
+  return `Dia ${day.position} · ${formatDay(day.date)}`;
+}
+
 function formatDuration(durationMinutes: number): string {
   const hours = Math.floor(durationMinutes / 60);
   const minutes = durationMinutes % 60;
@@ -145,6 +168,21 @@ function compareActivities(left: ProposedActivity, right: ProposedActivity): num
   const leftOrder = left.proposedOrder ?? Number.MAX_SAFE_INTEGER;
   const rightOrder = right.proposedOrder ?? Number.MAX_SAFE_INTEGER;
   return leftOrder - rightOrder || left.proposedActivityId.localeCompare(right.proposedActivityId);
+}
+
+function editValues(activity: ProposedActivity): ItineraryProposalReviewActivityEditValues {
+  return {
+    ...(activity.targetTripDayId ? { targetTripDayId: activity.targetTripDayId } : {}),
+    title: activity.title,
+    description: activity.description ?? "",
+    proposedStartTime: activity.proposedStartTime?.slice(0, 5) ?? "",
+    durationMinutes:
+      activity.durationMinutes === undefined ? "" : String(activity.durationMinutes),
+    flexibility: activity.flexibility ?? "",
+    estimatedCostAmount:
+      activity.estimatedCostAmount === undefined ? "" : String(activity.estimatedCostAmount),
+    estimatedCostCurrency: activity.estimatedCostCurrency ?? "",
+  };
 }
 
 export function hasReadyItineraryProposal(proposals: readonly ItineraryProposal[]): boolean {
@@ -227,6 +265,12 @@ export function buildItineraryProposalReview({
     groups.set(groupId, group);
   }
 
+  const dayOptions = Object.freeze(
+    [...itinerary.days]
+      .sort((left, right) => left.position - right.position || left.id.localeCompare(right.id))
+      .map((day): ItineraryProposalReviewDayOption => ({ id: day.id, label: dayLabel(day) })),
+  );
+
   const days = [...groups.entries()]
     .sort(([, left], [, right]) => {
       if (left.day && right.day) return left.day.position - right.day.position;
@@ -236,9 +280,7 @@ export function buildItineraryProposalReview({
     })
     .map(([id, group]): ItineraryProposalReviewDay => ({
       id,
-      label: group.day
-        ? `Dia ${group.day.position} · ${formatDay(group.day.date)}`
-        : "Referência de dia indisponível",
+      label: group.day ? dayLabel(group.day) : "Referência de dia indisponível",
       position: group.day?.position ?? Number.MAX_SAFE_INTEGER,
       referenceAvailable: Boolean(group.day),
       activities: group.activities.map((activity) => {
@@ -249,10 +291,12 @@ export function buildItineraryProposalReview({
         return {
           id: activity.proposedActivityId,
           title: activity.title,
+          operationType: activity.operationType,
           operationLabel: operationLabels[activity.operationType],
           timeLabel: activity.proposedStartTime
             ? `Horário proposto: ${activity.proposedStartTime.slice(0, 5)}`
             : "Horário não informado",
+          editValues: editValues(activity),
           ...(activity.description ? { description: activity.description } : {}),
           ...(activity.durationMinutes
             ? { durationLabel: formatDuration(activity.durationMinutes) }
@@ -275,6 +319,7 @@ export function buildItineraryProposalReview({
     criteria: content.criteria,
     justifications: content.justifications,
     limitations: content.limitations,
+    dayOptions,
     days,
   };
 

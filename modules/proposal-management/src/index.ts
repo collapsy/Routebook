@@ -9,6 +9,7 @@ export type {
 } from "./edit-itinerary-proposal";
 export {
   createAcceptItineraryProposalPartiallyCommand,
+  partialItineraryProposalAcceptanceApplicationType,
   partialItineraryProposalAcceptanceErrorCodes,
   PartialItineraryProposalAcceptanceError,
   partiallyAcceptItineraryProposal,
@@ -72,6 +73,7 @@ export {
   ItineraryProposalGenerationInputAssemblyError,
 } from "./itinerary-proposal-generation-input-assembler";
 export type {
+  AssembleAuthoritativeItineraryProposalGenerationInput,
   AssembleItineraryProposalGenerationInput,
   AssembledItineraryProposalGenerationInput,
   EligibleItineraryProposalRecommendationStatus,

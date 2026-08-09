@@ -176,8 +176,7 @@ function editValues(activity: ProposedActivity): ItineraryProposalReviewActivity
     title: activity.title,
     description: activity.description ?? "",
     proposedStartTime: activity.proposedStartTime?.slice(0, 5) ?? "",
-    durationMinutes:
-      activity.durationMinutes === undefined ? "" : String(activity.durationMinutes),
+    durationMinutes: activity.durationMinutes === undefined ? "" : String(activity.durationMinutes),
     flexibility: activity.flexibility ?? "",
     estimatedCostAmount:
       activity.estimatedCostAmount === undefined ? "" : String(activity.estimatedCostAmount),

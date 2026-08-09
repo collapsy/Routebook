@@ -67,8 +67,8 @@ export function ItineraryProposalActivityEditor({
         <div className={styles.intro}>
           <strong>Ajuste somente esta sugestão</strong>
           <p>
-            Salvar atualiza a proposta revisável. O Roteiro só muda depois de uma decisão de
-            aceite separada.
+            Salvar atualiza a proposta revisável. O Roteiro só muda depois de uma decisão de aceite
+            separada.
           </p>
         </div>
 
@@ -192,9 +192,7 @@ export function ItineraryProposalActivityEditor({
 
         <div aria-live="polite" className={styles.feedback}>
           {pending ? <p>Salvando a edição na proposta…</p> : null}
-          {feedback ? (
-            <p role={state.status === "error" ? "alert" : "status"}>{feedback}</p>
-          ) : null}
+          {feedback ? <p role={state.status === "error" ? "alert" : "status"}>{feedback}</p> : null}
         </div>
       </form>
     </details>

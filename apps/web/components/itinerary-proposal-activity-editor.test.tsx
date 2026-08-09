@@ -94,9 +94,7 @@ describe("ItineraryProposalActivityEditor", () => {
       "activity-proposed",
     );
     expect(screen.getByRole("combobox", { name: "Dia proposto" })).toHaveValue("day-1");
-    expect(screen.getByRole("textbox", { name: "Título" })).toHaveValue(
-      "Mirante ao pôr do sol",
-    );
+    expect(screen.getByRole("textbox", { name: "Título" })).toHaveValue("Mirante ao pôr do sol");
     expect(screen.getByRole("textbox", { name: "Descrição da sugestão" })).toHaveValue(
       "Vista aberta para o fim da tarde.",
     );

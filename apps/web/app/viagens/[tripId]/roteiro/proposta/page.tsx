@@ -37,7 +37,7 @@ export default async function ItineraryProposalReviewPage({
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const [itinerary, proposals, acceptanceAccess, generationAccess] = await Promise.all([
+  const [itinerary, proposals, acceptanceAccess, editAccess] = await Promise.all([
     new DrizzleItineraryRepository().findByTripId(trip.id),
     new DrizzleItineraryProposalRepository().listByTripId(trip.id),
     resolveTripRouteAccess({ tripId: trip.id, action: "trip:accept-proposal" }),
@@ -46,7 +46,7 @@ export default async function ItineraryProposalReviewPage({
   const proposal = findLatestReviewableItineraryProposal(proposals);
 
   if (!proposal) {
-    const canGenerate = generationAccess.status === "authorized";
+    const canGenerate = editAccess.status === "authorized";
     const generateAction = generateItineraryProposalAction.bind(null, trip.id);
 
     return (
@@ -79,6 +79,10 @@ export default async function ItineraryProposalReviewPage({
   const review = buildItineraryProposalReview({ itinerary, proposal });
   const discardAction = discardItineraryProposalAction.bind(null, trip.id);
   const canDecide = acceptanceAccess.status === "authorized";
+  const canEdit =
+    editAccess.status === "authorized" &&
+    review.status === "ready" &&
+    review.isBasedOnCurrentItinerary;
   const idempotencyKey = `accept-itinerary-proposal:${proposal.id}:${proposal.baseItineraryVersion}`;
   const itineraryHref = `/viagens/${trip.id}/roteiro`;
 
@@ -95,7 +99,7 @@ export default async function ItineraryProposalReviewPage({
           <p>
             {proposal.status === "expired"
               ? "Consulte critérios, limitações e mudanças registradas como referência histórica. Esta página não aplica alterações."
-              : "Revise critérios, limitações e mudanças sugeridas. Qualquer aplicação exige confirmação explícita."}
+              : "Revise, edite se necessário e só depois decida se deseja aplicar as mudanças ao Roteiro."}
           </p>
         </div>
         <span>Roteiro atual preservado</span>
@@ -104,6 +108,7 @@ export default async function ItineraryProposalReviewPage({
       <ItineraryProposalReview
         canAccept={canDecide}
         canDecide={canDecide}
+        canEdit={canEdit}
         discardAction={discardAction}
         expectedItineraryVersion={proposal.baseItineraryVersion}
         idempotencyKey={idempotencyKey}

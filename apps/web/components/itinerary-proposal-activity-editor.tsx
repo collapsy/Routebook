@@ -59,7 +59,7 @@ export function ItineraryProposalActivityEditor({
 
   return (
     <details className={styles.editor}>
-      <summary>Editar sugestão</summary>
+      <summary>{`Editar sugestão: ${activity.title}`}</summary>
       <form action={formAction}>
         <input name="itineraryProposalId" type="hidden" value={proposalId} />
         <input name="proposedActivityId" type="hidden" value={activity.id} />

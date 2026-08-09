@@ -1,0 +1,67 @@
+name: RB-INC-108 Governance Sync
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-108-partial-itinerary-proposal-acceptance-core
+    paths:
+      - .github/workflows/rb-inc-108-governance-sync.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-108-partial-itinerary-proposal-acceptance-core
+          fetch-depth: 0
+      - name: Synchronize registry and traceability
+        shell: python
+        run: |
+          from pathlib import Path
+
+          registry = Path("docs/registry.md")
+          text = registry.read_text()
+          rows = """| RB-INC-108 | Núcleo de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/increments/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
+          | RB-CTX-108 | Context Pack do RB-INC-108 | Implementation Context | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/context-packs/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
+          """
+          if "| RB-INC-108 |" not in text:
+              text = text.replace("\n## Status possíveis", "\n" + rows + "\n## Status possíveis", 1)
+          registry.write_text(text)
+
+          matrix = Path("docs/implementation/traceability-matrix.md")
+          text = matrix.read_text()
+          for old in ['last_updated: "2026-08-08"', 'last_updated: "2026-08-07"']:
+              text = text.replace(old, 'last_updated: "2026-08-09"', 1)
+          section = """## Evidências previstas do RB-INC-108
+
+          | Evidência | Localização/resultado |
+          | --- | --- |
+          | definição do incremento | `docs/implementation/increments/rb-inc-108-partial-itinerary-proposal-acceptance-core.md` |
+          | Context Pack | `docs/implementation/context-packs/rb-inc-108-partial-itinerary-proposal-acceptance-core.md` |
+          | núcleo de aceite parcial | `modules/proposal-management/src/accept-itinerary-proposal-partially.ts` |
+          | testes de domínio | `modules/proposal-management/src/accept-itinerary-proposal-partially.test.ts` |
+          | exports públicos | `modules/proposal-management/src/index.ts` |
+          | contrato de aplicação | `applicationType: partial` + `createApplyProposalItemsCommand` |
+          | idempotência | `createProposalApplicationRequestFingerprint` sobre seleção canônica |
+          | preservação | `partiallyAcceptItineraryProposal` retém apenas Proposed Activities não aplicadas |
+          | rastreabilidade | issue #245 e PR #246 |
+          | SHA técnico validado | `43ef85bc5f081622ab532648ab52a62620e0e196` |
+          | Engineering Validation técnico | #1342, run `31329125333`, success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo |
+          | migration | nenhuma neste incremento; persistência parcial fica para o próximo recorte |
+
+          """
+          if "## Evidências previstas do RB-INC-108" not in text:
+              text = text.replace("## Cadeia mínima", section + "## Cadeia mínima", 1)
+          matrix.write_text(text)
+      - name: Commit canonical governance and remove helper
+        run: |
+          rm .github/workflows/rb-inc-108-governance-sync.yml
+          git config user.name "collapsy"
+          git config user.email "38116052+collapsy@users.noreply.github.com"
+          git add docs/registry.md docs/implementation/traceability-matrix.md .github/workflows/rb-inc-108-governance-sync.yml
+          git commit -m "docs(rb-inc-108): synchronize canonical governance"
+          git push origin HEAD:feature/rb-inc-108-partial-itinerary-proposal-acceptance-core

@@ -73,7 +73,6 @@ export {
   ItineraryProposalGenerationInputAssemblyError,
 } from "./itinerary-proposal-generation-input-assembler";
 export type {
-  AssembleAuthoritativeItineraryProposalGenerationInput,
   AssembleItineraryProposalGenerationInput,
   AssembledItineraryProposalGenerationInput,
   EligibleItineraryProposalRecommendationStatus,

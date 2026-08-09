@@ -14,8 +14,7 @@ import {
 } from "./decision-repository";
 
 export type ItineraryProposalDecisionCommand =
-  | AcceptItineraryProposalCommand
-  | AcceptItineraryProposalPartiallyCommand;
+  AcceptItineraryProposalCommand | AcceptItineraryProposalPartiallyCommand;
 
 export type PersistItineraryProposalDecisionInput = Readonly<{
   command: ItineraryProposalDecisionCommand;

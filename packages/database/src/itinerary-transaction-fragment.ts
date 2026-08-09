@@ -15,8 +15,7 @@ import {
 } from "./itinerary-repository";
 
 export type ItineraryProposalApplicationCommand =
-  | AcceptItineraryProposalCommand
-  | AcceptItineraryProposalPartiallyCommand;
+  AcceptItineraryProposalCommand | AcceptItineraryProposalPartiallyCommand;
 
 export type ItineraryTransactionRepository = Readonly<{
   findByTripId(tripId: string): Promise<Itinerary | null>;
@@ -85,7 +84,9 @@ export function createItineraryTransactionFragment<TExecutor extends ItineraryDa
   }
 
   return Object.freeze({
-    async apply(command: ItineraryProposalApplicationCommand): Promise<AppliedProposalItemsToItinerary> {
+    async apply(
+      command: ItineraryProposalApplicationCommand,
+    ): Promise<AppliedProposalItemsToItinerary> {
       assertCommand(command);
       const itinerary = await repository.findByTripId(command.tripId);
       if (!itinerary) {

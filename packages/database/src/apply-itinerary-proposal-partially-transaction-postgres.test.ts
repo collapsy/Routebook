@@ -179,9 +179,9 @@ describe("ApplyPartialItineraryProposalTransaction with PostgreSQL", () => {
         status: "partially-accepted",
         acceptedAt: decidedAt,
       });
-      expect(persistedProposal?.proposedActivities?.map(({ proposedActivityId }) => proposedActivityId)).toEqual([
-        fixture.remainingProposedActivityId,
-      ]);
+      expect(
+        persistedProposal?.proposedActivities?.map(({ proposedActivityId }) => proposedActivityId),
+      ).toEqual([fixture.remainingProposedActivityId]);
 
       const application = await createPostgresProposalApplicationRepository(
         database,

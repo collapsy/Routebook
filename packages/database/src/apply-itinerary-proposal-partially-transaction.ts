@@ -178,12 +178,7 @@ export function createApplyPartialItineraryProposalTransaction(
                 "A aplicação anterior desta Itinerary Proposal terminou com falha.",
               );
             case "replay":
-              return replayPartialAcceptance(
-                command,
-                reservation,
-                fragments,
-                actorParticipantId,
-              );
+              return replayPartialAcceptance(command, reservation, fragments, actorParticipantId);
             case "reserved":
               return applyReservedPartialAcceptance(
                 command,

@@ -48,8 +48,7 @@ export interface ItineraryProposalTransactionFragment {
   accept(proposal: ReadyItineraryProposal, acceptedAt: Date): Promise<AcceptedItineraryProposal>;
 }
 
-export interface PartialItineraryProposalTransactionFragment
-  extends ItineraryProposalTransactionFragment {
+export interface PartialItineraryProposalTransactionFragment extends ItineraryProposalTransactionFragment {
   loadForPartialAcceptance(
     command: AcceptItineraryProposalPartiallyCommand,
   ): Promise<ReadyItineraryProposal>;

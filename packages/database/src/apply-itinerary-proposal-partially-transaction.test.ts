@@ -157,40 +157,42 @@ function harness(
   });
   const decision = { id: "decision-1" } as Decision;
 
-  const proposalApplication: ApplyPartialItineraryProposalTransactionFragments["proposalApplication"] = {
-    reserve: vi.fn(async () => {
-      events.push("reserve");
-      switch (reservationKind) {
-        case "reserved":
-          return { kind: "reserved", record: startedRecord } as const;
-        case "replay":
-          return { kind: "replay", record: succeededRecord } as const;
-        case "fingerprint-conflict":
-          return { kind: "fingerprint-conflict", record: startedRecord } as const;
-        case "application-in-progress":
-          return { kind: "application-in-progress", record: startedRecord } as const;
-        case "application-failed":
-          return { kind: "application-failed", record: failedRecord } as const;
-      }
-    }),
-    succeed: vi.fn(async () => {
-      events.push("succeed-application");
-      return succeededRecord;
-    }),
-    fail: vi.fn(async () => failedRecord),
-  };
-  const itineraryProposal: ApplyPartialItineraryProposalTransactionFragments["itineraryProposal"] = {
-    loadForAcceptance: vi.fn(async () => ready),
-    accept: vi.fn(async () => ({ ...ready, status: "accepted" }) as never),
-    loadForPartialAcceptance: vi.fn(async () => {
-      events.push("load-proposal");
-      return ready;
-    }),
-    acceptPartially: vi.fn(async () => {
-      events.push("accept-partially");
-      return partiallyAccepted;
-    }),
-  };
+  const proposalApplication: ApplyPartialItineraryProposalTransactionFragments["proposalApplication"] =
+    {
+      reserve: vi.fn(async () => {
+        events.push("reserve");
+        switch (reservationKind) {
+          case "reserved":
+            return { kind: "reserved", record: startedRecord } as const;
+          case "replay":
+            return { kind: "replay", record: succeededRecord } as const;
+          case "fingerprint-conflict":
+            return { kind: "fingerprint-conflict", record: startedRecord } as const;
+          case "application-in-progress":
+            return { kind: "application-in-progress", record: startedRecord } as const;
+          case "application-failed":
+            return { kind: "application-failed", record: failedRecord } as const;
+        }
+      }),
+      succeed: vi.fn(async () => {
+        events.push("succeed-application");
+        return succeededRecord;
+      }),
+      fail: vi.fn(async () => failedRecord),
+    };
+  const itineraryProposal: ApplyPartialItineraryProposalTransactionFragments["itineraryProposal"] =
+    {
+      loadForAcceptance: vi.fn(async () => ready),
+      accept: vi.fn(async () => ({ ...ready, status: "accepted" }) as never),
+      loadForPartialAcceptance: vi.fn(async () => {
+        events.push("load-proposal");
+        return ready;
+      }),
+      acceptPartially: vi.fn(async () => {
+        events.push("accept-partially");
+        return partiallyAccepted;
+      }),
+    };
   const itinerary: ApplyPartialItineraryProposalTransactionFragments["itinerary"] = {
     apply: vi.fn(async () => {
       events.push("apply-itinerary");
@@ -332,7 +334,9 @@ describe("ApplyPartialItineraryProposalTransaction", () => {
 
   it("rejeita unidade transacional inválida", () => {
     expect(() =>
-      createApplyPartialItineraryProposalTransaction({} as ApplyPartialItineraryProposalTransactionUnit),
+      createApplyPartialItineraryProposalTransaction(
+        {} as ApplyPartialItineraryProposalTransactionUnit,
+      ),
     ).toThrow("unidade transacional");
   });
 });

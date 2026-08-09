@@ -3,15 +3,22 @@ import {
   type Decision,
   type RecommendationId,
 } from "@routebook/decision-intelligence";
-import type { AcceptItineraryProposalCommand } from "@routebook/proposal-management";
+import type {
+  AcceptItineraryProposalCommand,
+  AcceptItineraryProposalPartiallyCommand,
+} from "@routebook/proposal-management";
 
 import {
   createPostgresDecisionRepository,
   type DecisionDatabaseExecutor,
 } from "./decision-repository";
 
+export type ItineraryProposalDecisionCommand =
+  | AcceptItineraryProposalCommand
+  | AcceptItineraryProposalPartiallyCommand;
+
 export type PersistItineraryProposalDecisionInput = Readonly<{
-  command: AcceptItineraryProposalCommand;
+  command: ItineraryProposalDecisionCommand;
   proposalApplicationId: string;
   actorParticipantId: string;
   resultingItineraryVersion: number;
@@ -45,7 +52,7 @@ function assertInput(input: PersistItineraryProposalDecisionInput): void {
     throw new TypeError("Informe os dados da Decision de aceite.");
   }
   if (!input.command || typeof input.command !== "object") {
-    throw new TypeError("Informe um comando AcceptItineraryProposal válido.");
+    throw new TypeError("Informe um comando de aceite de Itinerary Proposal válido.");
   }
   requiredText(input.proposalApplicationId, "proposalApplicationId");
   requiredText(input.actorParticipantId, "actorParticipantId");

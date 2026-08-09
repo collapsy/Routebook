@@ -6,12 +6,17 @@ import {
 import {
   AcceptItineraryProposalError,
   type AcceptItineraryProposalCommand,
+  type AcceptItineraryProposalPartiallyCommand,
 } from "@routebook/proposal-management";
 
 import {
   createPostgresItineraryRepository,
   type ItineraryDatabaseExecutor,
 } from "./itinerary-repository";
+
+export type ItineraryProposalApplicationCommand =
+  | AcceptItineraryProposalCommand
+  | AcceptItineraryProposalPartiallyCommand;
 
 export type ItineraryTransactionRepository = Readonly<{
   findByTripId(tripId: string): Promise<Itinerary | null>;
@@ -23,7 +28,7 @@ export type ItineraryTransactionRepositoryFactory<
 > = (executor: TExecutor) => ItineraryTransactionRepository;
 
 export interface ItineraryTransactionFragment {
-  apply(command: AcceptItineraryProposalCommand): Promise<AppliedProposalItemsToItinerary>;
+  apply(command: ItineraryProposalApplicationCommand): Promise<AppliedProposalItemsToItinerary>;
 }
 
 function acceptanceError(
@@ -33,15 +38,15 @@ function acceptanceError(
   throw new AcceptItineraryProposalError(code, message);
 }
 
-function assertCommand(command: AcceptItineraryProposalCommand): void {
+function assertCommand(command: ItineraryProposalApplicationCommand): void {
   if (!command || typeof command !== "object") {
-    throw new TypeError("Informe um comando AcceptItineraryProposal válido.");
+    throw new TypeError("Informe um comando de aplicação de Itinerary Proposal válido.");
   }
 }
 
 function assertCurrentItinerary(
   itinerary: Itinerary,
-  command: AcceptItineraryProposalCommand,
+  command: ItineraryProposalApplicationCommand,
 ): void {
   if (itinerary.tripId !== command.tripId || itinerary.id !== command.itineraryId) {
     acceptanceError("itinerary-not-found", "O Itinerary não pertence ao contexto solicitado.");
@@ -80,7 +85,7 @@ export function createItineraryTransactionFragment<TExecutor extends ItineraryDa
   }
 
   return Object.freeze({
-    async apply(command: AcceptItineraryProposalCommand): Promise<AppliedProposalItemsToItinerary> {
+    async apply(command: ItineraryProposalApplicationCommand): Promise<AppliedProposalItemsToItinerary> {
       assertCommand(command);
       const itinerary = await repository.findByTripId(command.tripId);
       if (!itinerary) {

@@ -117,7 +117,7 @@ A action expõe:
 - [x] caches da Proposal são revalidados somente após sucesso;
 - [x] testes do executor e da Server Action foram adicionados;
 - [x] Engineering Validation técnico aprovado antes da promoção documental;
-- [ ] registry, Context Pack e matriz de rastreabilidade sincronizados;
+- [x] registry, Context Pack e matriz de rastreabilidade sincronizados;
 - [ ] Documentation Validation e Engineering Validation aprovados no mesmo HEAD final.
 
 ## 8. Evidências técnicas

@@ -133,7 +133,7 @@ A arquitetura compartilhada foi ampliada por tipos de comando `full | partial`, 
 - [x] testes unitários e PostgreSQL aprovados;
 - [x] Engineering Validation técnico aprovado;
 - [x] registry, Context Pack e matriz de rastreabilidade sincronizados;
-- [ ] Documentation Validation e Engineering Validation aprovados no HEAD canônico antes do merge.
+- [x] Documentation Validation e Engineering Validation aprovados no HEAD canônico antes do merge.
 
 ## 10. Evidências técnicas
 
@@ -149,7 +149,10 @@ A arquitetura compartilhada foi ampliada por tipos de comando `full | partial`, 
 - testes PostgreSQL: `packages/database/src/apply-itinerary-proposal-partially-transaction-postgres.test.ts`;
 - SHA técnico validado: `b17f57f24a93c4cb9eac930abdae1eb83dedf6cc`;
 - Engineering Validation #1354 / run `31331066567`, attempt 2, job `93289823239`: success em format, docs, lint, typecheck, migration `0024`, testes, smoke, build e Playwright responsivo;
-- governança sincronizada em registry e matriz no ciclo canônico da PR #249.
+- governança sincronizada em registry e matriz no ciclo canônico da PR #249;
+- SHA canônico de promoção: `c114640bf0f3369d99915318ff897c58bf05cb66`;
+- Documentation Validation #958 / run `31332014111`: success;
+- Engineering Validation #1363 / run `31332014122`, job `93291682200`: success integral, incluindo Playwright responsivo.
 
 ## 11. Próximo recorte esperado
 

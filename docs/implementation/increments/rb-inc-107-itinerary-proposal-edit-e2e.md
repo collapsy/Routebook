@@ -133,7 +133,7 @@ O spec não fixa projeto Playwright. Ele é executado pela suíte responsiva can
 - [x] cenário concorrente não sobrescreve a Proposed Activity;
 - [x] cenário concorrente não altera o Itinerary;
 - [x] Engineering Validation técnico passou incluindo Playwright responsivo;
-- [ ] registry, Context Pack e matriz de rastreabilidade sincronizados.
+- [x] registry, Context Pack e matriz de rastreabilidade sincronizados.
 
 ## 9. Evidências técnicas
 

@@ -1,0 +1,58 @@
+name: RB-INC-109 Governance Sync
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-109-postgres-partial-itinerary-proposal-acceptance
+    paths:
+      - .github/workflows/rb-inc-109-governance-sync.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-109-postgres-partial-itinerary-proposal-acceptance
+          fetch-depth: 0
+
+      - name: Synchronize registry and traceability
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          registry_path = Path('docs/registry.md')
+          registry = registry_path.read_text()
+          if '| RB-INC-109 |' not in registry:
+              marker = '| RB-CTX-108 | Context Pack do RB-INC-108 | Implementation Context | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/context-packs/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |'
+              addition = '''\n| RB-INC-109 | Transação PostgreSQL de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md](./implementation/increments/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md) |
+          | RB-CTX-109 | Context Pack do RB-INC-109 | Implementation Context | Draft | 0.1.0 | [rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md](./implementation/context-packs/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md) |'''
+              addition = '\n'.join(line[10:] if line.startswith('          ') else line for line in addition.splitlines())
+              if marker not in registry:
+                  raise SystemExit('RB-CTX-108 registry marker not found')
+              registry = registry.replace(marker, marker + addition)
+              registry_path.write_text(registry)
+
+          matrix_path = Path('docs/implementation/traceability-matrix.md')
+          matrix = matrix_path.read_text()
+          if '| RB-INC-109 |' not in matrix:
+              lines = matrix.splitlines()
+              position = next((i for i, line in enumerate(lines) if line.startswith('| RB-INC-108 |')), None)
+              if position is None:
+                  raise SystemExit('RB-INC-108 traceability row not found')
+              row = '| RB-INC-109 | RB-BR-PRP-007, RB-BR-PRP-009, RB-DATA-001–002, RB-ADR-006 e RB-INC-108 | #248 | `feature/rb-inc-109-postgres-partial-itinerary-proposal-acceptance`, PR #249 | transação parcial, Proposal Application/Decision, repository, schema e migration 0024 | Engineering #1354 run 31331066567 attempt 2, job 93289823239, SHA b17f57f | Verde em Draft |'
+              lines.insert(position + 1, row)
+              matrix_path.write_text('\n'.join(lines) + '\n')
+          PY
+
+      - name: Commit canonical governance and remove helper
+        run: |
+          git config user.name "RouteBook Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/rb-inc-109-governance-sync.yml
+          git add docs/registry.md docs/implementation/traceability-matrix.md
+          git commit -m "docs(rb-inc-109): sync registry and traceability"
+          git push origin HEAD:feature/rb-inc-109-postgres-partial-itinerary-proposal-acceptance

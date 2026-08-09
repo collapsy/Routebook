@@ -261,6 +261,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-104 | Serviço de Aplicação para Edição Persistida de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-104-persisted-itinerary-proposal-edit.md](./implementation/increments/rb-inc-104-persisted-itinerary-proposal-edit.md) |
 | RB-CTX-104 | Context Pack do RB-INC-104 | Implementation Context | Draft | 0.1.0 | [rb-inc-104-persisted-itinerary-proposal-edit.md](./implementation/context-packs/rb-inc-104-persisted-itinerary-proposal-edit.md) |
 
+| RB-INC-105 | Server Action Autorizada para Edição de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-105-authorized-itinerary-proposal-edit-action.md](./implementation/increments/rb-inc-105-authorized-itinerary-proposal-edit-action.md) |
+| RB-CTX-105 | Context Pack do RB-INC-105 | Implementation Context | Draft | 0.1.0 | [rb-inc-105-authorized-itinerary-proposal-edit-action.md](./implementation/context-packs/rb-inc-105-authorized-itinerary-proposal-edit-action.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

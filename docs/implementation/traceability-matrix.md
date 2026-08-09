@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: "2026-08-07"
+last_updated: "2026-08-09"
 authors:
   - RouteBook Team
 tags:
@@ -275,6 +275,24 @@ ai_context:
 | migration | `packages/database/drizzle/0023_allow_ready_itinerary_proposal_edits.sql` |
 | journal de migrations | `packages/database/drizzle/meta/_journal.json` |
 | rastreabilidade | issue #237 e PR #238 |
+
+## Evidências previstas do RB-INC-105
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-105-authorized-itinerary-proposal-edit-action.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-105-authorized-itinerary-proposal-edit-action.md` |
+| executor web | `apps/web/lib/itinerary-proposal-editing.ts` |
+| testes do executor | `apps/web/lib/itinerary-proposal-editing.test.ts` |
+| Server Action | `apps/web/app/viagens/[tripId]/roteiro/proposta/edit-action.ts` |
+| testes da Server Action | `apps/web/app/viagens/[tripId]/roteiro/proposta/edit-action.test.ts` |
+| autorização | `resolveTripRouteAccess` com `trip:edit` |
+| application service reutilizado | `editAndPersistItineraryProposalProposedActivity` |
+| repository concreto | `DrizzleItineraryProposalRepository` |
+| rastreabilidade | issue #239 e PR #240 |
+| SHA técnico validado | `fdba3b2c2c2e88987936d04c673748f764b49f35` |
+| Engineering Validation técnico | #1306, run `31257205455`, success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo |
+| migration | nenhuma nova migration; RB-INC-104 reutilizado |
 
 ## Cadeia mínima
 

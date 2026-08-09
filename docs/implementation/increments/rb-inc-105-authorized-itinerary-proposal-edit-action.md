@@ -119,7 +119,7 @@ A action expõe:
 - [x] Engineering Validation técnico aprovado antes da promoção documental;
 - [x] registry, Context Pack e matriz de rastreabilidade sincronizados;
 - [x] Documentation Validation e Engineering Validation aprovados no mesmo SHA de promoção;
-- [ ] gates finais aprovados no último SHA da PR antes do merge.
+- [x] gates finais aprovados antes do commit documental de fechamento.
 
 ## 8. Evidências técnicas
 
@@ -131,7 +131,10 @@ A action expõe:
 - Engineering Validation #1306 / run `31257205455`: success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo;
 - SHA de promoção validado: `370ce6152eff5e85ee51412e4e638d44371026eb`;
 - Documentation Validation #926 / run `31325362234`: success;
-- Engineering Validation #1311 / run `31325362237`: success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo.
+- Engineering Validation #1311 / run `31325362237`: success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo;
+- SHA de gate final anterior ao fechamento: `cdb838924d72e5e3fcc4a8bd9f2ec99f729443b8`;
+- Documentation Validation #927 / run `31325578696`: success;
+- Engineering Validation #1312 / run `31325578665`: success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo.
 
 ## 9. Próximo recorte esperado
 

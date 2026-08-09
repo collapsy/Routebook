@@ -125,7 +125,8 @@ Essa decisão evita parsing reverso de:
 - [x] testes de model e componentes foram adicionados/atualizados;
 - [x] Engineering Validation técnico aprovado;
 - [x] registry, Context Pack e matriz de rastreabilidade sincronizados;
-- [ ] Documentation Validation e Engineering Validation aprovados no mesmo HEAD final.
+- [x] Documentation Validation e Engineering Validation aprovados no mesmo SHA de promoção;
+- [ ] gates finais aprovados no último SHA da PR antes do merge.
 
 ## 8. Evidências técnicas
 
@@ -138,7 +139,10 @@ Essa decisão evita parsing reverso de:
 - testes do model: `apps/web/lib/itinerary-proposal-experience.test.ts`;
 - página autorizada: `apps/web/app/viagens/[tripId]/roteiro/proposta/page.tsx`;
 - SHA técnico validado: `ffc6fc4e214c76c0241303ab7a80c51376fbfc48`;
-- Engineering Validation #1319 / run `31326575512`: success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo.
+- Engineering Validation #1319 / run `31326575512`: success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo;
+- SHA de promoção validado: `014135e650d017ddc6d1e8f9e51acd0167cdaa36`;
+- Documentation Validation #934 / run `31326919148`: success;
+- Engineering Validation #1324 / run `31326919147`: success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo.
 
 ## 9. Próximo recorte esperado
 

@@ -115,7 +115,7 @@ A migration `0024_persist_partially_accepted_itinerary_proposals`:
 
 ## Compatibilidade
 
-As mudanças de fragments são aditivas por tipo (`AcceptItineraryProposalCommand | AcceptItineraryProposalPartiallyCommand`). O comportamento do aceite integral deve permanecer idêntntico e continua coberto pela suíte existente.
+As mudanças de fragments são aditivas por tipo (`AcceptItineraryProposalCommand | AcceptItineraryProposalPartiallyCommand`). O comportamento do aceite integral deve permanecer idêntico e continua coberto pela suíte existente.
 
 ## Erros públicos relevantes
 

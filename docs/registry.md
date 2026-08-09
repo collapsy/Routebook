@@ -270,6 +270,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-107 | E2E Integral da Edição de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/increments/rb-inc-107-itinerary-proposal-edit-e2e.md) |
 | RB-CTX-107 | Context Pack do RB-INC-107 | Implementation Context | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/context-packs/rb-inc-107-itinerary-proposal-edit-e2e.md) |
 
+| RB-INC-108 | Núcleo de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/increments/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
+| RB-CTX-108 | Context Pack do RB-INC-108 | Implementation Context | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/context-packs/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

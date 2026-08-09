@@ -1,0 +1,156 @@
+.editor {
+  border-top: 1px solid var(--border);
+  padding-top: 0.85rem;
+}
+
+.editor summary {
+  color: var(--primary-strong);
+  cursor: pointer;
+  font-weight: 800;
+  width: fit-content;
+}
+
+.editor summary:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--primary) 30%, transparent);
+  outline-offset: 3px;
+}
+
+.editor form {
+  display: grid;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.intro {
+  background: var(--surface-soft);
+  border-radius: var(--radius-medium);
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+}
+
+.intro p,
+.actions span,
+.feedback p {
+  color: var(--foreground-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.fullField,
+.fieldGrid label,
+.costFields label {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.fullField > span,
+.fieldGrid label > span,
+.costFields label > span,
+.costFields legend {
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.editor input,
+.editor select,
+.editor textarea {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  color: var(--foreground);
+  font: inherit;
+  min-height: 2.75rem;
+  padding: 0.7rem 0.8rem;
+  width: 100%;
+}
+
+.editor textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.editor input:focus-visible,
+.editor select:focus-visible,
+.editor textarea:focus-visible {
+  border-color: var(--primary);
+  outline: 3px solid color-mix(in oklab, var(--primary) 20%, transparent);
+  outline-offset: 1px;
+}
+
+.fieldGrid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+}
+
+.costFields {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: minmax(0, 1fr) minmax(7rem, 0.45fr);
+  margin: 0;
+  padding: 0.9rem;
+}
+
+.costFields legend {
+  padding: 0 0.35rem;
+}
+
+.actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.actions button {
+  background: var(--primary);
+  border: 0;
+  border-radius: 999px;
+  color: var(--on-primary, white);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 850;
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+}
+
+.actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.actions button:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--primary) 30%, transparent);
+  outline-offset: 3px;
+}
+
+.feedback {
+  min-height: 1.5rem;
+}
+
+.feedback [role="alert"] {
+  color: var(--danger, #b42318);
+}
+
+.feedback [role="status"] {
+  color: var(--primary-strong);
+  font-weight: 750;
+}
+
+@media (max-width: 520px) {
+  .costFields {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}

@@ -1,4 +1,5 @@
 import type { ItineraryProposalReview as ReviewModel } from "../lib/itinerary-proposal-experience";
+import { ItineraryProposalActivityEditor } from "./itinerary-proposal-activity-editor";
 import { ItineraryProposalDecisionActions } from "./itinerary-proposal-decision-actions";
 import styles from "./itinerary-proposal-review.module.css";
 
@@ -9,6 +10,7 @@ function countLabel(count: number, singular: string, plural: string): string {
 export function ItineraryProposalReview({
   canAccept,
   canDecide,
+  canEdit,
   discardAction,
   expectedItineraryVersion,
   idempotencyKey,
@@ -18,6 +20,7 @@ export function ItineraryProposalReview({
 }: {
   canAccept: boolean;
   canDecide: boolean;
+  canEdit: boolean;
   discardAction: (formData: FormData) => void | Promise<void>;
   expectedItineraryVersion: number;
   idempotencyKey: string;
@@ -26,6 +29,7 @@ export function ItineraryProposalReview({
   tripId: string;
 }) {
   const isExpired = review.status === "expired";
+  const editingEnabled = canEdit && !isExpired && review.isBasedOnCurrentItinerary;
 
   return (
     <div className={styles.review}>
@@ -190,6 +194,14 @@ export function ItineraryProposalReview({
                               <strong>Por que foi sugerida</strong>
                               <p>{activity.reason}</p>
                             </div>
+                          ) : null}
+                          {editingEnabled ? (
+                            <ItineraryProposalActivityEditor
+                              activity={activity}
+                              dayOptions={review.dayOptions}
+                              proposalId={review.proposalId}
+                              tripId={tripId}
+                            />
                           ) : null}
                         </article>
                       </li>

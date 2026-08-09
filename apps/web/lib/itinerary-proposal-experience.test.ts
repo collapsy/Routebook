@@ -182,9 +182,10 @@ describe("itinerary proposal review experience", () => {
     );
   });
 
-  it("groups changes by known days and exposes unresolved references explicitly", () => {
+  it("groups changes by known days and exposes raw editable values without parsing labels", () => {
     const itinerary = createReviewItinerary();
     const firstDay = itinerary.days[0]!;
+    const secondDay = itinerary.days[1]!;
     const sourceActivity = firstDay.activities[0]!;
     const proposal = createReadyProposal({
       itinerary,
@@ -193,10 +194,12 @@ describe("itinerary proposal review experience", () => {
           proposedActivityId: "activity-add",
           targetTripDayId: firstDay.id,
           title: "Mirante ao pôr do sol",
-          proposedStartTime: "17:30",
+          description: "Vista aberta para o fim da tarde.",
+          proposedStartTime: "17:30:00",
           durationMinutes: 90,
           proposedOrder: 2,
           operationType: "add",
+          flexibility: "flexible",
           estimatedCostAmount: 25,
           estimatedCostCurrency: "BRL",
           reason: "Aproveita o fim da tarde.",
@@ -221,6 +224,10 @@ describe("itinerary proposal review experience", () => {
 
     expect(review.proposedChangeCount).toBe(3);
     expect(review.knownConflictCount).toBe(1);
+    expect(review.dayOptions).toEqual([
+      { id: firstDay.id, label: "Dia 1 · 22 de agosto" },
+      { id: secondDay.id, label: "Dia 2 · 23 de agosto" },
+    ]);
     expect(review.days.map(({ label }) => label)).toEqual([
       "Dia 1 · 22 de agosto",
       "Referência de dia indisponível",
@@ -230,15 +237,36 @@ describe("itinerary proposal review experience", () => {
       "activity-add",
     ]);
     expect(review.days[0]?.activities[0]).toMatchObject({
+      operationType: "update",
       operationLabel: "Atualizar",
       sourceActivityTitle: "Café já confirmado",
       timeLabel: "Horário não informado",
+      editValues: {
+        title: "Café sem pressa",
+        description: "",
+        proposedStartTime: "",
+        durationMinutes: "",
+        flexibility: "",
+        estimatedCostAmount: "",
+        estimatedCostCurrency: "",
+      },
     });
     expect(review.days[0]?.activities[1]).toMatchObject({
+      operationType: "add",
       durationLabel: "1 h 30 min",
       estimatedCostLabel: "R$ 25,00",
       operationLabel: "Adicionar",
       timeLabel: "Horário proposto: 17:30",
+      editValues: {
+        targetTripDayId: firstDay.id,
+        title: "Mirante ao pôr do sol",
+        description: "Vista aberta para o fim da tarde.",
+        proposedStartTime: "17:30",
+        durationMinutes: "90",
+        flexibility: "flexible",
+        estimatedCostAmount: "25",
+        estimatedCostCurrency: "BRL",
+      },
     });
     expect(review.days[1]?.referenceAvailable).toBe(false);
   });

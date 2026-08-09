@@ -246,9 +246,9 @@ test("edita uma Proposed Activity da UI ao PostgreSQL, reidrata e preserva o Iti
   );
   await expect(page.getByRole("textbox", { name: "Título" })).toHaveValue(editedActivity);
   await expect(page.getByLabel("Horário")).toHaveValue("18:10");
-  await expect(page.getByLabel("Duração (min)")).toHaveValue(75);
+  await expect(page.getByLabel("Duração (min)")).toHaveValue("75");
   await expect(page.getByRole("combobox", { name: "Flexibilidade" })).toHaveValue("fixed");
-  await expect(page.getByLabel("Valor")).toHaveValue(42.5);
+  await expect(page.getByLabel("Valor")).toHaveValue("42.5");
   await expect(page.getByLabel("Moeda")).toHaveValue("BRL");
 });
 

@@ -271,7 +271,7 @@ test("mantém erro recuperável quando a Proposal deixa de estar ready antes do 
   await proposalRepository.save(rejectItineraryProposal(ready!, new Date()));
 
   await page.getByRole("button", { name: "Salvar edição" }).click();
-  await expect(page.getByRole("alert")).toHaveText(
+  await expect(page.locator('p[role="alert"]')).toHaveText(
     "A proposta de roteiro não pode mais ser editada.",
   );
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { ApplyProposalItem } from "../../trip-management/src/index";
 
@@ -10,6 +10,7 @@ import {
   type ItineraryProposal,
 } from "./itinerary-proposal";
 import {
+  createAcceptItineraryProposalPartially,
   createAcceptItineraryProposalPartiallyCommand,
   partiallyAcceptItineraryProposal,
   selectItineraryProposalForPartialAcceptance,
@@ -221,6 +222,42 @@ describe("createAcceptItineraryProposalPartiallyCommand", () => {
         commandInput([item("proposed-1"), item("proposed-2"), item("proposed-3")]),
       ),
     ).toThrowError(expect.objectContaining({ code: "full-selection" }));
+  });
+});
+
+describe("createAcceptItineraryProposalPartially", () => {
+  it("normaliza o input e delega uma única vez ao port transacional", async () => {
+    const execute = vi.fn(async (command) => ({
+      kind: "applied" as const,
+      tripId: command.tripId,
+      itineraryId: command.itineraryId,
+      itineraryProposalId: command.itineraryProposalId,
+      proposalApplicationId: "application-1",
+      decisionId: "decision-1",
+      requestFingerprint: command.requestFingerprint,
+      resultingItineraryVersion: 8,
+      appliedProposedActivityIds: command.proposedActivityIds,
+      remainingProposedActivityIds: command.remainingProposedActivityIds,
+    }));
+    const accept = createAcceptItineraryProposalPartially({ execute });
+
+    await expect(accept.execute(commandInput([item("proposed-1")]))).resolves.toMatchObject({
+      kind: "applied",
+      resultingItineraryVersion: 8,
+      appliedProposedActivityIds: ["proposed-1"],
+      remainingProposedActivityIds: ["proposed-2", "proposed-3"],
+    });
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        applicationType: "partial",
+        proposedActivityIds: ["proposed-1"],
+      }),
+    );
+  });
+
+  it("rejeita port ausente", () => {
+    expect(() => createAcceptItineraryProposalPartially(undefined as never)).toThrow(TypeError);
   });
 });
 

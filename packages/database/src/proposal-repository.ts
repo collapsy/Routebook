@@ -41,6 +41,7 @@ const operationTypes: readonly ProposedActivityOperationType[] = [
 function hasReviewableContent(proposal: Readonly<{ status: string }>): boolean {
   return (
     proposal.status === "ready" ||
+    proposal.status === "partially-accepted" ||
     proposal.status === "accepted" ||
     proposal.status === "rejected" ||
     proposal.status === "expired"
@@ -142,6 +143,7 @@ function rehydrateItineraryProposal(
           requireDate(row.generationStartedAt, "generationStartedAt"),
         );
       case "ready":
+      case "partially-accepted":
       case "accepted":
       case "rejected":
       case "expired": {
@@ -174,6 +176,15 @@ function rehydrateItineraryProposal(
             ready,
             requireDate(row.acceptedAt, "acceptedAt"),
           );
+        }
+        if (row.status === "partially-accepted") {
+          const acceptedAt = requireDate(row.acceptedAt, "acceptedAt");
+          return Object.freeze({
+            ...ready,
+            status: "partially-accepted" as const,
+            acceptedAt: new Date(acceptedAt.getTime()),
+            updatedAt: new Date(row.updatedAt.getTime()),
+          });
         }
         if (row.status === "rejected") {
           return rejectItineraryProposal(ready, requireDate(row.rejectedAt, "rejectedAt"));

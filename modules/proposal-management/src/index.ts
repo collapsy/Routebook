@@ -8,6 +8,7 @@ export type {
   ItineraryProposalProposedActivityEditErrorCode,
 } from "./edit-itinerary-proposal";
 export {
+  createAcceptItineraryProposalPartially,
   createAcceptItineraryProposalPartiallyCommand,
   partialItineraryProposalAcceptanceApplicationType,
   partialItineraryProposalAcceptanceErrorCodes,
@@ -16,10 +17,12 @@ export {
   selectItineraryProposalForPartialAcceptance,
 } from "./accept-itinerary-proposal-partially";
 export type {
+  AcceptItineraryProposalPartially,
   AcceptItineraryProposalPartiallyCommand,
   AcceptItineraryProposalPartiallyCommandInput,
   AcceptItineraryProposalPartiallyResult,
   AppliedPartialItineraryProposalAcceptance,
+  ApplyPartialItineraryProposalTransaction,
   PartialItineraryProposalAcceptanceErrorCode,
   PartialItineraryProposalSelection,
   ReplayedPartialItineraryProposalAcceptance,

@@ -372,3 +372,17 @@ Ao concluir um incremento:
 4. registre comandos e resultados reais;
 5. atualize o estado;
 6. crie novas linhas para pendências que se tornaram incrementos independentes.
+
+## Evidências do RB-INC-109
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md` |
+| requisitos e regras | RB-BR-PRP-007, RB-BR-PRP-009, RB-DATA-001–002 e RB-ADR-006 |
+| rastreabilidade | issue #248 e PR #249 |
+| transação parcial | `packages/database/src/apply-itinerary-proposal-partially-transaction.ts` |
+| persistência da Proposal | `packages/database/src/proposal-repository.ts`, `proposal-schema.ts` e migration `0024_persist_partially_accepted_itinerary_proposals.sql` |
+| testes | composição unitária, PostgreSQL, replay e rollback integral |
+| SHA técnico validado | `b17f57f24a93c4cb9eac930abdae1eb83dedf6cc` |
+| Engineering Validation técnico | #1354, run `31331066567`, attempt 2, job `93289823239`, success integral incluindo Playwright responsivo |

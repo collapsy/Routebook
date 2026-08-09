@@ -272,6 +272,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-108 | Núcleo de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/increments/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
 | RB-CTX-108 | Context Pack do RB-INC-108 | Implementation Context | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/context-packs/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
+| RB-INC-109 | Transação PostgreSQL de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md](./implementation/increments/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md) |
+| RB-CTX-109 | Context Pack do RB-INC-109 | Implementation Context | Draft | 0.1.0 | [rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md](./implementation/context-packs/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md) |
 
 ## Status possíveis
 

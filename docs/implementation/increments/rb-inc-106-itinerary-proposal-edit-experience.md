@@ -124,7 +124,7 @@ Essa decisão evita parsing reverso de:
 - [x] feedback de pendência, erro e sucesso é acessível;
 - [x] testes de model e componentes foram adicionados/atualizados;
 - [x] Engineering Validation técnico aprovado;
-- [ ] registry, Context Pack e matriz de rastreabilidade sincronizados;
+- [x] registry, Context Pack e matriz de rastreabilidade sincronizados;
 - [ ] Documentation Validation e Engineering Validation aprovados no mesmo HEAD final.
 
 ## 8. Evidências técnicas

@@ -294,6 +294,25 @@ ai_context:
 | Engineering Validation técnico | #1306, run `31257205455`, success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo |
 | migration | nenhuma nova migration; RB-INC-104 reutilizado |
 
+## Evidências previstas do RB-INC-106
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-106-itinerary-proposal-edit-experience.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-106-itinerary-proposal-edit-experience.md` |
+| editor client | `apps/web/components/itinerary-proposal-activity-editor.tsx` |
+| estilos responsivos | `apps/web/components/itinerary-proposal-activity-editor.module.css` |
+| testes do editor | `apps/web/components/itinerary-proposal-activity-editor.test.tsx` |
+| integração da review | `apps/web/components/itinerary-proposal-review.tsx` |
+| testes de estados da review | `apps/web/components/itinerary-proposal-review.test.tsx` |
+| review model | `apps/web/lib/itinerary-proposal-experience.ts` |
+| testes do review model | `apps/web/lib/itinerary-proposal-experience.test.ts` |
+| página autorizada | `apps/web/app/viagens/[tripId]/roteiro/proposta/page.tsx` |
+| rastreabilidade | issue #241 e PR #242 |
+| SHA técnico validado | `ffc6fc4e214c76c0241303ab7a80c51376fbfc48` |
+| Engineering Validation técnico | #1319, run `31326575512`, success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo |
+| migration | nenhuma nova migration; RB-INC-104/RB-INC-105 reutilizados |
+
 ## Cadeia mínima
 
 ```text

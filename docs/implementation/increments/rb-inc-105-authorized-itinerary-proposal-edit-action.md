@@ -118,7 +118,8 @@ A action expõe:
 - [x] testes do executor e da Server Action foram adicionados;
 - [x] Engineering Validation técnico aprovado antes da promoção documental;
 - [x] registry, Context Pack e matriz de rastreabilidade sincronizados;
-- [ ] Documentation Validation e Engineering Validation aprovados no mesmo HEAD final.
+- [x] Documentation Validation e Engineering Validation aprovados no mesmo SHA de promoção;
+- [ ] gates finais aprovados no último SHA da PR antes do merge.
 
 ## 8. Evidências técnicas
 
@@ -127,7 +128,10 @@ A action expõe:
 - Server Action: `apps/web/app/viagens/[tripId]/roteiro/proposta/edit-action.ts`;
 - testes da Server Action: `apps/web/app/viagens/[tripId]/roteiro/proposta/edit-action.test.ts`;
 - SHA técnico validado: `fdba3b2c2c2e88987936d04c673748f764b49f35`;
-- Engineering Validation #1306 / run `31257205455`: success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo.
+- Engineering Validation #1306 / run `31257205455`: success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo;
+- SHA de promoção validado: `370ce6152eff5e85ee51412e4e638d44371026eb`;
+- Documentation Validation #926 / run `31325362234`: success;
+- Engineering Validation #1311 / run `31325362237`: success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo.
 
 ## 9. Próximo recorte esperado
 

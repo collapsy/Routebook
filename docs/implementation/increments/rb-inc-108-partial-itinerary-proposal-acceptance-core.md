@@ -138,7 +138,7 @@ O comando também carrega `remainingProposedActivityIds` para a futura transaç�
 - [x] Proposal original não é mutada;
 - [x] API pública exportada;
 - [x] Engineering Validation técnico aprovado;
-- [ ] registry, Context Pack e matriz de rastreabilidade sincronizados;
+- [x] registry, Context Pack e matriz de rastreabilidade sincronizados;
 - [ ] Documentation Validation e Engineering Validation aprovados no HEAD canônico antes do merge.
 
 ## 10. Evidências técnicas

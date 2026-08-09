@@ -89,8 +89,7 @@ export type ReplayedPartialItineraryProposalAcceptance = Readonly<{
 }>;
 
 export type AcceptItineraryProposalPartiallyResult =
-  | AppliedPartialItineraryProposalAcceptance
-  | ReplayedPartialItineraryProposalAcceptance;
+  AppliedPartialItineraryProposalAcceptance | ReplayedPartialItineraryProposalAcceptance;
 
 function requiredText(value: string, field: string): string {
   const normalized = typeof value === "string" ? value.trim() : "";

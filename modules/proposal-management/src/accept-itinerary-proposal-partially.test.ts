@@ -247,9 +247,9 @@ describe("partiallyAcceptItineraryProposal", () => {
       acceptedAt: decidedAt,
       updatedAt: decidedAt,
     });
-    expect(partiallyAccepted.proposedActivities?.map(({ proposedActivityId }) => proposedActivityId)).toEqual([
-      "proposed-2",
-    ]);
+    expect(
+      partiallyAccepted.proposedActivities?.map(({ proposedActivityId }) => proposedActivityId),
+    ).toEqual(["proposed-2"]);
     expect(partiallyAccepted.criteria).toEqual(proposal.criteria);
     expect(partiallyAccepted.justifications).toEqual(proposal.justifications);
     expect(partiallyAccepted.limitations).toEqual(proposal.limitations);
@@ -265,11 +265,9 @@ describe("partiallyAcceptItineraryProposal", () => {
     partiallyAcceptItineraryProposal(proposal, ["proposed-2"], decidedAt);
 
     expect(proposal.status).toBe("ready");
-    expect(proposal.proposedActivities?.map(({ proposedActivityId }) => proposedActivityId)).toEqual([
-      "proposed-1",
-      "proposed-2",
-      "proposed-3",
-    ]);
+    expect(
+      proposal.proposedActivities?.map(({ proposedActivityId }) => proposedActivityId),
+    ).toEqual(["proposed-1", "proposed-2", "proposed-3"]);
     expect(proposal.acceptedAt).toBeUndefined();
   });
 });

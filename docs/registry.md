@@ -267,6 +267,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-106 | Experiência de Edição de Proposed Activity na Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-106-itinerary-proposal-edit-experience.md](./implementation/increments/rb-inc-106-itinerary-proposal-edit-experience.md) |
 | RB-CTX-106 | Context Pack do RB-INC-106 | Implementation Context | Draft | 0.1.0 | [rb-inc-106-itinerary-proposal-edit-experience.md](./implementation/context-packs/rb-inc-106-itinerary-proposal-edit-experience.md) |
 
+| RB-INC-107 | E2E Integral da Edição de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/increments/rb-inc-107-itinerary-proposal-edit-e2e.md) |
+| RB-CTX-107 | Context Pack do RB-INC-107 | Implementation Context | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/context-packs/rb-inc-107-itinerary-proposal-edit-e2e.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

@@ -118,6 +118,16 @@ export {
   type ItineraryProposalTransactionOperation,
 } from "./itinerary-proposal-transaction-unit";
 export {
+  createPostgresProposalApplicationRepository,
+  ProposalApplicationPersistenceConcurrencyError,
+  ProposalApplicationPersistenceCorruptionError,
+  ProposalApplicationPersistenceValidationError,
+  type CreateProposalApplicationPersistenceResult,
+  type PostgresProposalApplicationRepository,
+  type ProposalApplicationPersistenceRecord,
+  type ProposalApplicationSqlExecutor,
+} from "./proposal-application-repository";
+export {
   createProposalApplicationTransactionFragment,
   ProposalApplicationTransactionFragmentValidationError,
   type ConflictingProposalApplication,

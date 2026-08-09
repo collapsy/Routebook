@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { ApplyProposalItem } from "@routebook/trip-management";
+import type { ApplyProposalItem } from "../../trip-management/src/index";
 
 import {
   completeItineraryProposalGeneration,
@@ -11,7 +11,6 @@ import {
 } from "./itinerary-proposal";
 import {
   createAcceptItineraryProposalPartiallyCommand,
-  PartialItineraryProposalAcceptanceError,
   partiallyAcceptItineraryProposal,
   selectItineraryProposalForPartialAcceptance,
 } from "./accept-itinerary-proposal-partially";
@@ -151,11 +150,7 @@ describe("selectItineraryProposalForPartialAcceptance", () => {
 
     expect(() =>
       selectItineraryProposalForPartialAcceptance(rejected, ["proposed-1"], decidedAt),
-    ).toThrowError(
-      expect.objectContaining<PartialItineraryProposalAcceptanceError>({
-        code: "proposal-not-ready",
-      }),
-    );
+    ).toThrowError(expect.objectContaining({ code: "proposal-not-ready" }));
   });
 
   it("rejeita aceite no instante de expiração ou depois dele", () => {

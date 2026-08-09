@@ -1,0 +1,40 @@
+name: RB-INC-106 Format
+
+on:
+  push:
+    branches:
+      - feature/rb-inc-106-itinerary-proposal-edit-experience
+    paths:
+      - .github/workflows/rb-inc-106-format.yml
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/rb-inc-106-itinerary-proposal-edit-experience
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Format RB-INC-106 files
+        run: |
+          pnpm exec prettier --write \
+            apps/web/components/itinerary-proposal-activity-editor.test.tsx \
+            apps/web/components/itinerary-proposal-activity-editor.tsx \
+            apps/web/lib/itinerary-proposal-experience.ts
+      - name: Commit canonical formatting and remove helper
+        run: |
+          rm .github/workflows/rb-inc-106-format.yml
+          git config user.name "collapsy"
+          git config user.email "38116052+collapsy@users.noreply.github.com"
+          git add apps/web/components/itinerary-proposal-activity-editor.test.tsx apps/web/components/itinerary-proposal-activity-editor.tsx apps/web/lib/itinerary-proposal-experience.ts .github/workflows/rb-inc-106-format.yml
+          git commit -m "style(rb-inc-106): apply canonical formatting"
+          git push origin HEAD:feature/rb-inc-106-itinerary-proposal-edit-experience

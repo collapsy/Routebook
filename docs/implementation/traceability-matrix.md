@@ -313,6 +313,25 @@ ai_context:
 | Engineering Validation técnico | #1319, run `31326575512`, success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo |
 | migration | nenhuma nova migration; RB-INC-104/RB-INC-105 reutilizados |
 
+## Evidências previstas do RB-INC-107
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-107-itinerary-proposal-edit-e2e.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-107-itinerary-proposal-edit-e2e.md` |
+| E2E integral de edição | `apps/web/e2e/itinerary-proposal-editing.spec.ts` |
+| autenticação/Trip E2E | `apps/web/e2e/support/authenticated-trip.ts` |
+| fronteira UI | `apps/web/components/itinerary-proposal-activity-editor.tsx` |
+| Server Action | `apps/web/app/viagens/[tripId]/roteiro/proposta/edit-action.ts` |
+| application service | `editAndPersistItineraryProposalProposedActivity` |
+| persistência | `DrizzleItineraryProposalRepository` e PostgreSQL |
+| prova de isolamento | id/version/Activities do Itinerary comparados antes/depois |
+| concorrência | Proposal transicionada para `rejected` antes do submit; `proposal-not-ready` sem sobrescrita |
+| rastreabilidade | issue #243 e PR #244 |
+| SHA técnico validado | `35b4b75859ffa6e4decd7b498189da84ff3a6a76` |
+| Engineering Validation técnico | #1329, run `31327843734`, success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo |
+| migration | nenhuma nova migration; cadeia RB-INC-104–106 reutilizada |
+
 ## Cadeia mínima
 
 ```text

@@ -332,6 +332,23 @@ ai_context:
 | Engineering Validation técnico | #1329, run `31327843734`, success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo |
 | migration | nenhuma nova migration; cadeia RB-INC-104–106 reutilizada |
 
+## Evidências previstas do RB-INC-108
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-108-partial-itinerary-proposal-acceptance-core.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-108-partial-itinerary-proposal-acceptance-core.md` |
+| núcleo de aceite parcial | `modules/proposal-management/src/accept-itinerary-proposal-partially.ts` |
+| testes de domínio | `modules/proposal-management/src/accept-itinerary-proposal-partially.test.ts` |
+| exports públicos | `modules/proposal-management/src/index.ts` |
+| contrato de aplicação | `applicationType: partial` + `createApplyProposalItemsCommand` |
+| idempotência | `createProposalApplicationRequestFingerprint` sobre seleção canônica |
+| preservação | `partiallyAcceptItineraryProposal` retém apenas Proposed Activities não aplicadas |
+| rastreabilidade | issue #245 e PR #246 |
+| SHA técnico validado | `43ef85bc5f081622ab532648ab52a62620e0e196` |
+| Engineering Validation técnico | #1342, run `31329125333`, success em format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright responsivo |
+| migration | nenhuma neste incremento; persistência parcial fica para o próximo recorte |
+
 ## Cadeia mínima
 
 ```text

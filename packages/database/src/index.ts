@@ -37,17 +37,6 @@ export { decisions } from "./decision-schema";
 export { planningConflicts } from "./planning-conflict-schema";
 export { itineraryProposals, proposedActivities } from "./proposal-schema";
 export {
-  itineraries,
-  itineraryActivities,
-  itineraryDays,
-  itineraryFreePeriods,
-  places,
-  recommendations,
-  savedPlaces,
-  travelerProfiles,
-  trips,
-} from "./schema";
-export {
   createPostgresAcceptItineraryProposal,
   type ApplyItineraryProposalTransactionFactory,
 } from "./accept-itinerary-proposal-service";
@@ -58,6 +47,12 @@ export {
   type ApplyItineraryProposalTransactionUnit,
 } from "./apply-itinerary-proposal-transaction";
 export {
+  createApplyPartialItineraryProposalTransaction,
+  createPostgresApplyPartialItineraryProposalTransaction,
+  type ApplyPartialItineraryProposalTransactionFragments,
+  type ApplyPartialItineraryProposalTransactionUnit,
+} from "./apply-itinerary-proposal-partially-transaction";
+export {
   createPostgresDecisionRepository,
   DrizzleDecisionRepository,
   type DecisionDatabaseExecutor,
@@ -67,6 +62,7 @@ export {
   type DecisionTransactionFragment,
   type DecisionTransactionRepository,
   type DecisionTransactionRepositoryFactory,
+  type ItineraryProposalDecisionCommand,
   type PersistItineraryProposalDecisionInput,
 } from "./decision-transaction-fragment";
 export {
@@ -76,6 +72,7 @@ export {
 } from "./itinerary-repository";
 export {
   createItineraryTransactionFragment,
+  type ItineraryProposalApplicationCommand,
   type ItineraryTransactionFragment,
   type ItineraryTransactionRepository,
   type ItineraryTransactionRepositoryFactory,
@@ -99,6 +96,8 @@ export {
   type ItineraryProposalTransactionFragment,
   type ItineraryProposalTransactionRepository,
   type ItineraryProposalTransactionRepositoryFactory,
+  type PartiallyAcceptedItineraryProposal,
+  type PartialItineraryProposalTransactionFragment,
   type ReadyItineraryProposal,
 } from "./itinerary-proposal-transaction-fragment";
 export {

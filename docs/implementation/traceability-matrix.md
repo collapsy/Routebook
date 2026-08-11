@@ -493,3 +493,4 @@ Ao concluir um incremento:
 | Preview | deployment `dpl_UMDTJft2qDM7Q9fekLBrHxeRnuWY`, estado `READY` |
 | health | liveness `ok`; readiness `ready`; database `available` |
 | runtime | nenhum erro encontrado na janela de uma hora após o smoke |
+| CI | run `31512711349` aprovado integralmente |

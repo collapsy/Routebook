@@ -84,7 +84,7 @@ IDs e URLs públicas podem ser registrados. Credenciais, tokens e valores de var
 - [x] 24 tabelas públicas criadas pelas migrations versionadas;
 - [x] `DATABASE_URL` e `BETTER_AUTH_SECRET` cadastradas como sensíveis somente em Preview;
 - [x] URL dinâmica da Vercel validada antes de configurar Better Auth;
-- [ ] testes locais e CI verdes;
+- [x] testes locais e CI verdes;
 - [x] Preview Deployment pronto;
 - [x] liveness, readiness e smoke operacional verdes;
 - [x] logs sem erro crítico.
@@ -95,6 +95,8 @@ IDs e URLs públicas podem ser registrados. Credenciais, tokens e valores de var
 - validação documental: aprovada com 8 avisos preexistentes;
 - lint e typecheck do monorepo: aprovados;
 - build local e build remoto Vercel: aprovados;
+- CI integral da PR #273: aprovado no run `31512711349`, incluindo migrations,
+  testes de componentes e domínio, smoke, build e 81 testes responsivos;
 - health protegido: `/api/health/live` retornou `ok` e `/api/health/ready`
   retornou `ready`, com database `available`, por acesso autenticado da Vercel;
 - erros de runtime na última hora após o smoke: nenhum encontrado;

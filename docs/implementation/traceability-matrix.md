@@ -485,7 +485,7 @@ Ao concluir um incremento:
 | definição do incremento | `docs/implementation/increments/rb-inc-117-vercel-neon-preview-bootstrap.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-117-vercel-neon-preview-bootstrap.md` |
 | decisões | RB-ADR-017 e RB-ADR-018 aprovados |
-| rastreabilidade | issue #272; PR a criar |
+| rastreabilidade | issue #272; PR #273 |
 | Vercel | team `rnd10`, project `routebook` |
 | Neon | project `rapid-brook-02474789`, branch `br-divine-heart-ay8hpdo1`, database `neondb` |
 | banco | PostGIS habilitado e 24 tabelas públicas após migrations |

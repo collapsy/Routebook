@@ -43,7 +43,7 @@ Issue: #272.
 
 Branch: `codex/rb-inc-117-vercel-neon-preview`.
 
-PR: a criar.
+PR: #273.
 
 ## 2. Recursos
 

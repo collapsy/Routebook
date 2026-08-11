@@ -184,7 +184,7 @@ test("edita uma Proposed Activity da UI ao PostgreSQL, reidrata e preserva o Iti
   await expect
     .poll(async () => {
       const proposal = await proposalRepository.findById(fixture.tripId, fixture.proposalId);
-      return proposal?.proposedActivities[0]?.title;
+      return proposal?.proposedActivities?.[0]?.title;
     })
     .toBe(editedActivity);
 

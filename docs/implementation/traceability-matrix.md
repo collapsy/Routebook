@@ -438,7 +438,7 @@ Ao concluir um incremento:
 | definição do incremento | `docs/implementation/increments/rb-inc-113-operational-health-checks.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-113-operational-health-checks.md` |
 | requisitos operacionais | RB-DEL-001, RB-OBS-001, RB-INFRA-001, RB-CICD-001 e RB-OPS-001 |
-| rastreabilidade | issue #264; PR a criar |
+| rastreabilidade | issue #264 e PR #265 |
 | liveness | `apps/web/app/api/health/live/route.ts` |
 | readiness PostgreSQL | `apps/web/app/api/health/ready/route.ts` |
 | serviço operacional | `apps/web/lib/operational-health.ts` |

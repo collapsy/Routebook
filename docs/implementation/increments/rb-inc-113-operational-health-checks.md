@@ -41,7 +41,7 @@ Issue: #264.
 
 Branch: `codex/rb-inc-113-operational-health-checks`.
 
-PR: a criar.
+PR: #265.
 
 ## 2. Problema
 

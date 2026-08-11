@@ -1,7 +1,7 @@
 ---
-id: RB-INC-120
-title: Geração de Proposal E2E Sincronizada
-description: Sincroniza a geração E2E de Itinerary Proposal com os sinais observáveis da Server Action e da navegação.
+id: RB-INC-121
+title: Mutações do Roteiro E2E Sincronizadas pelo Resultado Renderizado
+description: Sincroniza as mutações E2E do roteiro com a resposta da Server Action e a mensagem de sucesso renderizada.
 document_type: implementation-increment
 owner: Quality Engineering
 status: Draft
@@ -20,60 +20,56 @@ related_documents:
   - RB-QA-001
   - RB-CICD-001
   - RB-ADR-010
-  - RB-INC-118
-  - RB-INC-119
+  - RB-INC-120
 prerequisites:
-  - RB-INC-119
+  - RB-INC-120
 next_documents: []
 ai_context:
   priority: high
   index: true
 ---
 
-# RB-INC-120 — Geração de Proposal E2E Sincronizada
+# RB-INC-121 — Mutações do Roteiro E2E Sincronizadas pelo Resultado Renderizado
 
 ## 1. Objetivo
 
-Eliminar o flaky da geração de Itinerary Proposal registrando a resposta POST e a
-URL esperada antes do click.
+Eliminar o flaky das mutações do roteiro aguardando o resultado renderizado da
+Server Action antes de validar a URL final.
 
-Issue: #278.
+Issue: #280.
 
-Branch: `codex/rb-inc-120-deterministic-proposal-generation`.
+Branch: `codex/rb-inc-121-deterministic-itinerary-mutations`.
 
-Base empilhada: `codex/rb-inc-119-deterministic-landing-navigation`.
+Base empilhada: `codex/rb-inc-120-deterministic-proposal-generation`.
 
-PR: #279.
+PR: #281.
 
 ## 2. Evidência
 
-O Engineering Validation `31516435515` validou a URL antes da conclusão observável
-da geração em desktop Chromium. O cenário passou no retry e preservou corretamente
-a Proposal e o Itinerary.
-
-O primeiro run da PR, `31517303193`, confirmou que `waitForURL` fica acoplado ao
-lifecycle interno da navegação suave. A sequência final aguarda o POST, depois o
-heading renderizado e somente então valida a URL e o ID.
+O Engineering Validation `31517303193` concluiu o POST da movimentação de uma
+atividade, mas a assertion de URL ainda observou a query string da criação anterior.
+O cenário passou no retry, preservando corretamente a atividade movida.
 
 ## 3. Escopo
 
 - registrar o POST da rota atual antes do click;
 - aguardar a resposta POST registrada antes do click;
-- aguardar o heading renderizado antes de validar URL e ID;
-- preservar assertions de conteúdo, persistência e invariância do Itinerary.
+- aguardar a mensagem de sucesso renderizada antes de validar a URL;
+- aplicar o mesmo contrato às mutações que compartilham o helper;
+- preservar assertions de conteúdo e persistência.
 
 ## 4. Fora de escopo
 
-- domínio, geração, banco, UI ou Server Action;
+- domínio, aplicação, banco, UI ou Server Action;
 - configuração Playwright ou workflow;
 - aumento de timeout, retry ou workers;
 - sleep, quarentena ou remoção de assertion.
 
 ## 5. Critérios de aceite
 
-- [x] POST é registrado antes do click e conteúdo precede a validação da URL;
-- [x] URL e ID gerado continuam explicitamente validados;
-- [x] conteúdo, persistência e Itinerary preservado continuam cobertos;
+- [x] POST é registrado antes do click;
+- [x] resultado renderizado precede a validação da URL;
+- [x] URL, conteúdo e persistência continuam explicitamente validados;
 - [x] documentação, lint, tipagem, testes e build verdes;
 - [x] duas execuções consecutivas sem flaky annotation.
 

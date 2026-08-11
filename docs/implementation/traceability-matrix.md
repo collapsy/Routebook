@@ -567,3 +567,16 @@ Ao concluir um incremento:
 | runtime | nenhum log de erro encontrado após o smoke autenticado |
 | CI | Engineering Validation `31527703958`: 81 aprovados, sem flaky annotation |
 | rastreabilidade | issue #284; PR #285 |
+
+## Evidências do RB-INC-124
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-124-production-bootstrap.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-124-production-bootstrap.md` |
+| autorização | provisionamento e integração de Production aprovados pelo responsável em 2026-08-11 |
+| isolamento | Neon `routebook-production` / `bitter-queen-90455085`, distinto de Preview; dois secrets sensíveis exclusivos do target Production |
+| schema | branch `main` / `br-rough-dew-axo9u82j`; 25 migrations, 21 tabelas públicas, histórico Drizzle e 0 viagens |
+| deployment | Production automático da `main`; evidência pendente de integração |
+| validação | health, logs e CI pendentes |
+| rastreabilidade | issue #286; PR pendente |

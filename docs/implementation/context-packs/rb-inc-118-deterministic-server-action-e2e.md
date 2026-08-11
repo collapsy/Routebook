@@ -44,6 +44,8 @@ preservando todos os resultados já exigidos pelos testes.
 - run: `31513286871`;
 - resultado: 79 passed e 2 flaky aprovados por retry;
 - specs: `free-period.spec.ts` e `itinerary-proposal-review.spec.ts`.
+- run da primeira correção: `31514212266`, com os casos originais estáveis e um
+  novo flaky de mesma causa no descarte concorrente de Proposal.
 
 ## Leitura obrigatória
 

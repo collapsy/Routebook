@@ -181,21 +181,29 @@ async function openPartialAcceptance(page: Page, fixture: ProposalFixture): Prom
   await page.getByRole("checkbox", { name: new RegExp(proposedActivity, "i") }).check();
 }
 
-async function submitPartialAcceptance(
+async function submitAndWaitForActionResponse(
   page: Page,
   submit: () => Promise<void>,
-  expectedUrl: RegExp,
 ): Promise<void> {
   const actionPathname = new URL(page.url()).pathname;
   const actionResponse = page.waitForResponse((response) => {
     const request = response.request();
     return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
   });
+
+  await Promise.all([actionResponse, submit()]);
+}
+
+async function submitPartialAcceptance(
+  page: Page,
+  submit: () => Promise<void>,
+  expectedUrl: RegExp,
+): Promise<void> {
   const decisionAlert = page
     .locator('section[aria-labelledby="proposal-decision-title"]')
     .getByRole("alert");
 
-  await Promise.all([actionResponse, submit()]);
+  await submitAndWaitForActionResponse(page, submit);
   if (await decisionAlert.isVisible()) {
     throw new Error(`Aceite parcial falhou: ${await decisionAlert.textContent()}`);
   }
@@ -557,7 +565,9 @@ test("trata uma Proposal atualizada concorrentemente sem falso sucesso", async (
   const rejectedAt = new Date(Math.max(Date.now(), ready.updatedAt.getTime()) + 1_000);
   await repository.save(rejectItineraryProposal(ready, rejectedAt));
 
-  await page.getByRole("button", { name: "Descartar proposta" }).click();
+  await submitAndWaitForActionResponse(page, () =>
+    page.getByRole("button", { name: "Descartar proposta" }).click(),
+  );
   await expect(page).toHaveURL(/\/roteiro\?erroProposta=estado-atualizado$/);
 
   await expect(page.locator(".itinerary-feedback")).toHaveText(

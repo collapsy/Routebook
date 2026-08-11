@@ -57,6 +57,10 @@ cenários aprovados somente após retry:
 Ambos os testes já validam o resultado correto após o retry. A correção atua apenas
 na sincronização observável, sem alterar produto ou ampliar tolerâncias.
 
+A primeira execução da PR, run `31514212266`, confirmou os dois cenários originais
+sem retry e revelou a mesma causa no descarte concorrente de Proposal. Esse terceiro
+caso também passa a aguardar o POST antes da URL, sem ampliar o restante do escopo.
+
 ## 3. Escopo
 
 - registrar a espera pelo POST da rota atual antes do click;
@@ -76,6 +80,7 @@ na sincronização observável, sem alterar produto ou ampliar tolerâncias.
 
 - [x] remoção de período livre registra a espera pelo POST antes do click;
 - [x] aceite parcial registra a espera pelo POST antes do click;
+- [x] descarte concorrente registra a espera pelo POST antes do click;
 - [x] URL, feedback, conteúdo e persistência permanecem validados;
 - [x] timeout, retry, workers e projetos permanecem inalterados;
 - [ ] documentação, lint, tipagem, testes e build verdes;

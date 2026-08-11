@@ -503,4 +503,5 @@ Ao concluir um incremento:
 | Context Pack | `docs/implementation/context-packs/rb-inc-118-deterministic-server-action-e2e.md` |
 | origem | Engineering Validation `31513286871` |
 | defeito | 2 cenários flaky aprovados somente após retry |
+| evidência adicional | run `31514212266`, descarte concorrente com a mesma espera frágil |
 | rastreabilidade | issue #274; PR #275 |

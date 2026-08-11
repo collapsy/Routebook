@@ -35,7 +35,9 @@ const decidedAt = new Date("2026-08-09T20:00:00.000Z");
 const validUntil = new Date("2026-08-10T20:00:00.000Z");
 const idempotencyKey = "partial-accept-session-1";
 
-function trip(participants: Trip["participants"] = [{ userId, displayName: "Ronaldo", role: "owner" }]): Trip {
+function trip(
+  participants: Trip["participants"] = [{ userId, displayName: "Ronaldo", role: "owner" }],
+): Trip {
   return {
     id: tripId,
     name: "Pipa",
@@ -132,14 +134,17 @@ function readyProposal(): ItineraryProposal {
 }
 
 function partiallyAcceptedProposal(): ItineraryProposal {
+  const remainingActivity = readyProposal().proposedActivities?.find(
+    (activity) => activity.proposedActivityId === remainingId,
+  );
+  if (!remainingActivity) {
+    throw new Error("Fixture de Proposed Activity remanescente não encontrada.");
+  }
+
   return Object.freeze({
     ...readyProposal(),
     status: "partially-accepted" as const,
-    proposedActivities: Object.freeze([
-      readyProposal().proposedActivities?.find(
-        (activity) => activity.proposedActivityId === remainingId,
-      )!,
-    ]),
+    proposedActivities: Object.freeze([remainingActivity]),
     acceptedAt: new Date(decidedAt.getTime()),
     updatedAt: new Date(decidedAt.getTime()),
   });
@@ -307,11 +312,15 @@ describe("executeAcceptItineraryProposalPartiallyAction", () => {
   it("bloqueia visitante anônimo antes de consultar a Trip", async () => {
     const findTrip = vi.fn();
     const deps = dependencies({
-      resolveAccess: vi.fn(async (): Promise<TripRouteAccessResult> => ({ status: "unauthenticated" })),
+      resolveAccess: vi.fn(async (): Promise<TripRouteAccessResult> => ({
+        status: "unauthenticated",
+      })),
       tripRepository: { findById: findTrip },
     });
 
-    await expect(executeAcceptItineraryProposalPartiallyAction(input(), deps)).resolves.toMatchObject({
+    await expect(
+      executeAcceptItineraryProposalPartiallyAction(input(), deps),
+    ).resolves.toMatchObject({
       status: "error",
       code: "unauthenticated",
     });
@@ -337,7 +346,9 @@ describe("executeAcceptItineraryProposalPartiallyAction", () => {
       acceptItineraryProposalPartially: { execute },
     });
 
-    await expect(executeAcceptItineraryProposalPartiallyAction(input(), deps)).resolves.toMatchObject({
+    await expect(
+      executeAcceptItineraryProposalPartiallyAction(input(), deps),
+    ).resolves.toMatchObject({
       status: "error",
       code: "itinerary-version-mismatch",
     });
@@ -352,7 +363,9 @@ describe("executeAcceptItineraryProposalPartiallyAction", () => {
       acceptItineraryProposalPartially: { execute },
     });
 
-    await expect(executeAcceptItineraryProposalPartiallyAction(input(), deps)).resolves.toMatchObject({
+    await expect(
+      executeAcceptItineraryProposalPartiallyAction(input(), deps),
+    ).resolves.toMatchObject({
       status: "error",
       code: "proposal-expired",
     });
@@ -370,7 +383,9 @@ describe("executeAcceptItineraryProposalPartiallyAction", () => {
       acceptItineraryProposalPartially: { execute },
     });
 
-    await expect(executeAcceptItineraryProposalPartiallyAction(input(), deps)).resolves.toMatchObject({
+    await expect(
+      executeAcceptItineraryProposalPartiallyAction(input(), deps),
+    ).resolves.toMatchObject({
       status: "success",
       kind: "replay",
       proposalApplicationId: applicationId,
@@ -401,7 +416,9 @@ describe("executeAcceptItineraryProposalPartiallyAction", () => {
       acceptItineraryProposalPartially: { execute },
     });
 
-    await expect(executeAcceptItineraryProposalPartiallyAction(input(), deps)).resolves.toMatchObject({
+    await expect(
+      executeAcceptItineraryProposalPartiallyAction(input(), deps),
+    ).resolves.toMatchObject({
       status: "error",
       code: "proposal-not-ready",
     });

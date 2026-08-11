@@ -52,17 +52,20 @@ export async function acceptItineraryProposalPartiallyAction(
 ): Promise<AcceptItineraryProposalPartiallyActionState> {
   try {
     const database = getDatabase();
-    const result = await executeAcceptItineraryProposalPartiallyAction(actionInput(tripId, formData), {
-      resolveAccess: resolveTripRouteAccess,
-      tripRepository: new DrizzleTripRepository(),
-      itineraryRepository: new DrizzleItineraryRepository(),
-      proposalRepository: new DrizzleItineraryProposalRepository(),
-      proposalApplicationReader: createPostgresProposalApplicationRepository(database),
-      decisionReader: new DrizzleDecisionRepository(database),
-      acceptItineraryProposalPartially: createAcceptItineraryProposalPartially(
-        createPostgresApplyPartialItineraryProposalTransaction(),
-      ),
-    });
+    const result = await executeAcceptItineraryProposalPartiallyAction(
+      actionInput(tripId, formData),
+      {
+        resolveAccess: resolveTripRouteAccess,
+        tripRepository: new DrizzleTripRepository(),
+        itineraryRepository: new DrizzleItineraryRepository(),
+        proposalRepository: new DrizzleItineraryProposalRepository(),
+        proposalApplicationReader: createPostgresProposalApplicationRepository(database),
+        decisionReader: new DrizzleDecisionRepository(database),
+        acceptItineraryProposalPartially: createAcceptItineraryProposalPartially(
+          createPostgresApplyPartialItineraryProposalTransaction(),
+        ),
+      },
+    );
 
     if (result.status === "success") {
       revalidatePath(`/viagens/${tripId}`);

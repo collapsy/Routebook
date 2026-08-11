@@ -162,7 +162,9 @@ function normalizedRequest(
     return acceptItineraryProposalPartiallyActionError("selection-empty");
   }
 
-  const selectedProposedActivityIds = input.selectedProposedActivityIds.map((value) => value.trim());
+  const selectedProposedActivityIds = input.selectedProposedActivityIds.map((value) =>
+    value.trim(),
+  );
   if (selectedProposedActivityIds.some((value) => !uuidPattern.test(value))) {
     return acceptItineraryProposalPartiallyActionError("invalid-request");
   }
@@ -281,14 +283,14 @@ async function replayPartiallyAcceptedProposal(
     decision.actorParticipantId !== actorId ||
     decision.chosenOption.type !== "accept-itinerary-proposal" ||
     decision.chosenOption.itineraryProposalId !== request.itineraryProposalId ||
-    !sameSelection(decision.chosenOption.proposedActivityIds, persistedRequest.proposedActivityIds) ||
+    !sameSelection(
+      decision.chosenOption.proposedActivityIds,
+      persistedRequest.proposedActivityIds,
+    ) ||
     decision.effect.type !== "itinerary-proposal-applied" ||
     decision.effect.proposalApplicationId !== record.application.id ||
     decision.effect.resultingItineraryVersion !== record.application.resultingItineraryVersion ||
-    !sameSelection(
-      decision.effect.appliedProposedActivityIds,
-      persistedRequest.proposedActivityIds,
-    )
+    !sameSelection(decision.effect.appliedProposedActivityIds, persistedRequest.proposedActivityIds)
   ) {
     return acceptItineraryProposalPartiallyActionError("technical-error");
   }
@@ -329,7 +331,9 @@ export async function executeAcceptItineraryProposalPartiallyAction(
 
   const trip = await dependencies.tripRepository.findById(request.tripId);
   if (!trip) return acceptItineraryProposalPartiallyActionError("not-found");
-  const actor = trip.participants.find((participant) => participant.userId === access.context.userId);
+  const actor = trip.participants.find(
+    (participant) => participant.userId === access.context.userId,
+  );
   if (!actor) return acceptItineraryProposalPartiallyActionError("not-found");
 
   const proposal = await dependencies.proposalRepository.findById(

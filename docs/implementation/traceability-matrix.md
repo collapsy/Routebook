@@ -467,3 +467,13 @@ Ao concluir um incremento:
 | decisão | RB-ADR-017 versão 0.2.0, estado interno `Approved` |
 | governança | RB-GOV-001, RB-GOV-002 e aprovação humana explícita |
 | rastreabilidade | issue #268 e PR #269 |
+
+## Evidências do RB-INC-116
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-116-approve-adr-018.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-116-approve-adr-018.md` |
+| decisão | RB-ADR-018 versão 0.2.0, estado interno `Approved` |
+| governança | RB-GOV-001, RB-GOV-002 e aprovação humana explícita |
+| rastreabilidade | issue #270; PR a criar |

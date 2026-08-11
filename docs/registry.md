@@ -316,6 +316,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-129 | Context Pack do RB-INC-129 — Validação Integrada do MVP | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-129-mvp-production-validation.md](./implementation/context-packs/rb-inc-129-mvp-production-validation.md) |
 | RB-INC-130 | Entrada Visível para a Primeira Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-130-proposal-entrypoint.md](./implementation/increments/rb-inc-130-proposal-entrypoint.md) |
 | RB-CTX-130 | Context Pack do RB-INC-130 — Entrada da Primeira Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-130-proposal-entrypoint.md](./implementation/context-packs/rb-inc-130-proposal-entrypoint.md) |
+| RB-INC-131 | Deduplicação de Place na Geração de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-131-proposal-place-deduplication.md](./implementation/increments/rb-inc-131-proposal-place-deduplication.md) |
+| RB-CTX-131 | Context Pack do RB-INC-131 — Deduplicação de Place em Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-131-proposal-place-deduplication.md](./implementation/context-packs/rb-inc-131-proposal-place-deduplication.md) |
 
 ## Status possíveis
 

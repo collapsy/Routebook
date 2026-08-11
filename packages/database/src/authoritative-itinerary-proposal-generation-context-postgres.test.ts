@@ -133,7 +133,7 @@ beforeAll(async () => {
     startTime: "14:00",
     durationMinutes: 60,
     order: 1,
-    placeId: null,
+    placeId: firstPlaceId,
     createdAt: now,
     updatedAt: now,
   });
@@ -220,13 +220,13 @@ describe("PostgresAuthoritativeItineraryProposalGenerationContextPort", () => {
     });
     expect(
       context.recommendations.map((recommendation) => recommendation.recommendationId),
-    ).toEqual([firstRecommendationId, secondRecommendationId]);
+    ).toEqual([secondRecommendationId]);
     expect(context.recommendations[0]).toMatchObject({
       tripId,
-      placeId: firstPlaceId,
-      status: "presented",
-      score: 0.9,
-      reason: "Chance de observar golfinhos.",
+      placeId: secondPlaceId,
+      status: "generated",
+      score: 0.8,
+      reason: "Boa opção para o segundo dia.",
     });
     expect(context.places).toEqual(
       [...context.places].sort((left, right) => left.placeId.localeCompare(right.placeId)),
@@ -234,16 +234,14 @@ describe("PostgresAuthoritativeItineraryProposalGenerationContextPort", () => {
     expect(context.places).toEqual(
       expect.arrayContaining([
         {
-          placeId: firstPlaceId,
-          title: "Baía dos Golfinhos",
-          description: "Encontro com golfinhos em mar calmo.",
-        },
-        {
           placeId: secondPlaceId,
           title: "Praia do Amor",
           description: "Praia com falésias e ondas.",
         },
       ]),
+    );
+    expect(context.places).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ placeId: firstPlaceId })]),
     );
   });
 

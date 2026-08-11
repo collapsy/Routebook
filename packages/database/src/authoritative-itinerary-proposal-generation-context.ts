@@ -128,6 +128,7 @@ async function loadContext(
       id: itineraryActivities.id,
       itineraryDayId: itineraryActivities.itineraryDayId,
       order: itineraryActivities.order,
+      placeId: itineraryActivities.placeId,
     })
     .from(itineraryActivities)
     .where(inArray(itineraryActivities.itineraryDayId, dayIds))
@@ -143,11 +144,18 @@ async function loadContext(
     activitiesByDay.set(row.itineraryDayId, Object.freeze(activities));
   }
 
-  const recommendationRows = await database
+  const plannedPlaceIds = new Set(
+    activityRows.flatMap((activity) => (activity.placeId ? [activity.placeId] : [])),
+  );
+
+  const allRecommendationRows = await database
     .select()
     .from(recommendations)
     .where(eq(recommendations.tripId, tripId))
     .orderBy(asc(recommendations.generatedAt), asc(recommendations.id));
+  const recommendationRows = allRecommendationRows.filter(
+    (recommendation) => !plannedPlaceIds.has(recommendation.placeId),
+  );
   const placeIds = [...new Set(recommendationRows.map((recommendation) => recommendation.placeId))];
   const placeRows =
     placeIds.length === 0

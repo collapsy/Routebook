@@ -415,3 +415,18 @@ Ao concluir um incremento:
 | testes focados | 19 testes aprovados |
 | SHA técnico | `55e45ac30f2674e21903e884e17ce893324a9fb3` |
 | Engineering Validation técnico | run `31494965592`, job `93790262730`, success integral; 79 testes Playwright sem retry flaky |
+
+## Evidências do RB-INC-112
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-112-partial-itinerary-proposal-acceptance-e2e.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-112-partial-itinerary-proposal-acceptance-e2e.md` |
+| requisitos e interação | RB-PRD-006, RB-UX-005, RB-INT-066–067 e RB-INC-111 |
+| rastreabilidade | issue #256 e PR #257 |
+| jornada E2E | `apps/web/e2e/itinerary-proposal-review.spec.ts` |
+| correção de navegação | `apps/web/app/viagens/[tripId]/roteiro/proposta/partial-accept-action.ts` |
+| persistência comprovada | Itinerary, Proposal `partially-accepted`, Proposal Application e Decision |
+| idempotência comprovada | replay concorrente sem incremento adicional de versão, aplicação ou decisão |
+| SHA técnico | `d086a68fadaaef143c8dad863bd1d54103745e7d` |
+| Engineering Validation técnico | run `31498339765`, job `93801596100`, success integral; 79 testes Playwright aprovados, novo E2E parcial sem retry e duas anotações flaky preexistentes |

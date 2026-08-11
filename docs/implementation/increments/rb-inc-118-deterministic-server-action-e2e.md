@@ -64,6 +64,9 @@ caso também passa a aguardar o POST antes da URL, sem ampliar o restante do esc
 O run empilhado `31515863942` revelou a espera tardia equivalente no aceite integral
 concorrente e em seu replay. As duas submissões passam pelo mesmo helper observável.
 
+O run combinado `31516435515` mostrou que resposta e navegação precisam ser
+registradas juntas antes do click. O helper passa a aguardar ambos os sinais.
+
 ## 3. Escopo
 
 - registrar a espera pelo POST da rota atual antes do click;

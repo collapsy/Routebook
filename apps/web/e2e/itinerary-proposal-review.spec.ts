@@ -181,9 +181,10 @@ async function openPartialAcceptance(page: Page, fixture: ProposalFixture): Prom
   await page.getByRole("checkbox", { name: new RegExp(proposedActivity, "i") }).check();
 }
 
-async function submitAndWaitForActionResponse(
+async function submitAndWaitForActionNavigation(
   page: Page,
   submit: () => Promise<void>,
+  expectedUrl: RegExp,
 ): Promise<void> {
   const actionPathname = new URL(page.url()).pathname;
   const actionResponse = page.waitForResponse((response) => {
@@ -191,7 +192,7 @@ async function submitAndWaitForActionResponse(
     return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
   });
 
-  await Promise.all([actionResponse, submit()]);
+  await Promise.all([actionResponse, page.waitForURL(expectedUrl), submit()]);
 }
 
 async function submitPartialAcceptance(
@@ -203,7 +204,7 @@ async function submitPartialAcceptance(
     .locator('section[aria-labelledby="proposal-decision-title"]')
     .getByRole("alert");
 
-  await submitAndWaitForActionResponse(page, submit);
+  await submitAndWaitForActionNavigation(page, submit, expectedUrl);
   if (await decisionAlert.isVisible()) {
     throw new Error(`Aceite parcial falhou: ${await decisionAlert.textContent()}`);
   }
@@ -409,12 +410,16 @@ test("reproduz o aceite concorrente e rejeita chave nova sem duplicar efeitos", 
     await openAcceptance(replayPage, fixture.tripId);
     await openAcceptance(conflictingPage, fixture.tripId);
 
-    await submitAndWaitForActionResponse(page, () =>
-      page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
+    await submitAndWaitForActionNavigation(
+      page,
+      () => page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
+      /\/roteiro\?propostaAceita=applied$/,
     );
     await expect(page).toHaveURL(/\/roteiro\?propostaAceita=applied$/);
-    await submitAndWaitForActionResponse(replayPage, () =>
-      replayPage.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
+    await submitAndWaitForActionNavigation(
+      replayPage,
+      () => replayPage.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
+      /\/roteiro\?propostaAceita=replay$/,
     );
     await expect(replayPage).toHaveURL(/\/roteiro\?propostaAceita=replay$/);
 
@@ -569,8 +574,10 @@ test("trata uma Proposal atualizada concorrentemente sem falso sucesso", async (
   const rejectedAt = new Date(Math.max(Date.now(), ready.updatedAt.getTime()) + 1_000);
   await repository.save(rejectItineraryProposal(ready, rejectedAt));
 
-  await submitAndWaitForActionResponse(page, () =>
-    page.getByRole("button", { name: "Descartar proposta" }).click(),
+  await submitAndWaitForActionNavigation(
+    page,
+    () => page.getByRole("button", { name: "Descartar proposta" }).click(),
+    /\/roteiro\?erroProposta=estado-atualizado$/,
   );
   await expect(page).toHaveURL(/\/roteiro\?erroProposta=estado-atualizado$/);
 

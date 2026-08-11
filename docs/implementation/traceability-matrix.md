@@ -505,4 +505,5 @@ Ao concluir um incremento:
 | defeito | 2 cenários flaky aprovados somente após retry |
 | evidência adicional | run `31514212266`, descarte concorrente com a mesma espera frágil |
 | evidência empilhada | run `31515863942`, aceite integral concorrente com a mesma causa |
+| refinamento | run `31516435515`, resposta e URL precisam ser aguardadas em conjunto |
 | rastreabilidade | issue #274; PR #275 |

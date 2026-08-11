@@ -48,6 +48,8 @@ preservando todos os resultados já exigidos pelos testes.
   novo flaky de mesma causa no descarte concorrente de Proposal.
 - run empilhado `31515863942`: aceite integral concorrente apresentou a mesma espera
   tardia entre click e URL.
+- run combinado `31516435515`: aguardar somente o POST ainda permitiu validar a URL
+  antes da aplicação da navegação; resposta e URL devem ser registradas antes do click.
 
 ## Leitura obrigatória
 
@@ -83,7 +85,7 @@ packages/**
 
 ## Regras
 
-- registrar `waitForResponse` antes de disparar o click;
+- registrar `waitForResponse` e `waitForURL` antes de disparar o click;
 - identificar a submissão por método POST e pathname atual;
 - não interpretar o status do redirect como sucesso ou falha;
 - preservar assertions posteriores e erro explícito da decisão;

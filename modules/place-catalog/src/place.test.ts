@@ -11,6 +11,7 @@ const validInput = {
   latitude: -6.2366,
   longitude: -35.0465,
   addressLabel: "Pipa, Tibau do Sul — RN",
+  priceRange: "free" as const,
   publicationStatus: "published" as const,
 };
 
@@ -22,6 +23,7 @@ describe("createPlace", () => {
     expect(place.slug).toBe("praia-do-amor");
     expect(place.category).toBe("beach");
     expect(place.publicationStatus).toBe("published");
+    expect(place.priceRange).toBe("free");
   });
 
   it("mantém endereço ausente como propriedade omitida", () => {
@@ -38,5 +40,17 @@ describe("createPlace", () => {
 
   it("rejeita coordenadas fora dos limites geográficos", () => {
     expect(() => createPlace({ ...validInput, latitude: -91 })).toThrow(PlaceValidationError);
+  });
+
+  it("mantém Price Range ausente como propriedade omitida", () => {
+    const { priceRange, ...withoutPriceRange } = validInput;
+    expect(priceRange).toBe("free");
+    expect(createPlace(withoutPriceRange)).not.toHaveProperty("priceRange");
+  });
+
+  it("rejeita Price Range fora da linguagem do domínio", () => {
+    expect(() => createPlace({ ...validInput, priceRange: "unknown" as never })).toThrow(
+      PlaceValidationError,
+    );
   });
 });

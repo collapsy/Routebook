@@ -673,3 +673,13 @@ Ao concluir um incremento:
 | validação | PR #303; CI no PR e pós-merge com 83 testes; Production propôs somente o Place ainda não planejado |
 | operação | deployment `dpl_6hp5feWzaqz7eNARxFZ7ewZJUTgR` READY; sem erros de runtime na hora posterior |
 | rastreabilidade | issue #302, encerrada pela PR #303; relacionado a #298 |
+
+## Evidências do RB-INC-132
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-132-place-discovery-filters.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-132-place-discovery-filters.md` |
+| origem | conclusão condicionada do RB-INC-129 e requisito obrigatório de descoberta do RB-PRD-002 |
+| lacuna | pesquisa textual, distância, Price Range, filtros ativos e mapa filtrado ausentes em Explorar |
+| rastreabilidade | issue #304; relacionado a #298 |

@@ -18,6 +18,7 @@ function mapPlace(row: PlaceRow): Place {
     latitude: row.latitude,
     longitude: row.longitude,
     ...(row.addressLabel ? { addressLabel: row.addressLabel } : {}),
+    ...(row.priceRange ? { priceRange: row.priceRange as NonNullable<Place["priceRange"]> } : {}),
     publicationStatus: row.publicationStatus as Place["publicationStatus"],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

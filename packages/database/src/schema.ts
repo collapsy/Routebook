@@ -67,6 +67,7 @@ export const places = pgTable(
     latitude: doublePrecision("latitude").notNull(),
     longitude: doublePrecision("longitude").notNull(),
     addressLabel: text("address_label"),
+    priceRange: varchar("price_range", { length: 24 }),
     publicationStatus: varchar("publication_status", { length: 24 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),

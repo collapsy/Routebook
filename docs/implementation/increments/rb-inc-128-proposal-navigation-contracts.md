@@ -52,8 +52,8 @@ Branch: `codex/rb-inc-128-proposal-navigation-contracts`.
 - [x] nenhuma ocorrência `waitForURL + click` permanece no spec;
 - [x] Server Actions validam seu redirect;
 - [x] links validam seu destino acessível;
-- [ ] validações locais estão verdes;
-- [ ] duas matrizes no mesmo SHA não possuem flaky annotation.
+- [x] validações locais estão verdes;
+- [x] duas matrizes no mesmo SHA não possuem flaky annotation.
 
 ## 6. Testes obrigatórios
 
@@ -61,6 +61,16 @@ Branch: `codex/rb-inc-128-proposal-navigation-contracts`.
 - Playwright `--list`;
 - Engineering Validation executado duas vezes no mesmo SHA.
 
-## 7. Rollback
+## 7. Evidências finais
+
+- PR #296, incorporada à #294;
+- SHA `da003f0efe416ede4a2504ee0ce77d88cf0ca486` validado duas vezes;
+- Engineering Validation `31534321192`, attempts 1 e 2: 81 aprovados, sem flaky;
+- PR consolidada #290: run `31535217769`, 81 aprovados, sem flaky;
+- `main`: run `31535676668`, 81 aprovados, sem flaky;
+- Production: `dpl_Dymz5zmZcJZRjxyLgStKcZsnTSwS`, READY, liveness `ok`, readiness
+  `ready` com database `available` e nenhum log de erro após smoke.
+
+## 8. Rollback
 
 Reverter somente o spec e a documentação.

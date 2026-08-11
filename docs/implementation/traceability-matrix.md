@@ -617,3 +617,14 @@ Ao concluir um incremento:
 | correção | `href` validado e destino carregado explicitamente |
 | validação | pendente |
 | rastreabilidade | issue #293; PR pendente |
+
+## Evidências do RB-INC-128
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-128-proposal-navigation-contracts.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-128-proposal-navigation-contracts.md` |
+| origem | runs `31532256527` e `31532897047`, ambos com retry flaky em revisão de Proposal |
+| correção | Server Actions usam redirect declarado; links usam `href` validado |
+| validação | pendente |
+| rastreabilidade | issue #295; PR pendente |

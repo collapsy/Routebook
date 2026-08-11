@@ -529,3 +529,14 @@ Ao concluir um incremento:
 | defeito | geração validou URL antes da conclusão observável; passou no retry |
 | refinamento | run `31517303193`, conteúdo renderizado substitui espera de lifecycle |
 | rastreabilidade | issue #278; PR #279 |
+
+## Evidências do RB-INC-121
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-121-deterministic-itinerary-mutations.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-121-deterministic-itinerary-mutations.md` |
+| origem | Engineering Validation `31517303193` |
+| defeito | movimentação concluiu o POST, mas a URL anterior ainda foi observada; passou no retry |
+| correção | mensagem de sucesso renderizada precede a assertion da URL |
+| rastreabilidade | issue #280; PR pendente |

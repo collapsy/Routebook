@@ -14,6 +14,7 @@ async function submitAndExpectActionRedirect(
   page: Page,
   submit: () => Promise<void>,
   expectedUrl: RegExp,
+  expectedStatus: string,
 ) {
   const actionPathname = new URL(page.url()).pathname;
   const actionResponse = page.waitForResponse((response) => {
@@ -22,6 +23,7 @@ async function submitAndExpectActionRedirect(
   });
 
   await Promise.all([actionResponse, submit()]);
+  await expect(page.getByRole("status")).toContainText(expectedStatus);
   await expect(page).toHaveURL(expectedUrl);
 }
 
@@ -109,6 +111,7 @@ test("edita uma atividade preservando sua identidade no roteiro", async ({ page 
     page,
     () => editForm.getByRole("button", { name: "Salvar alterações" }).click(),
     /atividadeEditada=1$/,
+    "Atividade atualizada",
   );
 
   await expect(page.getByRole("status")).toContainText("Atividade atualizada");
@@ -151,6 +154,7 @@ test("reordena atividades dentro do mesmo período e preserva a sequência", asy
     page,
     () => page.getByRole("button", { name: `Subir ${secondTitle} no roteiro` }).click(),
     /atividadeReordenada=1$/,
+    "Ordem das atividades atualizada",
   );
   await expect(page.getByRole("status")).toContainText("Ordem das atividades atualizada");
   await expect(activityTitles).toHaveText([secondTitle, firstTitle]);
@@ -182,6 +186,7 @@ test("move uma atividade para outro dia e preserva seus dados", async ({ page },
     page,
     () => composer.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
     /atividadeCriada=1$/,
+    "Atividade adicionada",
   );
 
   const dayCards = page.locator(".itinerary-day-card");
@@ -197,6 +202,7 @@ test("move uma atividade para outro dia e preserva seus dados", async ({ page },
     page,
     () => moveForm.getByRole("button", { name: "Mover atividade" }).click(),
     /atividadeMovida=1$/,
+    "Atividade movida para outro dia",
   );
 
   await expect(page).toHaveURL(/atividadeMovida=1$/);
@@ -241,6 +247,7 @@ test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ 
     page,
     () => page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
     /adicionadoAoRoteiro=1$/,
+    "continua salvo",
   );
 
   await expect(page.getByRole("status")).toContainText("continua salvo");

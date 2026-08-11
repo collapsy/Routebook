@@ -42,7 +42,7 @@ Issue: #274.
 
 Branch: `codex/rb-inc-118-deterministic-server-action-e2e`.
 
-PR: a criar.
+PR: #275.
 
 ## 2. Problema e evidência
 

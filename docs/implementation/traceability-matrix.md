@@ -457,3 +457,13 @@ Ao concluir um incremento:
 | implementação | `scripts/operational-smoke.mjs` |
 | testes determinísticos | `scripts/operational-smoke.test.mjs` |
 | validação local | 5 testes do smoke, 268 documentos, lint, typecheck e build aprovados; suíte web com 173 aprovações e 2 testes PostgreSQL sem serviço local |
+
+## Evidências do RB-INC-115
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-115-approve-adr-017.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-115-approve-adr-017.md` |
+| decisão | RB-ADR-017 versão 0.2.0, estado interno `Approved` |
+| governança | RB-GOV-001, RB-GOV-002 e aprovação humana explícita |
+| rastreabilidade | issue #268 e PR #269 |

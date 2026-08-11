@@ -548,6 +548,7 @@ Ao concluir um incremento:
 | definição do incremento | `docs/implementation/increments/rb-inc-122-rsc-response-completion.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-122-rsc-response-completion.md` |
 | origem | Engineering Validation `31518438255`, attempt 2 |
-| defeito | headers do POST precederam o corpo RSC; 2 cenários passaram somente no retry |
-| correção | `Response.finished()` precede as assertions de UI e URL |
+| defeito | headers do POST precederam a navegação suave; 2 cenários passaram somente no retry |
+| experimento | `Response.finished()` manteve stream RSC aberto no run cancelado `31519586612` |
+| correção | header `x-action-redirect` é validado e seu destino carregado explicitamente |
 | rastreabilidade | issue #282; PR #283 |

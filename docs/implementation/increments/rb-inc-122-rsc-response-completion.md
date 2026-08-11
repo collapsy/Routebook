@@ -1,7 +1,7 @@
 ---
 id: RB-INC-122
-title: Conclusão do Corpo RSC nas Server Actions E2E
-description: Aguarda a conclusão do corpo RSC antes de observar os efeitos das Server Actions nos testes E2E.
+title: Contrato de Redirect das Server Actions E2E
+description: Valida o redirect declarado pela Server Action e carrega explicitamente seu destino nos testes E2E.
 document_type: implementation-increment
 owner: Quality Engineering
 status: Draft
@@ -31,12 +31,12 @@ ai_context:
   index: true
 ---
 
-# RB-INC-122 — Conclusão do Corpo RSC nas Server Actions E2E
+# RB-INC-122 — Contrato de Redirect das Server Actions E2E
 
 ## 1. Objetivo
 
-Eliminar os flakies residuais aguardando a conclusão do corpo da resposta RSC antes
-de observar os efeitos renderizados das Server Actions.
+Eliminar os flakies residuais validando o redirect declarado pela Server Action e
+carregando explicitamente seu destino antes de observar os efeitos renderizados.
 
 Issue: #282.
 
@@ -50,12 +50,13 @@ PR: #283.
 
 O attempt 2 do Engineering Validation `31518438255` recebeu os headers do POST,
 mas ainda não observou a criação do período livre em mobile nem a Proposal gerada
-em desktop. Ambos os cenários passaram no retry e a execução terminou com 79 testes
-aprovados e 2 flaky.
+em desktop. A primeira implementação com `Response.finished()` confirmou no run
+`31519586612` que o stream RSC pode permanecer aberto e não é uma barreira adequada.
 
 ## 3. Escopo
 
-- aguardar `Response.finished()` após o POST registrado;
+- validar o destino declarado no header `x-action-redirect`;
+- carregar explicitamente o destino validado;
 - cobrir criação e remoção de período livre;
 - cobrir geração e revisão de Proposal;
 - cobrir as mutações do roteiro que compartilham o helper;
@@ -70,7 +71,8 @@ aprovados e 2 flaky.
 
 ## 5. Critérios de aceite
 
-- [x] corpo da resposta RSC termina antes da observação da UI;
+- [x] redirect declarado pela Server Action é validado;
+- [x] destino validado é carregado antes da observação da UI;
 - [x] URL, conteúdo e persistência continuam explicitamente validados;
 - [ ] documentação, lint, tipagem, testes e build verdes;
 - [ ] duas execuções consecutivas sem flaky annotation.

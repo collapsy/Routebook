@@ -1,7 +1,7 @@
 ---
 id: RB-CTX-122
-title: Context Pack do RB-INC-122 — Conclusão do Corpo RSC nas Server Actions E2E
-description: Delimita a sincronização dos testes com a conclusão do corpo RSC.
+title: Context Pack do RB-INC-122 — Contrato de Redirect das Server Actions E2E
+description: Delimita a validação do redirect e o carregamento explícito de seu destino.
 document_type: implementation-context-pack
 owner: Quality Engineering
 status: Draft
@@ -29,19 +29,21 @@ ai_context:
   index: true
 ---
 
-# RB-CTX-122 — Conclusão do Corpo RSC nas Server Actions E2E
+# RB-CTX-122 — Contrato de Redirect das Server Actions E2E
 
 ## Missão
 
-Aguardar a resposta RSC completa antes de observar o resultado renderizado, sem
-alterar comportamento do produto ou tolerâncias do Playwright.
+Validar o redirect declarado pela Server Action e carregar seu destino antes de
+observar o resultado renderizado, sem alterar o comportamento do produto.
 
 ## Evidência
 
 - issue: #282;
 - run: `31518438255`, attempt 2;
 - cenários: criação de período livre mobile e Proposal sem Recommendation desktop;
-- resultado: headers do POST recebidos, corpo ainda em trânsito e aprovação no retry.
+- resultado: headers do POST recebidos, navegação suave ainda não aplicada e retry.
+- experimento descartado: `Response.finished()` manteve o stream RSC aberto no run
+  `31519586612` e não foi usado como barreira final.
 
 ## Leitura obrigatória
 

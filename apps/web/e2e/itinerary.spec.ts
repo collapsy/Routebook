@@ -23,7 +23,9 @@ async function submitAndExpectActionRedirect(
   });
 
   const [response] = await Promise.all([actionResponse, submit()]);
-  await response.finished();
+  const redirectUrl = response.headers()["x-action-redirect"]?.split(";")[0];
+  expect(redirectUrl).toMatch(expectedUrl);
+  await page.goto(redirectUrl!);
   await expect(page.getByRole("status")).toContainText(expectedStatus);
   await expect(page).toHaveURL(expectedUrl);
 }

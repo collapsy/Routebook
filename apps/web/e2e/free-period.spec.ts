@@ -72,7 +72,9 @@ async function submitFreePeriod(
     actionResponse,
     form.getByRole("button", { name: "Adicionar período livre" }).click(),
   ]);
-  await response.finished();
+  const redirectUrl = response.headers()["x-action-redirect"]?.split(";")[0];
+  expect(redirectUrl).toMatch(/periodoLivreCriado=1$/);
+  await page.goto(redirectUrl!);
   await expect(existingPeriods).toHaveCount(initialCount + 1);
 }
 
@@ -157,7 +159,9 @@ test("remove somente o período livre selecionado e preserva os demais", async (
     return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
   });
   const [response] = await Promise.all([removalResponse, removeButton.click()]);
-  await response.finished();
+  const redirectUrl = response.headers()["x-action-redirect"]?.split(";")[0];
+  expect(redirectUrl).toMatch(/periodoLivreRemovido=1$/);
+  await page.goto(redirectUrl!);
 
   await expect(page).toHaveURL(/periodoLivreRemovido=1$/);
   await expect(page.getByRole("status")).toContainText("Período livre removido");

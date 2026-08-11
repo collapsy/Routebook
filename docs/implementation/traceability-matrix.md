@@ -593,3 +593,15 @@ Ao concluir um incremento:
 | correção | criação e remoção sincronizadas pelo helper de redirect já consolidado |
 | validação | pendente |
 | rastreabilidade | issue #289; PR pendente |
+
+## Evidências do RB-INC-126
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-126-deterministic-conflict-navigation.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-126-deterministic-conflict-navigation.md` |
+| origem | Engineering Validation `31532256527`, attempt 1; retry flaky em desktop Chromium |
+| defeito | espera por navegação interna com fragmento não oferecia barreira determinística |
+| correção | `href` validado e destino carregado explicitamente antes das assertions |
+| validação | pendente |
+| rastreabilidade | issue #291; PR pendente |

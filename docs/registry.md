@@ -306,6 +306,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-124 | Context Pack do RB-INC-124 — Bootstrap Isolado de Production | Implementation Context | Draft | 0.1.0 | [rb-inc-124-production-bootstrap.md](./implementation/context-packs/rb-inc-124-production-bootstrap.md) |
 | RB-INC-125 | Remoção Mobile Determinística no E2E | Implementation | Draft | 0.1.0 | [rb-inc-125-deterministic-mobile-removal.md](./implementation/increments/rb-inc-125-deterministic-mobile-removal.md) |
 | RB-CTX-125 | Context Pack do RB-INC-125 — Remoção Mobile Determinística no E2E | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-125-deterministic-mobile-removal.md](./implementation/context-packs/rb-inc-125-deterministic-mobile-removal.md) |
+| RB-INC-126 | Navegação Determinística do Conflito para o Roteiro | Implementation | Draft | 0.1.0 | [rb-inc-126-deterministic-conflict-navigation.md](./implementation/increments/rb-inc-126-deterministic-conflict-navigation.md) |
+| RB-CTX-126 | Context Pack do RB-INC-126 — Navegação Determinística do Conflito | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-126-deterministic-conflict-navigation.md](./implementation/context-packs/rb-inc-126-deterministic-conflict-navigation.md) |
 
 ## Status possíveis
 

@@ -300,6 +300,10 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-121 | Context Pack do RB-INC-121 — Mutações do Roteiro E2E Sincronizadas | Implementation Context | Draft | 0.1.0 | [rb-inc-121-deterministic-itinerary-mutations.md](./implementation/context-packs/rb-inc-121-deterministic-itinerary-mutations.md) |
 | RB-INC-122 | Contrato de Redirect das Server Actions E2E | Implementation | Draft | 0.1.0 | [rb-inc-122-rsc-response-completion.md](./implementation/increments/rb-inc-122-rsc-response-completion.md) |
 | RB-CTX-122 | Context Pack do RB-INC-122 — Contrato de Redirect das Server Actions E2E | Implementation Context | Draft | 0.1.0 | [rb-inc-122-rsc-response-completion.md](./implementation/context-packs/rb-inc-122-rsc-response-completion.md) |
+| RB-INC-123 | Preview Automático pela Integração Git Vercel | Implementation | Draft | 0.1.0 | [rb-inc-123-git-preview-deployment.md](./implementation/increments/rb-inc-123-git-preview-deployment.md) |
+| RB-CTX-123 | Context Pack do RB-INC-123 — Preview Automático pela Integração Git Vercel | Implementation Context | Draft | 0.1.0 | [rb-inc-123-git-preview-deployment.md](./implementation/context-packs/rb-inc-123-git-preview-deployment.md) |
+| RB-INC-124 | Bootstrap Isolado de Production | Implementation | Draft | 0.1.0 | [rb-inc-124-production-bootstrap.md](./implementation/increments/rb-inc-124-production-bootstrap.md) |
+| RB-CTX-124 | Context Pack do RB-INC-124 — Bootstrap Isolado de Production | Implementation Context | Draft | 0.1.0 | [rb-inc-124-production-bootstrap.md](./implementation/context-packs/rb-inc-124-production-bootstrap.md) |
 
 ## Status possíveis
 

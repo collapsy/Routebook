@@ -553,3 +553,30 @@ Ao concluir um incremento:
 | correção | header `x-action-redirect` é validado e seu destino carregado explicitamente |
 | validação final | run `31520574275`, attempts 1 e 2: 81 aprovados, sem flaky annotation |
 | rastreabilidade | issue #282; PR #283 |
+
+## Evidências do RB-INC-123
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-123-git-preview-deployment.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-123-git-preview-deployment.md` |
+| vínculo Git | projeto `routebook` conectado a `collapsy/Routebook`; produção declarada em `main` |
+| isolamento | `DATABASE_URL` e `BETTER_AUTH_SECRET` sensíveis somente em Preview |
+| Preview automático | `dpl_64cSW7kr8TDPZWAbSNkNUW8DYsye`, branch e PR #285 reconhecidas pela Vercel |
+| health | liveness e readiness HTTP 200; database `available`; respostas `no-store` |
+| runtime | nenhum log de erro encontrado após o smoke autenticado |
+| CI | Engineering Validation `31527703958`: 81 aprovados, sem flaky annotation |
+| rastreabilidade | issue #284; PR #285 |
+
+## Evidências do RB-INC-124
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-124-production-bootstrap.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-124-production-bootstrap.md` |
+| autorização | provisionamento e integração de Production aprovados pelo responsável em 2026-08-11 |
+| isolamento | Neon `routebook-production` / `bitter-queen-90455085`, distinto de Preview; dois secrets sensíveis exclusivos do target Production |
+| schema | branch `main` / `br-rough-dew-axo9u82j`; 25 migrations, 21 tabelas públicas, histórico Drizzle e 0 viagens |
+| deployment | Production automático da `main`; evidência pendente de integração |
+| validação | health, logs e CI pendentes |
+| rastreabilidade | issue #286; PR pendente |

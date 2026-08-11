@@ -198,11 +198,7 @@ async function submitAndWaitForActionNavigation(
   await page.goto(redirectUrl!);
 }
 
-async function followValidatedLink(
-  page: Page,
-  link: Locator,
-  expectedUrl: RegExp,
-): Promise<void> {
+async function followValidatedLink(page: Page, link: Locator, expectedUrl: RegExp): Promise<void> {
   await expect(link).toHaveAttribute("href", expectedUrl);
   const href = await link.getAttribute("href");
   expect(href).not.toBeNull();

@@ -400,3 +400,18 @@ Ao concluir um incremento:
 | testes focados | 10 testes aprovados em `itinerary-proposal-partial-acceptance.test.ts` |
 | SHA técnico corrigido | `1b79e54b04cbe59c9b78f24d2e3291ea906c5a0a` |
 | Engineering Validation técnico | run `31493467942`, job `93785295900`, success integral; 77 testes Playwright aprovados, com duas anotações flaky preexistentes na edição de Proposed Activity |
+
+## Evidências do RB-INC-111
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-111-partial-itinerary-proposal-acceptance-experience.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-111-partial-itinerary-proposal-acceptance-experience.md` |
+| requisitos e interação | RB-PRD-006, RB-UX-005, RB-INT-066–067 e RB-INC-110 |
+| rastreabilidade | issue #253 e PR #254 |
+| experiência | `apps/web/components/itinerary-proposal-decision-actions.tsx` |
+| integração da revisão | `apps/web/components/itinerary-proposal-review.tsx` |
+| feedback no Roteiro | `apps/web/app/viagens/[tripId]/roteiro/page.tsx` |
+| testes focados | 19 testes aprovados |
+| SHA técnico | `55e45ac30f2674e21903e884e17ce893324a9fb3` |
+| Engineering Validation técnico | run `31494965592`, job `93790262730`, success integral; 79 testes Playwright sem retry flaky |

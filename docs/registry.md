@@ -276,6 +276,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-109 | Context Pack do RB-INC-109 | Implementation Context | Draft | 0.1.0 | [rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md](./implementation/context-packs/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md) |
 | RB-INC-110 | Server Action Autorizada para Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-110-authorized-partial-itinerary-proposal-action.md](./implementation/increments/rb-inc-110-authorized-partial-itinerary-proposal-action.md) |
 | RB-CTX-110 | Context Pack do RB-INC-110 | Implementation Context | Draft | 0.1.0 | [rb-inc-110-authorized-partial-itinerary-proposal-action.md](./implementation/context-packs/rb-inc-110-authorized-partial-itinerary-proposal-action.md) |
+| RB-INC-111 | Experiência de Seleção e Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-111-partial-itinerary-proposal-acceptance-experience.md](./implementation/increments/rb-inc-111-partial-itinerary-proposal-acceptance-experience.md) |
+| RB-CTX-111 | Context Pack do RB-INC-111 | Implementation Context | Draft | 0.1.0 | [rb-inc-111-partial-itinerary-proposal-acceptance-experience.md](./implementation/context-packs/rb-inc-111-partial-itinerary-proposal-acceptance-experience.md) |
 
 ## Status possíveis
 

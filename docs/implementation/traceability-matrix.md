@@ -682,4 +682,9 @@ Ao concluir um incremento:
 | Context Pack | `docs/implementation/context-packs/rb-inc-132-place-discovery-filters.md` |
 | origem | conclusão condicionada do RB-INC-129 e requisito obrigatório de descoberta do RB-PRD-002 |
 | lacuna | pesquisa textual, distância, Price Range, filtros ativos e mapa filtrado ausentes em Explorar |
-| rastreabilidade | issue #304; relacionado a #298 |
+| implementação | PR #307; merge `10943fca`; CI completo e E2E responsivo verdes |
+| banco | migration Neon `311f2142-6e6b-43d0-8a59-d7b1a6602cf6` validada em branch temporária e promovida com aprovação explícita |
+| Production | deployment `dpl_73NWcYLAD2SY9zKY2DYh8XNCjgP9` READY; busca e filtros combinados preservaram o mesmo Place na lista e no mapa |
+| responsividade | viewport 390 × 844 sem overflow; controles de busca, categoria, distância, preço e aplicação visíveis |
+| operação | live e ready em 200; banco disponível; nenhum erro de runtime após a migration; follow-up #308 aberto |
+| rastreabilidade | issue #304 encerrada pela PR #307; relacionado a #298 e #308 |

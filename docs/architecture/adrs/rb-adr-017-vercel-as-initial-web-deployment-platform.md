@@ -9,10 +9,10 @@ document_type: architecture_decision_record
 owner: Architecture
 
 status: Published
-version: "0.1.0"
+version: "0.2.0"
 
 created: "2026-07-24"
-last_updated: null
+last_updated: "2026-08-11"
 
 authors:
 
@@ -130,11 +130,11 @@ index: true
 
 ## 1. Status da decisão
 
-**Proposed**
+**Approved**
 
-Este ADR permanece em estado `Proposed` até receber aprovação formal conforme o processo definido no `RB-GOV-002`.
+Este ADR foi aprovado explicitamente pelo responsável humano e owner do projeto em `2026-08-11`, conforme o processo definido no `RB-GOV-002`.
 
-Após sua aprovação:
+A aprovação autoriza a implementação incremental da decisão, preservando os seguintes limites:
 
 * Vercel será a plataforma inicial de build, hosting e execução da aplicação web;
 * a aplicação Next.js será implantada como um único projeto Vercel no estágio inicial;
@@ -2197,3 +2197,14 @@ A região das Functions será escolhida prioritariamente pela proximidade com o 
 O RouteBook evitará dependências proprietárias nas camadas de domínio e aplicação.
 
 Essa separação permitirá utilizar a experiência operacional da Vercel durante o estágio inicial sem impedir uma futura migração para Cloudflare Workers, containers ou outra plataforma compatível com Next.js.
+
+---
+
+## 93. Registro de aprovação
+
+- decisão: **Approved — Vercel como plataforma inicial de deployment web**;
+- reviewer: Ronaldo Gentil (`collapsy`), responsável humano e owner do projeto;
+- approver: Ronaldo Gentil (`collapsy`), responsável humano e owner do projeto;
+- approvedAt: `2026-08-11`;
+- condições: implementação incremental, separação de secrets por ambiente, Preview sem dados ou secrets de produção, migrations fora do startup e preservação da portabilidade;
+- evidência: aprovação humana explícita registrada na issue [#268](https://github.com/collapsy/Routebook/issues/268), antes da implementação da plataforma.

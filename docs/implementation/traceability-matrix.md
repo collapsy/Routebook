@@ -386,3 +386,17 @@ Ao concluir um incremento:
 | testes | composição unitária, PostgreSQL, replay e rollback integral |
 | SHA técnico validado | `b17f57f24a93c4cb9eac930abdae1eb83dedf6cc` |
 | Engineering Validation técnico | #1354, run `31331066567`, attempt 2, job `93289823239`, success integral incluindo Playwright responsivo |
+
+## Evidências do RB-INC-110
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-110-authorized-partial-itinerary-proposal-action.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-110-authorized-partial-itinerary-proposal-action.md` |
+| requisitos e regras | RB-PRD-006, RB-UX-005, RB-INC-108 e RB-INC-109 |
+| rastreabilidade | issue #250 e PR #251 |
+| application service | `apps/web/lib/itinerary-proposal-partial-acceptance.ts` |
+| Server Action | `apps/web/app/viagens/[tripId]/roteiro/proposta/partial-accept-action.ts` |
+| testes focados | 10 testes aprovados em `itinerary-proposal-partial-acceptance.test.ts` |
+| SHA técnico corrigido | `1b79e54b04cbe59c9b78f24d2e3291ea906c5a0a` |
+| Engineering Validation técnico | run `31493467942`, job `93785295900`, success integral; 77 testes Playwright aprovados, com duas anotações flaky preexistentes na edição de Proposed Activity |

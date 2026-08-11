@@ -181,21 +181,25 @@ async function openPartialAcceptance(page: Page, fixture: ProposalFixture): Prom
   await page.getByRole("checkbox", { name: new RegExp(proposedActivity, "i") }).check();
 }
 
-async function submitPartialAcceptance(page: Page, expectedUrl: RegExp): Promise<void> {
+async function submitPartialAcceptance(
+  page: Page,
+  submit: () => Promise<void>,
+  expectedUrl: RegExp,
+): Promise<void> {
+  const actionPathname = new URL(page.url()).pathname;
+  const actionResponse = page.waitForResponse((response) => {
+    const request = response.request();
+    return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
+  });
   const decisionAlert = page
     .locator('section[aria-labelledby="proposal-decision-title"]')
     .getByRole("alert");
-  const outcome = await Promise.race([
-    page.waitForURL(expectedUrl, { timeout: 20_000 }).then(() => ({ kind: "navigated" as const })),
-    decisionAlert.waitFor({ timeout: 20_000 }).then(async () => ({
-      kind: "error" as const,
-      message: await decisionAlert.textContent(),
-    })),
-  ]);
 
-  expect(outcome, `Aceite parcial não navegou: ${JSON.stringify(outcome)}`).toEqual({
-    kind: "navigated",
-  });
+  await Promise.all([actionResponse, submit()]);
+  if (await decisionAlert.isVisible()) {
+    throw new Error(`Aceite parcial falhou: ${await decisionAlert.textContent()}`);
+  }
+  await expect(page).toHaveURL(expectedUrl);
 }
 
 async function proposalApplicationRows(
@@ -306,16 +310,22 @@ test("aceita parcialmente da UI ao PostgreSQL e reproduz sem reaplicar efeitos",
     await openPartialAcceptance(page, fixture);
     await openPartialAcceptance(replayPage, fixture);
 
-    await page.getByRole("button", { name: "Confirmar seleção" }).click();
-    await submitPartialAcceptance(page, /\/roteiro\?propostaAceita=partial-applied$/);
+    await submitPartialAcceptance(
+      page,
+      () => page.getByRole("button", { name: "Confirmar seleção" }).click(),
+      /\/roteiro\?propostaAceita=partial-applied$/,
+    );
     await expect(page.getByRole("status")).toHaveText(
       "Seleção aplicada. O Roteiro foi atualizado somente com as mudanças confirmadas.",
     );
     await expect(page.getByText(proposedActivity, { exact: true })).toBeVisible();
     await expect(page.getByText(remainingProposedActivity, { exact: true })).toHaveCount(0);
 
-    await replayPage.getByRole("button", { name: "Confirmar seleção" }).click();
-    await submitPartialAcceptance(replayPage, /\/roteiro\?propostaAceita=partial-replay$/);
+    await submitPartialAcceptance(
+      replayPage,
+      () => replayPage.getByRole("button", { name: "Confirmar seleção" }).click(),
+      /\/roteiro\?propostaAceita=partial-replay$/,
+    );
     await expect(replayPage.getByRole("status")).toHaveText(
       "Esta seleção já havia sido aplicada. O Roteiro atualizado foi carregado.",
     );

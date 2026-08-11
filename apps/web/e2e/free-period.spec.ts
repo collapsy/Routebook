@@ -142,7 +142,12 @@ test("remove somente o período livre selecionado e preserva os demais", async (
     name: "Remover Período livre flexível às 13:00 do roteiro",
   });
   await expect(removeButton).toBeEnabled();
-  await removeButton.click();
+  const actionPathname = new URL(page.url()).pathname;
+  const removalResponse = page.waitForResponse((response) => {
+    const request = response.request();
+    return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
+  });
+  await Promise.all([removalResponse, removeButton.click()]);
 
   await expect(page).toHaveURL(/periodoLivreRemovido=1$/);
   await expect(page.getByRole("status")).toContainText("Período livre removido");

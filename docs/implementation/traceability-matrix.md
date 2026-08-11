@@ -494,3 +494,13 @@ Ao concluir um incremento:
 | health | liveness `ok`; readiness `ready`; database `available` |
 | runtime | nenhum erro encontrado na janela de uma hora após o smoke |
 | CI | run `31512711349` aprovado integralmente |
+
+## Evidências do RB-INC-118
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-118-deterministic-server-action-e2e.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-118-deterministic-server-action-e2e.md` |
+| origem | Engineering Validation `31513286871` |
+| defeito | 2 cenários flaky aprovados somente após retry |
+| rastreabilidade | issue #274; PR a criar |

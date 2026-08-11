@@ -304,6 +304,14 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-123 | Context Pack do RB-INC-123 — Preview Automático pela Integração Git Vercel | Implementation Context | Draft | 0.1.0 | [rb-inc-123-git-preview-deployment.md](./implementation/context-packs/rb-inc-123-git-preview-deployment.md) |
 | RB-INC-124 | Bootstrap Isolado de Production | Implementation | Draft | 0.1.0 | [rb-inc-124-production-bootstrap.md](./implementation/increments/rb-inc-124-production-bootstrap.md) |
 | RB-CTX-124 | Context Pack do RB-INC-124 — Bootstrap Isolado de Production | Implementation Context | Draft | 0.1.0 | [rb-inc-124-production-bootstrap.md](./implementation/context-packs/rb-inc-124-production-bootstrap.md) |
+| RB-INC-125 | Remoção Mobile Determinística no E2E | Implementation | Draft | 0.1.0 | [rb-inc-125-deterministic-mobile-removal.md](./implementation/increments/rb-inc-125-deterministic-mobile-removal.md) |
+| RB-CTX-125 | Context Pack do RB-INC-125 — Remoção Mobile Determinística no E2E | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-125-deterministic-mobile-removal.md](./implementation/context-packs/rb-inc-125-deterministic-mobile-removal.md) |
+| RB-INC-126 | Navegação Determinística do Conflito para o Roteiro | Implementation | Draft | 0.1.0 | [rb-inc-126-deterministic-conflict-navigation.md](./implementation/increments/rb-inc-126-deterministic-conflict-navigation.md) |
+| RB-CTX-126 | Context Pack do RB-INC-126 — Navegação Determinística do Conflito | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-126-deterministic-conflict-navigation.md](./implementation/context-packs/rb-inc-126-deterministic-conflict-navigation.md) |
+| RB-INC-127 | Retorno Determinístico da Revisão de Proposal | Implementation | Draft | 0.1.0 | [rb-inc-127-deterministic-proposal-return.md](./implementation/increments/rb-inc-127-deterministic-proposal-return.md) |
+| RB-CTX-127 | Context Pack do RB-INC-127 — Retorno Determinístico da Revisão de Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-127-deterministic-proposal-return.md](./implementation/context-packs/rb-inc-127-deterministic-proposal-return.md) |
+| RB-INC-128 | Contratos Residuais de Navegação na Revisão de Proposal | Implementation | Draft | 0.1.0 | [rb-inc-128-proposal-navigation-contracts.md](./implementation/increments/rb-inc-128-proposal-navigation-contracts.md) |
+| RB-CTX-128 | Context Pack do RB-INC-128 — Contratos de Navegação de Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-128-proposal-navigation-contracts.md](./implementation/context-packs/rb-inc-128-proposal-navigation-contracts.md) |
 
 ## Status possíveis
 

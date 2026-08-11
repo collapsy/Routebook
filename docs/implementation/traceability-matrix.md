@@ -581,3 +581,50 @@ Ao concluir um incremento:
 | validação | liveness `ok`; readiness `ready` com database `available`; nenhum log de erro após smoke |
 | CI | Documentation Validation `31530544311` verde; Engineering Validation `31530544328` verde, com 80 passagens diretas e 1 retry flaky |
 | rastreabilidade | issue #286; PRs #287, #285 e #288 |
+
+## Evidências do RB-INC-125
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-125-deterministic-mobile-removal.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-125-deterministic-mobile-removal.md` |
+| origem | Engineering Validation `31530544328`; 1 retry flaky em mobile Chromium |
+| defeito | criação da Activity era observada sem validar e carregar o redirect da Server Action |
+| correção | criação e remoção sincronizadas pelo helper de redirect já consolidado |
+| validação | pendente |
+| rastreabilidade | issue #289; PR pendente |
+
+## Evidências do RB-INC-126
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-126-deterministic-conflict-navigation.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-126-deterministic-conflict-navigation.md` |
+| origem | Engineering Validation `31532256527`, attempt 1; retry flaky em desktop Chromium |
+| defeito | espera por navegação interna com fragmento não oferecia barreira determinística |
+| correção | `href` validado e destino carregado explicitamente antes das assertions |
+| validação | pendente |
+| rastreabilidade | issue #291; PR pendente |
+
+## Evidências do RB-INC-127
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-127-deterministic-proposal-return.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-127-deterministic-proposal-return.md` |
+| origem | Engineering Validation `31532256527`, attempt 2; retry flaky em desktop Chromium |
+| defeito | retorno por link aguardava evento de navegação não determinístico |
+| correção | `href` validado e destino carregado explicitamente |
+| validação | pendente |
+| rastreabilidade | issue #293; PR pendente |
+
+## Evidências do RB-INC-128
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-128-proposal-navigation-contracts.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-128-proposal-navigation-contracts.md` |
+| origem | runs `31532256527` e `31532897047`, ambos com retry flaky em revisão de Proposal |
+| correção | Server Actions usam redirect declarado; links usam `href` validado |
+| validação | pendente |
+| rastreabilidade | issue #295; PR pendente |

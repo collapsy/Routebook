@@ -643,3 +643,15 @@ Ao concluir um incremento:
 | bloqueio | primeira Itinerary Proposal não é alcançável pela UI quando nenhuma Proposal existe; issue #299, severidade Major |
 | operação | deployment READY; nenhum erro de runtime agregado em 24 h; acesso interno dependeu de URL temporária da Vercel |
 | rastreabilidade | issue #298; defeito #299 |
+
+## Evidências do RB-INC-130
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-130-proposal-entrypoint.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-130-proposal-entrypoint.md` |
+| origem | validação RB-INC-129 em Production, deployment `dpl_2KVxVFJCtpwxBnykRfidwDzkT2Mi` |
+| defeito | estado vazio de Proposal existia, mas não havia entrada visível a partir do Roteiro |
+| correção | Roteiro sempre aponta para revisão; rótulo distingue gerar, revisar e consultar expirada |
+| validação local | Prettier, lint, typecheck e build verdes; 23 E2E listados; 163 unitários verdes e 5 suítes dependentes de banco reservadas ao CI |
+| rastreabilidade | issue #299 |

@@ -242,14 +242,13 @@ export default async function ItineraryPage({
           <p className="product-eyebrow">Roteiro manual</p>
           <h1>{trip.name}</h1>
           <div className="itinerary-hero-actions">
-            {proposalReviewStatus ? (
-              <Link
-                className="product-secondary-action"
-                href={`/viagens/${tripId}/roteiro/proposta`}
-              >
-                {proposalReviewStatus === "expired" ? "Ver proposta expirada" : "Ver proposta"}
-              </Link>
-            ) : null}
+            <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro/proposta`}>
+              {proposalReviewStatus === "expired"
+                ? "Ver proposta expirada"
+                : proposalReviewStatus
+                  ? "Ver proposta"
+                  : "Gerar proposta"}
+            </Link>
             <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro/revisao`}>
               Revisar conflitos
             </Link>

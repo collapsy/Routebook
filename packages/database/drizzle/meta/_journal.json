@@ -176,6 +176,13 @@
       "when": 1786301600000,
       "tag": "0024_persist_partially_accepted_itinerary_proposals",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1786482000000,
+      "tag": "0025_add_place_price_range",
+      "breakpoints": true
     }
   ]
 }

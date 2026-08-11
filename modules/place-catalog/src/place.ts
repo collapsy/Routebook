@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 
 export const PLACE_CATEGORIES = ["beach", "gastronomy", "nature", "nightlife"] as const;
 export type PlaceCategory = (typeof PLACE_CATEGORIES)[number];
+export const PLACE_PRICE_RANGES = ["free", "budget", "moderate", "premium"] as const;
+export type PlacePriceRange = (typeof PLACE_PRICE_RANGES)[number];
 export type PlacePublicationStatus = "draft" | "published" | "archived";
 
 export type Place = {
@@ -14,6 +16,7 @@ export type Place = {
   latitude: number;
   longitude: number;
   addressLabel?: string;
+  priceRange?: PlacePriceRange;
   publicationStatus: PlacePublicationStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -28,6 +31,7 @@ export type CreatePlaceInput = {
   latitude: number;
   longitude: number;
   addressLabel?: string;
+  priceRange?: PlacePriceRange;
   publicationStatus?: PlacePublicationStatus;
 };
 
@@ -54,6 +58,9 @@ export function createPlace(input: CreatePlaceInput, now = new Date()): Place {
   if (!PLACE_CATEGORIES.includes(input.category)) {
     throw new PlaceValidationError("A categoria do lugar é inválida.");
   }
+  if (input.priceRange !== undefined && !PLACE_PRICE_RANGES.includes(input.priceRange)) {
+    throw new PlaceValidationError("A faixa de preço do lugar é inválida.");
+  }
   if (input.latitude < -90 || input.latitude > 90) {
     throw new PlaceValidationError("A latitude do lugar é inválida.");
   }
@@ -71,6 +78,7 @@ export function createPlace(input: CreatePlaceInput, now = new Date()): Place {
     latitude: input.latitude,
     longitude: input.longitude,
     ...(addressLabel ? { addressLabel } : {}),
+    ...(input.priceRange ? { priceRange: input.priceRange } : {}),
     publicationStatus: input.publicationStatus ?? "draft",
     createdAt: now,
     updatedAt: now,

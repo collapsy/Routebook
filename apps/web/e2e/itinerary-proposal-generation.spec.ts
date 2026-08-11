@@ -96,7 +96,11 @@ async function generateProposalFromEmptyState(
   page: Page,
   tripId: string,
 ): Promise<ItineraryProposalId> {
-  await page.goto(`/viagens/${tripId}/roteiro/proposta`);
+  await page.goto(`/viagens/${tripId}/roteiro`);
+  const proposalEntryPoint = page.getByRole("link", { name: "Gerar proposta" });
+  const proposalPath = `/viagens/${tripId}/roteiro/proposta`;
+  await expect(proposalEntryPoint).toHaveAttribute("href", proposalPath);
+  await page.goto(proposalPath);
   await expect(page.getByRole("heading", { name: "Nenhuma proposta disponível" })).toBeVisible();
 
   const generateButton = page.getByRole("button", { name: "Gerar proposta de roteiro" });

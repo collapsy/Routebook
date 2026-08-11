@@ -314,6 +314,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-128 | Context Pack do RB-INC-128 — Contratos de Navegação de Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-128-proposal-navigation-contracts.md](./implementation/context-packs/rb-inc-128-proposal-navigation-contracts.md) |
 | RB-INC-129 | Validação Integrada do MVP em Production | Implementation | Draft | 0.1.0 | [rb-inc-129-mvp-production-validation.md](./implementation/increments/rb-inc-129-mvp-production-validation.md) |
 | RB-CTX-129 | Context Pack do RB-INC-129 — Validação Integrada do MVP | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-129-mvp-production-validation.md](./implementation/context-packs/rb-inc-129-mvp-production-validation.md) |
+| RB-INC-130 | Entrada Visível para a Primeira Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-130-proposal-entrypoint.md](./implementation/increments/rb-inc-130-proposal-entrypoint.md) |
+| RB-CTX-130 | Context Pack do RB-INC-130 — Entrada da Primeira Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-130-proposal-entrypoint.md](./implementation/context-packs/rb-inc-130-proposal-entrypoint.md) |
 
 ## Status possíveis
 

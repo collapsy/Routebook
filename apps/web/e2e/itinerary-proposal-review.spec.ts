@@ -260,7 +260,10 @@ test("aceita uma Proposal ready da UI ao PostgreSQL e preserva o resultado após
     "Proposta aceita. O Roteiro foi atualizado com as mudanças confirmadas.",
   );
   await expect(page.getByText(proposedActivity, { exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Ver proposta" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Gerar proposta" })).toHaveAttribute(
+    "href",
+    `/viagens/${fixture.tripId}/roteiro/proposta`,
+  );
 
   const itinerary = await new DrizzleItineraryRepository().findByTripId(fixture.tripId);
   expect(itinerary).toMatchObject({
@@ -313,7 +316,10 @@ test("aceita uma Proposal ready da UI ao PostgreSQL e preserva o resultado após
 
   await page.reload();
   await expect(page.getByText(proposedActivity, { exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Ver proposta" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Gerar proposta" })).toHaveAttribute(
+    "href",
+    `/viagens/${fixture.tripId}/roteiro/proposta`,
+  );
 });
 
 test("aceita parcialmente da UI ao PostgreSQL e reproduz sem reaplicar efeitos", async ({
@@ -566,7 +572,10 @@ test("descarta uma Proposal ready e preserva integralmente o Roteiro", async ({
   );
   await expect(page.getByText(confirmedActivity, { exact: true })).toBeVisible();
   await expect(page.getByText(proposedActivity, { exact: true })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "Ver proposta" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Gerar proposta" })).toHaveAttribute(
+    "href",
+    `/viagens/${tripId}/roteiro/proposta`,
+  );
 
   const proposals = await new DrizzleItineraryProposalRepository().listByTripId(tripId);
   expect(proposals).toHaveLength(1);
@@ -604,13 +613,18 @@ test("trata uma Proposal atualizada concorrentemente sem falso sucesso", async (
   expect((await repository.listByTripId(tripId))[0]?.rejectedAt).toEqual(rejectedAt);
 });
 
-test("mantém a rota direta recuperável quando não existe Proposal revisável", async ({
+test("alcança o estado vazio de Proposal pelo Roteiro quando não existe Proposal revisável", async ({
   page,
 }, testInfo) => {
   const tripId = await createItineraryWithoutProposal(
     `Sem proposta ${testInfo.project.name} ${Date.now()}`,
   );
-  await page.goto(`/viagens/${tripId}/roteiro/proposta`);
+  await page.goto(`/viagens/${tripId}/roteiro`);
+  await followValidatedLink(
+    page,
+    page.getByRole("link", { name: "Gerar proposta" }),
+    /\/roteiro\/proposta$/,
+  );
 
   await expect(page.getByRole("heading", { name: "Nenhuma proposta disponível" })).toBeVisible();
   await expect(

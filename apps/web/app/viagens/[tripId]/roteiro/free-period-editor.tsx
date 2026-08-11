@@ -1,11 +1,30 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useSyncExternalStore } from "react";
+import { useFormStatus } from "react-dom";
 
 import type { FreePeriodMode } from "@routebook/trip-management";
 
 import { updateItineraryFreePeriodAction } from "./actions";
 import styles from "./free-periods.module.css";
+
+const subscribeToHydration = () => () => undefined;
+
+function SaveButton() {
+  const { pending } = useFormStatus();
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    () => true,
+    () => false,
+  );
+
+  return (
+    <button className="product-button" disabled={!hydrated || pending} type="submit">
+      {pending ? "Salvando período livre…" : "Salvar período livre"}
+    </button>
+  );
+}
 
 export function FreePeriodEditor({
   freePeriodId,
@@ -70,9 +89,7 @@ export function FreePeriodEditor({
           />
         </div>
 
-        <button className="product-button" type="submit">
-          Salvar período livre
-        </button>
+        <SaveButton />
       </form>
     </details>
   );

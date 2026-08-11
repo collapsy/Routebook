@@ -655,3 +655,15 @@ Ao concluir um incremento:
 | correção | Roteiro sempre aponta para revisão; rótulo distingue gerar, revisar e consultar expirada |
 | validação local | Prettier, lint, typecheck e build verdes; 23 E2E listados; 163 unitários verdes e 5 suítes dependentes de banco reservadas ao CI |
 | rastreabilidade | issue #299 |
+
+## Evidências do RB-INC-131
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-131-proposal-place-deduplication.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-131-proposal-place-deduplication.md` |
+| origem | retomada do RB-INC-129 após o deploy produtivo do RB-INC-130 |
+| defeito | Proposal ofereceu novamente três Places já vinculados a Activities do Roteiro |
+| contenção | Proposal descartada explicitamente; Roteiro permaneceu com três Activities |
+| correção | adaptador exclui Recommendations pela identidade persistida de Place antes da geração |
+| rastreabilidade | issue #302; relacionado a #298 |

@@ -8,7 +8,7 @@ import {
   recommendations,
 } from "@routebook/database";
 import type { ItineraryProposalId } from "@routebook/proposal-management";
-import { createItinerary } from "@routebook/trip-management";
+import { addActivity, createItinerary } from "@routebook/trip-management";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
@@ -23,6 +23,7 @@ type GenerationFixture = Readonly<{
 async function createGenerationFixture(
   tripName: string,
   withEligibleRecommendation: boolean,
+  withPlaceAlreadyPlanned = false,
 ): Promise<GenerationFixture> {
   const now = new Date();
   const { trip } = await createAuthenticatedE2ETrip(
@@ -88,6 +89,19 @@ async function createGenerationFixture(
     createdAt: now,
     updatedAt: now,
   });
+
+  if (withPlaceAlreadyPlanned) {
+    const updatedItinerary = addActivity(
+      itinerary,
+      {
+        dayDate: "2026-08-22",
+        title: placeTitle,
+        placeId,
+      },
+      now,
+    );
+    await new DrizzleItineraryRepository().save(updatedItinerary);
+  }
 
   return Object.freeze({ tripId: trip.id, placeId, placeTitle });
 }
@@ -198,5 +212,25 @@ test("gera Proposal ready sem mudanças quando não há Recommendation elegível
 
   await page.reload();
   await expect(page.getByText("Nenhuma mudança adequada foi proposta")).toBeVisible();
+  expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
+});
+
+test("não propõe novamente Place que já está no Roteiro", async ({ page }, testInfo) => {
+  const fixture = await createGenerationFixture(
+    `Geração sem duplicata ${testInfo.project.name} ${Date.now()}`,
+    true,
+    true,
+  );
+  const itineraryRepository = new DrizzleItineraryRepository();
+  const itineraryBefore = await itineraryRepository.findByTripId(fixture.tripId);
+  expect(itineraryBefore).not.toBeNull();
+
+  const proposalId = await generateProposalFromEmptyState(page, fixture.tripId);
+
+  await expect(page.getByText("Nenhuma mudança adequada foi proposta")).toBeVisible();
+  await expect(page.getByRole("heading", { name: fixture.placeTitle! })).toHaveCount(0);
+  expect(
+    await new DrizzleItineraryProposalRepository().findById(fixture.tripId, proposalId),
+  ).toMatchObject({ status: "ready", proposedActivities: [] });
   expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
 });

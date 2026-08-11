@@ -563,4 +563,4 @@ Ao concluir um incremento:
 | vínculo Git | projeto `routebook` conectado a `collapsy/Routebook`; produção declarada em `main` |
 | isolamento | `DATABASE_URL` e `BETTER_AUTH_SECRET` sensíveis somente em Preview |
 | Preview automático | pendente do primeiro push após o vínculo Git |
-| rastreabilidade | issue #284; PR pendente |
+| rastreabilidade | issue #284; PR #285 |

@@ -42,7 +42,7 @@ Issue: #284.
 
 Branch: `codex/rb-inc-123-git-preview-deployment`.
 
-PR: pendente.
+PR: #285.
 
 ## 2. Estado inicial
 

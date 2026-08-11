@@ -73,10 +73,20 @@ test("remove uma atividade do roteiro e preserva a remoção", async ({ page }, 
   await page.getByRole("link", { name: tripName }).click();
   await page.getByRole("link", { name: "Abrir roteiro" }).click();
   await page.getByLabel("Título").fill(activityTitle);
-  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+  await submitAndExpectActionRedirect(
+    page,
+    () => page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
+    /atividadeCriada=1$/,
+    "Atividade adicionada",
+  );
 
   await expect(page.getByText(activityTitle, { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: `Remover ${activityTitle} do roteiro` }).click();
+  await submitAndExpectActionRedirect(
+    page,
+    () => page.getByRole("button", { name: `Remover ${activityTitle} do roteiro` }).click(),
+    /atividadeRemovida=1$/,
+    "Atividade removida",
+  );
 
   await expect(page).toHaveURL(/atividadeRemovida=1$/);
   await expect(page.getByRole("status")).toContainText("Atividade removida");

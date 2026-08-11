@@ -581,3 +581,15 @@ Ao concluir um incremento:
 | validação | liveness `ok`; readiness `ready` com database `available`; nenhum log de erro após smoke |
 | CI | Documentation Validation `31530544311` verde; Engineering Validation `31530544328` verde, com 80 passagens diretas e 1 retry flaky |
 | rastreabilidade | issue #286; PRs #287, #285 e #288 |
+
+## Evidências do RB-INC-125
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-125-deterministic-mobile-removal.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-125-deterministic-mobile-removal.md` |
+| origem | Engineering Validation `31530544328`; 1 retry flaky em mobile Chromium |
+| defeito | criação da Activity era observada sem validar e carregar o redirect da Server Action |
+| correção | criação e remoção sincronizadas pelo helper de redirect já consolidado |
+| validação | pendente |
+| rastreabilidade | issue #289; PR pendente |

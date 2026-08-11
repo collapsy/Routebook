@@ -304,6 +304,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-123 | Context Pack do RB-INC-123 — Preview Automático pela Integração Git Vercel | Implementation Context | Draft | 0.1.0 | [rb-inc-123-git-preview-deployment.md](./implementation/context-packs/rb-inc-123-git-preview-deployment.md) |
 | RB-INC-124 | Bootstrap Isolado de Production | Implementation | Draft | 0.1.0 | [rb-inc-124-production-bootstrap.md](./implementation/increments/rb-inc-124-production-bootstrap.md) |
 | RB-CTX-124 | Context Pack do RB-INC-124 — Bootstrap Isolado de Production | Implementation Context | Draft | 0.1.0 | [rb-inc-124-production-bootstrap.md](./implementation/context-packs/rb-inc-124-production-bootstrap.md) |
+| RB-INC-125 | Remoção Mobile Determinística no E2E | Implementation | Draft | 0.1.0 | [rb-inc-125-deterministic-mobile-removal.md](./implementation/increments/rb-inc-125-deterministic-mobile-removal.md) |
+| RB-CTX-125 | Context Pack do RB-INC-125 — Remoção Mobile Determinística no E2E | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-125-deterministic-mobile-removal.md](./implementation/context-packs/rb-inc-125-deterministic-mobile-removal.md) |
 
 ## Status possíveis
 

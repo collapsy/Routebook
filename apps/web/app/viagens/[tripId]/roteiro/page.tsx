@@ -214,6 +214,13 @@ export default async function ItineraryPage({
             : "Proposta aceita. O Roteiro foi atualizado com as mudanças confirmadas."}
         </p>
       ) : null}
+      {propostaAceita === "partial-applied" || propostaAceita === "partial-replay" ? (
+        <p className="success-banner" role="status">
+          {propostaAceita === "partial-replay"
+            ? "Esta seleção já havia sido aplicada. O Roteiro atualizado foi carregado."
+            : "Seleção aplicada. O Roteiro foi atualizado somente com as mudanças confirmadas."}
+        </p>
+      ) : null}
       {propostaDescartada === "1" ? (
         <p className="success-banner" role="status">
           Proposta descartada. Seu Roteiro atual não foi alterado.

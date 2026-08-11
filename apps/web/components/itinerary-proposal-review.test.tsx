@@ -1,12 +1,13 @@
 import "@testing-library/jest-dom/vitest";
 
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { ItineraryProposalReview as ReviewModel } from "../lib/itinerary-proposal-experience";
 
 const routerMocks = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn() }));
 const acceptanceMocks = vi.hoisted(() => ({ accept: vi.fn() }));
+const partialAcceptanceMocks = vi.hoisted(() => ({ accept: vi.fn() }));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => routerMocks,
@@ -14,6 +15,10 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("../app/viagens/[tripId]/roteiro/proposta/accept-action", () => ({
   acceptItineraryProposalAction: acceptanceMocks.accept,
+}));
+
+vi.mock("../app/viagens/[tripId]/roteiro/proposta/partial-accept-action", () => ({
+  acceptItineraryProposalPartiallyAction: partialAcceptanceMocks.accept,
 }));
 
 vi.mock("./itinerary-proposal-activity-editor", () => ({
@@ -107,6 +112,40 @@ describe("ItineraryProposalReview", () => {
     expect(document.querySelector('input[name="itineraryProposalId"]')).toHaveValue(
       "proposal-ready",
     );
+  });
+
+  it("oferece seleção parcial quando existem ao menos duas Proposed Activities", () => {
+    const firstDay = review.days[0]!;
+    const firstActivity = firstDay.activities[0]!;
+
+    render(
+      <ItineraryProposalReview
+        {...decisionProps}
+        review={{
+          ...review,
+          proposedChangeCount: 2,
+          days: [
+            {
+              ...firstDay,
+              activities: [
+                firstActivity,
+                {
+                  ...firstActivity,
+                  id: "activity-proposed-2",
+                  title: "Praia no início da manhã",
+                },
+              ],
+            },
+          ],
+        }}
+      />,
+    );
+
+    fireEvent.click(screen.getByText("Aceitar parte da proposta"));
+
+    expect(screen.getByRole("checkbox", { name: /Mirante ao pôr do sol/i })).toBeVisible();
+    expect(screen.getByRole("checkbox", { name: /Praia no início da manhã/i })).toBeVisible();
+    expect(screen.getAllByText("Dia 1 · 22 de agosto")).toHaveLength(3);
   });
 
   it("shows stale context and disables editing and acceptance honestly", () => {

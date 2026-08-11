@@ -539,4 +539,4 @@ Ao concluir um incremento:
 | origem | Engineering Validation `31517303193` |
 | defeito | movimentação concluiu o POST, mas a URL anterior ainda foi observada; passou no retry |
 | correção | mensagem de sucesso renderizada precede a assertion da URL |
-| rastreabilidade | issue #280; PR pendente |
+| rastreabilidade | issue #280; PR #281 |

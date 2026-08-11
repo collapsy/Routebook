@@ -42,7 +42,7 @@ Branch: `codex/rb-inc-121-deterministic-itinerary-mutations`.
 
 Base empilhada: `codex/rb-inc-120-deterministic-proposal-generation`.
 
-PR: pendente.
+PR: #281.
 
 ## 2. Evidência
 

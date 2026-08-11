@@ -181,6 +181,23 @@ async function openPartialAcceptance(page: Page, fixture: ProposalFixture): Prom
   await page.getByRole("checkbox", { name: new RegExp(proposedActivity, "i") }).check();
 }
 
+async function submitPartialAcceptance(page: Page, expectedUrl: RegExp): Promise<void> {
+  const outcome = await Promise.race([
+    page.waitForURL(expectedUrl, { timeout: 20_000 }).then(() => ({ kind: "navigated" as const })),
+    page
+      .getByRole("alert")
+      .waitFor({ timeout: 20_000 })
+      .then(async () => ({
+        kind: "error" as const,
+        message: await page.getByRole("alert").textContent(),
+      })),
+  ]);
+
+  expect(outcome, `Aceite parcial não navegou: ${JSON.stringify(outcome)}`).toEqual({
+    kind: "navigated",
+  });
+}
+
 async function proposalApplicationRows(
   fixture: ProposalFixture,
   idempotencyKey = fixture.idempotencyKey,
@@ -289,20 +306,16 @@ test("aceita parcialmente da UI ao PostgreSQL e reproduz sem reaplicar efeitos",
     await openPartialAcceptance(page, fixture);
     await openPartialAcceptance(replayPage, fixture);
 
-    await Promise.all([
-      page.waitForURL(/\/roteiro\?propostaAceita=partial-applied$/),
-      page.getByRole("button", { name: "Confirmar seleção" }).click(),
-    ]);
+    await page.getByRole("button", { name: "Confirmar seleção" }).click();
+    await submitPartialAcceptance(page, /\/roteiro\?propostaAceita=partial-applied$/);
     await expect(page.getByRole("status")).toHaveText(
       "Seleção aplicada. O Roteiro foi atualizado somente com as mudanças confirmadas.",
     );
     await expect(page.getByText(proposedActivity, { exact: true })).toBeVisible();
     await expect(page.getByText(remainingProposedActivity, { exact: true })).toHaveCount(0);
 
-    await Promise.all([
-      replayPage.waitForURL(/\/roteiro\?propostaAceita=partial-replay$/),
-      replayPage.getByRole("button", { name: "Confirmar seleção" }).click(),
-    ]);
+    await replayPage.getByRole("button", { name: "Confirmar seleção" }).click();
+    await submitPartialAcceptance(replayPage, /\/roteiro\?propostaAceita=partial-replay$/);
     await expect(replayPage.getByRole("status")).toHaveText(
       "Esta seleção já havia sido aplicada. O Roteiro atualizado foi carregado.",
     );

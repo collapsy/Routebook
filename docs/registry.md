@@ -280,6 +280,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-111 | Context Pack do RB-INC-111 | Implementation Context | Draft | 0.1.0 | [rb-inc-111-partial-itinerary-proposal-acceptance-experience.md](./implementation/context-packs/rb-inc-111-partial-itinerary-proposal-acceptance-experience.md) |
 | RB-INC-112 | E2E do Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-112-partial-itinerary-proposal-acceptance-e2e.md](./implementation/increments/rb-inc-112-partial-itinerary-proposal-acceptance-e2e.md) |
 | RB-CTX-112 | Context Pack do RB-INC-112 — E2E do Aceite Parcial de Itinerary Proposal | Implementation Context | Draft | 0.1.0 | [rb-inc-112-partial-itinerary-proposal-acceptance-e2e.md](./implementation/context-packs/rb-inc-112-partial-itinerary-proposal-acceptance-e2e.md) |
+| RB-INC-113 | Liveness e Readiness Operacionais da Aplicação Web | Implementation | Draft | 0.1.0 | [rb-inc-113-operational-health-checks.md](./implementation/increments/rb-inc-113-operational-health-checks.md) |
+| RB-CTX-113 | Context Pack do RB-INC-113 — Liveness e Readiness Operacionais | Implementation Context | Draft | 0.1.0 | [rb-inc-113-operational-health-checks.md](./implementation/context-packs/rb-inc-113-operational-health-checks.md) |
 
 ## Status possíveis
 

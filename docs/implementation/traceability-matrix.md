@@ -430,3 +430,17 @@ Ao concluir um incremento:
 | idempotência comprovada | replay concorrente sem incremento adicional de versão, aplicação ou decisão |
 | SHA técnico | `d086a68fadaaef143c8dad863bd1d54103745e7d` |
 | Engineering Validation técnico | run `31498339765`, job `93801596100`, success integral; 79 testes Playwright aprovados, novo E2E parcial sem retry e duas anotações flaky preexistentes |
+
+## Evidências do RB-INC-113
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-113-operational-health-checks.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-113-operational-health-checks.md` |
+| requisitos operacionais | RB-DEL-001, RB-OBS-001, RB-INFRA-001, RB-CICD-001 e RB-OPS-001 |
+| rastreabilidade | issue #264; PR a criar |
+| liveness | `apps/web/app/api/health/live/route.ts` |
+| readiness PostgreSQL | `apps/web/app/api/health/ready/route.ts` |
+| serviço operacional | `apps/web/lib/operational-health.ts` |
+| testes focados | 8 testes aprovados para serviço, liveness e readiness |
+| validação local | documentação com 266 IDs sincronizados; lint, typecheck e build aprovados |

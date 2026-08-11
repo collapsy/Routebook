@@ -109,7 +109,9 @@ test("edita e limpa os dados temporais de um período livre", async ({ page }, t
   await editor.getByLabel("Proteção do espaço").selectOption("protected");
   await editor.getByLabel("Horário do período livre (opcional)").fill("");
   await editor.getByLabel("Duração do período livre (opcional)").fill("");
-  await editor.getByRole("button", { name: "Salvar período livre" }).click();
+  const saveButton = editor.getByRole("button", { name: "Salvar período livre" });
+  await expect(saveButton).toBeEnabled();
+  await saveButton.click();
 
   await expect(page).toHaveURL(/periodoLivreEditado=1$/);
   await expect(page.getByRole("status")).toContainText("Período livre atualizado");

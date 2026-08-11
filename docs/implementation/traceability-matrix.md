@@ -551,4 +551,5 @@ Ao concluir um incremento:
 | defeito | headers do POST precederam a navegação suave; 2 cenários passaram somente no retry |
 | experimento | `Response.finished()` manteve stream RSC aberto no run cancelado `31519586612` |
 | correção | header `x-action-redirect` é validado e seu destino carregado explicitamente |
+| validação final | run `31520574275`, attempts 1 e 2: 81 aprovados, sem flaky annotation |
 | rastreabilidade | issue #282; PR #283 |

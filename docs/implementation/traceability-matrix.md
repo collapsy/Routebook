@@ -640,9 +640,11 @@ Ao concluir um incremento:
 | validação parcial | conta e Trip sintéticas criadas; contexto, hospedagem geográfica, catálogo, três salvos, Roteiro editável, Período livre, Recommendation e Planning Conflict comprovados |
 | primeiro valor | Praia do Amor exibida a 268 m da hospedagem, com estimativa identificada |
 | valor principal | três Places transformados em Activities; reordenação, movimentação, remoção e mapa diário comprovados |
-| bloqueio | primeira Itinerary Proposal não é alcançável pela UI quando nenhuma Proposal existe; issue #299, severidade Major |
-| operação | deployment READY; nenhum erro de runtime agregado em 24 h; acesso interno dependeu de URL temporária da Vercel |
-| rastreabilidade | issue #298; defeito #299 |
+| retomada | RB-INC-130 expôs a entrada; RB-INC-131 removeu Places já planejados da geração |
+| persistência e mobile | logout/login recuperou a Trip; smoke real em 390 × 844 aprovou navegação, mapa, Roteiro e Proposal |
+| operação | liveness `200`/`ok`; readiness `200`/`ready`; sem erro agregado ou log error/fatal na hora posterior |
+| resultado | jornada crítica aprovada; lançamento condicionado à descoberta obrigatória #304 e ao acesso de Production #305 |
+| rastreabilidade | issue #298; defeitos #299 e #302; follow-ups #304 e #305 |
 
 ## Evidências do RB-INC-130
 
@@ -654,7 +656,9 @@ Ao concluir um incremento:
 | defeito | estado vazio de Proposal existia, mas não havia entrada visível a partir do Roteiro |
 | correção | Roteiro sempre aponta para revisão; rótulo distingue gerar, revisar e consultar expirada |
 | validação local | Prettier, lint, typecheck e build verdes; 23 E2E listados; 163 unitários verdes e 5 suítes dependentes de banco reservadas ao CI |
-| rastreabilidade | issue #299 |
+| integração | PR #301; commit `1568570e`; CI e deployment `dpl_Gzf1vWpo6nHTjVyHzu8sdQn7FAa9` verdes |
+| Production | entrada, estado vazio e geração explícita comprovados na Trip sintética do RB-INC-129 |
+| rastreabilidade | issue #299, encerrada pela PR #301 |
 
 ## Evidências do RB-INC-131
 
@@ -666,4 +670,6 @@ Ao concluir um incremento:
 | defeito | Proposal ofereceu novamente três Places já vinculados a Activities do Roteiro |
 | contenção | Proposal descartada explicitamente; Roteiro permaneceu com três Activities |
 | correção | adaptador exclui Recommendations pela identidade persistida de Place antes da geração |
-| rastreabilidade | issue #302; relacionado a #298 |
+| validação | PR #303; CI no PR e pós-merge com 83 testes; Production propôs somente o Place ainda não planejado |
+| operação | deployment `dpl_6hp5feWzaqz7eNARxFZ7ewZJUTgR` READY; sem erros de runtime na hora posterior |
+| rastreabilidade | issue #302, encerrada pela PR #303; relacionado a #298 |

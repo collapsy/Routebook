@@ -79,16 +79,16 @@ issue separada e este incremento permanece parcial até a correção ser integra
 
 ## 7. Critérios de aceite
 
-- [ ] liveness e readiness verdes antes da jornada;
+- [x] liveness e readiness verdes antes da jornada;
 - [x] conta e Trip sintéticas criadas em Production;
 - [x] primeiro valor comprovado por Places contextualizados pela hospedagem;
 - [x] valor principal comprovado por Places transformados em Roteiro editável;
-- [ ] Recommendation, Planning Conflict e Itinerary Proposal revisáveis sem aplicação silenciosa;
-- [ ] alterações persistem e reaparecem em nova sessão;
-- [ ] navegação crítica utilizável em viewport móvel;
+- [x] Recommendation, Planning Conflict e Itinerary Proposal revisáveis sem aplicação silenciosa;
+- [x] alterações persistem e reaparecem em nova sessão;
+- [x] navegação crítica utilizável em viewport móvel;
 - [x] console e logs de runtime inspecionados;
 - [x] falhas, latência percebida e fontes externas necessárias registradas;
-- [ ] documentação e CI verdes.
+- [x] documentação e CI verdes.
 
 ## 8. Testes obrigatórios
 
@@ -124,6 +124,28 @@ Resultado parcial em 2026-08-11:
   antes do conteúdo final, sem erro de aplicação;
 - bloqueio Major: a primeira Itinerary Proposal não é alcançável pela navegação do
   Roteiro sem Proposal preexistente; defeito #299 aberto e validação interrompida.
+
+Retomada concluída em 2026-08-11:
+
+- o RB-INC-130 tornou a primeira Proposal alcançável pelo Roteiro e foi integrado pela PR #301;
+- a primeira retomada preservou o Roteiro, mas ofereceu novamente três Places já
+  planejados; a Proposal foi descartada e o defeito #302 foi corrigido no RB-INC-131;
+- no deployment `dpl_6hp5feWzaqz7eNARxFZ7ewZJUTgR`, commit `b8d3e669`, a Proposal
+  apresentou somente o Place ainda não planejado e permaneceu sem aplicação silenciosa;
+- a Proposal válida foi descartada explicitamente, preservando três Activities e um
+  Período livre protegido;
+- logout e novo login recuperaram a Trip, três Viajantes, Preferências, orçamento,
+  Hospedagem e Roteiro persistidos;
+- viewport real de 390 × 844 exibiu navegação global, mapa, alternativa textual,
+  resumo do Roteiro, Período livre e entrada de Proposal sem bloqueio funcional;
+- liveness respondeu `200`/`ok`; readiness respondeu `200`/`ready`, com banco disponível;
+- nenhum erro agregado ou log `error`/`fatal` foi encontrado na hora posterior à jornada;
+- CI pós-merge `31540631621` aprovou 83 testes responsivos; documentação também passou.
+
+Resultado: a jornada crítica e os 15 critérios de conclusão do RB-PRD-002 foram
+comprovados tecnicamente. O MVP ainda não deve ser declarado pronto para lançamento
+até fechar a pesquisa e os filtros obrigatórios de descoberta (#304) e definir o acesso
+do público-alvo ao deployment protegido (#305).
 
 Nenhuma credencial, token, endereço de conexão ou dado pessoal foi registrado.
 

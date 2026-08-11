@@ -53,14 +53,14 @@ criaria duplicatas conceituais e reduziria a qualidade da decisão.
 
 ## 5. Critérios de aceite
 
-- [ ] Recommendation de Place já ligado a Activity não entra no contexto de geração;
-- [ ] Recommendation elegível de Place ainda não planejado continua disponível;
-- [ ] Proposal sem candidatos permanece ready e sem mudanças;
-- [ ] teste PostgreSQL comprova a exclusão pela identidade do Place;
-- [ ] E2E comprova o fluxo desde o Roteiro parcialmente preenchido;
-- [ ] lint, typecheck, testes, build e documentação estão verdes;
-- [ ] correção integrada e validada em Production;
-- [ ] RB-INC-129 pode retomar a jornada sem proposta duplicada.
+- [x] Recommendation de Place já ligado a Activity não entra no contexto de geração;
+- [x] Recommendation elegível de Place ainda não planejado continua disponível;
+- [x] Proposal sem candidatos permanece ready e sem mudanças;
+- [x] teste PostgreSQL comprova a exclusão pela identidade do Place;
+- [x] E2E comprova o fluxo desde o Roteiro parcialmente preenchido;
+- [x] lint, typecheck, testes, build e documentação estão verdes;
+- [x] correção integrada e validada em Production;
+- [x] RB-INC-129 pode retomar a jornada sem proposta duplicada.
 
 ## 6. Testes obrigatórios
 
@@ -75,3 +75,15 @@ criaria duplicatas conceituais e reduziria a qualidade da decisão.
 
 Reverter o filtro no adaptador, os testes e esta documentação. Nenhum schema ou dado
 existente precisa de rollback.
+
+## 8. Evidências
+
+- PR #303 integrada no commit `b8d3e669`;
+- Engineering Validation no PR `31540209253`: aprovada, com 83 testes;
+- Engineering Validation pós-merge `31540631621`: aprovada, com 83 testes;
+- Documentation Validation e Preview: aprovados;
+- deployment `dpl_6hp5feWzaqz7eNARxFZ7ewZJUTgR`: `READY` em Production;
+- nova Proposal produtiva apresentou somente `Vida Noturna na Avenida Baía dos
+  Golfinhos`; Centro Gastronômico de Pipa, Praia do Amor e Baía dos Golfinhos,
+  já planejados, não foram propostos novamente;
+- a Proposal permaneceu isolada e foi descartada explicitamente sem alterar o Roteiro.

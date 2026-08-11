@@ -550,4 +550,4 @@ Ao concluir um incremento:
 | origem | Engineering Validation `31518438255`, attempt 2 |
 | defeito | headers do POST precederam o corpo RSC; 2 cenários passaram somente no retry |
 | correção | `Response.finished()` precede as assertions de UI e URL |
-| rastreabilidade | issue #282; PR pendente |
+| rastreabilidade | issue #282; PR #283 |

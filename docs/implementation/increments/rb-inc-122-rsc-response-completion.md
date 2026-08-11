@@ -44,7 +44,7 @@ Branch: `codex/rb-inc-122-rsc-response-completion`.
 
 Base empilhada: `codex/rb-inc-121-deterministic-itinerary-mutations`.
 
-PR: pendente.
+PR: #283.
 
 ## 2. Evidência
 

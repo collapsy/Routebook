@@ -23,14 +23,17 @@ test.setTimeout(120_000);
 
 const confirmedActivity = "Café já confirmado";
 const proposedActivity = "Mirante ao pôr do sol";
+const remainingProposedActivity = "Caminhada leve na praia";
 
 type ProposalFixture = Readonly<{
   tripId: string;
   itineraryId: string;
   proposalId: ItineraryProposalId;
   proposedActivityId: string;
+  remainingProposedActivityId: string | null;
   baseItineraryVersion: number;
   idempotencyKey: string;
+  partialIdempotencyKey: string;
 }>;
 
 function resultRows(result: unknown): readonly Record<string, unknown>[] {
@@ -45,6 +48,7 @@ function resultRows(result: unknown): readonly Record<string, unknown>[] {
 async function createProposalFixture(
   tripName: string,
   status: "ready" | "expired" = "ready",
+  proposedActivityCount: 1 | 2 = 1,
 ): Promise<ProposalFixture> {
   const requestedAt = new Date(Date.now() - 10_000);
   const { trip } = await createAuthenticatedE2ETrip(
@@ -70,6 +74,7 @@ async function createProposalFixture(
   await new DrizzleItineraryRepository().save(itinerary);
 
   const proposedActivityId = crypto.randomUUID();
+  const remainingProposedActivityId = proposedActivityCount === 2 ? crypto.randomUUID() : null;
   const repository = new DrizzleItineraryProposalRepository();
   const requested = requestItineraryProposal({
     tripId: trip.id,
@@ -100,6 +105,24 @@ async function createProposalFixture(
         estimatedCostCurrency: "BRL",
         reason: "Aproveita o fim da tarde e reduz deslocamentos.",
       },
+      ...(remainingProposedActivityId
+        ? [
+            {
+              proposedActivityId: remainingProposedActivityId,
+              targetTripDayId: itinerary.days[1]!.id,
+              title: remainingProposedActivity,
+              description: "Uma caminhada tranquila antes do café da manhã.",
+              proposedStartTime: "07:30",
+              durationMinutes: 60,
+              proposedOrder: 1,
+              operationType: "add" as const,
+              flexibility: "flexible" as const,
+              estimatedCostAmount: 0,
+              estimatedCostCurrency: "BRL",
+              reason: "Preserva o ritmo leve no início do segundo dia.",
+            },
+          ]
+        : []),
     ],
     criteria: ["Ritmo leve", "Proximidade entre lugares"],
     justifications: ["A organização reduz deslocamentos no fim da tarde."],
@@ -123,8 +146,10 @@ async function createProposalFixture(
     itineraryId: itinerary.id,
     proposalId: ready.id,
     proposedActivityId,
+    remainingProposedActivityId,
     baseItineraryVersion: itinerary.version,
     idempotencyKey: `accept-itinerary-proposal:${ready.id}:${itinerary.version}`,
+    partialIdempotencyKey: `partial-accept-itinerary-proposal:${ready.id}:${itinerary.version}`,
   });
 }
 
@@ -149,19 +174,28 @@ async function openAcceptance(page: Page, tripId: string): Promise<void> {
   await page.getByRole("checkbox", { name: /atualizará o Roteiro/i }).check();
 }
 
+async function openPartialAcceptance(page: Page, fixture: ProposalFixture): Promise<void> {
+  await page.goto(`/viagens/${fixture.tripId}/roteiro/proposta`);
+  await page.waitForLoadState("networkidle");
+  await page.getByText("Aceitar parte da proposta", { exact: true }).click();
+  await page.getByRole("checkbox", { name: new RegExp(proposedActivity, "i") }).check();
+}
+
 async function proposalApplicationRows(
   fixture: ProposalFixture,
+  idempotencyKey = fixture.idempotencyKey,
 ): Promise<readonly Record<string, unknown>[]> {
   return resultRows(
     await getDatabase().execute(sql`
       SELECT
         id::text AS "id",
         status,
+        application_type AS "applicationType",
         request_fingerprint AS "requestFingerprint",
         resulting_itinerary_version AS "resultingItineraryVersion"
       FROM proposal_applications
       WHERE itinerary_proposal_id = ${fixture.proposalId}::uuid
-        AND idempotency_key = ${fixture.idempotencyKey}
+        AND idempotency_key = ${idempotencyKey}
       ORDER BY created_at, id
     `),
   );
@@ -238,6 +272,95 @@ test("aceita uma Proposal ready da UI ao PostgreSQL e preserva o resultado após
   await page.reload();
   await expect(page.getByText(proposedActivity, { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Ver proposta" })).toHaveCount(0);
+});
+
+test("aceita parcialmente da UI ao PostgreSQL e reproduz sem reaplicar efeitos", async ({
+  context,
+  page,
+}, testInfo) => {
+  const fixture = await createProposalFixture(
+    `Aceite parcial ${testInfo.project.name} ${Date.now()}`,
+    "ready",
+    2,
+  );
+  const replayPage = await context.newPage();
+
+  try {
+    await openPartialAcceptance(page, fixture);
+    await openPartialAcceptance(replayPage, fixture);
+
+    await Promise.all([
+      page.waitForURL(/\/roteiro\?propostaAceita=partial-applied$/),
+      page.getByRole("button", { name: "Confirmar seleção" }).click(),
+    ]);
+    await expect(page.getByRole("status")).toHaveText(
+      "Seleção aplicada. O Roteiro foi atualizado somente com as mudanças confirmadas.",
+    );
+    await expect(page.getByText(proposedActivity, { exact: true })).toBeVisible();
+    await expect(page.getByText(remainingProposedActivity, { exact: true })).toHaveCount(0);
+
+    await Promise.all([
+      replayPage.waitForURL(/\/roteiro\?propostaAceita=partial-replay$/),
+      replayPage.getByRole("button", { name: "Confirmar seleção" }).click(),
+    ]);
+    await expect(replayPage.getByRole("status")).toHaveText(
+      "Esta seleção já havia sido aplicada. O Roteiro atualizado foi carregado.",
+    );
+
+    const itinerary = await new DrizzleItineraryRepository().findByTripId(fixture.tripId);
+    expect(itinerary).toMatchObject({
+      id: fixture.itineraryId,
+      version: fixture.baseItineraryVersion + 1,
+    });
+    const activities = itinerary?.days.flatMap((day) => day.activities) ?? [];
+    expect(activities.filter(({ title }) => title === proposedActivity)).toHaveLength(1);
+    expect(activities.filter(({ title }) => title === remainingProposedActivity)).toHaveLength(0);
+
+    const proposal = await new DrizzleItineraryProposalRepository().findById(
+      fixture.tripId,
+      fixture.proposalId,
+    );
+    expect(proposal).toMatchObject({
+      status: "partially-accepted",
+      proposedActivities: [
+        expect.objectContaining({
+          proposedActivityId: fixture.remainingProposedActivityId,
+          title: remainingProposedActivity,
+        }),
+      ],
+    });
+
+    const applications = await proposalApplicationRows(fixture, fixture.partialIdempotencyKey);
+    expect(applications).toHaveLength(1);
+    expect(applications[0]).toMatchObject({
+      applicationType: "partial",
+      status: "succeeded",
+      resultingItineraryVersion: fixture.baseItineraryVersion + 1,
+    });
+
+    const decisions = (await new DrizzleDecisionRepository().listByTripId(fixture.tripId)).filter(
+      ({ idempotencyKey }) => idempotencyKey === fixture.partialIdempotencyKey,
+    );
+    expect(decisions).toHaveLength(1);
+    expect(decisions[0]).toMatchObject({
+      type: "accept-itinerary-proposal",
+      chosenOption: {
+        itineraryProposalId: fixture.proposalId,
+        proposedActivityIds: [fixture.proposedActivityId],
+      },
+      effect: {
+        proposalApplicationId: applications[0]?.id,
+        resultingItineraryVersion: fixture.baseItineraryVersion + 1,
+        appliedProposedActivityIds: [fixture.proposedActivityId],
+      },
+    });
+
+    await page.reload();
+    await expect(page.getByText(proposedActivity, { exact: true })).toBeVisible();
+    await expect(page.getByText(remainingProposedActivity, { exact: true })).toHaveCount(0);
+  } finally {
+    await replayPage.close();
+  }
 });
 
 test("reproduz o aceite concorrente e rejeita chave nova sem duplicar efeitos", async ({

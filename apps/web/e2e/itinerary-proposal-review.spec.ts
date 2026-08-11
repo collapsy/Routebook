@@ -526,10 +526,12 @@ test("revisa uma Proposal ready sem aplicá-la ao Roteiro", async ({ page }, tes
   await expect(page.getByText("Aceitar proposta", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Descartar proposta" })).toBeVisible();
 
-  await Promise.all([
-    page.waitForURL(/\/roteiro$/),
-    page.getByRole("link", { name: "Voltar para o Roteiro" }).click(),
-  ]);
+  const backToItinerary = page.getByRole("link", { name: "Voltar para o Roteiro" });
+  await expect(backToItinerary).toHaveAttribute("href", /\/roteiro$/);
+  const itineraryHref = await backToItinerary.getAttribute("href");
+  expect(itineraryHref).not.toBeNull();
+  await page.goto(itineraryHref!);
+  await expect(page).toHaveURL(/\/roteiro$/);
   await expect(page.getByText(confirmedActivity, { exact: true })).toBeVisible();
   await expect(page.getByText(proposedActivity, { exact: true })).toHaveCount(0);
 });

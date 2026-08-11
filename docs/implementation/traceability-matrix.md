@@ -605,3 +605,15 @@ Ao concluir um incremento:
 | correção | `href` validado e destino carregado explicitamente antes das assertions |
 | validação | pendente |
 | rastreabilidade | issue #291; PR pendente |
+
+## Evidências do RB-INC-127
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-127-deterministic-proposal-return.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-127-deterministic-proposal-return.md` |
+| origem | Engineering Validation `31532256527`, attempt 2; retry flaky em desktop Chromium |
+| defeito | retorno por link aguardava evento de navegação não determinístico |
+| correção | `href` validado e destino carregado explicitamente |
+| validação | pendente |
+| rastreabilidade | issue #293; PR pendente |

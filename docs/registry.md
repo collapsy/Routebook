@@ -308,6 +308,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-125 | Context Pack do RB-INC-125 — Remoção Mobile Determinística no E2E | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-125-deterministic-mobile-removal.md](./implementation/context-packs/rb-inc-125-deterministic-mobile-removal.md) |
 | RB-INC-126 | Navegação Determinística do Conflito para o Roteiro | Implementation | Draft | 0.1.0 | [rb-inc-126-deterministic-conflict-navigation.md](./implementation/increments/rb-inc-126-deterministic-conflict-navigation.md) |
 | RB-CTX-126 | Context Pack do RB-INC-126 — Navegação Determinística do Conflito | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-126-deterministic-conflict-navigation.md](./implementation/context-packs/rb-inc-126-deterministic-conflict-navigation.md) |
+| RB-INC-127 | Retorno Determinístico da Revisão de Proposal | Implementation | Draft | 0.1.0 | [rb-inc-127-deterministic-proposal-return.md](./implementation/increments/rb-inc-127-deterministic-proposal-return.md) |
+| RB-CTX-127 | Context Pack do RB-INC-127 — Retorno Determinístico da Revisão de Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-127-deterministic-proposal-return.md](./implementation/context-packs/rb-inc-127-deterministic-proposal-return.md) |
 
 ## Status possíveis
 

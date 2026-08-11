@@ -23,8 +23,12 @@ test("mantém a explicação institucional acessível", async ({ page }) => {
 
 test("abre a área de produto a partir da landing", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: "Abrir o RouteBook" }).first().click();
+  const tripsHeading = page.getByRole("heading", { name: "Minhas viagens" });
+  await Promise.all([
+    tripsHeading.waitFor(),
+    page.getByRole("link", { name: "Abrir o RouteBook" }).first().click(),
+  ]);
 
   await expect(page).toHaveURL(/\/viagens$/);
-  await expect(page.getByRole("heading", { name: "Minhas viagens" })).toBeVisible();
+  await expect(tripsHeading).toBeVisible();
 });

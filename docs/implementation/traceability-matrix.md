@@ -507,3 +507,13 @@ Ao concluir um incremento:
 | evidência empilhada | run `31515863942`, aceite integral concorrente com a mesma causa |
 | refinamento | run `31516435515`, resposta e URL precisam ser aguardadas em conjunto |
 | rastreabilidade | issue #274; PR #275 |
+
+## Evidências do RB-INC-119
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-119-deterministic-landing-navigation.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-119-deterministic-landing-navigation.md` |
+| origem | Engineering Validation `31514759756`, attempt 2 |
+| defeito | heading de destino observado depois da URL; cenário passou no retry |
+| rastreabilidade | issue #276; PR a criar |

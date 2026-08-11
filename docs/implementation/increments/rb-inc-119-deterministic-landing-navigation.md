@@ -43,7 +43,7 @@ Branch: `codex/rb-inc-119-deterministic-landing-navigation`.
 
 Base empilhada: `codex/rb-inc-118-deterministic-server-action-e2e`.
 
-PR: a criar.
+PR: #277.
 
 ## 2. Evidência
 

@@ -577,6 +577,7 @@ Ao concluir um incremento:
 | autorização | provisionamento e integração de Production aprovados pelo responsável em 2026-08-11 |
 | isolamento | Neon `routebook-production` / `bitter-queen-90455085`, distinto de Preview; dois secrets sensíveis exclusivos do target Production |
 | schema | branch `main` / `br-rough-dew-axo9u82j`; 25 migrations, 21 tabelas públicas, histórico Drizzle e 0 viagens |
-| deployment | Production automático da `main`; evidência pendente de integração |
-| validação | health, logs e CI pendentes |
-| rastreabilidade | issue #286; PR pendente |
+| deployment | merge `33a8cdaa`; `dpl_96Evpm9F2JuadmmRWAijzbuFBcrp` READY; alias `https://routebook-rnd10.vercel.app` |
+| validação | liveness `ok`; readiness `ready` com database `available`; nenhum log de erro após smoke |
+| CI | Documentation Validation `31530544311` verde; Engineering Validation `31530544328` verde, com 80 passagens diretas e 1 retry flaky |
+| rastreabilidade | issue #286; PRs #287, #285 e #288 |

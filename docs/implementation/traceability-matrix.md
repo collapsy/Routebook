@@ -628,3 +628,18 @@ Ao concluir um incremento:
 | correção | Server Actions usam redirect declarado; links usam `href` validado |
 | validação | `31534321192` attempts 1 e 2, `31535217769` e `31535676668`: 81 aprovados sem flaky; Production READY e saudável |
 | rastreabilidade | issue #295; PR #296 |
+
+## Evidências do RB-INC-129
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-129-mvp-production-validation.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-129-mvp-production-validation.md` |
+| ambiente | Production em `https://routebook-rnd10.vercel.app` |
+| cenário | Pipa (RN), 22–29/08/2026, três adultos e dados exclusivamente sintéticos |
+| validação parcial | conta e Trip sintéticas criadas; contexto, hospedagem geográfica, catálogo, três salvos, Roteiro editável, Período livre, Recommendation e Planning Conflict comprovados |
+| primeiro valor | Praia do Amor exibida a 268 m da hospedagem, com estimativa identificada |
+| valor principal | três Places transformados em Activities; reordenação, movimentação, remoção e mapa diário comprovados |
+| bloqueio | primeira Itinerary Proposal não é alcançável pela UI quando nenhuma Proposal existe; issue #299, severidade Major |
+| operação | deployment READY; nenhum erro de runtime agregado em 24 h; acesso interno dependeu de URL temporária da Vercel |
+| rastreabilidade | issue #298; defeito #299 |

@@ -78,10 +78,10 @@ Somente nomes, destinos e IDs não secretos podem ser registrados.
 - [x] `main` declarada como branch de produção;
 - [x] root directory preservado em `apps/web`;
 - [x] variáveis sensíveis continuam restritas a Preview;
-- [ ] Preview Deployment criado automaticamente para a branch/PR;
-- [ ] liveness e readiness verdes no Preview automático;
-- [ ] deployment pronto e sem erro crítico de runtime;
-- [ ] documentação e CI verdes.
+- [x] Preview Deployment criado automaticamente para a branch/PR;
+- [x] liveness e readiness verdes no Preview automático;
+- [x] deployment pronto e sem erro crítico de runtime;
+- [x] documentação e CI verdes.
 
 ## 6. Testes obrigatórios
 
@@ -92,7 +92,23 @@ Somente nomes, destinos e IDs não secretos podem ser registrados.
 - `GET /api/health/ready` autenticado;
 - inspeção de erros de runtime após o smoke.
 
-## 7. Rollback
+## 7. Evidências
+
+- PR: #285;
+- commit validado: `4f5233ad0163bbc42e6acf0931d3b0b0c535cb18`;
+- Preview automático: `dpl_64cSW7kr8TDPZWAbSNkNUW8DYsye`;
+- URL imutável: `https://routebook-8i2dm4p4x-rnd10.vercel.app`;
+- proveniência: branch `codex/rb-inc-123-git-preview-deployment`, PR #285 e commit
+  `4f5233a` reconhecidos pela Vercel;
+- liveness: HTTP 200, `status: ok` e `Cache-Control: no-store`;
+- readiness: HTTP 200, `status: ready`, database `available` e
+  `Cache-Control: no-store`;
+- logs de erro após o smoke: nenhum encontrado;
+- Documentation Validation: aprovado;
+- Engineering Validation `31527703958`: 81 testes responsivos aprovados, sem
+  flaky annotation.
+
+## 8. Rollback
 
 Reverter somente esta documentação. Desvincular o repositório é uma alteração externa
 com impacto no fluxo de entrega e exige uma decisão explícita separada.

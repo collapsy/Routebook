@@ -562,5 +562,8 @@ Ao concluir um incremento:
 | Context Pack | `docs/implementation/context-packs/rb-inc-123-git-preview-deployment.md` |
 | vínculo Git | projeto `routebook` conectado a `collapsy/Routebook`; produção declarada em `main` |
 | isolamento | `DATABASE_URL` e `BETTER_AUTH_SECRET` sensíveis somente em Preview |
-| Preview automático | pendente do primeiro push após o vínculo Git |
+| Preview automático | `dpl_64cSW7kr8TDPZWAbSNkNUW8DYsye`, branch e PR #285 reconhecidas pela Vercel |
+| health | liveness e readiness HTTP 200; database `available`; respostas `no-store` |
+| runtime | nenhum log de erro encontrado após o smoke autenticado |
+| CI | Engineering Validation `31527703958`: 81 aprovados, sem flaky annotation |
 | rastreabilidade | issue #284; PR #285 |

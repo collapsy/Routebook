@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import {
   createPostgresApplyPartialItineraryProposalTransaction,
@@ -45,37 +46,40 @@ function actionInput(
   };
 }
 
+function itineraryPath(tripId: string): string {
+  return `/viagens/${tripId}/roteiro`;
+}
+
 export async function acceptItineraryProposalPartiallyAction(
   tripId: string,
   _previousState: AcceptItineraryProposalPartiallyActionState,
   formData: FormData,
 ): Promise<AcceptItineraryProposalPartiallyActionState> {
+  let result: AcceptItineraryProposalPartiallyActionState;
+
   try {
     const database = getDatabase();
-    const result = await executeAcceptItineraryProposalPartiallyAction(
-      actionInput(tripId, formData),
-      {
-        resolveAccess: resolveTripRouteAccess,
-        tripRepository: new DrizzleTripRepository(),
-        itineraryRepository: new DrizzleItineraryRepository(),
-        proposalRepository: new DrizzleItineraryProposalRepository(),
-        proposalApplicationReader: createPostgresProposalApplicationRepository(database),
-        decisionReader: new DrizzleDecisionRepository(database),
-        acceptItineraryProposalPartially: createAcceptItineraryProposalPartially(
-          createPostgresApplyPartialItineraryProposalTransaction(),
-        ),
-      },
-    );
-
-    if (result.status === "success") {
-      revalidatePath(`/viagens/${tripId}`);
-      revalidatePath(`/viagens/${tripId}/roteiro`);
-      revalidatePath(`/viagens/${tripId}/roteiro/proposta`);
-    }
-
-    return result;
+    result = await executeAcceptItineraryProposalPartiallyAction(actionInput(tripId, formData), {
+      resolveAccess: resolveTripRouteAccess,
+      tripRepository: new DrizzleTripRepository(),
+      itineraryRepository: new DrizzleItineraryRepository(),
+      proposalRepository: new DrizzleItineraryProposalRepository(),
+      proposalApplicationReader: createPostgresProposalApplicationRepository(database),
+      decisionReader: new DrizzleDecisionRepository(database),
+      acceptItineraryProposalPartially: createAcceptItineraryProposalPartially(
+        createPostgresApplyPartialItineraryProposalTransaction(),
+      ),
+    });
   } catch (error) {
     console.error("Failed to partially accept Itinerary Proposal.", error);
     return acceptItineraryProposalPartiallyActionError("technical-error");
   }
+
+  if (result.status === "success") {
+    revalidatePath(`/viagens/${tripId}`);
+    revalidatePath(itineraryPath(tripId));
+    redirect(`${itineraryPath(tripId)}?propostaAceita=partial-${result.kind}`);
+  }
+
+  return result;
 }

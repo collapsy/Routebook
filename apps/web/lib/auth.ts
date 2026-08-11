@@ -32,6 +32,11 @@ export function resolveBetterAuthUrl(environment = process.env): string {
   const configured = environment.BETTER_AUTH_URL?.trim();
   if (configured) return configured;
 
+  const vercelHostname = environment.VERCEL_URL?.trim();
+  if (vercelHostname && /^[a-z0-9.-]+$/i.test(vercelHostname)) {
+    return `https://${vercelHostname}`;
+  }
+
   if (environment.NODE_ENV !== "production" || isProductionBuild()) {
     return DEVELOPMENT_URL;
   }

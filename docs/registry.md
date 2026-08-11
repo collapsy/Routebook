@@ -288,6 +288,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-115 | Context Pack do RB-INC-115 — Aprovação Formal do RB-ADR-017 | Implementation Context | Draft | 0.1.0 | [rb-inc-115-approve-adr-017.md](./implementation/context-packs/rb-inc-115-approve-adr-017.md) |
 | RB-INC-116 | Aprovação Formal do RB-ADR-018 | Implementation | Draft | 0.1.0 | [rb-inc-116-approve-adr-018.md](./implementation/increments/rb-inc-116-approve-adr-018.md) |
 | RB-CTX-116 | Context Pack do RB-INC-116 — Aprovação Formal do RB-ADR-018 | Implementation Context | Draft | 0.1.0 | [rb-inc-116-approve-adr-018.md](./implementation/context-packs/rb-inc-116-approve-adr-018.md) |
+| RB-INC-117 | Bootstrap Vercel e Neon para Preview | Implementation | Draft | 0.1.0 | [rb-inc-117-vercel-neon-preview-bootstrap.md](./implementation/increments/rb-inc-117-vercel-neon-preview-bootstrap.md) |
+| RB-CTX-117 | Context Pack do RB-INC-117 — Bootstrap Vercel e Neon para Preview | Implementation Context | Draft | 0.1.0 | [rb-inc-117-vercel-neon-preview-bootstrap.md](./implementation/context-packs/rb-inc-117-vercel-neon-preview-bootstrap.md) |
 
 ## Status possíveis
 

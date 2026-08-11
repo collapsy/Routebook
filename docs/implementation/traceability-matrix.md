@@ -452,7 +452,7 @@ Ao concluir um incremento:
 | definição do incremento | `docs/implementation/increments/rb-inc-114-operational-smoke.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-114-operational-smoke.md` |
 | requisitos operacionais | RB-DEL-001, RB-CICD-001, RB-OBS-001, RB-INFRA-001 e RB-INC-113 |
-| rastreabilidade | issue #266; PR a criar |
+| rastreabilidade | issue #266 e PR #267 |
 | comando operacional | `pnpm smoke:operational -- <base-url>` |
 | implementação | `scripts/operational-smoke.mjs` |
 | testes determinísticos | `scripts/operational-smoke.test.mjs` |

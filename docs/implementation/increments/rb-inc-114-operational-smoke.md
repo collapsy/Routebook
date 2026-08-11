@@ -38,7 +38,7 @@ Issue: #266.
 
 Branch: `codex/rb-inc-114-operational-smoke`.
 
-PR: a criar.
+PR: #267.
 
 ## 2. Escopo
 

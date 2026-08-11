@@ -477,3 +477,19 @@ Ao concluir um incremento:
 | decisão | RB-ADR-018 versão 0.2.0, estado interno `Approved` |
 | governança | RB-GOV-001, RB-GOV-002 e aprovação humana explícita |
 | rastreabilidade | issue #270 e PR #271 |
+
+## Evidências do RB-INC-117
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-117-vercel-neon-preview-bootstrap.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-117-vercel-neon-preview-bootstrap.md` |
+| decisões | RB-ADR-017 e RB-ADR-018 aprovados |
+| rastreabilidade | issue #272; PR a criar |
+| Vercel | team `rnd10`, project `routebook` |
+| Neon | project `rapid-brook-02474789`, branch `br-divine-heart-ay8hpdo1`, database `neondb` |
+| banco | PostGIS habilitado e 24 tabelas públicas após migrations |
+| secrets | nomes verificados em Preview; valores não registrados |
+| Preview | deployment `dpl_UMDTJft2qDM7Q9fekLBrHxeRnuWY`, estado `READY` |
+| health | liveness `ok`; readiness `ready`; database `available` |
+| runtime | nenhum erro encontrado na janela de uma hora após o smoke |

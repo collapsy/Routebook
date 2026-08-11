@@ -23,6 +23,26 @@ describe("Better Auth configuration", () => {
     expect(resolveBetterAuthUrl(environment)).toBe("http://localhost:3000");
   });
 
+  it("usa o hostname confiável do deployment Vercel quando a URL explícita não existe", () => {
+    const environment = {
+      NODE_ENV: "production",
+      VERCEL_URL: "routebook-git-preview-rnd10.vercel.app",
+    } as NodeJS.ProcessEnv;
+
+    expect(resolveBetterAuthUrl(environment)).toBe(
+      "https://routebook-git-preview-rnd10.vercel.app",
+    );
+  });
+
+  it("rejeita hostname Vercel com caracteres de URL injetáveis", () => {
+    const environment = {
+      NODE_ENV: "production",
+      VERCEL_URL: "routebook.vercel.app/path?token=secret",
+    } as NodeJS.ProcessEnv;
+
+    expect(() => resolveBetterAuthUrl(environment)).toThrow("BETTER_AUTH_URL");
+  });
+
   it("rejeita produção sem segredo ou URL", () => {
     const environment = { NODE_ENV: "production" } as NodeJS.ProcessEnv;
 

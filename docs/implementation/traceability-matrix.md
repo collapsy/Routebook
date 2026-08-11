@@ -518,3 +518,38 @@ Ao concluir um incremento:
 | defeito | heading de destino observado depois da URL; cenário passou no retry |
 | refinamento | run `31516435515`, aguardar URL antes do click e heading após navegação |
 | rastreabilidade | issue #276; PR #277 |
+
+## Evidências do RB-INC-120
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-120-deterministic-proposal-generation.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-120-deterministic-proposal-generation.md` |
+| origem | Engineering Validation `31516435515` |
+| defeito | geração validou URL antes da conclusão observável; passou no retry |
+| refinamento | run `31517303193`, conteúdo renderizado substitui espera de lifecycle |
+| rastreabilidade | issue #278; PR #279 |
+
+## Evidências do RB-INC-121
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-121-deterministic-itinerary-mutations.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-121-deterministic-itinerary-mutations.md` |
+| origem | Engineering Validation `31517303193` |
+| defeito | movimentação concluiu o POST, mas a URL anterior ainda foi observada; passou no retry |
+| correção | mensagem de sucesso renderizada precede a assertion da URL |
+| rastreabilidade | issue #280; PR #281 |
+
+## Evidências do RB-INC-122
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-122-rsc-response-completion.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-122-rsc-response-completion.md` |
+| origem | Engineering Validation `31518438255`, attempt 2 |
+| defeito | headers do POST precederam a navegação suave; 2 cenários passaram somente no retry |
+| experimento | `Response.finished()` manteve stream RSC aberto no run cancelado `31519586612` |
+| correção | header `x-action-redirect` é validado e seu destino carregado explicitamente |
+| validação final | run `31520574275`, attempts 1 e 2: 81 aprovados, sem flaky annotation |
+| rastreabilidade | issue #282; PR #283 |

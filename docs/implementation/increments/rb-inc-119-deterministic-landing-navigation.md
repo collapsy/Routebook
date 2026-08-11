@@ -73,8 +73,8 @@ click e mantém a assertion do heading depois da conclusão observável da naveg
 - [x] o click e a espera pela URL são registrados em conjunto;
 - [x] URL `/viagens` e heading `Minhas viagens` continuam validados;
 - [x] configuração e tolerâncias permanecem inalteradas;
-- [ ] documentação, lint, tipagem, testes e build verdes;
-- [ ] duas execuções consecutivas sem flaky annotation.
+- [x] documentação, lint, tipagem, testes e build verdes;
+- [x] duas execuções consecutivas sem flaky annotation.
 
 ## 6. Testes obrigatórios
 
@@ -85,6 +85,9 @@ click e mantém a assertion do heading depois da conclusão observável da naveg
 - `pnpm --filter @routebook/web build`;
 - `pnpm --filter @routebook/web exec playwright test --list`;
 - Engineering Validation executado duas vezes no mesmo SHA.
+
+Evidência final: run `31520574275`, attempts 1 e 2, com 81 testes aprovados e
+nenhuma flaky annotation em cada execução.
 
 ## 7. Rollback
 

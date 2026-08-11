@@ -101,8 +101,18 @@ async function generateProposalFromEmptyState(
 
   const generateButton = page.getByRole("button", { name: "Gerar proposta de roteiro" });
   await expect(generateButton).toBeEnabled();
-  await generateButton.click();
-  await expect(page).toHaveURL(/\/roteiro\/proposta\?propostaGerada=[0-9a-f-]+$/i);
+  const actionPathname = new URL(page.url()).pathname;
+  const actionResponse = page.waitForResponse((response) => {
+    const request = response.request();
+    return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
+  });
+  const generatedUrl = /\/roteiro\/proposta\?propostaGerada=[0-9a-f-]+$/i;
+  const [response] = await Promise.all([actionResponse, generateButton.click()]);
+  const redirectUrl = response.headers()["x-action-redirect"]?.split(";")[0];
+  expect(redirectUrl).toMatch(generatedUrl);
+  await page.goto(redirectUrl!);
+  await expect(page.getByRole("heading", { level: 1, name: "Proposta de Roteiro" })).toBeVisible();
+  await expect(page).toHaveURL(generatedUrl);
 
   const proposalId = new URL(page.url()).searchParams.get("propostaGerada");
   expect(proposalId).toMatch(/^[0-9a-f-]{36}$/i);

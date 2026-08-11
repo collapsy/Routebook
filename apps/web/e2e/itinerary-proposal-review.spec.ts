@@ -182,15 +182,15 @@ async function openPartialAcceptance(page: Page, fixture: ProposalFixture): Prom
 }
 
 async function submitPartialAcceptance(page: Page, expectedUrl: RegExp): Promise<void> {
+  const decisionAlert = page
+    .locator('section[aria-labelledby="proposal-decision-title"]')
+    .getByRole("alert");
   const outcome = await Promise.race([
     page.waitForURL(expectedUrl, { timeout: 20_000 }).then(() => ({ kind: "navigated" as const })),
-    page
-      .getByRole("alert")
-      .waitFor({ timeout: 20_000 })
-      .then(async () => ({
-        kind: "error" as const,
-        message: await page.getByRole("alert").textContent(),
-      })),
+    decisionAlert.waitFor({ timeout: 20_000 }).then(async () => ({
+      kind: "error" as const,
+      message: await decisionAlert.textContent(),
+    })),
   ]);
 
   expect(outcome, `Aceite parcial não navegou: ${JSON.stringify(outcome)}`).toEqual({

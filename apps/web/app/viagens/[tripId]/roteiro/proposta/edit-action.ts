@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { DrizzleItineraryProposalRepository } from "@routebook/database";
 
 import {
@@ -61,16 +59,10 @@ export async function editItineraryProposalAction(
   formData: FormData,
 ): Promise<EditItineraryProposalActionState> {
   try {
-    const result = await executeEditItineraryProposalAction(actionInput(tripId, formData), {
+    return await executeEditItineraryProposalAction(actionInput(tripId, formData), {
       resolveAccess: resolveTripRouteAccess,
       repository: new DrizzleItineraryProposalRepository(),
     });
-
-    if (result.status === "success") {
-      revalidatePath(`/viagens/${tripId}/roteiro/proposta`);
-    }
-
-    return result;
   } catch (error) {
     console.error("Failed to edit Itinerary Proposal.", error);
     return editItineraryProposalActionError("technical-error");

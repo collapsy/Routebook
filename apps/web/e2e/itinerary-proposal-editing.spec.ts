@@ -181,9 +181,12 @@ test("edita uma Proposed Activity da UI ao PostgreSQL, reidrata e preserva o Iti
   await page.getByLabel("Moeda").fill("brl");
   await page.getByRole("button", { name: "Salvar edição" }).click();
 
-  await expect(page.getByRole("heading", { name: editedActivity })).toBeVisible();
-  await expect(page.getByText(proposedActivity, { exact: true })).toHaveCount(0);
-  await expect(page.getByText(/Roteiro atual permanece preservado/i)).toBeVisible();
+  await expect
+    .poll(async () => {
+      const proposal = await proposalRepository.findById(fixture.tripId, fixture.proposalId);
+      return proposal?.proposedActivities?.[0]?.title;
+    })
+    .toBe(editedActivity);
 
   const proposalAfter = await proposalRepository.findById(fixture.tripId, fixture.proposalId);
   expect(proposalAfter).toMatchObject({
@@ -240,6 +243,8 @@ test("edita uma Proposed Activity da UI ao PostgreSQL, reidrata e preserva o Iti
 
   await page.reload();
   await expect(page.getByRole("heading", { name: editedActivity })).toBeVisible();
+  await expect(page.getByText(proposedActivity, { exact: true })).toHaveCount(0);
+  await expect(page.getByText(/Roteiro atual permanece preservado/i)).toBeVisible();
   await page.getByText(`Editar sugestão: ${editedActivity}`, { exact: true }).click();
   await expect(page.getByRole("combobox", { name: "Dia proposto" })).toHaveValue(
     fixture.secondDayId,

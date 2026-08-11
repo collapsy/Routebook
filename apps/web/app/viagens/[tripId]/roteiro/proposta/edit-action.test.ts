@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const cacheMocks = vi.hoisted(() => ({ revalidatePath: vi.fn() }));
 const editingMocks = vi.hoisted(() => ({
   execute: vi.fn(),
   error: vi.fn((code: string) => ({ status: "error", code, message: code })),
@@ -8,7 +7,6 @@ const editingMocks = vi.hoisted(() => ({
 const databaseMocks = vi.hoisted(() => ({ repositoryInstance: { save: vi.fn() } }));
 const accessMocks = vi.hoisted(() => ({ resolve: vi.fn() }));
 
-vi.mock("next/cache", () => ({ revalidatePath: cacheMocks.revalidatePath }));
 vi.mock("@routebook/database", () => ({
   DrizzleItineraryProposalRepository: class {
     constructor() {
@@ -60,7 +58,7 @@ describe("editItineraryProposalAction", () => {
     vi.clearAllMocks();
   });
 
-  it("delega o payload web, usa o repository PostgreSQL e revalida somente após sucesso", async () => {
+  it("delega o payload web e usa o repository PostgreSQL", async () => {
     editingMocks.execute.mockResolvedValue(success);
 
     await expect(editItineraryProposalAction(tripId, { status: "idle" }, formData())).resolves.toBe(
@@ -87,8 +85,6 @@ describe("editItineraryProposalAction", () => {
         repository: databaseMocks.repositoryInstance,
       },
     );
-    expect(cacheMocks.revalidatePath).toHaveBeenCalledTimes(1);
-    expect(cacheMocks.revalidatePath).toHaveBeenCalledWith(`/viagens/${tripId}/roteiro/proposta`);
   });
 
   it("preserva campos omitidos para permitir payload parcial", async () => {
@@ -111,7 +107,7 @@ describe("editItineraryProposalAction", () => {
     );
   });
 
-  it("preserva erro recuperável sem invalidar cache", async () => {
+  it("preserva erro recuperável", async () => {
     const error = {
       status: "error",
       code: "proposal-not-ready",
@@ -122,10 +118,9 @@ describe("editItineraryProposalAction", () => {
     await expect(editItineraryProposalAction(tripId, { status: "idle" }, formData())).resolves.toBe(
       error,
     );
-    expect(cacheMocks.revalidatePath).not.toHaveBeenCalled();
   });
 
-  it("normaliza falha técnica inesperada sem invalidar cache", async () => {
+  it("normaliza falha técnica inesperada", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     editingMocks.execute.mockRejectedValue(new Error("unexpected failure"));
 
@@ -133,7 +128,6 @@ describe("editItineraryProposalAction", () => {
       editItineraryProposalAction(tripId, { status: "idle" }, formData()),
     ).resolves.toEqual({ status: "error", code: "technical-error", message: "technical-error" });
     expect(editingMocks.error).toHaveBeenCalledWith("technical-error");
-    expect(cacheMocks.revalidatePath).not.toHaveBeenCalled();
     consoleError.mockRestore();
   });
 });

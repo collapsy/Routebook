@@ -74,8 +74,8 @@ heading renderizado e somente então valida a URL e o ID.
 - [x] POST é registrado antes do click e conteúdo precede a validação da URL;
 - [x] URL e ID gerado continuam explicitamente validados;
 - [x] conteúdo, persistência e Itinerary preservado continuam cobertos;
-- [ ] documentação, lint, tipagem, testes e build verdes;
-- [ ] duas execuções consecutivas sem flaky annotation.
+- [x] documentação, lint, tipagem, testes e build verdes;
+- [x] duas execuções consecutivas sem flaky annotation.
 
 ## 6. Testes obrigatórios
 
@@ -86,6 +86,9 @@ heading renderizado e somente então valida a URL e o ID.
 - `pnpm --filter @routebook/web build`;
 - `pnpm --filter @routebook/web exec playwright test --list`;
 - Engineering Validation executado duas vezes no mesmo SHA.
+
+Evidência final: run `31520574275`, attempts 1 e 2, com 81 testes aprovados e
+nenhuma flaky annotation em cada execução.
 
 ## 7. Rollback
 

@@ -540,3 +540,16 @@ Ao concluir um incremento:
 | defeito | movimentação concluiu o POST, mas a URL anterior ainda foi observada; passou no retry |
 | correção | mensagem de sucesso renderizada precede a assertion da URL |
 | rastreabilidade | issue #280; PR #281 |
+
+## Evidências do RB-INC-122
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-122-rsc-response-completion.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-122-rsc-response-completion.md` |
+| origem | Engineering Validation `31518438255`, attempt 2 |
+| defeito | headers do POST precederam a navegação suave; 2 cenários passaram somente no retry |
+| experimento | `Response.finished()` manteve stream RSC aberto no run cancelado `31519586612` |
+| correção | header `x-action-redirect` é validado e seu destino carregado explicitamente |
+| validação final | run `31520574275`, attempts 1 e 2: 81 aprovados, sem flaky annotation |
+| rastreabilidade | issue #282; PR #283 |

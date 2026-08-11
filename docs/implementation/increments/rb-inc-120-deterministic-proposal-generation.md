@@ -43,7 +43,7 @@ Branch: `codex/rb-inc-120-deterministic-proposal-generation`.
 
 Base empilhada: `codex/rb-inc-119-deterministic-landing-navigation`.
 
-PR: a criar.
+PR: #279.
 
 ## 2. Evidência
 

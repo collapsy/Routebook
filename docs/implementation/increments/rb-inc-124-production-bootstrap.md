@@ -43,6 +43,9 @@ Issue: #286.
 
 Branch: `codex/rb-inc-124-production-bootstrap`.
 
+PRs: #287 (provisionamento empilhado), #285 (integração da pilha) e #288
+(evidências pós-deployment).
+
 ## 2. Estado inicial
 
 - projeto Vercel `routebook` vinculado a `collapsy/Routebook`;
@@ -74,11 +77,11 @@ Branch: `codex/rb-inc-124-production-bootstrap`.
 - [x] Production usa projeto Neon separado de Preview;
 - [x] extensões e migrations do repositório estão aplicadas;
 - [x] `DATABASE_URL` e `BETTER_AUTH_SECRET` são sensíveis e restritas a Production;
-- [ ] a pilha aprovada está integrada na `main`;
-- [ ] Production Deployment automático está pronto;
-- [ ] liveness e readiness estão verdes, com banco disponível;
-- [ ] não há erro crítico de runtime após o smoke;
-- [ ] documentação e CI estão verdes.
+- [x] a pilha aprovada está integrada na `main`;
+- [x] Production Deployment automático está pronto;
+- [x] liveness e readiness estão verdes, com banco disponível;
+- [x] não há erro crítico de runtime após o smoke;
+- [x] documentação e CI estão verdes.
 
 ## 6. Testes obrigatórios
 
@@ -99,7 +102,17 @@ Branch: `codex/rb-inc-124-production-bootstrap`.
 - banco vazio: 0 registros em `trips`; nenhum seed ou dado de Preview copiado;
 - Vercel: `DATABASE_URL` e `BETTER_AUTH_SECRET` cadastradas como `Sensitive` somente
   para Production, preservando os valores separados de Preview;
-- deploy, health, logs e CI: pendentes da integração da pilha na `main`.
+- integração: PR #287 incorporada à PR #285 e merge da pilha na `main` pelo commit
+  `33a8cdaa098467ebb86dfc341daa25cdcec411c9`;
+- Production Deployment automático: `dpl_96Evpm9F2JuadmmRWAijzbuFBcrp`, estado
+  `READY`, URL imutável `https://routebook-aqgli0r08-rnd10.vercel.app` e alias
+  `https://routebook-rnd10.vercel.app`;
+- liveness: HTTP 200, `status: ok`;
+- readiness: HTTP 200, `status: ready` e database `available`;
+- logs de erro após o smoke: nenhum encontrado;
+- Documentation Validation `31530544311`: aprovado;
+- Engineering Validation `31530544328`: concluído com sucesso; 80 cenários passaram
+  na primeira tentativa e 1 cenário mobile passou no retry, registrado como flaky.
 
 Nenhum valor de secret, token ou connection string foi registrado.
 

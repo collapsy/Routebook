@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { sql } from "drizzle-orm";
 
 import {
@@ -198,6 +198,18 @@ async function submitAndWaitForActionNavigation(
   await page.goto(redirectUrl!);
 }
 
+async function followValidatedLink(
+  page: Page,
+  link: Locator,
+  expectedUrl: RegExp,
+): Promise<void> {
+  await expect(link).toHaveAttribute("href", expectedUrl);
+  const href = await link.getAttribute("href");
+  expect(href).not.toBeNull();
+  await page.goto(href!);
+  await expect(page).toHaveURL(expectedUrl);
+}
+
 async function submitPartialAcceptance(
   page: Page,
   submit: () => Promise<void>,
@@ -242,10 +254,11 @@ test("aceita uma Proposal ready da UI ao PostgreSQL e preserva o resultado após
   );
 
   await openAcceptance(page, fixture.tripId);
-  await Promise.all([
-    page.waitForURL(/\/roteiro\?propostaAceita=applied$/),
-    page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
-  ]);
+  await submitAndWaitForActionNavigation(
+    page,
+    () => page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
+    /\/roteiro\?propostaAceita=applied$/,
+  );
 
   await expect(page.getByRole("status")).toHaveText(
     "Proposta aceita. O Roteiro foi atualizado com as mudanças confirmadas.",
@@ -511,10 +524,11 @@ test("revisa uma Proposal ready sem aplicá-la ao Roteiro", async ({ page }, tes
 
   await expect(page.getByText(confirmedActivity, { exact: true })).toBeVisible();
   await expect(page.getByText(proposedActivity, { exact: true })).toHaveCount(0);
-  await Promise.all([
-    page.waitForURL(/\/roteiro\/proposta$/),
-    page.getByRole("link", { name: "Ver proposta" }).click(),
-  ]);
+  await followValidatedLink(
+    page,
+    page.getByRole("link", { name: "Ver proposta" }),
+    /\/roteiro\/proposta$/,
+  );
 
   await expect(page.getByRole("heading", { level: 1, name: "Proposta de Roteiro" })).toBeVisible();
   await expect(page.getByText("Sugestão — ainda não aplicada")).toBeVisible();
@@ -526,12 +540,11 @@ test("revisa uma Proposal ready sem aplicá-la ao Roteiro", async ({ page }, tes
   await expect(page.getByText("Aceitar proposta", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Descartar proposta" })).toBeVisible();
 
-  const backToItinerary = page.getByRole("link", { name: "Voltar para o Roteiro" });
-  await expect(backToItinerary).toHaveAttribute("href", /\/roteiro$/);
-  const itineraryHref = await backToItinerary.getAttribute("href");
-  expect(itineraryHref).not.toBeNull();
-  await page.goto(itineraryHref!);
-  await expect(page).toHaveURL(/\/roteiro$/);
+  await followValidatedLink(
+    page,
+    page.getByRole("link", { name: "Voltar para o Roteiro" }),
+    /\/roteiro$/,
+  );
   await expect(page.getByText(confirmedActivity, { exact: true })).toBeVisible();
   await expect(page.getByText(proposedActivity, { exact: true })).toHaveCount(0);
 });
@@ -546,10 +559,11 @@ test("descarta uma Proposal ready e preserva integralmente o Roteiro", async ({
   const itineraryBefore = await itineraryRepository.findByTripId(tripId);
   await page.goto(`/viagens/${tripId}/roteiro/proposta`);
 
-  await Promise.all([
-    page.waitForURL(/\/roteiro\?propostaDescartada=1$/),
-    page.getByRole("button", { name: "Descartar proposta" }).click(),
-  ]);
+  await submitAndWaitForActionNavigation(
+    page,
+    () => page.getByRole("button", { name: "Descartar proposta" }).click(),
+    /\/roteiro\?propostaDescartada=1$/,
+  );
 
   await expect(page.getByRole("status")).toHaveText(
     "Proposta descartada. Seu Roteiro atual não foi alterado.",
@@ -623,10 +637,11 @@ test("consulta uma Proposal expired somente como referência histórica", async 
 
   await expect(page.getByText(confirmedActivity, { exact: true })).toBeVisible();
   await expect(page.getByText(proposedActivity, { exact: true })).toHaveCount(0);
-  await Promise.all([
-    page.waitForURL(/\/roteiro\/proposta$/),
-    page.getByRole("link", { name: "Ver proposta expirada" }).click(),
-  ]);
+  await followValidatedLink(
+    page,
+    page.getByRole("link", { name: "Ver proposta expirada" }),
+    /\/roteiro\/proposta$/,
+  );
 
   await expect(page.getByText("Proposta expirada — somente referência")).toBeVisible();
   await expect(

@@ -107,7 +107,8 @@ async function generateProposalFromEmptyState(
     return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
   });
   const generatedUrl = /\/roteiro\/proposta\?propostaGerada=[0-9a-f-]+$/i;
-  await Promise.all([actionResponse, generateButton.click()]);
+  const [response] = await Promise.all([actionResponse, generateButton.click()]);
+  await response.finished();
   await expect(page.getByRole("heading", { level: 1, name: "Proposta de Roteiro" })).toBeVisible();
   await expect(page).toHaveURL(generatedUrl);
 

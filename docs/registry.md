@@ -298,6 +298,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-120 | Context Pack do RB-INC-120 — Geração de Proposal E2E Sincronizada | Implementation Context | Draft | 0.1.0 | [rb-inc-120-deterministic-proposal-generation.md](./implementation/context-packs/rb-inc-120-deterministic-proposal-generation.md) |
 | RB-INC-121 | Mutações do Roteiro E2E Sincronizadas pelo Resultado Renderizado | Implementation | Draft | 0.1.0 | [rb-inc-121-deterministic-itinerary-mutations.md](./implementation/increments/rb-inc-121-deterministic-itinerary-mutations.md) |
 | RB-CTX-121 | Context Pack do RB-INC-121 — Mutações do Roteiro E2E Sincronizadas | Implementation Context | Draft | 0.1.0 | [rb-inc-121-deterministic-itinerary-mutations.md](./implementation/context-packs/rb-inc-121-deterministic-itinerary-mutations.md) |
+| RB-INC-122 | Conclusão do Corpo RSC nas Server Actions E2E | Implementation | Draft | 0.1.0 | [rb-inc-122-rsc-response-completion.md](./implementation/increments/rb-inc-122-rsc-response-completion.md) |
+| RB-CTX-122 | Context Pack do RB-INC-122 — Conclusão do Corpo RSC nas Server Actions E2E | Implementation Context | Draft | 0.1.0 | [rb-inc-122-rsc-response-completion.md](./implementation/context-packs/rb-inc-122-rsc-response-completion.md) |
 
 ## Status possíveis
 

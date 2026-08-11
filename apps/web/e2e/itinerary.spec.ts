@@ -22,7 +22,8 @@ async function submitAndExpectActionRedirect(
     return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
   });
 
-  await Promise.all([actionResponse, submit()]);
+  const [response] = await Promise.all([actionResponse, submit()]);
+  await response.finished();
   await expect(page.getByRole("status")).toContainText(expectedStatus);
   await expect(page).toHaveURL(expectedUrl);
 }

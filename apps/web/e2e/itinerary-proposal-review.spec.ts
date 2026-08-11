@@ -192,7 +192,8 @@ async function submitAndWaitForActionNavigation(
     return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
   });
 
-  await Promise.all([actionResponse, page.waitForURL(expectedUrl), submit()]);
+  const [response] = await Promise.all([actionResponse, page.waitForURL(expectedUrl), submit()]);
+  await response.finished();
 }
 
 async function submitPartialAcceptance(

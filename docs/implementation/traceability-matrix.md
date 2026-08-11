@@ -540,3 +540,14 @@ Ao concluir um incremento:
 | defeito | movimentação concluiu o POST, mas a URL anterior ainda foi observada; passou no retry |
 | correção | mensagem de sucesso renderizada precede a assertion da URL |
 | rastreabilidade | issue #280; PR #281 |
+
+## Evidências do RB-INC-122
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-122-rsc-response-completion.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-122-rsc-response-completion.md` |
+| origem | Engineering Validation `31518438255`, attempt 2 |
+| defeito | headers do POST precederam o corpo RSC; 2 cenários passaram somente no retry |
+| correção | `Response.finished()` precede as assertions de UI e URL |
+| rastreabilidade | issue #282; PR pendente |

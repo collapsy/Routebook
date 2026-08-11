@@ -591,8 +591,8 @@ Ao concluir um incremento:
 | origem | Engineering Validation `31530544328`; 1 retry flaky em mobile Chromium |
 | defeito | criação da Activity era observada sem validar e carregar o redirect da Server Action |
 | correção | criação e remoção sincronizadas pelo helper de redirect já consolidado |
-| validação | pendente |
-| rastreabilidade | issue #289; PR pendente |
+| validação | `31534321192` attempts 1 e 2, `31535217769` e `31535676668`: 81 aprovados sem flaky |
+| rastreabilidade | issue #289; PR #290 |
 
 ## Evidências do RB-INC-126
 
@@ -603,8 +603,8 @@ Ao concluir um incremento:
 | origem | Engineering Validation `31532256527`, attempt 1; retry flaky em desktop Chromium |
 | defeito | espera por navegação interna com fragmento não oferecia barreira determinística |
 | correção | `href` validado e destino carregado explicitamente antes das assertions |
-| validação | pendente |
-| rastreabilidade | issue #291; PR pendente |
+| validação | `31534321192` attempts 1 e 2, `31535217769` e `31535676668`: 81 aprovados sem flaky |
+| rastreabilidade | issue #291; PR #292 |
 
 ## Evidências do RB-INC-127
 
@@ -615,8 +615,8 @@ Ao concluir um incremento:
 | origem | Engineering Validation `31532256527`, attempt 2; retry flaky em desktop Chromium |
 | defeito | retorno por link aguardava evento de navegação não determinístico |
 | correção | `href` validado e destino carregado explicitamente |
-| validação | pendente |
-| rastreabilidade | issue #293; PR pendente |
+| validação | `31534321192` attempts 1 e 2, `31535217769` e `31535676668`: 81 aprovados sem flaky |
+| rastreabilidade | issue #293; PR #294 |
 
 ## Evidências do RB-INC-128
 
@@ -626,5 +626,5 @@ Ao concluir um incremento:
 | Context Pack | `docs/implementation/context-packs/rb-inc-128-proposal-navigation-contracts.md` |
 | origem | runs `31532256527` e `31532897047`, ambos com retry flaky em revisão de Proposal |
 | correção | Server Actions usam redirect declarado; links usam `href` validado |
-| validação | pendente |
-| rastreabilidade | issue #295; PR pendente |
+| validação | `31534321192` attempts 1 e 2, `31535217769` e `31535676668`: 81 aprovados sem flaky; Production READY e saudável |
+| rastreabilidade | issue #295; PR #296 |

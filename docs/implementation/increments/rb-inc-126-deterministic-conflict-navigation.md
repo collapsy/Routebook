@@ -52,8 +52,8 @@ com fragmento e não fornece uma barreira de load determinística em todas as ex
 - [x] destino do link é validado antes da navegação;
 - [x] destino com âncora é carregado explicitamente;
 - [x] assertions funcionais posteriores são preservadas;
-- [ ] validações locais estão verdes;
-- [ ] duas matrizes completas no mesmo SHA não possuem flaky annotation.
+- [x] validações locais estão verdes;
+- [x] duas matrizes completas no mesmo SHA não possuem flaky annotation.
 
 ## 6. Testes obrigatórios
 
@@ -61,6 +61,12 @@ com fragmento e não fornece uma barreira de load determinística em todas as ex
 - Playwright `--list`;
 - Engineering Validation executado duas vezes no mesmo SHA.
 
-## 7. Rollback
+## 7. Evidências finais
+
+- PR #292, incorporada à #290;
+- Engineering Validation `31534321192`, attempts 1 e 2: 81 aprovados, sem flaky;
+- validações consolidada `31535217769` e pós-merge `31535676668`: 81 aprovados.
+
+## 8. Rollback
 
 Reverter somente o spec e a documentação.

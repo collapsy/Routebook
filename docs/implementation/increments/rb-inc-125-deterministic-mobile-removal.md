@@ -71,8 +71,8 @@ sem validar o redirect da Server Action nem carregar explicitamente seu destino.
 - [x] remoção aguarda e valida o redirect declarado;
 - [x] destino validado é carregado antes da observação da UI;
 - [x] assertions de URL, conteúdo e persistência são preservadas;
-- [ ] validações locais obrigatórias estão verdes;
-- [ ] duas execuções completas no mesmo SHA terminam sem flaky annotation.
+- [x] validações locais obrigatórias estão verdes;
+- [x] duas execuções completas no mesmo SHA terminam sem flaky annotation.
 
 ## 6. Testes obrigatórios
 
@@ -84,7 +84,15 @@ sem validar o redirect da Server Action nem carregar explicitamente seu destino.
 - `pnpm --filter @routebook/web exec playwright test --list`;
 - Engineering Validation executado duas vezes no mesmo SHA.
 
-## 7. Rollback
+## 7. Evidências finais
+
+- PR principal: #290; merge `d5f9fe32af270590deb4b8fd71da4dab8458648a`;
+- SHA final da ponta: `da003f0efe416ede4a2504ee0ce77d88cf0ca486`;
+- Engineering Validation `31534321192`, attempts 1 e 2: 81 aprovados, sem flaky;
+- validação consolidada `31535217769`: 81 aprovados, sem flaky;
+- validação pós-merge `31535676668`: 81 aprovados, sem flaky.
+
+## 8. Rollback
 
 Reverter somente o spec e a documentação. Não existe alteração de produto, banco ou
 Production.

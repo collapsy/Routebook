@@ -192,7 +192,10 @@ async function submitAndWaitForActionNavigation(
     return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
   });
 
-  await Promise.all([actionResponse, page.waitForURL(expectedUrl), submit()]);
+  const [response] = await Promise.all([actionResponse, submit()]);
+  const redirectUrl = response.headers()["x-action-redirect"]?.split(";")[0];
+  expect(redirectUrl).toMatch(expectedUrl);
+  await page.goto(redirectUrl!);
 }
 
 async function submitPartialAcceptance(

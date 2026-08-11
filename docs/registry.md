@@ -282,6 +282,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-112 | Context Pack do RB-INC-112 — E2E do Aceite Parcial de Itinerary Proposal | Implementation Context | Draft | 0.1.0 | [rb-inc-112-partial-itinerary-proposal-acceptance-e2e.md](./implementation/context-packs/rb-inc-112-partial-itinerary-proposal-acceptance-e2e.md) |
 | RB-INC-113 | Liveness e Readiness Operacionais da Aplicação Web | Implementation | Draft | 0.1.0 | [rb-inc-113-operational-health-checks.md](./implementation/increments/rb-inc-113-operational-health-checks.md) |
 | RB-CTX-113 | Context Pack do RB-INC-113 — Liveness e Readiness Operacionais | Implementation Context | Draft | 0.1.0 | [rb-inc-113-operational-health-checks.md](./implementation/context-packs/rb-inc-113-operational-health-checks.md) |
+| RB-INC-114 | Smoke Operacional Pós-deployment | Implementation | Draft | 0.1.0 | [rb-inc-114-operational-smoke.md](./implementation/increments/rb-inc-114-operational-smoke.md) |
+| RB-CTX-114 | Context Pack do RB-INC-114 — Smoke Operacional Pós-deployment | Implementation Context | Draft | 0.1.0 | [rb-inc-114-operational-smoke.md](./implementation/context-packs/rb-inc-114-operational-smoke.md) |
 
 ## Status possíveis
 

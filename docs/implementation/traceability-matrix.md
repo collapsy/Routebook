@@ -466,4 +466,4 @@ Ao concluir um incremento:
 | Context Pack | `docs/implementation/context-packs/rb-inc-115-approve-adr-017.md` |
 | decisão | RB-ADR-017 versão 0.2.0, estado interno `Approved` |
 | governança | RB-GOV-001, RB-GOV-002 e aprovação humana explícita |
-| rastreabilidade | issue #268; PR a criar |
+| rastreabilidade | issue #268 e PR #269 |

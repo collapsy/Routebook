@@ -38,7 +38,7 @@ Issue: #268.
 
 Branch: `codex/rb-inc-115-approve-adr-017`.
 
-PR: a criar.
+PR: #269.
 
 ## 2. Decisão
 

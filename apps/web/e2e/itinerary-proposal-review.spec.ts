@@ -181,21 +181,37 @@ async function openPartialAcceptance(page: Page, fixture: ProposalFixture): Prom
   await page.getByRole("checkbox", { name: new RegExp(proposedActivity, "i") }).check();
 }
 
-async function submitPartialAcceptance(page: Page, expectedUrl: RegExp): Promise<void> {
+async function submitAndWaitForActionNavigation(
+  page: Page,
+  submit: () => Promise<void>,
+  expectedUrl: RegExp,
+): Promise<void> {
+  const actionPathname = new URL(page.url()).pathname;
+  const actionResponse = page.waitForResponse((response) => {
+    const request = response.request();
+    return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
+  });
+
+  const [response] = await Promise.all([actionResponse, submit()]);
+  const redirectUrl = response.headers()["x-action-redirect"]?.split(";")[0];
+  expect(redirectUrl).toMatch(expectedUrl);
+  await page.goto(redirectUrl!);
+}
+
+async function submitPartialAcceptance(
+  page: Page,
+  submit: () => Promise<void>,
+  expectedUrl: RegExp,
+): Promise<void> {
   const decisionAlert = page
     .locator('section[aria-labelledby="proposal-decision-title"]')
     .getByRole("alert");
-  const outcome = await Promise.race([
-    page.waitForURL(expectedUrl, { timeout: 20_000 }).then(() => ({ kind: "navigated" as const })),
-    decisionAlert.waitFor({ timeout: 20_000 }).then(async () => ({
-      kind: "error" as const,
-      message: await decisionAlert.textContent(),
-    })),
-  ]);
 
-  expect(outcome, `Aceite parcial não navegou: ${JSON.stringify(outcome)}`).toEqual({
-    kind: "navigated",
-  });
+  await submitAndWaitForActionNavigation(page, submit, expectedUrl);
+  if (await decisionAlert.isVisible()) {
+    throw new Error(`Aceite parcial falhou: ${await decisionAlert.textContent()}`);
+  }
+  await expect(page).toHaveURL(expectedUrl);
 }
 
 async function proposalApplicationRows(
@@ -306,16 +322,22 @@ test("aceita parcialmente da UI ao PostgreSQL e reproduz sem reaplicar efeitos",
     await openPartialAcceptance(page, fixture);
     await openPartialAcceptance(replayPage, fixture);
 
-    await page.getByRole("button", { name: "Confirmar seleção" }).click();
-    await submitPartialAcceptance(page, /\/roteiro\?propostaAceita=partial-applied$/);
+    await submitPartialAcceptance(
+      page,
+      () => page.getByRole("button", { name: "Confirmar seleção" }).click(),
+      /\/roteiro\?propostaAceita=partial-applied$/,
+    );
     await expect(page.getByRole("status")).toHaveText(
       "Seleção aplicada. O Roteiro foi atualizado somente com as mudanças confirmadas.",
     );
     await expect(page.getByText(proposedActivity, { exact: true })).toBeVisible();
     await expect(page.getByText(remainingProposedActivity, { exact: true })).toHaveCount(0);
 
-    await replayPage.getByRole("button", { name: "Confirmar seleção" }).click();
-    await submitPartialAcceptance(replayPage, /\/roteiro\?propostaAceita=partial-replay$/);
+    await submitPartialAcceptance(
+      replayPage,
+      () => replayPage.getByRole("button", { name: "Confirmar seleção" }).click(),
+      /\/roteiro\?propostaAceita=partial-replay$/,
+    );
     await expect(replayPage.getByRole("status")).toHaveText(
       "Esta seleção já havia sido aplicada. O Roteiro atualizado foi carregado.",
     );
@@ -391,9 +413,17 @@ test("reproduz o aceite concorrente e rejeita chave nova sem duplicar efeitos", 
     await openAcceptance(replayPage, fixture.tripId);
     await openAcceptance(conflictingPage, fixture.tripId);
 
-    await page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
+    await submitAndWaitForActionNavigation(
+      page,
+      () => page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
+      /\/roteiro\?propostaAceita=applied$/,
+    );
     await expect(page).toHaveURL(/\/roteiro\?propostaAceita=applied$/);
-    await replayPage.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
+    await submitAndWaitForActionNavigation(
+      replayPage,
+      () => replayPage.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
+      /\/roteiro\?propostaAceita=replay$/,
+    );
     await expect(replayPage).toHaveURL(/\/roteiro\?propostaAceita=replay$/);
 
     await expect(replayPage.getByRole("status")).toHaveText(
@@ -547,7 +577,11 @@ test("trata uma Proposal atualizada concorrentemente sem falso sucesso", async (
   const rejectedAt = new Date(Math.max(Date.now(), ready.updatedAt.getTime()) + 1_000);
   await repository.save(rejectItineraryProposal(ready, rejectedAt));
 
-  await page.getByRole("button", { name: "Descartar proposta" }).click();
+  await submitAndWaitForActionNavigation(
+    page,
+    () => page.getByRole("button", { name: "Descartar proposta" }).click(),
+    /\/roteiro\?erroProposta=estado-atualizado$/,
+  );
   await expect(page).toHaveURL(/\/roteiro\?erroProposta=estado-atualizado$/);
 
   await expect(page.locator(".itinerary-feedback")).toHaveText(

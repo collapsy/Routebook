@@ -9,10 +9,10 @@ document_type: architecture_decision_record
 owner: Architecture
 
 status: Published
-version: "0.1.0"
+version: "0.2.0"
 
 created: "2026-07-27"
-last_updated: null
+last_updated: "2026-08-11"
 
 authors:
 
@@ -131,11 +131,11 @@ index: true
 
 ## 1. Status da decisão
 
-**Proposed**
+**Approved**
 
-Este ADR permanece em estado `Proposed` até receber aprovação formal conforme o processo definido no `RB-GOV-002`.
+Este ADR foi aprovado explicitamente pelo responsável humano e owner do projeto em `2026-08-11`, conforme o processo definido no `RB-GOV-002`.
 
-Após sua aprovação:
+A aprovação autoriza a implementação incremental da decisão, preservando os seguintes limites:
 
 * Neon será o Provider inicial de PostgreSQL gerenciado;
 * PostGIS será habilitado por migration controlada;
@@ -1971,3 +1971,14 @@ Branches, histórico e snapshots não substituirão:
 A integração com recursos específicos do Neon permanecerá confinada à infraestrutura e ao pipeline.
 
 O domínio, os casos de uso e os repositories continuarão dependentes somente dos contratos e capacidades padrão do PostgreSQL, permitindo futura migração para outro Provider compatível.
+
+---
+
+## 84. Registro de aprovação
+
+- decisão: **Approved — Neon como Provider inicial de PostgreSQL e PostGIS gerenciado**;
+- reviewer: Ronaldo Gentil (`collapsy`), responsável humano e owner do projeto;
+- approver: Ronaldo Gentil (`collapsy`), responsável humano e owner do projeto;
+- approvedAt: `2026-08-11`;
+- condições: implementação incremental, produção protegida, isolamento de Preview, runtime pooled, migrations por conexão direta, restore testado e portabilidade PostgreSQL preservada;
+- evidência: aprovação humana explícita registrada na issue [#270](https://github.com/collapsy/Routebook/issues/270), antes do provisionamento do Provider.

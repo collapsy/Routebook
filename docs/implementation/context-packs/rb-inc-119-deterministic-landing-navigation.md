@@ -42,6 +42,8 @@ intervalo entre a atualização da URL e a conclusão da renderização do App R
 - run: `31514759756`, attempt 2;
 - cenário: desktop Chromium, landing para Minhas viagens;
 - resultado: 80 passed e 1 flaky aprovado por retry.
+- run combinado `31516435515`: a espera direta pelo heading não acompanhou o
+  lifecycle da navegação mobile; `waitForURL` deve ser registrado antes do click.
 
 ## Leitura obrigatória
 

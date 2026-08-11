@@ -51,9 +51,13 @@ O Engineering Validation `31514759756`, attempt 2, alcançou `/viagens`, mas con
 o heading `Minhas viagens` antes da renderização final. O cenário passou no retry,
 resultando em 80 testes diretos e um flaky.
 
+O primeiro run combinado `31516435515` mostrou que aguardar diretamente o heading
+não representa o lifecycle da navegação. A correção registra `waitForURL` antes do
+click e mantém a assertion do heading depois da conclusão observável da navegação.
+
 ## 3. Escopo
 
-- iniciar a espera pelo heading de destino antes do click;
+- iniciar a espera pela URL de destino antes do click;
 - preservar as assertions explícitas de URL e heading;
 - executar duas matrizes consecutivas no mesmo SHA.
 
@@ -66,7 +70,7 @@ resultando em 80 testes diretos e um flaky.
 
 ## 5. Critérios de aceite
 
-- [x] o click e a espera pelo heading são registrados em conjunto;
+- [x] o click e a espera pela URL são registrados em conjunto;
 - [x] URL `/viagens` e heading `Minhas viagens` continuam validados;
 - [x] configuração e tolerâncias permanecem inalteradas;
 - [ ] documentação, lint, tipagem, testes e build verdes;

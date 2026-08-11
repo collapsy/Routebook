@@ -25,7 +25,7 @@ test("abre a área de produto a partir da landing", async ({ page }) => {
   await page.goto("/");
   const tripsHeading = page.getByRole("heading", { name: "Minhas viagens" });
   await Promise.all([
-    tripsHeading.waitFor(),
+    page.waitForURL(/\/viagens$/),
     page.getByRole("link", { name: "Abrir o RouteBook" }).first().click(),
   ]);
 

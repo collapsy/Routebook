@@ -516,4 +516,5 @@ Ao concluir um incremento:
 | Context Pack | `docs/implementation/context-packs/rb-inc-119-deterministic-landing-navigation.md` |
 | origem | Engineering Validation `31514759756`, attempt 2 |
 | defeito | heading de destino observado depois da URL; cenário passou no retry |
+| refinamento | run `31516435515`, aguardar URL antes do click e heading após navegação |
 | rastreabilidade | issue #276; PR #277 |

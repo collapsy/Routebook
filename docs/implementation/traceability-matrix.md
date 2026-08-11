@@ -518,3 +518,13 @@ Ao concluir um incremento:
 | defeito | heading de destino observado depois da URL; cenário passou no retry |
 | refinamento | run `31516435515`, aguardar URL antes do click e heading após navegação |
 | rastreabilidade | issue #276; PR #277 |
+
+## Evidências do RB-INC-120
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-120-deterministic-proposal-generation.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-120-deterministic-proposal-generation.md` |
+| origem | Engineering Validation `31516435515` |
+| defeito | geração validou URL antes da conclusão observável; passou no retry |
+| rastreabilidade | issue #278; PR a criar |

@@ -409,9 +409,13 @@ test("reproduz o aceite concorrente e rejeita chave nova sem duplicar efeitos", 
     await openAcceptance(replayPage, fixture.tripId);
     await openAcceptance(conflictingPage, fixture.tripId);
 
-    await page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
+    await submitAndWaitForActionResponse(page, () =>
+      page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
+    );
     await expect(page).toHaveURL(/\/roteiro\?propostaAceita=applied$/);
-    await replayPage.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
+    await submitAndWaitForActionResponse(replayPage, () =>
+      replayPage.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
+    );
     await expect(replayPage).toHaveURL(/\/roteiro\?propostaAceita=replay$/);
 
     await expect(replayPage.getByRole("status")).toHaveText(

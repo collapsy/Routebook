@@ -504,4 +504,5 @@ Ao concluir um incremento:
 | origem | Engineering Validation `31513286871` |
 | defeito | 2 cenários flaky aprovados somente após retry |
 | evidência adicional | run `31514212266`, descarte concorrente com a mesma espera frágil |
+| evidência empilhada | run `31515863942`, aceite integral concorrente com a mesma causa |
 | rastreabilidade | issue #274; PR #275 |

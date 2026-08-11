@@ -46,6 +46,8 @@ preservando todos os resultados já exigidos pelos testes.
 - specs: `free-period.spec.ts` e `itinerary-proposal-review.spec.ts`.
 - run da primeira correção: `31514212266`, com os casos originais estáveis e um
   novo flaky de mesma causa no descarte concorrente de Proposal.
+- run empilhado `31515863942`: aceite integral concorrente apresentou a mesma espera
+  tardia entre click e URL.
 
 ## Leitura obrigatória
 

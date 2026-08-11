@@ -61,6 +61,9 @@ A primeira execução da PR, run `31514212266`, confirmou os dois cenários orig
 sem retry e revelou a mesma causa no descarte concorrente de Proposal. Esse terceiro
 caso também passa a aguardar o POST antes da URL, sem ampliar o restante do escopo.
 
+O run empilhado `31515863942` revelou a espera tardia equivalente no aceite integral
+concorrente e em seu replay. As duas submissões passam pelo mesmo helper observável.
+
 ## 3. Escopo
 
 - registrar a espera pelo POST da rota atual antes do click;
@@ -81,6 +84,7 @@ caso também passa a aguardar o POST antes da URL, sem ampliar o restante do esc
 - [x] remoção de período livre registra a espera pelo POST antes do click;
 - [x] aceite parcial registra a espera pelo POST antes do click;
 - [x] descarte concorrente registra a espera pelo POST antes do click;
+- [x] aceite integral concorrente e replay registram a espera antes do click;
 - [x] URL, feedback, conteúdo e persistência permanecem validados;
 - [x] timeout, retry, workers e projetos permanecem inalterados;
 - [ ] documentação, lint, tipagem, testes e build verdes;

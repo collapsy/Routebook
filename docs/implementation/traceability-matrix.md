@@ -553,3 +553,14 @@ Ao concluir um incremento:
 | correção | header `x-action-redirect` é validado e seu destino carregado explicitamente |
 | validação final | run `31520574275`, attempts 1 e 2: 81 aprovados, sem flaky annotation |
 | rastreabilidade | issue #282; PR #283 |
+
+## Evidências do RB-INC-123
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-123-git-preview-deployment.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-123-git-preview-deployment.md` |
+| vínculo Git | projeto `routebook` conectado a `collapsy/Routebook`; produção declarada em `main` |
+| isolamento | `DATABASE_URL` e `BETTER_AUTH_SECRET` sensíveis somente em Preview |
+| Preview automático | pendente do primeiro push após o vínculo Git |
+| rastreabilidade | issue #284; PR pendente |

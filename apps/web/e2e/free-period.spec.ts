@@ -136,9 +136,11 @@ test("remove somente o período livre selecionado e preserva os demais", async (
   const flexiblePeriod = secondDay.getByRole("listitem").filter({
     hasText: "Período livre flexível",
   });
-  await flexiblePeriod
-    .getByRole("button", { name: "Remover Período livre flexível às 13:00 do roteiro" })
-    .click();
+  const removeButton = flexiblePeriod.getByRole("button", {
+    name: "Remover Período livre flexível às 13:00 do roteiro",
+  });
+  await expect(removeButton).toBeEnabled();
+  await removeButton.click();
 
   await expect(page).toHaveURL(/periodoLivreRemovido=1$/);
   await expect(page.getByRole("status")).toContainText("Período livre removido");

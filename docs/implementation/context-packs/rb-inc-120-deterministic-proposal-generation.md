@@ -42,6 +42,8 @@ da Proposal ou do Itinerary.
 - run: `31516435515`;
 - cenário: geração com Recommendation elegível em desktop Chromium;
 - resultado: cenário aprovado somente após retry.
+- primeiro run da PR: `31517303193`, no qual `waitForURL` permaneceu aguardando um
+  evento de lifecycle após a Server Action; conteúdo renderizado passa a ser o sinal.
 
 ## Leitura obrigatória
 

@@ -51,11 +51,15 @@ O Engineering Validation `31516435515` validou a URL antes da conclusão observ�
 da geração em desktop Chromium. O cenário passou no retry e preservou corretamente
 a Proposal e o Itinerary.
 
+O primeiro run da PR, `31517303193`, confirmou que `waitForURL` fica acoplado ao
+lifecycle interno da navegação suave. A sequência final aguarda o POST, depois o
+heading renderizado e somente então valida a URL e o ID.
+
 ## 3. Escopo
 
 - registrar o POST da rota atual antes do click;
-- registrar a URL com `propostaGerada` antes do click;
-- aguardar resposta, URL e click em conjunto;
+- aguardar a resposta POST registrada antes do click;
+- aguardar o heading renderizado antes de validar URL e ID;
 - preservar assertions de conteúdo, persistência e invariância do Itinerary.
 
 ## 4. Fora de escopo
@@ -67,7 +71,7 @@ a Proposal e o Itinerary.
 
 ## 5. Critérios de aceite
 
-- [x] POST e URL esperada são registrados antes do click;
+- [x] POST é registrado antes do click e conteúdo precede a validação da URL;
 - [x] URL e ID gerado continuam explicitamente validados;
 - [x] conteúdo, persistência e Itinerary preservado continuam cobertos;
 - [ ] documentação, lint, tipagem, testes e build verdes;

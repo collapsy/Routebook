@@ -527,4 +527,5 @@ Ao concluir um incremento:
 | Context Pack | `docs/implementation/context-packs/rb-inc-120-deterministic-proposal-generation.md` |
 | origem | Engineering Validation `31516435515` |
 | defeito | geração validou URL antes da conclusão observável; passou no retry |
+| refinamento | run `31517303193`, conteúdo renderizado substitui espera de lifecycle |
 | rastreabilidade | issue #278; PR #279 |

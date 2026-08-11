@@ -57,9 +57,9 @@ mas eram inalcançáveis pela navegação normal da primeira jornada.
 - [x] usuário autorizado gera Proposal somente após ação explícita;
 - [x] estados ready e expired preservam seus rótulos;
 - [x] após aceitar ou descartar, a nova geração volta a ser alcançável;
-- [ ] testes locais, CI e Preview estão verdes;
-- [ ] correção integrada e validada em Production;
-- [ ] RB-INC-129 pode retomar a jornada interrompida.
+- [x] testes locais, CI e Preview estão verdes;
+- [x] correção integrada e validada em Production;
+- [x] RB-INC-129 pode retomar a jornada interrompida.
 
 ## 6. Testes obrigatórios
 
@@ -82,3 +82,13 @@ Reverter o link, as assertions E2E e a documentação deste incremento.
 - Vitest: 163 testes aprovados; cinco suítes de autenticação não iniciaram por ausência
   deliberada de `DATABASE_URL` local e serão executadas no CI isolado;
 - documentação: aprovada com oito avisos preexistentes.
+
+## 9. Evidências integradas
+
+- PR #301 integrada no commit `1568570e`;
+- Engineering Validation `31539117050`: aprovada, com 81 testes responsivos;
+- Documentation Validation e Preview: aprovados;
+- deployment `dpl_Gzf1vWpo6nHTjVyHzu8sdQn7FAa9`: `READY` em Production;
+- smoke produtivo confirmou `Gerar proposta`, estado vazio e geração exclusivamente
+  após ação explícita;
+- a retomada revelou o defeito de duplicação tratado separadamente no RB-INC-131.

@@ -99,10 +99,10 @@ async function generateProposalFromEmptyState(
   await page.goto(`/viagens/${tripId}/roteiro/proposta`);
   await expect(page.getByRole("heading", { name: "Nenhuma proposta disponível" })).toBeVisible();
 
-  await Promise.all([
-    page.waitForURL(/\/roteiro\/proposta\?propostaGerada=[0-9a-f-]+$/i),
-    page.getByRole("button", { name: "Gerar proposta de roteiro" }).click(),
-  ]);
+  const generateButton = page.getByRole("button", { name: "Gerar proposta de roteiro" });
+  await expect(generateButton).toBeEnabled();
+  await generateButton.click();
+  await expect(page).toHaveURL(/\/roteiro\/proposta\?propostaGerada=[0-9a-f-]+$/i);
 
   const proposalId = new URL(page.url()).searchParams.get("propostaGerada");
   expect(proposalId).toMatch(/^[0-9a-f-]{36}$/i);

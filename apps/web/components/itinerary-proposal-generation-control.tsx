@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useSyncExternalStore, useTransition } from "react";
 
 import type { GenerateItineraryProposalActionState } from "@/lib/itinerary-proposal-generation";
 
@@ -8,9 +8,16 @@ type Props = Readonly<{
   action: () => Promise<GenerateItineraryProposalActionState>;
 }>;
 
+const subscribeToHydration = () => () => undefined;
+
 export function ItineraryProposalGenerationControl({ action }: Props) {
   const [state, setState] = useState<GenerateItineraryProposalActionState>({ status: "idle" });
   const [isPending, startTransition] = useTransition();
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    () => true,
+    () => false,
+  );
 
   function generate() {
     if (isPending) return;
@@ -25,7 +32,7 @@ export function ItineraryProposalGenerationControl({ action }: Props) {
     <div>
       <button
         className="product-primary-action"
-        disabled={isPending}
+        disabled={!hydrated || isPending}
         onClick={generate}
         type="button"
       >

@@ -240,6 +240,13 @@ export function ItineraryProposalReview({
           expectedItineraryVersion={expectedItineraryVersion}
           idempotencyKey={idempotencyKey}
           itineraryHref={itineraryHref}
+          partialAcceptanceItems={review.days.flatMap((day) =>
+            day.activities.map((activity) => ({
+              id: activity.id,
+              title: activity.title,
+              dayLabel: day.label,
+            })),
+          )}
           proposalId={review.proposalId}
           tripId={tripId}
         />

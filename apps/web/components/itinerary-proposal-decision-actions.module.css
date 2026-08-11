@@ -36,11 +36,13 @@
   gap: 0.75rem;
 }
 
-.acceptConfirmation {
+.acceptConfirmation,
+.partialConfirmation {
   min-width: min(100%, 24rem);
 }
 
-.acceptConfirmation summary {
+.acceptConfirmation summary,
+.partialConfirmation summary {
   background: var(--primary);
   border: 1px solid var(--primary);
   border-radius: 999px;
@@ -53,24 +55,83 @@
   text-align: center;
 }
 
-.acceptConfirmation summary::-webkit-details-marker {
+.partialConfirmation summary {
+  background: var(--surface);
+  color: var(--primary-strong);
+}
+
+.acceptConfirmation summary::-webkit-details-marker,
+.partialConfirmation summary::-webkit-details-marker {
   display: none;
 }
 
-.acceptConfirmation[open] {
+.acceptConfirmation[open],
+.partialConfirmation[open] {
   background: var(--surface-soft);
   border: 1px solid var(--border);
   border-radius: var(--radius-medium);
   padding: 1rem;
 }
 
-.acceptConfirmation[open] summary {
+.acceptConfirmation[open] summary,
+.partialConfirmation[open] summary {
   margin-bottom: 1rem;
 }
 
-.acceptConfirmation form {
+.acceptConfirmation form,
+.partialConfirmation form {
   display: grid;
   gap: 1rem;
+}
+
+.partialConfirmation fieldset {
+  border: 0;
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+}
+
+.partialConfirmation legend {
+  font-weight: 850;
+  margin-bottom: 0.4rem;
+}
+
+.partialSelectionList {
+  display: grid;
+  gap: 0.65rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.partialSelectionList label {
+  align-items: start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  cursor: pointer;
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.75rem;
+}
+
+.partialSelectionList input {
+  margin-top: 0.2rem;
+}
+
+.partialSelectionList span {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.partialSelectionList small,
+.selectionFeedback {
+  color: var(--foreground-muted);
+}
+
+.selectionFeedback {
+  margin: 0;
 }
 
 .acceptConfirmation label {
@@ -85,6 +146,7 @@
 }
 
 .acceptButton,
+.partialAcceptButton,
 .discardButton {
   border-radius: 999px;
   cursor: pointer;
@@ -92,6 +154,12 @@
   font-weight: 800;
   min-height: 2.75rem;
   padding: 0.7rem 1rem;
+}
+
+.partialAcceptButton {
+  background: var(--primary-strong);
+  border: 1px solid var(--primary-strong);
+  color: var(--primary-foreground);
 }
 
 .acceptButton {
@@ -107,13 +175,16 @@
 }
 
 .acceptButton:disabled,
+.partialAcceptButton:disabled,
 .discardButton:disabled {
   cursor: wait;
   opacity: 0.6;
 }
 
 .acceptButton:focus-visible,
-.acceptConfirmation summary:focus-visible {
+.partialAcceptButton:focus-visible,
+.acceptConfirmation summary:focus-visible,
+.partialConfirmation summary:focus-visible {
   outline: 3px solid color-mix(in oklab, var(--primary) 32%, transparent);
   outline-offset: 3px;
 }
@@ -155,7 +226,9 @@
   .decisionControls,
   .decisionControls > form,
   .acceptConfirmation,
+  .partialConfirmation,
   .acceptButton,
+  .partialAcceptButton,
   .discardButton {
     width: 100%;
   }

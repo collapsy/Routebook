@@ -391,14 +391,10 @@ test("reproduz o aceite concorrente e rejeita chave nova sem duplicar efeitos", 
     await openAcceptance(replayPage, fixture.tripId);
     await openAcceptance(conflictingPage, fixture.tripId);
 
-    await Promise.all([
-      page.waitForURL(/\/roteiro\?propostaAceita=applied$/),
-      page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
-    ]);
-    await Promise.all([
-      replayPage.waitForURL(/\/roteiro\?propostaAceita=replay$/),
-      replayPage.getByRole("button", { name: "Confirmar e aceitar proposta" }).click(),
-    ]);
+    await page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
+    await expect(page).toHaveURL(/\/roteiro\?propostaAceita=applied$/);
+    await replayPage.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
+    await expect(replayPage).toHaveURL(/\/roteiro\?propostaAceita=replay$/);
 
     await expect(replayPage.getByRole("status")).toHaveText(
       "Esta proposta já havia sido aceita. O Roteiro atualizado foi carregado.",

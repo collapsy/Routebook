@@ -56,14 +56,14 @@ também não podem ser removidos isoladamente nem limpos em conjunto.
 
 ## 5. Critérios de aceite
 
-- [ ] pesquisa básica preserva os demais filtros;
-- [ ] categoria, distância e Price Range afetam lista e mapa igualmente;
-- [ ] distância usa a Hospedagem e permanece identificada como geodésica estimada;
-- [ ] Price Range ausente é exibido como indisponível, nunca gratuito;
-- [ ] filtros ativos são visíveis, removíveis isoladamente e limpáveis em conjunto;
-- [ ] estado sem resultados orienta limpar ou ampliar filtros;
-- [ ] experiência funciona por teclado e em viewport móvel;
-- [ ] domínio, migration, testes, documentação, CI e Production estão verdes.
+- [x] pesquisa básica preserva os demais filtros;
+- [x] categoria, distância e Price Range afetam lista e mapa igualmente;
+- [x] distância usa a Hospedagem e permanece identificada como geodésica estimada;
+- [x] Price Range ausente é exibido como indisponível, nunca gratuito;
+- [x] filtros ativos são visíveis, removíveis isoladamente e limpáveis em conjunto;
+- [x] estado sem resultados orienta limpar ou ampliar filtros;
+- [x] experiência funciona por teclado e em viewport móvel;
+- [x] domínio, migration, testes, documentação, CI e Production estão verdes.
 
 ## 6. Testes obrigatórios
 
@@ -80,3 +80,21 @@ também não podem ser removidos isoladamente nem limpos em conjunto.
 Reverter UI, filtro, campo opcional e documentação. A coluna nullable pode permanecer
 sem alterar o significado de registros preexistentes; rollback destrutivo de migration
 fica fora deste incremento.
+
+## 8. Evidências de conclusão
+
+- implementação: PR #307, squash merge `10943fca21da967269ec1b30f12c4912037f0629`;
+- CI: Engineering Validation, Documentation Validation e Preview verdes, incluindo
+  migration PostgreSQL, testes e E2E responsivo;
+- deploy: `dpl_73NWcYLAD2SY9zKY2DYh8XNCjgP9`, target Production e estado `READY`;
+- banco: migration Neon `311f2142-6e6b-43d0-8a59-d7b1a6602cf6` validada em branch
+  temporária e promovida com aprovação explícita para a branch principal;
+- smoke autenticado: Trip `956badd7-b414-4606-96e6-ffc8025e5567`, com cinco Places
+  no catálogo, pesquisa por `gastronomico`, remoção isolada, filtros combinados de
+  categoria, distância e Price Range, estado vazio e limpeza total;
+- responsividade: viewport 390 × 844 sem overflow horizontal, com todos os controles
+  visíveis e operáveis;
+- observabilidade: health live e ready em 200, banco disponível e nenhum erro de
+  runtime após a promoção da migration;
+- follow-up operacional: issue #308 registra a lacuna de promoção de migrations antes
+  de código dependente em Production.

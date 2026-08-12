@@ -79,7 +79,7 @@ ai_context:
 | RB-INC-067 | RB-BR-PRP-001, RB-BR-PRP-004, RB-BR-PRP-006, RB-BR-PRP-008–009, RB-DATA-001–002, RB-ADR-006 e RB-INC-055, RB-INC-066 | #150 | `codex/rb-inc-067-accepted-persistence`, PR #151 | persistência e round trip de Proposal `accepted` | validações locais verdes; run 30721948930 com migrations, suíte integral, build e 56 E2E responsivos verdes | Pronto para integração |
 | RB-INC-068 | RB-BR-ITN-015–019, RB-BR-PRP-005–010, RB-ARC-002, RB-DATA-001–002 e RB-INC-066–067 | #152 | `codex/rb-inc-068-apply-proposal-items-contract`, PR #153 | contrato público `ApplyProposalItems` pertencente ao Itinerary Planning | 56 testes do módulo; run 30722787307 com migrations, suíte integral, build e 56 E2E concluídos | Pronto para integração |
 | RB-INC-069 | RB-ADR-027, RB-BR-PRP-006, RB-BR-PRP-009–010, RB-DATA-001–002 e RB-INC-068 | #159 | `feature/rb-inc-069-proposal-application-core`, PR #162 | núcleo de Proposal Application, fingerprint idempotente e lifecycle auditável | runs 30725223887 e 30725223889; 180 documentos, lint, typecheck, migrations, suíte integral, build e E2E responsivo verdes | Integrado |
-| RB-INC-070 | RB-ADR-027, RB-BR-ITN-015–019, RB-BR-PRP-005–010, RB-DATA-001–002 e RB-INC-068–069 | #163 | `feature/rb-inc-070-apply-proposal-items-domain`, PR #164 | aplicação pura das operações `add`, `move`, `update` e `remove` sobre cópia profunda do Itinerary | runs 30727788663 e 30727788669; 182 documentos, migrations, suíte integral, build e E2E responsivo verdes | Integrado |
+| RB-INC-070 | RB-ADR-027, RB-BR-ITN-015–019, RB-BR-PRP-005–010, RB-DATA-001–002 e RB-INC-068–069 | #163 | `feature/rb-inc-070-apply-proposal-items-domain`, PR #164 | aplicação pura das operações `add`, `move`, `update` e `remove` sobre cópia profunda do Itinerary | runs 30727788663 e 30727788669; 182 documentos, lint, typecheck, migrations, suíte integral, build e E2E responsivo verdes | Integrado |
 | RB-INC-071 | RB-ADR-006, RB-ADR-027, RB-DATA-001–002 e RB-INC-069–070 | #165 | `feature/rb-inc-071-proposal-application-persistence`, PR #166 | migration 0018, repository PostgreSQL, reidratação, fingerprint e lifecycle idempotente | runs 30728527007 e 30728527003; migration 0018, suíte integral, build e E2E responsivo verdes | Integrado |
 | RB-INC-072 | RB-ADR-027, RB-ARC-002–003 e RB-INC-068–071 | #167 | `feature/rb-inc-072-accept-itinerary-proposal-orchestration`, PR #170 | comando público, fingerprint antecipado, port transacional específico e Application Orchestrator | runs 30729353340 e 30729353334; 186 documentos, suíte integral, build e 56 E2E responsivos verdes | Integrado |
 | RB-INC-073 | RB-ADR-005–006, RB-ADR-027, RB-ARC-003–004, RB-DATA-002 e RB-INC-072 | #168 | `feature/rb-inc-073-postgres-transaction-runner`, PR #171 | runner genérico de transação PostgreSQL, host estrutural e executor escopado | runs 30730017605 e 30730017612; 188 documentos, migrations, suíte integral, build e 56 E2E responsivos verdes | Integrado |
@@ -154,8 +154,8 @@ ai_context:
 | --- | --- |
 | definição do incremento | `docs/implementation/increments/rb-inc-005-traveler-context.md` |
 | agregado e invariantes | `modules/traveler-profile/src/profile.ts` |
-| porta e serviços | `modules/traveler-profile/src/repository.ts` e `src/service.ts` |
-| schema e adapter | `packages/database/src/schema.ts` e `src/traveler-profile-repository.ts` |
+| porta e serviços | `modules/traveler-profile/src/repository.ts` e `modules/traveler-profile/src/service.ts` |
+| schema e adapter | `packages/database/src/schema.ts` e `packages/database/src/traveler-profile-repository.ts` |
 | migration | `packages/database/drizzle/0001_create_traveler_profiles.sql` |
 | configuração | `apps/web/app/viagens/[tripId]/contexto` e `apps/web/components/traveler-context-form.tsx` |
 | resumo | `apps/web/app/viagens/[tripId]/page.tsx` |
@@ -492,7 +492,7 @@ Ao concluir um incremento:
 | secrets | nomes verificados em Preview; valores não registrados |
 | Preview | deployment `dpl_UMDTJft2qDM7Q9fekLBrHxeRnuWY`, estado `READY` |
 | health | liveness `ok`; readiness `ready`; database `available` |
-| runtime | nenhum erro encontrado na janela de uma hora após o smoke autenticado |
+| runtime | nenhum erro encontrado na janela de uma hora após o smoke |
 | CI | run `31512711349` aprovado integralmente |
 
 ## Evidências do RB-INC-118

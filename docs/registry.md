@@ -323,6 +323,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-133 | Context Pack do RB-INC-133 — Gate de Migration de Production | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-133-production-migration-gate.md](./implementation/context-packs/rb-inc-133-production-migration-gate.md) |
 | RB-INC-134 | Acesso Público de Production com Preview Protegido | Implementation | Draft | 0.1.0 | [rb-inc-134-production-public-access.md](./implementation/increments/rb-inc-134-production-public-access.md) |
 | RB-CTX-134 | Context Pack do RB-INC-134 — Acesso Público de Production | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-134-production-public-access.md](./implementation/context-packs/rb-inc-134-production-public-access.md) |
+| RB-INC-135 | Catálogo Real de Pipa para Validação M8 | Implementation | Draft | 0.1.0 | [rb-inc-135-pipa-catalog-m8-readiness.md](./implementation/increments/rb-inc-135-pipa-catalog-m8-readiness.md) |
+| RB-CTX-135 | Context Pack do RB-INC-135 — Catálogo Real de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-135-pipa-catalog-m8-readiness.md](./implementation/context-packs/rb-inc-135-pipa-catalog-m8-readiness.md) |
 
 ## Status possíveis
 

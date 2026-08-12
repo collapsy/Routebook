@@ -1,0 +1,263 @@
+name: Production Release
+
+on:
+  workflow_run:
+    workflows:
+      - Engineering Validation
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: SHA exato de main a promover
+        required: true
+        type: string
+      approve_high_risk_migrations:
+        description: Aprovação humana explícita para migrations de alto risco pendentes
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: production-release
+  cancel-in-progress: false
+
+env:
+  RELEASE_BRANCH: codex/production-release
+
+jobs:
+  resolve-candidate:
+    name: Resolve immutable candidate
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      candidate_sha: ${{ steps.candidate.outputs.candidate_sha }}
+      allow_high_risk: ${{ steps.candidate.outputs.allow_high_risk }}
+    steps:
+      - name: Resolve candidate
+        id: candidate
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          MANUAL_SHA: ${{ inputs.candidate_sha }}
+          MANUAL_APPROVAL: ${{ inputs.approve_high_risk_migrations }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            candidate_sha="$MANUAL_SHA"
+            allow_high_risk="$MANUAL_APPROVAL"
+          else
+            candidate_sha="$WORKFLOW_RUN_SHA"
+            allow_high_risk="false"
+          fi
+
+          if [[ ! "$candidate_sha" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::Candidate SHA inválido."
+            exit 1
+          fi
+
+          echo "candidate_sha=$candidate_sha" >> "$GITHUB_OUTPUT"
+          echo "allow_high_risk=$allow_high_risk" >> "$GITHUB_OUTPUT"
+
+  validate-candidate:
+    name: Validate candidate and migration history
+    needs: resolve-candidate
+    runs-on: ubuntu-latest
+    outputs:
+      release_sha: ${{ steps.refs.outputs.release_sha }}
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.resolve-candidate.outputs.candidate_sha }}
+          fetch-depth: 0
+
+      - name: Fetch protected references
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin \
+            "+refs/heads/main:refs/remotes/origin/main" \
+            "+refs/heads/${RELEASE_BRANCH}:refs/remotes/origin/${RELEASE_BRANCH}"
+
+      - name: Validate ancestry
+        id: refs
+        shell: bash
+        env:
+          CANDIDATE_SHA: ${{ needs.resolve-candidate.outputs.candidate_sha }}
+        run: |
+          set -euo pipefail
+          release_sha="$(git rev-parse "origin/${RELEASE_BRANCH}")"
+          main_sha="$(git rev-parse origin/main)"
+
+          if ! git merge-base --is-ancestor "$CANDIDATE_SHA" "$main_sha"; then
+            echo "::error::Candidate não pertence ao histórico atual de main."
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$release_sha" "$CANDIDATE_SHA"; then
+            echo "::error::Promoção recusada: release branch não é ancestral do candidate."
+            exit 1
+          fi
+
+          echo "release_sha=$release_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Verify successful Engineering Validation for manual release
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/github-script@v8
+        env:
+          CANDIDATE_SHA: ${{ needs.resolve-candidate.outputs.candidate_sha }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const response = await github.rest.actions.listWorkflowRuns({
+              owner,
+              repo,
+              workflow_id: "engineering-validation.yml",
+              head_sha: process.env.CANDIDATE_SHA,
+              event: "push",
+              status: "completed",
+              per_page: 20,
+            });
+            const passed = response.data.workflow_runs.some((run) => run.conclusion === "success");
+            if (!passed) {
+              core.setFailed("Candidate não possui Engineering Validation de push em main concluída com sucesso.");
+            }
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Check migration history policy
+        shell: bash
+        env:
+          CANDIDATE_SHA: ${{ needs.resolve-candidate.outputs.candidate_sha }}
+          RELEASE_SHA: ${{ steps.refs.outputs.release_sha }}
+        run: |
+          set -euo pipefail
+          node scripts/release-migration-policy.mjs \
+            --base-ref "$RELEASE_SHA" \
+            --head-ref "$CANDIDATE_SHA"
+
+  migrate-and-promote:
+    name: Migrate, verify and promote
+    needs:
+      - resolve-candidate
+      - validate-candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: Production
+    env:
+      DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL_DIRECT }}
+      RELEASE_SSH_KEY: ${{ secrets.PRODUCTION_RELEASE_SSH_KEY }}
+      CANDIDATE_SHA: ${{ needs.resolve-candidate.outputs.candidate_sha }}
+      RELEASE_SHA: ${{ needs.validate-candidate.outputs.release_sha }}
+      ALLOW_HIGH_RISK: ${{ needs.resolve-candidate.outputs.allow_high_risk }}
+    steps:
+      - name: Require Production release secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${DATABASE_URL:-}" ]]; then
+            echo "::error::Environment secret PRODUCTION_DATABASE_URL_DIRECT não configurado."
+            exit 1
+          fi
+          if [[ -z "${RELEASE_SSH_KEY:-}" ]]; then
+            echo "::error::Environment secret PRODUCTION_RELEASE_SSH_KEY não configurado."
+            exit 1
+          fi
+
+      - name: Checkout candidate with release deploy key
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.resolve-candidate.outputs.candidate_sha }}
+          fetch-depth: 0
+          ssh-key: ${{ secrets.PRODUCTION_RELEASE_SSH_KEY }}
+
+      - name: Fetch release reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "+refs/heads/${RELEASE_BRANCH}:refs/remotes/origin/${RELEASE_BRANCH}"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Inspect Production migration ledger
+        id: ledger-before
+        run: pnpm db:migration-status
+
+      - name: Classify all pending Production migrations
+        id: migration-policy
+        shell: bash
+        env:
+          LATEST_APPLIED_AT: ${{ steps.ledger-before.outputs.latest_applied_at }}
+        run: |
+          set -euo pipefail
+          node scripts/release-migration-policy.mjs \
+            --base-ref "$RELEASE_SHA" \
+            --head-ref "$CANDIDATE_SHA" \
+            --latest-applied-at "$LATEST_APPLIED_AT" \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Require explicit approval for high-risk migrations
+        if: steps.migration-policy.outputs.migration_risk == 'high' && env.ALLOW_HIGH_RISK != 'true'
+        shell: bash
+        env:
+          PENDING_TAGS: ${{ steps.migration-policy.outputs.pending_tags }}
+          RISK_REASONS: ${{ steps.migration-policy.outputs.risk_reasons }}
+        run: |
+          echo "::error::Migration de alto risco bloqueada. Candidate: ${CANDIDATE_SHA}; migrations: ${PENDING_TAGS}; motivos: ${RISK_REASONS}. Execute novamente via workflow_dispatch com o mesmo SHA e aprovação explícita."
+          exit 1
+
+      - name: Apply pending Production migrations
+        if: steps.migration-policy.outputs.pending_count != '0'
+        run: pnpm db:migrate
+
+      - name: Verify Production migration ledger
+        id: ledger-after
+        run: pnpm db:migration-status
+
+      - name: Require zero pending migrations
+        shell: bash
+        env:
+          PENDING_COUNT: ${{ steps.ledger-after.outputs.pending_count }}
+          PENDING_TAGS: ${{ steps.ledger-after.outputs.pending_tags }}
+        run: |
+          set -euo pipefail
+          if [[ "$PENDING_COUNT" != "0" ]]; then
+            echo "::error::Schema não foi promovido integralmente; migrations ainda pendentes: ${PENDING_TAGS}."
+            exit 1
+          fi
+
+      - name: Promote immutable candidate to Production release branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          current_release="$(git rev-parse "origin/${RELEASE_BRANCH}")"
+          if [[ "$current_release" == "$CANDIDATE_SHA" ]]; then
+            echo "Release branch já aponta para o candidate."
+            exit 0
+          fi
+          if ! git merge-base --is-ancestor "$current_release" "$CANDIDATE_SHA"; then
+            echo "::error::Release branch avançou fora do histórico do candidate; promoção abortada."
+            exit 1
+          fi
+          git push origin "$CANDIDATE_SHA:refs/heads/${RELEASE_BRANCH}"

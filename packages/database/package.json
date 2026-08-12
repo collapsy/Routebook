@@ -8,6 +8,7 @@
   },
   "scripts": {
     "db:migrate": "tsx src/migrate.ts",
+    "db:migration-status": "tsx src/migration-ledger-status.ts",
     "lint": "eslint src --max-warnings=0",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit"

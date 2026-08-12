@@ -19,6 +19,7 @@ on:
       - "compose.yaml"
       - ".env.example"
       - ".github/workflows/engineering-validation.yml"
+      - ".github/workflows/production-release.yml"
   push:
     branches:
       - main
@@ -39,6 +40,7 @@ on:
       - "compose.yaml"
       - ".env.example"
       - ".github/workflows/engineering-validation.yml"
+      - ".github/workflows/production-release.yml"
 
 permissions:
   contents: read
@@ -97,6 +99,9 @@ jobs:
 
       - name: Typecheck
         run: pnpm typecheck
+
+      - name: Test release migration policy
+        run: pnpm test:release-migration-policy
 
       - name: Apply database migrations
         run: pnpm db:migrate

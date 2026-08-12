@@ -7,7 +7,7 @@ owner: Platform and Delivery
 status: Draft
 version: "0.1.0"
 created: "2026-08-11"
-last_updated: "2026-08-11"
+last_updated: "2026-08-12"
 authors: [RouteBook Team]
 tags: [implementation, context-pack, cicd, production, migrations]
 related_documents: [RB-INC-133, RB-CORE-0004, RB-CICD-001, RB-DATA-002, RB-ADR-006, RB-ADR-017, RB-ADR-018, RB-ADR-019, RB-INC-124, RB-INC-132]
@@ -58,20 +58,17 @@ docs/registry.md
 
 ## Estado operacional observado
 
-- `main` canônica inicial: `90c90cb8e95f48a6e799213486d71c63eca00634`;
-- PR #310 integrada por squash em `7c27ebe61c755ec267ad0d4a40b345a02b8c32f0`;
-- Engineering Validation #1467 passou integralmente no SHA integrado de `main`;
-- alteração da Production Branch da Vercel para `codex/production-release` foi confirmada operacionalmente pelo responsável, embora o conector disponível não exponha esse campo específico para leitura;
-- environments GitHub `Preview` e `Production` existem;
-- nomes de secrets GitHub não puderam ser enumerados pela integração;
-- Neon Production está isolado do Preview;
-- ledger Drizzle de Production termina na 0024, embora a alteração da 0025 já esteja no schema;
-- `codex/production-release` permanece no SHA produtivo inicial `90c90cb8e95f48a6e799213486d71c63eca00634`;
+- `main` canônica e candidate validado: `a9c0496eca45d90618808a853eaa692ccafc3702`;
+- PRs #310 e #311 integradas; Documentation Validation #1049 e Engineering Validation #1471 verdes no SHA da correção;
+- Vercel Production acompanha `codex/production-release`, comprovado pelo deployment produtivo após o fast-forward;
+- GitHub Environment `Production` fornece conexão Direct do Neon e a Deploy Key em Base64; a existência e validade foram comprovadas pelo workflow sem enumerar ou expor valores;
 - ruleset ativo aponta exatamente para `refs/heads/codex/production-release`, com `update`, `deletion`, `non_fast_forward` e bypass `DeployKey`;
-- o App interno associado ao `GITHUB_TOKEN` não está disponível como ator selecionável na bypass list observada;
-- a promoção usa Deploy Key dedicada para permitir `Restrict updates` sem bypass pessoal/admin;
-- Production Release #1 (`31556534393`) confirmou os dois secrets existentes, mas falhou no checkout SSH com `error in libcrypto` antes de qualquer leitura do ledger ou migration;
-- a correção passa a transportar a chave privada como Base64, decodificá-la somente no runner, validar formato e autenticação SSH antes de qualquer operação em Production e apagar os arquivos temporários no cleanup.
+- execução automática válida leu 25 registros no ledger, detectou a 0025 pendente e a bloqueou como alto risco por `drop-constraint` e `update-data`, sem migration e sem promoção;
+- após aprovação humana explícita do SHA e da migration, Production Release #3 (`31596977124`) aplicou a 0025, verificou 26 registros, `latestAppliedAt=1786482000000` e zero pendências;
+- `codex/production-release` avançou somente depois da verificação do schema e agora aponta para `a9c0496eca45d90618808a853eaa692ccafc3702`;
+- Vercel deployment `dpl_FBfJuNxULQ64X7NaWzWDTXFAWu1x` está `READY`, `target=production`, originado de `codex/production-release` no mesmo SHA;
+- Production respondeu HTTP 200 e não apresentou logs `error`/`fatal` na janela pós-release verificada;
+- #305 permanece fora deste incremento.
 
 ## Restrições
 
@@ -94,10 +91,9 @@ docs/registry.md
 
 ## Validação
 
-Executar testes unitários da policy e do ledger, validação documental, lint, typecheck,
-migration em PostgreSQL efêmero, suíte integral, build e E2E. Antes de qualquer write
-em Production, validar que o Environment `Production` possui `PRODUCTION_DATABASE_URL_DIRECT`
-e `PRODUCTION_RELEASE_SSH_KEY_B64`, que a chave decodificada autentica no repositório e
-que o ruleset bloqueia updates comuns preservando bypass do mecanismo de Deploy Key.
-A execução automática deve então alcançar o ledger e bloquear a 0025 como alto risco,
-sem aplicar migration ou mover a release branch até aprovação humana explícita.
+
+A cadeia foi comprovada em execução real: CI verde em `main`, autenticação da Deploy Key,
+leitura do ledger, bloqueio automático da 0025 sem write, aprovação humana explícita,
+migration, verificação de zero pendências, fast-forward da referência protegida e
+Production Vercel `READY` no mesmo SHA. O ledger final possui 26 registros e o smoke
+produtivo respondeu HTTP 200 sem erros de runtime observados.

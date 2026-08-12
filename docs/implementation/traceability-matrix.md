@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: "2026-08-09"
+last_updated: "2026-08-11"
 authors:
   - RouteBook Team
 tags:
@@ -688,3 +688,19 @@ Ao concluir um incremento:
 | responsividade | viewport 390 × 844 sem overflow; controles de busca, categoria, distância, preço e aplicação visíveis |
 | operação | live e ready em 200; banco disponível; nenhum erro de runtime após a migration; follow-up #308 aberto |
 | rastreabilidade | issue #304 encerrada pela PR #307; relacionado a #298 e #308 |
+
+
+## Evidências previstas do RB-INC-133
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-133-production-migration-gate.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-133-production-migration-gate.md` |
+| origem | incidente de ordem de deployment observado no RB-INC-132 e issue #308 |
+| release gate | `.github/workflows/production-release.yml` |
+| policy | `scripts/release-migration-policy.mjs` e testes |
+| ledger | `packages/database/src/migration-ledger-status.ts` e testes |
+| referência de Production | `codex/production-release`, inicialmente em `90c90cb8e95f48a6e799213486d71c63eca00634` |
+| estado do banco | leitura somente: 25 registros no ledger, último timestamp `1786301600000` (0024), com 0025 pendente no ledger |
+| segurança | nenhum secret versionado; alto risco bloqueado sem `workflow_dispatch` explícito |
+| rastreabilidade | issue #308; PR pendente |

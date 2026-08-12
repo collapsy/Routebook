@@ -320,6 +320,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-131 | Context Pack do RB-INC-131 — Deduplicação de Place em Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-131-proposal-place-deduplication.md](./implementation/context-packs/rb-inc-131-proposal-place-deduplication.md) |
 | RB-INC-132 | Pesquisa e Filtros Obrigatórios na Descoberta de Places | Implementation | Draft | 0.1.0 | [rb-inc-132-place-discovery-filters.md](./implementation/increments/rb-inc-132-place-discovery-filters.md) |
 | RB-CTX-132 | Context Pack do RB-INC-132 — Pesquisa e Filtros de Places | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-132-place-discovery-filters.md](./implementation/context-packs/rb-inc-132-place-discovery-filters.md) |
+| RB-INC-133 | Gate de Migration antes da Promoção de Production | Implementation | Draft | 0.1.0 | [rb-inc-133-production-migration-gate.md](./implementation/increments/rb-inc-133-production-migration-gate.md) |
+| RB-CTX-133 | Context Pack do RB-INC-133 — Gate de Migration de Production | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-133-production-migration-gate.md](./implementation/context-packs/rb-inc-133-production-migration-gate.md) |
 
 ## Status possíveis
 

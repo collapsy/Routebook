@@ -60,7 +60,9 @@ describe("DrizzlePlaceRepository", () => {
   });
 
   it("carrega o catálogo curado de Pipa com cobertura nas quatro categorias", async () => {
-    const result = await new DrizzlePlaceRepository().listPublished({ destinationId: "pipa-rn-br" });
+    const result = await new DrizzlePlaceRepository().listPublished({
+      destinationId: "pipa-rn-br",
+    });
     const slugs = result.map((place) => place.slug);
     const countsByCategory = result.reduce<Record<string, number>>((counts, place) => {
       counts[place.category] = (counts[place.category] ?? 0) + 1;

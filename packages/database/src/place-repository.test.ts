@@ -58,4 +58,47 @@ describe("DrizzlePlaceRepository", () => {
       "priceRange",
     );
   });
+
+  it("carrega o catálogo curado de Pipa com cobertura nas quatro categorias", async () => {
+    const result = await new DrizzlePlaceRepository().listPublished({ destinationId: "pipa-rn-br" });
+    const slugs = result.map((place) => place.slug);
+    const countsByCategory = result.reduce<Record<string, number>>((counts, place) => {
+      counts[place.category] = (counts[place.category] ?? 0) + 1;
+      return counts;
+    }, {});
+
+    expect(result).toHaveLength(13);
+    expect(new Set(slugs).size).toBe(result.length);
+    expect(countsByCategory).toEqual({
+      beach: 3,
+      gastronomy: 4,
+      nature: 3,
+      nightlife: 3,
+    });
+    expect(slugs).toEqual(
+      expect.arrayContaining([
+        "praia-do-amor",
+        "praia-do-centro",
+        "praia-do-madeiro",
+        "baia-dos-golfinhos",
+        "chapadao-de-pipa",
+        "santuario-ecologico-de-pipa",
+        "centro-gastronomico-de-pipa",
+        "camarao-na-fazenda-pipa",
+        "atelier-de-massas",
+        "o-tal-do-escondidinho",
+        "avenida-baia-dos-golfinhos-noite",
+        "mirante-sunset-bar",
+        "agora-club",
+      ]),
+    );
+
+    for (const place of result) {
+      expect(place.publicationStatus).toBe("published");
+      expect(place.latitude).toBeGreaterThanOrEqual(-90);
+      expect(place.latitude).toBeLessThanOrEqual(90);
+      expect(place.longitude).toBeGreaterThanOrEqual(-180);
+      expect(place.longitude).toBeLessThanOrEqual(180);
+    }
+  });
 });

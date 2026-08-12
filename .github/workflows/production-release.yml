@@ -157,7 +157,7 @@ jobs:
     environment: Production
     env:
       DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL_DIRECT }}
-      RELEASE_SSH_KEY: ${{ secrets.PRODUCTION_RELEASE_SSH_KEY }}
+      RELEASE_SSH_KEY_B64: ${{ secrets.PRODUCTION_RELEASE_SSH_KEY_B64 }}
       CANDIDATE_SHA: ${{ needs.resolve-candidate.outputs.candidate_sha }}
       RELEASE_SHA: ${{ needs.validate-candidate.outputs.release_sha }}
       ALLOW_HIGH_RISK: ${{ needs.resolve-candidate.outputs.allow_high_risk }}
@@ -170,17 +170,50 @@ jobs:
             echo "::error::Environment secret PRODUCTION_DATABASE_URL_DIRECT não configurado."
             exit 1
           fi
-          if [[ -z "${RELEASE_SSH_KEY:-}" ]]; then
-            echo "::error::Environment secret PRODUCTION_RELEASE_SSH_KEY não configurado."
+          if [[ -z "${RELEASE_SSH_KEY_B64:-}" ]]; then
+            echo "::error::Environment secret PRODUCTION_RELEASE_SSH_KEY_B64 não configurado."
             exit 1
           fi
 
-      - name: Checkout candidate with release deploy key
+      - name: Checkout candidate
         uses: actions/checkout@v6
         with:
           ref: ${{ needs.resolve-candidate.outputs.candidate_sha }}
           fetch-depth: 0
-          ssh-key: ${{ secrets.PRODUCTION_RELEASE_SSH_KEY }}
+
+      - name: Prepare and validate release deploy key
+        shell: bash
+        run: |
+          set -euo pipefail
+          key_file="${RUNNER_TEMP}/routebook-production-release"
+          known_hosts="${RUNNER_TEMP}/routebook-github-known-hosts"
+
+          if ! printf '%s' "$RELEASE_SSH_KEY_B64" | base64 --decode > "$key_file"; then
+            echo "::error::Environment secret PRODUCTION_RELEASE_SSH_KEY_B64 não contém Base64 válido."
+            exit 1
+          fi
+          chmod 600 "$key_file"
+
+          if ! ssh-keygen -y -f "$key_file" >/dev/null 2>&1; then
+            echo "::error::Deploy Key decodificada é inválida ou exige passphrase."
+            exit 1
+          fi
+
+          curl --fail --silent --show-error https://api.github.com/meta \
+            | jq -r '.ssh_keys[] | "github.com " + .' \
+            > "$known_hosts"
+          if [[ ! -s "$known_hosts" ]]; then
+            echo "::error::Não foi possível preparar os host keys oficiais do GitHub."
+            exit 1
+          fi
+          chmod 600 "$known_hosts"
+
+          git_ssh_command="ssh -i $key_file -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$known_hosts"
+          echo "GIT_SSH_COMMAND=$git_ssh_command" >> "$GITHUB_ENV"
+
+          GIT_SSH_COMMAND="$git_ssh_command" \
+            git ls-remote "git@github.com:${GITHUB_REPOSITORY}.git" \
+            "refs/heads/${RELEASE_BRANCH}" >/dev/null
 
       - name: Fetch release reference
         shell: bash
@@ -260,4 +293,13 @@ jobs:
             echo "::error::Release branch avançou fora do histórico do candidate; promoção abortada."
             exit 1
           fi
-          git push origin "$CANDIDATE_SHA:refs/heads/${RELEASE_BRANCH}"
+          git push "git@github.com:${GITHUB_REPOSITORY}.git" \
+            "$CANDIDATE_SHA:refs/heads/${RELEASE_BRANCH}"
+
+      - name: Remove release deploy key
+        if: always()
+        shell: bash
+        run: |
+          rm -f \
+            "${RUNNER_TEMP}/routebook-production-release" \
+            "${RUNNER_TEMP}/routebook-github-known-hosts"

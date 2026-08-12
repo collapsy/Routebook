@@ -58,19 +58,21 @@ docs/registry.md
 
 ## Estado operacional observado
 
-- `main` canônica: `90c90cb8e95f48a6e799213486d71c63eca00634`;
-- Vercel ainda trata `main` como origem de Production;
+- `main` canônica inicial: `90c90cb8e95f48a6e799213486d71c63eca00634`;
+- alteração da Production Branch da Vercel para `codex/production-release` foi confirmada operacionalmente pelo responsável, embora o conector disponível não exponha esse campo específico para leitura;
 - environments GitHub `Preview` e `Production` existem;
-- o environment `Production` não possui protection rules observáveis;
 - nomes de secrets GitHub não puderam ser enumerados pela integração;
 - Neon Production está isolado do Preview;
 - ledger Drizzle de Production termina na 0024, embora a alteração da 0025 já esteja no schema;
-- `codex/production-release` foi criada no SHA produtivo atual e não deve avançar fora do novo gate.
+- `codex/production-release` foi criada no SHA produtivo inicial e não deve avançar fora do novo gate;
+- ruleset de branch já aponta exatamente para `refs/heads/codex/production-release`;
+- o App interno associado ao `GITHUB_TOKEN` não está disponível como ator selecionável na bypass list observada;
+- a promoção passa a usar Deploy Key dedicada, com chave privada no Environment `Production`, para permitir `Restrict updates` sem bypass pessoal/admin.
 
 ## Restrições
 
-- nunca logar URL, senha, token ou secret;
-- não presumir que `PRODUCTION_DATABASE_URL_DIRECT` existe;
+- nunca logar URL, senha, token, chave privada ou secret;
+- não presumir que `PRODUCTION_DATABASE_URL_DIRECT` ou `PRODUCTION_RELEASE_SSH_KEY` existe;
 - não usar URL pooled para migrations quando conexão direta for requerida;
 - não permitir alteração de migration histórica;
 - usar o ledger do banco, não apenas o diff Git, para descobrir pendências;
@@ -78,12 +80,15 @@ docs/registry.md
 - não executar alto risco no gatilho automático;
 - `workflow_dispatch` com SHA exato e flag explícita representa a aprovação humana do alto risco;
 - promoção da referência de release é somente fast-forward;
+- `codex/production-release` deve bloquear updates comuns e aceitar bypass pelo mecanismo de Deploy Key usado exclusivamente no workflow de release;
+- não conceder bypass pessoal/admin como caminho normal de promoção;
 - #305 permanece integralmente fora deste Context Pack.
 
 ## Validação
 
 Executar testes unitários da policy e do ledger, validação documental, lint, typecheck,
 migration em PostgreSQL efêmero, suíte integral, build e E2E. Antes do merge, validar
-que Vercel acompanha `codex/production-release` e que o GitHub Environment `Production`
-possui a conexão direta exigida. Nenhuma migration produtiva deve ocorrer durante a
-validação segura sem aprovação explícita.
+que Vercel acompanha `codex/production-release`, que o GitHub Environment `Production`
+possui a conexão direta exigida e a chave privada da Deploy Key de release, e que o
+ruleset bloqueia updates comuns preservando bypass do mecanismo de Deploy Key. Nenhuma
+migration produtiva deve ocorrer durante a validação segura sem aprovação explícita.

@@ -114,16 +114,18 @@ packages/database/drizzle/0026_expand_pipa_catalog_for_m8.sql
 packages/database/drizzle/meta/_journal.json
 packages/database/src/place-repository.test.ts
 apps/web/e2e/place-discovery-filters.spec.ts
+apps/web/e2e/recommendations-experience.spec.ts
 docs/implementation/increments/rb-inc-135-pipa-catalog-m8-readiness.md
 docs/implementation/context-packs/rb-inc-135-pipa-catalog-m8-readiness.md
 docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
 
-O E2E de descoberta foi incluído depois que a primeira execução de Engineering Validation
-comprovou que seu contrato ainda fixava a contagem histórica de cinco Places. A alteração
-permitida nesse arquivo é estritamente a atualização da fixture observável para treze Places;
-não autoriza mudança de comportamento, filtros, mapa ou navegação.
+Os E2Es de descoberta e Recommendations foram incluídos depois que as execuções de
+Engineering Validation comprovaram que seus contratos ainda fixavam o catálogo histórico
+de cinco Places. As alterações permitidas nesses arquivos são estritamente a atualização
+da fixture observável e do conjunto determinístico esperado para treze Places; não
+autorizam mudança de filtros, mapa, navegação ou regras de Recommendation.
 
 Mudanças fora desses paths exigem justificativa objetiva ligada a falha de CI ou contrato
 já existente.
@@ -187,8 +189,9 @@ em PostgreSQL efêmero:
 Não escrever nem limpar os registros `pipa-rn-br` no teardown do teste.
 
 O Playwright de descoberta também deve usar a contagem resultante das migrations em seu
-ambiente efêmero. Valores hardcoded que representem o seed histórico de cinco Places são
-contratos obsoletos depois da 0026.
+ambiente efêmero. O E2E de Recommendations deve preservar a ordem determinística gerada
+pela engine para o catálogo expandido. Valores hardcoded que representem somente o seed
+histórico de cinco Places são contratos obsoletos depois da 0026.
 
 ## 11. CI obrigatório
 

@@ -53,13 +53,16 @@ reaplicar silenciosamente uma migration classificada como de alto risco.
 - exigir `workflow_dispatch` explícito para migrations destrutivas, DML ou de maior risco;
 - executar `pnpm db:migrate` com concorrência exclusiva;
 - verificar que nenhuma migration permaneceu pendente antes de avançar a referência de release;
-- falhar fechado quando secret, ledger, ancestry, CI ou schema não puderem ser comprovados.
+- proteger `codex/production-release` com ruleset que restrinja updates;
+- autenticar o avanço da release branch por Deploy Key de escrita dedicada ao repositório;
+- manter a chave privada da promoção exclusivamente no GitHub Environment `Production`;
+- falhar fechado quando secret, ledger, ancestry, CI, autenticação de release ou schema não puderem ser comprovados.
 
 ## 4. Fora de escopo
 
 - alterar a política de acesso de Production da issue #305;
 - alterar Provider de banco, hosting ou ORM;
-- versionar ou imprimir `DATABASE_URL` ou qualquer secret;
+- versionar ou imprimir `DATABASE_URL`, chave SSH ou qualquer secret;
 - executar migration destrutiva automaticamente;
 - reescrever migrations históricas;
 - corrigir manualmente o ledger de Production neste incremento sem aprovação explícita.
@@ -75,6 +78,7 @@ main
   -> migration segura OU aprovação manual explícita para alto risco
   -> pnpm db:migrate
   -> ledger sem pendências
+  -> autenticação pela Deploy Key de release
   -> fast-forward de codex/production-release para o SHA
   -> Vercel Production acompanha exclusivamente codex/production-release
 ```
@@ -94,14 +98,27 @@ pela política `expand-contract`.
 - [ ] migration é aplicada antes da referência de release avançar;
 - [ ] promoção só ocorre com zero migrations pendentes após o migrator;
 - [ ] conexão direta de Production vem exclusivamente de GitHub Environment secret;
+- [ ] `PRODUCTION_RELEASE_SSH_KEY` contém somente a chave privada da Deploy Key dedicada;
+- [ ] ruleset de `codex/production-release` contém `Restrict updates`, `Restrict deletions` e `Block force pushes`;
+- [ ] bypass do ruleset é concedido ao mecanismo de Deploy Key, sem bypass pessoal/admin usado como caminho normal;
 - [ ] política e leitura de ledger possuem testes automatizados;
 - [ ] Engineering Validation e Documentation Validation passam no mesmo SHA da PR.
 
 ## 7. Configuração operacional requerida
 
-O workflow espera o secret de environment GitHub `Production` chamado
-`PRODUCTION_DATABASE_URL_DIRECT`. O valor deve ser uma conexão direta do projeto Neon
-de Production e nunca deve ser exposto em logs, documentação ou PR.
+O workflow espera dois secrets no GitHub Environment `Production`:
+
+- `PRODUCTION_DATABASE_URL_DIRECT`: conexão direta do projeto Neon de Production;
+- `PRODUCTION_RELEASE_SSH_KEY`: chave privada da Deploy Key dedicada à promoção.
+
+A chave pública correspondente deve ser cadastrada em `Settings > Deploy keys` do
+repositório com `Allow write access`. A chave deve ser exclusiva deste repositório e
+não deve ser reutilizada. O ruleset de `codex/production-release` deve conceder bypass
+a Deploy Keys e habilitar `Restrict updates`; assim, pushes humanos normais permanecem
+bloqueados enquanto o job autenticado pela chave consegue fazer somente o fast-forward
+validado pelo pipeline.
+
+Nenhum valor de secret deve ser exposto em logs, documentação ou PR.
 
 A Vercel deve alterar a Production Branch de `main` para
 `codex/production-release` antes de este incremento ser integrado. Enquanto essa troca
@@ -128,9 +145,11 @@ roll-forward ou procedimento operacional aprovado.
 ## 10. Riscos
 
 - secret direto ausente ou incorreto bloqueia release, por design;
+- Deploy Key ou secret SSH ausente/incorreto bloqueia promoção, por design;
 - drift entre ledger e journal bloqueia release para investigação;
 - a primeira execução detectará a 0025 pendente no ledger e exigirá aprovação manual;
 - proteção inadequada da referência de release pode enfraquecer o gate operacional;
+- conceder bypass pessoal/admin como caminho normal enfraquece a separação entre operação humana e promoção automatizada;
 - mudança da Production Branch da Vercel em ordem incorreta poderia reabrir a janela de race.
 
 ## 11. Evidências de execução
@@ -142,4 +161,6 @@ roll-forward ou procedimento operacional aprovado.
 - leitura somente de Production: ledger com 25 registros e último `created_at`
   `1786301600000`, correspondente à migration 0024;
 - `codex/production-release` criada no SHA `90c90cb8e95f48a6e799213486d71c63eca00634`;
+- ruleset criado e direcionado exatamente a `refs/heads/codex/production-release`;
+- autenticação de promoção alterada para Deploy Key dedicada em vez de `GITHUB_TOKEN` com escrita;
 - nenhuma escrita em Production foi executada durante a implementação.

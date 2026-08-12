@@ -79,7 +79,7 @@ ai_context:
 | RB-INC-067 | RB-BR-PRP-001, RB-BR-PRP-004, RB-BR-PRP-006, RB-BR-PRP-008–009, RB-DATA-001–002, RB-ADR-006 e RB-INC-055, RB-INC-066 | #150 | `codex/rb-inc-067-accepted-persistence`, PR #151 | persistência e round trip de Proposal `accepted` | validações locais verdes; run 30721948930 com migrations, suíte integral, build e 56 E2E responsivos verdes | Pronto para integração |
 | RB-INC-068 | RB-BR-ITN-015–019, RB-BR-PRP-005–010, RB-ARC-002, RB-DATA-001–002 e RB-INC-066–067 | #152 | `codex/rb-inc-068-apply-proposal-items-contract`, PR #153 | contrato público `ApplyProposalItems` pertencente ao Itinerary Planning | 56 testes do módulo; run 30722787307 com migrations, suíte integral, build e 56 E2E concluídos | Pronto para integração |
 | RB-INC-069 | RB-ADR-027, RB-BR-PRP-006, RB-BR-PRP-009–010, RB-DATA-001–002 e RB-INC-068 | #159 | `feature/rb-inc-069-proposal-application-core`, PR #162 | núcleo de Proposal Application, fingerprint idempotente e lifecycle auditável | runs 30725223887 e 30725223889; 180 documentos, lint, typecheck, migrations, suíte integral, build e E2E responsivo verdes | Integrado |
-| RB-INC-070 | RB-ADR-027, RB-BR-ITN-015–019, RB-BR-PRP-005–010, RB-DATA-001–002 e RB-INC-068–069 | #163 | `feature/rb-inc-070-apply-proposal-items-domain`, PR #164 | aplicação pura das operações `add`, `move`, `update` e `remove` sobre cópia profunda do Itinerary | runs 30727788663 e 30727788669; 182 documentos, lint, typecheck, migrations, suíte integral, build e E2E responsivo verdes | Integrado |
+| RB-INC-070 | RB-ADR-027, RB-BR-ITN-015–019, RB-BR-PRP-005–010, RB-DATA-001–002 e RB-INC-068–069 | #163 | `feature/rb-inc-070-apply-proposal-items-domain`, PR #164 | aplicação pura das operações `add`, `move`, `update` e `remove` sobre cópia profunda do Itinerary | runs 30727788663 e 30727788669; 182 documentos, migrations, suíte integral, build e E2E responsivo verdes | Integrado |
 | RB-INC-071 | RB-ADR-006, RB-ADR-027, RB-DATA-001–002 e RB-INC-069–070 | #165 | `feature/rb-inc-071-proposal-application-persistence`, PR #166 | migration 0018, repository PostgreSQL, reidratação, fingerprint e lifecycle idempotente | runs 30728527007 e 30728527003; migration 0018, suíte integral, build e E2E responsivo verdes | Integrado |
 | RB-INC-072 | RB-ADR-027, RB-ARC-002–003 e RB-INC-068–071 | #167 | `feature/rb-inc-072-accept-itinerary-proposal-orchestration`, PR #170 | comando público, fingerprint antecipado, port transacional específico e Application Orchestrator | runs 30729353340 e 30729353334; 186 documentos, suíte integral, build e 56 E2E responsivos verdes | Integrado |
 | RB-INC-073 | RB-ADR-005–006, RB-ADR-027, RB-ARC-003–004, RB-DATA-002 e RB-INC-072 | #168 | `feature/rb-inc-073-postgres-transaction-runner`, PR #171 | runner genérico de transação PostgreSQL, host estrutural e executor escopado | runs 30730017605 e 30730017612; 188 documentos, migrations, suíte integral, build e 56 E2E responsivos verdes | Integrado |
@@ -492,7 +492,7 @@ Ao concluir um incremento:
 | secrets | nomes verificados em Preview; valores não registrados |
 | Preview | deployment `dpl_UMDTJft2qDM7Q9fekLBrHxeRnuWY`, estado `READY` |
 | health | liveness `ok`; readiness `ready`; database `available` |
-| runtime | nenhum erro encontrado na janela de uma hora após o smoke |
+| runtime | nenhum erro encontrado na janela de uma hora após o smoke autenticado |
 | CI | run `31512711349` aprovado integralmente |
 
 ## Evidências do RB-INC-118
@@ -709,3 +709,23 @@ Ao concluir um incremento:
 | Vercel | `dpl_FBfJuNxULQ64X7NaWzWDTXFAWu1x` READY, `target=production`, branch `codex/production-release`, SHA `a9c0496eca45d90618808a853eaa692ccafc3702` |
 | smoke | `https://routebook-one.vercel.app` HTTP 200; nenhum log `error`/`fatal` na janela pós-release |
 | rastreabilidade | issue #308; PRs #310 e #311; entrega operacional comprovada em Production |
+
+## Evidências do RB-INC-134
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-134-production-public-access.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-134-production-public-access.md` |
+| decisão humana | Production pública aprovada em 2026-08-12 |
+| diagnóstico corrigido | URLs geradas de deployment/Preview estavam protegidas; o alias canônico de Production já estava público sob Standard Protection |
+| Vercel Authentication | `Require Log In` ON e `Standard Protection` comprovados no painel; nenhuma mutação de configuração necessária |
+| Production pública | `https://routebook-one.vercel.app` aberta em janela anônima sem login da Vercel |
+| Preview | deployment da PR #315 `dpl_Auqp32VhuWDjmg34oiDC4wdaE1ix` READY e protegido; nenhum Shareable Link/token registrado |
+| autorização anônima | `/viagens` sem sessão redireciona para `/entrar?next=%2Fviagens` antes da consulta autorizada de Trips |
+| health | liveness `200`/`ok`; readiness `200`/`ready`; database `available` |
+| jornada autenticada | evidência do RB-INC-129 no mesmo SHA de aplicação; não reexecutada interativamente neste incremento |
+| runtime | sem `error`, `fatal`, `warning` ou `5xx` na janela de 24 horas consultada |
+| Production | `dpl_Caz5LVTB9P8Di8bG8YFBkvZFPUmW` READY, `target=production`, branch `codex/production-release`, SHA `bd32107bb5d79ddd13baf1472dce0bd4c05b281c` |
+| CI preliminar | Documentation Validation #1055 (`31607305678`) e Engineering Validation #1476 (`31607305719`) verdes no SHA `ffd5acb88c8892453b54c92a1a167d95e9258167` |
+| mudanças de aplicação | nenhuma; sem migration, banco, secret ou código de autenticação/autorização alterado |
+| rastreabilidade | issue #305 e PR #315; gates finais devem permanecer verdes no HEAD definitivo antes do merge |

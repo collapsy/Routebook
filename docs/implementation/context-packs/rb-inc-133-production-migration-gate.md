@@ -5,7 +5,7 @@ description: Delimita o pipeline que promove migrations antes do código depende
 document_type: implementation-context-pack
 owner: Platform and Delivery
 status: Draft
-version: "0.1.1"
+version: "0.1.0"
 created: "2026-08-11"
 last_updated: "2026-08-11"
 authors: [RouteBook Team]

@@ -18,8 +18,7 @@ on:
       - "docs/**"
       - "compose.yaml"
       - ".env.example"
-      - ".github/workflows/engineering-validation.yml"
-      - ".github/workflows/production-release.yml"
+      - ".github/workflows/**"
   push:
     branches:
       - main
@@ -39,8 +38,7 @@ on:
       - "docs/**"
       - "compose.yaml"
       - ".env.example"
-      - ".github/workflows/engineering-validation.yml"
-      - ".github/workflows/production-release.yml"
+      - ".github/workflows/**"
 
 permissions:
   contents: read

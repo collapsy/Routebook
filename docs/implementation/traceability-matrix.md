@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: "2026-08-11"
+last_updated: "2026-08-12"
 authors:
   - RouteBook Team
 tags:
@@ -690,17 +690,22 @@ Ao concluir um incremento:
 | rastreabilidade | issue #304 encerrada pela PR #307; relacionado a #298 e #308 |
 
 
-## Evidências previstas do RB-INC-133
+## Evidências do RB-INC-133
 
 | Evidência | Localização/resultado |
 | --- | --- |
 | definição do incremento | `docs/implementation/increments/rb-inc-133-production-migration-gate.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-133-production-migration-gate.md` |
 | origem | incidente de ordem de deployment observado no RB-INC-132 e issue #308 |
-| release gate | `.github/workflows/production-release.yml` |
-| policy | `scripts/release-migration-policy.mjs` e testes |
-| ledger | `packages/database/src/migration-ledger-status.ts` e testes |
-| referência de Production | `codex/production-release`, inicialmente em `90c90cb8e95f48a6e799213486d71c63eca00634` |
-| estado do banco | leitura somente: 25 registros no ledger, último timestamp `1786301600000` (0024), com 0025 pendente no ledger |
-| segurança | nenhum secret versionado; alto risco bloqueado sem `workflow_dispatch` explícito |
-| rastreabilidade | issue #308; PR pendente |
+| implementação | PR #310; correção operacional PR #311; candidate final `a9c0496eca45d90618808a853eaa692ccafc3702` |
+| CI | Documentation Validation #1049 e Engineering Validation #1471 verdes no SHA final |
+| release gate | `.github/workflows/production-release.yml`; SHA imutável, ledger real, classificação de risco e promoção serializada |
+| segurança | ruleset com update/deletion/non-fast-forward e bypass `DeployKey`; secrets validados sem exposição |
+| fail-closed | Production Release #2 (`31558997377`) bloqueou a 0025 `high` por `drop-constraint`/`update-data` antes de migration ou promoção |
+| aprovação humana | 0025 aprovada explicitamente para `a9c0496eca45d90618808a853eaa692ccafc3702` antes do despacho manual |
+| migration | Production Release #3 (`31596977124`) aplicou `0025_add_place_price_range` com sucesso |
+| ledger final | 26 registros, `latestAppliedAt=1786482000000`, zero pendências |
+| referência de Production | `codex/production-release` promovida por fast-forward para `a9c0496eca45d90618808a853eaa692ccafc3702` somente após o schema |
+| Vercel | `dpl_FBfJuNxULQ64X7NaWzWDTXFAWu1x` READY, `target=production`, branch `codex/production-release`, SHA `a9c0496eca45d90618808a853eaa692ccafc3702` |
+| smoke | `https://routebook-one.vercel.app` HTTP 200; nenhum log `error`/`fatal` na janela pós-release |
+| rastreabilidade | issue #308; PRs #310 e #311; entrega operacional comprovada em Production |

@@ -709,3 +709,23 @@ Ao concluir um incremento:
 | Vercel | `dpl_FBfJuNxULQ64X7NaWzWDTXFAWu1x` READY, `target=production`, branch `codex/production-release`, SHA `a9c0496eca45d90618808a853eaa692ccafc3702` |
 | smoke | `https://routebook-one.vercel.app` HTTP 200; nenhum log `error`/`fatal` na janela pós-release |
 | rastreabilidade | issue #308; PRs #310 e #311; entrega operacional comprovada em Production |
+
+## Evidências do RB-INC-134
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-134-production-public-access.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-134-production-public-access.md` |
+| decisão humana | Production pública aprovada em 2026-08-12 |
+| diagnóstico corrigido | URLs geradas de deployment/Preview estavam protegidas; o alias canônico de Production já estava público sob Standard Protection |
+| Vercel Authentication | `Require Log In` ON e `Standard Protection` comprovados no painel; nenhuma mutação de configuração necessária |
+| Production pública | `https://routebook-one.vercel.app` aberta em janela anônima sem login da Vercel |
+| Preview | deployment da PR #315 `dpl_Auqp32VhuWDjmg34oiDC4wdaE1ix` READY e protegido; nenhum Shareable Link/token registrado |
+| autorização anônima | `/viagens` sem sessão redireciona para `/entrar?next=%2Fviagens` antes da consulta autorizada de Trips |
+| health | liveness `200`/`ok`; readiness `200`/`ready`; database `available` |
+| jornada autenticada | evidência do RB-INC-129 no mesmo SHA de aplicação; não reexecutada interativamente neste incremento |
+| runtime | sem `error`, `fatal`, `warning` ou `5xx` na janela de 24 horas consultada |
+| Production | `dpl_Caz5LVTB9P8Di8bG8YFBkvZFPUmW` READY, `target=production`, branch `codex/production-release`, SHA `bd32107bb5d79ddd13baf1472dce0bd4c05b281c` |
+| CI preliminar | Documentation Validation #1055 (`31607305678`) e Engineering Validation #1476 (`31607305719`) verdes no SHA `ffd5acb88c8892453b54c92a1a167d95e9258167` |
+| mudanças de aplicação | nenhuma; sem migration, banco, secret ou código de autenticação/autorização alterado |
+| rastreabilidade | issue #305 e PR #315; gates finais devem permanecer verdes no HEAD definitivo antes do merge |

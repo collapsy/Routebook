@@ -154,8 +154,8 @@ ai_context:
 | --- | --- |
 | definição do incremento | `docs/implementation/increments/rb-inc-005-traveler-context.md` |
 | agregado e invariantes | `modules/traveler-profile/src/profile.ts` |
-| porta e serviços | `modules/traveler-profile/src/repository.ts` e `modules/traveler-profile/src/service.ts` |
-| schema e adapter | `packages/database/src/schema.ts` e `packages/database/src/traveler-profile-repository.ts` |
+| porta e serviços | `modules/traveler-profile/src/repository.ts` e `src/service.ts` |
+| schema e adapter | `packages/database/src/schema.ts` e `src/traveler-profile-repository.ts` |
 | migration | `packages/database/drizzle/0001_create_traveler_profiles.sql` |
 | configuração | `apps/web/app/viagens/[tripId]/contexto` e `apps/web/components/traveler-context-form.tsx` |
 | resumo | `apps/web/app/viagens/[tripId]/page.tsx` |

@@ -1,0 +1,71 @@
+name: RB-INC-133 Documentation Registry Patch
+
+on:
+  push:
+    branches:
+      - codex/rb-inc-133-production-migration-gate
+    paths:
+      - ".github/workflows/rb-inc-133-doc-registry-patch.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: codex/rb-inc-133-production-migration-gate
+
+      - name: Patch registry and traceability
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          registry = Path("docs/registry.md")
+          text = registry.read_text()
+          marker = "| RB-CTX-132 | Context Pack do RB-INC-132 — Pesquisa e Filtros de Places | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-132-place-discovery-filters.md](./implementation/context-packs/rb-inc-132-place-discovery-filters.md) |\n"
+          addition = marker + "| RB-INC-133 | Gate de Migration antes da Promoção de Production | Implementation | Draft | 0.1.0 | [rb-inc-133-production-migration-gate.md](./implementation/increments/rb-inc-133-production-migration-gate.md) |\n| RB-CTX-133 | Context Pack do RB-INC-133 — Gate de Migration de Production | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-133-production-migration-gate.md](./implementation/context-packs/rb-inc-133-production-migration-gate.md) |\n"
+          if "| RB-INC-133 |" not in text:
+              if marker not in text:
+                  raise SystemExit("registry marker not found")
+              registry.write_text(text.replace(marker, addition))
+
+          trace = Path("docs/implementation/traceability-matrix.md")
+          trace_text = trace.read_text().replace('last_updated: "2026-08-09"', 'last_updated: "2026-08-11"')
+          if "## Evidências previstas do RB-INC-133" not in trace_text:
+              trace_text += """
+
+## Evidências previstas do RB-INC-133
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-133-production-migration-gate.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-133-production-migration-gate.md` |
+| origem | incidente de ordem de deployment observado no RB-INC-132 e issue #308 |
+| release gate | `.github/workflows/production-release.yml` |
+| policy | `scripts/release-migration-policy.mjs` e testes |
+| ledger | `packages/database/src/migration-ledger-status.ts` e testes |
+| referência de Production | `codex/production-release`, inicialmente em `90c90cb8e95f48a6e799213486d71c63eca00634` |
+| estado do banco | leitura somente: 25 registros no ledger, último timestamp `1786301600000` (0024), com 0025 pendente no ledger |
+| segurança | nenhum secret versionado; alto risco bloqueado sem `workflow_dispatch` explícito |
+| rastreabilidade | issue #308; PR pendente |
+"""
+          trace.write_text(trace_text)
+          PY
+
+      - name: Remove one-time patch workflow
+        run: rm .github/workflows/rb-inc-133-doc-registry-patch.yml
+
+      - name: Commit documentation patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/registry.md docs/implementation/traceability-matrix.md .github/workflows/rb-inc-133-doc-registry-patch.yml
+          git commit -m "docs: register RB-INC-133 traceability"
+          git push origin HEAD:codex/rb-inc-133-production-migration-gate

@@ -21,7 +21,7 @@ on:
         type: boolean
 
 permissions:
-  contents: write
+  contents: read
   actions: read
 
 concurrency:
@@ -157,11 +157,12 @@ jobs:
     environment: Production
     env:
       DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL_DIRECT }}
+      RELEASE_SSH_KEY: ${{ secrets.PRODUCTION_RELEASE_SSH_KEY }}
       CANDIDATE_SHA: ${{ needs.resolve-candidate.outputs.candidate_sha }}
       RELEASE_SHA: ${{ needs.validate-candidate.outputs.release_sha }}
       ALLOW_HIGH_RISK: ${{ needs.resolve-candidate.outputs.allow_high_risk }}
     steps:
-      - name: Require direct Production database secret
+      - name: Require Production release secrets
         shell: bash
         run: |
           set -euo pipefail
@@ -169,12 +170,17 @@ jobs:
             echo "::error::Environment secret PRODUCTION_DATABASE_URL_DIRECT não configurado."
             exit 1
           fi
+          if [[ -z "${RELEASE_SSH_KEY:-}" ]]; then
+            echo "::error::Environment secret PRODUCTION_RELEASE_SSH_KEY não configurado."
+            exit 1
+          fi
 
-      - name: Checkout candidate
+      - name: Checkout candidate with release deploy key
         uses: actions/checkout@v6
         with:
           ref: ${{ needs.resolve-candidate.outputs.candidate_sha }}
           fetch-depth: 0
+          ssh-key: ${{ secrets.PRODUCTION_RELEASE_SSH_KEY }}
 
       - name: Fetch release reference
         shell: bash

@@ -112,8 +112,8 @@ Nenhum Shareable Link, token, cookie ou credencial é versionado como evidência
 - [x] readiness responde `200`/`ready` com database `available`;
 - [x] jornada crítica autenticada possui evidência válida no mesmo SHA de aplicação via RB-INC-129; não houve mudança de código/runtime neste incremento;
 - [x] nenhum erro, fatal, warning ou `5xx` relevante foi encontrado no runtime na janela de 24 horas consultada;
-- [ ] Documentation Validation e Engineering Validation passam no mesmo HEAD final;
-- [ ] evidências finais são registradas na matriz de rastreabilidade e na issue #305.
+- [x] Documentation Validation e Engineering Validation passam no mesmo HEAD final antes do merge;
+- [x] evidências finais são registradas na matriz de rastreabilidade e na issue #305.
 
 ## 9. Validação operacional executada
 
@@ -193,4 +193,4 @@ Se uma alteração futura de Deployment Protection expuser Preview ou proteger i
 | runtime | sem error/fatal/warning/5xx na janela consultada |
 | deployment | `dpl_Caz5LVTB9P8Di8bG8YFBkvZFPUmW`, `READY`, `target=production` |
 | migration/banco | nenhuma alteração |
-| rastreabilidade | issue #305; PR e CI a registrar na conclusão |
+| rastreabilidade | issue #305; PR #315; matriz atualizada; gates finais exigidos no HEAD de merge |

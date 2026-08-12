@@ -11,9 +11,7 @@ const journal = {
 
 describe("resolveMigrationLedgerStatus", () => {
   it("identifica migrations pendentes por timestamp contíguo", () => {
-    expect(
-      resolveMigrationLedgerStatus(journal, { count: 1, latestAppliedAt: 1000 }),
-    ).toEqual({
+    expect(resolveMigrationLedgerStatus(journal, { count: 1, latestAppliedAt: 1000 })).toEqual({
       appliedCount: 1,
       latestAppliedAt: 1000,
       pendingCount: 1,
@@ -22,9 +20,7 @@ describe("resolveMigrationLedgerStatus", () => {
   });
 
   it("trata banco sem ledger como totalmente pendente", () => {
-    expect(
-      resolveMigrationLedgerStatus(journal, { count: 0, latestAppliedAt: null }),
-    ).toEqual({
+    expect(resolveMigrationLedgerStatus(journal, { count: 0, latestAppliedAt: null })).toEqual({
       appliedCount: 0,
       latestAppliedAt: null,
       pendingCount: 2,

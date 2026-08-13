@@ -183,6 +183,13 @@
       "when": 1786482000000,
       "tag": "0025_add_place_price_range",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1786549200000,
+      "tag": "0026_expand_pipa_catalog_for_m8",
+      "breakpoints": true
     }
   ]
 }

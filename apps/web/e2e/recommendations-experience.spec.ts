@@ -141,8 +141,16 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
     "Baía dos Golfinhos",
     "Chapadão de Pipa",
     "Praia do Amor",
+    "Praia do Centro",
+    "Santuário Ecológico de Pipa",
+    "Praia do Madeiro",
+    "Agora Club",
+    "Atelier de Massas",
     "Vida Noturna na Avenida Baía dos Golfinhos",
+    "Camarão na Fazenda Pipa",
     "Centro Gastronômico de Pipa",
+    "Mirante Sunset Bar",
+    "O Tal do Escondidinho",
   ]);
 
   const recommendation = page.getByRole("article", {

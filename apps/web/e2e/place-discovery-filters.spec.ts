@@ -17,7 +17,7 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(page.getByRole("heading", { name: /Lugares em Pipa/ })).toBeVisible();
   await expect(
     page.getByRole("list", { name: "Lugares publicados" }).getByRole("listitem"),
-  ).toHaveCount(5);
+  ).toHaveCount(13);
 
   await page.getByLabel("Nome ou termo").fill("gastronomico");
   await page.getByLabel("Faixa de preço").selectOption("moderate");
@@ -53,7 +53,7 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
 
   await page.getByRole("link", { name: "Limpar filtros" }).first().click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares$`));
-  await expect(page.getByRole("heading", { name: "5 lugares encontrados" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "13 lugares encontrados" })).toBeVisible();
 });
 
 test("orienta recuperação quando os filtros não retornam lugares", async ({ page }) => {

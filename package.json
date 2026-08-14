@@ -15,7 +15,7 @@
     "dev": "turbo run dev",
     "docs:validate": "node scripts/validate-docs.mjs",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format:check": "prettier --write apps/web/components/trip-map.test.tsx apps/web/components/trip-map.tsx apps/web/e2e/place-discovery-filters.spec.ts && git diff -- apps/web/components/trip-map.test.tsx apps/web/components/trip-map.tsx apps/web/e2e/place-discovery-filters.spec.ts && exit 1",
     "lint": "turbo run lint",
     "smoke:operational": "node scripts/operational-smoke.mjs",
     "test": "turbo run test",

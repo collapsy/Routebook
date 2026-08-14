@@ -81,18 +81,11 @@ test("mantém marcadores ancorados ao viewport durante pan e zoom", async ({ pag
 
   const centerBeforePan = await map.getAttribute("data-map-center-lng");
   const markerBeforePan = await marker.boundingBox();
-  const mapBox = await map.boundingBox();
-  if (!markerBeforePan || !mapBox || centerBeforePan === null) {
+  if (!markerBeforePan || centerBeforePan === null) {
     throw new Error("Mapa ou marker não disponibilizou geometria para a regressão de pan.");
   }
 
-  const dragStartX = mapBox.x + mapBox.width * 0.72;
-  const dragStartY = mapBox.y + mapBox.height * 0.68;
-  await page.mouse.move(dragStartX, dragStartY);
-  await page.mouse.down();
-  await page.mouse.move(dragStartX + 72, dragStartY + 24, { steps: 6 });
-  await page.mouse.up();
-
+  await map.press("ArrowRight");
   await expect.poll(() => map.getAttribute("data-map-center-lng")).not.toBe(centerBeforePan);
 
   const markerAfterPan = await marker.boundingBox();

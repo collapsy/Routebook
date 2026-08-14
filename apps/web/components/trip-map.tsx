@@ -3,11 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  isValidTripMapPoint,
-  type TripMapPoint,
-  type TripMapPointKind,
-} from "../lib/trip-map";
+import { isValidTripMapPoint, type TripMapPoint, type TripMapPointKind } from "../lib/trip-map";
 
 import styles from "./trip-map.module.css";
 
@@ -62,10 +58,7 @@ type LeafletNamespace = {
     position: LeafletLatLng,
     options: { icon: LeafletDivIcon; keyboard?: boolean },
   ): LeafletLayer;
-  tileLayer(
-    url: string,
-    options: { attribution: string; maxZoom: number },
-  ): LeafletLayer;
+  tileLayer(url: string, options: { attribution: string; maxZoom: number }): LeafletLayer;
 };
 
 declare global {

@@ -49,10 +49,9 @@ describe("TripMap", () => {
     expect(screen.queryByLabelText("Marcadores do mapa")).not.toBeInTheDocument();
     expect(screen.getByRole("list", { name: "Legenda do mapa" })).toBeInTheDocument();
     expect(screen.getAllByText("Condomínio Solar Água").length).toBeGreaterThan(0);
-    expect(screen.getByRole("link", { name: "Ver detalhes" })).toHaveAttribute(
-      "href",
-      "/viagens/trip-1/lugares/praia-do-amor",
-    );
+    expect(
+      screen.getByRole("link", { name: "Lugar salvo: Praia do Amor. Abrir detalhes." }),
+    ).toHaveAttribute("href", "/viagens/trip-1/lugares/praia-do-amor");
 
     const leafletScript = document.head.querySelector<HTMLScriptElement>(
       'script[data-routebook-leaflet="1.9.4"]',

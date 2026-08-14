@@ -90,8 +90,8 @@ function ensureLeafletStylesheet(): void {
   const stylesheet = document.createElement("link");
   stylesheet.rel = "stylesheet";
   stylesheet.href = LEAFLET_CSS_URL;
-  stylesheet.integrity = LEAFLET_CSS_INTEGRITY;
-  stylesheet.crossOrigin = "anonymous";
+  stylesheet.setAttribute("integrity", LEAFLET_CSS_INTEGRITY);
+  stylesheet.setAttribute("crossorigin", "anonymous");
   stylesheet.dataset.routebookLeaflet = LEAFLET_VERSION;
   document.head.append(stylesheet);
 }
@@ -127,8 +127,8 @@ function loadLeaflet(): Promise<LeafletNamespace> {
 
     if (!existingScript) {
       script.src = LEAFLET_SCRIPT_URL;
-      script.integrity = LEAFLET_SCRIPT_INTEGRITY;
-      script.crossOrigin = "anonymous";
+      script.setAttribute("integrity", LEAFLET_SCRIPT_INTEGRITY);
+      script.setAttribute("crossorigin", "anonymous");
       script.dataset.routebookLeaflet = LEAFLET_VERSION;
       document.head.append(script);
     }
@@ -333,7 +333,11 @@ export function TripMap({
               <span>{describePoint(point)}</span>
               <strong>{point.label}</strong>
             </div>
-            {point.href ? <Link href={point.href}>Ver detalhes</Link> : null}
+            {point.href ? (
+              <Link aria-label={`${describePoint(point)}. Abrir detalhes.`} href={point.href}>
+                Ver detalhes
+              </Link>
+            ) : null}
           </li>
         ))}
       </ul>

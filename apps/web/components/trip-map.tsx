@@ -156,14 +156,14 @@ function createMarkerContent(point: TripMapPoint): HTMLElement {
   }
 
   const dot = document.createElement("span");
-  dot.className = styles.markerDot;
+  dot.className = styles.markerDot!;
   dot.setAttribute("aria-hidden", "true");
   if (point.kind === "itinerary-activity" && point.sequence !== undefined) {
     dot.textContent = String(point.sequence);
   }
 
   const label = document.createElement("span");
-  label.className = styles.markerLabel;
+  label.className = styles.markerLabel!;
   label.textContent = point.label;
 
   marker.append(dot, label);
@@ -237,7 +237,7 @@ export function TripMap({
         for (const point of validPoints) {
           const markerContent = createMarkerContent(point);
           const icon = leaflet.divIcon({
-            className: styles.leafletMarkerIcon,
+            className: styles.leafletMarkerIcon!,
             html: markerContent,
             iconAnchor: [MAP_POINT_ICON_SIZE / 2, MAP_POINT_ICON_SIZE / 2],
             iconSize: [MAP_POINT_ICON_SIZE, MAP_POINT_ICON_SIZE],

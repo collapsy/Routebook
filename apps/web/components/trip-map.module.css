@@ -112,19 +112,17 @@
   position: relative;
 }
 
-.mapFrame {
-  border: 0;
+.mapCanvas {
   height: 100%;
-  inset: 0;
   min-height: 22rem;
-  position: absolute;
+  position: relative;
   width: 100%;
+  z-index: 0;
 }
 
-.markerLayer {
-  inset: 0;
-  pointer-events: none;
-  position: absolute;
+.leafletMarkerIcon {
+  background: transparent !important;
+  border: 0 !important;
 }
 
 .marker {
@@ -133,10 +131,8 @@
   display: flex;
   gap: 0.45rem;
   max-width: 12rem;
-  pointer-events: auto;
-  position: absolute;
   text-decoration: none;
-  transform: translate(-0.675rem, -0.675rem);
+  width: max-content;
 }
 
 .markerLabel {
@@ -161,6 +157,23 @@
 .marker:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 4px;
+}
+
+.mapFailure {
+  background: color-mix(in oklab, var(--surface) 94%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  color: var(--foreground-muted);
+  left: 50%;
+  line-height: 1.5;
+  margin: 0;
+  max-width: min(28rem, calc(100% - 2rem));
+  padding: 0.85rem 1rem;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
 }
 
 .locationList {

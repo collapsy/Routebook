@@ -61,10 +61,7 @@ describe("TripMap", () => {
       'link[data-routebook-leaflet="1.9.4"]',
     );
 
-    expect(leafletScript).toHaveAttribute(
-      "src",
-      "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
-    );
+    expect(leafletScript).toHaveAttribute("src", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js");
     expect(leafletScript).toHaveAttribute(
       "integrity",
       "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
@@ -151,7 +148,9 @@ describe("TripMap", () => {
       "Lugar salvo: Praia </script><script>não executar</script> do Amor. Abrir detalhes.",
     );
     expect(markerContents[1]?.querySelector("script")).toBeNull();
-    expect(markerContents[1]).toHaveTextContent("Praia </script><script>não executar</script> do Amor");
+    expect(markerContents[1]).toHaveTextContent(
+      "Praia </script><script>não executar</script> do Amor",
+    );
   });
 
   it("ignores malformed coordinates", () => {

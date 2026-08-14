@@ -108,7 +108,9 @@ test("mantém marcadores ancorados ao viewport durante pan e zoom", async ({ pag
   }
 
   await map.getByRole("button", { name: "Aproximar mapa" }).click();
-  await expect.poll(async () => Number(await map.getAttribute("data-map-zoom"))).toBe(zoomBefore + 1);
+  await expect
+    .poll(async () => Number(await map.getAttribute("data-map-zoom")))
+    .toBe(zoomBefore + 1);
 
   const markerAfterZoom = await marker.boundingBox();
   if (!markerAfterZoom) throw new Error("Marker desapareceu após aplicar zoom.");

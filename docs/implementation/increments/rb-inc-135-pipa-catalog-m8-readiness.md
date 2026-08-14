@@ -7,7 +7,7 @@ owner: Place Catalog and Platform
 status: Draft
 version: "0.1.0"
 created: "2026-08-12"
-last_updated: "2026-08-12"
+last_updated: "2026-08-14"
 authors: [RouteBook Team]
 tags: [implementation, place-catalog, pipa, mvp, m8, data-curation, migrations]
 related_documents: [RB-CORE-0004, RB-PRD-002, RB-DEL-001, RB-DATA-002, RB-QA-001, RB-CICD-001, RB-ADR-018, RB-INC-129, RB-INC-132, RB-INC-133, RB-INC-134]
@@ -219,16 +219,16 @@ A aprovação de merge do código não equivale à aprovação da migration em P
 - [x] gastronomia passa a conter estabelecimentos específicos;
 - [x] vida noturna passa a conter estabelecimentos específicos;
 - [x] teste PostgreSQL valida total, contagem por categoria, slugs e coordenadas válidas;
-- [ ] Documentation Validation e Engineering Validation passam no mesmo SHA final da PR;
-- [ ] PR integrada por squash em `main`;
-- [ ] Engineering Validation pós-merge permanece verde;
-- [ ] Production Release detecta 0026 e bloqueia antes de qualquer write como migration high risk;
-- [ ] responsável aprova explicitamente a 0026 para o SHA candidato exato;
-- [ ] workflow manual aplica 0026 e termina com zero migrations pendentes;
-- [ ] `codex/production-release` avança somente depois do ledger ficar limpo;
-- [ ] Vercel cria deployment Production READY do SHA aprovado;
-- [ ] Production contém 13 Places publicados com distribuição 3/4/3/3;
-- [ ] liveness/readiness e runtime permanecem verdes.
+- [x] Documentation Validation e Engineering Validation passam no mesmo SHA final da PR;
+- [x] PR integrada por squash em `main`;
+- [x] Engineering Validation pós-merge permanece verde;
+- [x] Production Release detecta 0026 e bloqueia antes de qualquer write como migration high risk;
+- [x] responsável aprova explicitamente a 0026 para o SHA candidato exato;
+- [x] workflow manual aplica 0026 e termina com zero migrations pendentes;
+- [x] `codex/production-release` avança somente depois do ledger ficar limpo;
+- [x] Vercel cria deployment Production READY do SHA aprovado;
+- [x] Production contém 13 Places publicados com distribuição 3/4/3/3;
+- [x] liveness/readiness e runtime permanecem verdes.
 
 ## 11. Testes
 
@@ -274,3 +274,25 @@ Após sua conclusão, o próximo incremento recomendado é **RB-INC-136 — Vali
 MVP em Pipa (M8)**, no qual o uso pessoal deve registrar fricções, decisões realmente
 apoiadas pelo produto, feedback qualitativo, riscos e decisão de continuidade sem
 fabricar evidências de experiência humana.
+
+## 14. Evidências finais de Production
+
+| Evidência | Resultado |
+| --- | --- |
+| PR de implementação | PR #317 integrada por squash |
+| candidate/merge SHA | `1853947ec74fcb691224013551aca5d3473535d6` |
+| CI da PR/main | Documentation Validation #1066 e Engineering Validation #1487 (`31659572754`) verdes no SHA do merge |
+| fail-closed | Production Release #7 (`31659851407`) detectou a 0026 pendente, classificou `high` por `insert-data` e bloqueou antes de qualquer write ou promoção |
+| aprovação humana | migration 0026 aprovada explicitamente para o SHA `1853947ec74fcb691224013551aca5d3473535d6` |
+| release manual | Production Release #8 (`31831464393`) executado via `workflow_dispatch` com aprovação high-risk para o candidate exato |
+| ledger antes | 26 migrations aplicadas e `0026_expand_pipa_catalog_for_m8` como única pendência |
+| migration | 0026 aplicada uma única vez pelo pipeline autorizado |
+| ledger depois | 27 migrations aplicadas, `latestAppliedAt=1786549200000`, zero pendências |
+| release branch | `codex/production-release` promovida por fast-forward para `1853947ec74fcb691224013551aca5d3473535d6` somente após ledger limpo |
+| Vercel Production | `dpl_69WBYuB9QezNC6NbGeHkSq7XN77h`, `READY`, `target=production`, branch `codex/production-release`, SHA `1853947ec74fcb691224013551aca5d3473535d6` |
+| catálogo real | 13 Places publicados em `pipa-rn-br`: `beach=3`, `gastronomy=4`, `nature=3`, `nightlife=3` |
+| integridade do catálogo | 13 slugs únicos e 13/13 coordenadas dentro dos limites válidos |
+| liveness | `/api/health/live` HTTP 200, `status=ok` |
+| readiness | `/api/health/ready` HTTP 200, `status=ready`, database `available` |
+| runtime | nenhum `error`, `fatal`, `warning` ou HTTP `5xx` encontrado no deployment novo na janela pós-release consultada |
+| limite M8 | o catálogo está pronto para o piloto, mas nenhuma evidência de experiência humana ou validação qualitativa M8 é inferida deste incremento |

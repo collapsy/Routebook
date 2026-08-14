@@ -56,6 +56,67 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(page.getByRole("heading", { name: "13 lugares encontrados" })).toBeVisible();
 });
 
+test("mantém marcadores ancorados ao viewport durante pan e zoom", async ({ page }) => {
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: `Mapa ancorado ${test.info().project.name} ${Date.now()}`,
+    startDate: "2026-08-22",
+    endDate: "2026-08-24",
+    accommodationName: "Hospedagem central",
+    accommodationAddress: "Pipa, Tibau do Sul — RN",
+    accommodationLatitude: -6.2302,
+    accommodationLongitude: -35.0503,
+  });
+
+  await page.goto(`/viagens/${trip.id}/lugares`);
+
+  const map = page.locator('[data-routebook-map="true"]');
+  await expect(map).toHaveAttribute("data-map-state", "ready", { timeout: 20_000 });
+  await expect(map.getByRole("button", { name: "Aproximar mapa" })).toBeVisible();
+  await expect(map.getByRole("button", { name: "Afastar mapa" })).toBeVisible();
+
+  const marker = map.getByRole("link", {
+    name: "Lugar publicado: Praia do Amor. Abrir detalhes.",
+  });
+  await expect(marker).toBeVisible();
+
+  const centerBeforePan = await map.getAttribute("data-map-center-lng");
+  const markerBeforePan = await marker.boundingBox();
+  const mapBox = await map.boundingBox();
+  if (!markerBeforePan || !mapBox || centerBeforePan === null) {
+    throw new Error("Mapa ou marker não disponibilizou geometria para a regressão de pan.");
+  }
+
+  const dragStartX = mapBox.x + mapBox.width * 0.72;
+  const dragStartY = mapBox.y + mapBox.height * 0.68;
+  await page.mouse.move(dragStartX, dragStartY);
+  await page.mouse.down();
+  await page.mouse.move(dragStartX + 72, dragStartY + 24, { steps: 6 });
+  await page.mouse.up();
+
+  await expect.poll(() => map.getAttribute("data-map-center-lng")).not.toBe(centerBeforePan);
+
+  const markerAfterPan = await marker.boundingBox();
+  if (!markerAfterPan) throw new Error("Marker desapareceu após movimentar o mapa.");
+  expect(
+    Math.hypot(markerAfterPan.x - markerBeforePan.x, markerAfterPan.y - markerBeforePan.y),
+  ).toBeGreaterThan(20);
+
+  const zoomBefore = Number(await map.getAttribute("data-map-zoom"));
+  const markerBeforeZoom = await marker.boundingBox();
+  if (!markerBeforeZoom || !Number.isFinite(zoomBefore)) {
+    throw new Error("Mapa não disponibilizou estado de zoom para a regressão.");
+  }
+
+  await map.getByRole("button", { name: "Aproximar mapa" }).click();
+  await expect.poll(async () => Number(await map.getAttribute("data-map-zoom"))).toBe(zoomBefore + 1);
+
+  const markerAfterZoom = await marker.boundingBox();
+  if (!markerAfterZoom) throw new Error("Marker desapareceu após aplicar zoom.");
+  expect(
+    Math.hypot(markerAfterZoom.x - markerBeforeZoom.x, markerAfterZoom.y - markerBeforeZoom.y),
+  ).toBeGreaterThan(5);
+});
+
 test("orienta recuperação quando os filtros não retornam lugares", async ({ page }) => {
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Descoberta vazia ${test.info().project.name} ${Date.now()}`,

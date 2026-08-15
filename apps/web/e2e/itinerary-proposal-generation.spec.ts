@@ -106,6 +106,73 @@ async function createGenerationFixture(
   return Object.freeze({ tripId: trip.id, placeId, placeTitle });
 }
 
+async function createDensityFixture(tripName: string, candidateCount: number): Promise<string> {
+  const now = new Date();
+  const { trip } = await createAuthenticatedE2ETrip(
+    {
+      name: tripName,
+      startDate: "2026-08-22",
+      endDate: "2026-08-22",
+    },
+    now,
+  );
+  const itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);
+  await new DrizzleItineraryRepository().save(itinerary);
+
+  const database = getDatabase();
+  for (let index = 0; index < candidateCount; index += 1) {
+    const placeId = crypto.randomUUID();
+    const recommendationId = crypto.randomUUID();
+    await database.insert(places).values({
+      id: placeId,
+      destinationId: "pipa-rn",
+      slug: `density-place-${index}-${placeId}`,
+      name: `Lugar de densidade ${index + 1}`,
+      summary: "Opção elegível para validar o teto diário da Proposal.",
+      category: "beach",
+      latitude: -6.23 - index * 0.001,
+      longitude: -35.04 - index * 0.001,
+      addressLabel: "Pipa, Tibau do Sul - RN",
+      publicationStatus: "published",
+      createdAt: now,
+      updatedAt: now,
+    });
+    await database.insert(recommendations).values({
+      id: recommendationId,
+      tripId: trip.id,
+      placeId,
+      status: "presented",
+      contextSnapshot: { schemaVersion: 1, tripId: trip.id },
+      contextFingerprint: recommendationId.replaceAll("-", "").padEnd(64, "0").slice(0, 64),
+      reasons: [
+        {
+          code: "density-e2e",
+          message: `Candidato elegível ${index + 1}.`,
+          evidence: {},
+        },
+      ],
+      limitations: [],
+      score: candidateCount - index,
+      confidenceLevel: "high",
+      confidenceBasis: ["published-place"],
+      validFrom: new Date(now.getTime() - 60_000),
+      expiresAt: new Date(now.getTime() + 86_400_000),
+      generator: "deterministic",
+      policyVersion: "rb-inc-140-e2e",
+      generatedAt: new Date(now.getTime() - 120_000 - index),
+      presentedAt: new Date(now.getTime() - 60_000),
+      resolvedAt: null,
+      linkedDecisionId: null,
+      statusReason: null,
+      supersededByRecommendationId: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  return trip.id;
+}
+
 async function generateProposalFromEmptyState(
   page: Page,
   tripId: string,
@@ -164,7 +231,7 @@ test("gera uma Proposal ready da UI ao PostgreSQL sem alterar o Itinerary", asyn
     tripId: fixture.tripId,
     status: "ready",
     generationMethod: "deterministic-candidate-balancing",
-    generationVersion: "1",
+    generationVersion: "2",
     proposedActivities: [
       expect.objectContaining({
         placeId: fixture.placeId,
@@ -181,6 +248,36 @@ test("gera uma Proposal ready da UI ao PostgreSQL sem alterar o Itinerary", asyn
     await new DrizzleItineraryProposalRepository().findById(fixture.tripId, proposalId),
   ).toEqual(proposal);
   expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
+});
+
+test("limita a densidade diária sem alterar o Itinerary antes do aceite", async ({
+  page,
+}, testInfo) => {
+  const tripId = await createDensityFixture(
+    `Densidade Proposal ${testInfo.project.name} ${Date.now()}`,
+    5,
+  );
+  const itineraryRepository = new DrizzleItineraryRepository();
+  const itineraryBefore = await itineraryRepository.findByTripId(tripId);
+  expect(itineraryBefore).not.toBeNull();
+
+  const proposalId = await generateProposalFromEmptyState(page, tripId);
+  const proposal = await new DrizzleItineraryProposalRepository().findById(tripId, proposalId);
+
+  expect(proposal).toMatchObject({
+    status: "ready",
+    generationVersion: "2",
+  });
+  expect(proposal?.proposedActivities).toHaveLength(3);
+  expect(proposal?.limitations).toContain(
+    "2 candidato(s) elegível(is) não foram propostos porque os Dias disponíveis atingiram a densidade desejada ou foram preservados como vazios intencionais.",
+  );
+  await expect(
+    page.getByText(
+      "2 candidato(s) elegível(is) não foram propostos porque os Dias disponíveis atingiram a densidade desejada ou foram preservados como vazios intencionais.",
+    ),
+  ).toBeVisible();
+  expect(await itineraryRepository.findByTripId(tripId)).toEqual(itineraryBefore);
 });
 
 test("gera Proposal ready sem mudanças quando não há Recommendation elegível", async ({

@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          unexpected="$(git status --short | awk '{print $2}' | grep -Ev '^(apps/web/data/pipa-place-images\.json|apps/web/public/place-images/pipa/)' || true)"
+          unexpected="$(git status --short --untracked-files=all | awk '{print $2}' | grep -Ev '^(apps/web/data/pipa-place-images\.json|apps/web/public/place-images/pipa/)' || true)"
           if [[ -n "$unexpected" ]]; then
             echo "::error::Materialização alterou caminho não autorizado:"
             echo "$unexpected"

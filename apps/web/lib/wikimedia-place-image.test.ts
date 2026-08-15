@@ -50,7 +50,7 @@ describe("normalizeWikimediaImageRecord", () => {
 
   it("rejeita mídia fora dos hosts oficiais", () => {
     const page = commonsPage();
-    const info = page.imageinfo[0];
+    const info = page.imageinfo[0]!;
     expect(
       normalizeWikimediaImageRecord({
         ...page,
@@ -61,7 +61,7 @@ describe("normalizeWikimediaImageRecord", () => {
 
   it("rejeita licença não incluída na política de reutilização do incremento", () => {
     const page = commonsPage();
-    const info = page.imageinfo[0];
+    const info = page.imageinfo[0]!;
     expect(
       normalizeWikimediaImageRecord({
         ...page,
@@ -86,7 +86,8 @@ describe("classifyWikimediaImageMatch", () => {
         { name: "Lagoa de Guaraíras" },
         {
           fileTitle: "File:Lagoa Guaraíras.jpg",
-          description: "Pôr do sol na Lagoa Guaraíras, vista a partir do município de Tibau do Sul/RN.",
+          description:
+            "Pôr do sol na Lagoa Guaraíras, vista a partir do município de Tibau do Sul/RN.",
         },
       ).status,
     ).toBe("secure");
@@ -104,7 +105,7 @@ describe("classifyWikimediaImageMatch", () => {
     ).toBe("ambiguous");
   });
 
-  it("rejeita homônimo sem identidade nem contexto local", () => {
+  it("mantém homônimo ambíguo quando não existe contexto de Pipa", () => {
     expect(
       classifyWikimediaImageMatch(
         { name: "Baía dos Golfinhos" },
@@ -169,6 +170,12 @@ describe("WikimediaCommonsPlaceImageAdapter", () => {
     expect(calledUrl.hostname).toBe("commons.wikimedia.org");
     expect(calledUrl.searchParams.get("gsrnamespace")).toBe("6");
     expect(calledUrl.searchParams.get("iiurlwidth")).toBe("1280");
+    expect(calledUrl.searchParams.get("maxlag")).toBe("1");
+    const init = fetcher.mock.calls[0]?.[1];
+    expect(init?.headers).toMatchObject({
+      "User-Agent": expect.stringContaining("https://github.com/collapsy/Routebook"),
+      "Api-User-Agent": expect.stringContaining("https://github.com/collapsy/Routebook"),
+    });
   });
 
   it("propaga indisponibilidade da fonte sem produzir fallback falso", async () => {

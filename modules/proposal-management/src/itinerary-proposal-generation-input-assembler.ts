@@ -8,10 +8,16 @@ export const eligibleItineraryProposalRecommendationStatuses = ["generated", "pr
 export type EligibleItineraryProposalRecommendationStatus =
   (typeof eligibleItineraryProposalRecommendationStatuses)[number];
 
+export type ItineraryProposalSourceFreePeriod = Readonly<{
+  freePeriodId: string;
+  mode: string;
+}>;
+
 export type ItineraryProposalSourceDay = Readonly<{
   tripDayId: string;
   date: string;
   activities: readonly unknown[];
+  freePeriods?: readonly ItineraryProposalSourceFreePeriod[];
 }>;
 
 export type ItineraryProposalSourceItinerary = Readonly<{
@@ -55,6 +61,8 @@ export type ItineraryProposalGenerationInputAssemblyErrorCode =
   | "invalid-itinerary"
   | "invalid-day"
   | "duplicate-day"
+  | "invalid-free-period"
+  | "duplicate-free-period"
   | "invalid-recommendation"
   | "duplicate-recommendation"
   | "recommendation-trip-mismatch"
@@ -114,6 +122,53 @@ function isValidIsoDate(value: string): boolean {
   return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
 }
 
+function freePeriodCounts(
+  freePeriods: readonly ItineraryProposalSourceFreePeriod[] | undefined,
+  ids: Set<string>,
+): Readonly<{ protectedFreePeriodCount: number; flexibleFreePeriodCount: number }> | undefined {
+  if (freePeriods === undefined) return undefined;
+  if (!Array.isArray(freePeriods)) {
+    throw new ItineraryProposalGenerationInputAssemblyError(
+      "Informe uma coleção válida de Free Periods.",
+      "invalid-free-period",
+    );
+  }
+
+  let protectedFreePeriodCount = 0;
+  let flexibleFreePeriodCount = 0;
+  for (const freePeriod of freePeriods) {
+    if (!freePeriod || typeof freePeriod !== "object") {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Informe um Free Period válido.",
+        "invalid-free-period",
+      );
+    }
+    const freePeriodId = requiredText(
+      freePeriod.freePeriodId,
+      "invalid-free-period",
+      "Informe um FreePeriodId válido.",
+    );
+    if (ids.has(freePeriodId)) {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Cada Free Period deve possuir identidade única no Itinerary.",
+        "duplicate-free-period",
+      );
+    }
+    ids.add(freePeriodId);
+
+    if (freePeriod.mode === "protected") protectedFreePeriodCount += 1;
+    else if (freePeriod.mode === "flexible") flexibleFreePeriodCount += 1;
+    else {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Free Period deve usar modo protected ou flexible.",
+        "invalid-free-period",
+      );
+    }
+  }
+
+  return Object.freeze({ protectedFreePeriodCount, flexibleFreePeriodCount });
+}
+
 function normalizeDays(
   itinerary: ItineraryProposalSourceItinerary,
 ): readonly ItineraryProposalGenerationDay[] {
@@ -132,6 +187,7 @@ function normalizeDays(
   }
 
   const ids = new Set<string>();
+  const freePeriodIds = new Set<string>();
   const days = itinerary.days.map((day) => {
     if (!day || typeof day !== "object") {
       throw new ItineraryProposalGenerationInputAssemblyError(
@@ -154,8 +210,25 @@ function normalizeDays(
       );
     }
     ids.add(tripDayId);
-    return Object.freeze({ tripDayId, date, existingActivityCount: day.activities.length });
+    const counts = freePeriodCounts(day.freePeriods, freePeriodIds);
+    return Object.freeze({
+      tripDayId,
+      date,
+      existingActivityCount: day.activities.length,
+      ...(counts ?? {}),
+    });
   });
+
+  const knownFreePeriodDays = days.filter(
+    (day) =>
+      day.protectedFreePeriodCount !== undefined && day.flexibleFreePeriodCount !== undefined,
+  ).length;
+  if (knownFreePeriodDays !== 0 && knownFreePeriodDays !== days.length) {
+    throw new ItineraryProposalGenerationInputAssemblyError(
+      "O snapshot deve fornecer Free Periods para todos os Dias ou para nenhum deles.",
+      "invalid-day",
+    );
+  }
 
   return Object.freeze(
     days.sort(

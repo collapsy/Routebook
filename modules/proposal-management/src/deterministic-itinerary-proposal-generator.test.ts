@@ -7,6 +7,7 @@ import {
 } from "./itinerary-proposal";
 import {
   DEFAULT_DETERMINISTIC_ACTIVITY_DURATION_MINUTES,
+  DETERMINISTIC_DESIRED_ACTIVITY_COUNT_PER_DAY,
   DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_METHOD,
   DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_VERSION,
   DETERMINISTIC_ITINERARY_PROPOSAL_VALIDITY_HOURS,
@@ -113,6 +114,160 @@ describe("DeterministicItineraryProposalGenerator", () => {
     ).toBe(true);
     expect(result.limitations).toContain(
       `Candidatos sem duração conhecida receberam a estimativa padrão de ${DEFAULT_DETERMINISTIC_ACTIVITY_DURATION_MINUTES} minutos.`,
+    );
+    expect(result.limitations).toContain(
+      "O contexto de Free Periods não foi fornecido; a geração preservou o balanceamento legado por quantidade de Activities e não classificou espaço livre intencional.",
+    );
+  });
+
+  it("preenche Dias elegíveis até a meta de densidade sem ultrapassá-la", async () => {
+    const generator = new DeterministicItineraryProposalGenerator();
+    const candidates = Array.from({ length: 8 }, (_, index) => ({
+      candidateId: `candidate-${index + 1}`,
+      title: `Opção ${index + 1}`,
+      durationMinutes: 60,
+    }));
+
+    const result = await generator.generate(
+      input({
+        days: [
+          {
+            tripDayId: "day-a",
+            date: "2026-08-22",
+            existingActivityCount: 0,
+            protectedFreePeriodCount: 0,
+            flexibleFreePeriodCount: 0,
+          },
+          {
+            tripDayId: "day-b",
+            date: "2026-08-23",
+            existingActivityCount: 1,
+            protectedFreePeriodCount: 0,
+            flexibleFreePeriodCount: 0,
+          },
+        ],
+        candidates,
+      }),
+    );
+
+    expect(result.proposedActivities).toHaveLength(5);
+    const proposedForDayA = result.proposedActivities.filter(
+      (activity) => activity.targetTripDayId === "day-a",
+    );
+    const proposedForDayB = result.proposedActivities.filter(
+      (activity) => activity.targetTripDayId === "day-b",
+    );
+    expect(proposedForDayA).toHaveLength(3);
+    expect(proposedForDayB).toHaveLength(2);
+    expect(1 + proposedForDayB.length).toBe(DETERMINISTIC_DESIRED_ACTIVITY_COUNT_PER_DAY);
+    expect(result.limitations).toContain(
+      "3 candidato(s) elegível(is) não foram propostos porque os Dias disponíveis atingiram a densidade desejada ou foram preservados como vazios intencionais.",
+    );
+  });
+
+  it("preserva Dia vazio intencional com Free Period protected", async () => {
+    const generator = new DeterministicItineraryProposalGenerator();
+
+    const result = await generator.generate(
+      input({
+        days: [
+          {
+            tripDayId: "day-protected",
+            date: "2026-08-22",
+            existingActivityCount: 0,
+            protectedFreePeriodCount: 1,
+            flexibleFreePeriodCount: 0,
+          },
+          {
+            tripDayId: "day-open",
+            date: "2026-08-23",
+            existingActivityCount: 0,
+            protectedFreePeriodCount: 0,
+            flexibleFreePeriodCount: 0,
+          },
+        ],
+        candidates: input().candidates.slice(0, 2),
+      }),
+    );
+
+    expect(result.proposedActivities).toHaveLength(2);
+    expect(
+      result.proposedActivities.every((activity) => activity.targetTripDayId === "day-open"),
+    ).toBe(true);
+  });
+
+  it("mantém Dia com Free Period flexible elegível para sugestão", async () => {
+    const generator = new DeterministicItineraryProposalGenerator();
+
+    const result = await generator.generate(
+      input({
+        days: [
+          {
+            tripDayId: "day-flexible",
+            date: "2026-08-22",
+            existingActivityCount: 0,
+            protectedFreePeriodCount: 0,
+            flexibleFreePeriodCount: 1,
+          },
+        ],
+        candidates: input().candidates.slice(0, 1),
+      }),
+    );
+
+    expect(result.proposedActivities).toEqual([
+      expect.objectContaining({ targetTripDayId: "day-flexible", title: "Praia do Amor" }),
+    ]);
+  });
+
+  it("não fabrica candidatos quando a densidade desejada não pode ser atingida", async () => {
+    const generator = new DeterministicItineraryProposalGenerator();
+
+    const result = await generator.generate(
+      input({
+        days: [
+          {
+            tripDayId: "day-open",
+            date: "2026-08-22",
+            existingActivityCount: 0,
+            protectedFreePeriodCount: 0,
+            flexibleFreePeriodCount: 0,
+          },
+        ],
+        candidates: input().candidates.slice(0, 1),
+      }),
+    );
+
+    expect(result.proposedActivities).toHaveLength(1);
+    expect(result.limitations.some((limitation) => limitation.startsWith("1 candidato"))).toBe(
+      false,
+    );
+  });
+
+  it("usa Free Period protected como capacidade reservada em Dia já planejado", async () => {
+    const generator = new DeterministicItineraryProposalGenerator();
+
+    const result = await generator.generate(
+      input({
+        days: [
+          {
+            tripDayId: "day-partial",
+            date: "2026-08-22",
+            existingActivityCount: 1,
+            protectedFreePeriodCount: 1,
+            flexibleFreePeriodCount: 0,
+          },
+        ],
+        candidates: input().candidates.slice(0, 3),
+      }),
+    );
+
+    expect(result.proposedActivities).toHaveLength(1);
+    expect(result.proposedActivities[0]).toMatchObject({
+      targetTripDayId: "day-partial",
+      proposedOrder: 1,
+    });
+    expect(result.limitations).toContain(
+      "2 candidato(s) elegível(is) não foram propostos porque os Dias disponíveis atingiram a densidade desejada ou foram preservados como vazios intencionais.",
     );
   });
 
@@ -230,6 +385,27 @@ describe("DeterministicItineraryProposalGenerator", () => {
         }),
       ),
     ).rejects.toMatchObject({ code: "duplicate-candidate" });
+  });
+
+  it("rejeita contexto de Free Periods parcial entre Dias", async () => {
+    const generator = new DeterministicItineraryProposalGenerator();
+
+    await expect(
+      generator.generate(
+        input({
+          days: [
+            {
+              tripDayId: "day-known",
+              date: "2026-08-22",
+              existingActivityCount: 0,
+              protectedFreePeriodCount: 0,
+              flexibleFreePeriodCount: 0,
+            },
+            { tripDayId: "day-unknown", date: "2026-08-23", existingActivityCount: 0 },
+          ],
+        }),
+      ),
+    ).rejects.toMatchObject({ code: "invalid-day" });
   });
 
   it("rejeita ProposedActivityIds duplicados produzidos pela factory", async () => {

@@ -5,14 +5,17 @@ import type {
 
 export const DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_METHOD =
   "deterministic-candidate-balancing";
-export const DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_VERSION = "1";
+export const DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_VERSION = "2";
 export const DETERMINISTIC_ITINERARY_PROPOSAL_VALIDITY_HOURS = 24;
 export const DEFAULT_DETERMINISTIC_ACTIVITY_DURATION_MINUTES = 90;
+export const DETERMINISTIC_DESIRED_ACTIVITY_COUNT_PER_DAY = 3;
 
 export type ItineraryProposalGenerationDay = Readonly<{
   tripDayId: string;
   date: string;
   existingActivityCount: number;
+  protectedFreePeriodCount?: number;
+  flexibleFreePeriodCount?: number;
 }>;
 
 export type ItineraryProposalGenerationCandidate = Readonly<{
@@ -92,6 +95,10 @@ function isValidIsoDate(value: string): boolean {
   return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
 }
 
+function hasFreePeriodContext(day: ItineraryProposalGenerationDay): boolean {
+  return day.protectedFreePeriodCount !== undefined && day.flexibleFreePeriodCount !== undefined;
+}
+
 function normalizeDay(day: ItineraryProposalGenerationDay): ItineraryProposalGenerationDay {
   if (!day || typeof day !== "object") {
     throw new DeterministicItineraryProposalGenerationError(
@@ -117,7 +124,38 @@ function normalizeDay(day: ItineraryProposalGenerationDay): ItineraryProposalGen
     );
   }
 
-  return Object.freeze({ tripDayId, date, existingActivityCount: day.existingActivityCount });
+  const hasProtectedCount = day.protectedFreePeriodCount !== undefined;
+  const hasFlexibleCount = day.flexibleFreePeriodCount !== undefined;
+  if (hasProtectedCount !== hasFlexibleCount) {
+    throw new DeterministicItineraryProposalGenerationError(
+      "O contexto de Free Periods deve informar as contagens protected e flexible em conjunto.",
+      "invalid-day",
+    );
+  }
+
+  if (
+    (day.protectedFreePeriodCount !== undefined &&
+      (!Number.isInteger(day.protectedFreePeriodCount) || day.protectedFreePeriodCount < 0)) ||
+    (day.flexibleFreePeriodCount !== undefined &&
+      (!Number.isInteger(day.flexibleFreePeriodCount) || day.flexibleFreePeriodCount < 0))
+  ) {
+    throw new DeterministicItineraryProposalGenerationError(
+      "As contagens de Free Periods devem ser inteiros maiores ou iguais a zero.",
+      "invalid-day",
+    );
+  }
+
+  return Object.freeze({
+    tripDayId,
+    date,
+    existingActivityCount: day.existingActivityCount,
+    ...(day.protectedFreePeriodCount !== undefined
+      ? { protectedFreePeriodCount: day.protectedFreePeriodCount }
+      : {}),
+    ...(day.flexibleFreePeriodCount !== undefined
+      ? { flexibleFreePeriodCount: day.flexibleFreePeriodCount }
+      : {}),
+  });
 }
 
 function normalizeCandidate(
@@ -226,6 +264,14 @@ function normalizedDays(
     ids.add(day.tripDayId);
   }
 
+  const daysWithFreePeriodContext = normalized.filter(hasFreePeriodContext).length;
+  if (daysWithFreePeriodContext !== 0 && daysWithFreePeriodContext !== normalized.length) {
+    throw new DeterministicItineraryProposalGenerationError(
+      "O contexto de Free Periods deve estar disponível para todos os Dias ou para nenhum deles.",
+      "invalid-day",
+    );
+  }
+
   return Object.freeze(
     [...normalized].sort(
       (left, right) =>
@@ -260,7 +306,7 @@ function normalizedCandidates(
   return Object.freeze(normalized);
 }
 
-function nextDay(
+function nextLegacyDay(
   days: readonly ItineraryProposalGenerationDay[],
   activityCounts: ReadonlyMap<string, number>,
 ): ItineraryProposalGenerationDay {
@@ -272,14 +318,62 @@ function nextDay(
   });
 }
 
+function isIntentionallyEmpty(day: ItineraryProposalGenerationDay): boolean {
+  return (
+    hasFreePeriodContext(day) &&
+    day.existingActivityCount === 0 &&
+    (day.protectedFreePeriodCount ?? 0) > 0 &&
+    (day.flexibleFreePeriodCount ?? 0) === 0
+  );
+}
+
+function effectiveDensity(
+  day: ItineraryProposalGenerationDay,
+  activityCounts: ReadonlyMap<string, number>,
+): number {
+  return (
+    (activityCounts.get(day.tripDayId) ?? day.existingActivityCount) +
+    (day.protectedFreePeriodCount ?? 0)
+  );
+}
+
+function nextDensityAwareDay(
+  days: readonly ItineraryProposalGenerationDay[],
+  activityCounts: ReadonlyMap<string, number>,
+): ItineraryProposalGenerationDay | undefined {
+  const eligible = days.filter(
+    (day) =>
+      !isIntentionallyEmpty(day) &&
+      effectiveDensity(day, activityCounts) < DETERMINISTIC_DESIRED_ACTIVITY_COUNT_PER_DAY,
+  );
+  if (eligible.length === 0) return undefined;
+
+  return eligible.reduce((selected, candidate) =>
+    effectiveDensity(candidate, activityCounts) < effectiveDensity(selected, activityCounts)
+      ? candidate
+      : selected,
+  );
+}
+
 function limitationsFor(
   candidates: readonly ItineraryProposalGenerationCandidate[],
+  freePeriodContextKnown: boolean,
+  skippedCandidateCount: number,
 ): readonly string[] {
   const limitations = [
     "A política determinística não consulta horário de funcionamento, disponibilidade, trânsito ou rota viária.",
     "Nenhum horário de início foi definido; a organização temporal exige revisão humana.",
-    "A distribuição considera apenas a carga de Atividades por Dia e não calcula proximidade geográfica.",
   ];
+
+  if (freePeriodContextKnown) {
+    limitations.push(
+      `A densidade diária usa uma heurística conservadora de até ${DETERMINISTIC_DESIRED_ACTIVITY_COUNT_PER_DAY} Activities por Dia, considerando Free Periods protected como capacidade reservada; isso não comprova viabilidade por horário.`,
+    );
+  } else {
+    limitations.push(
+      "O contexto de Free Periods não foi fornecido; a geração preservou o balanceamento legado por quantidade de Activities e não classificou espaço livre intencional.",
+    );
+  }
 
   if (candidates.some((candidate) => candidate.durationMinutes === undefined)) {
     limitations.push(
@@ -290,6 +384,12 @@ function limitationsFor(
   if (candidates.length === 0) {
     limitations.push(
       "Nenhum candidato elegível foi recebido; a proposta não contém mudanças e o Roteiro atual permanece preservado.",
+    );
+  }
+
+  if (skippedCandidateCount > 0) {
+    limitations.push(
+      `${skippedCandidateCount} candidato(s) elegível(is) não foram propostos porque os Dias disponíveis atingiram a densidade desejada ou foram preservados como vazios intencionais.`,
     );
   }
 
@@ -316,14 +416,23 @@ export class DeterministicItineraryProposalGenerator implements ItineraryProposa
 
     const days = normalizedDays(input.days);
     const candidates = normalizedCandidates(input.candidates);
+    const freePeriodContextKnown = days.every(hasFreePeriodContext);
     const activityCounts = new Map(
       days.map((day) => [day.tripDayId, day.existingActivityCount] as const),
     );
     const proposedActivityIds = new Set<string>();
     const proposedActivities: ProposedActivityInput[] = [];
+    let skippedCandidateCount = 0;
 
     candidates.forEach((candidate, index) => {
-      const day = nextDay(days, activityCounts);
+      const day = freePeriodContextKnown
+        ? nextDensityAwareDay(days, activityCounts)
+        : nextLegacyDay(days, activityCounts);
+      if (!day) {
+        skippedCandidateCount += 1;
+        return;
+      }
+
       const proposedOrder = activityCounts.get(day.tripDayId) ?? day.existingActivityCount;
       const proposedActivityId = requiredText(
         input.createProposedActivityId(candidate, index),
@@ -379,17 +488,28 @@ export class DeterministicItineraryProposalGenerator implements ItineraryProposa
       generationMethod: DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_METHOD,
       generationVersion: DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_VERSION,
       proposedActivities: Object.freeze(proposedActivities),
-      criteria: Object.freeze([
-        "Candidatos preservados na ordem recebida.",
-        "Distribuição balanceada pela quantidade de Atividades de cada Dia.",
-        "Novas Atividades anexadas após o conteúdo existente.",
-      ]),
+      criteria: Object.freeze(
+        freePeriodContextKnown
+          ? [
+              "Candidatos preservados na ordem recebida.",
+              `Dias elegíveis recebem sugestões até a densidade conservadora de ${DETERMINISTIC_DESIRED_ACTIVITY_COUNT_PER_DAY} Activities, descontando Free Periods protected da capacidade.`,
+              "Dias vazios protegidos permanecem sem Proposed Activities e Free Periods flexible continuam elegíveis para sugestão.",
+              "Novas Activities são anexadas após o conteúdo existente sem horário inventado.",
+            ]
+          : [
+              "Candidatos preservados na ordem recebida.",
+              "Distribuição balanceada pela quantidade de Atividades de cada Dia.",
+              "Novas Atividades anexadas após o conteúdo existente.",
+            ],
+      ),
       justifications: Object.freeze([
         candidates.length > 0
-          ? "A política determinística mantém a ordem dos candidatos e distribui a carga entre os Dias disponíveis."
+          ? freePeriodContextKnown
+            ? "A política determinística prioriza Dias subpreenchidos, preserva espaço protegido e limita a densidade para evitar sobreplanejamento."
+            : "A política determinística mantém a ordem dos candidatos e distribui a carga entre os Dias disponíveis no modo legado."
           : "Nenhum candidato elegível foi recebido; nenhuma mudança foi proposta.",
       ]),
-      limitations: limitationsFor(candidates),
+      limitations: limitationsFor(candidates, freePeriodContextKnown, skippedCandidateCount),
       planningConflictIds: Object.freeze([]),
       generatedAt,
       validUntil,

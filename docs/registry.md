@@ -332,6 +332,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-138 | Context Pack do RB-INC-138 — Exclusão Segura de Viagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-138-delete-trip.md](./implementation/context-packs/rb-inc-138-delete-trip.md) |
 | RB-INC-139 | Proximidade da Hospedagem em Discovery e Recommendations | Implementation | Draft | 0.1.0 | [rb-inc-139-accommodation-proximity.md](./implementation/increments/rb-inc-139-accommodation-proximity.md) |
 | RB-CTX-139 | Context Pack do RB-INC-139 — Proximidade da Hospedagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-139-accommodation-proximity.md](./implementation/context-packs/rb-inc-139-accommodation-proximity.md) |
+| RB-INC-140 | Densidade Útil do Roteiro e Itinerary Proposals | Implementation | Draft | 0.1.0 | [rb-inc-140-itinerary-density.md](./implementation/increments/rb-inc-140-itinerary-density.md) |
+| RB-CTX-140 | Context Pack do RB-INC-140 — Densidade Útil do Roteiro | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-140-itinerary-density.md](./implementation/context-packs/rb-inc-140-itinerary-density.md) |
 
 ## Status possíveis
 

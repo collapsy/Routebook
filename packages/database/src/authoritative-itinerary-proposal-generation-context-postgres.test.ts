@@ -12,6 +12,7 @@ import {
   itineraries,
   itineraryActivities,
   itineraryDays,
+  itineraryFreePeriods,
   places,
   recommendations,
   trips,
@@ -27,6 +28,8 @@ const itineraryWithoutDaysId = randomUUID();
 const firstDayId = randomUUID();
 const secondDayId = randomUUID();
 const activityId = randomUUID();
+const flexibleFreePeriodId = randomUUID();
+const protectedFreePeriodId = randomUUID();
 const firstPlaceId = randomUUID();
 const secondPlaceId = randomUUID();
 const firstRecommendationId = randomUUID();
@@ -137,6 +140,28 @@ beforeAll(async () => {
     createdAt: now,
     updatedAt: now,
   });
+  await database.insert(itineraryFreePeriods).values([
+    {
+      id: flexibleFreePeriodId,
+      itineraryDayId: firstDayId,
+      mode: "flexible",
+      startTime: "16:00",
+      durationMinutes: 120,
+      order: 1,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: protectedFreePeriodId,
+      itineraryDayId: secondDayId,
+      mode: "protected",
+      startTime: null,
+      durationMinutes: null,
+      order: 1,
+      createdAt: now,
+      updatedAt: now,
+    },
+  ]);
   await database.insert(recommendations).values([
     {
       id: secondRecommendationId,
@@ -198,7 +223,7 @@ afterAll(async () => {
 });
 
 describe("PostgresAuthoritativeItineraryProposalGenerationContextPort", () => {
-  it("carrega um snapshot autoritativo e determinístico da Trip", async () => {
+  it("carrega Activities e Free Periods em snapshot autoritativo e determinístico", async () => {
     const port = createPostgresAuthoritativeItineraryProposalGenerationContextPort(database);
 
     const context = await port.load({ tripId, asOf: now });
@@ -210,11 +235,13 @@ describe("PostgresAuthoritativeItineraryProposalGenerationContextPort", () => {
           tripDayId: firstDayId,
           date: "2026-08-22",
           activities: [{ activityId }],
+          freePeriods: [{ freePeriodId: flexibleFreePeriodId, mode: "flexible" }],
         },
         {
           tripDayId: secondDayId,
           date: "2026-08-23",
           activities: [],
+          freePeriods: [{ freePeriodId: protectedFreePeriodId, mode: "protected" }],
         },
       ],
     });

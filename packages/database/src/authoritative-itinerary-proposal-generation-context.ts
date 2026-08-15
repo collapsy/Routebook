@@ -13,6 +13,7 @@ import {
   itineraries,
   itineraryActivities,
   itineraryDays,
+  itineraryFreePeriods,
   places,
   recommendations,
   trips,
@@ -144,6 +145,30 @@ async function loadContext(
     activitiesByDay.set(row.itineraryDayId, Object.freeze(activities));
   }
 
+  const freePeriodRows = await database
+    .select({
+      id: itineraryFreePeriods.id,
+      itineraryDayId: itineraryFreePeriods.itineraryDayId,
+      mode: itineraryFreePeriods.mode,
+      order: itineraryFreePeriods.order,
+    })
+    .from(itineraryFreePeriods)
+    .where(inArray(itineraryFreePeriods.itineraryDayId, dayIds))
+    .orderBy(
+      asc(itineraryFreePeriods.itineraryDayId),
+      asc(itineraryFreePeriods.order),
+      asc(itineraryFreePeriods.id),
+    );
+  const freePeriodsByDay = new Map<
+    string,
+    readonly Readonly<{ freePeriodId: string; mode: string }>[]
+  >();
+  for (const row of freePeriodRows) {
+    const freePeriods = [...(freePeriodsByDay.get(row.itineraryDayId) ?? [])];
+    freePeriods.push(Object.freeze({ freePeriodId: row.id, mode: row.mode }));
+    freePeriodsByDay.set(row.itineraryDayId, Object.freeze(freePeriods));
+  }
+
   const plannedPlaceIds = new Set(
     activityRows.flatMap((activity) => (activity.placeId ? [activity.placeId] : [])),
   );
@@ -211,6 +236,7 @@ async function loadContext(
             tripDayId: day.id,
             date: day.date,
             activities: activitiesByDay.get(day.id) ?? Object.freeze([]),
+            freePeriods: freePeriodsByDay.get(day.id) ?? Object.freeze([]),
           }),
         ),
       ),

@@ -15,8 +15,16 @@ function input(
     itinerary: {
       tripId: "trip-1",
       days: [
-        { tripDayId: "day-2", date: "2026-08-23", activities: [{ id: "activity-1" }] },
-        { tripDayId: "day-1", date: "2026-08-22", activities: [] },
+        {
+          tripDayId: "day-2",
+          date: "2026-08-23",
+          activities: [{ id: "activity-1" }],
+          freePeriods: [
+            { freePeriodId: "free-protected", mode: "protected" },
+            { freePeriodId: "free-flexible", mode: "flexible" },
+          ],
+        },
+        { tripDayId: "day-1", date: "2026-08-22", activities: [], freePeriods: [] },
       ],
     },
     recommendations: [
@@ -65,8 +73,41 @@ function expectCode(run: () => unknown, code: string): void {
 }
 
 describe("assembleItineraryProposalGenerationInput", () => {
-  it("ordena Dias canonicamente e deriva a quantidade de Atividades", () => {
+  it("ordena Dias canonicamente e deriva Activities e Free Periods", () => {
     const result = assembleItineraryProposalGenerationInput(input());
+
+    expect(result.days).toEqual([
+      {
+        tripDayId: "day-1",
+        date: "2026-08-22",
+        existingActivityCount: 0,
+        protectedFreePeriodCount: 0,
+        flexibleFreePeriodCount: 0,
+      },
+      {
+        tripDayId: "day-2",
+        date: "2026-08-23",
+        existingActivityCount: 1,
+        protectedFreePeriodCount: 1,
+        flexibleFreePeriodCount: 1,
+      },
+    ]);
+  });
+
+  it("preserva contexto de Free Periods desconhecido sem assumir zero", () => {
+    const source = input();
+    const result = assembleItineraryProposalGenerationInput(
+      input({
+        itinerary: {
+          ...source.itinerary,
+          days: source.itinerary.days.map((day) => ({
+            tripDayId: day.tripDayId,
+            date: day.date,
+            activities: day.activities,
+          })),
+        },
+      }),
+    );
 
     expect(result.days).toEqual([
       { tripDayId: "day-1", date: "2026-08-22", existingActivityCount: 0 },
@@ -180,6 +221,48 @@ describe("assembleItineraryProposalGenerationInput", () => {
           }),
         ),
       "duplicate-day",
+    );
+  });
+
+  it("rejeita modo de Free Period desconhecido", () => {
+    const base = input();
+    expectCode(
+      () =>
+        assembleItineraryProposalGenerationInput(
+          input({
+            itinerary: {
+              ...base.itinerary,
+              days: [
+                {
+                  tripDayId: "day-invalid-free",
+                  date: "2026-08-22",
+                  activities: [],
+                  freePeriods: [{ freePeriodId: "free-invalid", mode: "unknown" }],
+                },
+              ],
+            },
+          }),
+        ),
+      "invalid-free-period",
+    );
+  });
+
+  it("rejeita snapshot com Free Periods conhecido apenas para parte dos Dias", () => {
+    const base = input();
+    expectCode(
+      () =>
+        assembleItineraryProposalGenerationInput(
+          input({
+            itinerary: {
+              ...base.itinerary,
+              days: [
+                { tripDayId: "day-known", date: "2026-08-22", activities: [], freePeriods: [] },
+                { tripDayId: "day-unknown", date: "2026-08-23", activities: [] },
+              ],
+            },
+          }),
+        ),
+      "invalid-day",
     );
   });
 

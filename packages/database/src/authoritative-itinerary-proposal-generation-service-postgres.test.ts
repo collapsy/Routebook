@@ -135,7 +135,7 @@ describe("createPostgresAuthoritativeItineraryProposalGenerationService", () => 
       itineraryId,
       status: "ready",
       generationMethod: "deterministic-candidate-balancing",
-      generationVersion: "1",
+      generationVersion: "2",
       proposedActivities: [
         expect.objectContaining({
           proposedActivityId,

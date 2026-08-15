@@ -211,10 +211,11 @@ export function parseLatestOvertureTileRelease(xml: string): string {
   const releases = [...xml.matchAll(/<Prefix>tiles\/(\d{4}-\d{2}-\d{2}\.\d+)\/<\/Prefix>/g)].map(
     (match) => match[1],
   );
-  if (releases.length === 0) {
+  const latest = releases.sort().at(-1);
+  if (!latest) {
     throw new Error("Nenhuma release de PMTiles do Overture foi encontrada.");
   }
-  return releases.sort().at(-1) ?? releases[0];
+  return latest;
 }
 
 export async function resolveLatestOvertureTileRelease(
@@ -302,8 +303,16 @@ function parseTile(range: RangeResponse, coordinate: TileCoordinate): ParsedPoin
     const feature = layer.feature(index);
     const geoJson = feature.toGeoJSON(coordinate.x, coordinate.y, coordinate.zoom);
     if (geoJson.geometry.type !== "Point") continue;
-    const [longitude, latitude] = geoJson.geometry.coordinates;
-    if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) continue;
+    const longitude = geoJson.geometry.coordinates[0];
+    const latitude = geoJson.geometry.coordinates[1];
+    if (
+      typeof longitude !== "number" ||
+      !Number.isFinite(longitude) ||
+      typeof latitude !== "number" ||
+      !Number.isFinite(latitude)
+    ) {
+      continue;
+    }
     features.push({
       properties: feature.properties as JsonRecord,
       longitude,

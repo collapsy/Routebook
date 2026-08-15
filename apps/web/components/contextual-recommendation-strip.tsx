@@ -55,7 +55,7 @@ export function ContextualRecommendationStrip({
       </div>
 
       {hasContextLimitations && !contextIsInsufficient ? (
-        <p className="notice" role="status">
+        <p className="notice">
           O contexto ainda tem lacunas. A seleção pode estar incompleta; configure os dados da
           Viagem antes de tratá-la como uma leitura abrangente.
         </p>

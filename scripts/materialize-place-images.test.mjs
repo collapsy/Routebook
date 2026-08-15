@@ -131,12 +131,18 @@ describe("metadata do Commons", () => {
 
   it("respeita Retry-After e limita espera de throttling", () => {
     assert.equal(
-      retryDelayMilliseconds(new Response(null, { status: 429, headers: { "retry-after": "2" } }), 0),
+      retryDelayMilliseconds(
+        new Response(null, { status: 429, headers: { "retry-after": "2" } }),
+        0,
+      ),
       2_000,
     );
     assert.equal(retryDelayMilliseconds(new Response(null, { status: 503 }), 2), 4_000);
     assert.equal(
-      retryDelayMilliseconds(new Response(null, { status: 429, headers: { "retry-after": "120" } }), 0),
+      retryDelayMilliseconds(
+        new Response(null, { status: 429, headers: { "retry-after": "120" } }),
+        0,
+      ),
       30_000,
     );
   });

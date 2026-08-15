@@ -12,8 +12,7 @@ function commonsPage(overrides: Record<string, unknown> = {}) {
     title: "File:Praia do Amor, Pipa, Brazil.jpg",
     imageinfo: [
       {
-        descriptionurl:
-          "https://commons.wikimedia.org/wiki/File:Praia_do_Amor,_Pipa,_Brazil.jpg",
+        descriptionurl: "https://commons.wikimedia.org/wiki/File:Praia_do_Amor,_Pipa,_Brazil.jpg",
         url: "https://upload.wikimedia.org/example/praia-do-amor.jpg",
         thumburl: "https://upload.wikimedia.org/example/1280px-praia-do-amor.jpg",
         mime: "image/jpeg",
@@ -132,15 +131,16 @@ describe("classifyWikimediaImageMatch", () => {
 
 describe("WikimediaCommonsPlaceImageAdapter", () => {
   it("consulta somente a API oficial e devolve candidato com Provenance", async () => {
-    const fetcher = vi.fn(async () =>
-      new Response(
-        JSON.stringify({
-          query: {
-            pages: [commonsPage()],
-          },
-        }),
-        { status: 200, headers: { "content-type": "application/json" } },
-      ),
+    const fetcher = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            query: {
+              pages: [commonsPage()],
+            },
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        ),
     );
     const adapter = new WikimediaCommonsPlaceImageAdapter({
       fetcher,

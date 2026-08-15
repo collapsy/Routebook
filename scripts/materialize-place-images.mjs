@@ -90,11 +90,7 @@ export function retryDelayMilliseconds(response, attempt) {
   return Math.min(maximumRetryDelayMs, 1_000 * 2 ** attempt);
 }
 
-async function fetchWithRespectfulRetry(
-  url,
-  init,
-  { fetcher, sleep, retries = maximumRetries },
-) {
+async function fetchWithRespectfulRetry(url, init, { fetcher, sleep, retries = maximumRetries }) {
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     const response = await fetcher(url, init);
     if (![429, 503].includes(response.status) || attempt === retries) return response;
@@ -114,7 +110,11 @@ export function validatePlaceImageManifest(manifest, { requireIntegrity = false 
   ) {
     throw new Error("requestedWidth deve estar entre 320 e 1600 pixels.");
   }
-  if (!Array.isArray(manifest.entries) || manifest.entries.length < 1 || manifest.entries.length > 20) {
+  if (
+    !Array.isArray(manifest.entries) ||
+    manifest.entries.length < 1 ||
+    manifest.entries.length > 20
+  ) {
     throw new Error("Manifesto deve possuir entre 1 e 20 entradas curadas.");
   }
 
@@ -144,7 +144,8 @@ export function validatePlaceImageManifest(manifest, { requireIntegrity = false 
       throw new Error(`URL de licença fora do namespace Creative Commons para ${entry.placeSlug}.`);
     }
     assetFilePath(entry.assetPath);
-    if (text(entry.altText).length < 20) throw new Error(`altText insuficiente para ${entry.placeSlug}.`);
+    if (text(entry.altText).length < 20)
+      throw new Error(`altText insuficiente para ${entry.placeSlug}.`);
     if (entry.matchStatus !== "secure") {
       throw new Error(`Somente correspondência secure pode ser materializada: ${entry.placeSlug}.`);
     }
@@ -225,7 +226,8 @@ export function parseCommonsImageInfo(payload, entry, requestedWidth = 1280) {
   if (thumbnailUrl) {
     assertHttpsHost(thumbnailUrl, "upload.wikimedia.org", `URL de thumbnail de ${entry.placeSlug}`);
   }
-  const downloadUrl = Number.isFinite(width) && width <= requestedWidth ? originalUrl : thumbnailUrl;
+  const downloadUrl =
+    Number.isFinite(width) && width <= requestedWidth ? originalUrl : thumbnailUrl;
   if (!downloadUrl) {
     throw new Error(`Commons não forneceu thumbnail limitada para ${entry.placeSlug}.`);
   }
@@ -272,7 +274,8 @@ export async function verifyPlaceImageAssets(manifest, { readAsset = readFile } 
     assertImageBytes(buffer, mime, entry.placeSlug);
     const digest = createHash("sha256").update(buffer).digest("hex");
     if (digest !== entry.assetSha256) throw new Error(`SHA-256 diverge para ${entry.placeSlug}.`);
-    if (buffer.length !== entry.assetBytes) throw new Error(`Tamanho diverge para ${entry.placeSlug}.`);
+    if (buffer.length !== entry.assetBytes)
+      throw new Error(`Tamanho diverge para ${entry.placeSlug}.`);
   }
 }
 
@@ -328,12 +331,7 @@ async function downloadImage(url, expectedMime, { fetcher, sleep }) {
 
 export async function materializePlaceImages(
   manifest,
-  {
-    fetcher = fetch,
-    sleep = defaultSleep,
-    writeAsset = writeFile,
-    ensureDirectory = mkdir,
-  } = {},
+  { fetcher = fetch, sleep = defaultSleep, writeAsset = writeFile, ensureDirectory = mkdir } = {},
 ) {
   validatePlaceImageManifest(manifest);
   const entries = [];

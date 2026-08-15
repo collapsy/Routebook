@@ -153,7 +153,9 @@ describe("DrizzlePlaceRepository", () => {
   });
 
   it("carrega seis imagens curadas de Pipa e mantém fallback para Places sem cobertura", async () => {
-    const result = await new DrizzlePlaceRepository().listPublished({ destinationId: "pipa-rn-br" });
+    const result = await new DrizzlePlaceRepository().listPublished({
+      destinationId: "pipa-rn-br",
+    });
     const withImages = result.filter((place) => place.primaryImage);
 
     expect(withImages).toHaveLength(6);
@@ -163,7 +165,9 @@ describe("DrizzlePlaceRepository", () => {
         assetPath,
         sourceName: "Wikimedia Commons",
       });
-      expect(place?.primaryImage?.sourceUrl).toMatch(/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/);
+      expect(place?.primaryImage?.sourceUrl).toMatch(
+        /^https:\/\/commons\.wikimedia\.org\/wiki\/File:/,
+      );
       expect(place?.primaryImage?.license).toMatch(/^CC BY-SA /);
       expect(place?.primaryImage?.attribution).toBeTruthy();
     }

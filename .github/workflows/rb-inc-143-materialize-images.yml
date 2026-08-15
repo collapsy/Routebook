@@ -1,0 +1,73 @@
+name: RB-INC-143 Materialize Place Images
+
+on:
+  push:
+    branches:
+      - codex/rb-inc-143-place-images
+    paths:
+      - ".github/workflows/rb-inc-143-materialize-images.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rb-inc-143-materialize-place-images
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    name: Materialize curated Wikimedia assets
+    if: github.ref == 'refs/heads/codex/rb-inc-143-place-images'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: codex/rb-inc-143-place-images
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Materialize curated images
+        run: pnpm materialize:place-images
+
+      - name: Verify curated images offline
+        run: pnpm test:place-images
+
+      - name: Require scoped diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          unexpected="$(git status --short | awk '{print $2}' | grep -Ev '^(apps/web/data/pipa-place-images\.json|apps/web/public/place-images/pipa/)' || true)"
+          if [[ -n "$unexpected" ]]; then
+            echo "::error::Materialização alterou caminho não autorizado:"
+            echo "$unexpected"
+            exit 1
+          fi
+
+      - name: Commit binary assets to feature branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add apps/web/data/pipa-place-images.json apps/web/public/place-images/pipa/
+          if git diff --cached --quiet; then
+            echo "Assets já materializados; nenhuma alteração necessária."
+            exit 0
+          fi
+          git config user.name "routebook-ci"
+          git config user.email "routebook-ci@users.noreply.github.com"
+          git commit -m "feat(place-images): materialize curated Pipa assets"
+          git push origin HEAD:codex/rb-inc-143-place-images

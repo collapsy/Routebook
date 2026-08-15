@@ -68,20 +68,24 @@ A implementação inicial usa Overture Maps como fonte aberta para geração de 
 
 A fronteira aceita que Overture é dataset versionado, não API transacional. A obtenção oficial poderá usar:
 
-- catálogo STAC para descobrir release atual;
-- `overturemaps` Python CLI para recorte por bounding box;
-- GeoJSON como formato intermediário do pipeline;
+- listagem pública S3 para descobrir release atual sem depender do catálogo STAC opcional;
+- `overturemaps` Python API para recorte operacional por bounding box;
+- PMTiles públicos + HTTP Range para descoberta server-side sob demanda;
+- GeoJSON como formato intermediário do pipeline operacional;
 - `sources`/licenças da feature para Provenance.
 
-O normalizador RouteBook não depende do Python e deve ser testável sobre fixtures locais.
+O normalizador RouteBook não depende do Python e deve ser testável sobre fixtures locais. O adapter de produto deve permanecer isolado atrás de `PlaceSearchPort` e possuir dependências de rede injetáveis/testáveis quando aplicável.
 
 ## 6. Limite geográfico inicial
 
 O pipeline inicial deverá operar apenas sobre área explicitamente delimitada de Pipa/Tibau do Sul, nunca sobre download mundial. O bounding box usado no workflow deve permanecer versionado e explicado no próprio arquivo.
 
+A descoberta sob demanda deverá consultar somente os tiles necessários ao centro/raio solicitado e possuir limite estrito de raio, quantidade de tiles, candidatos e timeout.
+
 Parâmetros devem ser conservadores:
 
-- máximo de 200 candidatos normalizados por execução inicial;
+- máximo de 200 candidatos normalizados por execução operacional;
+- limite menor e orientado à UX na descoberta sob demanda;
 - somente categorias que possuem mapeamento canônico;
 - confidence mínima configurável quando disponível;
 - sem ingestão de entidade marcada como fechada permanentemente quando o Provider fornecer esse estado.
@@ -99,6 +103,8 @@ Ordem de decisão:
 7. retornar `new` apenas na ausência de sinais fortes de duplicata.
 
 `possible_match` não equivale a duplicata confirmada.
+
+Na experiência de descoberta, `new`, `possible_match` e `linked` devem permanecer distinguíveis. A interface não pode apresentar candidato externo como Place publicado antes da promoção/publicação correspondente.
 
 ## 8. Persistência
 
@@ -141,7 +147,22 @@ A operação de promoção deverá:
 
 Publicação do draft permanece operação separada.
 
-## 10. Imagem
+## 10. Descoberta na aplicação
+
+A tela `/viagens/[tripId]/lugares` deverá expor uma ação explícita para descoberta externa. A carga normal da página continua baseada somente no catálogo canônico publicado.
+
+Quando acionada:
+
+- a busca roda exclusivamente no servidor;
+- Overture é acessado pelo adapter de `PlaceSearchPort` via PMTiles públicos e HTTP Range;
+- o centro parte da hospedagem quando geocodificada e usa referência conhecida do destino apenas como fallback delimitado;
+- filtros de categoria podem restringir a consulta externa;
+- candidatos são reconciliados contra Places/referências existentes;
+- candidatos externos aparecem em seção própria e nunca são misturados silenciosamente ao catálogo publicado;
+- falha, timeout ou indisponibilidade da fonte externa preserva a lista/mapa canônicos e exibe feedback de degradação;
+- nenhuma busca externa produz write.
+
+## 11. Imagem
 
 O contrato de mídia externa deve ser separado de `PlacePrimaryImage`:
 
@@ -159,7 +180,7 @@ ExternalPlaceImageCandidate
 
 `PlaceImagePort` pode encontrar candidatos, mas não deve gravar `primaryImage`. Somente após download/cópia permitida para asset controlado pelo RouteBook a mídia poderá ser promovida ao contrato do RB-INC-141.
 
-## 11. Caminhos autorizados
+## 12. Caminhos autorizados
 
 ```text
 modules/place-catalog/src/external-place.ts
@@ -177,6 +198,11 @@ scripts/normalize-overture-places.mjs
 scripts/normalize-overture-places.test.mjs
 scripts/promote-place-candidates.mjs
 package.json
+apps/web/app/viagens/[tripId]/lugares/page.tsx
+apps/web/lib/overture-place-search.ts
+apps/web/lib/overture-place-search.test.ts
+apps/web/package.json
+pnpm-lock.yaml
 .github/workflows/engineering-validation.yml
 .github/workflows/overture-place-discovery.yml
 docs/implementation/increments/rb-inc-142-organic-place-ingestion.md
@@ -184,7 +210,7 @@ docs/implementation/context-packs/rb-inc-142-organic-place-ingestion.md
 docs/registry.md
 ```
 
-## 12. Gates
+## 13. Gates
 
 ```text
 pnpm format:check
@@ -203,7 +229,7 @@ GitHub Actions no SHA atual da PR é a fonte de verdade para gates executáveis 
 
 O workflow Overture deve ser dry-run/read-only por padrão e gerar artefato; nenhuma credencial de Production deve existir nele neste incremento.
 
-## 13. Quando escalar
+## 14. Quando escalar
 
 Escalar somente se a implementação exigir:
 

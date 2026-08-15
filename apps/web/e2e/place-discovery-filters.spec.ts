@@ -18,7 +18,15 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(
     page.getByRole("list", { name: "Lugares publicados" }).getByRole("listitem"),
   ).toHaveCount(30);
-  await expect(page.getByRole("img", { name: /^Imagem não disponível para / })).toHaveCount(30);
+  await expect(page.getByRole("img", { name: /^Imagem não disponível para / })).toHaveCount(24);
+  await expect(
+    page.getByRole("img", {
+      name: "Vista da Praia do Amor em Pipa, cercada por falésias e vegetação costeira.",
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: "Imagem não disponível para Praia das Minas" }),
+  ).toBeVisible();
   await expect(page.getByRole("link", { name: "Descobrir mais lugares" })).toHaveAttribute(
     "href",
     `/viagens/${trip.id}/lugares?descoberta=externa`,

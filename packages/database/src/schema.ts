@@ -202,3 +202,27 @@ export const itineraryFreePeriods = pgTable(
     uniqueIndex("itinerary_free_periods_day_order_unique").on(table.itineraryDayId, table.order),
   ],
 );
+
+export const placeExternalReferences = pgTable(
+  "place_external_references",
+  {
+    id: uuid("id").primaryKey(),
+    placeId: uuid("place_id")
+      .notNull()
+      .references(() => places.id, { onDelete: "cascade" }),
+    provider: varchar("provider", { length: 80 }).notNull(),
+    externalId: varchar("external_id", { length: 200 }).notNull(),
+    sourceLicense: text("source_license").notNull(),
+    sourceUrl: text("source_url"),
+    collectedAt: timestamp("collected_at", { withTimezone: true, mode: "date" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
+  },
+  (table) => [
+    uniqueIndex("place_external_references_provider_external_id_unique").on(
+      table.provider,
+      table.externalId,
+    ),
+    index("place_external_references_place_id_idx").on(table.placeId),
+  ],
+);

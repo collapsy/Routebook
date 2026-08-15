@@ -120,7 +120,12 @@ function addressLabel(properties) {
   const freeform = text(address.freeform);
   if (freeform) return freeform;
 
-  const parts = [address.address_levels?.[0]?.value, address.locality, address.region, address.country]
+  const parts = [
+    address.address_levels?.[0]?.value,
+    address.locality,
+    address.region,
+    address.country,
+  ]
     .map(text)
     .filter(Boolean);
   return parts.length > 0 ? parts.join(", ") : undefined;
@@ -130,10 +135,7 @@ function rejection(reason) {
   return { candidate: undefined, reason };
 }
 
-export function normalizeOvertureFeature(
-  feature,
-  { collectedAt, minimumConfidence = 0.7 } = {},
-) {
+export function normalizeOvertureFeature(feature, { collectedAt, minimumConfidence = 0.7 } = {}) {
   if (!feature || typeof feature !== "object" || feature.type !== "Feature") {
     return rejection("invalid-feature");
   }
@@ -176,8 +178,7 @@ export function normalizeOvertureFeature(
   const sourceLicense = resolveOvertureSourceLicense(source);
   if (!sourceLicense) return rejection("missing-source-license");
 
-  const collected =
-    collectedAt instanceof Date ? collectedAt : new Date(collectedAt ?? Date.now());
+  const collected = collectedAt instanceof Date ? collectedAt : new Date(collectedAt ?? Date.now());
   if (Number.isNaN(collected.getTime())) return rejection("invalid-collected-at");
 
   const address = addressLabel(properties);
@@ -229,10 +230,7 @@ export function normalizeOvertureFeatureCollection(
     }
 
     const previous = byExternalId.get(result.candidate.externalId);
-    if (
-      !previous ||
-      (result.candidate.confidence ?? -1) > (previous.confidence ?? -1)
-    ) {
+    if (!previous || (result.candidate.confidence ?? -1) > (previous.confidence ?? -1)) {
       byExternalId.set(result.candidate.externalId, result.candidate);
     }
   }
@@ -252,10 +250,7 @@ export function normalizeOvertureFeatureCollection(
     limit,
     inputFeatureCount: features.length,
     candidateCount: candidates.length,
-    rejectedCount: Object.values(rejectedByReason).reduce(
-      (total, count) => total + count,
-      0,
-    ),
+    rejectedCount: Object.values(rejectedByReason).reduce((total, count) => total + count, 0),
     rejectedByReason,
     candidates,
   };

@@ -37,7 +37,7 @@ export type PromoteExternalPlaceCandidateResult = Readonly<{
   status: "created" | "existing";
   placeId: string;
   slug: string;
-  publicationStatus: "draft";
+  publicationStatus: Place["publicationStatus"];
 }>;
 
 type PlaceRow = typeof places.$inferSelect;
@@ -136,7 +136,7 @@ export async function promoteExternalPlaceCandidate(
         status: "existing",
         placeId: linkedPlace.id,
         slug: linkedPlace.slug,
-        publicationStatus: "draft",
+        publicationStatus: linkedPlace.publicationStatus as Place["publicationStatus"],
       };
     }
 
@@ -167,6 +167,14 @@ export async function promoteExternalPlaceCandidate(
       );
     }
 
+    const category = input.candidate.category;
+    if (!category) {
+      throw new PlacePromotionServiceError(
+        "O candidato não possui categoria canônica para promoção.",
+        "candidate-rejected",
+      );
+    }
+
     const slug = promotionSlug(
       input.candidate,
       new Set(destinationRows.map((row) => row.slug)),
@@ -177,7 +185,7 @@ export async function promoteExternalPlaceCandidate(
         slug,
         name: input.candidate.name,
         summary: technicalSummary(input.candidate),
-        category: input.candidate.category!,
+        category,
         latitude: input.candidate.latitude,
         longitude: input.candidate.longitude,
         ...(input.candidate.addressLabel ? { addressLabel: input.candidate.addressLabel } : {}),
@@ -219,7 +227,7 @@ export async function promoteExternalPlaceCandidate(
       status: "created",
       placeId: place.id,
       slug: place.slug,
-      publicationStatus: "draft",
+      publicationStatus: place.publicationStatus,
     };
   });
 }

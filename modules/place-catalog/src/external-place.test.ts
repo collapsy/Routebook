@@ -110,13 +110,17 @@ describe("validatePlaceSearchQuery", () => {
 
 describe("reconcileExternalPlaceCandidate", () => {
   it("reconhece referência externa já vinculada", () => {
-    const result = reconcileExternalPlaceCandidate(candidate(), [place()], [
-      {
-        placeId: "10000000-0000-4000-8000-000000000001",
-        provider: "overture",
-        externalId: "08b2-example",
-      },
-    ]);
+    const result = reconcileExternalPlaceCandidate(
+      candidate(),
+      [place()],
+      [
+        {
+          placeId: "10000000-0000-4000-8000-000000000001",
+          provider: "overture",
+          externalId: "08b2-example",
+        },
+      ],
+    );
 
     expect(result).toMatchObject({
       status: "linked",

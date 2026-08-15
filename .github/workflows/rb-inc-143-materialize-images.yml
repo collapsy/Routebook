@@ -1,0 +1,76 @@
+name: RB-INC-143 Temporary Prettier Fix
+
+# One-shot helper on the already-authorized temporary RB-INC-143 path.
+on:
+  push:
+    branches:
+      - codex/rb-inc-143-place-images
+    paths:
+      - ".github/workflows/rb-inc-143-materialize-images.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  format-and-remove:
+    name: Format RB-INC-143 files and remove helper
+    if: github.ref == 'refs/heads/codex/rb-inc-143-place-images'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: codex/rb-inc-143-place-images
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Format only files reported by Engineering Validation
+        run: |
+          pnpm exec prettier --write \
+            apps/web/e2e/place-discovery-filters.spec.ts \
+            apps/web/e2e/recommendations-experience.spec.ts \
+            apps/web/lib/wikimedia-place-image.test.ts \
+            packages/database/src/place-repository.test.ts \
+            scripts/materialize-place-images.mjs \
+            scripts/materialize-place-images.test.mjs
+
+      - name: Remove temporary helper and require scoped diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/rb-inc-143-materialize-images.yml
+          unexpected="$(git status --short --untracked-files=all | awk '{print $2}' | grep -Ev '^(apps/web/e2e/place-discovery-filters\.spec\.ts|apps/web/e2e/recommendations-experience\.spec\.ts|apps/web/lib/wikimedia-place-image\.test\.ts|packages/database/src/place-repository\.test\.ts|scripts/materialize-place-images\.mjs|scripts/materialize-place-images\.test\.mjs|\.github/workflows/rb-inc-143-materialize-images\.yml)$' || true)"
+          if [[ -n "$unexpected" ]]; then
+            echo "::error::Prettier alterou caminho não autorizado:"
+            echo "$unexpected"
+            exit 1
+          fi
+
+      - name: Commit formatting and helper removal
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add \
+            apps/web/e2e/place-discovery-filters.spec.ts \
+            apps/web/e2e/recommendations-experience.spec.ts \
+            apps/web/lib/wikimedia-place-image.test.ts \
+            packages/database/src/place-repository.test.ts \
+            scripts/materialize-place-images.mjs \
+            scripts/materialize-place-images.test.mjs
+          git config user.name "routebook-ci"
+          git config user.email "routebook-ci@users.noreply.github.com"
+          git commit -m "style(rb-inc-143): apply Prettier corrections"
+          git push origin HEAD:codex/rb-inc-143-place-images

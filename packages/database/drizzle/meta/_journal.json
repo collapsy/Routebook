@@ -211,6 +211,13 @@
       "when": 1786807200000,
       "tag": "0029_create_place_external_references",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1786816500000,
+      "tag": "0030_curate_pipa_place_primary_images",
+      "breakpoints": true
     }
   ]
 }

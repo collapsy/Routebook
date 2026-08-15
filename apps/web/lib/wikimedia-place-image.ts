@@ -9,6 +9,21 @@ const SOURCE_NAME = "Wikimedia Commons";
 const MAX_RESULTS = 8;
 
 const REUSABLE_LICENSE_PATTERN = /^CC BY(?:-SA)? (?:2\.0|2\.5|3\.0|4\.0)$/i;
+const PLACE_NAME_STOPWORDS = new Set([
+  "a",
+  "as",
+  "da",
+  "das",
+  "de",
+  "do",
+  "dos",
+  "e",
+  "o",
+  "os",
+  "praia",
+  "baia",
+  "lagoa",
+]);
 
 type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 
@@ -84,6 +99,12 @@ function normalizeIdentity(value: string): string {
     .replace(/\s+/g, " ");
 }
 
+function significantPlaceTokens(placeName: string): string[] {
+  return normalizeIdentity(placeName)
+    .split(" ")
+    .filter((token) => token.length >= 3 && !PLACE_NAME_STOPWORDS.has(token));
+}
+
 function isAllowedCommonsPageUrl(value: string): boolean {
   try {
     const url = new URL(value);
@@ -146,20 +167,23 @@ export function classifyWikimediaImageMatch(
   place: Readonly<{ name: string }>,
   image: Pick<WikimediaImageRecord, "fileTitle" | "description">,
 ): WikimediaImageMatch {
-  const placeName = normalizeIdentity(place.name);
   const title = normalizeIdentity(image.fileTitle.replace(/^File:/, ""));
   const description = normalizeIdentity(image.description);
   const combined = `${title} ${description}`;
-  const hasExactPlaceName = title.includes(placeName) || description.includes(placeName);
+  const combinedTokens = new Set(combined.split(" ").filter(Boolean));
+  const placeTokens = significantPlaceTokens(place.name);
+  const hasPlaceIdentity =
+    placeTokens.length > 0 && placeTokens.every((token) => combinedTokens.has(token));
   const hasLocalContext = /\b(?:pipa|tibau do sul)\b/.test(combined);
 
-  if (hasExactPlaceName && hasLocalContext) {
+  if (hasPlaceIdentity && hasLocalContext) {
     return {
       status: "secure",
-      reason: "Nome do Place e contexto local de Pipa/Tibau do Sul aparecem na metadata da mídia.",
+      reason:
+        "Tokens distintivos do Place e contexto local de Pipa/Tibau do Sul aparecem na metadata da mídia.",
     };
   }
-  if (hasExactPlaceName || hasLocalContext) {
+  if (hasPlaceIdentity || hasLocalContext) {
     return {
       status: "ambiguous",
       reason: "A metadata possui apenas parte dos sinais necessários para confirmar a identidade do Place.",

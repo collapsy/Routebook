@@ -342,6 +342,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-144 | Visão de Decisão Contextual da Viagem | Implementation | Draft | 0.1.0 | [rb-inc-144-contextual-decision-view.md](./implementation/increments/rb-inc-144-contextual-decision-view.md) |
 | RB-CTX-144 | Context Pack do RB-INC-144 — Visão de Decisão Contextual da Viagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-144-contextual-decision-view.md](./implementation/context-packs/rb-inc-144-contextual-decision-view.md) |
+| RB-INC-145 | Verificação Efetiva do Production Deployment | Implementation | Draft | 0.1.0 | [rb-inc-145-production-release-verification.md](./implementation/increments/rb-inc-145-production-release-verification.md) |
+| RB-CTX-145 | Context Pack do RB-INC-145 — Verificação Efetiva do Production Deployment | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-145-production-release-verification.md](./implementation/context-packs/rb-inc-145-production-release-verification.md) |
 
 ## Status possíveis
 

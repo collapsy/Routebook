@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import type { RecommendationCardViewModel } from "../lib/recommendation-experience";
+import { PlacePrimaryImage } from "./place-primary-image";
 import styles from "./recommendation-card.module.css";
 
 const categoryLabels = {
@@ -57,6 +58,8 @@ export function RecommendationCard({
       aria-labelledby={titleId}
       className={`${styles.card} ${isRejected ? styles.rejected : ""}`}
     >
+      <PlacePrimaryImage placeName={card.placeName} primaryImage={card.primaryImage} />
+
       <header className={styles.header}>
         <p className={styles.eyebrow}>{categoryLabels[card.category]}</p>
         <h2 id={titleId}>{card.placeName}</h2>

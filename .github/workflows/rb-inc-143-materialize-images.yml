@@ -63,7 +63,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add docs/registry.md .github/workflows/rb-inc-143-materialize-images.yml
+          git add docs/registry.md
           git config user.name "routebook-ci"
           git config user.email "routebook-ci@users.noreply.github.com"
           git commit -m "docs(rb-inc-143): register increment and remove temporary helper"

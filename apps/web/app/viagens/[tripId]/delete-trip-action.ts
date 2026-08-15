@@ -13,8 +13,6 @@ export type DeleteTripActionState = Readonly<{
   message?: string;
 }>;
 
-export const initialDeleteTripActionState: DeleteTripActionState = { status: "idle" };
-
 export async function deleteTripAction(
   tripId: string,
   state: DeleteTripActionState,

@@ -235,6 +235,7 @@ scripts/normalize-overture-places.test.mjs
 scripts/promote-place-candidates.mjs
 package.json
 apps/web/app/viagens/[tripId]/lugares/page.tsx
+apps/web/e2e/place-discovery-filters.spec.ts
 apps/web/lib/overture-place-search.ts
 apps/web/lib/overture-place-search.test.ts
 apps/web/package.json
@@ -261,6 +262,7 @@ Arquivo adicional indispensável deve ser registrado neste incremento e explicad
 - [ ] migration 0029 é somente DDL aditivo e sem backfill/DML de catálogo;
 - [ ] pipeline Overture gera artefato de candidatos limitado a Pipa/Tibau do Sul sem secret;
 - [ ] tela de Lugares possui entrada server-side explícita para descobrir candidatos externos sem substituir o catálogo publicado;
+- [ ] carga padrão da tela de Lugares continua exibindo apenas o catálogo publicado e a ação explícita para descoberta externa;
 - [ ] falha do Provider não quebra Places já canônicos e mantém feedback previsível;
 - [ ] contrato de imagem exige licença/atribuição/cache compatíveis antes da promoção para asset;
 - [ ] nenhum Provider pago é ativado;
@@ -276,6 +278,7 @@ Arquivo adicional indispensável deve ser registrado neste incremento e explicad
 - bloqueio de provável duplicata e candidato rejeitado;
 - normalização de fixture Overture sem rede;
 - adapter PMTiles com fonte injetável/fixture sem rede, incluindo release, tiles, normalização, limites e falha externa;
+- E2E da carga padrão garantindo catálogo canônico + ação explícita de descoberta sem consulta externa implícita;
 - experiência de descoberta preservando catálogo canônico quando a fonte externa falha;
 - migration policy + aplicação das migrations;
 - regressão dos 30 Places existentes;

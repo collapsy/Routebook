@@ -1,0 +1,81 @@
+name: Overture Place Discovery
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 8 20 * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: overture-place-discovery
+  cancel-in-progress: true
+
+jobs:
+  discover-pipa:
+    name: Discover Pipa place candidates
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install official Overture client
+        run: pip install --disable-pip-version-check overturemaps==1.0.1
+
+      - name: Download Pipa and Tibau do Sul places
+        shell: bash
+        run: |
+          set -euo pipefail
+          # west,south,east,north. The box deliberately covers Pipa, Tibau do Sul,
+          # Sibaúma and the immediate decision area without downloading a broad region.
+          overturemaps download \
+            --bbox=-35.15,-6.33,-34.98,-6.15 \
+            -f geojson \
+            --type=place \
+            -o /tmp/overture-pipa-places.geojson
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Normalize governed candidates
+        run: |
+          node scripts/normalize-overture-places.mjs \
+            --input /tmp/overture-pipa-places.geojson \
+            --output /tmp/routebook-pipa-place-candidates.json \
+            --min-confidence 0.7 \
+            --limit 200
+
+      - name: Summarize candidate artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e '
+            const fs = require("node:fs");
+            const payload = JSON.parse(fs.readFileSync("/tmp/routebook-pipa-place-candidates.json", "utf8"));
+            const counts = payload.candidates.reduce((acc, candidate) => {
+              acc[candidate.category] = (acc[candidate.category] ?? 0) + 1;
+              return acc;
+            }, {});
+            console.log(`Candidates: ${payload.candidateCount}/${payload.inputFeatureCount}`);
+            console.log(`Rejected: ${payload.rejectedCount}`);
+            console.log(`By category: ${JSON.stringify(counts)}`);
+          '
+
+      - name: Upload discovery artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: routebook-pipa-place-candidates
+          path: /tmp/routebook-pipa-place-candidates.json
+          if-no-files-found: error
+          retention-days: 14

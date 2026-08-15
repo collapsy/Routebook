@@ -411,8 +411,9 @@ describe("DeterministicItineraryProposalGenerator", () => {
   it("rejeita ProposedActivityIds duplicados produzidos pela factory", async () => {
     const generator = new DeterministicItineraryProposalGenerator();
 
-    await expect(generator.generate(input({ createProposedActivityId: () => "proposed-duplicate" })))
-      .rejects.toMatchObject({ code: "duplicate-proposed-activity-id" });
+    await expect(
+      generator.generate(input({ createProposedActivityId: () => "proposed-duplicate" })),
+    ).rejects.toMatchObject({ code: "duplicate-proposed-activity-id" });
   });
 
   it("rejeita duração, custo, data, validade e ProposedActivityId inválidos com códigos estáveis", async () => {

@@ -3,11 +3,9 @@
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
-import {
-  deleteTripAction,
-  initialDeleteTripActionState,
-  type DeleteTripActionState,
-} from "./delete-trip-action";
+import { deleteTripAction, type DeleteTripActionState } from "./delete-trip-action";
+
+const initialDeleteTripActionState: DeleteTripActionState = { status: "idle" };
 
 function ConfirmDeleteButton() {
   const { pending } = useFormStatus();

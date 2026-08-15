@@ -24,13 +24,6 @@ function formatReasons(card: RecommendationCardViewModel): string {
     .join(" ");
 }
 
-function uniqueLimitations(cards: readonly RecommendationCardViewModel[]): readonly string[] {
-  return [...new Set(cards.flatMap((card) => card.limitations.map((limitation) => limitation.message)))].slice(
-    0,
-    3,
-  );
-}
-
 export function ContextualRecommendationStrip({
   tripId,
   cards,
@@ -41,7 +34,9 @@ export function ContextualRecommendationStrip({
   hasContextLimitations: boolean;
 }) {
   const visibleCards = cards.filter((card) => card.status !== "rejected").slice(0, 3);
-  const limitations = uniqueLimitations(visibleCards);
+  const contextIsInsufficient =
+    visibleCards.length === 0 ||
+    (hasContextLimitations && visibleCards.every((card) => card.confidenceLevel === "low"));
 
   return (
     <section className="traveler-context-summary" aria-labelledby="contextual-decision-title">
@@ -59,14 +54,14 @@ export function ContextualRecommendationStrip({
         </Link>
       </div>
 
-      {hasContextLimitations ? (
+      {hasContextLimitations && !contextIsInsufficient ? (
         <p className="notice" role="status">
           O contexto ainda tem lacunas. A seleção pode estar incompleta; configure os dados da
-          Viagem antes de tratar estas sugestões como uma leitura abrangente.
+          Viagem antes de tratá-la como uma leitura abrangente.
         </p>
       ) : null}
 
-      {visibleCards.length > 0 ? (
+      {!contextIsInsufficient ? (
         <>
           <p>
             <strong>Próximo passo possível:</strong> abra os detalhes de uma opção para comparar o

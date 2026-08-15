@@ -91,4 +91,26 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
       }),
     ).rejects.toThrow("Overture indisponível");
   });
+
+  if (process.env.ROUTEBOOK_LIVE_OVERTURE === "1") {
+    it("consulta o PMTiles público real pelo mesmo adapter usado na tela de Lugares", async () => {
+      const candidates = await new OverturePmtilesPlaceSearchAdapter().search({
+        destinationId: "pipa-rn-br",
+        center: { latitude: -6.2285, longitude: -35.0503 },
+        radiusMeters: 3_000,
+        limit: 10,
+      });
+
+      expect(candidates.length).toBeGreaterThan(0);
+      expect(candidates.length).toBeLessThanOrEqual(10);
+      expect(
+        candidates.every(
+          (candidate) =>
+            candidate.provider === "overture" &&
+            candidate.sourceLicense.length > 0 &&
+            candidate.category !== undefined,
+        ),
+      ).toBe(true);
+    });
+  }
 });

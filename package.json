@@ -15,7 +15,7 @@
     "dev": "turbo run dev",
     "docs:validate": "node scripts/validate-docs.mjs",
     "format": "prettier --write .",
-    "format:check": "prettier --write modules/proposal-management/src/deterministic-itinerary-proposal-generator.ts modules/proposal-management/src/deterministic-itinerary-proposal-generator.test.ts && git diff -- modules/proposal-management/src/deterministic-itinerary-proposal-generator.ts modules/proposal-management/src/deterministic-itinerary-proposal-generator.test.ts && exit 1",
+    "format:check": "prettier --check .",
     "lint": "turbo run lint",
     "smoke:operational": "node scripts/operational-smoke.mjs",
     "test": "turbo run test",

@@ -96,10 +96,17 @@ describe("createPlace", () => {
   });
 
   it("aceita sourceUrl ausente, mas rejeita origem não HTTPS quando informada", () => {
-    const { sourceUrl: _sourceUrl, ...withoutSourceUrl } = validPrimaryImage;
-    expect(createPlace({ ...validInput, primaryImage: withoutSourceUrl }).primaryImage).not.toHaveProperty(
-      "sourceUrl",
-    );
+    const withoutSourceUrl = {
+      assetPath: validPrimaryImage.assetPath,
+      altText: validPrimaryImage.altText,
+      sourceName: validPrimaryImage.sourceName,
+      license: validPrimaryImage.license,
+      attribution: validPrimaryImage.attribution,
+    };
+
+    expect(
+      createPlace({ ...validInput, primaryImage: withoutSourceUrl }).primaryImage,
+    ).not.toHaveProperty("sourceUrl");
 
     expect(() =>
       createPlace({

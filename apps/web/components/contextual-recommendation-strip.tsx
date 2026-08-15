@@ -124,7 +124,7 @@ export function ContextualRecommendationStrip({
           </p>
           <div className="section-heading-row">
             <Link className="product-secondary-action" href={`/viagens/${tripId}/contexto`}>
-              Configurar contexto
+              Configurar dados para recomendações
             </Link>
             <Link className="product-secondary-action" href={`/viagens/${tripId}/hospedagem`}>
               Informar hospedagem

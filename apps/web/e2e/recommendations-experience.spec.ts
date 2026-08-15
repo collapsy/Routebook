@@ -138,6 +138,7 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
 
   const list = page.getByRole("list", { name: "Recommendations de Lugares" });
   await expect(list.getByRole("heading", { level: 2 })).toHaveCount(30);
+  await expect(list.getByRole("img", { name: /^Imagem não disponível para / })).toHaveCount(30);
 
   const newRecommendation = page.getByRole("article", {
     name: "Praia das Minas",
@@ -153,6 +154,9 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
     name: "Praia do Amor",
     exact: true,
   });
+  await expect(
+    recommendation.getByRole("img", { name: "Imagem não disponível para Praia do Amor" }),
+  ).toBeVisible();
   await expect(
     recommendation.getByText(/categoria do Lugar corresponde a um interesse/i),
   ).toBeVisible();

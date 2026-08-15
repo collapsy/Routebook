@@ -6,10 +6,7 @@ import { eq } from "drizzle-orm";
 import type { ExternalPlaceCandidate } from "@routebook/place-catalog";
 
 import { closeDatabase, getDatabase } from "./client";
-import {
-  PlacePromotionServiceError,
-  promoteExternalPlaceCandidate,
-} from "./place-promotion-service";
+import { promoteExternalPlaceCandidate } from "./place-promotion-service";
 import { placeExternalReferences, places } from "./schema";
 
 const database = getDatabase();
@@ -58,11 +55,19 @@ afterAll(async () => {
 
 describe("promoteExternalPlaceCandidate", () => {
   it("promove candidato novo como draft e persiste a referência externa", async () => {
-    const result = await promoteExternalPlaceCandidate({ destinationId, candidate: candidate(), promotedAt: now });
+    const result = await promoteExternalPlaceCandidate({
+      destinationId,
+      candidate: candidate(),
+      promotedAt: now,
+    });
 
     expect(result).toMatchObject({ status: "created", publicationStatus: "draft" });
 
-    const [place] = await database.select().from(places).where(eq(places.id, result.placeId)).limit(1);
+    const [place] = await database
+      .select()
+      .from(places)
+      .where(eq(places.id, result.placeId))
+      .limit(1);
     const [reference] = await database
       .select()
       .from(placeExternalReferences)
@@ -84,19 +89,30 @@ describe("promoteExternalPlaceCandidate", () => {
   });
 
   it("é idempotente para a mesma identidade externa", async () => {
+    const idempotentCandidate = candidate({
+      externalId: "idempotent-gers",
+      name: "Lugar Idempotente",
+      latitude: -6.31,
+      longitude: -35.08,
+    });
     const first = await promoteExternalPlaceCandidate({
       destinationId,
-      candidate: candidate({ externalId: "idempotent-gers", name: "Lugar Idempotente" }),
+      candidate: idempotentCandidate,
       promotedAt: now,
     });
     const repeated = await promoteExternalPlaceCandidate({
       destinationId,
-      candidate: candidate({ externalId: "idempotent-gers", name: "Lugar Idempotente" }),
+      candidate: idempotentCandidate,
       promotedAt: new Date("2026-08-15T15:45:00.000Z"),
     });
 
     expect(first.status).toBe("created");
-    expect(repeated).toMatchObject({ status: "existing", placeId: first.placeId, slug: first.slug });
+    expect(repeated).toMatchObject({
+      status: "existing",
+      placeId: first.placeId,
+      slug: first.slug,
+      publicationStatus: "draft",
+    });
   });
 
   it("bloqueia possível duplicata em vez de criar outro Place", async () => {
@@ -114,23 +130,24 @@ describe("promoteExternalPlaceCandidate", () => {
         }),
         promotedAt: now,
       }),
-    ).rejects.toMatchObject<Partial<PlacePromotionServiceError>>({
+    ).rejects.toMatchObject({
       code: "possible-match",
       matchedPlaceId: existingPlaceId,
     });
   });
 
   it("rejeita candidato sem categoria canônica", async () => {
+    const { category: _category, ...unsupportedCandidate } = candidate({
+      externalId: "unsupported-gers",
+      providerCategory: "pet_store",
+    });
+
     await expect(
       promoteExternalPlaceCandidate({
         destinationId,
-        candidate: candidate({
-          externalId: "unsupported-gers",
-          providerCategory: "pet_store",
-          category: undefined,
-        }),
+        candidate: unsupportedCandidate,
         promotedAt: now,
       }),
-    ).rejects.toMatchObject<Partial<PlacePromotionServiceError>>({ code: "candidate-rejected" });
+    ).rejects.toMatchObject({ code: "candidate-rejected" });
   });
 });

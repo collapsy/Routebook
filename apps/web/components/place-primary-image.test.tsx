@@ -27,10 +27,9 @@ describe("PlacePrimaryImage", () => {
   it("usa fallback acessível quando o Place não possui imagem", () => {
     render(<PlacePrimaryImage placeName="Praia do Amor" />);
 
-    expect(screen.getByRole("img", { name: "Imagem não disponível para Praia do Amor" })).toHaveAttribute(
-      "data-place-image-fallback",
-      "true",
-    );
+    expect(
+      screen.getByRole("img", { name: "Imagem não disponível para Praia do Amor" }),
+    ).toHaveAttribute("data-place-image-fallback", "true");
   });
 
   it("troca para fallback quando o asset falha ao carregar", () => {

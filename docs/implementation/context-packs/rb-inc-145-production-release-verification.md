@@ -60,13 +60,14 @@ Corrigir o gap operacional da issue #339 sem substituir o mecanismo de deploymen
 7. `docs/architecture/adrs/rb-adr-017-vercel-as-initial-web-deployment-platform.md`;
 8. `docs/architecture/adrs/rb-adr-019-github-actions-for-continuous-integration-and-delivery-governance.md`;
 9. `docs/implementation/increments/rb-inc-144-contextual-decision-view.md`;
-10. `.github/workflows/production-release.yml`;
-11. `apps/web/lib/operational-health.ts`;
-12. `apps/web/lib/operational-health.test.ts`;
-13. `scripts/operational-smoke.mjs`;
-14. `scripts/operational-smoke.test.mjs`;
-15. `docs/implementation/increments/rb-inc-145-production-release-verification.md`;
-16. este Context Pack.
+10. `.github/workflows/engineering-validation.yml`;
+11. `.github/workflows/production-release.yml`;
+12. `apps/web/lib/operational-health.ts`;
+13. `apps/web/lib/operational-health.test.ts`;
+14. `scripts/operational-smoke.mjs`;
+15. `scripts/operational-smoke.test.mjs`;
+16. `docs/implementation/increments/rb-inc-145-production-release-verification.md`;
+17. este Context Pack.
 
 ## 4. Evidência do problema
 
@@ -108,6 +109,7 @@ Conclusão: promoção de ref e deployment efetivo são estados distintos e o wo
 ## 7. Caminhos permitidos
 
 ```text
+.github/workflows/engineering-validation.yml
 .github/workflows/production-release.yml
 apps/web/app/api/health/release/route.ts
 apps/web/lib/operational-health.ts
@@ -203,13 +205,15 @@ Após a promoção da referência:
 
 Se a Vercel não publicar o candidate dentro da janela, o job deve falhar. O workflow não deve disparar deployment alternativo para mascarar a falha.
 
+O `Engineering Validation` deve executar `pnpm test:production-deployment-verification` explicitamente, porque os testes raiz de scripts não fazem parte do `turbo run test` por padrão.
+
 ## 13. Testes obrigatórios
 
 Prioridade local/específica:
 
 ```bash
 pnpm --filter @routebook/web test -- operational-health.test.ts
-node --test scripts/verify-production-deployment.test.mjs
+pnpm test:production-deployment-verification
 pnpm test:operational-smoke
 pnpm format:check
 pnpm docs:validate
@@ -222,7 +226,7 @@ pnpm build
 CI final:
 
 - Documentation Validation;
-- Engineering Validation;
+- Engineering Validation, incluindo o gate explícito do verificador;
 - E2E existente quando executado pelo gate.
 
 A verificação real de Production somente ocorrerá depois de integração autorizada na `main`; este incremento não pode produzir essa evidência antes do merge porque a própria mudança ainda não estará na referência de release.
@@ -237,6 +241,7 @@ A verificação real de Production somente ocorrerá depois de integração auto
 - [ ] Workflow aguarda SHA exato após a promoção.
 - [ ] Workflow roda smoke após match.
 - [ ] Workflow não termina verde sob stale Production.
+- [ ] Engineering Validation executa o teste específico do verificador.
 - [ ] Nenhum secret novo, migration ou deployment manual.
 - [ ] Registry atualizado.
 - [ ] CI verde no SHA final.

@@ -18,7 +18,7 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(
     page.getByRole("list", { name: "Lugares publicados" }).getByRole("listitem"),
   ).toHaveCount(30);
-  await expect(page.getByRole("img", { name: /^Imagem não disponível para / })).toHaveCount(23);
+  await expect(page.getByRole("img", { name: /^Imagem não disponível para / })).toHaveCount(24);
   await expect(
     page.getByRole("img", {
       name: "Vista da Praia do Amor em Pipa, cercada por falésias e vegetação costeira.",

@@ -99,7 +99,9 @@ test("permanece neutra quando o contexto é insuficiente", async ({ page }) => {
     }),
   ).toBeVisible();
   await expect(page.getByRole("list", { name: "Sugestões contextuais de lugares" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "Configurar contexto" }).last()).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Configurar dados para recomendações", exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole("link", { name: "Informar hospedagem" })).toBeVisible();
 });
 

@@ -151,15 +151,15 @@ describe("DeterministicItineraryProposalGenerator", () => {
     );
 
     expect(result.proposedActivities).toHaveLength(5);
-    const proposedByDay = result.proposedActivities.reduce<Record<string, number>>(
-      (counts, activity) => ({
-        ...counts,
-        [activity.targetTripDayId]: (counts[activity.targetTripDayId] ?? 0) + 1,
-      }),
-      {},
+    const proposedForDayA = result.proposedActivities.filter(
+      (activity) => activity.targetTripDayId === "day-a",
     );
-    expect(proposedByDay).toEqual({ "day-a": 3, "day-b": 2 });
-    expect(1 + proposedByDay["day-b"]!).toBe(DETERMINISTIC_DESIRED_ACTIVITY_COUNT_PER_DAY);
+    const proposedForDayB = result.proposedActivities.filter(
+      (activity) => activity.targetTripDayId === "day-b",
+    );
+    expect(proposedForDayA).toHaveLength(3);
+    expect(proposedForDayB).toHaveLength(2);
+    expect(1 + proposedForDayB.length).toBe(DETERMINISTIC_DESIRED_ACTIVITY_COUNT_PER_DAY);
     expect(result.limitations).toContain(
       "3 candidato(s) elegível(is) não foram propostos porque os Dias disponíveis atingiram a densidade desejada ou foram preservados como vazios intencionais.",
     );

@@ -122,6 +122,9 @@ jobs:
       - name: Run Overture place normalizer tests
         run: pnpm test:overture-place-normalizer
 
+      - name: Verify curated place images offline
+        run: pnpm test:place-images
+
       - name: Smoke development server
         shell: bash
         run: |

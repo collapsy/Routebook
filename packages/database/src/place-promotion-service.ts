@@ -16,10 +16,7 @@ export class PlacePromotionServiceError extends Error {
   constructor(
     message: string,
     readonly code:
-      | "candidate-rejected"
-      | "possible-match"
-      | "linked-place-not-found"
-      | "destination-conflict",
+      "candidate-rejected" | "possible-match" | "linked-place-not-found" | "destination-conflict",
     readonly matchedPlaceId?: string,
   ) {
     super(message);
@@ -53,9 +50,7 @@ function rowForReconciliation(row: PlaceRow): Place {
     latitude: row.latitude,
     longitude: row.longitude,
     ...(row.addressLabel ? { addressLabel: row.addressLabel } : {}),
-    ...(row.priceRange
-      ? { priceRange: row.priceRange as NonNullable<Place["priceRange"]> }
-      : {}),
+    ...(row.priceRange ? { priceRange: row.priceRange as NonNullable<Place["priceRange"]> } : {}),
     publicationStatus: row.publicationStatus as Place["publicationStatus"],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -180,10 +175,7 @@ export async function promoteExternalPlaceCandidate(
       );
     }
 
-    const slug = promotionSlug(
-      input.candidate,
-      new Set(destinationRows.map((row) => row.slug)),
-    );
+    const slug = promotionSlug(input.candidate, new Set(destinationRows.map((row) => row.slug)));
     const place = createPlace(
       {
         destinationId,
@@ -193,9 +185,7 @@ export async function promoteExternalPlaceCandidate(
         category,
         latitude: input.candidate.latitude,
         longitude: input.candidate.longitude,
-        ...(input.candidate.addressLabel
-          ? { addressLabel: input.candidate.addressLabel }
-          : {}),
+        ...(input.candidate.addressLabel ? { addressLabel: input.candidate.addressLabel } : {}),
         publicationStatus: "draft",
       },
       promotedAt,

@@ -50,7 +50,7 @@ ai_context:
 
 ## 1. Missão do executor
 
-Conectar a visão principal da Viagem às Recommendations determinísticas já existentes, apresentando uma pequena seleção explicável e somente leitura, sem criar novo estado de domínio.
+Conectar a visão principal da Viagem às Recommendations determinísticas já existentes, apresentando uma seleção limitada e explicável em modo não executor. A superfície não deve salvar, planejar, reservar, comprar, enviar mensagens, chamar fornecedores ou gerar efeitos externos.
 
 ## 2. Incremento
 
@@ -83,53 +83,43 @@ Conectar a visão principal da Viagem às Recommendations determinísticas já e
 19. `docs/implementation/increments/rb-inc-144-contextual-decision-view.md`;
 20. este Context Pack.
 
-## 4. Conceitos relevantes
-
-| Termo oficial | Interpretação necessária |
-| --- | --- |
-| Viagem | Contexto organizador do produto, contendo destino, período, grupo, preferências, restrições e referências geográficas. |
-| Lugar | Opção descoberta ou catalogada; visualizar ou salvar não o torna atividade do Roteiro. |
-| Recommendation | Orientação contextual acompanhada dos fatores relevantes; não é Decision e não altera estado por si mesma. |
-| Decision | Escolha explícita do usuário; este incremento apenas navega para ações existentes e não cria Decision. |
-| Lugar salvo | Interesse persistido; não equivale a atividade do Roteiro. |
-| Distância geodésica | Estimativa em linha reta; não deve ser apresentada como rota, trânsito ou duração. |
-
-## 5. Invariantes
+## 4. Invariantes
 
 - Recommendation não é Decision.
 - Lugar salvo não é Atividade de Roteiro.
-- Visualização da seção contextual não aplica efeitos canônicos.
+- Visualização não aplica efeitos canônicos.
 - Informação desconhecida permanece desconhecida.
-- Estimativa deve ser identificada como estimativa.
-- Mapa e lista preservam o mesmo significado quando usados nesta jornada.
-- Falha de Provider não redefine o catálogo canônico.
-- IA não é necessária para esta capacidade.
+- Distância geodésica é linha reta, não rota/tempo.
+- Contexto insuficiente exige neutralidade.
+- Custos, riscos e perda de oportunidade só podem aparecer quando suportados por dados governados.
+- IA não é necessária para a base determinística deste incremento.
 
-## 6. Decisões arquiteturais aplicáveis
+## 5. Contratos existentes
 
-| ADR | Decisão que deve ser respeitada |
-| --- | --- |
-| RB-ADR-001 | Preservar o monólito modular e bounded contexts existentes. |
-| RB-ADR-003 | Manter a implementação web no Next.js/App Router existente. |
-| RB-ADR-005 | Nenhuma mudança de persistência ou PostGIS é necessária neste incremento. |
-| RB-ADR-009 | Validar entradas/contratos existentes nas fronteiras; não inventar dados. |
-| RB-ADR-010 | Cobrir regras e jornadas com testes automatizados existentes. |
-| RB-ADR-012 | Não substituir a estratégia geoespacial atual neste incremento. |
-| RB-ADR-019 | Usar CI existente como gate de validação. |
-
-## 7. Contratos existentes
-
-- `loadRecommendationExperience(tripId, now)` como orquestrador existente da experiência de Recommendations;
-- `RecommendationCardViewModel` para Reasons, Confidence, Limitations, imagem e distância;
-- `toRecommendationCardViewModel` como view model sem `RecommendationScore` exposto;
-- `formatGeodesicDistance` para apresentação explícita de distância em linha reta;
-- `PlacePrimaryImage` para imagem governada e fallback;
+- `loadRecommendationExperience(tripId, now, options)`;
+- `RecommendationCardViewModel` para Reasons, Confidence, Limitations, imagem, preço e distância;
+- `toRecommendationCardViewModel` sem expor `RecommendationScore`;
+- `formatGeodesicDistance`;
+- `PlacePrimaryImage`;
 - `/viagens/[tripId]/recomendacoes` para experiência completa;
-- `/viagens/[tripId]/lugares/[placeSlug]` para detalhes.
+- `/viagens/[tripId]/lugares/[placeSlug]` para detalhes;
+- `Place.priceRange` somente como faixa de preço do catálogo.
 
-A implementação pode introduzir uma opção de leitura em `loadRecommendationExperience` para impedir persistência quando a visão principal apenas consulta Recommendations. O comportamento atual da página completa deve permanecer compatível.
+A visão principal deve chamar a experiência em `persist: false`, preservando o comportamento persistente da página completa de Recommendations.
 
-## 8. Caminhos permitidos
+## 6. Arquitetura e governança
+
+| ADR | Aplicação |
+| --- | --- |
+| RB-ADR-001 | Preservar monólito modular e contextos existentes. |
+| RB-ADR-003 | Usar Next.js/App Router existente. |
+| RB-ADR-005 | Nenhuma alteração de persistência/PostGIS. |
+| RB-ADR-009 | Validar fronteiras e não inventar dados. |
+| RB-ADR-010 | Cobrir regras e jornadas com testes existentes. |
+| RB-ADR-012 | Não substituir a estratégia geoespacial. |
+| RB-ADR-019 | Usar CI existente como gate. |
+
+## 7. Caminhos permitidos
 
 ```text
 apps/web/app/viagens/[tripId]/page.tsx
@@ -140,18 +130,11 @@ apps/web/e2e/recommendations-experience.spec.ts
 docs/implementation/increments/rb-inc-144-contextual-decision-view.md
 docs/implementation/context-packs/rb-inc-144-contextual-decision-view.md
 docs/registry.md
-.github/workflows/rb-inc-144-registry-helper.yml
 ```
 
-O workflow listado acima é um helper temporário exclusivamente mecânico para registrar os dois novos documentos no Registry porque o conector de edição disponível não oferece operação de append. Ele deve:
+Qualquer caminho adicional exige justificativa no PR.
 
-- executar somente na branch `codex/rb-inc-144-contextual-decision-view`;
-- inserir somente `RB-INC-144` e `RB-CTX-144`;
-- não alterar outros documentos;
-- usar somente `GITHUB_TOKEN` implícito do Actions;
-- ser removido antes da PR final.
-
-## 9. Caminhos somente leitura
+## 8. Caminhos somente leitura
 
 ```text
 modules/decision-intelligence/src/**
@@ -163,64 +146,55 @@ docs/domain/**
 docs/architecture/**
 ```
 
-Não alterar esses caminhos para corrigir o escopo do incremento. Se um contrato de domínio precisar mudar, interromper e escalar.
+Se um contrato de domínio precisar mudar, interromper e escalar.
 
-## 10. Caminhos proibidos
+## 9. Caminhos proibidos
 
 ```text
 packages/database/drizzle/**
 apps/web/public/place-images/**
+.github/workflows/**
 ```
 
-Não criar migration, asset novo ou secret neste incremento. O único arquivo em `.github/workflows/` permitido é o helper temporário explicitamente listado acima, que deve ser removido antes da PR final.
+Não criar migration, asset, workflow, secret ou mudança de Production neste incremento.
 
-## 11. Entradas disponíveis
+## 10. Entradas e saídas
 
-- Trip existente e seu contexto já persistido;
-- Traveler Profile existente, quando configurado;
-- Accommodation e coordenada, quando configuradas;
-- Places publicados do destino;
-- Recommendations determinísticas existentes;
-- imagens governadas/fallback existentes.
+Entradas permitidas: Trip, Traveler Profile quando existente, Accommodation/coordenada quando existente, Places publicados, Recommendations determinísticas e imagens governadas/fallback.
+
+Saídas: seção contextual limitada, componente de apresentação, modo de leitura seguro, preço de catálogo quando existente, distância explicitamente geodésica, Reasons/Confidence/Limitations e navegação para detalhe/Recommendations.
 
 Não usar dados externos novos para preencher lacunas.
 
-## 12. Saídas esperadas
+## 11. Comportamento sob contexto insuficiente
 
-- seção contextual na visão principal da Viagem;
-- componente de apresentação limitado e reutilizável;
-- modo de leitura seguro para Recommendations quando necessário;
-- testes de view model/loader;
-- E2E da jornada principal;
-- documentação e Registry atualizados;
-- helper temporário removido antes da PR final.
+Quando o contexto for insuficiente, a UI deve permanecer neutra. Não deve chamar uma opção de “melhor”, inventar fatores ou aumentar a assertividade.
+
+A interface deve indicar que a seleção pode estar incompleta e apontar dados configuráveis, como interesses e hospedagem. Dados ausentes permanecem ausentes.
+
+## 12. Custos, riscos e perda de oportunidade
+
+- `priceRange` pode ser exibido como **faixa de preço do catálogo**, nunca como custo real;
+- custo real, disponibilidade, horário, rota e duração não devem ser inferidos;
+- riscos e perda de oportunidade só podem ser apresentados quando houver evidência governada;
+- nesta base do produto, quando esses fatores não estiverem medidos, a UI deve dizer explicitamente que não estão medidos/disponíveis;
+- nenhuma dessas dimensões pode entrar no ranking sem contrato próprio e evidência.
 
 ## 13. Critérios de aceite
 
-- [ ] A visão da Viagem apresenta a decisão contextual antes do catálogo secundário.
-- [ ] A seleção é limitada e vem do mesmo motor de Recommendations já existente.
+- [ ] Seção contextual aparece na visão da Viagem.
+- [ ] No máximo três Recommendations são apresentadas.
 - [ ] Reasons, Confidence e Limitations não são reinterpretados.
 - [ ] Imagem/fallback é renderizada sem hotlink.
-- [ ] Distância é explicitamente em linha reta quando presente.
-- [ ] Detalhe do Place e Recommendations completas permanecem navegáveis.
-- [ ] Visualizar a seção não cria novas Recommendations persistidas.
-- [ ] Estado sem contexto é claro e acionável.
-- [ ] Desktop e mobile são cobertos pela jornada E2E aplicável.
+- [ ] Faixa de preço é distinguida de custo real.
+- [ ] Distância é explicitamente em linha reta.
+- [ ] Próximo passo é apenas navegação/comparação, sem execução.
+- [ ] Custos/riscos/perdas não medidos são declarados como indisponíveis.
+- [ ] Contexto insuficiente mantém neutralidade e indica dados configuráveis.
+- [ ] Visualização não cria Recommendations persistidas, não salva Places e não altera Atividades.
+- [ ] Desktop/mobile e E2E aplicável passam.
 
-## 14. Restrições
-
-- não alterar o domínio;
-- não adicionar Provider ou dependência;
-- não criar migration;
-- não alterar Production;
-- não criar nova regra de ranking na UI;
-- não usar dados inventados;
-- não afirmar que uma Recommendation é melhor por causa de uma heurística nova;
-- não declarar testes executados sem execução real;
-- não expandir o incremento;
-- remover o helper de Registry antes da PR final.
-
-## 15. Comandos
+## 14. Testes
 
 ```bash
 pnpm format:check
@@ -232,31 +206,12 @@ pnpm build
 pnpm test:e2e
 ```
 
-Durante desenvolvimento, priorizar os testes diretamente afetados antes da suíte completa.
+Priorizar testes diretamente afetados antes da suíte completa.
 
-## 16. Dados e privacidade
+## 15. Quando interromper
 
-Usar somente o contexto mínimo já necessário para a Recommendation da própria Trip. Não introduzir analytics, tracking comportamental ou novos dados pessoais. Fixtures devem usar dados sintéticos existentes.
+Interromper se surgir necessidade de alterar domínio, criar estado persistido novo, mudar ranking canônico, adicionar Provider/secret/infraestrutura, criar migration, introduzir dados não governados ou ampliar o escopo.
 
-## 17. Quando interromper e escalar
+## 16. Definition of Done
 
-Interromper se:
-
-- surgir necessidade de alterar o domínio;
-- a seleção exigir novo conceito persistido;
-- for necessário mudar o algoritmo canônico de Recommendation;
-- for necessário novo Provider, secret ou infraestrutura;
-- for necessária migration;
-- um teste revelar divergência semântica entre Recommendations e a nova superfície;
-- o escopo não puder ser satisfeito pelos caminhos permitidos.
-
-## 18. Formato do relatório final
-
-- resultado entregue;
-- arquivos alterados;
-- testes executados e resultados;
-- testes não executados;
-- riscos e pendências;
-- mudanças documentais;
-- issue `#337`;
-- PR, quando aberta.
+Critérios de aceite satisfeitos, documentação registrada, testes com evidência real, CI verde no SHA final e PR pronta para revisão humana. Merge permanece condicionado à autorização explícita.

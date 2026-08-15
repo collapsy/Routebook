@@ -1,6 +1,6 @@
 import type { AccountMembership, AccountMembershipRole } from "./identity";
 
-export type TripAction = "trip:view" | "trip:edit" | "trip:accept-proposal";
+export type TripAction = "trip:view" | "trip:edit" | "trip:accept-proposal" | "trip:delete";
 
 export type TripScopeLookup =
   | Readonly<{ status: "not-found" }>
@@ -42,7 +42,7 @@ export class TripAuthorizationError extends Error {
 }
 
 const ACTIONS_BY_ROLE = {
-  owner: ["trip:view", "trip:edit", "trip:accept-proposal"],
+  owner: ["trip:view", "trip:edit", "trip:accept-proposal", "trip:delete"],
   editor: ["trip:view", "trip:edit", "trip:accept-proposal"],
   viewer: ["trip:view"],
 } as const satisfies Readonly<Record<AccountMembershipRole, readonly TripAction[]>>;

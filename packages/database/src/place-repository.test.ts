@@ -10,6 +10,14 @@ import { places } from "./schema";
 const database = getDatabase();
 const destinationId = `test-${randomUUID()}`;
 const now = new Date("2026-08-11T00:00:00Z");
+const primaryImage = {
+  assetPath: "/place-images/tests/lugar-com-faixa.webp",
+  altText: "Imagem de teste de um lugar gastronômico.",
+  sourceName: "Fixture RouteBook",
+  sourceUrl: "https://example.com/fixture",
+  license: "fixture de teste",
+  attribution: "Imagem de teste",
+};
 
 const baselinePipaSlugs = [
   "praia-do-amor",
@@ -59,6 +67,7 @@ beforeAll(async () => {
       latitude: -6.23,
       longitude: -35.05,
       priceRange: "moderate",
+      primaryImage,
       publicationStatus: "published",
       createdAt: now,
       updatedAt: now,
@@ -73,6 +82,7 @@ beforeAll(async () => {
       latitude: -6.24,
       longitude: -35.04,
       priceRange: null,
+      primaryImage: null,
       publicationStatus: "published",
       createdAt: now,
       updatedAt: now,
@@ -93,6 +103,15 @@ describe("DrizzlePlaceRepository", () => {
     expect(result.find((place) => place.slug === "lugar-sem-faixa")).not.toHaveProperty(
       "priceRange",
     );
+  });
+
+  it("mapeia imagem principal governada e omite imagem ausente", async () => {
+    const repository = new DrizzlePlaceRepository();
+    const withImage = await repository.findPublishedBySlug(destinationId, "lugar-com-faixa");
+    const withoutImage = await repository.findPublishedBySlug(destinationId, "lugar-sem-faixa");
+
+    expect(withImage?.primaryImage).toEqual(primaryImage);
+    expect(withoutImage).not.toHaveProperty("primaryImage");
   });
 
   it("carrega o catálogo curado expandido de Pipa com cobertura nas quatro categorias", async () => {

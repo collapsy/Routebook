@@ -6,6 +6,13 @@ import { createPlace } from "@routebook/place-catalog";
 import { formatGeodesicDistance, toRecommendationCardViewModel } from "./recommendation-experience";
 
 const generatedAt = new Date("2026-07-30T20:00:00.000Z");
+const primaryImage = {
+  assetPath: "/place-images/tests/praia-do-amor.webp",
+  altText: "Falésias da Praia do Amor vistas do alto.",
+  sourceName: "Acervo RouteBook",
+  sourceUrl: "https://example.com/acervo/praia-do-amor",
+  license: "uso autorizado",
+} as const;
 
 function presentedRecommendation() {
   return presentRecommendation(
@@ -65,6 +72,7 @@ describe("Recommendation experience view model", () => {
       category: "beach",
       latitude: -6.2366,
       longitude: -35.0465,
+      primaryImage,
       publicationStatus: "published",
     });
     const viewModel = toRecommendationCardViewModel({
@@ -80,5 +88,29 @@ describe("Recommendation experience view model", () => {
     expect(viewModel).not.toHaveProperty("rating");
     expect(viewModel.confidenceLevel).toBe("high");
     expect(viewModel.canIgnore).toBe(true);
+    expect(viewModel.primaryImage).toEqual(primaryImage);
+  });
+
+  it("omits primaryImage when the Place has no governed image", () => {
+    const place = createPlace({
+      destinationId: "pipa-rn-br",
+      slug: "praia-do-centro",
+      name: "Praia do Centro",
+      summary: "Praia publicada no catálogo sem imagem principal curada.",
+      category: "beach",
+      latitude: -6.23,
+      longitude: -35.05,
+      publicationStatus: "published",
+    });
+
+    const viewModel = toRecommendationCardViewModel({
+      tripId: "trip-1",
+      recommendation: presentedRecommendation(),
+      place: { ...place, id: "10000000-0000-4000-8000-000000000001" },
+      isSaved: false,
+      isPlanned: false,
+    });
+
+    expect(viewModel).not.toHaveProperty("primaryImage");
   });
 });

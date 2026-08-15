@@ -18,6 +18,7 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(
     page.getByRole("list", { name: "Lugares publicados" }).getByRole("listitem"),
   ).toHaveCount(30);
+  await expect(page.getByRole("img", { name: /^Imagem não disponível para / })).toHaveCount(30);
 
   await page.getByLabel("Nome ou termo").fill("minas");
   await page.getByRole("button", { name: "Aplicar filtros" }).click();

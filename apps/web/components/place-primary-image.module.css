@@ -1,0 +1,57 @@
+.figure {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  min-width: 0;
+}
+
+.frame,
+.fallback {
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  overflow: hidden;
+}
+
+.frame {
+  background: var(--surface-soft);
+  position: relative;
+}
+
+.image {
+  object-fit: cover;
+}
+
+.fallback {
+  align-items: center;
+  background: var(--surface-soft);
+  color: var(--foreground-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+}
+
+.fallbackMark {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.fallbackText {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.caption {
+  color: var(--foreground-muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.caption a {
+  color: var(--primary-strong);
+  font-weight: 700;
+}

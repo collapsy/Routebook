@@ -267,7 +267,6 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-107 | E2E Integral da Edição de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/increments/rb-inc-107-itinerary-proposal-edit-e2e.md) |
 | RB-CTX-107 | Context Pack do RB-INC-107 | Implementation Context | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/context-packs/rb-inc-107-itinerary-proposal-edit-e2e.md) |
-
 | RB-INC-108 | Núcleo de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/increments/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
 | RB-CTX-108 | Context Pack do RB-INC-108 | Implementation Context | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/context-packs/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
 | RB-INC-109 | Transação PostgreSQL de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md](./implementation/increments/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md) |
@@ -334,6 +333,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-139 | Context Pack do RB-INC-139 — Proximidade da Hospedagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-139-accommodation-proximity.md](./implementation/context-packs/rb-inc-139-accommodation-proximity.md) |
 | RB-INC-140 | Densidade Útil do Roteiro e Itinerary Proposals | Implementation | Draft | 0.1.0 | [rb-inc-140-itinerary-density.md](./implementation/increments/rb-inc-140-itinerary-density.md) |
 | RB-CTX-140 | Context Pack do RB-INC-140 — Densidade Útil do Roteiro | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-140-itinerary-density.md](./implementation/context-packs/rb-inc-140-itinerary-density.md) |
+| RB-INC-141 | Imagem Principal de Places para Apoio à Decisão | Implementation | Draft | 0.1.0 | [rb-inc-141-place-primary-image.md](./implementation/increments/rb-inc-141-place-primary-image.md) |
+| RB-CTX-141 | Context Pack do RB-INC-141 — Imagem Principal de Places | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-141-place-primary-image.md](./implementation/context-packs/rb-inc-141-place-primary-image.md) |
 
 ## Status possíveis
 

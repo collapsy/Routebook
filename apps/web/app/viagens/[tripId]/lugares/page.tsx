@@ -10,6 +10,7 @@ import {
 } from "@routebook/place-catalog";
 import { findTripById } from "@routebook/trip-management";
 
+import { PlacePrimaryImage } from "../../../../components/place-primary-image";
 import { TripMap } from "../../../../components/trip-map";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import {
@@ -263,6 +264,7 @@ export default async function PlacesPage({
         <ul className="trip-days-grid" aria-label="Lugares publicados">
           {filteredPlaces.map(({ place, distanceMeters }) => (
             <li key={place.id}>
+              <PlacePrimaryImage placeName={place.name} primaryImage={place.primaryImage} />
               <span>{categoryLabels[place.category]}</span>
               <strong>{place.name}</strong>
               <p>{place.summary}</p>

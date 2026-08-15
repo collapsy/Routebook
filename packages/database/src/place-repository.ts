@@ -1,6 +1,11 @@
 import { and, asc, eq } from "drizzle-orm";
 
-import type { ListPublishedPlacesQuery, Place, PlaceRepository } from "@routebook/place-catalog";
+import {
+  parsePlacePrimaryImage,
+  type ListPublishedPlacesQuery,
+  type Place,
+  type PlaceRepository,
+} from "@routebook/place-catalog";
 
 import { getDatabase } from "./client";
 import { places } from "./schema";
@@ -8,6 +13,8 @@ import { places } from "./schema";
 type PlaceRow = typeof places.$inferSelect;
 
 function mapPlace(row: PlaceRow): Place {
+  const primaryImage = parsePlacePrimaryImage(row.primaryImage);
+
   return {
     id: row.id,
     destinationId: row.destinationId,
@@ -19,6 +26,7 @@ function mapPlace(row: PlaceRow): Place {
     longitude: row.longitude,
     ...(row.addressLabel ? { addressLabel: row.addressLabel } : {}),
     ...(row.priceRange ? { priceRange: row.priceRange as NonNullable<Place["priceRange"]> } : {}),
+    ...(primaryImage ? { primaryImage } : {}),
     publicationStatus: row.publicationStatus as Place["publicationStatus"],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

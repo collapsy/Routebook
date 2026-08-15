@@ -335,6 +335,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-140 | Context Pack do RB-INC-140 — Densidade Útil do Roteiro | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-140-itinerary-density.md](./implementation/context-packs/rb-inc-140-itinerary-density.md) |
 | RB-INC-141 | Imagem Principal de Places para Apoio à Decisão | Implementation | Draft | 0.1.0 | [rb-inc-141-place-primary-image.md](./implementation/increments/rb-inc-141-place-primary-image.md) |
 | RB-CTX-141 | Context Pack do RB-INC-141 — Imagem Principal de Places | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-141-place-primary-image.md](./implementation/context-packs/rb-inc-141-place-primary-image.md) |
+| RB-INC-142 | Descoberta Orgânica e Ingestão Governada de Places | Implementation | Draft | 0.1.0 | [rb-inc-142-organic-place-ingestion.md](./implementation/increments/rb-inc-142-organic-place-ingestion.md) |
+| RB-CTX-142 | Context Pack do RB-INC-142 — Descoberta Orgânica e Ingestão Governada de Places | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-142-organic-place-ingestion.md](./implementation/context-packs/rb-inc-142-organic-place-ingestion.md) |
 
 ## Status possíveis
 

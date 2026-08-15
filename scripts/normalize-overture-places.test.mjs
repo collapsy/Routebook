@@ -38,7 +38,10 @@ test("mapeia categoria diretamente ou por hierarquia", () => {
 });
 
 test("resolve licença explícita e fallback conhecido por dataset", () => {
-  assert.equal(resolveOvertureSourceLicense({ dataset: "fsq", license: "Apache-2.0" }), "Apache-2.0");
+  assert.equal(
+    resolveOvertureSourceLicense({ dataset: "fsq", license: "Apache-2.0" }),
+    "Apache-2.0",
+  );
   assert.equal(resolveOvertureSourceLicense({ dataset: "meta" }), "CDLA-Permissive-2.0");
   assert.equal(resolveOvertureSourceLicense({ dataset: "unknown-provider" }), undefined);
 });
@@ -84,10 +87,19 @@ test("filtra fechamento permanente, baixa confiança, categoria desconhecida e l
     },
   });
 
-  assert.equal(normalizeOvertureFeature(permanentlyClosed, { collectedAt }).reason, "permanently-closed");
+  assert.equal(
+    normalizeOvertureFeature(permanentlyClosed, { collectedAt }).reason,
+    "permanently-closed",
+  );
   assert.equal(normalizeOvertureFeature(lowConfidence, { collectedAt }).reason, "low-confidence");
-  assert.equal(normalizeOvertureFeature(unknownCategory, { collectedAt }).reason, "unsupported-category");
-  assert.equal(normalizeOvertureFeature(unknownLicense, { collectedAt }).reason, "missing-source-license");
+  assert.equal(
+    normalizeOvertureFeature(unknownCategory, { collectedAt }).reason,
+    "unsupported-category",
+  );
+  assert.equal(
+    normalizeOvertureFeature(unknownLicense, { collectedAt }).reason,
+    "missing-source-license",
+  );
 });
 
 test("deduplica por externalId, ordena por confiança e respeita limite", () => {
@@ -98,7 +110,11 @@ test("deduplica por externalId, ordena por confiança e respeita limite", () => 
       feature({ id: "same", properties: { ...feature().properties, confidence: 0.95 } }),
       feature({
         id: "other",
-        properties: { ...feature().properties, names: { primary: "Outro Restaurante" }, confidence: 0.9 },
+        properties: {
+          ...feature().properties,
+          names: { primary: "Outro Restaurante" },
+          confidence: 0.9,
+        },
       }),
     ],
   };

@@ -127,7 +127,16 @@ apps/web/e2e/recommendations-experience.spec.ts
 docs/implementation/increments/rb-inc-144-contextual-decision-view.md
 docs/implementation/context-packs/rb-inc-144-contextual-decision-view.md
 docs/registry.md
+.github/workflows/rb-inc-144-registry-helper.yml
 ```
+
+O workflow listado acima é um helper temporário exclusivamente mecânico para registrar os dois novos documentos no Registry porque o conector de edição disponível não oferece operação de append. Ele deve:
+
+- executar somente na branch `codex/rb-inc-144-contextual-decision-view`;
+- inserir somente `RB-INC-144` e `RB-CTX-144`;
+- não alterar outros documentos;
+- usar somente `GITHUB_TOKEN` implícito do Actions;
+- ser removido antes da PR final.
 
 Qualquer caminho adicional exige justificativa no Context Pack e no PR.
 
@@ -194,8 +203,9 @@ Qualquer caminho adicional exige justificativa no Context Pack e no PR.
 - sem novo conceito de domínio;
 - sem alteração de `main` direta;
 - PR somente após gates aplicáveis passarem;
-- merge somente mediante autorização humana explícita.
+- merge somente mediante autorização humana explícita;
+- helper temporário de Registry deve ser removido antes da PR final.
 
 ## 12. Definition of Done
 
-O incremento somente será considerado concluído quando os critérios de aceite forem satisfeitos, a documentação estiver registrada, os testes aplicáveis tiverem evidência real e a PR estiver pronta para revisão humana. O merge permanece fora da execução autônoma.
+O incremento somente será considerado concluído quando os critérios de aceite forem satisfeitos, a documentação estiver registrada, os testes aplicáveis tiverem evidência real, o helper temporário tiver sido removido e a PR estiver pronta para revisão humana. O merge permanece fora da execução autônoma.

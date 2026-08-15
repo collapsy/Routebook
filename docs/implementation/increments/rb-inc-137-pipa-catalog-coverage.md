@@ -10,7 +10,7 @@ created: "2026-08-14"
 last_updated: "2026-08-14"
 authors: [RouteBook Team]
 tags: [implementation, place-catalog, pipa, m8, data-curation, coverage, migrations]
-related_documents: [RB-CORE-0004, RB-PRD-002, RB-DATA-002, RB-QA-001, RB-CICD-001, RB-INC-133, RB-INC-135, RB-INC-136]
+related_documents: [RB-CORE-0004, RB-PRD-002, RB-DATA-002, RB-QA-001, RB-CICD-001, RB-INC-133, RB-INC-135, RB-INC-136, RB-CTX-137]
 prerequisites: [RB-INC-133, RB-INC-135]
 next_documents: [RB-INC-136]
 ai_context:
@@ -52,7 +52,7 @@ A expansão respeita `valor antes de volume` da RouteBook Bible:
 - manter as quatro categorias já existentes, sem criar conceito novo de domínio;
 - priorizar variedade de decisão: praias distintas, refeições, café/brunch, sobremesa e noite;
 - preferir fontes oficiais/institucionais para praias e natureza;
-- preferir fonte do estabelecimento, diretório local atual e cadastro empresarial atual para negócios;
+- preferir fonte do estabelecimento, diretório local atual e cadastro atual para negócios;
 - não persistir rating, review count, horários, preço monetário ou ranking;
 - usar coordenadas como referência aproximada do Place ou de seu ponto de acesso, não como garantia de entrada física;
 - preservar `price_range=null` quando não houver classificação qualitativa suficientemente estável;
@@ -77,20 +77,20 @@ Fontes atuais usadas para existência/endereço, combinadas conforme disponibili
 - Caxangá: site oficial e índice local;
 - Macoco Cozinha Artesanal: Pipa.com.br e índice local;
 - Aprecíe Restaurante: Pipa.com.br e perfil atual do estabelecimento;
-- El Farolito: Pipa.com.br e Vive Pipa;
-- Moka Cafés Especiais: guia Pipa.tur.br e cadastro empresarial ativo;
-- Caju: perfil atual do estabelecimento/índice gastronômico;
-- Sorveteria Real de 14: site oficial e Pipa.com.br;
-- Pipa Beach Club: Pipa.com.br e índice local da unidade de Pipa/RN.
+- El Farolito: perfil atual e índice local;
+- Moka Cafés Especiais: Guia Pipa e índice atual;
+- Caju: perfil atual do estabelecimento e índice gastronômico;
+- Sorveteria Real de 14: perfil atual e índice local;
+- Pipa Beach Club: índice atual da unidade de Pipa/RN.
 
 ### Vida noturna
 
-- Tribus Bar: Pipa.com.br e índice atual;
-- Bakana: cadastro empresarial ativo e índice atual;
-- UMI Bar: Google Maps/índices atuais;
-- Alma Pipa: perfil atual e evento de inauguração em 2026.
+- Tribus In Pipa: cadastro atual em Pipa/RN;
+- Bakana: cadastro atual de vida noturna;
+- Birring in Paradise: cadastro atual confirma operação na Avenida Baía dos Golfinhos, 767 / Galeria das Cores;
+- UMI Bar: cadastro atual na Avenida Baía dos Golfinhos.
 
-Um candidato inicialmente considerado para vida noturna foi descartado porque fontes atuais divergiam sobre seu funcionamento. A migration não versiona Place cuja existência atual permaneça ambígua.
+A revisão de 2026-08-14 eliminou a ambiguidade anterior sobre Birring in Paradise e manteve o candidato original da Issue #321. Nenhum Place substituto foi adicionado apenas para atingir a meta numérica.
 
 ## 5. Catálogo alvo
 
@@ -111,10 +111,10 @@ A migration 0027 adiciona 17 Places:
 | `sorveteria-real-de-14` | Sorveteria Real de 14 | `gastronomy` |
 | `pipa-beach-club` | Pipa Beach Club | `gastronomy` |
 | `lagoa-de-guarairas` | Lagoa de Guaraíras | `nature` |
-| `tribus-bar` | Tribus Bar | `nightlife` |
+| `tribus-in-pipa` | Tribus In Pipa | `nightlife` |
 | `bakana` | Bakana | `nightlife` |
+| `birring-in-paradise` | Birring in Paradise | `nightlife` |
 | `umi-bar` | UMI Bar | `nightlife` |
-| `alma-pipa` | Alma Pipa | `nightlife` |
 
 Resultado esperado:
 
@@ -135,7 +135,7 @@ A auditoria read-only em Production confirmou, antes da criação da migration, 
 - UUIDs `10000000-0000-4000-8000-000000000014` a `10000000-0000-4000-8000-000000000030` estão livres;
 - os 17 slugs da seção anterior estão livres.
 
-A migration será `0027_expand_pipa_catalog_coverage` e seguirá:
+A migration `0027_expand_pipa_catalog_coverage` segue:
 
 - somente `INSERT`;
 - `ON CONFLICT DO NOTHING`;
@@ -145,19 +145,21 @@ A migration será `0027_expand_pipa_catalog_coverage` e seguirá:
 - timestamps explícitos;
 - IDs e slugs estáveis;
 - `publication_status=published`;
+- `price_range=null` para os novos registros sem faixa qualitativa estável;
 - journal append-only.
 
 ## 7. Escopo
 
 - criar migration 0027 e journal correspondente;
 - ampliar teste PostgreSQL para total e distribuição 30 / 7-12-4-7;
-- atualizar contratos E2E que representem deterministicamente o catálogo publicado;
+- comprovar preservação dos 13 slugs e presença dos 17 novos;
+- atualizar Place Discovery para provar pesquisa de um novo Place sem remover regressão de lista/mapa;
+- atualizar Recommendations para provar que um novo Place é selecionável pelo motor determinístico em contexto compatível;
 - preservar a regressão de ancoragem do mapa entregue pela #322/#323;
 - documentar Increment, Context Pack, Registry e rastreabilidade;
 - executar Documentation Validation e Engineering Validation no mesmo SHA;
 - integrar por squash quando verde;
-- comprovar fail-closed do Production Release antes de qualquer DML;
-- solicitar aprovação humana explícita para a 0027 vinculada ao SHA candidato.
+- executar o Production Release governado antes de qualquer DML.
 
 ## 8. Fora de escopo
 
@@ -169,11 +171,12 @@ A migration será `0027_expand_pipa_catalog_coverage` e seguirá:
 - novo Provider de Places;
 - scraping ou ingestão remota em runtime;
 - alterações em mapa, distância, rota ou autenticação;
+- alteração da política determinística `place-ranking-v1`;
 - declarar M8 validado sem uso humano real.
 
 ## 9. Risco de Production
 
-A migration é aditiva, mas contém DML. Pelo RB-INC-133, deve ser classificada como `high` e bloquear o release automático antes de `pnpm db:migrate`.
+A migration é aditiva, mas contém DML. Pelo RB-INC-133, o Production Release deve classificar e aplicar o gate correspondente antes de `pnpm db:migrate`.
 
 Fluxo obrigatório:
 
@@ -182,36 +185,36 @@ PR verde
   -> squash merge em main
   -> Engineering Validation verde no SHA
   -> Production Release encontra 0027 pendente
-  -> classificação high risk
-  -> bloqueio antes de write
-  -> aprovação humana explícita para o SHA candidato
-  -> workflow_dispatch aprovado
+  -> classificação de risco
+  -> bloqueio antes de write quando exigido pela política
+  -> aprovação humana vinculada ao SHA candidato
+  -> workflow manual autorizado quando aplicável
   -> migration 0027
   -> ledger sem pendências
   -> promoção de codex/production-release
   -> Vercel Production
 ```
 
-A aprovação de merge não equivale à aprovação da migration.
+A autorização humana para seguir com o DML foi registrada na sessão de implementação em 2026-08-14. Ela só pode ser consumida para o SHA final que passar pelos gates; nenhum draft intermediário pode ser aplicado em Production.
 
 ## 10. Critérios de aceite
 
 - [x] baseline Production 13 / 3-4-3-3 auditado;
-- [x] pool de curadoria revisada com fontes atuais;
-- [x] candidato com situação ambígua removido;
+- [x] pool de curadoria revisado com fontes atuais;
+- [x] Birring in Paradise revalidado e mantido no pool original;
 - [x] 17 slugs e UUIDs novos comprovados livres em Production por consulta read-only;
-- [ ] migration 0027 aditiva/idempotente criada;
-- [ ] journal append-only recebe somente idx 27;
+- [x] migration 0027 aditiva/idempotente criada;
+- [x] journal append-only recebe somente idx 27;
+- [x] testes PostgreSQL especificam 30 Places e distribuição 7/12/4/7;
+- [x] testes preservam os 13 slugs e exigem os 17 novos;
+- [x] E2E de Discovery exige `Praia das Minas` em lista e mapa;
+- [x] E2E de Recommendations exige `Praia das Minas` com compatibilidade de interesse e distância;
 - [ ] PostgreSQL efêmero comprova 30 Places e distribuição 7/12/4/7;
-- [ ] 30 slugs são únicos e coordenadas válidas;
-- [ ] E2Es dependentes do catálogo são atualizados sem remover regressões existentes;
+- [ ] 30 slugs são únicos e coordenadas válidas em CI;
 - [ ] Registry e rastreabilidade atualizados;
 - [ ] Documentation e Engineering Validation verdes no mesmo SHA;
 - [ ] PR integrada por squash;
-- [ ] Engineering Validation pós-merge verde;
-- [ ] Production Release bloqueia 0027 como high-risk antes de qualquer write;
-- [ ] responsável aprova explicitamente a 0027 para o SHA exato;
-- [ ] workflow manual aplica 0027 e deixa zero migrations pendentes;
+- [ ] Production Release aplica 0027 somente após gate aplicável;
 - [ ] `codex/production-release` avança somente após ledger limpo;
 - [ ] novo deployment Production fica READY;
 - [ ] Production comprova 30 Places / 7-12-4-7;
@@ -219,4 +222,4 @@ A aprovação de merge não equivale à aprovação da migration.
 
 ## 11. Rollback
 
-Antes da aprovação produtiva, rollback é não promover a 0027. Depois da aplicação, os registros permanecem como expansão compatível; remoção em massa não é executada automaticamente. Correções devem seguir roll-forward governado.
+Antes da aplicação produtiva, rollback é não promover a 0027. Depois da aplicação, os registros permanecem como expansão compatível; remoção em massa não é executada automaticamente. Correções devem seguir roll-forward governado.

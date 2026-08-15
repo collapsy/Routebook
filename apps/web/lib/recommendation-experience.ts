@@ -21,7 +21,12 @@ import {
   type RecommendationStatus,
   type TravelerInterest,
 } from "@routebook/decision-intelligence";
-import { listPublishedPlaces, type Place, type PlaceCategory } from "@routebook/place-catalog";
+import {
+  listPublishedPlaces,
+  type Place,
+  type PlaceCategory,
+  type PlacePrimaryImage,
+} from "@routebook/place-catalog";
 import { listSavedPlaces } from "@routebook/saved-places";
 import { findTravelerProfile } from "@routebook/traveler-profile";
 import { findTripById, type Trip } from "@routebook/trip-management";
@@ -36,6 +41,7 @@ export type RecommendationCardViewModel = Readonly<{
   placeName: string;
   category: PlaceCategory;
   summary: string;
+  primaryImage?: PlacePrimaryImage;
   reasons: readonly RecommendationReason[];
   limitations: readonly RecommendationLimitation[];
   confidenceLevel: RecommendationConfidenceLevel;
@@ -142,6 +148,7 @@ export function toRecommendationCardViewModel(input: {
     placeName: input.place.name,
     category: input.place.category,
     summary: input.place.summary,
+    ...(input.place.primaryImage ? { primaryImage: input.place.primaryImage } : {}),
     reasons: input.recommendation.reasons,
     limitations: input.recommendation.limitations,
     confidenceLevel: input.recommendation.confidence.level,

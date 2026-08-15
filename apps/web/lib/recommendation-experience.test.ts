@@ -72,6 +72,7 @@ describe("Recommendation experience view model", () => {
       category: "beach",
       latitude: -6.2366,
       longitude: -35.0465,
+      priceRange: "moderate",
       primaryImage,
       publicationStatus: "published",
     });
@@ -89,6 +90,7 @@ describe("Recommendation experience view model", () => {
     expect(viewModel.confidenceLevel).toBe("high");
     expect(viewModel.canIgnore).toBe(true);
     expect(viewModel.primaryImage).toEqual(primaryImage);
+    expect(viewModel.priceRange).toBe("moderate");
   });
 
   it("omits primaryImage when the Place has no governed image", () => {

@@ -17,11 +17,13 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "turbo run lint",
+    "materialize:place-images": "node scripts/materialize-place-images.mjs --materialize",
     "promote:place-candidates": "pnpm --filter @routebook/database exec tsx ../../scripts/promote-place-candidates.mjs",
     "smoke:operational": "node scripts/operational-smoke.mjs",
     "test": "turbo run test",
     "test:operational-smoke": "node --test scripts/operational-smoke.test.mjs",
     "test:overture-place-normalizer": "node --test scripts/normalize-overture-places.test.mjs",
+    "test:place-images": "node --test scripts/materialize-place-images.test.mjs && node scripts/materialize-place-images.mjs --verify",
     "test:release-migration-policy": "node --test scripts/release-migration-policy.test.mjs",
     "test:e2e": "pnpm --filter @routebook/web test:e2e",
     "typecheck": "turbo run typecheck"

@@ -112,7 +112,7 @@ export default async function TripOverviewPage({
       latitude: place.latitude,
       longitude: place.longitude,
       href: `/viagens/${tripId}/lugares/${place.slug}`,
-    }));
+    });
   }
 
   return (

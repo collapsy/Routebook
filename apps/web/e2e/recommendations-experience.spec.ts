@@ -65,6 +65,44 @@ async function openRecommendations(page: Page, tripUrl: string, tripName: string
   await expect(page.getByText(/cada mudança exige uma ação explícita/i)).toBeVisible();
 }
 
+test("mostra decisão contextual sem aplicar uma escolha", async ({ page }) => {
+  const { tripUrl } = await createTripWithRecommendationContext(page);
+
+  await page.goto(tripUrl);
+  await expect(
+    page.getByRole("heading", { name: "O que vale a pena considerar?", exact: true }),
+  ).toBeVisible();
+
+  const contextualList = page.getByRole("list", {
+    name: "Sugestões contextuais de lugares",
+  });
+  await expect(contextualList).toBeVisible();
+  await expect(contextualList.getByRole("listitem")).toHaveCount(3);
+  await expect(contextualList.getByRole("img").first()).toBeVisible();
+  await expect(page.getByText(/Faixa de preço do catálogo|Faixa de preço: indisponível/)).toBeVisible();
+  await expect(
+    page.getByText(/não mede custo real, risco ou impacto de esperar/i),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ver todas as sugestões" })).toBeVisible();
+  await expect(contextualList.getByRole("link", { name: /Comparar detalhes/ }).first()).toBeVisible();
+
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "O que vale a pena considerar?", exact: true }),
+  ).toBeVisible();
+
+  await page.goto(`${tripUrl}/lugares-salvos`);
+  await expect(
+    page.getByRole("heading", {
+      name: "Você ainda não salvou nenhum lugar",
+      exact: true,
+    }),
+  ).toBeVisible();
+
+  await page.goto(`${tripUrl}/roteiro`);
+  await expect(page.getByLabel("Resumo do roteiro")).toContainText("0atividades");
+});
+
 test("salva Recommendation sem criar Activity", async ({ page }) => {
   const { tripName, tripUrl } = await createTripWithRecommendationContext(page);
   await openRecommendations(page, tripUrl, tripName);

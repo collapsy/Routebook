@@ -30,11 +30,7 @@ export type PlaceExternalReference = Readonly<{
   externalId: string;
 }>;
 
-export type ExternalPlaceReconciliationStatus =
-  | "new"
-  | "possible_match"
-  | "linked"
-  | "rejected";
+export type ExternalPlaceReconciliationStatus = "new" | "possible_match" | "linked" | "rejected";
 
 export type ExternalPlaceReconciliation = Readonly<{
   candidate: ExternalPlaceCandidate;

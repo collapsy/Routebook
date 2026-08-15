@@ -56,6 +56,18 @@ describe("filterPlaces", () => {
     ).toEqual(["beach"]);
   });
 
+  it("prefere lugares mais próximos quando a hospedagem possui coordenadas", () => {
+    const results = filterPlaces(places, {}, { latitude: -6.2297, longitude: -35.0536 });
+
+    expect(results.map(({ place }) => place.id)).toEqual(["food", "beach"]);
+    expect(results[0]?.distanceMeters).toBe(0);
+    expect(results[1]?.distanceMeters).toBeGreaterThan(0);
+  });
+
+  it("preserva a ordem original quando não há coordenadas da hospedagem", () => {
+    expect(filterPlaces(places, {}).map(({ place }) => place.id)).toEqual(["beach", "food"]);
+  });
+
   it("não aplica distância sem coordenada da hospedagem", () => {
     expect(filterPlaces(places, { maximumDistanceMeters: 3_000 })).toEqual([]);
   });

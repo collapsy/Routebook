@@ -92,7 +92,7 @@ O incremento reutiliza essa política de integridade em vez de implementar uma s
 - [x] persistência usa a raiz `trips` e cascades existentes;
 - [x] teste PostgreSQL comprova remoção de dados dependentes;
 - [x] E2E cobre cancelamento e exclusão confirmada;
-- [ ] Registry atualizado;
+- [x] Registry atualizado;
 - [ ] Documentation Validation verde;
 - [ ] Engineering Validation verde no mesmo SHA;
 - [ ] PR integrada.

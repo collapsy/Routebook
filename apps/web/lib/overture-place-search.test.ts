@@ -27,15 +27,13 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
   });
 
   it("limita a consulta geográfica a um conjunto finito de tiles de Pipa", () => {
-    const tiles = tileCoordinatesForRadius(
-      { latitude: -6.2285, longitude: -35.0503 },
-      8_000,
-      14,
-    );
+    const tiles = tileCoordinatesForRadius({ latitude: -6.2285, longitude: -35.0503 }, 8_000, 14);
 
     expect(tiles.length).toBeGreaterThan(0);
     expect(tiles.length).toBeLessThanOrEqual(100);
-    expect(new Set(tiles.map((tile) => `${tile.zoom}/${tile.x}/${tile.y}`)).size).toBe(tiles.length);
+    expect(new Set(tiles.map((tile) => `${tile.zoom}/${tile.x}/${tile.y}`)).size).toBe(
+      tiles.length,
+    );
   });
 
   it("monta o PMTiles da release resolvida e retorna vazio quando nenhum tile possui Place", async () => {

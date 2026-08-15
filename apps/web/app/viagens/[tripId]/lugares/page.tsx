@@ -392,7 +392,8 @@ export default async function PlacesPage({
           <h2 id="external-place-discovery">Mais lugares encontrados no Overture</h2>
           <p>
             Estes resultados são candidatos externos e ainda não fazem parte do catálogo publicado.
-            O RouteBook mantém a fonte, licença e reconciliação separadas antes de qualquer promoção.
+            O RouteBook mantém a fonte, licença e reconciliação separadas antes de qualquer
+            promoção.
           </p>
           {priceRange ? (
             <p className={styles.notice} role="status">
@@ -408,8 +409,8 @@ export default async function PlacesPage({
             <>
               <p>
                 {externalResults.length} candidatos novos exibidos. {externalPossibleMatchCount}{" "}
-                possíveis correspondências foram retidas para evitar duplicatas e {externalLinkedCount}{" "}
-                já possuem vínculo canônico.
+                possíveis correspondências foram retidas para evitar duplicatas e{" "}
+                {externalLinkedCount} já possuem vínculo canônico.
               </p>
               <ul className="trip-days-grid" aria-label="Candidatos externos de lugares">
                 {externalResults.map((result) => {

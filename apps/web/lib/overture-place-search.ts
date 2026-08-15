@@ -13,8 +13,7 @@ import {
   type PlaceSearchQuery,
 } from "@routebook/place-catalog";
 
-const OVERTURE_EXTRAS_BUCKET =
-  "https://overturemaps-extras-us-west-2.s3.us-west-2.amazonaws.com";
+const OVERTURE_EXTRAS_BUCKET = "https://overturemaps-extras-us-west-2.s3.us-west-2.amazonaws.com";
 const OVERTURE_PLACES_SOURCE_URL = "https://docs.overturemaps.org/guides/places/";
 const DEFAULT_ZOOM = 14;
 const DEFAULT_MINIMUM_CONFIDENCE = 0.7;
@@ -106,7 +105,9 @@ function sourceDatasetKey(value: unknown): string {
     .replace(/[\s_]+/g, "-");
 }
 
-export function resolveOvertureTileSourceLicense(source: JsonRecord | undefined): string | undefined {
+export function resolveOvertureTileSourceLicense(
+  source: JsonRecord | undefined,
+): string | undefined {
   if (!source) return undefined;
   const explicit = text(source.license);
   if (explicit) return explicit;
@@ -371,9 +372,7 @@ export class OverturePmtilesPlaceSearchAdapter implements PlaceSearchPort {
     }
 
     const coordinates = tileCoordinatesForRadius(query.center, query.radiusMeters, this.zoom);
-    const archive = this.createArchive(
-      `${OVERTURE_EXTRAS_BUCKET}/tiles/${release}/places.pmtiles`,
-    );
+    const archive = this.createArchive(`${OVERTURE_EXTRAS_BUCKET}/tiles/${release}/places.pmtiles`);
     const collectedAt = this.now();
     const candidatesById = new Map<string, ExternalPlaceCandidate>();
 
@@ -381,7 +380,8 @@ export class OverturePmtilesPlaceSearchAdapter implements PlaceSearchPort {
       const candidate = normalizeTileFeature(feature, collectedAt, this.minimumConfidence);
       if (!candidate) continue;
       if (placeDistanceMeters(candidate, query.center) > query.radiusMeters) continue;
-      if (query.categories && !query.categories.includes(candidate.category as PlaceCategory)) continue;
+      if (query.categories && !query.categories.includes(candidate.category as PlaceCategory))
+        continue;
 
       const previous = candidatesById.get(candidate.externalId);
       if (!previous || (candidate.confidence ?? -1) > (previous.confidence ?? -1)) {

@@ -7,6 +7,7 @@ import {
 const COMMONS_API_URL = "https://commons.wikimedia.org/w/api.php";
 const SOURCE_NAME = "Wikimedia Commons";
 const MAX_RESULTS = 8;
+const USER_AGENT = "RouteBookPlaceImageBot/0.1 (https://github.com/collapsy/Routebook)";
 
 const REUSABLE_LICENSE_PATTERN = /^CC BY(?:-SA)? (?:2\.0|2\.5|3\.0|4\.0)$/i;
 const PLACE_NAME_STOPWORDS = new Set([
@@ -224,6 +225,7 @@ export class WikimediaCommonsPlaceImageAdapter implements PlaceImagePort {
       action: "query",
       format: "json",
       formatversion: "2",
+      maxlag: "1",
       generator: "search",
       gsrsearch: `\"${place.name}\" Pipa Tibau do Sul`,
       gsrnamespace: "6",
@@ -240,7 +242,10 @@ export class WikimediaCommonsPlaceImageAdapter implements PlaceImagePort {
     try {
       const response = await this.fetcher(`${COMMONS_API_URL}?${query}`, {
         signal: controller.signal,
-        headers: { "User-Agent": "RouteBook/0.1 place-image-discovery" },
+        headers: {
+          "User-Agent": USER_AGENT,
+          "Api-User-Agent": USER_AGENT,
+        },
       });
       if (!response.ok) {
         throw new Error(`Wikimedia Commons respondeu ${response.status}.`);

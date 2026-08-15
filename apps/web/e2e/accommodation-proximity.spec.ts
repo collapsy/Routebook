@@ -15,6 +15,9 @@ test("prioriza no Discovery o lugar mais próximo da hospedagem geocodificada", 
 
   await page.goto(`/viagens/${trip.id}/lugares`);
 
+  await expect(
+    page.getByText(/Hospedagem geocodificada.*prioriza os Lugares mais próximos/),
+  ).toBeVisible();
   const places = page.getByRole("list", { name: "Lugares publicados" }).getByRole("listitem");
   await expect(places).toHaveCount(30);
   await expect(places.first()).toContainText("Praia do Amor");

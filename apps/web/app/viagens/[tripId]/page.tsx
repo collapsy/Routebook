@@ -16,6 +16,8 @@ import { deriveTripDays, findTripById } from "@routebook/trip-management";
 import { TripMap } from "../../../components/trip-map";
 import { resolveTripDestinationId } from "../../../lib/trip-destination";
 import type { TripMapPoint } from "../../../lib/trip-map";
+import { resolveTripRouteAccess } from "../../../lib/trip-route-access";
+import { DeleteTripControl } from "./delete-trip-control";
 
 export const dynamic = "force-dynamic";
 
@@ -76,10 +78,11 @@ export default async function TripOverviewPage({
   if (!trip) notFound();
 
   const destinationId = resolveTripDestinationId(trip.destination.name);
-  const [profile, publishedPlaces, savedPlaces] = await Promise.all([
+  const [profile, publishedPlaces, savedPlaces, deleteAccess] = await Promise.all([
     findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
     destinationId ? listPublishedPlaces(new DrizzlePlaceRepository(), destinationId) : [],
     listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
+    resolveTripRouteAccess({ tripId, action: "trip:delete" }),
   ]);
   const { contextUpdated } = await searchParams;
   const owner = trip.participants.find((participant) => participant.role === "owner");
@@ -277,6 +280,20 @@ export default async function TripOverviewPage({
           </Link>
         </div>
       </section>
+
+      {deleteAccess.status === "authorized" ? (
+        <section className="trip-danger-zone" aria-labelledby="trip-danger-title">
+          <div>
+            <p className="product-eyebrow">Zona de risco</p>
+            <h2 id="trip-danger-title">Excluir esta viagem</h2>
+            <p>
+              Use esta opção somente quando não quiser mais manter a Viagem e todo o planejamento
+              associado no RouteBook.
+            </p>
+          </div>
+          <DeleteTripControl tripId={tripId} tripName={trip.name} />
+        </section>
+      ) : null}
     </section>
   );
 }

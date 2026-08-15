@@ -138,7 +138,7 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
 
   const list = page.getByRole("list", { name: "Recommendations de Lugares" });
   await expect(list.getByRole("heading", { level: 2 })).toHaveCount(30);
-  await expect(list.getByRole("img", { name: /^Imagem não disponível para / })).toHaveCount(23);
+  await expect(list.getByRole("img", { name: /^Imagem não disponível para / })).toHaveCount(24);
 
   const newRecommendation = page.getByRole("article", {
     name: "Praia das Minas",

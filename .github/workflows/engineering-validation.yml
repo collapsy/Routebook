@@ -87,7 +87,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Check formatting
-        run: pnpm format:check
+        shell: bash
+        run: |
+          if ! pnpm format:check; then
+            pnpm format
+            git diff -- modules/place-catalog packages/database scripts
+            exit 1
+          fi
 
       - name: Validate documentation
         run: pnpm docs:validate

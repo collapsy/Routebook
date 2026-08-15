@@ -80,4 +80,21 @@ describe("DrizzlePlaceExternalReferenceRepository", () => {
       }),
     ).rejects.toThrow();
   });
+
+  it("lista referências do Destination mesmo quando o Place vinculado ainda é draft", async () => {
+    const repository = new DrizzlePlaceExternalReferenceRepository();
+    const externalId = `destination-reference-${randomUUID()}`;
+    const created = await repository.create({
+      placeId,
+      provider: "overture",
+      externalId,
+      sourceLicense: "Apache-2.0",
+      collectedAt: now,
+      now,
+    });
+
+    const references = await repository.listByDestination(destinationId);
+
+    expect(references).toContainEqual(created);
+  });
 });

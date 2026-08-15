@@ -44,7 +44,7 @@ type DiscoverySearchParams = {
   categoria?: string;
   distancia?: string;
   preco?: string;
-  descoberta?: string;
+  descoberta?: string | undefined;
 };
 
 const distanceOptions = [1, 3, 5, 10] as const;

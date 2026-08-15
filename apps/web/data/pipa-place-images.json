@@ -92,21 +92,6 @@
       "sourceSha1": "",
       "assetSha256": "",
       "assetBytes": 0
-    },
-    {
-      "placeSlug": "praia-de-sibauma",
-      "fileTitle": "File:Praia de Sibaúma.jpeg",
-      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Praia_de_Siba%C3%BAma.jpeg",
-      "expectedAuthor": "Giovanni L. Zanchet",
-      "license": "CC BY-SA 4.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-      "assetPath": "/place-images/pipa/praia-de-sibauma.jpg",
-      "altText": "Vista da Praia de Sibaúma, no município de Tibau do Sul, com litoral e vegetação costeira.",
-      "matchStatus": "secure",
-      "matchEvidence": "Título, descrição e coordenadas identificam explicitamente Praia de Sibaúma em Tibau do Sul e são coerentes com o Place canônico.",
-      "sourceSha1": "",
-      "assetSha256": "",
-      "assetBytes": 0
     }
   ]
 }

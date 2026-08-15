@@ -2,17 +2,25 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { DrizzlePlaceRepository, DrizzleTripRepository } from "@routebook/database";
+import {
+  DrizzlePlaceExternalReferenceRepository,
+  DrizzlePlaceRepository,
+  DrizzleTripRepository,
+} from "@routebook/database";
 import {
   PLACE_CATEGORIES,
   PLACE_PRICE_RANGES,
   listPublishedPlaces,
+  placeDistanceMeters,
+  reconcileExternalPlaceCandidate,
+  type ExternalPlaceReconciliation,
 } from "@routebook/place-catalog";
 import { findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
 import { TripMap } from "../../../../components/trip-map";
 import type { TripMapPoint } from "../../../../lib/trip-map";
+import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
 import {
   categoryLabels,
   filterPlaces,
@@ -36,9 +44,12 @@ type DiscoverySearchParams = {
   categoria?: string;
   distancia?: string;
   preco?: string;
+  descoberta?: string | undefined;
 };
 
 const distanceOptions = [1, 3, 5, 10] as const;
+const pipaDiscoveryCenter = { latitude: -6.24, longitude: -35.065 } as const;
+const externalDiscoveryRadiusMeters = 8_000;
 
 function resolveDestinationId(destinationName: string): string | null {
   const normalized = destinationName.trim().toLocaleLowerCase("pt-BR");
@@ -61,6 +72,28 @@ function formatDistance(meters: number): string {
   return `${new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 }).format(meters / 1_000)} km`;
 }
 
+function normalizeSearchText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function matchesExternalSearch(result: ExternalPlaceReconciliation, search?: string): boolean {
+  if (!search) return true;
+  const needle = normalizeSearchText(search);
+  return [
+    result.candidate.name,
+    result.candidate.addressLabel,
+    result.candidate.providerCategory,
+    result.candidate.category,
+  ]
+    .filter((value): value is string => Boolean(value))
+    .some((value) => normalizeSearchText(value).includes(needle));
+}
+
 export default async function PlacesPage({
   params,
   searchParams,
@@ -78,6 +111,7 @@ export default async function PlacesPage({
   const search = rawFilters.busca?.trim().slice(0, 120) || undefined;
   const category = parsePlaceCategory(rawFilters.categoria);
   const priceRange = parsePlacePriceRange(rawFilters.preco);
+  const discoverExternal = rawFilters.descoberta === "externa";
   const accommodationCoordinate = trip.accommodation?.coordinate;
   const maximumDistanceMeters = accommodationCoordinate
     ? parseMaximumDistance(rawFilters.distancia)
@@ -100,6 +134,7 @@ export default async function PlacesPage({
     ...(category ? { categoria: category } : {}),
     ...(maximumDistanceMeters ? { distancia: String(maximumDistanceMeters / 1_000) } : {}),
     ...(priceRange ? { preco: priceRange } : {}),
+    ...(discoverExternal ? { descoberta: "externa" } : {}),
   };
   const activeFilters = [
     ...(search
@@ -144,6 +179,46 @@ export default async function PlacesPage({
     });
   }
 
+  let externalResults: ExternalPlaceReconciliation[] = [];
+  let externalPossibleMatchCount = 0;
+  let externalLinkedCount = 0;
+  let externalDiscoveryError: string | undefined;
+  const discoveryCenter = accommodationCoordinate ?? pipaDiscoveryCenter;
+
+  if (discoverExternal && destinationId) {
+    try {
+      const references = await new DrizzlePlaceExternalReferenceRepository().listByDestination(
+        destinationId,
+      );
+      const radiusMeters = Math.min(
+        maximumDistanceMeters ?? externalDiscoveryRadiusMeters,
+        externalDiscoveryRadiusMeters,
+      );
+      const candidates = await new OverturePmtilesPlaceSearchAdapter().search({
+        destinationId,
+        center: discoveryCenter,
+        radiusMeters,
+        ...(category ? { categories: [category] } : {}),
+        limit: 40,
+      });
+      const reconciliations = candidates.map((candidate) =>
+        reconcileExternalPlaceCandidate(candidate, publishedPlaces, references),
+      );
+
+      externalPossibleMatchCount = reconciliations.filter(
+        (result) => result.status === "possible_match",
+      ).length;
+      externalLinkedCount = reconciliations.filter((result) => result.status === "linked").length;
+      externalResults = reconciliations
+        .filter((result) => result.status === "new")
+        .filter((result) => matchesExternalSearch(result, search));
+    } catch (error) {
+      console.error("Falha ao descobrir Places externos via Overture", error);
+      externalDiscoveryError =
+        "A fonte externa não respondeu agora. O catálogo publicado continua disponível normalmente.";
+    }
+  }
+
   return (
     <section className="app-page trip-overview-page">
       <Link className="back-link" href={`/viagens/${tripId}`}>
@@ -163,6 +238,7 @@ export default async function PlacesPage({
       </header>
 
       <form action={`/viagens/${tripId}/lugares`} className={styles.filters} method="get">
+        {discoverExternal ? <input name="descoberta" type="hidden" value="externa" /> : null}
         <div className={styles.searchField}>
           <label htmlFor="place-search">Nome ou termo</label>
           <input
@@ -245,19 +321,33 @@ export default async function PlacesPage({
               );
             })}
           </ul>
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
+          <Link
+            className="product-secondary-action"
+            href={discoveryHref(tripId, discoverExternal ? { descoberta: "externa" } : {})}
+          >
             Limpar filtros
           </Link>
         </section>
       ) : null}
 
       <div className={styles.resultHeading}>
-        <h2>
-          {filteredPlaces.length === 1
-            ? "1 lugar encontrado"
-            : `${filteredPlaces.length} lugares encontrados`}
-        </h2>
-        <p>Lista e mapa exibem o mesmo conjunto filtrado.</p>
+        <div>
+          <h2>
+            {filteredPlaces.length === 1
+              ? "1 lugar encontrado"
+              : `${filteredPlaces.length} lugares encontrados`}
+          </h2>
+          <p>Lista e mapa exibem o mesmo conjunto publicado e filtrado.</p>
+        </div>
+        <Link
+          className="product-secondary-action"
+          href={discoveryHref(tripId, {
+            ...canonicalParams,
+            ...(discoverExternal ? { descoberta: undefined } : { descoberta: "externa" }),
+          })}
+        >
+          {discoverExternal ? "Ocultar descobertas externas" : "Descobrir mais lugares"}
+        </Link>
       </div>
 
       {filteredPlaces.length > 0 ? (
@@ -296,8 +386,61 @@ export default async function PlacesPage({
         </section>
       )}
 
+      {discoverExternal ? (
+        <section aria-labelledby="external-place-discovery" className="traveler-context-summary">
+          <p className="product-eyebrow">Fonte externa governada</p>
+          <h2 id="external-place-discovery">Mais lugares encontrados no Overture</h2>
+          <p>
+            Estes resultados são candidatos externos e ainda não fazem parte do catálogo publicado.
+            O RouteBook mantém a fonte, licença e reconciliação separadas antes de qualquer
+            promoção.
+          </p>
+          {priceRange ? (
+            <p className={styles.notice} role="status">
+              A fonte externa não fornece a faixa de preço canônica do RouteBook; esse filtro vale
+              somente para o catálogo publicado.
+            </p>
+          ) : null}
+          {externalDiscoveryError ? (
+            <p className={styles.notice} role="status">
+              {externalDiscoveryError}
+            </p>
+          ) : externalResults.length > 0 ? (
+            <>
+              <p>
+                {externalResults.length} candidatos novos exibidos. {externalPossibleMatchCount}{" "}
+                possíveis correspondências foram retidas para evitar duplicatas e{" "}
+                {externalLinkedCount} já possuem vínculo canônico.
+              </p>
+              <ul className="trip-days-grid" aria-label="Candidatos externos de lugares">
+                {externalResults.map((result) => {
+                  const distanceMeters = placeDistanceMeters(result.candidate, discoveryCenter);
+                  return (
+                    <li key={`${result.candidate.provider}:${result.candidate.externalId}`}>
+                      <span>{categoryLabels[result.candidate.category!]}</span>
+                      <strong>{result.candidate.name}</strong>
+                      <p>{result.candidate.addressLabel ?? "Endereço não informado pela fonte"}</p>
+                      <small>{formatDistance(distanceMeters)} do centro da descoberta</small>
+                      <small>
+                        Fonte: Overture · licença da origem: {result.candidate.sourceLicense}
+                      </small>
+                      <small>Candidato externo — ainda não publicado no RouteBook</small>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          ) : (
+            <p role="status">
+              Nenhum candidato novo corresponde ao recorte atual. Lugares já vinculados ou com
+              possível duplicidade não são reapresentados como novos.
+            </p>
+          )}
+        </section>
+      ) : null}
+
       <TripMap
-        description="O mapa usa exatamente os lugares visíveis na lista, além da hospedagem como referência quando disponível."
+        description="O mapa usa exatamente os lugares publicados visíveis na lista, além da hospedagem como referência quando disponível. Candidatos externos só entram no mapa depois de promoção e publicação governadas."
         emptyDescription="Não há lugar com coordenadas no conjunto filtrado. Limpe ou amplie os filtros para recuperar resultados."
         emptyTitle="Nenhum lugar para exibir no mapa"
         points={mapPoints}

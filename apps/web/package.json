@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@mapbox/vector-tile": "3.0.0",
     "@routebook/database": "workspace:*",
     "@routebook/decision-intelligence": "workspace:*",
     "@routebook/geo-distance": "workspace:*",
@@ -24,6 +25,8 @@
     "better-auth": "1.6.14",
     "kysely": "0.28.14",
     "next": "16.2.12",
+    "pbf": "5.1.2",
+    "pmtiles": "4.5.0",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },

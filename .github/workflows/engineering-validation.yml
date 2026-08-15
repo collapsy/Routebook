@@ -84,10 +84,22 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        shell: bash
+        run: |
+          if ! pnpm install --frozen-lockfile; then
+            pnpm install --lockfile-only
+            git diff -- pnpm-lock.yaml
+            exit 1
+          fi
 
       - name: Check formatting
-        run: pnpm format:check
+        shell: bash
+        run: |
+          if ! pnpm format:check; then
+            pnpm format
+            git diff -- .
+            exit 1
+          fi
 
       - name: Validate documentation
         run: pnpm docs:validate
@@ -106,6 +118,9 @@ jobs:
 
       - name: Run component and domain tests
         run: pnpm test
+
+      - name: Run Overture place normalizer tests
+        run: pnpm test:overture-place-normalizer
 
       - name: Smoke development server
         shell: bash

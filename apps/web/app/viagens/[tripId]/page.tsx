@@ -13,7 +13,9 @@ import { listSavedPlaces } from "@routebook/saved-places";
 import { findTravelerProfile } from "@routebook/traveler-profile";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
+import { ContextualRecommendationStrip } from "../../../components/contextual-recommendation-strip";
 import { TripMap } from "../../../components/trip-map";
+import { loadRecommendationExperience } from "../../../lib/recommendation-experience";
 import { resolveTripDestinationId } from "../../../lib/trip-destination";
 import type { TripMapPoint } from "../../../lib/trip-map";
 import { resolveTripRouteAccess } from "../../../lib/trip-route-access";
@@ -78,12 +80,14 @@ export default async function TripOverviewPage({
   if (!trip) notFound();
 
   const destinationId = resolveTripDestinationId(trip.destination.name);
-  const [profile, publishedPlaces, savedPlaces, deleteAccess] = await Promise.all([
-    findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
-    destinationId ? listPublishedPlaces(new DrizzlePlaceRepository(), destinationId) : [],
-    listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
-    resolveTripRouteAccess({ tripId, action: "trip:delete" }),
-  ]);
+  const [profile, publishedPlaces, savedPlaces, deleteAccess, recommendationExperience] =
+    await Promise.all([
+      findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
+      destinationId ? listPublishedPlaces(new DrizzlePlaceRepository(), destinationId) : [],
+      listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
+      resolveTripRouteAccess({ tripId, action: "trip:delete" }),
+      loadRecommendationExperience(tripId, new Date(), { persist: false }),
+    ]);
   const { contextUpdated } = await searchParams;
   const owner = trip.participants.find((participant) => participant.role === "owner");
   const days = deriveTripDays(trip.period);
@@ -108,7 +112,7 @@ export default async function TripOverviewPage({
       latitude: place.latitude,
       longitude: place.longitude,
       href: `/viagens/${tripId}/lugares/${place.slug}`,
-    });
+    }));
   }
 
   return (
@@ -130,8 +134,8 @@ export default async function TripOverviewPage({
           </p>
           <h1>{trip.name}</h1>
           <p>
-            Esta visão reúne a estrutura da Viagem e o contexto progressivo dos viajantes, sem gerar
-            automaticamente lugares, roteiro ou recomendações.
+            Esta visão reúne a estrutura da Viagem e o contexto progressivo dos viajantes, sem
+            executar mudanças automaticamente.
           </p>
         </div>
         <span className="trip-context-version">Contexto estrutural v{trip.contextVersion}</span>
@@ -161,6 +165,14 @@ export default async function TripOverviewPage({
           <dd>{owner?.displayName ?? "Owner não identificado"}</dd>
         </div>
       </dl>
+
+      {recommendationExperience?.destinationSupported ? (
+        <ContextualRecommendationStrip
+          cards={recommendationExperience.cards}
+          hasContextLimitations={recommendationExperience.hasContextLimitations}
+          tripId={tripId}
+        />
+      ) : null}
 
       <TripMap points={mapPoints} title={`Mapa de ${trip.destination.name}`} />
 
@@ -216,8 +228,8 @@ export default async function TripOverviewPage({
           </dl>
         ) : (
           <p>
-            Quantidade de viajantes, interesses, ritmo, transporte e orçamento são opcionais e podem
-            ser preenchidos aos poucos.
+            Quantidade de viajantes, interesses, ritmo, transporte e orçamento são opcionais e
+            podem ser preenchidos aos poucos.
           </p>
         )}
       </section>

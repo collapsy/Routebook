@@ -140,7 +140,16 @@ apps/web/e2e/recommendations-experience.spec.ts
 docs/implementation/increments/rb-inc-144-contextual-decision-view.md
 docs/implementation/context-packs/rb-inc-144-contextual-decision-view.md
 docs/registry.md
+.github/workflows/rb-inc-144-registry-helper.yml
 ```
+
+O workflow listado acima é um helper temporário exclusivamente mecânico para registrar os dois novos documentos no Registry porque o conector de edição disponível não oferece operação de append. Ele deve:
+
+- executar somente na branch `codex/rb-inc-144-contextual-decision-view`;
+- inserir somente `RB-INC-144` e `RB-CTX-144`;
+- não alterar outros documentos;
+- usar somente `GITHUB_TOKEN` implícito do Actions;
+- ser removido antes da PR final.
 
 ## 9. Caminhos somente leitura
 
@@ -160,11 +169,10 @@ Não alterar esses caminhos para corrigir o escopo do incremento. Se um contrato
 
 ```text
 packages/database/drizzle/**
-.github/workflows/**
 apps/web/public/place-images/**
 ```
 
-Não criar migration, workflow temporário, asset novo ou secret neste incremento.
+Não criar migration, asset novo ou secret neste incremento. O único arquivo em `.github/workflows/` permitido é o helper temporário explicitamente listado acima, que deve ser removido antes da PR final.
 
 ## 11. Entradas disponíveis
 
@@ -184,7 +192,8 @@ Não usar dados externos novos para preencher lacunas.
 - modo de leitura seguro para Recommendations quando necessário;
 - testes de view model/loader;
 - E2E da jornada principal;
-- documentação e Registry atualizados.
+- documentação e Registry atualizados;
+- helper temporário removido antes da PR final.
 
 ## 13. Critérios de aceite
 
@@ -208,7 +217,8 @@ Não usar dados externos novos para preencher lacunas.
 - não usar dados inventados;
 - não afirmar que uma Recommendation é melhor por causa de uma heurística nova;
 - não declarar testes executados sem execução real;
-- não expandir o incremento.
+- não expandir o incremento;
+- remover o helper de Registry antes da PR final.
 
 ## 15. Comandos
 

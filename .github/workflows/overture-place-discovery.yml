@@ -35,15 +35,51 @@ jobs:
       - name: Install official Overture client
         run: pip install --disable-pip-version-check overturemaps==1.0.1
 
-      - name: Download Pipa and Tibau do Sul places
+      - name: Resolve latest Overture release from public S3
+        id: overture-release
         shell: bash
         run: |
           set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import re
+          import urllib.parse
+          import urllib.request
+          import xml.etree.ElementTree as ET
+
+          endpoint = "https://overturemaps-us-west-2.s3.us-west-2.amazonaws.com/"
+          query = urllib.parse.urlencode(
+              {"list-type": "2", "prefix": "release/", "delimiter": "/"}
+          )
+          with urllib.request.urlopen(f"{endpoint}?{query}", timeout=30) as response:
+              root = ET.fromstring(response.read())
+
+          namespace = {"s3": "http://s3.amazonaws.com/doc/2006-03-01/"}
+          releases = []
+          for prefix in root.findall("s3:CommonPrefixes/s3:Prefix", namespace):
+              match = re.fullmatch(r"release/(\d{4}-\d{2}-\d{2}\.\d+)/", prefix.text or "")
+              if match:
+                  releases.append(match.group(1))
+
+          if not releases:
+              raise SystemExit("Nenhuma release Overture foi encontrada no bucket público.")
+
+          latest = max(releases)
+          print(f"release={latest}")
+          PY
+
+      - name: Download Pipa and Tibau do Sul places
+        shell: bash
+        env:
+          OVERTURE_RELEASE: ${{ steps.overture-release.outputs.release }}
+        run: |
+          set -euo pipefail
+          echo "Using Overture release: ${OVERTURE_RELEASE}"
           # west,south,east,north. The box deliberately covers Pipa, Tibau do Sul,
           # Sibaúma and the immediate decision area without downloading a broad region.
-          # --no-stac avoids coupling discovery to the optional STAC release catalog;
-          # the official client resolves the latest release directly from the S3 layout.
+          # The release is resolved from the public S3 prefixes and passed explicitly,
+          # avoiding the optional STAC catalog while still following new releases.
           overturemaps download \
+            --release="${OVERTURE_RELEASE}" \
             --no-stac \
             --bbox=-35.15,-6.33,-34.98,-6.15 \
             -f geojson \

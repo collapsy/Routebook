@@ -84,14 +84,20 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        shell: bash
+        run: |
+          if ! pnpm install --frozen-lockfile; then
+            pnpm install --lockfile-only
+            git diff -- pnpm-lock.yaml
+            exit 1
+          fi
 
       - name: Check formatting
         shell: bash
         run: |
           if ! pnpm format:check; then
             pnpm format
-            git diff -- modules/place-catalog packages/database scripts
+            git diff -- .
             exit 1
           fi
 

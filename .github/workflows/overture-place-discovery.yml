@@ -41,7 +41,10 @@ jobs:
           set -euo pipefail
           # west,south,east,north. The box deliberately covers Pipa, Tibau do Sul,
           # Sibaúma and the immediate decision area without downloading a broad region.
+          # --no-stac avoids coupling discovery to the optional STAC release catalog;
+          # the official client resolves the latest release directly from the S3 layout.
           overturemaps download \
+            --no-stac \
             --bbox=-35.15,-6.33,-34.98,-6.15 \
             -f geojson \
             --type=place \

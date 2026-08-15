@@ -1,5 +1,6 @@
 name: RB-INC-143 Materialize Place Images
 
+# Temporary helper for RB-INC-143. Remove before PR readiness.
 on:
   push:
     branches:

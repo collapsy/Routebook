@@ -107,6 +107,9 @@ jobs:
       - name: Run component and domain tests
         run: pnpm test
 
+      - name: Run Overture place normalizer tests
+        run: pnpm test:overture-place-normalizer
+
       - name: Smoke development server
         shell: bash
         run: |

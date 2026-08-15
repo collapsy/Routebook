@@ -131,17 +131,16 @@ describe("classifyWikimediaImageMatch", () => {
 
 describe("WikimediaCommonsPlaceImageAdapter", () => {
   it("consulta somente a API oficial e devolve candidato com Provenance", async () => {
-    const fetcher = vi.fn<
-      (input: string | URL | Request, init?: RequestInit) => Promise<Response>
-    >(async () =>
-      new Response(
-        JSON.stringify({
-          query: {
-            pages: [commonsPage()],
-          },
-        }),
-        { status: 200, headers: { "content-type": "application/json" } },
-      ),
+    const fetcher = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>(
+      async () =>
+        new Response(
+          JSON.stringify({
+            query: {
+              pages: [commonsPage()],
+            },
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        ),
     );
     const adapter = new WikimediaCommonsPlaceImageAdapter({
       fetcher,
@@ -190,7 +189,7 @@ describe("WikimediaCommonsPlaceImageAdapter", () => {
       adapter.findCandidates({
         name: "Praia do Amor",
         latitude: -6.2366,
-        longitude: -35.0465,
+        longitude: -35.0503,
       }),
     ).rejects.toThrow("Wikimedia Commons respondeu 429");
   });

@@ -131,16 +131,17 @@ describe("classifyWikimediaImageMatch", () => {
 
 describe("WikimediaCommonsPlaceImageAdapter", () => {
   it("consulta somente a API oficial e devolve candidato com Provenance", async () => {
-    const fetcher = vi.fn(
-      async (_input: string | URL | Request, _init?: RequestInit): Promise<Response> =>
-        new Response(
-          JSON.stringify({
-            query: {
-              pages: [commonsPage()],
-            },
-          }),
-          { status: 200, headers: { "content-type": "application/json" } },
-        ),
+    const fetcher = vi.fn<
+      (input: string | URL | Request, init?: RequestInit) => Promise<Response>
+    >(async () =>
+      new Response(
+        JSON.stringify({
+          query: {
+            pages: [commonsPage()],
+          },
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      ),
     );
     const adapter = new WikimediaCommonsPlaceImageAdapter({
       fetcher,

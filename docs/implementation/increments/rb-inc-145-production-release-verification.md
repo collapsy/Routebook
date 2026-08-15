@@ -73,6 +73,7 @@ A correção deve tornar a diferença observável e impedir falso sucesso sem as
 - falhar após esgotar a janela sem confirmação do candidate;
 - executar smoke operacional somente após confirmar o SHA esperado;
 - integrar a verificação ao `Production Release` depois da promoção da branch protegida;
+- executar o teste do verificador explicitamente no `Engineering Validation`;
 - produzir evidência legível no GitHub Actions Step Summary;
 - cobrir contrato e polling com testes automatizados;
 - registrar Increment e Context Pack.
@@ -109,6 +110,7 @@ O SHA deve ser lido de metadado de ambiente fornecido pela plataforma de build, 
 ## 7. Caminhos permitidos
 
 ```text
+.github/workflows/engineering-validation.yml
 .github/workflows/production-release.yml
 apps/web/app/api/health/release/route.ts
 apps/web/lib/operational-health.ts
@@ -135,6 +137,7 @@ Qualquer caminho adicional exige justificativa no PR e atualização do Context 
 - [ ] `Production Release` não conclui verde apenas porque `codex/production-release` avançou.
 - [ ] Após o SHA correto ser observado, liveness e readiness passam pelo smoke existente.
 - [ ] O workflow registra candidate e resultado de verificação no Step Summary.
+- [ ] O `Engineering Validation` executa explicitamente o teste do verificador.
 - [ ] Nenhum Vercel token, secret novo, Provider novo ou migration é introduzido.
 - [ ] Testes do contrato e polling passam.
 - [ ] Documentation Validation e Engineering Validation passam no SHA final.
@@ -159,7 +162,7 @@ Qualquer caminho adicional exige justificativa no PR e atualização do Context 
 ### Pipeline
 
 - format, docs, lint, typecheck, unit/integration, build e E2E existentes;
-- teste específico do verificador;
+- `pnpm test:production-deployment-verification` como gate explícito do Engineering Validation;
 - após integração futura, uma execução real do `Production Release` deve provar o SHA servido e smoke operacional.
 
 ## 10. Riscos e mitigação

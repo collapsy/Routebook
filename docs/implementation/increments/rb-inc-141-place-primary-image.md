@@ -106,8 +106,8 @@ apps/web/lib/recommendation-experience.test.ts
 apps/web/app/viagens/[tripId]/lugares/page.tsx
 apps/web/app/viagens/[tripId]/lugares/place-discovery.module.css
 apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx
-apps/web/e2e/place-discovery.spec.ts
-apps/web/e2e/recommendations.spec.ts
+apps/web/e2e/place-discovery-filters.spec.ts
+apps/web/e2e/recommendations-experience.spec.ts
 docs/implementation/increments/rb-inc-141-place-primary-image.md
 docs/implementation/context-packs/rb-inc-141-place-primary-image.md
 docs/registry.md

@@ -10,6 +10,7 @@ import {
 import { findPublishedPlace, type PlaceCategory } from "@routebook/place-catalog";
 import { findTripById } from "@routebook/trip-management";
 
+import { PlacePrimaryImage } from "../../../../../components/place-primary-image";
 import { presentAccommodationDistance } from "../distance";
 import { removePlaceAction, savePlaceAction } from "./actions";
 
@@ -94,6 +95,13 @@ export default async function PlaceDetailsPage({
           <p>{place.summary}</p>
         </div>
       </header>
+
+      <PlacePrimaryImage
+        placeName={place.name}
+        primaryImage={place.primaryImage}
+        priority
+        showProvenance
+      />
 
       <section className="traveler-context-summary" aria-labelledby="saved-place-title">
         <div className="section-heading-row">

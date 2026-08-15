@@ -17,7 +17,22 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(page.getByRole("heading", { name: /Lugares em Pipa/ })).toBeVisible();
   await expect(
     page.getByRole("list", { name: "Lugares publicados" }).getByRole("listitem"),
-  ).toHaveCount(13);
+  ).toHaveCount(30);
+
+  await page.getByLabel("Nome ou termo").fill("minas");
+  await page.getByRole("button", { name: "Aplicar filtros" }).click();
+
+  await expect(page).toHaveURL(/busca=minas/);
+  await expect(page.getByRole("heading", { name: "1 lugar encontrado" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Lugares publicados" })).toContainText(
+    "Praia das Minas",
+  );
+  await expect(page.getByRole("list", { name: "Locais exibidos no mapa" })).toContainText(
+    "Praia das Minas",
+  );
+
+  await page.getByRole("link", { name: "Limpar filtros" }).first().click();
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares$`));
 
   await page.getByLabel("Nome ou termo").fill("gastronomico");
   await page.getByLabel("Faixa de preço").selectOption("moderate");
@@ -53,7 +68,7 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
 
   await page.getByRole("link", { name: "Limpar filtros" }).first().click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares$`));
-  await expect(page.getByRole("heading", { name: "13 lugares encontrados" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "30 lugares encontrados" })).toBeVisible();
 });
 
 test("mantém marcadores ancorados ao viewport durante pan e zoom", async ({ page }) => {

@@ -55,7 +55,10 @@ describe("accommodation proximity in deterministic recommendations", () => {
 
     const results = generate([far, near], true);
 
-    expect(results.map(({ place: candidate }) => candidate.id)).toEqual(["near", "far"]);
+    expect(results.map(({ place: candidate }) => candidate.id)).toEqual([
+      "near",
+      "far",
+    ]);
     expect(results).toHaveLength(2);
     expect(results[0]?.recommendation.score.value).toBe(
       INTEREST_MATCH_WEIGHT + DISTANCE_UP_TO_2_KM_WEIGHT,
@@ -71,8 +74,13 @@ describe("accommodation proximity in deterministic recommendations", () => {
 
     const results = generate([second, first], false);
 
-    expect(results.map(({ place: candidate }) => candidate.slug)).toEqual(["alfa", "beta"]);
-    expect(results.every((result) => result.geodesicDistanceMeters === undefined)).toBe(true);
+    expect(results.map(({ place: candidate }) => candidate.slug)).toEqual([
+      "alfa",
+      "beta",
+    ]);
+    expect(
+      results.every((result) => result.geodesicDistanceMeters === undefined),
+    ).toBe(true);
     expect(
       results.every((result) =>
         result.recommendation.limitations.some(

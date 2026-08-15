@@ -15,7 +15,7 @@
     "dev": "turbo run dev",
     "docs:validate": "node scripts/validate-docs.mjs",
     "format": "prettier --write .",
-    "format:check": "prettier --write modules/decision-intelligence/src/deterministic-recommendations-proximity.test.ts && git diff -- modules/decision-intelligence/src/deterministic-recommendations-proximity.test.ts && exit 1",
+    "format:check": "prettier --check .",
     "lint": "turbo run lint",
     "smoke:operational": "node scripts/operational-smoke.mjs",
     "test": "turbo run test",

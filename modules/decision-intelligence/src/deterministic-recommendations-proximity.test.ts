@@ -10,12 +10,7 @@ import {
 
 const generatedAt = new Date("2026-08-15T00:00:00.000Z");
 
-function place(
-  id: string,
-  slug: string,
-  latitude: number,
-  longitude: number,
-): Place {
+function place(id: string, slug: string, latitude: number, longitude: number): Place {
   return {
     id,
     destinationId: "pipa-rn-br",
@@ -72,9 +67,7 @@ describe("accommodation proximity in deterministic recommendations", () => {
     const second = place("second", "beta", 0, 0);
     const results = generate([second, first], false);
     const slugs = results.map(({ place: candidate }) => candidate.slug);
-    const lacksDistance = results.every(
-      (result) => result.geodesicDistanceMeters === undefined,
-    );
+    const lacksDistance = results.every((result) => result.geodesicDistanceMeters === undefined);
     const hasLimitation = results.every((result) =>
       result.recommendation.limitations.some(
         (limitation) => limitation.code === "accommodation-distance-unavailable",

@@ -30,12 +30,7 @@ function normalizeReleaseUrl(value) {
     throw new ProductionDeploymentVerificationError("invalid_release_url");
   }
 
-  if (
-    !["http:", "https:"].includes(url.protocol) ||
-    url.username ||
-    url.password ||
-    url.hash
-  ) {
+  if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.hash) {
     throw new ProductionDeploymentVerificationError("invalid_release_url");
   }
 
@@ -235,7 +230,9 @@ async function main() {
     const code =
       error instanceof ProductionDeploymentVerificationError ? error.code : "unexpected_failure";
     const lastObservation =
-      error instanceof ProductionDeploymentVerificationError ? error.details.lastObservation : undefined;
+      error instanceof ProductionDeploymentVerificationError
+        ? error.details.lastObservation
+        : undefined;
     const suffix = lastObservation ? ` last=${formatObservation(lastObservation)}` : "";
     process.stderr.write(`[production-deployment] failed code=${code}${suffix}\n`);
     process.exitCode = 1;

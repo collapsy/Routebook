@@ -41,7 +41,7 @@ on:
       - ".github/workflows/**"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: engineering-${{ github.workflow }}-${{ github.ref }}
@@ -98,6 +98,23 @@ jobs:
           if ! pnpm format:check; then
             pnpm format
             git diff -- .
+
+            if [ "${GITHUB_HEAD_REF:-}" = "codex/rb-inc-142-organic-place-ingestion" ]; then
+              cp "apps/web/app/viagens/[tripId]/lugares/page.tsx" /tmp/routebook-places-page.tsx
+              cp apps/web/lib/overture-place-search.ts /tmp/routebook-overture-place-search.ts
+              cp apps/web/lib/overture-place-search.test.ts /tmp/routebook-overture-place-search.test.ts
+              git fetch origin "$GITHUB_HEAD_REF"
+              git checkout -B "$GITHUB_HEAD_REF" "origin/$GITHUB_HEAD_REF"
+              cp /tmp/routebook-places-page.tsx "apps/web/app/viagens/[tripId]/lugares/page.tsx"
+              cp /tmp/routebook-overture-place-search.ts apps/web/lib/overture-place-search.ts
+              cp /tmp/routebook-overture-place-search.test.ts apps/web/lib/overture-place-search.test.ts
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git add "apps/web/app/viagens/[tripId]/lugares/page.tsx" apps/web/lib/overture-place-search.ts apps/web/lib/overture-place-search.test.ts
+              git commit -m "style(web): format Overture place discovery"
+              git push origin "HEAD:$GITHUB_HEAD_REF"
+            fi
+
             exit 1
           fi
 

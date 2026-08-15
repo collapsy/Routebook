@@ -51,7 +51,10 @@ test("conclui imediatamente quando Production serve o candidate", async () => {
   assert.equal(result.status, "verified");
   assert.equal(result.expectedSha, candidate);
   assert.equal(result.attemptsUsed, 1);
-  assert.deepEqual(observations.map(({ kind }) => kind), ["identified"]);
+  assert.deepEqual(
+    observations.map(({ kind }) => kind),
+    ["identified"],
+  );
 });
 
 test("retenta SHA anterior até observar exatamente o candidate", async () => {
@@ -90,11 +93,10 @@ test("retenta 404 e erro de rede antes do candidate", async () => {
   });
 
   assert.equal(result.attemptsUsed, 3);
-  assert.deepEqual(observations.map(({ kind }) => kind), [
-    "http_status",
-    "request_error",
-    "identified",
-  ]);
+  assert.deepEqual(
+    observations.map(({ kind }) => kind),
+    ["http_status", "request_error", "identified"],
+  );
 });
 
 test("retenta contrato inválido e release ainda desconhecido", async () => {
@@ -160,7 +162,9 @@ test("rejeita SHA e URL inválidos antes de consultar a rede", async () => {
       intervalMs: 1,
       timeoutMs: 1,
     }),
-    (error) => error instanceof ProductionDeploymentVerificationError && error.code === "invalid_expected_sha",
+    (error) =>
+      error instanceof ProductionDeploymentVerificationError &&
+      error.code === "invalid_expected_sha",
   );
 
   await assert.rejects(
@@ -173,7 +177,9 @@ test("rejeita SHA e URL inválidos antes de consultar a rede", async () => {
       intervalMs: 1,
       timeoutMs: 1,
     }),
-    (error) => error instanceof ProductionDeploymentVerificationError && error.code === "invalid_release_url",
+    (error) =>
+      error instanceof ProductionDeploymentVerificationError &&
+      error.code === "invalid_release_url",
   );
 
   assert.equal(requests, 0);

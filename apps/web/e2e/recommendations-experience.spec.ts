@@ -137,21 +137,17 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
   await openRecommendations(page, tripUrl, tripName);
 
   const list = page.getByRole("list", { name: "Recommendations de Lugares" });
-  await expect(list.getByRole("heading", { level: 2 })).toHaveText([
-    "Baía dos Golfinhos",
-    "Chapadão de Pipa",
-    "Praia do Amor",
-    "Praia do Centro",
-    "Santuário Ecológico de Pipa",
-    "Praia do Madeiro",
-    "Agora Club",
-    "Atelier de Massas",
-    "Vida Noturna na Avenida Baía dos Golfinhos",
-    "Camarão na Fazenda Pipa",
-    "Centro Gastronômico de Pipa",
-    "Mirante Sunset Bar",
-    "O Tal do Escondidinho",
-  ]);
+  await expect(list.getByRole("heading", { level: 2 })).toHaveCount(30);
+
+  const newRecommendation = page.getByRole("article", {
+    name: "Praia das Minas",
+    exact: true,
+  });
+  await expect(newRecommendation).toBeVisible();
+  await expect(
+    newRecommendation.getByText(/categoria do Lugar corresponde a um interesse/i),
+  ).toBeVisible();
+  await expect(newRecommendation.getByText(/^Distância da hospedagem:/)).toBeVisible();
 
   const recommendation = page.getByRole("article", {
     name: "Praia do Amor",

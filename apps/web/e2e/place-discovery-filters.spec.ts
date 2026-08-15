@@ -19,6 +19,13 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
     page.getByRole("list", { name: "Lugares publicados" }).getByRole("listitem"),
   ).toHaveCount(30);
   await expect(page.getByRole("img", { name: /^Imagem não disponível para / })).toHaveCount(30);
+  await expect(page.getByRole("link", { name: "Descobrir mais lugares" })).toHaveAttribute(
+    "href",
+    `/viagens/${trip.id}/lugares?descoberta=externa`,
+  );
+  await expect(
+    page.getByRole("heading", { name: "Mais lugares encontrados no Overture" }),
+  ).toHaveCount(0);
 
   await page.getByLabel("Nome ou termo").fill("minas");
   await page.getByRole("button", { name: "Aplicar filtros" }).click();

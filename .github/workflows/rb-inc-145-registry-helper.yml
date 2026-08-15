@@ -1,0 +1,54 @@
+name: Temporary RB-INC-145 Registry Helper
+
+on:
+  push:
+    branches:
+      - codex/rb-inc-145-production-release-verification
+    paths:
+      - .github/workflows/rb-inc-145-registry-helper.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update-registry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: codex/rb-inc-145-production-release-verification
+
+      - name: Register RB-INC-145 documents
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path("docs/registry.md")
+          text = path.read_text(encoding="utf-8")
+          increment = "| RB-INC-145 | Verificação Efetiva do Production Deployment | Implementation | Draft | 0.1.0 | [rb-inc-145-production-release-verification.md](./implementation/increments/rb-inc-145-production-release-verification.md) |"
+          context = "| RB-CTX-145 | Context Pack do RB-INC-145 — Verificação Efetiva do Production Deployment | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-145-production-release-verification.md](./implementation/context-packs/rb-inc-145-production-release-verification.md) |"
+
+          if increment in text and context in text:
+              raise SystemExit(0)
+
+          anchor = "| RB-CTX-144 | Context Pack do RB-INC-144 — Visão de Decisão Contextual da Viagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-144-contextual-decision-view.md](./implementation/context-packs/rb-inc-144-contextual-decision-view.md) |"
+          if anchor not in text:
+              raise SystemExit("RB-CTX-144 anchor not found")
+
+          replacement = f"{anchor}\n{increment}\n{context}"
+          path.write_text(text.replace(anchor, replacement, 1), encoding="utf-8")
+
+      - name: Commit Registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- docs/registry.md; then
+            echo "Registry já atualizado."
+            exit 0
+          fi
+          git config user.name "routebook-ci"
+          git config user.email "routebook-ci@users.noreply.github.com"
+          git add docs/registry.md
+          git commit -m "docs(rb-inc-145): register increment and context pack"
+          git push origin HEAD:codex/rb-inc-145-production-release-verification

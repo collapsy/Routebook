@@ -1,6 +1,11 @@
 name: Overture Place Discovery
 
 on:
+  pull_request:
+    paths:
+      - ".github/workflows/overture-place-discovery.yml"
+      - "scripts/normalize-overture-places.mjs"
+      - "scripts/normalize-overture-places.test.mjs"
   workflow_dispatch:
   schedule:
     - cron: "17 8 20 * *"

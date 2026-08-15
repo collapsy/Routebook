@@ -41,6 +41,7 @@ jobs:
           mkdir -p validation
           set +e
           pnpm --dir apps/web exec node <<'NODE'
+          const crypto = require('node:crypto');
           const fs = require('node:fs');
           const path = require('node:path');
           const { chromium } = require('@playwright/test');
@@ -50,7 +51,7 @@ jobs:
           const account = {
             name: `RouteBook Validation ${runId}`,
             email: `routebook.validation.${runId}@example.com`,
-            password: `Rb!${runId}Validation9`,
+            password: `${crypto.randomBytes(24).toString('base64url')}Aa1!`,
           };
           const result = {
             baseURL,
@@ -84,7 +85,7 @@ jobs:
             try {
               let response = await page.goto(baseURL, { waitUntil: 'networkidle', timeout: 60000 });
               record('home', response && response.status() === 200 ? 'pass' : 'fail', {
-                status: response?.status(),
+                httpStatus: response?.status(),
                 title: await page.title(),
               });
               await screenshot(page, '01-home');
@@ -148,9 +149,8 @@ jobs:
                 hasMapHeading: overviewText.includes('Mapa de Pipa'),
                 hasContextualDecisionHeading: overviewText.includes('O que vale a pena considerar?'),
               };
-              const mapState = await page.locator('[data-map-state]').first().getAttribute('data-map-state').catch(() => null);
-              result.observations.overview.mapState = mapState;
-              record('trip-overview', result.observations.overview.hasAccommodation ? 'pass' : 'fail', result.observations.overview);
+              result.observations.overview.mapState = await page.locator('[data-map-state]').first().getAttribute('data-map-state').catch(() => null);
+              record('trip-overview', result.observations.overview.hasAccommodation && result.observations.overview.mapState === 'ready' ? 'pass' : 'fail', result.observations.overview);
               await screenshot(page, '04-trip-overview-configured');
 
               await page.goto(`${baseURL}${tripUrl}/lugares`, { waitUntil: 'networkidle', timeout: 60000 });
@@ -158,27 +158,43 @@ jobs:
               const placesText = await page.locator('body').innerText();
               const knownPlaces = ['Praia do Amor', 'Baía dos Golfinhos', 'Chapadão de Pipa', 'Praia do Madeiro', 'Lagoa de Guaraíras', 'Praia de Tibau do Sul'];
               const knownPresence = Object.fromEntries(knownPlaces.map((name) => [name, placesText.includes(name)]));
-              const curatedImageCount = await page.locator('img[src*="/place-images/pipa/"]').count();
-              const fallbackCount = await page.locator('img[alt^="Imagem não disponível para "]').count();
+              const imageSources = await page.locator('img').evaluateAll((images) => images.map((image) => image.getAttribute('src') || ''));
+              const curatedImageCount = imageSources.filter((src) => src.includes('place-images%2Fpipa%2F') || src.includes('/place-images/pipa/')).length;
+              const fallbackCount = await page.locator('[data-place-image-fallback="true"]').count();
+              const publishedCountText = (placesText.match(/(\d+) lugares encontrados/) || [])[1];
               const placeMapState = await page.locator('[data-map-state]').first().getAttribute('data-map-state').catch(() => null);
-              result.observations.places = { knownPresence, curatedImageCount, fallbackCount, mapState: placeMapState };
-              record('places', Object.values(knownPresence).every(Boolean) && curatedImageCount >= 6 ? 'pass' : 'fail', result.observations.places);
+              result.observations.places = {
+                publishedCount: publishedCountText ? Number(publishedCountText) : null,
+                knownPresence,
+                curatedImageCount,
+                fallbackCount,
+                mapState: placeMapState,
+              };
+              record('places', Object.values(knownPresence).every(Boolean) && curatedImageCount === 6 && fallbackCount === 24 && placeMapState === 'ready' ? 'pass' : 'fail', result.observations.places);
               await screenshot(page, '05-places');
 
-              const discoveryButton = page.getByRole('button', { name: /Descobrir mais lugares/i });
-              if (await discoveryButton.count()) {
-                await discoveryButton.click();
-                await page.waitForTimeout(8000);
+              const discoveryLink = page.getByRole('link', { name: 'Descobrir mais lugares', exact: true });
+              if (await discoveryLink.count()) {
+                await Promise.all([
+                  page.waitForURL(/descoberta=externa/, { timeout: 60000 }),
+                  discoveryLink.click(),
+                ]);
+                await page.waitForLoadState('networkidle', { timeout: 60000 }).catch(() => {});
                 const discoveryText = await page.locator('body').innerText();
+                const externalSection = page.locator('section[aria-labelledby="external-place-discovery"]');
+                const externalCandidateCount = await externalSection.locator('li').count().catch(() => 0);
+                const providerError = discoveryText.includes('A fonte externa não respondeu agora.');
                 result.observations.discovery = {
-                  buttonPresent: true,
-                  textSample: discoveryText.split('\n').filter(Boolean).slice(-30),
-                  hasExternalCandidateLanguage: /candidat|extern|Overture|descobert/i.test(discoveryText),
+                  linkPresent: true,
+                  headingPresent: discoveryText.includes('Mais lugares encontrados no Overture'),
+                  externalCandidateCount,
+                  providerError,
+                  hasGovernanceLanguage: discoveryText.includes('candidatos externos') && discoveryText.includes('catálogo publicado'),
                 };
-                record('organic-discovery', 'observed', result.observations.discovery);
+                record('organic-discovery', !providerError && result.observations.discovery.headingPresent ? 'pass' : 'fail', result.observations.discovery);
                 await screenshot(page, '06-organic-discovery');
               } else {
-                result.observations.discovery = { buttonPresent: false };
+                result.observations.discovery = { linkPresent: false };
                 record('organic-discovery', 'fail', result.observations.discovery);
               }
 
@@ -194,7 +210,7 @@ jobs:
                 hasConfidence: /Confiança/i.test(recText),
                 hasExplicitActionLanguage: /ação explícita/i.test(recText),
               };
-              record('recommendations', articleCount > 0 && result.observations.recommendations.hasDistance ? 'pass' : 'fail', result.observations.recommendations);
+              record('recommendations', articleCount === 30 && result.observations.recommendations.hasDistance && result.observations.recommendations.hasConfidence ? 'pass' : 'fail', result.observations.recommendations);
               await screenshot(page, '07-recommendations');
 
               await page.goto(`${baseURL}${tripUrl}/roteiro`, { waitUntil: 'networkidle', timeout: 60000 });
@@ -203,13 +219,13 @@ jobs:
                 hasZeroActivities: /0\s*atividades/i.test(itineraryText),
                 hasDays: itineraryText.includes('22/08/2026') || itineraryText.includes('22 de agosto'),
               };
-              record('itinerary', result.observations.itinerary.hasZeroActivities ? 'pass' : 'observed', result.observations.itinerary);
+              record('itinerary', result.observations.itinerary.hasZeroActivities && result.observations.itinerary.hasDays ? 'pass' : 'fail', result.observations.itinerary);
               await screenshot(page, '08-itinerary');
 
               result.finishedAt = new Date().toISOString();
               fs.writeFileSync(path.join('..', '..', 'validation', 'summary.json'), JSON.stringify(result, null, 2));
 
-              const criticalFailures = result.steps.filter((step) => step.status === 'fail' && step.name !== 'organic-discovery');
+              const criticalFailures = result.steps.filter((step) => step.status === 'fail');
               await browser.close();
               if (criticalFailures.length) {
                 console.error(`Critical validation failures: ${criticalFailures.map((s) => s.name).join(', ')}`);

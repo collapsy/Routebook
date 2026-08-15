@@ -156,7 +156,12 @@ A promoção passa a ser write normal da aplicação/serviço, não uma migratio
 
 ## 10. Descoberta Overture
 
-O repositório possuirá um pipeline reproduzível de descoberta por bounding box:
+O repositório possuirá dois caminhos reproduzíveis e coerentes de descoberta, ambos read-only:
+
+1. pipeline operacional por bounding box para gerar artefato auditável no GitHub Actions;
+2. adapter server-side consumido pela experiência de Lugares para descobrir candidatos sob demanda sem expor segredo ao browser.
+
+O pipeline operacional deverá:
 
 1. obter a release atual do catálogo Overture;
 2. baixar somente `type=place` para a área delimitada de Pipa/Tibau do Sul usando a ferramenta oficial;
@@ -164,6 +169,10 @@ O repositório possuirá um pipeline reproduzível de descoberta por bounding bo
 4. aplicar ACL e filtros de categoria/confiança;
 5. gerar artefato de candidatos;
 6. nunca escrever em Production no modo discovery/dry-run.
+
+A entrada de produto deverá consultar os PMTiles públicos de Places server-side, usando HTTP Range e somente os tiles da área solicitada. Ela deverá aplicar o mesmo contrato canônico, limite, ACL, licença e reconciliação antes de exibir candidatos.
+
+Candidatos externos serão apresentados em seção separada do catálogo publicado. Não entram silenciosamente na lista/mapa canônicos e não recebem rota de detalhe enquanto não forem promovidos.
 
 A etapa de promoção deverá ser separada e usar o mesmo serviço idempotente da aplicação.
 
@@ -188,6 +197,9 @@ Imagem permanece uma capability separada da descoberta de POI:
 - promoção idempotente de candidato `new` para `Place`;
 - bloqueio de `possible_match`/`rejected` sem resolução explícita;
 - pipeline de descoberta Overture em modo dry-run/artefato;
+- adapter Overture PMTiles server-side para descoberta sob demanda no produto;
+- entrada explícita na tela de Lugares para consultar e visualizar candidatos externos sem alterar o catálogo;
+- falha da fonte externa degradando para o catálogo canônico existente com feedback previsível;
 - normalizador testável sem rede;
 - contratos de candidato de imagem e `PlaceImagePort` sem ativar Provider pago;
 - documentação, Registry e testes aplicáveis.
@@ -222,6 +234,11 @@ scripts/normalize-overture-places.mjs
 scripts/normalize-overture-places.test.mjs
 scripts/promote-place-candidates.mjs
 package.json
+apps/web/app/viagens/[tripId]/lugares/page.tsx
+apps/web/lib/overture-place-search.ts
+apps/web/lib/overture-place-search.test.ts
+apps/web/package.json
+pnpm-lock.yaml
 .github/workflows/engineering-validation.yml
 .github/workflows/overture-place-discovery.yml
 docs/implementation/increments/rb-inc-142-organic-place-ingestion.md
@@ -243,7 +260,8 @@ Arquivo adicional indispensável deve ser registrado neste incremento e explicad
 - [ ] promoção cria Place e referência externa atomicamente;
 - [ ] migration 0029 é somente DDL aditivo e sem backfill/DML de catálogo;
 - [ ] pipeline Overture gera artefato de candidatos limitado a Pipa/Tibau do Sul sem secret;
-- [ ] falha do Provider não quebra Places já canônicos;
+- [ ] tela de Lugares possui entrada server-side explícita para descobrir candidatos externos sem substituir o catálogo publicado;
+- [ ] falha do Provider não quebra Places já canônicos e mantém feedback previsível;
 - [ ] contrato de imagem exige licença/atribuição/cache compatíveis antes da promoção para asset;
 - [ ] nenhum Provider pago é ativado;
 - [ ] Documentation e Engineering Validation ficam verdes no mesmo SHA.
@@ -257,6 +275,8 @@ Arquivo adicional indispensável deve ser registrado neste incremento e explicad
 - promoção idempotente;
 - bloqueio de provável duplicata e candidato rejeitado;
 - normalização de fixture Overture sem rede;
+- adapter PMTiles com fonte injetável/fixture sem rede, incluindo release, tiles, normalização, limites e falha externa;
+- experiência de descoberta preservando catálogo canônico quando a fonte externa falha;
 - migration policy + aplicação das migrations;
 - regressão dos 30 Places existentes;
 - format, docs, lint, typecheck, testes, build e E2E pelo Engineering Validation.
@@ -267,6 +287,7 @@ Arquivo adicional indispensável deve ser registrado neste incremento e explicad
 - taxonomia externa é mais ampla que as quatro categorias atuais; desconhecido falha fechado;
 - deduplicação conservadora pode exigir revisão humana em casos ambíguos;
 - volume precisa ser limitado por área, confidence e categorias para não degradar UX;
+- PMTiles é uma fonte de leitura remota e deve ser acionada sob demanda, com limites e timeout para não degradar a página canônica;
 - imagem possui risco jurídico maior que texto/posição; ausência é preferível a licença incerta.
 
 ## 18. Rollback

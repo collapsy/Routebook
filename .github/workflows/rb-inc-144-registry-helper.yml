@@ -1,0 +1,52 @@
+name: RB-INC-144 Registry Helper
+
+on:
+  push:
+    branches:
+      - codex/rb-inc-144-contextual-decision-view
+
+permissions:
+  contents: write
+
+jobs:
+  register-documents:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/rb-inc-144-contextual-decision-view
+          fetch-depth: 1
+
+      - name: Append only RB-INC-144 registry entries
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("docs/registry.md")
+          text = path.read_text(encoding="utf-8")
+          marker = "\n## Status possíveis\n"
+          rows = (
+              "| RB-INC-144 | Visão de Decisão Contextual da Viagem | Implementation | Draft | 0.1.0 | [rb-inc-144-contextual-decision-view.md](./implementation/increments/rb-inc-144-contextual-decision-view.md) |\n"
+              "| RB-CTX-144 | Context Pack do RB-INC-144 — Visão de Decisão Contextual da Viagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-144-contextual-decision-view.md](./implementation/context-packs/rb-inc-144-contextual-decision-view.md) |\n"
+          )
+
+          if "| RB-INC-144 |" in text or "| RB-CTX-144 |" in text:
+              raise SystemExit("RB-INC-144 registry entries already exist; refusing to modify Registry.")
+          if marker not in text:
+              raise SystemExit("Registry status marker not found; refusing to modify Registry.")
+
+          path.write_text(text.replace(marker, "\n" + rows + marker, 1), encoding="utf-8")
+          PY
+
+      - name: Commit registry-only change
+        shell: bash
+        run: |
+          git config user.name "routebook-ci"
+          git config user.email "routebook-ci@users.noreply.github.com"
+          git add docs/registry.md
+          git diff --cached --check
+          git commit -m "docs(rb-inc-144): register increment and context pack"
+          git push origin HEAD:codex/rb-inc-144-contextual-decision-view

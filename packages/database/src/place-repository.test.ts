@@ -60,7 +60,6 @@ const curatedPipaImages = {
   "baia-dos-golfinhos": "/place-images/pipa/baia-dos-golfinhos.jpg",
   "chapadao-de-pipa": "/place-images/pipa/chapadao-de-pipa.jpg",
   "praia-do-madeiro": "/place-images/pipa/praia-do-madeiro.jpg",
-  "praia-de-sibauma": "/place-images/pipa/praia-de-sibauma.jpg",
   "praia-de-tibau-do-sul": "/place-images/pipa/praia-de-tibau-do-sul.jpg",
   "lagoa-de-guarairas": "/place-images/pipa/lagoa-de-guarairas.jpg",
 } as const;
@@ -153,11 +152,11 @@ describe("DrizzlePlaceRepository", () => {
     }
   });
 
-  it("carrega sete imagens curadas de Pipa e mantém fallback para Places sem cobertura", async () => {
+  it("carrega seis imagens curadas de Pipa e mantém fallback para Places sem cobertura", async () => {
     const result = await new DrizzlePlaceRepository().listPublished({ destinationId: "pipa-rn-br" });
     const withImages = result.filter((place) => place.primaryImage);
 
-    expect(withImages).toHaveLength(7);
+    expect(withImages).toHaveLength(6);
     for (const [slug, assetPath] of Object.entries(curatedPipaImages)) {
       const place = result.find((candidate) => candidate.slug === slug);
       expect(place?.primaryImage).toMatchObject({
@@ -169,6 +168,9 @@ describe("DrizzlePlaceRepository", () => {
       expect(place?.primaryImage?.attribution).toBeTruthy();
     }
 
+    expect(result.find((place) => place.slug === "praia-de-sibauma")).not.toHaveProperty(
+      "primaryImage",
+    );
     expect(result.find((place) => place.slug === "praia-do-centro")).not.toHaveProperty(
       "primaryImage",
     );

@@ -29,6 +29,7 @@ function sequenceFetch(sequence) {
     index += 1;
     if (value instanceof Error) throw value;
     if (typeof value === "function") return value();
+    if (value instanceof Response) return value.clone();
     return value;
   };
 }

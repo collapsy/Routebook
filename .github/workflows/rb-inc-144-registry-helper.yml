@@ -19,7 +19,7 @@ jobs:
           ref: codex/rb-inc-144-contextual-decision-view
           fetch-depth: 1
 
-      - name: Append only RB-INC-144 registry entries
+      - name: Register documents if missing
         shell: bash
         run: |
           python - <<'PY'
@@ -33,8 +33,11 @@ jobs:
               "| RB-CTX-144 | Context Pack do RB-INC-144 — Visão de Decisão Contextual da Viagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-144-contextual-decision-view.md](./implementation/context-packs/rb-inc-144-contextual-decision-view.md) |\n"
           )
 
+          if "| RB-INC-144 |" in text and "| RB-CTX-144 |" in text:
+              print("Registry already contains both RB-INC-144 and RB-CTX-144; no change needed.")
+              raise SystemExit(0)
           if "| RB-INC-144 |" in text or "| RB-CTX-144 |" in text:
-              raise SystemExit("RB-INC-144 registry entries already exist; refusing to modify Registry.")
+              raise SystemExit("Registry contains only one RB-INC-144 entry; refusing to repair partially.")
           if marker not in text:
               raise SystemExit("Registry status marker not found; refusing to modify Registry.")
 
@@ -44,6 +47,10 @@ jobs:
       - name: Commit registry-only change
         shell: bash
         run: |
+          if git diff --quiet -- docs/registry.md; then
+            echo "Registry already correct."
+            exit 0
+          fi
           git config user.name "routebook-ci"
           git config user.email "routebook-ci@users.noreply.github.com"
           git add docs/registry.md

@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import type { Place } from "./place";
 import {
+  canPromoteExternalImageToControlledAsset,
   mapOverturePlaceCategory,
   reconcileExternalPlaceCandidate,
   validatePlaceSearchQuery,
   type ExternalPlaceCandidate,
+  type ExternalPlaceImageCandidate,
 } from "./external-place";
 
 function place(overrides: Partial<Place> = {}): Place {
@@ -43,6 +45,22 @@ function candidate(overrides: Partial<ExternalPlaceCandidate> = {}): ExternalPla
   };
 }
 
+function imageCandidate(
+  overrides: Partial<ExternalPlaceImageCandidate> = {},
+): ExternalPlaceImageCandidate {
+  return {
+    provider: "wikimedia-commons",
+    externalPlaceId: "08b2-example",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Praia_do_Amor.jpg",
+    sourceName: "Wikimedia Commons",
+    license: "CC-BY-SA-4.0",
+    attribution: "Autor de exemplo",
+    collectedAt: new Date("2026-08-15T15:00:00.000Z"),
+    cachePolicy: "download_allowed",
+    ...overrides,
+  };
+}
+
 describe("mapOverturePlaceCategory", () => {
   it.each([
     ["beach", "beach"],
@@ -53,6 +71,12 @@ describe("mapOverturePlaceCategory", () => {
     ["scenic_viewpoint", "nature"],
   ] as const)("mapeia %s para %s", (externalCategory, canonicalCategory) => {
     expect(mapOverturePlaceCategory(externalCategory)).toBe(canonicalCategory);
+  });
+
+  it("usa a hierarquia quando a categoria primária é mais específica que o ACL", () => {
+    expect(
+      mapOverturePlaceCategory("sushi_restaurant", ["dining_and_drinking", "restaurant"]),
+    ).toBe("gastronomy");
   });
 
   it("não inventa categoria canônica para categoria desconhecida", () => {
@@ -125,10 +149,10 @@ describe("reconcileExternalPlaceCandidate", () => {
   });
 
   it("falha fechado quando a categoria externa não possui mapeamento", () => {
-    const result = reconcileExternalPlaceCandidate(
-      candidate({ providerCategory: "pet_store", category: undefined }),
-      [place()],
-    );
+    const { category: _category, ...unsupportedCandidate } = candidate({
+      providerCategory: "pet_store",
+    });
+    const result = reconcileExternalPlaceCandidate(unsupportedCandidate, [place()]);
 
     expect(result.status).toBe("rejected");
     expect(result.reason).toContain("não possui mapeamento canônico");
@@ -139,5 +163,29 @@ describe("reconcileExternalPlaceCandidate", () => {
 
     expect(result.status).toBe("rejected");
     expect(result.reason).toContain("licença");
+  });
+});
+
+describe("ExternalPlaceImageCandidate", () => {
+  it("permite promoção somente quando download/cache são explicitamente autorizados", () => {
+    expect(canPromoteExternalImageToControlledAsset(imageCandidate())).toBe(true);
+    expect(
+      canPromoteExternalImageToControlledAsset(imageCandidate({ cachePolicy: "temporary_only" })),
+    ).toBe(false);
+    expect(
+      canPromoteExternalImageToControlledAsset(imageCandidate({ cachePolicy: "unknown" })),
+    ).toBe(false);
+  });
+
+  it("falha fechado para mídia sem licença verificável", () => {
+    expect(canPromoteExternalImageToControlledAsset(imageCandidate({ license: "" }))).toBe(false);
+  });
+
+  it("falha fechado para URL de mídia não HTTPS", () => {
+    expect(
+      canPromoteExternalImageToControlledAsset(
+        imageCandidate({ sourceUrl: "http://example.com/image.jpg" }),
+      ),
+    ).toBe(false);
   });
 });

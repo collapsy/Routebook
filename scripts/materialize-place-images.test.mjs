@@ -6,6 +6,7 @@ import {
   assertImageBytes,
   materializePlaceImages,
   parseCommonsImageInfo,
+  retryDelayMilliseconds,
   validatePlaceImageManifest,
   verifyPlaceImageAssets,
 } from "./materialize-place-images.mjs";
@@ -98,7 +99,10 @@ describe("manifesto de imagens", () => {
 describe("metadata do Commons", () => {
   it("seleciona thumbnail limitada e preserva Provenance/licença", () => {
     const result = parseCommonsImageInfo(commonsPayload(), entry());
-    assert.equal(result.downloadUrl, "https://upload.wikimedia.org/example/1280px-praia-do-amor.jpg");
+    assert.equal(
+      result.downloadUrl,
+      "https://upload.wikimedia.org/example/1280px-praia-do-amor.jpg",
+    );
     assert.equal(result.mime, "image/jpeg");
     assert.equal(result.artist, "Flaviohmg");
     assert.equal(result.license, "CC BY-SA 4.0");
@@ -108,14 +112,32 @@ describe("metadata do Commons", () => {
     assert.throws(
       () =>
         parseCommonsImageInfo(
-          commonsPayload({ extmetadata: { Artist: { value: "Outra Pessoa" }, LicenseShortName: { value: "CC BY-SA 4.0" } } }),
+          commonsPayload({
+            extmetadata: {
+              Artist: { value: "Outra Pessoa" },
+              LicenseShortName: { value: "CC BY-SA 4.0" },
+            },
+          }),
           entry(),
         ),
       /Autor retornado/,
     );
     assert.throws(
-      () => parseCommonsImageInfo(commonsPayload({ url: "https://example.com/image.jpg" }), entry()),
+      () =>
+        parseCommonsImageInfo(commonsPayload({ url: "https://example.com/image.jpg" }), entry()),
       /upload.wikimedia.org/,
+    );
+  });
+
+  it("respeita Retry-After e limita espera de throttling", () => {
+    assert.equal(
+      retryDelayMilliseconds(new Response(null, { status: 429, headers: { "retry-after": "2" } }), 0),
+      2_000,
+    );
+    assert.equal(retryDelayMilliseconds(new Response(null, { status: 503 }), 2), 4_000);
+    assert.equal(
+      retryDelayMilliseconds(new Response(null, { status: 429, headers: { "retry-after": "120" } }), 0),
+      30_000,
     );
   });
 });
@@ -134,11 +156,15 @@ describe("materialização", () => {
         });
       }
       assert.equal(url, "https://upload.wikimedia.org/example/1280px-praia-do-amor.jpg");
-      return new Response(jpegBytes, { status: 200, headers: { "content-type": "image/jpeg" } });
+      return new Response(jpegBytes, {
+        status: 200,
+        headers: { "content-type": "image/jpeg" },
+      });
     };
 
     const result = await materializePlaceImages(manifest(), {
       fetcher,
+      sleep: async () => {},
       ensureDirectory: async () => {},
       writeAsset: async (filePath, buffer) => writes.push({ filePath, buffer }),
     });
@@ -151,6 +177,38 @@ describe("materialização", () => {
       createHash("sha256").update(jpegBytes).digest("hex"),
     );
     assert.equal(result.entries[0].sourceSha1, "3110c3c6dbe053ffed9adc3f2f7c74d92841ee23");
+  });
+
+  it("aguarda throttling e tenta novamente sem paralelismo", async () => {
+    let mediaAttempts = 0;
+    const delays = [];
+    const fetcher = async (input) => {
+      const url = String(input);
+      if (url.startsWith("https://commons.wikimedia.org/w/api.php")) {
+        return new Response(JSON.stringify(commonsPayload()), { status: 200 });
+      }
+      mediaAttempts += 1;
+      if (mediaAttempts === 1) {
+        return new Response("rate limited", {
+          status: 429,
+          headers: { "retry-after": "1" },
+        });
+      }
+      return new Response(jpegBytes, {
+        status: 200,
+        headers: { "content-type": "image/jpeg" },
+      });
+    };
+
+    await materializePlaceImages(manifest(), {
+      fetcher,
+      sleep: async (delay) => delays.push(delay),
+      ensureDirectory: async () => {},
+      writeAsset: async () => {},
+    });
+
+    assert.equal(mediaAttempts, 2);
+    assert.deepEqual(delays, [1_000, 500]);
   });
 
   it("verifica os assets offline pelo hash, tamanho e assinatura", async () => {
@@ -167,7 +225,10 @@ describe("materialização", () => {
       verifyPlaceImageAssets(completeManifest, { readAsset: async () => jpegBytes }),
     );
     await assert.rejects(
-      () => verifyPlaceImageAssets(completeManifest, { readAsset: async () => Buffer.from(jpegBytes).fill(0, 5, 8) }),
+      () =>
+        verifyPlaceImageAssets(completeManifest, {
+          readAsset: async () => Buffer.from(jpegBytes).fill(0, 5, 8),
+        }),
       /SHA-256 diverge/,
     );
   });

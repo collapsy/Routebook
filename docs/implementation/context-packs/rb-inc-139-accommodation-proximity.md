@@ -106,6 +106,7 @@ apps/web/app/viagens/[tripId]/lugares/filters.ts
 apps/web/app/viagens/[tripId]/lugares/filters.test.ts
 apps/web/app/viagens/[tripId]/lugares/page.tsx
 apps/web/e2e/accommodation-proximity.spec.ts
+apps/web/e2e/itinerary-spatial.spec.ts
 modules/decision-intelligence/src/deterministic-recommendations-proximity.test.ts
 docs/implementation/increments/rb-inc-139-accommodation-proximity.md
 docs/implementation/context-packs/rb-inc-139-accommodation-proximity.md
@@ -122,6 +123,7 @@ docs/registry.md
 - Decision Intelligence para fallback sem Hospedagem e Limitation correspondente;
 - E2E autenticado com Hospedagem geocodificada;
 - E2E autenticado sem coordenadas;
+- estabilização de seletores E2E espaciais quando lista e marcador compartilham o mesmo nome acessível;
 - format, docs, lint, typecheck, testes e build;
 - Engineering Validation e Documentation Validation no mesmo SHA.
 

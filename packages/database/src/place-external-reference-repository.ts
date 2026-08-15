@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 import type { PlaceExternalReference } from "@routebook/place-catalog";
 
 import { getDatabase } from "./client";
-import { placeExternalReferences } from "./schema";
+import { placeExternalReferences, places } from "./schema";
 
 export type PersistPlaceExternalReferenceInput = Readonly<{
   placeId: string;
@@ -64,6 +64,16 @@ export class DrizzlePlaceExternalReferenceRepository {
       .limit(1);
 
     return row ? mapReference(row) : null;
+  }
+
+  async listByDestination(destinationId: string): Promise<PersistedPlaceExternalReference[]> {
+    const rows = await this.database
+      .select({ reference: placeExternalReferences })
+      .from(placeExternalReferences)
+      .innerJoin(places, eq(places.id, placeExternalReferences.placeId))
+      .where(eq(places.destinationId, destinationId));
+
+    return rows.map(({ reference }) => mapReference(reference));
   }
 
   async create(

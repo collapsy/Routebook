@@ -132,7 +132,7 @@ describe("classifyWikimediaImageMatch", () => {
 describe("WikimediaCommonsPlaceImageAdapter", () => {
   it("consulta somente a API oficial e devolve candidato com Provenance", async () => {
     const fetcher = vi.fn(
-      async () =>
+      async (_input: string | URL | Request, _init?: RequestInit): Promise<Response> =>
         new Response(
           JSON.stringify({
             query: {
@@ -166,12 +166,14 @@ describe("WikimediaCommonsPlaceImageAdapter", () => {
       },
     ]);
     expect(fetcher).toHaveBeenCalledTimes(1);
-    const calledUrl = new URL(String(fetcher.mock.calls[0]?.[0]));
+    const call = fetcher.mock.calls[0];
+    expect(call).toBeDefined();
+    const [calledInput, init] = call!;
+    const calledUrl = new URL(String(calledInput));
     expect(calledUrl.hostname).toBe("commons.wikimedia.org");
     expect(calledUrl.searchParams.get("gsrnamespace")).toBe("6");
     expect(calledUrl.searchParams.get("iiurlwidth")).toBe("1280");
     expect(calledUrl.searchParams.get("maxlag")).toBe("1");
-    const init = fetcher.mock.calls[0]?.[1];
     expect(init?.headers).toMatchObject({
       "User-Agent": expect.stringContaining("https://github.com/collapsy/Routebook"),
       "Api-User-Agent": expect.stringContaining("https://github.com/collapsy/Routebook"),

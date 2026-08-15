@@ -2,6 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import { createPlace, PlaceValidationError } from "./place";
 
+const validPrimaryImage = {
+  assetPath: "/place-images/pipa/praia-do-amor.webp",
+  altText: "Vista da Praia do Amor entre falésias em Pipa.",
+  sourceName: "Acervo RouteBook",
+  sourceUrl: "https://example.com/acervo/praia-do-amor",
+  license: "uso autorizado para o RouteBook",
+  attribution: "Foto: Acervo RouteBook",
+} as const;
+
 const validInput = {
   destinationId: "pipa-rn-br",
   slug: "praia-do-amor",
@@ -52,5 +61,51 @@ describe("createPlace", () => {
     expect(() => createPlace({ ...validInput, priceRange: "unknown" as never })).toThrow(
       PlaceValidationError,
     );
+  });
+
+  it("normaliza uma imagem principal com asset interno e Provenance declarada", () => {
+    const place = createPlace({ ...validInput, primaryImage: validPrimaryImage });
+
+    expect(place.primaryImage).toEqual(validPrimaryImage);
+  });
+
+  it("mantém imagem ausente como propriedade omitida", () => {
+    expect(createPlace(validInput)).not.toHaveProperty("primaryImage");
+  });
+
+  it("rejeita URL externa como asset carregável", () => {
+    expect(() =>
+      createPlace({
+        ...validInput,
+        primaryImage: {
+          ...validPrimaryImage,
+          assetPath: "https://images.example.com/praia-do-amor.webp",
+        },
+      }),
+    ).toThrow(PlaceValidationError);
+  });
+
+  it("rejeita imagem sem alt, origem ou licença declarada", () => {
+    for (const primaryImage of [
+      { ...validPrimaryImage, altText: "" },
+      { ...validPrimaryImage, sourceName: "" },
+      { ...validPrimaryImage, license: "" },
+    ]) {
+      expect(() => createPlace({ ...validInput, primaryImage })).toThrow(PlaceValidationError);
+    }
+  });
+
+  it("aceita sourceUrl ausente, mas rejeita origem não HTTPS quando informada", () => {
+    const { sourceUrl: _sourceUrl, ...withoutSourceUrl } = validPrimaryImage;
+    expect(createPlace({ ...validInput, primaryImage: withoutSourceUrl }).primaryImage).not.toHaveProperty(
+      "sourceUrl",
+    );
+
+    expect(() =>
+      createPlace({
+        ...validInput,
+        primaryImage: { ...validPrimaryImage, sourceUrl: "http://example.com/origem" },
+      }),
+    ).toThrow(PlaceValidationError);
   });
 });

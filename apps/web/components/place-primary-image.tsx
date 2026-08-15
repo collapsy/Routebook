@@ -53,7 +53,8 @@ export function PlacePrimaryImage({
       {showProvenance ? (
         <figcaption className={styles.caption}>
           <span>
-            {primaryImage.attribution ?? `Imagem: ${primaryImage.sourceName}`}. Licença/base de uso: {primaryImage.license}.
+            {primaryImage.attribution ?? `Imagem: ${primaryImage.sourceName}`}. Licença/base de uso:{" "}
+            {primaryImage.license}.
           </span>{" "}
           {primaryImage.sourceUrl ? (
             <a href={primaryImage.sourceUrl} rel="noreferrer" target="_blank">

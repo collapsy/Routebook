@@ -9,6 +9,10 @@ const manifestPath = path.join(repositoryRoot, "apps/web/data/pipa-place-images.
 const publicRoot = path.join(repositoryRoot, "apps/web/public");
 const commonsApiUrl = "https://commons.wikimedia.org/w/api.php";
 const maximumAssetBytes = 3 * 1024 * 1024;
+const maximumRetryDelayMs = 30_000;
+const maximumRetries = 3;
+const politeDelayBetweenAssetsMs = 500;
+const userAgent = "RouteBookPlaceImageBot/0.1 (https://github.com/collapsy/Routebook)";
 const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const allowedLicensePattern = /^CC BY(?:-SA)? (?:2\.0|2\.5|3\.0|4\.0)$/i;
 
@@ -63,6 +67,38 @@ function assetFilePath(assetPath) {
     throw new Error(`assetPath escapou do public root: ${assetPath}`);
   }
   return resolved;
+}
+
+function defaultSleep(delayMs) {
+  return new Promise((resolve) => setTimeout(resolve, delayMs));
+}
+
+export function retryDelayMilliseconds(response, attempt) {
+  const retryAfter = text(response.headers.get("retry-after"));
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    if (Number.isFinite(seconds) && seconds >= 0) {
+      return Math.min(maximumRetryDelayMs, Math.max(250, Math.ceil(seconds * 1_000)));
+    }
+    const retryDate = Date.parse(retryAfter);
+    if (Number.isFinite(retryDate)) {
+      return Math.min(maximumRetryDelayMs, Math.max(250, retryDate - Date.now()));
+    }
+  }
+  return Math.min(maximumRetryDelayMs, 1_000 * 2 ** attempt);
+}
+
+async function fetchWithRespectfulRetry(
+  url,
+  init,
+  { fetcher, sleep, retries = maximumRetries },
+) {
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    const response = await fetcher(url, init);
+    if (![429, 503].includes(response.status) || attempt === retries) return response;
+    await sleep(retryDelayMilliseconds(response, attempt));
+  }
+  throw new Error("Retry loop inválido.");
 }
 
 export function validatePlaceImageManifest(manifest, { requireIntegrity = false } = {}) {
@@ -127,7 +163,11 @@ export function validatePlaceImageManifest(manifest, { requireIntegrity = false 
       if (!/^[a-f0-9]{64}$/.test(text(entry.assetSha256))) {
         throw new Error(`assetSha256 ausente/inválido para ${entry.placeSlug}.`);
       }
-      if (!Number.isInteger(entry.assetBytes) || entry.assetBytes <= 0 || entry.assetBytes > maximumAssetBytes) {
+      if (
+        !Number.isInteger(entry.assetBytes) ||
+        entry.assetBytes <= 0 ||
+        entry.assetBytes > maximumAssetBytes
+      ) {
         throw new Error(`assetBytes ausente/inválido para ${entry.placeSlug}.`);
       }
     }
@@ -135,7 +175,7 @@ export function validatePlaceImageManifest(manifest, { requireIntegrity = false 
   return manifest;
 }
 
-export function parseCommonsImageInfo(payload, entry) {
+export function parseCommonsImageInfo(payload, entry, requestedWidth = 1280) {
   const page = payload?.query?.pages?.[0];
   const info = page?.imageinfo?.[0];
   if (!page || page.missing || !info) {
@@ -150,7 +190,9 @@ export function parseCommonsImageInfo(payload, entry) {
     throw new Error(`Provenance retornada diverge do manifesto para ${entry.placeSlug}.`);
   }
   const mime = text(info.mime);
-  if (!allowedMimeTypes.has(mime)) throw new Error(`MIME não permitido para ${entry.placeSlug}: ${mime}.`);
+  if (!allowedMimeTypes.has(mime)) {
+    throw new Error(`MIME não permitido para ${entry.placeSlug}: ${mime}.`);
+  }
 
   const metadata = info.extmetadata ?? {};
   const artist = stripHtml(metadata.Artist?.value);
@@ -181,7 +223,7 @@ export function parseCommonsImageInfo(payload, entry) {
   if (thumbnailUrl) {
     assertHttpsHost(thumbnailUrl, "upload.wikimedia.org", `URL de thumbnail de ${entry.placeSlug}`);
   }
-  const downloadUrl = Number.isFinite(width) && width <= 1280 ? originalUrl : thumbnailUrl;
+  const downloadUrl = Number.isFinite(width) && width <= requestedWidth ? originalUrl : thumbnailUrl;
   if (!downloadUrl) {
     throw new Error(`Commons não forneceu thumbnail limitada para ${entry.placeSlug}.`);
   }
@@ -204,8 +246,12 @@ export function assertImageBytes(buffer, mime, label = "asset") {
     throw new Error(`${label} possui tamanho inválido.`);
   }
   const isJpeg = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
-  const isPng = buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
-  const isWebp = buffer.subarray(0, 4).toString("ascii") === "RIFF" && buffer.subarray(8, 12).toString("ascii") === "WEBP";
+  const isPng = buffer
+    .subarray(0, 8)
+    .equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+  const isWebp =
+    buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
+    buffer.subarray(8, 12).toString("ascii") === "WEBP";
   const matches =
     (mime === "image/jpeg" && isJpeg) ||
     (mime === "image/png" && isPng) ||
@@ -219,7 +265,8 @@ export async function verifyPlaceImageAssets(manifest, { readAsset = readFile } 
     const filePath = assetFilePath(entry.assetPath);
     const buffer = await readAsset(filePath);
     const extension = path.extname(entry.assetPath);
-    const mime = extension === ".png" ? "image/png" : extension === ".webp" ? "image/webp" : "image/jpeg";
+    const mime =
+      extension === ".png" ? "image/png" : extension === ".webp" ? "image/webp" : "image/jpeg";
     assertImageBytes(buffer, mime, entry.placeSlug);
     const digest = createHash("sha256").update(buffer).digest("hex");
     if (digest !== entry.assetSha256) throw new Error(`SHA-256 diverge para ${entry.placeSlug}.`);
@@ -227,15 +274,22 @@ export async function verifyPlaceImageAssets(manifest, { readAsset = readFile } 
   }
 }
 
-async function fetchJson(url, fetcher) {
+async function fetchJson(url, { fetcher, sleep }) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
   try {
-    const response = await fetcher(url, {
-      signal: controller.signal,
-      redirect: "manual",
-      headers: { "User-Agent": "RouteBook/0.1 place-image-materializer" },
-    });
+    const response = await fetchWithRespectfulRetry(
+      url,
+      {
+        signal: controller.signal,
+        redirect: "manual",
+        headers: {
+          "User-Agent": userAgent,
+          "Api-User-Agent": userAgent,
+        },
+      },
+      { fetcher, sleep },
+    );
     if (!response.ok) throw new Error(`Wikimedia Commons respondeu ${response.status}.`);
     return await response.json();
   } finally {
@@ -243,16 +297,20 @@ async function fetchJson(url, fetcher) {
   }
 }
 
-async function downloadImage(url, expectedMime, fetcher) {
+async function downloadImage(url, expectedMime, { fetcher, sleep }) {
   assertHttpsHost(url, "upload.wikimedia.org", "URL de download");
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15_000);
+  const timeout = setTimeout(() => controller.abort(), 90_000);
   try {
-    const response = await fetcher(url, {
-      signal: controller.signal,
-      redirect: "manual",
-      headers: { "User-Agent": "RouteBook/0.1 place-image-materializer" },
-    });
+    const response = await fetchWithRespectfulRetry(
+      url,
+      {
+        signal: controller.signal,
+        redirect: "manual",
+        headers: { "User-Agent": userAgent },
+      },
+      { fetcher, sleep },
+    );
     if (!response.ok) throw new Error(`Download Commons respondeu ${response.status}.`);
     const contentType = text(response.headers.get("content-type")).split(";")[0];
     if (contentType && contentType !== expectedMime) {
@@ -268,7 +326,12 @@ async function downloadImage(url, expectedMime, fetcher) {
 
 export async function materializePlaceImages(
   manifest,
-  { fetcher = fetch, writeAsset = writeFile, ensureDirectory = mkdir } = {},
+  {
+    fetcher = fetch,
+    sleep = defaultSleep,
+    writeAsset = writeFile,
+    ensureDirectory = mkdir,
+  } = {},
 ) {
   validatePlaceImageManifest(manifest);
   const entries = [];
@@ -277,6 +340,7 @@ export async function materializePlaceImages(
       action: "query",
       format: "json",
       formatversion: "2",
+      maxlag: "1",
       titles: entry.fileTitle,
       prop: "imageinfo",
       iiprop: "url|size|mime|sha1|extmetadata",
@@ -284,9 +348,9 @@ export async function materializePlaceImages(
       iiextmetadatafilter: "Artist|LicenseShortName|LicenseUrl|ImageDescription|Credit",
       origin: "*",
     });
-    const payload = await fetchJson(`${commonsApiUrl}?${query}`, fetcher);
-    const info = parseCommonsImageInfo(payload, entry);
-    const buffer = await downloadImage(info.downloadUrl, info.mime, fetcher);
+    const payload = await fetchJson(`${commonsApiUrl}?${query}`, { fetcher, sleep });
+    const info = parseCommonsImageInfo(payload, entry, manifest.requestedWidth);
+    const buffer = await downloadImage(info.downloadUrl, info.mime, { fetcher, sleep });
     const filePath = assetFilePath(entry.assetPath);
     await ensureDirectory(path.dirname(filePath), { recursive: true });
     await writeAsset(filePath, buffer);
@@ -296,6 +360,7 @@ export async function materializePlaceImages(
       assetSha256: createHash("sha256").update(buffer).digest("hex"),
       assetBytes: buffer.length,
     });
+    await sleep(politeDelayBetweenAssetsMs);
   }
   return { ...manifest, entries };
 }

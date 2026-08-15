@@ -62,11 +62,12 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   const secondPlaceName = secondPlace!.name;
   await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-08-23`);
   await expect(page.getByRole("heading", { name: "Mapa do Dia 2" })).toBeVisible();
+  const map = page.getByRole("region", { name: "Mapa interativo: Mapa do Dia 2" });
   await expect(
-    page.getByRole("link", { name: `Atividade 1: ${firstPlaceName}. Abrir detalhes.` }),
+    map.getByRole("link", { name: `Atividade 1: ${firstPlaceName}. Abrir detalhes.` }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: `Atividade 2: ${secondPlaceName}. Abrir detalhes.` }),
+    map.getByRole("link", { name: `Atividade 2: ${secondPlaceName}. Abrir detalhes.` }),
   ).toBeVisible();
   await expect(page.getByText("Hospedagem sem coordenadas disponíveis.")).toBeVisible();
   await expect(

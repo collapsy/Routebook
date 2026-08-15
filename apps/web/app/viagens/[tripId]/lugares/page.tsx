@@ -154,8 +154,9 @@ export default async function PlacesPage({
           <p className="product-eyebrow">Descoberta inicial</p>
           <h1>Lugares em {trip.destination.name}</h1>
           <p>
-            Pesquise o catálogo publicado e combine filtros. Os resultados não representam ranking
-            ou recomendação personalizada.
+            Pesquise o catálogo publicado e combine filtros. Com Hospedagem geocodificada, a lista
+            prioriza os Lugares mais próximos pela distância geodésica; isso não representa rota,
+            duração ou recomendação personalizada.
           </p>
         </div>
       </header>

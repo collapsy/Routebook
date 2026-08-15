@@ -61,7 +61,7 @@ export function filterPlaces(
 ): FilteredPlace[] {
   const normalizedSearch = filters.search ? normalizeSearchTerm(filters.search) : undefined;
 
-  return places.flatMap((place) => {
+  const filteredPlaces = places.flatMap((place) => {
     const distanceMeters = accommodationCoordinate
       ? calculateGeodesicDistance(
           createGeoCoordinate(accommodationCoordinate),
@@ -86,4 +86,13 @@ export function filterPlaces(
 
     return [{ place, ...(distanceMeters === undefined ? {} : { distanceMeters }) }];
   });
+
+  if (!accommodationCoordinate) return filteredPlaces;
+
+  return filteredPlaces.sort(
+    (left, right) =>
+      (left.distanceMeters ?? Number.POSITIVE_INFINITY) -
+        (right.distanceMeters ?? Number.POSITIVE_INFINITY) ||
+      left.place.slug.localeCompare(right.place.slug),
+  );
 }

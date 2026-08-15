@@ -199,6 +199,7 @@ scripts/normalize-overture-places.test.mjs
 scripts/promote-place-candidates.mjs
 package.json
 apps/web/app/viagens/[tripId]/lugares/page.tsx
+apps/web/e2e/place-discovery-filters.spec.ts
 apps/web/lib/overture-place-search.ts
 apps/web/lib/overture-place-search.test.ts
 apps/web/package.json

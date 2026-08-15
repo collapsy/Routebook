@@ -63,8 +63,7 @@ jobs:
           if not releases:
               raise SystemExit("Nenhuma release Overture foi encontrada no bucket público.")
 
-          latest = max(releases)
-          print(f"release={latest}")
+          print(f"release={max(releases)}")
           PY
 
       - name: Download Pipa and Tibau do Sul places
@@ -74,17 +73,35 @@ jobs:
         run: |
           set -euo pipefail
           echo "Using Overture release: ${OVERTURE_RELEASE}"
-          # west,south,east,north. The box deliberately covers Pipa, Tibau do Sul,
-          # Sibaúma and the immediate decision area without downloading a broad region.
-          # The release is resolved from the public S3 prefixes and passed explicitly,
-          # avoiding the optional STAC catalog while still following new releases.
-          overturemaps download \
-            --release="${OVERTURE_RELEASE}" \
-            --no-stac \
-            --bbox=-35.15,-6.33,-34.98,-6.15 \
-            -f geojson \
-            --type=place \
-            -o /tmp/overture-pipa-places.geojson
+          # The CLI release callback currently consults the optional STAC catalog even
+          # when --no-stac is requested. The official Python API accepts an explicit
+          # release and stac=False, so it can read the same public S3 layout directly.
+          python - <<'PY'
+          import os
+
+          from overturemaps import record_batch_reader
+          from overturemaps.writers import copy, get_writer
+
+          release = os.environ["OVERTURE_RELEASE"]
+          bbox = (-35.15, -6.33, -34.98, -6.15)  # west,south,east,north
+          reader = record_batch_reader(
+              "place",
+              bbox=bbox,
+              release=release,
+              connect_timeout=30,
+              request_timeout=120,
+              stac=False,
+          )
+          if reader is None:
+              raise SystemExit("A consulta Overture não retornou um reader para a área de Pipa.")
+
+          with get_writer(
+              "geojson",
+              "/tmp/overture-pipa-places.geojson",
+              schema=reader.schema,
+          ) as writer:
+              copy(reader, writer)
+          PY
 
       - name: Setup Node.js
         uses: actions/setup-node@v6

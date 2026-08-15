@@ -228,8 +228,8 @@ export default async function TripOverviewPage({
           </dl>
         ) : (
           <p>
-            Quantidade de viajantes, interesses, ritmo, transporte e orçamento são opcionais e
-            podem ser preenchidos aos poucos.
+            Quantidade de viajantes, interesses, ritmo, transporte e orçamento são opcionais e podem
+            ser preenchidos aos poucos.
           </p>
         )}
       </section>

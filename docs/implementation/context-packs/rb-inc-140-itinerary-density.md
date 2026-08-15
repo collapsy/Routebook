@@ -97,6 +97,7 @@ modules/proposal-management/src/itinerary-proposal-generation-input-assembler.te
 modules/proposal-management/src/itinerary-proposal-generation-service.test.ts
 packages/database/src/authoritative-itinerary-proposal-generation-context.ts
 packages/database/src/authoritative-itinerary-proposal-generation-context-postgres.test.ts
+packages/database/src/authoritative-itinerary-proposal-generation-service-postgres.test.ts
 apps/web/e2e/itinerary-proposal-generation.spec.ts
 docs/implementation/increments/rb-inc-140-itinerary-density.md
 docs/implementation/context-packs/rb-inc-140-itinerary-density.md
@@ -119,6 +120,7 @@ docs/registry.md
 
 - ler `itinerary_free_periods` na mesma transação read-only/repeatable-read já usada;
 - mapear apenas identidade e modo necessários à geração;
+- regressão do serviço autoritativo PostgreSQL acompanha a generationVersion v2;
 - nenhuma persistência nova.
 
 ### Web / E2E
@@ -138,6 +140,7 @@ docs/registry.md
 - assembler counts e invalid mode;
 - lifecycle do serviço alinhado à generationVersion v2;
 - PostgreSQL snapshot;
+- serviço autoritativo PostgreSQL alinhado à generationVersion v2;
 - E2E version/isolation;
 - suíte integral do repositório.
 

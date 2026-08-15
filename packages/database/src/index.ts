@@ -41,6 +41,7 @@ export {
   itineraryActivities,
   itineraryDays,
   itineraryFreePeriods,
+  placeExternalReferences,
   places,
   recommendations,
   savedPlaces,
@@ -88,6 +89,17 @@ export {
   type ItineraryTransactionRepository,
   type ItineraryTransactionRepositoryFactory,
 } from "./itinerary-transaction-fragment";
+export {
+  DrizzlePlaceExternalReferenceRepository,
+  type PersistedPlaceExternalReference,
+  type PersistPlaceExternalReferenceInput,
+} from "./place-external-reference-repository";
+export {
+  PlacePromotionServiceError,
+  promoteExternalPlaceCandidate,
+  type PromoteExternalPlaceCandidateInput,
+  type PromoteExternalPlaceCandidateResult,
+} from "./place-promotion-service";
 export { DrizzlePlaceRepository } from "./place-repository";
 export {
   ignorePlanningRisk,

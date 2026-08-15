@@ -156,6 +156,7 @@ describe("reconcileExternalPlaceCandidate", () => {
     const { category: _category, ...unsupportedCandidate } = candidate({
       providerCategory: "pet_store",
     });
+    void _category;
     const result = reconcileExternalPlaceCandidate(unsupportedCandidate, [place()]);
 
     expect(result.status).toBe("rejected");

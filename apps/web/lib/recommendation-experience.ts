@@ -41,6 +41,7 @@ export type RecommendationCardViewModel = Readonly<{
   placeName: string;
   category: PlaceCategory;
   summary: string;
+  priceRange?: Place["priceRange"];
   primaryImage?: PlacePrimaryImage;
   reasons: readonly RecommendationReason[];
   limitations: readonly RecommendationLimitation[];
@@ -61,6 +62,10 @@ export type RecommendationExperienceViewModel = Readonly<{
   rejectedCount: number;
   invalidatedCount: number;
   hasContextLimitations: boolean;
+}>;
+
+export type RecommendationExperienceOptions = Readonly<{
+  persist?: boolean;
 }>;
 
 const contextLimitationCodes = new Set([
@@ -148,6 +153,7 @@ export function toRecommendationCardViewModel(input: {
     placeName: input.place.name,
     category: input.place.category,
     summary: input.place.summary,
+    ...(input.place.priceRange ? { priceRange: input.place.priceRange } : {}),
     ...(input.place.primaryImage ? { primaryImage: input.place.primaryImage } : {}),
     reasons: input.recommendation.reasons,
     limitations: input.recommendation.limitations,
@@ -166,6 +172,7 @@ export function toRecommendationCardViewModel(input: {
 export async function loadRecommendationExperience(
   tripId: string,
   now = new Date(),
+  options: RecommendationExperienceOptions = {},
 ): Promise<RecommendationExperienceViewModel | null> {
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) return null;
@@ -183,13 +190,18 @@ export async function loadRecommendationExperience(
     };
   }
 
-  const recommendationRepository = new DrizzleRecommendationRepository();
+  const shouldPersist = options.persist ?? true;
+  const recommendationRepository = shouldPersist
+    ? new DrizzleRecommendationRepository()
+    : undefined;
   const [profile, places, savedPlaces, itinerary, initialPersisted] = await Promise.all([
     findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
     listPublishedPlaces(new DrizzlePlaceRepository(), destinationId),
     listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
     new DrizzleItineraryRepository().findByTripId(tripId),
-    recommendationRepository.listByTripId(tripId),
+    recommendationRepository
+      ? recommendationRepository.listByTripId(tripId)
+      : Promise.resolve<readonly Recommendation[]>([]),
   ]);
 
   const currentContext = {
@@ -203,6 +215,7 @@ export async function loadRecommendationExperience(
 
   for (const recommendation of initialPersisted) {
     if (
+      shouldPersist &&
       (recommendation.status === "generated" || recommendation.status === "presented") &&
       !hasCompatibleContext(recommendation, currentContext)
     ) {
@@ -211,7 +224,7 @@ export async function loadRecommendationExperience(
         "decision-context-version-changed",
         now,
       );
-      await recommendationRepository.save(invalidated);
+      await recommendationRepository!.save(invalidated);
       persisted.push(invalidated);
       invalidatedCount += 1;
     } else {
@@ -245,11 +258,15 @@ export async function loadRecommendationExperience(
     let recommendation = latestEquivalentRecommendation(persisted, result.recommendation);
 
     if (!recommendation) {
-      recommendation = await recommendationRepository.saveGenerated(result.recommendation);
-      persisted.push(recommendation);
+      if (recommendationRepository) {
+        recommendation = await recommendationRepository.saveGenerated(result.recommendation);
+        persisted.push(recommendation);
+      } else {
+        recommendation = result.recommendation;
+      }
     }
 
-    if (recommendation.status === "generated") {
+    if (recommendation.status === "generated" && recommendationRepository) {
       recommendation = presentRecommendation(recommendation, now);
       await recommendationRepository.save(recommendation);
       const index = persisted.findIndex((candidate) => candidate.id === recommendation?.id);

@@ -55,7 +55,9 @@ test("cria Trip autenticada e impede leitura por outro User", async ({ page }, t
   await expect(page.getByText(tripName, { exact: true })).toHaveCount(0);
 });
 
-test("owner cancela ou confirma a exclusão definitiva da própria Trip", async ({ page }, testInfo) => {
+test("owner cancela ou confirma a exclusão definitiva da própria Trip", async ({
+  page,
+}, testInfo) => {
   const suffix = `${testInfo.project.name}-${Date.now()}`;
   const email = `rb-inc-138-delete-${suffix}@example.com`;
   const password = "routebook-e2e-password";

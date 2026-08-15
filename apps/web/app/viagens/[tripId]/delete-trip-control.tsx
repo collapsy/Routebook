@@ -36,13 +36,21 @@ export function DeleteTripControl({ tripId, tripName }: { tripId: string; tripNa
   }
 
   return (
-    <div className="trip-delete-confirmation" role="group" aria-label="Confirmar exclusão da viagem">
+    <div
+      className="trip-delete-confirmation"
+      role="group"
+      aria-label="Confirmar exclusão da viagem"
+    >
       <p>
-        <strong>Excluir “{tripName}”?</strong> Esta ação remove definitivamente a viagem, seu roteiro,
-        lugares salvos, recomendações, conflitos e propostas associados.
+        <strong>Excluir “{tripName}”?</strong> Esta ação remove definitivamente a viagem, seu
+        roteiro, lugares salvos, recomendações, conflitos e propostas associados.
       </p>
       <div className="trip-delete-actions">
-        <button className="product-secondary-action" onClick={() => setConfirming(false)} type="button">
+        <button
+          className="product-secondary-action"
+          onClick={() => setConfirming(false)}
+          type="button"
+        >
           Cancelar
         </button>
         <form action={formAction}>

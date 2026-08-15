@@ -6,6 +6,11 @@ on:
       - ".github/workflows/overture-place-discovery.yml"
       - "scripts/normalize-overture-places.mjs"
       - "scripts/normalize-overture-places.test.mjs"
+      - "apps/web/lib/overture-place-search.ts"
+      - "apps/web/lib/overture-place-search.test.ts"
+      - "apps/web/package.json"
+      - "modules/place-catalog/src/external-place.ts"
+      - "pnpm-lock.yaml"
   workflow_dispatch:
   schedule:
     - cron: "17 8 20 * *"
@@ -108,6 +113,17 @@ jobs:
         with:
           node-version-file: .node-version
           package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install JavaScript dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Smoke live PMTiles adapter used by product
+        env:
+          ROUTEBOOK_LIVE_OVERTURE: "1"
+        run: pnpm --filter @routebook/web exec vitest run lib/overture-place-search.test.ts
 
       - name: Normalize governed candidates
         run: |

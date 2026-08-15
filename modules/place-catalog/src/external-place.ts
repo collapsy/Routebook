@@ -15,6 +15,7 @@ export type ExternalPlaceCandidate = Readonly<{
   latitude: number;
   longitude: number;
   providerCategory: string;
+  providerCategoryHierarchy?: readonly string[];
   category?: PlaceCategory;
   addressLabel?: string;
   sourceUrl?: string;
@@ -47,9 +48,29 @@ export interface PlaceSearchPort {
   search(query: PlaceSearchQuery): Promise<readonly ExternalPlaceCandidate[]>;
 }
 
+export type ExternalPlaceImageCachePolicy = "download_allowed" | "temporary_only" | "unknown";
+
+export type ExternalPlaceImageCandidate = Readonly<{
+  provider: string;
+  externalPlaceId: string;
+  sourceUrl: string;
+  sourceName: string;
+  license: string;
+  attribution?: string;
+  collectedAt: Date;
+  cachePolicy: ExternalPlaceImageCachePolicy;
+}>;
+
+export interface PlaceImagePort {
+  findCandidates(
+    place: Readonly<{ name: string; latitude: number; longitude: number; externalId?: string }>,
+  ): Promise<readonly ExternalPlaceImageCandidate[]>;
+}
+
 const OVERTURE_CATEGORY_MAP: Readonly<Record<string, PlaceCategory>> = Object.freeze({
   beach: "beach",
   restaurant: "gastronomy",
+  casual_eatery: "gastronomy",
   cafe: "gastronomy",
   coffee_shop: "gastronomy",
   bakery: "gastronomy",
@@ -61,11 +82,13 @@ const OVERTURE_CATEGORY_MAP: Readonly<Record<string, PlaceCategory>> = Object.fr
   bar: "nightlife",
   pub: "nightlife",
   night_club: "nightlife",
+  nightclub: "nightlife",
   cocktail_bar: "nightlife",
   music_venue: "nightlife",
   park: "nature",
   nature_reserve: "nature",
   scenic_viewpoint: "nature",
+  viewpoint: "nature",
   tourist_attraction: "nature",
   lagoon: "nature",
   waterfall: "nature",
@@ -73,8 +96,15 @@ const OVERTURE_CATEGORY_MAP: Readonly<Record<string, PlaceCategory>> = Object.fr
   hiking_area: "nature",
 });
 
-export function mapOverturePlaceCategory(category: string): PlaceCategory | undefined {
-  return OVERTURE_CATEGORY_MAP[category.trim().toLowerCase()];
+export function mapOverturePlaceCategory(
+  category: string,
+  hierarchy: readonly string[] = [],
+): PlaceCategory | undefined {
+  for (const value of [category, ...hierarchy].map((item) => item.trim().toLowerCase()).reverse()) {
+    const mapped = OVERTURE_CATEGORY_MAP[value];
+    if (mapped) return mapped;
+  }
+  return undefined;
 }
 
 export function validatePlaceSearchQuery(query: PlaceSearchQuery): void {
@@ -89,19 +119,38 @@ export function validatePlaceSearchQuery(query: PlaceSearchQuery): void {
   ) {
     throw new Error("O centro geográfico da busca externa é inválido.");
   }
-  if (!Number.isFinite(query.radiusMeters) || query.radiusMeters <= 0 || query.radiusMeters > 50_000) {
+  if (
+    !Number.isFinite(query.radiusMeters) ||
+    query.radiusMeters <= 0 ||
+    query.radiusMeters > 50_000
+  ) {
     throw new Error("O raio da busca externa deve estar entre 1 e 50000 metros.");
   }
-  if (query.limit !== undefined && (!Number.isInteger(query.limit) || query.limit < 1 || query.limit > 200)) {
+  if (
+    query.limit !== undefined &&
+    (!Number.isInteger(query.limit) || query.limit < 1 || query.limit > 200)
+  ) {
     throw new Error("O limite da busca externa deve estar entre 1 e 200.");
   }
 }
 
+function requireHttpsUrl(value: string, message: string): void {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(message);
+  }
+  if (url.protocol !== "https:") throw new Error(message);
+}
+
 export function validateExternalPlaceCandidate(candidate: ExternalPlaceCandidate): void {
   if (!candidate.provider.trim()) throw new Error("O Provider do candidato externo é obrigatório.");
-  if (!candidate.externalId.trim()) throw new Error("O identificador externo do candidato é obrigatório.");
+  if (!candidate.externalId.trim())
+    throw new Error("O identificador externo do candidato é obrigatório.");
   if (candidate.name.trim().length < 2) throw new Error("O nome do candidato externo é inválido.");
-  if (!candidate.providerCategory.trim()) throw new Error("A categoria externa do candidato é obrigatória.");
+  if (!candidate.providerCategory.trim())
+    throw new Error("A categoria externa do candidato é obrigatória.");
   if (!candidate.sourceLicense.trim()) throw new Error("A licença da Fonte externa é obrigatória.");
   if (
     !Number.isFinite(candidate.latitude) ||
@@ -113,18 +162,41 @@ export function validateExternalPlaceCandidate(candidate: ExternalPlaceCandidate
   ) {
     throw new Error("As coordenadas do candidato externo são inválidas.");
   }
-  if (candidate.confidence !== undefined && (candidate.confidence < 0 || candidate.confidence > 1)) {
+  if (
+    candidate.confidence !== undefined &&
+    (candidate.confidence < 0 || candidate.confidence > 1)
+  ) {
     throw new Error("A confiança do candidato externo deve estar entre 0 e 1.");
   }
   if (candidate.sourceUrl) {
-    const source = new URL(candidate.sourceUrl);
-    if (source.protocol !== "https:") {
-      throw new Error("A URL da Fonte externa deve usar HTTPS.");
-    }
+    requireHttpsUrl(candidate.sourceUrl, "A URL da Fonte externa deve usar HTTPS.");
   }
   if (Number.isNaN(candidate.collectedAt.getTime())) {
     throw new Error("O instante de coleta do candidato externo é inválido.");
   }
+}
+
+export function validateExternalPlaceImageCandidate(candidate: ExternalPlaceImageCandidate): void {
+  if (!candidate.provider.trim()) throw new Error("O Provider da imagem externa é obrigatório.");
+  if (!candidate.externalPlaceId.trim())
+    throw new Error("A identidade externa do Place da imagem é obrigatória.");
+  if (!candidate.sourceName.trim()) throw new Error("A Fonte da imagem externa é obrigatória.");
+  if (!candidate.license.trim()) throw new Error("A licença da imagem externa é obrigatória.");
+  requireHttpsUrl(candidate.sourceUrl, "A URL da imagem externa deve usar HTTPS.");
+  if (Number.isNaN(candidate.collectedAt.getTime())) {
+    throw new Error("O instante de coleta da imagem externa é inválido.");
+  }
+}
+
+export function canPromoteExternalImageToControlledAsset(
+  candidate: ExternalPlaceImageCandidate,
+): boolean {
+  try {
+    validateExternalPlaceImageCandidate(candidate);
+  } catch {
+    return false;
+  }
+  return candidate.cachePolicy === "download_allowed";
 }
 
 function normalizeIdentity(value: string): string {
@@ -201,7 +273,8 @@ export function reconcileExternalPlaceCandidate(
       sameName: normalizeIdentity(place.name) === normalizedCandidateName,
       sameAddress:
         Boolean(candidate.addressLabel && place.addressLabel) &&
-        normalizeIdentity(candidate.addressLabel ?? "") === normalizeIdentity(place.addressLabel ?? ""),
+        normalizeIdentity(candidate.addressLabel ?? "") ===
+          normalizeIdentity(place.addressLabel ?? ""),
     }))
     .filter(
       (match) =>

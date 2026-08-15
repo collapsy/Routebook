@@ -14,7 +14,7 @@ export function PlacePrimaryImage({
   priority = false,
 }: {
   placeName: string;
-  primaryImage?: PlacePrimaryImageContract;
+  primaryImage?: PlacePrimaryImageContract | undefined;
   showProvenance?: boolean;
   priority?: boolean;
 }) {

@@ -10,7 +10,12 @@ import {
 
 const generatedAt = new Date("2026-08-15T00:00:00.000Z");
 
-function place(id: string, slug: string, latitude: number, longitude: number): Place {
+function place(
+  id: string,
+  slug: string,
+  latitude: number,
+  longitude: number,
+): Place {
   return {
     id,
     destinationId: "pipa-rn-br",

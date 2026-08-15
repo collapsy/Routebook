@@ -35,9 +35,8 @@ export function releaseReport(
   environment: Readonly<Record<string, string | undefined>> = process.env,
 ): ReleaseReport {
   const configuredSha = environment.VERCEL_GIT_COMMIT_SHA?.trim();
-  const commitSha = configuredSha && gitCommitShaPattern.test(configuredSha)
-    ? configuredSha.toLowerCase()
-    : null;
+  const commitSha =
+    configuredSha && gitCommitShaPattern.test(configuredSha) ? configuredSha.toLowerCase() : null;
 
   return Object.freeze({
     service,

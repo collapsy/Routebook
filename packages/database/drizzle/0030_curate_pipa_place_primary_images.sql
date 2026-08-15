@@ -42,14 +42,6 @@ SET
       'license', 'CC BY-SA 2.0',
       'attribution', 'Helder da Rocha'
     )
-    WHEN '10000000-0000-4000-8000-000000000016'::uuid THEN jsonb_build_object(
-      'assetPath', '/place-images/pipa/praia-de-sibauma.jpg',
-      'altText', 'Vista da Praia de Sibaúma, no município de Tibau do Sul, com litoral e vegetação costeira.',
-      'sourceName', 'Wikimedia Commons',
-      'sourceUrl', 'https://commons.wikimedia.org/wiki/File:Praia_de_Siba%C3%BAma.jpeg',
-      'license', 'CC BY-SA 4.0',
-      'attribution', 'Giovanni L. Zanchet'
-    )
     WHEN '10000000-0000-4000-8000-000000000017'::uuid THEN jsonb_build_object(
       'assetPath', '/place-images/pipa/praia-de-tibau-do-sul.jpg',
       'altText', 'Praia central de Tibau do Sul junto ao encontro com a Lagoa de Guaraíras.',
@@ -76,7 +68,6 @@ WHERE
     '10000000-0000-4000-8000-000000000002'::uuid,
     '10000000-0000-4000-8000-000000000003'::uuid,
     '10000000-0000-4000-8000-000000000007'::uuid,
-    '10000000-0000-4000-8000-000000000016'::uuid,
     '10000000-0000-4000-8000-000000000017'::uuid,
     '10000000-0000-4000-8000-000000000026'::uuid
   );

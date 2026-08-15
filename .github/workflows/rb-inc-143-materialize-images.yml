@@ -1,6 +1,6 @@
 name: RB-INC-143 Materialize Place Images
 
-# Temporary helper for RB-INC-143. Remove before PR readiness. Attempt 3 uses punctuation-normalized author validation.
+# Temporary helper for RB-INC-143. Remove before PR readiness. Attempt 4 includes the current materializer head.
 on:
   push:
     branches:

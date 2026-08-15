@@ -141,6 +141,7 @@ describe("promoteExternalPlaceCandidate", () => {
       externalId: "unsupported-gers",
       providerCategory: "pet_store",
     });
+    void _category;
 
     await expect(
       promoteExternalPlaceCandidate({

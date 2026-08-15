@@ -96,9 +96,7 @@ function isValidIsoDate(value: string): boolean {
 }
 
 function hasFreePeriodContext(day: ItineraryProposalGenerationDay): boolean {
-  return (
-    day.protectedFreePeriodCount !== undefined && day.flexibleFreePeriodCount !== undefined
-  );
+  return day.protectedFreePeriodCount !== undefined && day.flexibleFreePeriodCount !== undefined;
 }
 
 function normalizeDay(day: ItineraryProposalGenerationDay): ItineraryProposalGenerationDay {

@@ -117,12 +117,14 @@ test("mostra decisão contextual sem aplicar uma escolha", async ({ page }) => {
   await expect(contextualList).toBeVisible();
   await expect(contextualList.getByRole("listitem")).toHaveCount(3);
   await expect(contextualList.getByRole("img").first()).toBeVisible();
-  await expect(page.getByText(/Faixa de preço do catálogo|Faixa de preço: indisponível/)).toBeVisible();
   await expect(
-    page.getByText(/não mede custo real, risco ou impacto de esperar/i),
+    page.getByText(/Faixa de preço do catálogo|Faixa de preço: indisponível/),
   ).toBeVisible();
+  await expect(page.getByText(/não mede custo real, risco ou impacto de esperar/i)).toBeVisible();
   await expect(page.getByRole("link", { name: "Ver todas as sugestões" })).toBeVisible();
-  await expect(contextualList.getByRole("link", { name: /Comparar detalhes/ }).first()).toBeVisible();
+  await expect(
+    contextualList.getByRole("link", { name: /Comparar detalhes/ }).first(),
+  ).toBeVisible();
 
   await page.reload();
   await expect(

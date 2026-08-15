@@ -54,7 +54,9 @@ function finiteNumber(value) {
 }
 
 function sourceDatasetKey(value) {
-  return text(value).toLowerCase().replace(/[\s_]+/g, "-");
+  return text(value)
+    .toLowerCase()
+    .replace(/[\s_]+/g, "-");
 }
 
 export function resolveOvertureSourceLicense(source) {
@@ -174,7 +176,8 @@ export function normalizeOvertureFeature(
   const sourceLicense = resolveOvertureSourceLicense(source);
   if (!sourceLicense) return rejection("missing-source-license");
 
-  const collected = collectedAt instanceof Date ? collectedAt : new Date(collectedAt ?? Date.now());
+  const collected =
+    collectedAt instanceof Date ? collectedAt : new Date(collectedAt ?? Date.now());
   if (Number.isNaN(collected.getTime())) return rejection("invalid-collected-at");
 
   const address = addressLabel(properties);
@@ -249,7 +252,10 @@ export function normalizeOvertureFeatureCollection(
     limit,
     inputFeatureCount: features.length,
     candidateCount: candidates.length,
-    rejectedCount: Object.values(rejectedByReason).reduce((total, count) => total + count, 0),
+    rejectedCount: Object.values(rejectedByReason).reduce(
+      (total, count) => total + count,
+      0,
+    ),
     rejectedByReason,
     candidates,
   };

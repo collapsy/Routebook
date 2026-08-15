@@ -24,6 +24,10 @@ export function findTripById(repository: TripRepository, tripId: string): Promis
   return repository.findById(tripId);
 }
 
+export function deletePersistedTrip(repository: TripRepository, tripId: string): Promise<boolean> {
+  return repository.deleteById(tripId);
+}
+
 export async function updateAndPersistTripAccommodation(
   repository: TripRepository,
   tripId: string,

@@ -50,57 +50,58 @@ ai_context:
 
 ## 1. Resultado vertical
 
-Na visão principal de uma Viagem, o usuário consegue encontrar rapidamente uma pequena seleção de Places recomendados a partir do contexto já informado, compreender por que foram sugeridos e seguir para uma ação explícita.
+Na visão principal de uma Viagem, o usuário consegue encontrar rapidamente uma pequena seleção explicável de Places relevantes ao contexto conhecido, entender por que aparecem e seguir para um próximo passo explícito sem que o RouteBook execute uma escolha.
 
-A superfície deve responder à pergunta de produto:
+A superfície deve responder, com honestidade factual, à pergunta:
 
 > **O que vale a pena considerar a partir do que eu já informei sobre esta Viagem?**
 
-Ela não pretende responder ainda a disponibilidade em tempo real, horário de funcionamento, tempo de rota ou planejamento completo do dia.
+Quando custos, riscos ou perdas de oportunidade não forem suportados por dados governados, a interface deve declarar que não estão medidos, em vez de inferi-los.
 
 ## 2. Problema
 
-O RouteBook já possui contexto da Viagem, Hospedagem, catálogo de Places, proximidade geodésica, Recommendations determinísticas, imagens e descoberta externa. Essas capacidades estão funcionando, mas distribuídas entre telas diferentes.
+O RouteBook já possui contexto da Viagem, Hospedagem, catálogo de Places, proximidade geodésica, Recommendations determinísticas, imagens e descoberta externa. Essas capacidades funcionam, mas estão distribuídas entre telas diferentes.
 
-A visão principal atualmente apresenta a estrutura da Viagem e direciona para “Explorar lugares” ou “Ver sugestões contextualizadas”. Isso faz o produto depender de navegação manual para chegar ao apoio à decisão.
-
-O incremento conecta as capacidades existentes em uma primeira superfície contextual, sem criar um novo conceito de domínio.
+A visão principal ainda depende de navegação manual para chegar ao apoio à decisão. Este incremento cria uma primeira superfície contextual sem criar um novo conceito de domínio.
 
 ## 3. Princípios
 
 - contexto antes de volume;
 - Recommendation continua sendo orientação, não Decision;
+- a visão é não executora: não salva, não planeja, não reserva, não compra, não envia mensagens, não chama fornecedores e não gera efeitos externos;
 - o usuário permanece no controle;
-- distância é estimativa quando não representa rota;
 - informação ausente permanece ausente;
+- distância geodésica é estimativa em linha reta, nunca rota ou duração;
 - imagem melhora reconhecimento, mas não altera ranking ou Reasons;
-- visualizar a Viagem não deve aplicar mudanças canônicas silenciosas;
-- catálogo e descoberta externa continuam disponíveis como alternativas.
+- contexto insuficiente produz neutralidade e indica os dados necessários;
+- custo, risco e perda de oportunidade só aparecem quando sustentados por dados governados.
 
 ## 4. Escopo
 
 - adicionar uma seção contextual à visão principal da Viagem;
-- carregar Recommendations existentes sem duplicar a lógica de geração;
-- limitar a apresentação a um conjunto pequeno, adequado à superfície de entrada;
-- apresentar nome, categoria, resumo, imagem/fallback, confiança, Reasons relevantes, limitações e distância geodésica quando disponível;
-- fornecer link para detalhes do Place;
-- fornecer entrada para a experiência completa de Recommendations;
+- reutilizar Recommendations existentes sem duplicar a lógica de geração;
+- limitar a apresentação a três opções de entrada;
+- apresentar nome, categoria, resumo, imagem/fallback, confiança, Reasons, limitações e distância quando disponível;
+- apresentar a faixa de preço do catálogo somente quando existir, deixando explícito que não é custo real;
+- apresentar um próximo passo possível de navegação, sem chamá-lo de Decision nem executar ação;
+- explicitar custos reais, riscos e impacto de esperar como “não medidos/disponíveis” quando não houver evidência governada;
+- oferecer links para detalhes e Recommendations completas;
 - manter catálogo, lugares salvos e descoberta externa acessíveis;
-- apresentar estado vazio quando não houver contexto suficiente ou Recommendations disponíveis;
-- evitar persistência/mutação adicional causada apenas pela visualização da seção contextual;
-- cobrir a nova jornada por testes de unidade e E2E;
-- atualizar o Context Pack e o Registry.
+- apresentar estado neutro quando não houver contexto suficiente;
+- evitar persistência/mutação causada apenas pela visualização da seção;
+- cobrir a jornada por testes unitários e E2E;
+- atualizar Context Pack e Registry.
 
 ## 5. Fora de escopo
 
-- novo agregado ou entidade de domínio;
-- novo estado persistido de “snapshot” ou “decision view”;
+- novo agregado, entidade ou estado persistido de “Decision View”;
 - migration ou alteração de schema;
-- LLM, agente ou Provider novo;
+- LLM, agente ou Provider novo neste incremento;
 - mudança no algoritmo canônico de ranking de Recommendation;
-- estimativa de tempo de rota, trânsito ou horário de funcionamento;
+- inferência de custo real, avaliação pública, disponibilidade, horário, trânsito, rota ou duração;
+- cálculo de risco ou perda de oportunidade sem dados governados;
 - publicação automática de candidatos externos;
-- mudança de `primaryImage` ou nova curadoria de imagens;
+- nova curadoria de imagens;
 - concluir a validação humana do M8;
 - integração na `main`.
 
@@ -108,13 +109,14 @@ O incremento conecta as capacidades existentes em uma primeira superfície conte
 
 A implementação deve reutilizar:
 
-- `loadRecommendationExperience` e `RecommendationCardViewModel` como fonte da experiência de Recommendation;
+- `loadRecommendationExperience` e `RecommendationCardViewModel`;
 - `PlacePrimaryImage` para imagem/fallback;
 - `formatGeodesicDistance` para distância declaradamente em linha reta;
-- Recommendation Reasons, Confidence e Limitations existentes;
+- Reasons, Confidence e Limitations existentes;
+- `Place.priceRange` somente como faixa de preço do catálogo;
 - navegação existente para detalhe e Recommendations.
 
-Quando a visão principal precisar apenas consultar Recommendations, a camada de experiência deve permitir um modo de leitura que não gere novos efeitos persistentes.
+Quando a visão principal apenas consultar Recommendations, a camada de experiência deve operar em modo de leitura sem persistir novas Recommendations.
 
 ## 7. Caminhos permitidos
 
@@ -127,35 +129,27 @@ apps/web/e2e/recommendations-experience.spec.ts
 docs/implementation/increments/rb-inc-144-contextual-decision-view.md
 docs/implementation/context-packs/rb-inc-144-contextual-decision-view.md
 docs/registry.md
-.github/workflows/rb-inc-144-registry-helper.yml
 ```
-
-O workflow listado acima é um helper temporário exclusivamente mecânico para registrar os dois novos documentos no Registry porque o conector de edição disponível não oferece operação de append. Ele deve:
-
-- executar somente na branch `codex/rb-inc-144-contextual-decision-view`;
-- inserir somente `RB-INC-144` e `RB-CTX-144`;
-- não alterar outros documentos;
-- usar somente `GITHUB_TOKEN` implícito do Actions;
-- ser removido antes da PR final.
 
 Qualquer caminho adicional exige justificativa no Context Pack e no PR.
 
 ## 8. Critérios de aceite
 
 - [ ] A visão da Viagem possui uma entrada primária de decisão contextual.
-- [ ] A seção contextual mostra uma seleção limitada de Recommendations existentes.
+- [ ] A seção mostra no máximo três Recommendations existentes.
 - [ ] A seleção não cria um segundo algoritmo de ranking na UI.
-- [ ] Reasons, Confidence e Limitations permanecem semanticamente idênticos aos existentes.
+- [ ] Reasons, Confidence e Limitations permanecem semanticamente idênticos.
 - [ ] Imagem local ou fallback é apresentada quando aplicável.
+- [ ] Faixa de preço do catálogo, quando existente, é distinguida de custo real.
 - [ ] Distância é identificada como linha reta/estimativa e nunca como tempo de deslocamento.
-- [ ] O usuário consegue abrir o detalhe do Place.
-- [ ] O usuário consegue abrir a experiência completa de Recommendations.
-- [ ] Nenhuma ação de salvar ou planejar ocorre apenas por visualizar a seção.
-- [ ] Contexto insuficiente produz uma explicação clara e acionável.
+- [ ] A interface apresenta um próximo passo possível sem executar uma escolha.
+- [ ] Custos, riscos e perdas de oportunidade só são exibidos quando factualmente suportados; caso contrário, a indisponibilidade é declarada.
+- [ ] Contexto insuficiente mantém a interface neutra e indica dados que podem ser configurados.
+- [ ] O usuário consegue abrir o detalhe do Place e a experiência completa de Recommendations.
+- [ ] Visualizar a seção não cria novas Recommendations persistidas, não salva lugares e não altera o Roteiro.
 - [ ] Catálogo e descoberta externa continuam acessíveis.
 - [ ] Nenhuma migration, secret, Provider novo ou alteração de Production é necessária.
-- [ ] Unit/integration tests aplicáveis passam.
-- [ ] Playwright/E2E cobre a jornada principal em desktop e mobile quando a infraestrutura existente permitir.
+- [ ] Unit/integration tests aplicáveis e E2E passam.
 - [ ] Documentation Validation e Engineering Validation passam no SHA final.
 
 ## 9. Estratégia de testes
@@ -163,37 +157,39 @@ Qualquer caminho adicional exige justificativa no Context Pack e no PR.
 ### Recommendation experience
 
 - modo somente leitura não persiste novas Recommendations;
-- modo existente continua preservando o comportamento da tela completa;
-- view model mantém Reasons, Confidence, Limitations, imagem e distância;
-- ausência de contexto continua explícita.
+- modo interativo existente continua preservando o comportamento da tela completa;
+- view model mantém Reasons, Confidence, Limitations, imagem, faixa de preço e distância;
+- ausência de contexto permanece explícita.
 
 ### Interface
 
-- seção contextual aparece com Recommendations;
-- máximo definido de cards é respeitado;
+- seção contextual aparece com seleção limitada;
+- preço é apresentado somente como faixa do catálogo;
+- custos/riscos/espera não medidos não são apresentados como fatos;
 - links de detalhe e Recommendations funcionam;
 - imagem e fallback não quebram o layout;
-- estado vazio é acessível.
+- estado neutro é acessível.
 
 ### E2E
 
 - abrir uma Viagem com contexto e encontrar a seção contextual;
-- verificar que um Place recomendado pode abrir seus detalhes;
-- navegar para Recommendations completas;
-- verificar estado de contexto insuficiente;
-- validar desktop e viewport móvel sem depender de texto frágil ou posição visual.
+- verificar seleção limitada, imagem/fallback, preço e distância;
+- navegar para detalhe e Recommendations completas;
+- confirmar que salvar lugares e atividades continuam vazios após somente visualizar a seção;
+- validar estado de contexto insuficiente;
+- validar desktop e viewport móvel.
 
 ## 10. Riscos e mitigação
 
-**Duplicação de lógica de Recommendation:** reutilizar `loadRecommendationExperience` e view models existentes.
+**Duplicação de lógica:** reutilizar `loadRecommendationExperience` e view models.
 
-**Efeito colateral ao visitar a visão principal:** introduzir modo de leitura explicitamente não persistente para esta superfície.
+**Efeito colateral na visão principal:** modo de leitura explicitamente não persistente.
 
-**Excesso de conteúdo:** limitar a seleção e manter a tela de Recommendations como experiência completa.
+**Falsa precisão:** separar faixa de preço de custo real e distância de rota/tempo.
 
-**Falsa precisão:** manter a distinção entre distância geodésica e rota/tempo.
+**Recomendação opaca sob contexto insuficiente:** estado neutro e indicação de dados faltantes.
 
-**Alteração de semântica:** nenhuma alteração de score, Reasons, Confidence ou regra de domínio.
+**Decisão executada por engano:** a superfície oferece apenas navegação para ações existentes; não executa ações.
 
 ## 11. Governança
 
@@ -201,11 +197,10 @@ Qualquer caminho adicional exige justificativa no Context Pack e no PR.
 - sem Production;
 - sem novo Provider;
 - sem novo conceito de domínio;
-- sem alteração de `main` direta;
+- sem alteração direta de `main`;
 - PR somente após gates aplicáveis passarem;
-- merge somente mediante autorização humana explícita;
-- helper temporário de Registry deve ser removido antes da PR final.
+- merge somente mediante autorização humana explícita.
 
 ## 12. Definition of Done
 
-O incremento somente será considerado concluído quando os critérios de aceite forem satisfeitos, a documentação estiver registrada, os testes aplicáveis tiverem evidência real, o helper temporário tiver sido removido e a PR estiver pronta para revisão humana. O merge permanece fora da execução autônoma.
+O incremento somente será considerado concluído quando os critérios de aceite forem satisfeitos, a documentação estiver registrada, os testes aplicáveis tiverem evidência real e a PR estiver pronta para revisão humana. O merge permanece fora da execução autônoma.

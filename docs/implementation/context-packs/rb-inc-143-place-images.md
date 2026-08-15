@@ -98,6 +98,8 @@ Curar inicialmente:
 | Lagoa de Guaraíras | título/descrição e coordenadas explicitam a lagoa em Tibau do Sul |
 | Praia de Tibau do Sul | título/descrição e coordenadas explicitam a praia central de Tibau do Sul |
 
+Praia de Sibaúma permanece em fallback porque a API oficial do Commons não forneceu `Artist` auditável para o arquivo avaliado, apesar da licença reutilizável.
+
 Não extrapolar cobertura para negócios sem arquivo que represente o estabelecimento específico.
 
 ## 8. Manifesto e assets
@@ -130,17 +132,23 @@ A representação baixada deve ter largura alvo de até 1280 px quando a API for
 
 ## 10. Materialização binária nesta sessão
 
-O conector GitHub disponível escreve texto, não binário. É permitido um workflow temporário restrito à branch do incremento para executar o materializador e commitar exclusivamente:
+O conector GitHub disponível escreve texto, não binário. É permitido um workflow temporário restrito à branch do incremento para executar o materializador e commitar:
 
 - `apps/web/public/place-images/pipa/**`;
 - metadata de integridade do manifesto, se aplicável.
+
+Depois de uma materialização bem-sucedida, o mesmo helper pode executar uma única finalização determinística:
+
+- inserir somente `RB-INC-143` e `RB-CTX-143` em `docs/registry.md`;
+- remover `.github/workflows/rb-inc-143-materialize-images.yml` no mesmo commit.
 
 Regras do helper temporário:
 
 - branch exata `codex/rb-inc-143-place-images`;
 - nenhuma secret;
-- origem fixa Commons;
+- origem fixa Commons durante materialização;
 - commit somente quando houver diff esperado;
+- finalização do Registry idempotente e limitada às duas entradas novas;
 - remover o workflow antes da PR final;
 - workflow final do projeto continua `contents: read`.
 

@@ -17,9 +17,12 @@ export const initialDeleteTripActionState: DeleteTripActionState = { status: "id
 
 export async function deleteTripAction(
   tripId: string,
-  _state: DeleteTripActionState,
-  _formData: FormData,
+  state: DeleteTripActionState,
+  formData: FormData,
 ): Promise<DeleteTripActionState> {
+  void state;
+  void formData;
+
   const access = await resolveTripRouteAccess({ tripId, action: "trip:delete" });
 
   if (access.status !== "authorized") {

@@ -53,7 +53,9 @@ function rowForReconciliation(row: PlaceRow): Place {
     latitude: row.latitude,
     longitude: row.longitude,
     ...(row.addressLabel ? { addressLabel: row.addressLabel } : {}),
-    ...(row.priceRange ? { priceRange: row.priceRange as NonNullable<Place["priceRange"]> } : {}),
+    ...(row.priceRange
+      ? { priceRange: row.priceRange as NonNullable<Place["priceRange"]> }
+      : {}),
     publicationStatus: row.publicationStatus as Place["publicationStatus"],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -77,7 +79,10 @@ function externalIdentitySuffix(candidate: ExternalPlaceCandidate): string {
     .slice(0, 8);
 }
 
-function promotionSlug(candidate: ExternalPlaceCandidate, existingSlugs: ReadonlySet<string>): string {
+function promotionSlug(
+  candidate: ExternalPlaceCandidate,
+  existingSlugs: ReadonlySet<string>,
+): string {
   const base = slugBase(candidate.name) || "lugar";
   if (!existingSlugs.has(base)) return base;
   return `${base.slice(0, 150)}-${externalIdentitySuffix(candidate)}`;
@@ -188,7 +193,9 @@ export async function promoteExternalPlaceCandidate(
         category,
         latitude: input.candidate.latitude,
         longitude: input.candidate.longitude,
-        ...(input.candidate.addressLabel ? { addressLabel: input.candidate.addressLabel } : {}),
+        ...(input.candidate.addressLabel
+          ? { addressLabel: input.candidate.addressLabel }
+          : {}),
         publicationStatus: "draft",
       },
       promotedAt,

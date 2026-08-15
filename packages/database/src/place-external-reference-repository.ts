@@ -27,12 +27,11 @@ export type PersistedPlaceExternalReference = PlaceExternalReference &
     updatedAt: Date;
   }>;
 
-type PlaceExternalReferenceDatabase = Pick<
-  ReturnType<typeof getDatabase>,
-  "select" | "insert"
->;
+type PlaceExternalReferenceDatabase = Pick<ReturnType<typeof getDatabase>, "select" | "insert">;
 
-function mapReference(row: typeof placeExternalReferences.$inferSelect): PersistedPlaceExternalReference {
+function mapReference(
+  row: typeof placeExternalReferences.$inferSelect,
+): PersistedPlaceExternalReference {
   return {
     id: row.id,
     placeId: row.placeId,

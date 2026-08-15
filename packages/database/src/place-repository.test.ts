@@ -11,6 +11,42 @@ const database = getDatabase();
 const destinationId = `test-${randomUUID()}`;
 const now = new Date("2026-08-11T00:00:00Z");
 
+const baselinePipaSlugs = [
+  "praia-do-amor",
+  "praia-do-centro",
+  "praia-do-madeiro",
+  "baia-dos-golfinhos",
+  "chapadao-de-pipa",
+  "santuario-ecologico-de-pipa",
+  "centro-gastronomico-de-pipa",
+  "camarao-na-fazenda-pipa",
+  "atelier-de-massas",
+  "o-tal-do-escondidinho",
+  "avenida-baia-dos-golfinhos-noite",
+  "mirante-sunset-bar",
+  "agora-club",
+] as const;
+
+const expandedPipaSlugs = [
+  "praia-das-minas",
+  "praia-de-cacimbinhas",
+  "praia-de-sibauma",
+  "praia-de-tibau-do-sul",
+  "caxanga-restaurante",
+  "macoco-cozinha-artesanal",
+  "aprecie-restaurante",
+  "el-farolito",
+  "moka-cafes-especiais",
+  "caju-cafeteria",
+  "sorveteria-real-de-14",
+  "pipa-beach-club",
+  "lagoa-de-guarairas",
+  "tribus-in-pipa",
+  "bakana",
+  "birring-in-paradise",
+  "umi-bar",
+] as const;
+
 beforeAll(async () => {
   await database.insert(places).values([
     {
@@ -59,7 +95,7 @@ describe("DrizzlePlaceRepository", () => {
     );
   });
 
-  it("carrega o catálogo curado de Pipa com cobertura nas quatro categorias", async () => {
+  it("carrega o catálogo curado expandido de Pipa com cobertura nas quatro categorias", async () => {
     const result = await new DrizzlePlaceRepository().listPublished({
       destinationId: "pipa-rn-br",
     });
@@ -69,31 +105,15 @@ describe("DrizzlePlaceRepository", () => {
       return counts;
     }, {});
 
-    expect(result).toHaveLength(13);
+    expect(result).toHaveLength(30);
     expect(new Set(slugs).size).toBe(result.length);
     expect(countsByCategory).toEqual({
-      beach: 3,
-      gastronomy: 4,
-      nature: 3,
-      nightlife: 3,
+      beach: 7,
+      gastronomy: 12,
+      nature: 4,
+      nightlife: 7,
     });
-    expect(slugs).toEqual(
-      expect.arrayContaining([
-        "praia-do-amor",
-        "praia-do-centro",
-        "praia-do-madeiro",
-        "baia-dos-golfinhos",
-        "chapadao-de-pipa",
-        "santuario-ecologico-de-pipa",
-        "centro-gastronomico-de-pipa",
-        "camarao-na-fazenda-pipa",
-        "atelier-de-massas",
-        "o-tal-do-escondidinho",
-        "avenida-baia-dos-golfinhos-noite",
-        "mirante-sunset-bar",
-        "agora-club",
-      ]),
-    );
+    expect(slugs).toEqual(expect.arrayContaining([...baselinePipaSlugs, ...expandedPipaSlugs]));
 
     for (const place of result) {
       expect(place.publicationStatus).toBe("published");

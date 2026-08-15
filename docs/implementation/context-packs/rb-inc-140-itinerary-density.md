@@ -94,6 +94,7 @@ modules/proposal-management/src/deterministic-itinerary-proposal-generator.ts
 modules/proposal-management/src/deterministic-itinerary-proposal-generator.test.ts
 modules/proposal-management/src/itinerary-proposal-generation-input-assembler.ts
 modules/proposal-management/src/itinerary-proposal-generation-input-assembler.test.ts
+modules/proposal-management/src/itinerary-proposal-generation-service.test.ts
 packages/database/src/authoritative-itinerary-proposal-generation-context.ts
 packages/database/src/authoritative-itinerary-proposal-generation-context-postgres.test.ts
 apps/web/e2e/itinerary-proposal-generation.spec.ts
@@ -111,6 +112,7 @@ docs/registry.md
 - assembler deriva contagens a partir do snapshot autoritativo;
 - adapter aplica política v2 somente quando o contexto estiver completo;
 - bump de generationVersion para `2`;
+- regressão do serviço de lifecycle acompanha a versão do adapter real;
 - critérios/justificativas/limitations tornam a política auditável.
 
 ### Data
@@ -134,6 +136,7 @@ docs/registry.md
 - insufficient candidates;
 - unknown free-period fallback;
 - assembler counts e invalid mode;
+- lifecycle do serviço alinhado à generationVersion v2;
 - PostgreSQL snapshot;
 - E2E version/isolation;
 - suíte integral do repositório.

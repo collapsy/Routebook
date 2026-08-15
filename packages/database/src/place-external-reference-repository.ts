@@ -32,9 +32,7 @@ type PlaceExternalReferenceDatabase = Pick<
   "select" | "insert"
 >;
 
-function mapReference(
-  row: typeof placeExternalReferences.$inferSelect,
-): PersistedPlaceExternalReference {
+function mapReference(row: typeof placeExternalReferences.$inferSelect): PersistedPlaceExternalReference {
   return {
     id: row.id,
     placeId: row.placeId,
@@ -69,7 +67,9 @@ export class DrizzlePlaceExternalReferenceRepository {
     return row ? mapReference(row) : null;
   }
 
-  async create(input: PersistPlaceExternalReferenceInput): Promise<PersistedPlaceExternalReference> {
+  async create(
+    input: PersistPlaceExternalReferenceInput,
+  ): Promise<PersistedPlaceExternalReference> {
     const now = input.now ?? new Date();
     const [row] = await this.database
       .insert(placeExternalReferences)

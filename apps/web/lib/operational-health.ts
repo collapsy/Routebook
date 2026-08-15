@@ -1,4 +1,5 @@
 const service = "routebook-web";
+const gitCommitShaPattern = /^[0-9a-f]{40}$/i;
 
 export const readinessTimeoutMilliseconds = 2_000;
 
@@ -17,10 +18,32 @@ export type ReadinessReport = Readonly<{
   }>;
 }>;
 
-export type OperationalHealthReport = LivenessReport | ReadinessReport;
+export type ReleaseReport = Readonly<{
+  service: typeof service;
+  signal: "release";
+  status: "identified" | "unknown";
+  commitSha: string | null;
+}>;
+
+export type OperationalHealthReport = LivenessReport | ReadinessReport | ReleaseReport;
 
 export function livenessReport(): LivenessReport {
   return Object.freeze({ service, signal: "liveness", status: "ok" });
+}
+
+export function releaseReport(
+  environment: Readonly<Record<string, string | undefined>> = process.env,
+): ReleaseReport {
+  const configuredSha = environment.VERCEL_GIT_COMMIT_SHA?.trim();
+  const commitSha =
+    configuredSha && gitCommitShaPattern.test(configuredSha) ? configuredSha.toLowerCase() : null;
+
+  return Object.freeze({
+    service,
+    signal: "release",
+    status: commitSha ? "identified" : "unknown",
+    commitSha,
+  });
 }
 
 export async function readinessReport(

@@ -30,6 +30,7 @@ concurrency:
 
 env:
   RELEASE_BRANCH: codex/production-release
+  PRODUCTION_BASE_URL: https://routebook-one.vercel.app
 
 jobs:
   resolve-candidate:
@@ -153,7 +154,7 @@ jobs:
       - resolve-candidate
       - validate-candidate
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     environment: Production
     env:
       DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL_DIRECT }}
@@ -303,3 +304,36 @@ jobs:
           rm -f \
             "${RUNNER_TEMP}/routebook-production-release" \
             "${RUNNER_TEMP}/routebook-github-known-hosts"
+
+      - name: Verify immutable candidate is served in Production
+        id: deployment-verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/verify-production-deployment.mjs \
+            --url "${PRODUCTION_BASE_URL}/api/health/release" \
+            --expected-sha "$CANDIDATE_SHA" \
+            --attempts 60 \
+            --interval-ms 10000 \
+            --timeout-ms 5000
+
+      - name: Run Production operational smoke
+        id: operational-smoke
+        run: pnpm smoke:operational "$PRODUCTION_BASE_URL"
+
+      - name: Record Production release evidence
+        if: always()
+        shell: bash
+        env:
+          DEPLOYMENT_OUTCOME: ${{ steps.deployment-verification.outcome }}
+          SMOKE_OUTCOME: ${{ steps.operational-smoke.outcome }}
+        run: |
+          {
+            echo "## Production Release Evidence"
+            echo
+            echo "- Candidate SHA: \`$CANDIDATE_SHA\`"
+            echo "- Release branch: \`$RELEASE_BRANCH\`"
+            echo "- Production domain: \`$PRODUCTION_BASE_URL\`"
+            echo "- Immutable SHA verification: \`$DEPLOYMENT_OUTCOME\`"
+            echo "- Liveness/readiness smoke: \`$SMOKE_OUTCOME\`"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { livenessReport, operationalHealthResponse, readinessReport } from "./operational-health";
+import {
+  livenessReport,
+  operationalHealthResponse,
+  readinessReport,
+  releaseReport,
+} from "./operational-health";
 
 describe("operational health", () => {
   afterEach(() => {
@@ -12,6 +17,32 @@ describe("operational health", () => {
       service: "routebook-web",
       signal: "liveness",
       status: "ok",
+    });
+  });
+
+  it("identifica o release somente com SHA Git válido", () => {
+    expect(
+      releaseReport({ VERCEL_GIT_COMMIT_SHA: "ABCDEF0123456789ABCDEF0123456789ABCDEF01" }),
+    ).toEqual({
+      service: "routebook-web",
+      signal: "release",
+      status: "identified",
+      commitSha: "abcdef0123456789abcdef0123456789abcdef01",
+    });
+  });
+
+  it("não ecoa metadado de release ausente ou inválido", () => {
+    expect(releaseReport({})).toEqual({
+      service: "routebook-web",
+      signal: "release",
+      status: "unknown",
+      commitSha: null,
+    });
+    expect(releaseReport({ VERCEL_GIT_COMMIT_SHA: "not-a-sha-sensitive-value" })).toEqual({
+      service: "routebook-web",
+      signal: "release",
+      status: "unknown",
+      commitSha: null,
     });
   });
 
@@ -52,12 +83,17 @@ describe("operational health", () => {
 
   it("mapeia status HTTP e proíbe cache", async () => {
     const liveResponse = operationalHealthResponse(livenessReport());
+    const releaseResponse = operationalHealthResponse(
+      releaseReport({ VERCEL_GIT_COMMIT_SHA: "abcdef0123456789abcdef0123456789abcdef01" }),
+    );
     const unavailableResponse = operationalHealthResponse(
       await readinessReport(() => Promise.reject(new Error("sensitive"))),
     );
 
     expect(liveResponse.status).toBe(200);
     expect(liveResponse.headers.get("Cache-Control")).toBe("no-store");
+    expect(releaseResponse.status).toBe(200);
+    expect(releaseResponse.headers.get("Cache-Control")).toBe("no-store");
     expect(unavailableResponse.status).toBe(503);
     expect(await unavailableResponse.text()).not.toContain("sensitive");
   });

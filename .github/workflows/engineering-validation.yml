@@ -113,6 +113,9 @@ jobs:
       - name: Test release migration policy
         run: pnpm test:release-migration-policy
 
+      - name: Test Production deployment verification
+        run: pnpm test:production-deployment-verification
+
       - name: Apply database migrations
         run: pnpm db:migrate
 

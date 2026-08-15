@@ -54,3 +54,37 @@ test("cria Trip autenticada e impede leitura por outro User", async ({ page }, t
   await expect(page.getByRole("heading", { name: "Essa página saiu do roteiro." })).toBeVisible();
   await expect(page.getByText(tripName, { exact: true })).toHaveCount(0);
 });
+
+test("owner cancela ou confirma a exclusão definitiva da própria Trip", async ({ page }, testInfo) => {
+  const suffix = `${testInfo.project.name}-${Date.now()}`;
+  const email = `rb-inc-138-delete-${suffix}@example.com`;
+  const password = "routebook-e2e-password";
+  const tripName = `Viagem descartável ${suffix}`;
+
+  await page.goto("/criar-conta?next=%2Fviagens");
+  await page.getByLabel("Nome").fill("Owner RB-INC-138");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Senha").fill(password);
+  await page.getByRole("button", { name: "Criar conta" }).click();
+  await expect(page).toHaveURL(/\/viagens$/);
+
+  await page.goto("/viagens/nova");
+  await page.getByLabel("Nome da viagem").fill(tripName);
+  await page.getByRole("button", { name: "Criar viagem" }).click();
+  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+
+  await page.getByRole("link", { name: tripName }).click();
+  await page.getByRole("button", { name: "Excluir viagem" }).click();
+  await expect(page.getByText(`Excluir “${tripName}”?`)).toBeVisible();
+
+  await page.getByRole("button", { name: "Cancelar" }).click();
+  await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
+  await expect(page.getByText(`Excluir “${tripName}”?`)).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Excluir viagem" }).click();
+  await page.getByRole("button", { name: "Excluir definitivamente" }).click();
+
+  await expect(page).toHaveURL(/\/viagens\?deleted=1$/);
+  await expect(page.getByRole("status")).toContainText("Viagem excluída com sucesso.");
+  await expect(page.getByRole("link", { name: tripName })).toHaveCount(0);
+});

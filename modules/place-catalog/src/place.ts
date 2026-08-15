@@ -6,6 +6,15 @@ export const PLACE_PRICE_RANGES = ["free", "budget", "moderate", "premium"] as c
 export type PlacePriceRange = (typeof PLACE_PRICE_RANGES)[number];
 export type PlacePublicationStatus = "draft" | "published" | "archived";
 
+export type PlacePrimaryImage = Readonly<{
+  assetPath: string;
+  altText: string;
+  sourceName: string;
+  sourceUrl?: string;
+  license: string;
+  attribution?: string;
+}>;
+
 export type Place = {
   id: string;
   destinationId: string;
@@ -17,6 +26,7 @@ export type Place = {
   longitude: number;
   addressLabel?: string;
   priceRange?: PlacePriceRange;
+  primaryImage?: PlacePrimaryImage;
   publicationStatus: PlacePublicationStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -32,6 +42,7 @@ export type CreatePlaceInput = {
   longitude: number;
   addressLabel?: string;
   priceRange?: PlacePriceRange;
+  primaryImage?: PlacePrimaryImage;
   publicationStatus?: PlacePublicationStatus;
 };
 
@@ -42,12 +53,78 @@ export class PlaceValidationError extends Error {
   }
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function requiredText(value: unknown, field: string): string {
+  if (typeof value !== "string" || !value.trim()) {
+    throw new PlaceValidationError(`${field} da imagem principal é obrigatório.`);
+  }
+  return value.trim();
+}
+
+function optionalText(value: unknown, field: string): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== "string") {
+    throw new PlaceValidationError(`${field} da imagem principal é inválido.`);
+  }
+  return value.trim() || undefined;
+}
+
+function validateSourceUrl(value: unknown): string | undefined {
+  const sourceUrl = optionalText(value, "A URL de origem");
+  if (!sourceUrl) return undefined;
+
+  try {
+    const parsed = new URL(sourceUrl);
+    if (parsed.protocol !== "https:") {
+      throw new PlaceValidationError("A URL de origem da imagem principal deve usar HTTPS.");
+    }
+  } catch (error) {
+    if (error instanceof PlaceValidationError) throw error;
+    throw new PlaceValidationError("A URL de origem da imagem principal é inválida.");
+  }
+
+  return sourceUrl;
+}
+
+export function parsePlacePrimaryImage(input: unknown): PlacePrimaryImage | undefined {
+  if (input === undefined || input === null) return undefined;
+  if (!isRecord(input)) {
+    throw new PlaceValidationError("A imagem principal do lugar é inválida.");
+  }
+
+  const assetPath = requiredText(input.assetPath, "O assetPath");
+  if (!/^\/place-images\/[a-zA-Z0-9][a-zA-Z0-9/_-]*\.(?:avif|webp|jpe?g|png)$/.test(assetPath)) {
+    throw new PlaceValidationError(
+      "A imagem principal deve usar um asset interno sob /place-images/.",
+    );
+  }
+
+  const altText = requiredText(input.altText, "O altText");
+  const sourceName = requiredText(input.sourceName, "A origem");
+  const license = requiredText(input.license, "A licença");
+  const sourceUrl = validateSourceUrl(input.sourceUrl);
+  const attribution = optionalText(input.attribution, "A atribuição");
+
+  return Object.freeze({
+    assetPath,
+    altText,
+    sourceName,
+    ...(sourceUrl ? { sourceUrl } : {}),
+    license,
+    ...(attribution ? { attribution } : {}),
+  });
+}
+
 export function createPlace(input: CreatePlaceInput, now = new Date()): Place {
   const destinationId = input.destinationId.trim();
   const slug = input.slug.trim().toLowerCase();
   const name = input.name.trim();
   const summary = input.summary.trim();
   const addressLabel = input.addressLabel?.trim();
+  const primaryImage = parsePlacePrimaryImage(input.primaryImage);
 
   if (!destinationId) throw new PlaceValidationError("O destino do lugar é obrigatório.");
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
@@ -79,6 +156,7 @@ export function createPlace(input: CreatePlaceInput, now = new Date()): Place {
     longitude: input.longitude,
     ...(addressLabel ? { addressLabel } : {}),
     ...(input.priceRange ? { priceRange: input.priceRange } : {}),
+    ...(primaryImage ? { primaryImage } : {}),
     publicationStatus: input.publicationStatus ?? "draft",
     createdAt: now,
     updatedAt: now,

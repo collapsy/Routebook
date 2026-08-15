@@ -18,13 +18,13 @@ export const metadata: Metadata = {
 export default async function TripsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ created?: string }>;
+  searchParams: Promise<{ created?: string; deleted?: string }>;
 }) {
   const session = await getRouteBookSession();
   if (!session) redirect("/entrar?next=%2Fviagens");
 
   const trips = await listPostgresAuthorizedTrips(session.user.id);
-  const { created } = await searchParams;
+  const { created, deleted } = await searchParams;
 
   return (
     <section className="app-page">
@@ -47,6 +47,12 @@ export default async function TripsPage({
       {created === "1" ? (
         <p className="success-banner" role="status">
           Viagem criada e salva com sucesso.
+        </p>
+      ) : null}
+
+      {deleted === "1" ? (
+        <p className="success-banner" role="status">
+          Viagem excluída com sucesso.
         </p>
       ) : null}
 

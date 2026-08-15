@@ -36,6 +36,9 @@ describe("Trip authorization", () => {
     expect(canPerformTripAction("viewer", "trip:view")).toBe(true);
     expect(canPerformTripAction("viewer", "trip:edit")).toBe(false);
     expect(canPerformTripAction("viewer", "trip:accept-proposal")).toBe(false);
+    expect(canPerformTripAction("owner", "trip:delete")).toBe(true);
+    expect(canPerformTripAction("editor", "trip:delete")).toBe(false);
+    expect(canPerformTripAction("viewer", "trip:delete")).toBe(false);
   });
 
   it.each(["owner", "editor"] as const)("autoriza %s ativo a aceitar Proposal", async (role) => {
@@ -60,6 +63,24 @@ describe("Trip authorization", () => {
       role,
       action: "trip:accept-proposal",
     });
+  });
+
+  it("autoriza somente owner ativo a excluir Trip", async () => {
+    await expect(
+      authorizeTripAction({ userId, tripId, action: "trip:delete" }, reader()),
+    ).resolves.toMatchObject({ role: "owner", action: "trip:delete" });
+
+    for (const role of ["editor", "viewer"] as const) {
+      const authorizationReader = reader({
+        findMembership: vi.fn(async () =>
+          createAccountMembership({ id: membershipId, accountId, userId, role }),
+        ),
+      });
+
+      await expect(
+        authorizeTripAction({ userId, tripId, action: "trip:delete" }, authorizationReader),
+      ).rejects.toEqual(new TripAuthorizationError("permission-denied"));
+    }
   });
 
   it.each([

@@ -5,7 +5,8 @@
 
 .trip-overview-hero,
 .trip-next-steps,
-.traveler-context-summary {
+.traveler-context-summary,
+.trip-danger-zone {
   align-items: start;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -27,7 +28,8 @@
 .trip-overview-hero p:last-child,
 .trip-next-steps p:last-child,
 .section-heading-row > p,
-.traveler-context-summary > p {
+.traveler-context-summary > p,
+.trip-danger-zone p {
   color: var(--foreground-muted);
   line-height: 1.6;
   max-width: 44rem;
@@ -95,7 +97,8 @@
 }
 
 .section-heading-row h2,
-.trip-next-steps h2 {
+.trip-next-steps h2,
+.trip-danger-zone h2 {
   font-size: clamp(1.65rem, 4vw, 2.4rem);
   letter-spacing: -0.04em;
 }
@@ -121,6 +124,65 @@
 .trip-days-grid strong {
   display: block;
   text-transform: capitalize;
+}
+
+.trip-danger-zone {
+  border-color: color-mix(in srgb, #b42318 45%, var(--border));
+}
+
+.trip-delete-trigger,
+.trip-delete-confirm {
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  padding: 0.8rem 1rem;
+}
+
+.trip-delete-trigger {
+  background: transparent;
+  border: 1px solid #b42318;
+  color: #b42318;
+}
+
+.trip-delete-confirm {
+  background: #b42318;
+  border: 1px solid #b42318;
+  color: #fff;
+}
+
+.trip-delete-trigger:focus-visible,
+.trip-delete-confirm:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.trip-delete-confirm:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.trip-delete-confirmation {
+  display: grid;
+  gap: 0.9rem;
+  max-width: 34rem;
+  width: 100%;
+}
+
+.trip-delete-confirmation p {
+  margin: 0;
+}
+
+.trip-delete-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.trip-delete-error {
+  color: #b42318 !important;
+  font-weight: 700;
 }
 
 .trip-card-link:focus-visible {
@@ -197,6 +259,7 @@
 @media (min-width: 48rem) {
   .trip-overview-hero,
   .trip-next-steps,
+  .trip-danger-zone,
   .section-heading-row,
   .trip-card-footer {
     align-items: center;

@@ -91,6 +91,15 @@ export class DrizzleTripRepository implements TripRepository {
       .where(eq(trips.id, trip.id));
   }
 
+  async deleteById(tripId: string): Promise<boolean> {
+    const deletedRows = await getDatabase()
+      .delete(trips)
+      .where(eq(trips.id, tripId))
+      .returning({ id: trips.id });
+
+    return deletedRows.length === 1;
+  }
+
   async list(): Promise<Trip[]> {
     const rows = await getDatabase().select().from(trips).orderBy(desc(trips.createdAt));
     return rows.map(mapTripRow);

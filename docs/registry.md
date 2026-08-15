@@ -337,6 +337,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-141 | Context Pack do RB-INC-141 — Imagem Principal de Places | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-141-place-primary-image.md](./implementation/context-packs/rb-inc-141-place-primary-image.md) |
 | RB-INC-142 | Descoberta Orgânica e Ingestão Governada de Places | Implementation | Draft | 0.1.0 | [rb-inc-142-organic-place-ingestion.md](./implementation/increments/rb-inc-142-organic-place-ingestion.md) |
 | RB-CTX-142 | Context Pack do RB-INC-142 — Descoberta Orgânica e Ingestão Governada de Places | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-142-organic-place-ingestion.md](./implementation/context-packs/rb-inc-142-organic-place-ingestion.md) |
+| RB-INC-143 | Enriquecimento Governado de Imagens Reais dos Places de Pipa | Implementation | Draft | 0.1.0 | [rb-inc-143-place-images.md](./implementation/increments/rb-inc-143-place-images.md) |
+| RB-CTX-143 | Context Pack do RB-INC-143 — Enriquecimento Governado de Imagens Reais | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-143-place-images.md](./implementation/context-packs/rb-inc-143-place-images.md) |
 
 ## Status possíveis
 

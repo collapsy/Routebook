@@ -100,7 +100,11 @@ describe("assembleItineraryProposalGenerationInput", () => {
       input({
         itinerary: {
           ...source.itinerary,
-          days: source.itinerary.days.map(({ freePeriods: _freePeriods, ...day }) => day),
+          days: source.itinerary.days.map((day) => ({
+            tripDayId: day.tripDayId,
+            date: day.date,
+            activities: day.activities,
+          })),
         },
       }),
     );

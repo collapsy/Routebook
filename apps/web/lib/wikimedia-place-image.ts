@@ -128,9 +128,7 @@ function isReusableLicense(value: string): boolean {
   return REUSABLE_LICENSE_PATTERN.test(value.trim());
 }
 
-export function normalizeWikimediaImageRecord(
-  page: CommonsPage,
-): WikimediaImageRecord | undefined {
+export function normalizeWikimediaImageRecord(page: CommonsPage): WikimediaImageRecord | undefined {
   const info = page.imageinfo?.[0];
   const fileTitle = page.title?.trim() ?? "";
   const descriptionUrl = info?.descriptionurl?.trim() ?? "";
@@ -148,7 +146,8 @@ export function normalizeWikimediaImageRecord(
   if (thumbnailUrl && !isAllowedMediaUrl(thumbnailUrl)) return undefined;
   if (!mime.startsWith("image/")) return undefined;
   if (!artist || !isReusableLicense(license)) return undefined;
-  if (licenseUrl && !licenseUrl.startsWith("https://creativecommons.org/licenses/")) return undefined;
+  if (licenseUrl && !licenseUrl.startsWith("https://creativecommons.org/licenses/"))
+    return undefined;
 
   return {
     fileTitle,
@@ -187,7 +186,8 @@ export function classifyWikimediaImageMatch(
   if (hasPlaceIdentity || hasLocalContext) {
     return {
       status: "ambiguous",
-      reason: "A metadata possui apenas parte dos sinais necessários para confirmar a identidade do Place.",
+      reason:
+        "A metadata possui apenas parte dos sinais necessários para confirmar a identidade do Place.",
     };
   }
   return {

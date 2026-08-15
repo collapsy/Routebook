@@ -12,6 +12,26 @@ async function submitAndExpectRedirect(
   await expect(page).toHaveURL(expectedUrl);
 }
 
+async function createTripWithoutContext(page: Page) {
+  const tripName = `Contexto insuficiente ${test.info().project.name} ${Date.now()}`;
+
+  await page.goto("/viagens/nova");
+  await page.getByLabel("Nome da viagem").fill(tripName);
+  await page.getByLabel("Data de início").fill("2026-08-22");
+  await page.getByLabel("Data de término").fill("2026-08-24");
+  await Promise.all([
+    page.waitForURL(/\/viagens\?created=1$/),
+    page.getByRole("button", { name: "Criar viagem" }).click(),
+  ]);
+  await Promise.all([
+    page.waitForURL(/\/viagens\/[^/?]+$/),
+    page.getByRole("link", { name: tripName }).click(),
+  ]);
+  await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
+
+  return { tripName, tripUrl: new URL(page.url()).pathname };
+}
+
 async function createTripWithRecommendationContext(page: Page) {
   const tripName = `Recommendations ${test.info().project.name} ${Date.now()}`;
 
@@ -64,6 +84,24 @@ async function openRecommendations(page: Page, tripUrl: string, tripName: string
   ).toBeVisible();
   await expect(page.getByText(/cada mudança exige uma ação explícita/i)).toBeVisible();
 }
+
+test("permanece neutra quando o contexto é insuficiente", async ({ page }) => {
+  const { tripUrl } = await createTripWithoutContext(page);
+
+  await page.goto(tripUrl);
+  await expect(
+    page.getByRole("heading", { name: "O que vale a pena considerar?", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "Ainda não há contexto suficiente para uma seleção confiável",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(page.getByRole("list", { name: "Sugestões contextuais de lugares" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Configurar contexto" }).last()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Informar hospedagem" })).toBeVisible();
+});
 
 test("mostra decisão contextual sem aplicar uma escolha", async ({ page }) => {
   const { tripUrl } = await createTripWithRecommendationContext(page);

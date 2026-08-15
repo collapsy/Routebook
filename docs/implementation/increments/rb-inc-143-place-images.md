@@ -84,6 +84,8 @@ A primeira cobertura prioriza landmarks com documentação inequívoca no Common
 5. Lagoa de Guaraíras;
 6. Praia de Tibau do Sul.
 
+Praia de Sibaúma foi avaliada, mas o `Artist` retornado pela API oficial do Commons estava vazio. Embora a licença do arquivo fosse reutilizável, a ausência de autoria auditável impediu a promoção; o Place mantém fallback.
+
 Restaurantes e bares não receberão imagem genérica da região para simular cobertura.
 
 ## 6. Materialização e armazenamento
@@ -191,13 +193,13 @@ docs/implementation/context-packs/rb-inc-143-place-images.md
 docs/registry.md
 ```
 
-Helper temporário autorizado exclusivamente para materializar os binários na branch:
+Helper temporário autorizado para materializar os binários na branch e, após a materialização bem-sucedida, executar uma única finalização determinística do Registry e remover a si próprio:
 
 ```text
 .github/workflows/rb-inc-143-materialize-images.yml
 ```
 
-Ele deve ser removido antes da PR ficar pronta e não pode existir no diff final.
+A finalização só pode inserir as entradas `RB-INC-143` e `RB-CTX-143` em `docs/registry.md` e excluir o próprio helper. Ele deve estar ausente do diff final da PR.
 
 Arquivo adicional indispensável deve ser registrado aqui e explicado na PR antes da alteração.
 

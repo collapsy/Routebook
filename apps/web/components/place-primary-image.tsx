@@ -3,18 +3,23 @@
 import Image from "next/image";
 import { useState } from "react";
 
-import type { PlacePrimaryImage as PlacePrimaryImageContract } from "@routebook/place-catalog";
+import type {
+  PlaceCategory,
+  PlacePrimaryImage as PlacePrimaryImageContract,
+} from "@routebook/place-catalog";
 
 import styles from "./place-primary-image.module.css";
 
 export function PlacePrimaryImage({
   placeName,
   primaryImage,
+  category,
   showProvenance = false,
   priority = false,
 }: {
   placeName: string;
   primaryImage?: PlacePrimaryImageContract | undefined;
+  category?: PlaceCategory | undefined;
   showProvenance?: boolean;
   priority?: boolean;
 }) {
@@ -25,13 +30,34 @@ export function PlacePrimaryImage({
       <div
         aria-label={`Imagem não disponível para ${placeName}`}
         className={styles.fallback}
+        data-place-category={category ?? "unknown"}
         data-place-image-fallback="true"
         role="img"
       >
         <span aria-hidden="true" className={styles.fallbackMark}>
-          ◇
+          {category === "beach"
+            ? "≈"
+            : category === "nature"
+              ? "△"
+              : category === "gastronomy"
+                ? "◌"
+                : category === "nightlife"
+                  ? "✦"
+                  : "◇"}
+        </span>
+        <span className={styles.fallbackCategory}>
+          {category === "beach"
+            ? "Praia"
+            : category === "nature"
+              ? "Natureza"
+              : category === "gastronomy"
+                ? "Gastronomia"
+                : category === "nightlife"
+                  ? "Vida noturna"
+                  : "Lugar"}
         </span>
         <span className={styles.fallbackText}>Imagem não disponível</span>
+        <span className={styles.fallbackDisclosure}>Capa de categoria — não é foto do local</span>
       </div>
     );
   }

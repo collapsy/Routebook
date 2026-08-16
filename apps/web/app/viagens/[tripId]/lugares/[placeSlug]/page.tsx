@@ -11,6 +11,10 @@ import { findPublishedPlace, type PlaceCategory } from "@routebook/place-catalog
 import { findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../../components/place-primary-image";
+import {
+  buildGoogleMapsDirectionsUrl,
+  buildGoogleMapsSearchUrl,
+} from "../../../../../lib/google-maps-links";
 import { presentAccommodationDistance } from "../distance";
 import { removePlaceAction, savePlaceAction } from "./actions";
 
@@ -64,6 +68,12 @@ export default async function PlaceDetailsPage({
     latitude: place.latitude,
     longitude: place.longitude,
   });
+  const placeCoordinate = { latitude: place.latitude, longitude: place.longitude };
+  const mapsSearchUrl = buildGoogleMapsSearchUrl({
+    name: place.name,
+    addressLabel: place.addressLabel,
+    coordinate: placeCoordinate,
+  });
 
   return (
     <section className="app-page trip-overview-page">
@@ -97,11 +107,64 @@ export default async function PlaceDetailsPage({
       </header>
 
       <PlacePrimaryImage
+        category={place.category}
         placeName={place.name}
         primaryImage={place.primaryImage}
         priority
         showProvenance
       />
+
+      <section className="traveler-context-summary" aria-labelledby="place-route-title">
+        <div className="section-heading-row">
+          <div>
+            <p className="product-eyebrow">Deslocamento e informação atual</p>
+            <h2 id="place-route-title">Confira antes de sair</h2>
+            <p>
+              Abra o local no Google Maps para consultar fotos e dados atuais. Se a hospedagem
+              estiver geocodificada, calcule a rota real por ruas; o resultado externo pode incluir
+              duração e trânsito.
+            </p>
+          </div>
+          <div className="section-heading-row">
+            <a
+              className="product-secondary-action"
+              href={mapsSearchUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
+              Ver mapa e fotos
+            </a>
+            {trip.accommodation?.coordinate ? (
+              <>
+                <a
+                  className="product-secondary-action"
+                  href={buildGoogleMapsDirectionsUrl({
+                    origin: trip.accommodation.coordinate,
+                    destination: placeCoordinate,
+                    travelMode: "walking",
+                  })}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Rota real a pé
+                </a>
+                <a
+                  className="product-secondary-action"
+                  href={buildGoogleMapsDirectionsUrl({
+                    origin: trip.accommodation.coordinate,
+                    destination: placeCoordinate,
+                    travelMode: "driving",
+                  })}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Rota real de carro
+                </a>
+              </>
+            ) : null}
+          </div>
+        </div>
+      </section>
 
       <section className="traveler-context-summary" aria-labelledby="saved-place-title">
         <div className="section-heading-row">
@@ -166,8 +229,9 @@ export default async function PlaceDetailsPage({
         <p>
           Esta página apresenta somente informações persistidas e publicadas pelo RouteBook. A
           distância é uma estimativa geodésica em linha reta e não representa rota por ruas,
-          trânsito ou tempo de deslocamento. Horários, preços, avaliações e disponibilidade em tempo
-          real ainda não fazem parte deste ciclo.
+          trânsito ou tempo de deslocamento. As ações externas permitem consultar esses dados no
+          momento da decisão, sem persistir conteúdo do Google como informação canônica do
+          RouteBook.
         </p>
       </section>
     </section>

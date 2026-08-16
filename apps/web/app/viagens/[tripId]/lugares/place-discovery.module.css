@@ -81,6 +81,19 @@
   color: var(--color-text-muted, #4c5750);
 }
 
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: auto;
+}
+
+.cardActions a {
+  flex: 1 1 9rem;
+  justify-content: center;
+  text-align: center;
+}
+
 .visuallyHidden {
   position: absolute;
   width: 1px;

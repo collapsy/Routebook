@@ -358,6 +358,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-151 | Context Pack do RB-INC-151 — Promoção do Staged Production pela API Oficial da Vercel | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-151-vercel-promote-api.md](./implementation/context-packs/rb-inc-151-vercel-promote-api.md) |
 | RB-INC-152 | Resposta sem Corpo na Promoção pela API da Vercel | Implementation | Draft | 0.1.0 | [rb-inc-152-vercel-promote-no-content.md](./implementation/increments/rb-inc-152-vercel-promote-no-content.md) |
 | RB-CTX-152 | Context Pack do RB-INC-152 — Resposta sem Corpo na Promoção pela API da Vercel | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-152-vercel-promote-no-content.md](./implementation/context-packs/rb-inc-152-vercel-promote-no-content.md) |
+| RB-INC-153 | Guia Operacional de Pipa Antes da Viagem | Implementation | Draft | 0.1.0 | [rb-inc-153-pipa-operational-guide.md](./implementation/increments/rb-inc-153-pipa-operational-guide.md) |
+| RB-CTX-153 | Context Pack do RB-INC-153 — Guia Operacional de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-153-pipa-operational-guide.md](./implementation/context-packs/rb-inc-153-pipa-operational-guide.md) |
 
 ## Status possíveis
 

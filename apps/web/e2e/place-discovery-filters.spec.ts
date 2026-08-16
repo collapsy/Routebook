@@ -18,7 +18,11 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(
     page.getByRole("list", { name: "Lugares publicados" }).getByRole("listitem"),
   ).toHaveCount(30);
-  await expect(page.getByRole("img", { name: /^Imagem não disponível para / })).toHaveCount(24);
+  await expect(
+    page
+      .getByRole("list", { name: "Lugares publicados" })
+      .getByRole("img", { name: /^Imagem não disponível para / }),
+  ).toHaveCount(24);
   await expect(
     page.getByRole("img", {
       name: "Vista da Praia do Amor em Pipa, cercada por falésias e vegetação costeira.",
@@ -27,13 +31,25 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(
     page.getByRole("img", { name: "Imagem não disponível para Praia das Minas" }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Descobrir mais lugares" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Ocultar descobertas atualizadas" })).toHaveAttribute(
     "href",
-    `/viagens/${trip.id}/lugares?descoberta=externa`,
+    `/viagens/${trip.id}/lugares?descoberta=ocultar`,
   );
   await expect(
-    page.getByRole("heading", { name: "Mais lugares encontrados no Overture" }),
-  ).toHaveCount(0);
+    page.getByRole("heading", { name: "Descobertas atualizadas no Overture" }),
+  ).toBeVisible();
+  const praiaDoAmorCard = page
+    .getByRole("list", { name: "Lugares publicados" })
+    .getByRole("listitem")
+    .filter({ has: page.getByText("Praia do Amor", { exact: true }) });
+  await expect(praiaDoAmorCard.getByRole("link", { name: "Ver mapa e fotos" })).toHaveAttribute(
+    "href",
+    /google\.com\/maps\/search/,
+  );
+  await expect(praiaDoAmorCard.getByRole("link", { name: "Calcular rota real" })).toHaveAttribute(
+    "href",
+    /google\.com\/maps\/dir/,
+  );
 
   await page.getByLabel("Nome ou termo").fill("minas");
   await page.getByRole("button", { name: "Aplicar filtros" }).click();

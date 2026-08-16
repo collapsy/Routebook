@@ -38,29 +38,23 @@ jobs:
 
           increment_doc = Path("docs/implementation/increments/rb-inc-147-focused-recommendations.md")
           increment_text = increment_doc.read_text(encoding="utf-8")
-          increment_note = """
-
-## 18. Exceção operacional temporária para o Registry
-
-Para atualizar `docs/registry.md` sem reescrever manualmente o arquivo extenso pelo connector, foi utilizado exclusivamente na branch o helper `.github/workflows/rb-inc-147-registry-helper.yml`.
-
-A exceção é limitada à manutenção documental: o helper apenas registra `RB-INC-147`/`RB-CTX-147`, documenta esta exceção e remove o próprio arquivo antes do estado final da branch. Ele não altera CI canônico, aplicação, domínio, dados, secrets ou Production e não deve aparecer no diff final da PR.
-"""
+          increment_note = (
+              "\n\n## 18. Exceção operacional temporária para o Registry\n\n"
+              "Para atualizar `docs/registry.md` sem reescrever manualmente o arquivo extenso pelo connector, foi utilizado exclusivamente na branch o helper `.github/workflows/rb-inc-147-registry-helper.yml`.\n\n"
+              "A exceção é limitada à manutenção documental: o helper apenas registra `RB-INC-147`/`RB-CTX-147`, documenta esta exceção e remove o próprio arquivo antes do estado final da branch. Ele não altera CI canônico, aplicação, domínio, dados, secrets ou Production e não deve aparecer no diff final da PR.\n"
+          )
           if "## 18. Exceção operacional temporária para o Registry" not in increment_text:
-              increment_doc.write_text(increment_text.rstrip() + increment_note + "\n", encoding="utf-8")
+              increment_doc.write_text(increment_text.rstrip() + increment_note, encoding="utf-8")
 
           context_doc = Path("docs/implementation/context-packs/rb-inc-147-focused-recommendations.md")
           context_text = context_doc.read_text(encoding="utf-8")
-          context_note = """
-
-## 20. Exceção operacional temporária para o Registry
-
-Fica autorizada exclusivamente durante a preparação desta branch a criação transitória de `.github/workflows/rb-inc-147-registry-helper.yml` para registrar `RB-INC-147` e `RB-CTX-147` em `docs/registry.md`.
-
-O helper deve remover a si próprio no mesmo ciclo, não pode modificar workflows canônicos, executar Production, acessar secrets de aplicação ou permanecer no diff final. Qualquer outro arquivo sob `.github/workflows/**` continua proibido.
-"""
+          context_note = (
+              "\n\n## 20. Exceção operacional temporária para o Registry\n\n"
+              "Fica autorizada exclusivamente durante a preparação desta branch a criação transitória de `.github/workflows/rb-inc-147-registry-helper.yml` para registrar `RB-INC-147` e `RB-CTX-147` em `docs/registry.md`.\n\n"
+              "O helper deve remover a si próprio no mesmo ciclo, não pode modificar workflows canônicos, executar Production, acessar secrets de aplicação ou permanecer no diff final. Qualquer outro arquivo sob `.github/workflows/**` continua proibido.\n"
+          )
           if "## 20. Exceção operacional temporária para o Registry" not in context_text:
-              context_doc.write_text(context_text.rstrip() + context_note + "\n", encoding="utf-8")
+              context_doc.write_text(context_text.rstrip() + context_note, encoding="utf-8")
 
       - name: Remove temporary helper and commit documentation
         shell: bash

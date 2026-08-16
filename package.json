@@ -26,6 +26,7 @@
     "test:place-images": "node --test scripts/materialize-place-images.test.mjs && node scripts/materialize-place-images.mjs --verify",
     "test:production-deployment-verification": "node --test scripts/verify-production-deployment.test.mjs",
     "test:release-migration-policy": "node --test scripts/release-migration-policy.test.mjs",
+    "test:vercel-staged-deployment": "node --test scripts/verify-vercel-staged-deployment.test.mjs",
     "test:e2e": "pnpm --filter @routebook/web test:e2e",
     "typecheck": "turbo run typecheck"
   },

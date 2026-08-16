@@ -1,19 +1,17 @@
 name: Production Release
 
 on:
-  workflow_run:
-    workflows:
-      - Engineering Validation
-    types:
-      - completed
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       candidate_sha:
         description: SHA exato de main a promover
         required: true
         type: string
+      confirm_production_promotion:
+        description: Confirmação humana explícita para executar staged deployment e promoção em Production
+        required: true
+        default: false
+        type: boolean
       approve_high_risk_migrations:
         description: Aprovação humana explícita para migrations de alto risco pendentes
         required: true
@@ -37,30 +35,29 @@ env:
 
 jobs:
   resolve-candidate:
-    name: Resolve immutable candidate
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    name: Resolve explicitly approved immutable candidate
     runs-on: ubuntu-latest
     outputs:
       candidate_sha: ${{ steps.candidate.outputs.candidate_sha }}
       allow_high_risk: ${{ steps.candidate.outputs.allow_high_risk }}
     steps:
-      - name: Resolve candidate
+      - name: Resolve explicit Production authorization
         id: candidate
         shell: bash
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
           MANUAL_SHA: ${{ inputs.candidate_sha }}
+          CONFIRM_PROMOTION: ${{ inputs.confirm_production_promotion }}
           MANUAL_APPROVAL: ${{ inputs.approve_high_risk_migrations }}
         run: |
           set -euo pipefail
-          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
-            candidate_sha="$MANUAL_SHA"
-            allow_high_risk="$MANUAL_APPROVAL"
-          else
-            candidate_sha="$WORKFLOW_RUN_SHA"
-            allow_high_risk="false"
+
+          if [[ "$CONFIRM_PROMOTION" != "true" ]]; then
+            echo "::error::Promoção de Production não autorizada. Marque confirm_production_promotion explicitamente."
+            exit 1
           fi
+
+          candidate_sha="$MANUAL_SHA"
+          allow_high_risk="$MANUAL_APPROVAL"
 
           if [[ ! "$candidate_sha" =~ ^[0-9a-f]{40}$ ]]; then
             echo "::error::Candidate SHA inválido."
@@ -112,8 +109,7 @@ jobs:
 
           echo "release_sha=$release_sha" >> "$GITHUB_OUTPUT"
 
-      - name: Verify successful Engineering Validation for manual release
-        if: github.event_name == 'workflow_dispatch'
+      - name: Verify successful Engineering Validation on main
         uses: actions/github-script@v8
         env:
           CANDIDATE_SHA: ${{ needs.resolve-candidate.outputs.candidate_sha }}

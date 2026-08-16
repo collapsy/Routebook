@@ -350,6 +350,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-147 | Context Pack do RB-INC-147 — Recommendations Focadas com Divulgação Progressiva | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-147-focused-recommendations.md](./implementation/context-packs/rb-inc-147-focused-recommendations.md) |
 | RB-INC-148 | Promoção Governada de Candidatos Externos para Draft | Implementation | Draft | 0.1.0 | [rb-inc-148-external-place-promotion.md](./implementation/increments/rb-inc-148-external-place-promotion.md) |
 | RB-CTX-148 | Context Pack do RB-INC-148 — Promoção Governada de Candidatos Externos para Draft | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-148-external-place-promotion.md](./implementation/context-packs/rb-inc-148-external-place-promotion.md) |
+| RB-INC-149 | Compatibilidade do Staged Production com Alias Padrão da Vercel | Implementation | Draft | 0.1.0 | [rb-inc-149-vercel-system-alias.md](./implementation/increments/rb-inc-149-vercel-system-alias.md) |
+| RB-CTX-149 | Context Pack do RB-INC-149 — Compatibilidade do Staged Production com Alias Padrão da Vercel | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-149-vercel-system-alias.md](./implementation/context-packs/rb-inc-149-vercel-system-alias.md) |
 
 ## Status possíveis
 

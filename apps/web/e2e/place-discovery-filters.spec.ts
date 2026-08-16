@@ -2,6 +2,16 @@ import { expect, test } from "@playwright/test";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
+const integratedOptionsHeading = /\d+ opç(?:ão|ões) para explorar/;
+const overtureDiscoveryCount = /\d+ descoberta(?: atualizada|s atualizadas) no Overture/;
+
+function integratedCount(publishedCount: number): RegExp {
+  const publishedLabel = publishedCount === 1 ? "lugar publicado" : "lugares publicados";
+  return new RegExp(
+    `${publishedCount} ${publishedLabel} no RouteBook \\+ ${overtureDiscoveryCount.source}`,
+  );
+}
+
 test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ page }) => {
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Descoberta ${test.info().project.name} ${Date.now()}`,
@@ -38,6 +48,8 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(
     page.getByRole("heading", { name: "Descobertas atualizadas no Overture" }),
   ).toBeVisible();
+  await expect(page.getByRole("heading", { name: integratedOptionsHeading })).toBeVisible();
+  await expect(page.getByText(integratedCount(30))).toBeVisible();
   const praiaDoAmorCard = page
     .getByRole("list", { name: "Lugares publicados" })
     .getByRole("listitem")
@@ -55,7 +67,8 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await page.getByRole("button", { name: "Aplicar filtros" }).click();
 
   await expect(page).toHaveURL(/busca=minas/);
-  await expect(page.getByRole("heading", { name: "1 lugar encontrado" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: integratedOptionsHeading })).toBeVisible();
+  await expect(page.getByText(integratedCount(1))).toBeVisible();
   await expect(page.getByRole("list", { name: "Lugares publicados" })).toContainText(
     "Praia das Minas",
   );
@@ -71,7 +84,8 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await page.getByRole("button", { name: "Aplicar filtros" }).click();
 
   await expect(page).toHaveURL(/busca=gastronomico.*preco=moderate/);
-  await expect(page.getByRole("heading", { name: "1 lugar encontrado" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: integratedOptionsHeading })).toBeVisible();
+  await expect(page.getByText(integratedCount(1))).toBeVisible();
   await expect(page.getByRole("list", { name: "Lugares publicados" })).toContainText(
     "Centro Gastronômico de Pipa",
   );
@@ -100,7 +114,14 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
 
   await page.getByRole("link", { name: "Limpar filtros" }).first().click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares$`));
-  await expect(page.getByRole("heading", { name: "30 lugares encontrados" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: integratedOptionsHeading })).toBeVisible();
+  await expect(page.getByText(integratedCount(30))).toBeVisible();
+
+  await page.goto(`/viagens/${trip.id}/lugares?descoberta=ocultar`);
+  await expect(page.getByRole("heading", { name: "30 lugares publicados" })).toBeVisible();
+  await expect(
+    page.getByText("Lista e mapa exibem o mesmo conjunto publicado e filtrado."),
+  ).toBeVisible();
 });
 
 test("mantém marcadores ancorados ao viewport durante pan e zoom", async ({ page }) => {

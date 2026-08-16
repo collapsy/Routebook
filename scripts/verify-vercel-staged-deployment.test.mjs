@@ -135,16 +135,13 @@ test("rejeita staged deployment que já recebeu domínio público", async () => 
 
 test("falha fechado em erro HTTP e JSON inválido sem expor body", async () => {
   const httpFetch = async () => new Response("forbidden", { status: 403 });
-  await assert.rejects(
-    verifyVercelStagedDeployment(baseOptions(httpFetch)),
-    (error) => {
-      assert.ok(error instanceof VercelStagedDeploymentError);
-      assert.equal(error.code, "deployment_lookup_http_status");
-      assert.equal(error.details.httpStatus, 403);
-      assert.equal(JSON.stringify(error.details).includes("forbidden"), false);
-      return true;
-    },
-  );
+  await assert.rejects(verifyVercelStagedDeployment(baseOptions(httpFetch)), (error) => {
+    assert.ok(error instanceof VercelStagedDeploymentError);
+    assert.equal(error.code, "deployment_lookup_http_status");
+    assert.equal(error.details.httpStatus, 403);
+    assert.equal(JSON.stringify(error.details).includes("forbidden"), false);
+    return true;
+  });
 
   const invalidJsonFetch = async () => new Response("not-json", { status: 200 });
   await assert.rejects(

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
 import {
@@ -175,4 +176,29 @@ test("valida inputs antes de consultar a rede e exige token", async () => {
   );
 
   assert.equal(requests, 0);
+});
+
+test("Production Release exige autorização manual e staged deployment governado", () => {
+  const workflow = readFileSync(".github/workflows/production-release.yml", "utf8");
+
+  assert.match(workflow, /^\s*workflow_dispatch:\s*$/m);
+  assert.doesNotMatch(workflow, /^\s*workflow_run:\s*$/m);
+  assert.doesNotMatch(workflow, /^\s*push:\s*$/m);
+  assert.doesNotMatch(workflow, /^\s*pull_request:\s*$/m);
+
+  assert.match(workflow, /confirm_production_promotion:/);
+  assert.match(workflow, /CONFIRM_PROMOTION:/);
+  assert.match(workflow, /if \[\[ "\$CONFIRM_PROMOTION" != "true" \]\]; then/);
+  assert.match(workflow, /event: "push"/);
+  assert.match(workflow, /conclusion === "success"/);
+
+  assert.match(workflow, /^\s*VERCEL_CLI_VERSION: 58\.4\.0\s*$/m);
+  assert.doesNotMatch(workflow, /vercel@latest/);
+  assert.match(workflow, /--prod/);
+  assert.match(workflow, /--skip-domain/);
+  assert.match(workflow, /Verify staged Vercel deployment identity/);
+  assert.match(workflow, /Smoke staged Production deployment/);
+  assert.match(workflow, /promote "\$STAGED_URL"/);
+  assert.match(workflow, /Verify immutable candidate is served in Production/);
+  assert.match(workflow, /Run Production operational smoke/);
 });

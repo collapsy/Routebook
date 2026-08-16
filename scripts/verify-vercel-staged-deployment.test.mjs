@@ -4,6 +4,7 @@ import { test } from "node:test";
 
 import {
   VercelStagedDeploymentError,
+  formatGitHubOutputs,
   verifyVercelStagedDeployment,
 } from "./verify-vercel-staged-deployment.mjs";
 
@@ -50,6 +51,27 @@ function baseOptions(fetchImpl) {
     timeoutMs: 1,
   };
 }
+
+test("formata somente a identidade verificada para o GitHub Output", () => {
+  assert.equal(
+    formatGitHubOutputs({
+      deploymentId,
+      deploymentUrl: `https://${deploymentHost}`,
+    }),
+    `deployment_id=${deploymentId}\ndeployment_url=https://${deploymentHost}\n`,
+  );
+  assert.throws(
+    () => formatGitHubOutputs({ deploymentId: "dpl_invalid\nname", deploymentUrl: "https://x" }),
+    (error) =>
+      error instanceof VercelStagedDeploymentError && error.code === "invalid_github_output",
+  );
+  assert.equal(
+    formatGitHubOutputs({ deploymentId, deploymentUrl: `https://${deploymentHost}` }).includes(
+      token,
+    ),
+    false,
+  );
+});
 
 test("aceita staged Production Deployment READY do projeto e SHA exatos", async () => {
   const { requests, fetchImpl } = fetchJson(deployment());
@@ -226,7 +248,22 @@ test("Production Release exige autorização manual e staged deployment governad
   assert.match(workflow, /"\$\{STAGED_URL\}\/api\/health\/live"/);
   assert.match(workflow, /"\$\{STAGED_URL\}\/api\/health\/ready"/);
   assert.doesNotMatch(workflow, /"vercel@\$\{VERCEL_CLI_VERSION\}" curl/);
-  assert.match(workflow, /promote "\$STAGED_URL"/);
+  assert.match(workflow, /--github-output "\$GITHUB_OUTPUT"/);
+  assert.match(
+    workflow,
+    /STAGED_DEPLOYMENT_ID: \$\{\{ steps\.staged-verification\.outputs\.deployment_id \}\}/,
+  );
+  assert.match(workflow, /--request POST/);
+  assert.match(workflow, /Authorization: Bearer \$\{VERCEL_API_TOKEN\}/);
+  assert.match(workflow, /--data '\{\}'/);
+  assert.match(
+    workflow,
+    /https:\/\/api\.vercel\.com\/v10\/projects\/\$\{VERCEL_PROJECT_ID\}\/promote\/\$\{STAGED_DEPLOYMENT_ID\}\?teamId=\$\{VERCEL_ORG_ID\}/,
+  );
+  assert.match(workflow, /\.projectId == \$project_id/);
+  assert.match(workflow, /\.deploymentId == \$deployment_id/);
+  assert.doesNotMatch(workflow, /vercel@\$\{VERCEL_CLI_VERSION\}" promote/);
+  assert.doesNotMatch(workflow, /promote "\$STAGED_URL"/);
   assert.match(workflow, /Verify immutable candidate is served in Production/);
   assert.match(workflow, /Run Production operational smoke/);
 });

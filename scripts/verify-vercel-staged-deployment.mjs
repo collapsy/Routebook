@@ -1,3 +1,4 @@
+import { appendFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 
 const DEFAULT_API_BASE_URL = "https://api.vercel.com";
@@ -298,12 +299,32 @@ function parseCliArguments(argv) {
     token: process.env.VERCEL_API_TOKEN,
     forbiddenDomains,
     timeoutMs,
+    githubOutput: values.get("github-output"),
   };
+}
+
+export function formatGitHubOutputs(result) {
+  const deploymentId = requiredString(result?.deploymentId, "invalid_deployment_id");
+  const deploymentUrl = requiredString(result?.deploymentUrl, "invalid_deployment_url");
+  if (deploymentId.includes("\n") || deploymentUrl.includes("\n")) {
+    throw new VercelStagedDeploymentError("invalid_github_output");
+  }
+  return `deployment_id=${deploymentId}\ndeployment_url=${deploymentUrl}\n`;
 }
 
 async function main() {
   try {
-    const result = await verifyVercelStagedDeployment(parseCliArguments(process.argv.slice(2)));
+    const options = parseCliArguments(process.argv.slice(2));
+    const githubOutput =
+      typeof options.githubOutput === "string" ? options.githubOutput.trim() : "";
+    if (options.githubOutput !== undefined && !githubOutput) {
+      throw new VercelStagedDeploymentError("invalid_github_output");
+    }
+
+    const result = await verifyVercelStagedDeployment(options);
+    if (githubOutput) {
+      await appendFile(githubOutput, formatGitHubOutputs(result), "utf8");
+    }
     process.stdout.write(
       `[vercel-staged-deployment] verified deployment=${result.deploymentId} sha=${result.expectedSha} target=${result.target}\n`,
     );

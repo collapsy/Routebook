@@ -234,6 +234,7 @@ Query string é estado de apresentação, não domínio.
 
 ```text
 apps/web/app/viagens/[tripId]/lugares/actions.ts
+apps/web/app/viagens/[tripId]/lugares/actions.test.ts
 apps/web/app/viagens/[tripId]/lugares/page.tsx
 apps/web/app/viagens/[tripId]/lugares/place-discovery.module.css
 apps/web/lib/overture-place-search.ts
@@ -244,6 +245,8 @@ docs/implementation/context-packs/rb-inc-148-external-place-promotion.md
 docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
+
+A inclusão de `lugares/actions.test.ts` é uma extensão explícita da allowlist porque a nova fronteira de mutação precisa provar autorização, revalidação server-side, payload mínimo e ausência de write nos bloqueios sem depender da rede Overture real ou de Production.
 
 ## 13. Caminhos somente leitura
 
@@ -283,6 +286,14 @@ Não criar migration, secret, Provider pago, asset, workflow permanente ou alter
 - delegação ao serviço de promoção;
 - mapping de resultado/erro para feedback seguro;
 - redirect somente para a mesma rota de Lugares.
+
+### `lugares/actions.test.ts`
+
+- provar que `trip:edit` é exigido na fronteira;
+- provar que a promoção recebe o candidato reobtido do adapter, não fatos arbitrários do formulário;
+- provar ausência de write para candidato ausente e falha do Provider;
+- provar mapping de `created`, `existing` e bloqueios conhecidos para redirect seguro;
+- provar preservação/canonicalização dos filtros sem aceitar URL de retorno arbitrária.
 
 ### `lugares/page.tsx`
 
@@ -334,6 +345,7 @@ Cobrir a nova UX e ausência de publicação/efeitos colaterais. Usar fixture/in
 Executar primeiro os afetados e depois os gates integrais:
 
 ```bash
+pnpm --filter @routebook/web test -- actions.test.ts
 pnpm --filter @routebook/web test -- overture-place-search
 pnpm --filter @routebook/web test:e2e -- external-place-promotion.spec.ts
 pnpm format:check

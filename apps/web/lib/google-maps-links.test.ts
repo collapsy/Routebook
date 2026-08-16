@@ -15,9 +15,7 @@ describe("Google Maps links", () => {
     expect(url.origin).toBe("https://www.google.com");
     expect(url.pathname).toBe("/maps/search/");
     expect(url.searchParams.get("api")).toBe("1");
-    expect(url.searchParams.get("query")).toBe(
-      "Praia do Amor, Pipa, Tibau do Sul — RN",
-    );
+    expect(url.searchParams.get("query")).toBe("Praia do Amor, Pipa, Tibau do Sul — RN");
   });
 
   it.each(["walking", "driving"] as const)(

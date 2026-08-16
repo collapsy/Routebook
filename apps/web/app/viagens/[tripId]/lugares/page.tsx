@@ -21,6 +21,7 @@ import { PlacePrimaryImage } from "../../../../components/place-primary-image";
 import { TripMap } from "../../../../components/trip-map";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
+import { promoteExternalPlaceAction } from "./actions";
 import {
   categoryLabels,
   filterPlaces,
@@ -45,6 +46,8 @@ type DiscoverySearchParams = {
   distancia?: string;
   preco?: string;
   descoberta?: string | undefined;
+  promocao?: string;
+  erroPromocao?: string;
 };
 
 const distanceOptions = [1, 3, 5, 10] as const;
@@ -94,6 +97,40 @@ function matchesExternalSearch(result: ExternalPlaceReconciliation, search?: str
     .some((value) => normalizeSearchText(value).includes(needle));
 }
 
+function promotionMessage(value?: string): string | undefined {
+  switch (value) {
+    case "criada":
+      return "Candidato enviado para curadoria como draft. Ele só aparecerá no catálogo depois de uma publicação governada.";
+    case "existente":
+      return "Este candidato já havia sido enviado para curadoria. Nenhuma duplicata foi criada.";
+    default:
+      return undefined;
+  }
+}
+
+function promotionErrorMessage(value?: string): string | undefined {
+  switch (value) {
+    case "candidato-invalido":
+      return "O candidato informado é inválido. Refaça a descoberta antes de tentar novamente.";
+    case "candidato-nao-encontrado":
+      return "O candidato não foi reencontrado na fonte atual. Refaça a descoberta antes de tentar novamente.";
+    case "candidato-rejeitado":
+      return "O candidato não atende aos critérios atuais para promoção e não foi gravado.";
+    case "possivel-duplicata":
+      return "O RouteBook encontrou uma possível duplicidade. A promoção foi bloqueada para evitar criar outro Lugar.";
+    case "fonte-indisponivel":
+      return "A fonte externa não pôde revalidar este candidato agora. Nenhuma alteração foi gravada.";
+    case "destino-nao-suportado":
+      return "A promoção externa ainda não está disponível para este destino.";
+    case "consistencia":
+      return "O candidato possui um vínculo inconsistente e não foi promovido. Nenhuma alteração parcial foi mantida.";
+    case "erro-tecnico":
+      return "Não foi possível enviar o candidato para curadoria agora. Nenhuma alteração parcial foi mantida.";
+    default:
+      return undefined;
+  }
+}
+
 export default async function PlacesPage({
   params,
   searchParams,
@@ -112,6 +149,8 @@ export default async function PlacesPage({
   const category = parsePlaceCategory(rawFilters.categoria);
   const priceRange = parsePlacePriceRange(rawFilters.preco);
   const discoverExternal = rawFilters.descoberta === "externa";
+  const promotionStatusMessage = promotionMessage(rawFilters.promocao);
+  const promotionError = promotionErrorMessage(rawFilters.erroPromocao);
   const accommodationCoordinate = trip.accommodation?.coordinate;
   const maximumDistanceMeters = accommodationCoordinate
     ? parseMaximumDistance(rawFilters.distancia)
@@ -392,9 +431,19 @@ export default async function PlacesPage({
           <h2 id="external-place-discovery">Mais lugares encontrados no Overture</h2>
           <p>
             Estes resultados são candidatos externos e ainda não fazem parte do catálogo publicado.
-            O RouteBook mantém a fonte, licença e reconciliação separadas antes de qualquer
-            promoção.
+            Ao enviar um candidato para curadoria, o RouteBook revalida os dados na fonte e cria
+            somente um draft; a publicação continua sendo uma operação governada separada.
           </p>
+          {promotionStatusMessage ? (
+            <p className={styles.notice} role="status">
+              {promotionStatusMessage}
+            </p>
+          ) : null}
+          {promotionError ? (
+            <p className={styles.notice} role="alert">
+              {promotionError}
+            </p>
+          ) : null}
           {priceRange ? (
             <p className={styles.notice} role="status">
               A fonte externa não fornece a faixa de preço canônica do RouteBook; esse filtro vale
@@ -425,6 +474,35 @@ export default async function PlacesPage({
                         Fonte: Overture · licença da origem: {result.candidate.sourceLicense}
                       </small>
                       <small>Candidato externo — ainda não publicado no RouteBook</small>
+                      <form action={promoteExternalPlaceAction}>
+                        <input name="tripId" type="hidden" value={tripId} />
+                        <input
+                          name="externalId"
+                          type="hidden"
+                          value={result.candidate.externalId}
+                        />
+                        {search ? <input name="busca" type="hidden" value={search} /> : null}
+                        {category ? (
+                          <input name="categoria" type="hidden" value={category} />
+                        ) : null}
+                        {maximumDistanceMeters ? (
+                          <input
+                            name="distancia"
+                            type="hidden"
+                            value={String(maximumDistanceMeters / 1_000)}
+                          />
+                        ) : null}
+                        {priceRange ? (
+                          <input name="preco" type="hidden" value={priceRange} />
+                        ) : null}
+                        <button className="product-secondary-action" type="submit">
+                          Enviar para curadoria
+                        </button>
+                      </form>
+                      <small>
+                        A ação cria um draft para revisão; não publica, não salva na viagem e não
+                        adiciona este lugar ao roteiro.
+                      </small>
                     </li>
                   );
                 })}

@@ -262,6 +262,10 @@ export default async function PlacesPage({
     }
   }
 
+  const hasExternalCoverage = discoverExternal && !externalDiscoveryError;
+  const visibleOptionCount =
+    filteredPlaces.length + (hasExternalCoverage ? externalResults.length : 0);
+
   return (
     <section className="app-page trip-overview-page">
       <Link className="back-link" href={`/viagens/${tripId}`}>
@@ -376,13 +380,21 @@ export default async function PlacesPage({
       <div className={styles.resultHeading}>
         <div>
           <h2>
-            {filteredPlaces.length === 1
-              ? "1 lugar encontrado"
-              : `${filteredPlaces.length} lugares encontrados`}
+            {hasExternalCoverage
+              ? `${visibleOptionCount} ${visibleOptionCount === 1 ? "opção" : "opções"} para explorar`
+              : `${filteredPlaces.length} ${
+                  filteredPlaces.length === 1 ? "lugar publicado" : "lugares publicados"
+                }`}
           </h2>
           <p>
-            {discoverExternal && !externalDiscoveryError
-              ? `${filteredPlaces.length} no catálogo + ${externalResults.length} descobertas recentes abaixo.`
+            {hasExternalCoverage
+              ? `${filteredPlaces.length} ${
+                  filteredPlaces.length === 1 ? "lugar publicado" : "lugares publicados"
+                } no RouteBook + ${externalResults.length} ${
+                  externalResults.length === 1
+                    ? "descoberta atualizada"
+                    : "descobertas atualizadas"
+                } no Overture.`
               : "Lista e mapa exibem o mesmo conjunto publicado e filtrado."}
           </p>
         </div>

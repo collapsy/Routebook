@@ -135,9 +135,7 @@ test("rejeita staged deployment que já recebeu domínio público", async () => 
 });
 
 test("aceita alias padrão gerenciado pela Vercel sem o domínio canônico", async () => {
-  const { fetchImpl } = fetchJson(
-    deployment({ alias: ["routebook-rnd10.vercel.app"] }),
-  );
+  const { fetchImpl } = fetchJson(deployment({ alias: ["routebook-rnd10.vercel.app"] }));
 
   const result = await verifyVercelStagedDeployment(baseOptions(fetchImpl));
 

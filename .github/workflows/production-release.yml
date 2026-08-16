@@ -31,6 +31,9 @@ concurrency:
 env:
   RELEASE_BRANCH: codex/production-release
   PRODUCTION_BASE_URL: https://routebook-one.vercel.app
+  VERCEL_CLI_VERSION: 58.4.0
+  VERCEL_PROJECT_ID: prj_o7utdxB9SymdCL56AOH57B64NRec
+  VERCEL_ORG_ID: team_Vj5YB1D4TkH2S3nLeQnjrRog
 
 jobs:
   resolve-candidate:
@@ -149,16 +152,17 @@ jobs:
             --head-ref "$CANDIDATE_SHA"
 
   migrate-and-promote:
-    name: Migrate, verify and promote
+    name: Migrate, stage, verify and promote
     needs:
       - resolve-candidate
       - validate-candidate
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     environment: Production
     env:
       DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL_DIRECT }}
       RELEASE_SSH_KEY_B64: ${{ secrets.PRODUCTION_RELEASE_SSH_KEY_B64 }}
+      VERCEL_API_TOKEN: ${{ secrets.VERCEL_API_TOKEN }}
       CANDIDATE_SHA: ${{ needs.resolve-candidate.outputs.candidate_sha }}
       RELEASE_SHA: ${{ needs.validate-candidate.outputs.release_sha }}
       ALLOW_HIGH_RISK: ${{ needs.resolve-candidate.outputs.allow_high_risk }}
@@ -173,6 +177,10 @@ jobs:
           fi
           if [[ -z "${RELEASE_SSH_KEY_B64:-}" ]]; then
             echo "::error::Environment secret PRODUCTION_RELEASE_SSH_KEY_B64 não configurado."
+            exit 1
+          fi
+          if [[ -z "${VERCEL_API_TOKEN:-}" ]]; then
+            echo "::error::Environment secret VERCEL_API_TOKEN não configurado."
             exit 1
           fi
 
@@ -281,6 +289,80 @@ jobs:
             exit 1
           fi
 
+      - name: Create staged Vercel Production deployment
+        id: staged-deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          staged_url="$(pnpm dlx "vercel@${VERCEL_CLI_VERSION}" deploy \
+            --prod \
+            --skip-domain \
+            --yes \
+            --token "$VERCEL_API_TOKEN")"
+
+          if [[ ! "$staged_url" =~ ^https://[A-Za-z0-9.-]+\.vercel\.app$ ]]; then
+            echo "::error::Vercel não retornou URL imutável válida para o staged deployment."
+            exit 1
+          fi
+
+          echo "staged_url=$staged_url" >> "$GITHUB_OUTPUT"
+          echo "Staged Production deployment criado sem atribuição de domínio público."
+
+      - name: Verify staged Vercel deployment identity
+        id: staged-verification
+        shell: bash
+        env:
+          STAGED_URL: ${{ steps.staged-deployment.outputs.staged_url }}
+        run: |
+          set -euo pipefail
+          node scripts/verify-vercel-staged-deployment.mjs \
+            --deployment "$STAGED_URL" \
+            --expected-sha "$CANDIDATE_SHA" \
+            --project-id "$VERCEL_PROJECT_ID" \
+            --team-id "$VERCEL_ORG_ID" \
+            --forbidden-domains "routebook-one.vercel.app,routebook-rnd10.vercel.app" \
+            --timeout-ms 10000
+
+      - name: Smoke staged Production deployment
+        id: staged-smoke
+        shell: bash
+        env:
+          STAGED_URL: ${{ steps.staged-deployment.outputs.staged_url }}
+        run: |
+          set -euo pipefail
+          vercel_cmd=(pnpm dlx "vercel@${VERCEL_CLI_VERSION}")
+
+          release_json="$("${vercel_cmd[@]}" curl /api/health/release \
+            --deployment "$STAGED_URL" \
+            --token "$VERCEL_API_TOKEN")"
+          printf '%s' "$release_json" | jq -e --arg sha "$CANDIDATE_SHA" '
+            .service == "routebook-web" and
+            .signal == "release" and
+            .status == "identified" and
+            .commitSha == $sha
+          ' >/dev/null
+
+          live_json="$("${vercel_cmd[@]}" curl /api/health/live \
+            --deployment "$STAGED_URL" \
+            --token "$VERCEL_API_TOKEN")"
+          printf '%s' "$live_json" | jq -e '
+            .service == "routebook-web" and
+            .signal == "liveness" and
+            .status == "ok"
+          ' >/dev/null
+
+          ready_json="$("${vercel_cmd[@]}" curl /api/health/ready \
+            --deployment "$STAGED_URL" \
+            --token "$VERCEL_API_TOKEN")"
+          printf '%s' "$ready_json" | jq -e '
+            .service == "routebook-web" and
+            .signal == "readiness" and
+            .status == "ready" and
+            .dependencies.database == "available"
+          ' >/dev/null
+
+          echo "Staged release/liveness/readiness confirmados."
+
       - name: Promote immutable candidate to Production release branch
         shell: bash
         run: |
@@ -305,6 +387,18 @@ jobs:
             "${RUNNER_TEMP}/routebook-production-release" \
             "${RUNNER_TEMP}/routebook-github-known-hosts"
 
+      - name: Promote staged Vercel deployment to Production
+        id: vercel-promotion
+        shell: bash
+        env:
+          STAGED_URL: ${{ steps.staged-deployment.outputs.staged_url }}
+        run: |
+          set -euo pipefail
+          pnpm dlx "vercel@${VERCEL_CLI_VERSION}" promote "$STAGED_URL" \
+            --yes \
+            --timeout 5m \
+            --token "$VERCEL_API_TOKEN"
+
       - name: Verify immutable candidate is served in Production
         id: deployment-verification
         shell: bash
@@ -325,6 +419,11 @@ jobs:
         if: always()
         shell: bash
         env:
+          STAGED_URL: ${{ steps.staged-deployment.outputs.staged_url }}
+          STAGED_OUTCOME: ${{ steps.staged-deployment.outcome }}
+          STAGED_VERIFICATION_OUTCOME: ${{ steps.staged-verification.outcome }}
+          STAGED_SMOKE_OUTCOME: ${{ steps.staged-smoke.outcome }}
+          PROMOTION_OUTCOME: ${{ steps.vercel-promotion.outcome }}
           DEPLOYMENT_OUTCOME: ${{ steps.deployment-verification.outcome }}
           SMOKE_OUTCOME: ${{ steps.operational-smoke.outcome }}
         run: |
@@ -334,6 +433,11 @@ jobs:
             echo "- Candidate SHA: \`$CANDIDATE_SHA\`"
             echo "- Release branch: \`$RELEASE_BRANCH\`"
             echo "- Production domain: \`$PRODUCTION_BASE_URL\`"
-            echo "- Immutable SHA verification: \`$DEPLOYMENT_OUTCOME\`"
-            echo "- Liveness/readiness smoke: \`$SMOKE_OUTCOME\`"
+            echo "- Staged Production deployment: \`${STAGED_URL:-unavailable}\`"
+            echo "- Staged deployment creation: \`$STAGED_OUTCOME\`"
+            echo "- Staged identity verification: \`$STAGED_VERIFICATION_OUTCOME\`"
+            echo "- Staged health smoke: \`$STAGED_SMOKE_OUTCOME\`"
+            echo "- Vercel promotion: \`$PROMOTION_OUTCOME\`"
+            echo "- Immutable public SHA verification: \`$DEPLOYMENT_OUTCOME\`"
+            echo "- Public liveness/readiness smoke: \`$SMOKE_OUTCOME\`"
           } >> "$GITHUB_STEP_SUMMARY"

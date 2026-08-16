@@ -306,7 +306,7 @@ function parseCliArguments(argv) {
 export function formatGitHubOutputs(result) {
   const deploymentId = requiredString(result?.deploymentId, "invalid_deployment_id");
   const deploymentUrl = requiredString(result?.deploymentUrl, "invalid_deployment_url");
-  if (deploymentId.includes("\n") || deploymentUrl.includes("\n")) {
+  if (/[\r\n]/.test(deploymentId) || /[\r\n]/.test(deploymentUrl)) {
     throw new VercelStagedDeploymentError("invalid_github_output");
   }
   return `deployment_id=${deploymentId}\ndeployment_url=${deploymentUrl}\n`;

@@ -68,6 +68,13 @@ export type RecommendationExperienceOptions = Readonly<{
   persist?: boolean;
 }>;
 
+export type FocusedRecommendationPresentation = Readonly<{
+  focusedCards: readonly RecommendationCardViewModel[];
+  consideredCards: readonly RecommendationCardViewModel[];
+  remainingPendingCount: number;
+  totalCount: number;
+}>;
+
 const contextLimitationCodes = new Set([
   "traveler-interests-unavailable",
   "interest-category-unavailable",
@@ -107,6 +114,34 @@ function plannedPlaceIds(
       day.activities.flatMap((activity) => (activity.placeId ? [activity.placeId] : [])),
     ) ?? [],
   );
+}
+
+function isPendingRecommendationCard(card: RecommendationCardViewModel): boolean {
+  return card.status === "presented" && !card.isSaved && !card.isPlanned;
+}
+
+function isConsideredRecommendationCard(card: RecommendationCardViewModel): boolean {
+  return card.status === "accepted" || card.status === "rejected" || card.isSaved || card.isPlanned;
+}
+
+export function buildFocusedRecommendationPresentation(
+  cards: readonly RecommendationCardViewModel[],
+  limit = 6,
+): FocusedRecommendationPresentation {
+  if (!Number.isInteger(limit) || limit <= 0) {
+    throw new RangeError("focused recommendation limit must be a positive integer");
+  }
+
+  const pendingCards = cards.filter(isPendingRecommendationCard);
+  const focusedCards = pendingCards.slice(0, limit);
+  const consideredCards = cards.filter(isConsideredRecommendationCard);
+
+  return Object.freeze({
+    focusedCards: Object.freeze(focusedCards),
+    consideredCards: Object.freeze(consideredCards),
+    remainingPendingCount: Math.max(0, pendingCards.length - focusedCards.length),
+    totalCount: cards.length,
+  });
 }
 
 export function formatGeodesicDistance(distanceMeters: number): string {

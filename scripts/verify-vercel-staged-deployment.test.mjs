@@ -212,6 +212,20 @@ test("Production Release exige autorização manual e staged deployment governad
   );
   assert.match(workflow, /Verify staged Vercel deployment identity/);
   assert.match(workflow, /Smoke staged Production deployment/);
+  assert.match(
+    workflow,
+    /^\s*VERCEL_PROTECTION_BYPASS_SECRET: \$\{\{ secrets\.VERCEL_PROTECTION_BYPASS_SECRET \}\}\s*$/m,
+  );
+  assert.match(workflow, /if \[\[ -z "\$\{VERCEL_PROTECTION_BYPASS_SECRET:-\}" \]\]; then/);
+  assert.equal(
+    workflow.match(/--header "x-vercel-protection-bypass: \$\{VERCEL_PROTECTION_BYPASS_SECRET\}"/g)
+      ?.length,
+    3,
+  );
+  assert.match(workflow, /"\$\{STAGED_URL\}\/api\/health\/release"/);
+  assert.match(workflow, /"\$\{STAGED_URL\}\/api\/health\/live"/);
+  assert.match(workflow, /"\$\{STAGED_URL\}\/api\/health\/ready"/);
+  assert.doesNotMatch(workflow, /"vercel@\$\{VERCEL_CLI_VERSION\}" curl/);
   assert.match(workflow, /promote "\$STAGED_URL"/);
   assert.match(workflow, /Verify immutable candidate is served in Production/);
   assert.match(workflow, /Run Production operational smoke/);

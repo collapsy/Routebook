@@ -159,6 +159,7 @@ jobs:
       DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL_DIRECT }}
       RELEASE_SSH_KEY_B64: ${{ secrets.PRODUCTION_RELEASE_SSH_KEY_B64 }}
       VERCEL_API_TOKEN: ${{ secrets.VERCEL_API_TOKEN }}
+      VERCEL_PROTECTION_BYPASS_SECRET: ${{ secrets.VERCEL_PROTECTION_BYPASS_SECRET }}
       CANDIDATE_SHA: ${{ needs.resolve-candidate.outputs.candidate_sha }}
       RELEASE_SHA: ${{ needs.validate-candidate.outputs.release_sha }}
       ALLOW_HIGH_RISK: ${{ needs.resolve-candidate.outputs.allow_high_risk }}
@@ -177,6 +178,10 @@ jobs:
           fi
           if [[ -z "${VERCEL_API_TOKEN:-}" ]]; then
             echo "::error::Environment secret VERCEL_API_TOKEN não configurado."
+            exit 1
+          fi
+          if [[ -z "${VERCEL_PROTECTION_BYPASS_SECRET:-}" ]]; then
+            echo "::error::Environment secret VERCEL_PROTECTION_BYPASS_SECRET não configurado."
             exit 1
           fi
 
@@ -326,11 +331,10 @@ jobs:
           STAGED_URL: ${{ steps.staged-deployment.outputs.staged_url }}
         run: |
           set -euo pipefail
-          vercel_cmd=(pnpm dlx "vercel@${VERCEL_CLI_VERSION}")
 
-          release_json="$("${vercel_cmd[@]}" curl /api/health/release \
-            --deployment "$STAGED_URL" \
-            --token "$VERCEL_API_TOKEN")"
+          release_json="$(curl --fail --silent --show-error \
+            --header "x-vercel-protection-bypass: ${VERCEL_PROTECTION_BYPASS_SECRET}" \
+            "${STAGED_URL}/api/health/release")"
           printf '%s' "$release_json" | jq -e --arg sha "$CANDIDATE_SHA" '
             .service == "routebook-web" and
             .signal == "release" and
@@ -338,18 +342,18 @@ jobs:
             .commitSha == $sha
           ' >/dev/null
 
-          live_json="$("${vercel_cmd[@]}" curl /api/health/live \
-            --deployment "$STAGED_URL" \
-            --token "$VERCEL_API_TOKEN")"
+          live_json="$(curl --fail --silent --show-error \
+            --header "x-vercel-protection-bypass: ${VERCEL_PROTECTION_BYPASS_SECRET}" \
+            "${STAGED_URL}/api/health/live")"
           printf '%s' "$live_json" | jq -e '
             .service == "routebook-web" and
             .signal == "liveness" and
             .status == "ok"
           ' >/dev/null
 
-          ready_json="$("${vercel_cmd[@]}" curl /api/health/ready \
-            --deployment "$STAGED_URL" \
-            --token "$VERCEL_API_TOKEN")"
+          ready_json="$(curl --fail --silent --show-error \
+            --header "x-vercel-protection-bypass: ${VERCEL_PROTECTION_BYPASS_SECRET}" \
+            "${STAGED_URL}/api/health/ready")"
           printf '%s' "$ready_json" | jq -e '
             .service == "routebook-web" and
             .signal == "readiness" and

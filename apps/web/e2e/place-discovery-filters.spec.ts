@@ -41,7 +41,7 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   const praiaDoAmorCard = page
     .getByRole("list", { name: "Lugares publicados" })
     .getByRole("listitem")
-    .filter({ hasText: "Praia do Amor" });
+    .filter({ has: page.getByText("Praia do Amor", { exact: true }) });
   await expect(praiaDoAmorCard.getByRole("link", { name: "Ver mapa e fotos" })).toHaveAttribute(
     "href",
     /google\.com\/maps\/search/,

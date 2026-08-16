@@ -121,9 +121,7 @@ function isPendingRecommendationCard(card: RecommendationCardViewModel): boolean
 }
 
 function isConsideredRecommendationCard(card: RecommendationCardViewModel): boolean {
-  return (
-    card.status === "accepted" || card.status === "rejected" || card.isSaved || card.isPlanned
-  );
+  return card.status === "accepted" || card.status === "rejected" || card.isSaved || card.isPlanned;
 }
 
 export function buildFocusedRecommendationPresentation(

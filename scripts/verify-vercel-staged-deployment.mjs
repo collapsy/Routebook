@@ -308,8 +308,7 @@ async function main() {
       `[vercel-staged-deployment] verified deployment=${result.deploymentId} sha=${result.expectedSha} target=${result.target}\n`,
     );
   } catch (error) {
-    const code =
-      error instanceof VercelStagedDeploymentError ? error.code : "unexpected_failure";
+    const code = error instanceof VercelStagedDeploymentError ? error.code : "unexpected_failure";
     const httpStatus =
       error instanceof VercelStagedDeploymentError ? error.details.httpStatus : undefined;
     const suffix = httpStatus === undefined ? "" : ` http=${httpStatus}`;

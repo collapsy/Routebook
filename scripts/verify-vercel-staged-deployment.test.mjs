@@ -262,8 +262,11 @@ test("Production Release exige autorização manual e staged deployment governad
     workflow,
     /https:\/\/api\.vercel\.com\/v10\/projects\/\$\{VERCEL_PROJECT_ID\}\/promote\/\$\{STAGED_DEPLOYMENT_ID\}\?teamId=\$\{VERCEL_ORG_ID\}/,
   );
-  assert.match(workflow, /\.projectId == \$project_id/);
-  assert.match(workflow, /\.deploymentId == \$deployment_id/);
+  assert.match(workflow, /--output \/dev\/null/);
+  assert.match(workflow, /--write-out '%\{http_code\}'/);
+  assert.match(workflow, /201 \| 202\) ;;/);
+  assert.match(workflow, /Vercel promotion returned unexpected HTTP status/);
+  assert.doesNotMatch(workflow, /promotion_json/);
   assert.doesNotMatch(workflow, /vercel@\$\{VERCEL_CLI_VERSION\}" promote/);
   assert.doesNotMatch(workflow, /promote "\$STAGED_URL"/);
   assert.match(workflow, /Verify immutable candidate is served in Production/);

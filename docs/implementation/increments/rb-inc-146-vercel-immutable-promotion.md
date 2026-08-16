@@ -41,6 +41,8 @@ ai_context:
 
 O `Production Release` passa a materializar explicitamente um **Production Deployment staged** do SHA candidato, usando o ambiente Production da Vercel sem atribuir os domínios públicos. Esse deployment é validado antes da promoção e somente depois recebe tráfego, seguido pela verificação pública por SHA e pelo smoke operacional.
 
+A operação produtiva deixa de ser efeito implícito de um merge: a workflow exige `workflow_dispatch` com SHA exato e confirmação humana explícita para a promoção de Production.
+
 ## 2. Problema
 
 O RB-INC-145 tornou impossível concluir um release sem evidência do SHA efetivamente servido. A execução real do Production Release #22 mostrou que mover `codex/production-release` para um SHA já construído em `main` não materializou um novo `target=production` na Vercel.
@@ -48,6 +50,8 @@ O RB-INC-145 tornou impossível concluir um release sem evidência do SHA efetiv
 O release terminou corretamente em failure depois de 60 respostas 404 no endpoint de identidade do release. O domínio público permaneceu no deployment anterior.
 
 O Preview de `main` não pode ser promovido cegamente porque RouteBook separa configuração e dados de Preview e Production. A promoção precisa partir de um deployment construído como Production.
+
+Além disso, autorização para merge e autorização para uma operação em Production são decisões distintas. O mecanismo não pode transformar a integração de uma PR em consentimento implícito para executar staged deployment, migrations ou promoção de tráfego.
 
 ## 3. Base canônica
 
@@ -65,13 +69,17 @@ Código → validação → build → artefato imutável → promoção → depl
 - promoção e rollback baseados em deployments imutáveis;
 - operação manual controlada permitida para promoção/rollback.
 
+`RB-ADR-019` foi consultado por tratar da governança de GitHub Actions, porém sua decisão interna permanece `Proposed`; portanto ele é contexto, não autoridade para ampliar permissões de Production.
+
 A Vercel oferece staged Production Deployments via `--prod --skip-domain`, permitindo construir com configuração Production sem apontar ainda os domínios públicos.
 
 ## 4. Fluxo alvo
 
 ```text
 Engineering Validation verde em main
-→ candidate SHA imutável
+→ autorização humana explícita via workflow_dispatch
+→ candidate SHA imutável informado explicitamente
+→ confirmar Engineering Validation verde para esse SHA
 → validar histórico e migration policy
 → aplicar migrations pendentes autorizadas
 → exigir zero pending migrations
@@ -84,6 +92,8 @@ Engineering Validation verde em main
 → smoke público
 → evidência
 ```
+
+Não existe trigger automático de Production a partir do merge ou do término do Engineering Validation.
 
 ## 5. Segurança
 
@@ -98,6 +108,8 @@ O token:
 - fica limitado ao job associado ao Environment `Production`.
 
 IDs de projeto/time não são secrets e podem ser configuração explícita do workflow.
+
+A execução produtiva exige, além do SHA, `confirm_production_promotion=true`. Migrations classificadas como alto risco continuam exigindo uma aprovação independente em `approve_high_risk_migrations=true`.
 
 ## 6. CLI e determinismo
 
@@ -131,6 +143,7 @@ Divergência ou metadata insuficiente falham fechado.
 ```text
 .github/workflows/engineering-validation.yml
 .github/workflows/production-release.yml
+.github/workflows/rb-inc-146-registry-helper.yml  # temporário; deve ser removido antes da PR final
 scripts/verify-vercel-staged-deployment.mjs
 scripts/verify-vercel-staged-deployment.test.mjs
 package.json
@@ -138,6 +151,8 @@ docs/implementation/increments/rb-inc-146-vercel-immutable-promotion.md
 docs/implementation/context-packs/rb-inc-146-vercel-immutable-promotion.md
 docs/registry.md
 ```
+
+O helper temporário existe apenas para atualizar atomicamente o Registry através da API do GitHub disponível nesta sessão; ele não pode permanecer no diff final.
 
 ## 9. Fora de escopo
 
@@ -150,10 +165,14 @@ docs/registry.md
 - alterar funcionalidade do produto;
 - declarar M8 concluído;
 - executar promoção real durante a PR;
+- promover Production automaticamente após merge;
 - merge sem autorização humana explícita.
 
 ## 10. Critérios de aceite
 
+- [ ] Production Release executa somente por `workflow_dispatch` explícito.
+- [ ] O dispatch exige SHA exato e `confirm_production_promotion=true`.
+- [ ] O SHA informado precisa possuir Engineering Validation de push em `main` concluída com sucesso.
 - [ ] Staged Production Deployment é criado do checkout exato do candidate.
 - [ ] A Vercel CLI está fixada em versão explícita.
 - [ ] O staged deployment não recebe domínio público antes da promoção.
@@ -181,7 +200,8 @@ docs/registry.md
 - domínio público prematuramente atribuído rejeitado;
 - erro HTTP/JSON inválido sem body sensível nos detalhes;
 - inputs inválidos e token ausente falham antes da rede;
-- pipeline existente completo, incluindo build e Playwright/E2E.
+- pipeline existente completo, incluindo build e Playwright/E2E;
+- inspeção da workflow garante ausência de `workflow_run` como gatilho de promoção produtiva.
 
 ## 12. Riscos e mitigação
 
@@ -195,6 +215,8 @@ docs/registry.md
 
 **Deployment válido mas aplicação indisponível:** health staged precede a promoção; health público e smoke pós-promoção complementam a evidência.
 
+**Autorização implícita:** não existe trigger automático; um humano precisa informar SHA e confirmar a operação produtiva no dispatch.
+
 ## 13. Governança
 
 - issue: `#341`;
@@ -202,8 +224,10 @@ docs/registry.md
 - base: `main` em `184b6cd259c6ec23b4b2c7b0078614a7f46cd0fb`;
 - sem migration;
 - secret novo somente como configuração do GitHub Environment Production, nunca no repositório;
-- promoção real e merge permanecem operações controladas.
+- autorização de merge não implica autorização de Production;
+- promoção real exige dispatch explícito separado;
+- helper de Registry deve ser removido antes da PR final.
 
 ## 14. Definition of Done
 
-O incremento fica pronto para revisão quando documentação e implementação estiverem consistentes, os testes do contrato passarem, o pipeline completo estiver verde no mesmo SHA e a PR registrar explicitamente que a promoção real dependerá da configuração segura de `VERCEL_API_TOKEN` e de autorização para integração/Production.
+O incremento fica pronto para revisão quando documentação e implementação estiverem consistentes, os testes do contrato passarem, o pipeline completo estiver verde no mesmo SHA e a PR registrar explicitamente que a promoção real dependerá da configuração segura de `VERCEL_API_TOKEN` e de autorização humana específica para Production.

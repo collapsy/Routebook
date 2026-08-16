@@ -322,7 +322,8 @@ jobs:
             --project-id "$VERCEL_PROJECT_ID" \
             --team-id "$VERCEL_ORG_ID" \
             --forbidden-domains "routebook-one.vercel.app" \
-            --timeout-ms 10000
+            --timeout-ms 10000 \
+            --github-output "$GITHUB_OUTPUT"
 
       - name: Smoke staged Production deployment
         id: staged-smoke
@@ -391,13 +392,23 @@ jobs:
         id: vercel-promotion
         shell: bash
         env:
-          STAGED_URL: ${{ steps.staged-deployment.outputs.staged_url }}
+          STAGED_DEPLOYMENT_ID: ${{ steps.staged-verification.outputs.deployment_id }}
         run: |
           set -euo pipefail
-          pnpm dlx "vercel@${VERCEL_CLI_VERSION}" promote "$STAGED_URL" \
-            --yes \
-            --timeout 5m \
-            --token "$VERCEL_API_TOKEN"
+
+          promotion_json="$(curl --fail --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer ${VERCEL_API_TOKEN}" \
+            --header "Content-Type: application/json" \
+            --data '{}' \
+            "https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/promote/${STAGED_DEPLOYMENT_ID}?teamId=${VERCEL_ORG_ID}")"
+
+          printf '%s' "$promotion_json" | jq -e \
+            --arg project_id "$VERCEL_PROJECT_ID" \
+            --arg deployment_id "$STAGED_DEPLOYMENT_ID" '
+              .projectId == $project_id and
+              .deploymentId == $deployment_id
+            ' >/dev/null
 
       - name: Verify immutable candidate is served in Production
         id: deployment-verification

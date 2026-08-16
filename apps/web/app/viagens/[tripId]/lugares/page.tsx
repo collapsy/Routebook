@@ -391,9 +391,7 @@ export default async function PlacesPage({
               ? `${filteredPlaces.length} ${
                   filteredPlaces.length === 1 ? "lugar publicado" : "lugares publicados"
                 } no RouteBook + ${externalResults.length} ${
-                  externalResults.length === 1
-                    ? "descoberta atualizada"
-                    : "descobertas atualizadas"
+                  externalResults.length === 1 ? "descoberta atualizada" : "descobertas atualizadas"
                 } no Overture.`
               : "Lista e mapa exibem o mesmo conjunto publicado e filtrado."}
           </p>

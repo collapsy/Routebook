@@ -60,11 +60,13 @@ test("formata somente a identidade verificada para o GitHub Output", () => {
     }),
     `deployment_id=${deploymentId}\ndeployment_url=https://${deploymentHost}\n`,
   );
-  assert.throws(
-    () => formatGitHubOutputs({ deploymentId: "dpl_invalid\nname", deploymentUrl: "https://x" }),
-    (error) =>
-      error instanceof VercelStagedDeploymentError && error.code === "invalid_github_output",
-  );
+  for (const invalidDeploymentId of ["dpl_invalid\nname", "dpl_invalid\rname"]) {
+    assert.throws(
+      () => formatGitHubOutputs({ deploymentId: invalidDeploymentId, deploymentUrl: "https://x" }),
+      (error) =>
+        error instanceof VercelStagedDeploymentError && error.code === "invalid_github_output",
+    );
+  }
   assert.equal(
     formatGitHubOutputs({ deploymentId, deploymentUrl: `https://${deploymentHost}` }).includes(
       token,

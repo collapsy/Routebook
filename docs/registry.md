@@ -354,6 +354,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-149 | Context Pack do RB-INC-149 — Compatibilidade do Staged Production com Alias Padrão da Vercel | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-149-vercel-system-alias.md](./implementation/context-packs/rb-inc-149-vercel-system-alias.md) |
 | RB-INC-150 | Bypass de Proteção para Smoke do Staged Production | Implementation | Draft | 0.1.0 | [rb-inc-150-vercel-protection-bypass.md](./implementation/increments/rb-inc-150-vercel-protection-bypass.md) |
 | RB-CTX-150 | Context Pack do RB-INC-150 — Bypass de Proteção para Smoke do Staged Production | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-150-vercel-protection-bypass.md](./implementation/context-packs/rb-inc-150-vercel-protection-bypass.md) |
+| RB-INC-151 | Promoção do Staged Production pela API Oficial da Vercel | Implementation | Draft | 0.1.0 | [rb-inc-151-vercel-promote-api.md](./implementation/increments/rb-inc-151-vercel-promote-api.md) |
+| RB-CTX-151 | Context Pack do RB-INC-151 — Promoção do Staged Production pela API Oficial da Vercel | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-151-vercel-promote-api.md](./implementation/context-packs/rb-inc-151-vercel-promote-api.md) |
 
 ## Status possíveis
 

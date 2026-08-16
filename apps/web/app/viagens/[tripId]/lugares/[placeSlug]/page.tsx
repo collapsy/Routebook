@@ -15,6 +15,7 @@ import {
   buildGoogleMapsDirectionsUrl,
   buildGoogleMapsSearchUrl,
 } from "../../../../../lib/google-maps-links";
+import { findPipaPlacePracticalGuide } from "../../../../../lib/pipa-place-guide";
 import { presentAccommodationDistance } from "../distance";
 import { removePlaceAction, savePlaceAction } from "./actions";
 
@@ -74,6 +75,7 @@ export default async function PlaceDetailsPage({
     addressLabel: place.addressLabel,
     coordinate: placeCoordinate,
   });
+  const practicalGuide = findPipaPlacePracticalGuide(place.slug);
 
   return (
     <section className="app-page trip-overview-page">
@@ -113,6 +115,68 @@ export default async function PlaceDetailsPage({
         priority
         showProvenance
       />
+
+      {practicalGuide ? (
+        <section className="traveler-context-summary" aria-labelledby="place-practical-guide">
+          <p className="product-eyebrow">Planejamento prático</p>
+          <h2 id="place-practical-guide">Como encaixar este lugar na viagem</h2>
+          <dl className="trip-overview-summary">
+            <div>
+              <dt>Bom para</dt>
+              <dd>{practicalGuide.goodFor}</dd>
+            </div>
+            <div>
+              <dt>Tempo sugerido</dt>
+              <dd>{practicalGuide.suggestedDuration}</dd>
+            </div>
+            <div>
+              <dt>Melhor encaixe</dt>
+              <dd>{practicalGuide.bestWindow}</dd>
+            </div>
+            <div>
+              <dt>Acesso</dt>
+              <dd>{practicalGuide.access}</dd>
+            </div>
+          </dl>
+          <h3>Confira antes de sair</h3>
+          <ul>
+            {practicalGuide.checks.map((check) => (
+              <li key={check}>{check}</li>
+            ))}
+          </ul>
+          <p>
+            Orientação editorial revisada em 16/08/2026. Não representa horário, preço,
+            disponibilidade, maré, clima ou condição de rota em tempo real.
+          </p>
+          {practicalGuide.sources.length > 0 ? (
+            <p>
+              Referências institucionais:{" "}
+              {practicalGuide.sources.map((source, index) => (
+                <span key={source.url}>
+                  {index > 0 ? " · " : null}
+                  <a href={source.url} rel="noreferrer" target="_blank">
+                    {source.label}
+                  </a>
+                </span>
+              ))}
+            </p>
+          ) : (
+            <p>
+              Base editorial: catálogo publicado do RouteBook. Use “Ver mapa e fotos” para confirmar
+              dados operacionais atuais do estabelecimento.
+            </p>
+          )}
+        </section>
+      ) : (
+        <section className="traveler-context-summary" aria-labelledby="place-guide-pending">
+          <p className="product-eyebrow">Planejamento prático</p>
+          <h2 id="place-guide-pending">Orientação específica em revisão</h2>
+          <p>
+            O resumo publicado continua disponível, mas este lugar ainda não possui um perfil
+            operacional revisado. Confirme acesso e dados atuais antes de sair.
+          </p>
+        </section>
+      )}
 
       <section className="traveler-context-summary" aria-labelledby="place-route-title">
         <div className="section-heading-row">

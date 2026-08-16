@@ -45,7 +45,7 @@ function baseOptions(fetchImpl) {
     projectId,
     teamId,
     token,
-    forbiddenDomains: ["routebook-one.vercel.app", "routebook-rnd10.vercel.app"],
+    forbiddenDomains: ["routebook-one.vercel.app"],
     fetchImpl,
     timeoutMs: 1,
   };
@@ -134,6 +134,17 @@ test("rejeita staged deployment que já recebeu domínio público", async () => 
   );
 });
 
+test("aceita alias padrão gerenciado pela Vercel sem o domínio canônico", async () => {
+  const { fetchImpl } = fetchJson(
+    deployment({ alias: ["routebook-rnd10.vercel.app"] }),
+  );
+
+  const result = await verifyVercelStagedDeployment(baseOptions(fetchImpl));
+
+  assert.equal(result.status, "verified");
+  assert.equal(result.deploymentId, deploymentId);
+});
+
 test("falha fechado em erro HTTP e JSON inválido sem expor body", async () => {
   const httpFetch = async () => new Response("forbidden", { status: 403 });
   await assert.rejects(verifyVercelStagedDeployment(baseOptions(httpFetch)), (error) => {
@@ -196,6 +207,11 @@ test("Production Release exige autorização manual e staged deployment governad
   assert.doesNotMatch(workflow, /vercel@latest/);
   assert.match(workflow, /--prod/);
   assert.match(workflow, /--skip-domain/);
+  assert.match(workflow, /--forbidden-domains "routebook-one\.vercel\.app"/);
+  assert.doesNotMatch(
+    workflow,
+    /--forbidden-domains "routebook-one\.vercel\.app,routebook-rnd10\.vercel\.app"/,
+  );
   assert.match(workflow, /Verify staged Vercel deployment identity/);
   assert.match(workflow, /Smoke staged Production deployment/);
   assert.match(workflow, /promote "\$STAGED_URL"/);

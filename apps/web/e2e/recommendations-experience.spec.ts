@@ -174,15 +174,21 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
   await expect(
     page.getByRole("heading", { name: "Sugestões para decidir agora", exact: true }),
   ).toBeVisible();
-  await expect(page.getByText(/Exibindo 6 de 30 Recommendations como seleção inicial/i)).toBeVisible();
+  await expect(
+    page.getByText(/Exibindo 6 de 30 Recommendations como seleção inicial/i),
+  ).toBeVisible();
 
   const focusedList = page.getByRole("list", { name: "Recommendations de Lugares" });
   const focusedHeadings = focusedList.getByRole("heading", { level: 2 });
   await expect(focusedHeadings).toHaveCount(6);
   const focusedNames = await focusedHeadings.allTextContents();
-  await expect(page.getByRole("link", { name: "Ver todas as sugestões", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Ver todas as sugestões", exact: true }),
+  ).toBeVisible();
   expect(
-    await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+    ),
   ).toBe(true);
 
   await Promise.all([
@@ -195,7 +201,9 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
   expect((await fullHeadings.allTextContents()).slice(0, 6)).toEqual(focusedNames);
   await expect(fullList.getByRole("img", { name: /^Imagem não disponível para / })).toHaveCount(24);
   expect(
-    await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+    ),
   ).toBe(true);
 
   await Promise.all([
@@ -203,7 +211,9 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
     page.getByRole("link", { name: "Voltar às sugestões focadas", exact: true }).click(),
   ]);
   await expect(
-    page.getByRole("list", { name: "Recommendations de Lugares" }).getByRole("heading", { level: 2 }),
+    page
+      .getByRole("list", { name: "Recommendations de Lugares" })
+      .getByRole("heading", { level: 2 }),
   ).toHaveCount(6);
 });
 

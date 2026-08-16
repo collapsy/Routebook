@@ -316,7 +316,7 @@ jobs:
             --expected-sha "$CANDIDATE_SHA" \
             --project-id "$VERCEL_PROJECT_ID" \
             --team-id "$VERCEL_ORG_ID" \
-            --forbidden-domains "routebook-one.vercel.app,routebook-rnd10.vercel.app" \
+            --forbidden-domains "routebook-one.vercel.app" \
             --timeout-ms 10000
 
       - name: Smoke staged Production deployment

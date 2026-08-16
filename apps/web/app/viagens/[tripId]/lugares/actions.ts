@@ -12,11 +12,7 @@ import { findTripById } from "@routebook/trip-management";
 
 import { resolveTripRouteAccess } from "../../../../lib/trip-route-access";
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
-import {
-  parseMaximumDistance,
-  parsePlaceCategory,
-  parsePlacePriceRange,
-} from "./filters";
+import { parseMaximumDistance, parsePlaceCategory, parsePlacePriceRange } from "./filters";
 
 const pipaDiscoveryCenter = { latitude: -6.24, longitude: -35.065 } as const;
 const externalDiscoveryRadiusMeters = 8_000;
@@ -48,7 +44,9 @@ function promotionReturnPath(
   hasAccommodationCoordinate: boolean,
 ): string {
   const query = new URLSearchParams({ descoberta: "externa" });
-  const search = String(formData.get("busca") ?? "").trim().slice(0, 120);
+  const search = String(formData.get("busca") ?? "")
+    .trim()
+    .slice(0, 120);
   const category = parsePlaceCategory(String(formData.get("categoria") ?? ""));
   const priceRange = parsePlacePriceRange(String(formData.get("preco") ?? ""));
   const maximumDistanceMeters = hasAccommodationCoordinate

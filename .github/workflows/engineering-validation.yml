@@ -116,6 +116,9 @@ jobs:
       - name: Test Production deployment verification
         run: pnpm test:production-deployment-verification
 
+      - name: Test staged Vercel deployment verification
+        run: pnpm test:vercel-staged-deployment
+
       - name: Apply database migrations
         run: pnpm db:migrate
 

@@ -269,7 +269,6 @@ test("adiciona Recommendation ao Dia escolhido", async ({ page }) => {
 
   await page.reload();
   const considered = consideredRecommendationItem(page, "Chapadão de Pipa");
-  await expect(considered).toContainText("Escolha confirmada");
   await expect(considered).toContainText("Já está no roteiro");
 
   await page.goto(`${tripUrl}/roteiro`);

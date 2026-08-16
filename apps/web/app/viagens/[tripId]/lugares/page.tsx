@@ -376,14 +376,14 @@ export default async function PlacesPage({
       <div className={styles.resultHeading}>
         <div>
           <h2>
-           {filteredPlaces.length === 1
+            {filteredPlaces.length === 1
               ? "1 lugar encontrado"
               : `${filteredPlaces.length} lugares encontrados`}
-         </h2>
-         <p>
-           {discoverExternal && !externalDiscoveryError
+          </h2>
+          <p>
+            {discoverExternal && !externalDiscoveryError
               ? `${filteredPlaces.length} no catálogo + ${externalResults.length} descobertas recentes abaixo.`
-             : "Lista e mapa exibem o mesmo conjunto publicado e filtrado."}
+              : "Lista e mapa exibem o mesmo conjunto publicado e filtrado."}
           </p>
         </div>
         <Link

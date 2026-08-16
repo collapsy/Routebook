@@ -83,9 +83,7 @@ async function openRecommendations(
   const recommendationUrl =
     view === "all" ? `${tripUrl}/recomendacoes?view=all` : `${tripUrl}/recomendacoes`;
   await page.goto(recommendationUrl);
-  await expect(page).toHaveURL(
-    view === "all" ? /\/recomendacoes\?view=all$/ : /\/recomendacoes$/,
-  );
+  await expect(page).toHaveURL(view === "all" ? /\/recomendacoes\?view=all$/ : /\/recomendacoes$/);
   await expect(
     page.getByRole("heading", {
       name: `Sugestões para ${tripName}`,

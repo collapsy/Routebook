@@ -476,8 +476,8 @@ export default async function PlacesPage({
           <h2 id="external-place-discovery">Descobertas atualizadas no Overture</h2>
           <p>
             Estes resultados ampliam a exploração além dos {publishedPlaces.length} Places
-            publicados, mas ainda são candidatos externos. Consulte mapa, fotos e rota real antes
-            de decidir; a publicação no RouteBook continua sendo uma operação governada separada.
+            publicados, mas ainda são candidatos externos. Consulte mapa, fotos e rota real antes de
+            decidir; a publicação no RouteBook continua sendo uma operação governada separada.
           </p>
           {promotionStatusMessage ? (
             <p className={styles.notice} role="status">

@@ -38,7 +38,9 @@ test("mantém Discovery funcional sem coordenadas da hospedagem", async ({ page 
 
   await expect(page.getByRole("heading", { name: /\d+ opções para explorar/ })).toBeVisible();
   await expect(
-    page.getByText(/30 lugares publicados no RouteBook \+ \d+ descobertas atualizadas no Overture/),
+    page.getByText(
+      /30 lugares publicados no RouteBook \+ \d+ descoberta(?: atualizada|s atualizadas) no Overture/,
+    ),
   ).toBeVisible();
   await expect(page.getByLabel("Distância máxima")).toBeDisabled();
   await expect(page.getByText(/filtro de distância fica disponível/)).toBeVisible();

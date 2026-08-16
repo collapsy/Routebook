@@ -216,14 +216,10 @@ test("Production Release exige autorização manual e staged deployment governad
     workflow,
     /^\s*VERCEL_PROTECTION_BYPASS_SECRET: \$\{\{ secrets\.VERCEL_PROTECTION_BYPASS_SECRET \}\}\s*$/m,
   );
-  assert.match(
-    workflow,
-    /if \[\[ -z "\$\{VERCEL_PROTECTION_BYPASS_SECRET:-\}" \]\]; then/,
-  );
+  assert.match(workflow, /if \[\[ -z "\$\{VERCEL_PROTECTION_BYPASS_SECRET:-\}" \]\]; then/);
   assert.equal(
-    workflow.match(
-      /--header "x-vercel-protection-bypass: \$\{VERCEL_PROTECTION_BYPASS_SECRET\}"/g,
-    )?.length,
+    workflow.match(/--header "x-vercel-protection-bypass: \$\{VERCEL_PROTECTION_BYPASS_SECRET\}"/g)
+      ?.length,
     3,
   );
   assert.match(workflow, /"\$\{STAGED_URL\}\/api\/health\/release"/);

@@ -17,7 +17,9 @@
 .summary h2,
 .summary p,
 .empty h2,
-.empty p {
+.empty p,
+.considered h2,
+.considered p {
   margin: 0;
 }
 
@@ -31,13 +33,16 @@
 
 .heading > p:not(.eyebrow),
 .summary p,
-.empty p {
+.empty p,
+.considered p,
+.consideredCopy span {
   color: var(--foreground-muted);
   line-height: 1.6;
 }
 
 .backLink,
-.contextLink {
+.contextLink,
+.modeLink {
   color: var(--primary-strong);
   font-weight: 800;
   justify-self: start;
@@ -45,12 +50,14 @@
 }
 
 .backLink:hover,
-.contextLink:hover {
+.contextLink:hover,
+.modeLink:hover {
   text-decoration: underline;
 }
 
 .backLink:focus-visible,
-.contextLink:focus-visible {
+.contextLink:focus-visible,
+.modeLink:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
 }
@@ -59,7 +66,8 @@
 .success,
 .error,
 .summary,
-.empty {
+.empty,
+.considered {
   border: 1px solid var(--border);
   border-radius: var(--radius-medium);
   line-height: 1.55;
@@ -68,7 +76,8 @@
 
 .notice,
 .summary,
-.empty {
+.empty,
+.considered {
   background: var(--surface-soft);
 }
 
@@ -84,7 +93,21 @@
 
 .summary {
   display: grid;
-  gap: 0.55rem;
+  gap: 0.7rem;
+}
+
+.viewControls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.modeLink {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  padding: 0.65rem 0.85rem;
 }
 
 .list {
@@ -102,6 +125,54 @@
 .empty {
   display: grid;
   gap: 0.75rem;
+}
+
+.considered {
+  display: grid;
+  gap: 1rem;
+}
+
+.consideredHeading {
+  align-items: start;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.consideredHeading > div {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.consideredList {
+  display: grid;
+  gap: 0.65rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.consideredItem {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 0.8rem;
+}
+
+.consideredCopy {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.consideredCopy strong,
+.consideredCopy span {
+  overflow-wrap: anywhere;
 }
 
 .loadingCard {
@@ -129,5 +200,10 @@
 
   .list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .consideredHeading {
+    align-items: center;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 }

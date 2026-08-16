@@ -308,3 +308,9 @@ pnpm test:e2e
 ## 17. Definition of Done
 
 O incremento está pronto para revisão quando os critérios de aceite estiverem satisfeitos, o Context Pack e o Registry estiverem atualizados, todos os testes aplicáveis possuírem evidência real e Documentation Validation + Engineering Validation estiverem verdes no mesmo SHA. A integração na `main` permanece uma decisão humana separada.
+
+## 18. Exceção operacional temporária para o Registry
+
+Para atualizar `docs/registry.md` sem reescrever manualmente o arquivo extenso pelo connector, foi utilizado exclusivamente na branch o helper `.github/workflows/rb-inc-147-registry-helper.yml`.
+
+A exceção é limitada à manutenção documental: o helper apenas registra `RB-INC-147`/`RB-CTX-147`, documenta esta exceção e remove o próprio arquivo antes do estado final da branch. Ele não altera CI canônico, aplicação, domínio, dados, secrets ou Production e não deve aparecer no diff final da PR.

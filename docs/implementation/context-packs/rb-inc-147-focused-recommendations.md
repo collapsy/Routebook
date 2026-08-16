@@ -319,3 +319,9 @@ Interromper e escalar se a solução exigir:
 ## 19. Definition of Done
 
 Incremento e Context Pack registrados, implementação limitada aos caminhos autorizados, testes afetados e suíte integral com resultados reais, CI verde no mesmo SHA e PR pronta para revisão. Merge permanece condicionado à autorização humana explícita.
+
+## 20. Exceção operacional temporária para o Registry
+
+Fica autorizada exclusivamente durante a preparação desta branch a criação transitória de `.github/workflows/rb-inc-147-registry-helper.yml` para registrar `RB-INC-147` e `RB-CTX-147` em `docs/registry.md`.
+
+O helper deve remover a si próprio no mesmo ciclo, não pode modificar workflows canônicos, executar Production, acessar secrets de aplicação ou permanecer no diff final. Qualquer outro arquivo sob `.github/workflows/**` continua proibido.

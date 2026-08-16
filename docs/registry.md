@@ -346,6 +346,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-145 | Context Pack do RB-INC-145 — Verificação Efetiva do Production Deployment | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-145-production-release-verification.md](./implementation/context-packs/rb-inc-145-production-release-verification.md) |
 | RB-INC-146 | Promoção Imutável de Staged Production Deployment na Vercel | Implementation | Draft | 0.1.0 | [rb-inc-146-vercel-immutable-promotion.md](./implementation/increments/rb-inc-146-vercel-immutable-promotion.md) |
 | RB-CTX-146 | Context Pack do RB-INC-146 — Promoção Imutável de Staged Production Deployment | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-146-vercel-immutable-promotion.md](./implementation/context-packs/rb-inc-146-vercel-immutable-promotion.md) |
+| RB-INC-147 | Recommendations Focadas com Divulgação Progressiva | Implementation | Draft | 0.1.0 | [rb-inc-147-focused-recommendations.md](./implementation/increments/rb-inc-147-focused-recommendations.md) |
+| RB-CTX-147 | Context Pack do RB-INC-147 — Recommendations Focadas com Divulgação Progressiva | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-147-focused-recommendations.md](./implementation/context-packs/rb-inc-147-focused-recommendations.md) |
 
 ## Status possíveis
 

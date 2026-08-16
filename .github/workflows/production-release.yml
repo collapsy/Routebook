@@ -396,19 +396,22 @@ jobs:
         run: |
           set -euo pipefail
 
-          promotion_json="$(curl --fail --silent --show-error \
+          promotion_status="$(curl --fail --silent --show-error \
+            --output /dev/null \
+            --write-out '%{http_code}' \
             --request POST \
             --header "Authorization: Bearer ${VERCEL_API_TOKEN}" \
             --header "Content-Type: application/json" \
             --data '{}' \
             "https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/promote/${STAGED_DEPLOYMENT_ID}?teamId=${VERCEL_ORG_ID}")"
 
-          printf '%s' "$promotion_json" | jq -e \
-            --arg project_id "$VERCEL_PROJECT_ID" \
-            --arg deployment_id "$STAGED_DEPLOYMENT_ID" '
-              .projectId == $project_id and
-              .deploymentId == $deployment_id
-            ' >/dev/null
+          case "$promotion_status" in
+            201 | 202) ;;
+            *)
+              echo "::error::Vercel promotion returned unexpected HTTP status: ${promotion_status}."
+              exit 1
+              ;;
+          esac
 
       - name: Verify immutable candidate is served in Production
         id: deployment-verification

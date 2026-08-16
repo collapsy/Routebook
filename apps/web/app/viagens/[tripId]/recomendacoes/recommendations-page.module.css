@@ -105,8 +105,8 @@
 
 .modeLink {
   background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-small);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
   padding: 0.65rem 0.85rem;
 }
 
@@ -155,7 +155,7 @@
   align-items: center;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-small);
+  border-radius: var(--radius-medium);
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;

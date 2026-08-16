@@ -80,7 +80,12 @@ async function openRecommendations(
   tripName: string,
   view: "focused" | "all" = "focused",
 ) {
-  await page.goto(`${tripUrl}/recomendacoes`);
+  const recommendationUrl =
+    view === "all" ? `${tripUrl}/recomendacoes?view=all` : `${tripUrl}/recomendacoes`;
+  await page.goto(recommendationUrl);
+  await expect(page).toHaveURL(
+    view === "all" ? /\/recomendacoes\?view=all$/ : /\/recomendacoes$/,
+  );
   await expect(
     page.getByRole("heading", {
       name: `Sugestões para ${tripName}`,
@@ -90,10 +95,6 @@ async function openRecommendations(
   await expect(page.getByText(/cada mudança exige uma ação explícita/i)).toBeVisible();
 
   if (view === "all") {
-    await Promise.all([
-      page.waitForURL(/\/recomendacoes\?view=all$/),
-      page.getByRole("link", { name: "Ver todas as sugestões", exact: true }).click(),
-    ]);
     await expect(
       page.getByRole("heading", { name: "Lista completa e explicável", exact: true }),
     ).toBeVisible();
@@ -182,19 +183,19 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
   const focusedHeadings = focusedList.getByRole("heading", { level: 2 });
   await expect(focusedHeadings).toHaveCount(6);
   const focusedNames = await focusedHeadings.allTextContents();
-  await expect(
-    page.getByRole("link", { name: "Ver todas as sugestões", exact: true }),
-  ).toBeVisible();
+  const showAllLink = page.getByRole("link", { name: "Ver todas as sugestões", exact: true });
+  await expect(showAllLink).toBeVisible();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
     ),
   ).toBe(true);
 
-  await Promise.all([
-    page.waitForURL(/\/recomendacoes\?view=all$/),
-    page.getByRole("link", { name: "Ver todas as sugestões", exact: true }).click(),
-  ]);
+  await showAllLink.click();
+  await expect(page).toHaveURL(/\/recomendacoes\?view=all$/);
+  await expect(
+    page.getByRole("heading", { name: "Lista completa e explicável", exact: true }),
+  ).toBeVisible();
   const fullList = page.getByRole("list", { name: "Recommendations de Lugares" });
   const fullHeadings = fullList.getByRole("heading", { level: 2 });
   await expect(fullHeadings).toHaveCount(30);
@@ -206,10 +207,9 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
     ),
   ).toBe(true);
 
-  await Promise.all([
-    page.waitForURL(/\/recomendacoes$/),
-    page.getByRole("link", { name: "Voltar às sugestões focadas", exact: true }).click(),
-  ]);
+  const focusLink = page.getByRole("link", { name: "Voltar às sugestões focadas", exact: true });
+  await focusLink.click();
+  await expect(page).toHaveURL(/\/recomendacoes$/);
   await expect(
     page
       .getByRole("list", { name: "Recommendations de Lugares" })

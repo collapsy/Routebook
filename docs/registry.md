@@ -348,6 +348,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-146 | Context Pack do RB-INC-146 — Promoção Imutável de Staged Production Deployment | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-146-vercel-immutable-promotion.md](./implementation/context-packs/rb-inc-146-vercel-immutable-promotion.md) |
 | RB-INC-147 | Recommendations Focadas com Divulgação Progressiva | Implementation | Draft | 0.1.0 | [rb-inc-147-focused-recommendations.md](./implementation/increments/rb-inc-147-focused-recommendations.md) |
 | RB-CTX-147 | Context Pack do RB-INC-147 — Recommendations Focadas com Divulgação Progressiva | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-147-focused-recommendations.md](./implementation/context-packs/rb-inc-147-focused-recommendations.md) |
+| RB-INC-148 | Promoção Governada de Candidatos Externos para Draft | Implementation | Draft | 0.1.0 | [rb-inc-148-external-place-promotion.md](./implementation/increments/rb-inc-148-external-place-promotion.md) |
+| RB-CTX-148 | Context Pack do RB-INC-148 — Promoção Governada de Candidatos Externos para Draft | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-148-external-place-promotion.md](./implementation/context-packs/rb-inc-148-external-place-promotion.md) |
 
 ## Status possíveis
 

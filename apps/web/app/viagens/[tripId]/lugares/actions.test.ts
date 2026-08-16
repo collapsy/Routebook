@@ -14,10 +14,7 @@ const databaseMocks = vi.hoisted(() => {
     constructor(
       message: string,
       readonly code:
-        | "candidate-rejected"
-        | "possible-match"
-        | "linked-place-not-found"
-        | "destination-conflict",
+        "candidate-rejected" | "possible-match" | "linked-place-not-found" | "destination-conflict",
       readonly matchedPlaceId?: string,
     ) {
       super(message);

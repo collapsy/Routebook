@@ -273,9 +273,9 @@ export default async function PlacesPage({
           <p className="product-eyebrow">Guia de viagem</p>
           <h1>Lugares em {trip.destination.name}</h1>
           <p>
-            Compare o catálogo curado com descobertas recentes da região. A distância exibida no
-            RouteBook é em linha reta; para distância por ruas, duração e trânsito, use as ações de
-            rota real em cada lugar.
+            Compare o catálogo curado com descobertas recentes da região. Com Hospedagem
+            geocodificada, a lista prioriza os Lugares mais próximos pela distância geodésica em
+            linha reta. Para distância por ruas, duração e trânsito, use as ações de rota real.
           </p>
         </div>
       </header>
@@ -376,14 +376,14 @@ export default async function PlacesPage({
       <div className={styles.resultHeading}>
         <div>
           <h2>
-            {filteredPlaces.length === 1
-              ? "1 lugar do catálogo"
-              : `${filteredPlaces.length} lugares do catálogo`}
-          </h2>
-          <p>
-            {discoverExternal && !externalDiscoveryError
-              ? `Mais ${externalResults.length} descobertas recentes disponíveis abaixo.`
-              : "Lista e mapa exibem o mesmo conjunto publicado e filtrado."}
+           {filteredPlaces.length === 1
+              ? "1 lugar encontrado"
+              : `${filteredPlaces.length} lugares encontrados`}
+         </h2>
+         <p>
+           {discoverExternal && !externalDiscoveryError
+              ? `${filteredPlaces.length} no catálogo + ${externalResults.length} descobertas recentes abaixo.`
+             : "Lista e mapa exibem o mesmo conjunto publicado e filtrado."}
           </p>
         </div>
         <Link

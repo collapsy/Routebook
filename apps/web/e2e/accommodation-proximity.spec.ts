@@ -36,7 +36,10 @@ test("mantém Discovery funcional sem coordenadas da hospedagem", async ({ page 
 
   await page.goto(`/viagens/${trip.id}/lugares`);
 
-  await expect(page.getByRole("heading", { name: "30 lugares encontrados" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /\d+ opções para explorar/ })).toBeVisible();
+  await expect(
+    page.getByText(/30 lugares publicados no RouteBook \+ \d+ descobertas atualizadas no Overture/),
+  ).toBeVisible();
   await expect(page.getByLabel("Distância máxima")).toBeDisabled();
   await expect(page.getByText(/filtro de distância fica disponível/)).toBeVisible();
 });

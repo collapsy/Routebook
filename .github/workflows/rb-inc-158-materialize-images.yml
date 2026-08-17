@@ -14,7 +14,7 @@ jobs:
   audit-commons-candidates:
     runs-on: ubuntu-latest
     steps:
-      - name: Audit Wikimedia Commons candidates
+      - name: Audit exact Wikimedia Commons candidates
         shell: bash
         run: |
           node <<'NODE'
@@ -22,11 +22,22 @@ jobs:
           const API = "https://commons.wikimedia.org/w/api.php";
           const USER_AGENT = "RouteBookPlaceImageBot/0.1 (https://github.com/collapsy/Routebook)";
           const targets = [
-            { slug: "santuario-ecologico-de-pipa", query: '"Santuário Ecológico de Pipa"' },
-            { slug: "praia-de-cacimbinhas", query: '"Praia Cacimbinhas" Tibau do Sul' },
-            { slug: "praia-de-sibauma", query: '"Praia de Sibaúma" Tibau do Sul' },
-            { slug: "praia-das-minas", query: '"Praia das Minas" Pipa Tibau do Sul' },
-            { slug: "praia-do-centro", query: '"Praia de Pipa" Tibau do Sul' },
+            {
+              slug: "santuario-ecologico-de-pipa",
+              fileTitle: "File:Santuário Ecológico de Pipa.jpg",
+            },
+            {
+              slug: "praia-de-cacimbinhas",
+              fileTitle: "File:A vista da Praia Cacimbinhas de acima das rochas.JPG",
+            },
+            {
+              slug: "praia-do-centro",
+              fileTitle: "File:PipaBeachView.JPG",
+            },
+            {
+              slug: "praia-de-sibauma",
+              fileTitle: "File:Praia de Sibaúma.jpeg",
+            },
           ];
 
           function stripHtml(value = "") {
@@ -46,10 +57,7 @@ jobs:
                 action: "query",
                 format: "json",
                 formatversion: "2",
-                generator: "search",
-                gsrsearch: target.query,
-                gsrnamespace: "6",
-                gsrlimit: "8",
+                titles: target.fileTitle,
                 prop: "imageinfo",
                 iiprop: "url|size|mime|sha1|extmetadata",
                 iiurlwidth: "1280",
@@ -61,21 +69,25 @@ jobs:
               });
               if (!response.ok) throw new Error(`Commons ${target.slug}: HTTP ${response.status}`);
               const payload = await response.json();
-              const candidates = (payload.query?.pages ?? []).map((page) => {
-                const info = page.imageinfo?.[0] ?? {};
-                const metadata = info.extmetadata ?? {};
-                return {
-                  title: page.title,
-                  descriptionUrl: info.descriptionurl,
-                  mime: info.mime,
-                  sha1: info.sha1,
-                  artist: stripHtml(metadata.Artist?.value),
-                  license: stripHtml(metadata.LicenseShortName?.value),
-                  licenseUrl: stripHtml(metadata.LicenseUrl?.value),
-                  description: stripHtml(metadata.ImageDescription?.value),
-                };
+              const page = payload.query?.pages?.[0];
+              const info = page?.imageinfo?.[0] ?? {};
+              const metadata = info.extmetadata ?? {};
+              audit.push({
+                ...target,
+                resolvedTitle: page?.title,
+                missing: Boolean(page?.missing),
+                descriptionUrl: info.descriptionurl,
+                originalUrl: info.url,
+                thumbnailUrl: info.thumburl,
+                width: info.width,
+                height: info.height,
+                mime: info.mime,
+                sha1: info.sha1,
+                artist: stripHtml(metadata.Artist?.value),
+                license: stripHtml(metadata.LicenseShortName?.value),
+                licenseUrl: stripHtml(metadata.LicenseUrl?.value),
+                description: stripHtml(metadata.ImageDescription?.value),
               });
-              audit.push({ ...target, candidates });
             }
             await writeFile("commons-audit.json", `${JSON.stringify(audit, null, 2)}\n`);
           })().catch((error) => {

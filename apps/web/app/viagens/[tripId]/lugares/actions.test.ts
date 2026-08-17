@@ -143,7 +143,7 @@ describe("promoteExternalPlaceAction", () => {
       center: { latitude: -6.2302, longitude: -35.0503 },
       radiusMeters: 3_000,
       categories: ["beach"],
-      limit: 40,
+      limit: 200,
     });
     expect(databaseMocks.promote).toHaveBeenCalledWith({
       destinationId: "pipa-rn-br",

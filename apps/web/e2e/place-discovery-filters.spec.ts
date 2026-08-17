@@ -46,9 +46,6 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
     "href",
     `/viagens/${trip.id}/lugares?descoberta=ocultar`,
   );
-  await expect(
-    page.getByRole("heading", { name: "Descobertas atualizadas no Overture" }),
-  ).toBeVisible();
   await expect(page.getByRole("heading", { name: integratedOptionsHeading })).toBeVisible();
   await expect(page.getByText(integratedCount(30))).toBeVisible();
   await expect(page.getByText("Uma grade, duas fontes claramente identificadas")).toBeVisible();

@@ -2,8 +2,9 @@ import { expect, test } from "@playwright/test";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
-const integratedOptionsHeading = /\d+ opç(?:ão|ões) para explorar/;
-const overtureDiscoveryCount = /\d+ descoberta(?: atualizada|s atualizadas) no Overture/;
+const integratedOptionsHeading = /\d+ de \d+ opç(?:ão disponível|ões disponíveis) exibidas/;
+const overtureDiscoveryCount =
+  /\d+ de \d+ descoberta(?: atualizada disponível|s atualizadas disponíveis) no Overture/;
 
 function integratedCount(publishedCount: number): RegExp {
   const publishedLabel = publishedCount === 1 ? "lugar publicado" : "lugares publicados";
@@ -35,8 +36,8 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   const publishedPlaces = options.locator('[data-place-source="published"]');
   const externalPlaces = options.locator('[data-place-source="external"]');
   await expect(publishedPlaces).toHaveCount(30);
-  await expect(externalPlaces.first()).toBeVisible();
-  expect(await options.getByRole("listitem").count()).toBeGreaterThan(30);
+  await expect(externalPlaces).toHaveCount(60);
+  expect(await options.getByRole("listitem").count()).toBe(90);
   await expect(
     publishedPlaces.getByRole("img", { name: /^Imagem não disponível para / }),
   ).toHaveCount(24);
@@ -75,6 +76,30 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(page.getByLabel("Resumo do mapa")).toContainText(
     `${visibleOptionTotal + 1} pontos representados`,
   );
+
+  const expandDiscoveryLink = page.getByRole("link", {
+    name: /Mostrar todas as \d+ descobertas/,
+  });
+  await expect(expandDiscoveryLink).toBeVisible();
+  await expect(expandDiscoveryLink).toHaveAttribute("href", /descoberta=todas/);
+  await expandDiscoveryLink.click();
+  await expect(page).toHaveURL(/descoberta=todas/);
+  const expandedExternalTotal = await externalPlaces.count();
+  expect(expandedExternalTotal).toBeGreaterThan(60);
+  const expandedVisibleTotal = await options.getByRole("listitem").count();
+  await expect(discoveryMap).toHaveAttribute(
+    "data-map-point-count",
+    String(expandedVisibleTotal + 1),
+  );
+  await expect(discoveryMap).toHaveAttribute(
+    "data-map-external-count",
+    String(expandedExternalTotal),
+  );
+  await expect(page.getByRole("link", { name: "Mostrar primeiras 60 descobertas" })).toBeVisible();
+  await page.getByRole("link", { name: "Mostrar primeiras 60 descobertas" }).click();
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares$`));
+  await expect(externalPlaces).toHaveCount(60);
+
   const praiaDoAmorCard = publishedPlaces.filter({
     has: page.locator("strong").filter({ hasText: /^Praia do Amor$/ }),
   });

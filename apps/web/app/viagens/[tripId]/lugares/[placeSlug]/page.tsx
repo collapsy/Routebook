@@ -221,7 +221,8 @@ export default async function PlaceDetailsPage({
 
         {adicionadoAoRoteiro === "1" && selectedDay ? (
           <p className="success-banner" role="status">
-            {place.name} foi adicionado ao Dia {selectedDay.index} — {formatDayLabel(selectedDay.date)}.
+            {place.name} foi adicionado ao Dia {selectedDay.index} —{" "}
+            {formatDayLabel(selectedDay.date)}.
           </p>
         ) : null}
         {erroRoteiro ? (

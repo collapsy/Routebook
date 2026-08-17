@@ -371,6 +371,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-158 | Expansão Governada da Cobertura Visual dos Places de Pipa | Implementation | Draft | 0.1.0 | [rb-inc-158-pipa-visual-coverage.md](./implementation/increments/rb-inc-158-pipa-visual-coverage.md) |
 | RB-CTX-158 | Context Pack do RB-INC-158 — Expansão Governada da Cobertura Visual dos Places de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-158-pipa-visual-coverage.md](./implementation/context-packs/rb-inc-158-pipa-visual-coverage.md) |
+| RB-INC-159 | Ações diretas de Lugar no planejamento | Implementation | Draft | 0.1.0 | [rb-inc-159-place-actions-itinerary-entry.md](./implementation/increments/rb-inc-159-place-actions-itinerary-entry.md) |
+| RB-CTX-159 | Context Pack do RB-INC-159 — Ações diretas de Lugar no planejamento | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-159-place-actions-itinerary-entry.md](./implementation/context-packs/rb-inc-159-place-actions-itinerary-entry.md) |
 
 ## Status possíveis
 

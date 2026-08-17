@@ -32,9 +32,7 @@ test("salva no catálogo preservando filtros e abre o compositor do Lugar", asyn
   await expect(card.getByRole("button", { name: "Remover dos salvos" })).toBeVisible();
 
   await card.getByRole("link", { name: "Adicionar ao roteiro" }).click();
-  await expect(page).toHaveURL(
-    new RegExp(`/viagens/${trip.id}/lugares/praia-do-amor#?`),
-  );
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares/praia-do-amor#?`));
   await expect(page.getByRole("heading", { name: "Adicionar ao roteiro" })).toBeVisible();
 });
 

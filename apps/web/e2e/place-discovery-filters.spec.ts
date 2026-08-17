@@ -56,7 +56,10 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   expect(await mapLocations.getByRole("listitem").count()).toBe(
     (await options.getByRole("listitem").count()) + 1,
   );
-  const praiaDoAmorCard = publishedPlaces.filter({ hasText: "Praia do Amor" });
+  const praiaDoAmorCard = publishedPlaces.filter({
+    has: page.locator("strong").filter({ hasText: /^Praia do Amor$/ }),
+  });
+  await expect(praiaDoAmorCard).toHaveCount(1);
   await expect(praiaDoAmorCard.getByRole("link", { name: "Ver mapa e fotos" })).toHaveAttribute(
     "href",
     /google\.com\/maps\/search/,

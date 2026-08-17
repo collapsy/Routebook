@@ -18,6 +18,8 @@ import {
   ItineraryValidationError,
 } from "@routebook/trip-management";
 
+import { resolveTripRouteAccess } from "../../../../../lib/trip-route-access";
+
 function resolveDestinationId(destinationName: string): string | null {
   const normalized = destinationName.trim().toLocaleLowerCase("pt-BR");
   return normalized.includes("pipa") ? "pipa-rn-br" : null;
@@ -29,6 +31,15 @@ function optionalText(value: FormDataEntryValue | null): string | undefined {
 }
 
 async function resolvePublishedPlace(tripId: string, placeSlug: string) {
+  const placePath = `/viagens/${tripId}/lugares/${placeSlug}`;
+  if (!tripId || !placeSlug) redirect("/viagens?erro=viagem-invalida");
+
+  const access = await resolveTripRouteAccess({ tripId, action: "trip:edit" });
+  if (access.status === "unauthenticated") {
+    redirect(`/entrar?next=${encodeURIComponent(placePath)}`);
+  }
+  if (access.status === "not-found") notFound();
+
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 

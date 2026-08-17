@@ -25,6 +25,14 @@ const savedPlacePoint: TripMapPoint = {
 
 const points: TripMapPoint[] = [accommodationPoint, savedPlacePoint];
 
+const externalPlacePoint: TripMapPoint = {
+  id: "external:overture:restaurant-1",
+  label: "Restaurante descoberto",
+  kind: "external-place",
+  latitude: -6.231,
+  longitude: -35.049,
+};
+
 afterEach(() => {
   cleanup();
   Reflect.deleteProperty(window, "L");
@@ -162,5 +170,19 @@ describe("TripMap", () => {
 
     expect(screen.queryByText("Condomínio Solar Água")).not.toBeInTheDocument();
     expect(screen.getAllByText("Praia do Amor").length).toBeGreaterThan(0);
+  });
+
+  it("distinguishes external discoveries in the map legend and accessible list", () => {
+    render(<TripMap points={[accommodationPoint, externalPlacePoint]} title="Mapa de Pipa" />);
+
+    expect(screen.getByRole("list", { name: "Legenda do mapa" })).toHaveTextContent(
+      "Descoberta externa",
+    );
+    expect(screen.getByText("Descoberta externa: Restaurante descoberto")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", {
+        name: "Descoberta externa: Restaurante descoberto. Abrir detalhes.",
+      }),
+    ).not.toBeInTheDocument();
   });
 });

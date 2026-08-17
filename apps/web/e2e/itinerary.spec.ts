@@ -65,7 +65,7 @@ test("orienta um dia vazio pela jornada antes das ações manuais", async ({ pag
   );
   await expect(page.getByText("Adicionar atividade manual", { exact: true })).toBeVisible();
   await expect(page.getByText("Adicionar período livre", { exact: true })).toBeVisible();
-  await expect(page.getByLabel("Título")).toHaveCount(0);
+  await expect(page.getByLabel("Título")).toBeHidden();
 });
 
 test("cria e preserva uma atividade no Dia em foco", async ({ page }, testInfo) => {

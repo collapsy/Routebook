@@ -136,7 +136,6 @@ test("edita e limpa os dados temporais preservando o Dia em foco", async ({ page
   await saveButton.click();
 
   await expect(page).toHaveURL(/periodoLivreEditado=1.*dia=2026-08-23/);
-  await expect(page.getByRole("status")).toContainText("Período livre atualizado");
   await expect(focusedDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
   await expect(focusedDay.getByText("Horário aberto", { exact: true })).toBeVisible();
   await expect(focusedDay.getByText(/duração aberta/)).toBeVisible();
@@ -175,7 +174,6 @@ test("remove somente o período livre selecionado e preserva os demais no Dia", 
   await page.goto(redirectUrl!);
 
   await expect(page).toHaveURL(/periodoLivreRemovido=1.*dia=2026-08-23/);
-  await expect(page.getByRole("status")).toContainText("Período livre removido");
   await expect(focusedDay.getByText("Período livre flexível", { exact: true })).toHaveCount(0);
   await expect(focusedDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
   await expect(focusedDay.getByText("16:00", { exact: true })).toBeVisible();

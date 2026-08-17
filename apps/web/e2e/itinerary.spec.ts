@@ -52,7 +52,9 @@ test("orienta um dia vazio pela jornada antes das ações manuais", async ({ pag
   await expect(journey).toContainText("3. Roteiro");
   await expect(journey).toContainText("4. Revisar");
   await expect(page.getByRole("heading", { name: /Dia 1 —/ })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Escolha um Lugar para começar este Dia" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Escolha um Lugar para começar este Dia" }),
+  ).toBeVisible();
   await expect(page.getByRole("link", { name: "Explorar Lugares" })).toHaveAttribute(
     "href",
     `/viagens/${trip.id}/lugares`,
@@ -127,7 +129,9 @@ test("remove uma atividade e mantém o mesmo Dia em foco", async ({ page }, test
   );
 
   await expect(page.getByText(activityTitle, { exact: true })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Escolha um Lugar para começar este Dia" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Escolha um Lugar para começar este Dia" }),
+  ).toBeVisible();
 
   await page.reload();
   await expect(page.getByText(activityTitle, { exact: true })).toHaveCount(0);
@@ -214,7 +218,9 @@ test("reordena atividades dentro do mesmo período preservando Dia e sequência"
   ]);
 });
 
-test("move uma atividade para outro Dia e muda o foco para o destino", async ({ page }, testInfo) => {
+test("move uma atividade para outro Dia e muda o foco para o destino", async ({
+  page,
+}, testInfo) => {
   const tripName = `Movimentação ${testInfo.project.name} ${Date.now()}`;
   const activityTitle = "Passeio para mover";
 
@@ -237,7 +243,9 @@ test("move uma atividade para outro Dia e muda o foco para o destino", async ({ 
     "Atividade adicionada",
   );
 
-  await expect(page.locator(".itinerary-day-card").getByText(activityTitle, { exact: true })).toBeVisible();
+  await expect(
+    page.locator(".itinerary-day-card").getByText(activityTitle, { exact: true }),
+  ).toBeVisible();
 
   await page.locator(`summary[aria-label="Mover ${activityTitle} para outro dia"]`).click();
   const moveForm = page.getByRole("form", { name: `Mover ${activityTitle} para outro dia` });
@@ -250,16 +258,26 @@ test("move uma atividade para outro Dia e muda o foco para o destino", async ({ 
   );
 
   await expect(page.getByRole("heading", { name: /Dia 2 —/ })).toBeVisible();
-  await expect(page.locator(".itinerary-day-card").getByText(activityTitle, { exact: true })).toBeVisible();
-  await expect(page.locator(".itinerary-day-card").getByText("11:15", { exact: true })).toBeVisible();
-  await expect(page.locator(".itinerary-day-card").getByText("2 h 30 min", { exact: true })).toBeVisible();
+  await expect(
+    page.locator(".itinerary-day-card").getByText(activityTitle, { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.locator(".itinerary-day-card").getByText("11:15", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.locator(".itinerary-day-card").getByText("2 h 30 min", { exact: true }),
+  ).toBeVisible();
 
   await page.getByRole("link", { name: /Dia 1/ }).click();
   await expect(page).toHaveURL(/dia=2026-08-22/);
-  await expect(page.locator(".itinerary-day-card").getByText(activityTitle, { exact: true })).toHaveCount(0);
+  await expect(
+    page.locator(".itinerary-day-card").getByText(activityTitle, { exact: true }),
+  ).toHaveCount(0);
 
   await page.getByRole("link", { name: /Dia 2/ }).click();
-  await expect(page.locator(".itinerary-day-card").getByText(activityTitle, { exact: true })).toBeVisible();
+  await expect(
+    page.locator(".itinerary-day-card").getByText(activityTitle, { exact: true }),
+  ).toBeVisible();
 });
 
 test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ page }, testInfo) => {

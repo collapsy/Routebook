@@ -70,7 +70,8 @@ Um único Dia fica em foco por vez. A seleção do Dia governa:
 - resumo e estado vazio;
 - Atividades e Períodos livres exibidos;
 - mapa e contexto geográfico;
-- formulário manual quando aberto.
+- formulário manual quando aberto;
+- Dia padrão do compositor de Período livre.
 
 Quando o Dia estiver vazio, a primeira ação recomendada é Explorar Lugares; Salvos aparece como alternativa. Criação manual e Período livre continuam disponíveis como ações explícitas, porém secundárias e recolhidas.
 
@@ -112,6 +113,7 @@ apps/web/app/viagens/[tripId]/lugares/page.tsx
 apps/web/app/viagens/[tripId]/roteiro/page.tsx
 apps/web/app/viagens/[tripId]/roteiro/layout.tsx
 apps/web/app/viagens/[tripId]/roteiro/actions.ts
+apps/web/app/viagens/[tripId]/roteiro/free-periods.tsx
 apps/web/app/viagens/[tripId]/roteiro/itinerary-spatial-panel.tsx
 apps/web/app/viagens/[tripId]/roteiro/itinerary-journey.module.css
 apps/web/e2e/place-discovery-filters.spec.ts
@@ -121,6 +123,8 @@ docs/implementation/increments/rb-inc-157-progressive-catalog-itinerary-journey.
 docs/implementation/context-packs/rb-inc-157-progressive-catalog-itinerary-journey.md
 docs/registry.md
 ```
+
+`free-periods.tsx` foi incluído porque o compositor precisa receber o Dia em foco como seleção padrão; sem isso, a própria ação secundária poderia voltar a criar conteúdo no Dia 1 por padrão e quebrar o contrato de contexto preservado.
 
 Arquivo adicional indispensável exige atualização explícita desta seção e justificativa na PR.
 

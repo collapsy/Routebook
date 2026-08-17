@@ -369,6 +369,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-157 | Catálogo progressivo e jornada clara de criação do roteiro | Implementation | Draft | 0.1.0 | [rb-inc-157-progressive-catalog-itinerary-journey.md](./implementation/increments/rb-inc-157-progressive-catalog-itinerary-journey.md) |
 | RB-CTX-157 | Context Pack do RB-INC-157 — Catálogo progressivo e jornada clara de criação do roteiro | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-157-progressive-catalog-itinerary-journey.md](./implementation/context-packs/rb-inc-157-progressive-catalog-itinerary-journey.md) |
 
+| RB-INC-158 | Expansão Governada da Cobertura Visual dos Places de Pipa | Implementation | Draft | 0.1.0 | [rb-inc-158-pipa-visual-coverage.md](./implementation/increments/rb-inc-158-pipa-visual-coverage.md) |
+| RB-CTX-158 | Context Pack do RB-INC-158 — Expansão Governada da Cobertura Visual dos Places de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-158-pipa-visual-coverage.md](./implementation/context-packs/rb-inc-158-pipa-visual-coverage.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

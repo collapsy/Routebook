@@ -105,8 +105,8 @@
       "matchStatus": "secure",
       "matchEvidence": "Título e descrição do Commons identificam explicitamente o Santuário Ecológico da Praia de Pipa, no Rio Grande do Norte.",
       "sourceSha1": "3cc70953739d7a698ad7fe884b522e91bb24faf7",
-      "assetSha256": "",
-      "assetBytes": 0
+      "assetSha256": "bd63b19f5a927e1821c0c42269e7f5eaa06b3f877cbd2a90514d11a6e17cf3d4",
+      "assetBytes": 370108
     },
     {
       "placeSlug": "praia-de-cacimbinhas",
@@ -120,8 +120,8 @@
       "matchStatus": "secure",
       "matchEvidence": "Título e descrição identificam diretamente a Praia de Cacimbinhas; a categoria Praia de Cacimbinhas integra Beaches in Tibau do Sul no Commons.",
       "sourceSha1": "8987490e58727e56deacbc63bf3e6c232ef0f029",
-      "assetSha256": "",
-      "assetBytes": 0
+      "assetSha256": "b2ec938e87873ab101a11e221c3abb7935bcdcd61902e8d6456dad3dbcd6b054",
+      "assetBytes": 293452
     },
     {
       "placeSlug": "praia-do-centro",
@@ -135,8 +135,8 @@
       "matchStatus": "secure",
       "matchEvidence": "A descrição oficial identifica explicitamente a vista como centre of Pipa Beach/Praia da Pipa e situa o ponto de observação acima da Praia do Amor.",
       "sourceSha1": "4c544507d3c933777e34220a1e2002338fd9c844",
-      "assetSha256": "",
-      "assetBytes": 0
+      "assetSha256": "e96522ebf8ca5734fb38761e9082b853e2710b1a2c086045fc23b3a820f7f8eb",
+      "assetBytes": 406886
     }
   ]
 }

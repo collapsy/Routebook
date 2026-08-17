@@ -46,7 +46,7 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
     }),
   ).toBeVisible();
   await expect(
-    page.getByRole("img", { name: "Imagem não disponível para Praia das Minas" }),
+    publishedPlaces.getByRole("img", { name: "Imagem não disponível para Praia das Minas" }),
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Ocultar descobertas atualizadas" })).toHaveAttribute(
     "href",
@@ -55,12 +55,25 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(page.getByRole("heading", { name: integratedOptionsHeading })).toBeVisible();
   await expect(page.getByText(integratedCount(30))).toBeVisible();
   await expect(page.getByText("Uma grade, duas fontes claramente identificadas")).toBeVisible();
-  await expect(page.getByRole("list", { name: "Legenda do mapa" })).toContainText(
-    "Descoberta externa",
-  );
+  const mapLegend = page.getByRole("list", { name: "Legenda do mapa" });
+  await expect(mapLegend).toContainText("Descoberta externa");
   const mapLocations = page.getByRole("list", { name: "Locais exibidos no mapa" });
-  expect(await mapLocations.getByRole("listitem").count()).toBe(
-    (await options.getByRole("listitem").count()) + 1,
+  const visibleOptionTotal = await options.getByRole("listitem").count();
+  const externalTotal = await externalPlaces.count();
+  expect(await mapLocations.getByRole("listitem").count()).toBe(visibleOptionTotal + 1);
+  const discoveryMap = page.locator('[data-routebook-map="true"]');
+  await expect(discoveryMap).toHaveAttribute(
+    "data-map-point-count",
+    String(visibleOptionTotal + 1),
+  );
+  await expect(discoveryMap).toHaveAttribute("data-map-published-count", "30");
+  await expect(discoveryMap).toHaveAttribute("data-map-external-count", String(externalTotal));
+  await expect(discoveryMap).toHaveAttribute("data-map-density", "dense");
+  await expect(
+    mapLegend.getByRole("listitem").filter({ hasText: "Descoberta externa" }),
+  ).toContainText(String(externalTotal));
+  await expect(page.getByLabel("Resumo do mapa")).toContainText(
+    `${visibleOptionTotal + 1} pontos representados`,
   );
   const praiaDoAmorCard = publishedPlaces.filter({
     has: page.locator("strong").filter({ hasText: /^Praia do Amor$/ }),

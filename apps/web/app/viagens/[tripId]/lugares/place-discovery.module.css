@@ -69,6 +69,11 @@
 }
 
 .resultHeading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: end;
+  justify-content: space-between;
   margin: 2rem 0 1rem;
 }
 
@@ -79,6 +84,47 @@
 
 .resultHeading p {
   color: var(--color-text-muted, #4c5750);
+}
+
+.discoverySummary {
+  display: grid;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid color-mix(in oklab, var(--primary) 25%, var(--border));
+  border-radius: 0.9rem;
+  background: color-mix(in oklab, var(--primary) 5%, var(--surface));
+}
+
+.discoverySummary p {
+  margin: 0;
+}
+
+.cardIdentity {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sourceBadge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+.publishedSource {
+  background: color-mix(in oklab, var(--primary) 12%, var(--surface));
+  color: var(--primary-strong);
+}
+
+.externalSource {
+  background: #fff3df;
+  color: #8a3f06;
 }
 
 .cardActions {
@@ -92,6 +138,19 @@
   flex: 1 1 9rem;
   justify-content: center;
   text-align: center;
+}
+
+.promotionForm {
+  margin-top: 0.25rem;
+}
+
+.promotionForm button {
+  width: 100%;
+}
+
+.optionsGrid > li {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 32rem;
 }
 
 .visuallyHidden {

@@ -59,6 +59,26 @@
   gap: 0.4rem;
 }
 
+.legendCount {
+  align-items: center;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--foreground);
+  display: inline-flex;
+  font-size: 0.75rem;
+  justify-content: center;
+  min-width: 1.75rem;
+  padding: 0.12rem 0.42rem;
+}
+
+.pointSummary {
+  color: var(--foreground);
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin: 0;
+}
+
 .legendDot,
 .markerDot {
   background: var(--primary);
@@ -87,6 +107,13 @@
 .marker.saved-place .markerDot {
   background: var(--accent);
   box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 75%, var(--foreground));
+}
+
+.external-place .legendDot,
+.legendDot.external-place,
+.marker.external-place .markerDot {
+  background: #b45309;
+  box-shadow: 0 0 0 2px color-mix(in oklab, #b45309 78%, var(--foreground));
 }
 
 .accommodation .legendDot,
@@ -147,6 +174,10 @@
   padding: 0.35rem 0.55rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.denseMarker .markerLabel {
+  display: none;
 }
 
 .marker:hover .markerLabel,
@@ -240,7 +271,7 @@
     flex-direction: row;
   }
 
-  .markerLabel {
+  .marker:not(.denseMarker) .markerLabel {
     display: block;
   }
 

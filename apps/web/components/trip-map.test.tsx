@@ -25,6 +25,14 @@ const savedPlacePoint: TripMapPoint = {
 
 const points: TripMapPoint[] = [accommodationPoint, savedPlacePoint];
 
+const externalPlacePoint: TripMapPoint = {
+  id: "external:overture:restaurant-1",
+  label: "Restaurante descoberto",
+  kind: "external-place",
+  latitude: -6.231,
+  longitude: -35.049,
+};
+
 afterEach(() => {
   cleanup();
   Reflect.deleteProperty(window, "L");
@@ -162,5 +170,42 @@ describe("TripMap", () => {
 
     expect(screen.queryByText("Condomínio Solar Água")).not.toBeInTheDocument();
     expect(screen.getAllByText("Praia do Amor").length).toBeGreaterThan(0);
+  });
+
+  it("distinguishes external discoveries in the map legend and accessible list", () => {
+    render(<TripMap points={[accommodationPoint, externalPlacePoint]} title="Mapa de Pipa" />);
+
+    const legend = screen.getByRole("list", { name: "Legenda do mapa" });
+    expect(legend).toHaveTextContent("Descoberta externa");
+    expect(screen.getByText("Descoberta externa").closest("li")).toHaveTextContent("1");
+    expect(screen.getByLabelText("Resumo do mapa")).toHaveTextContent("2 pontos representados");
+    expect(screen.getByRole("region", { name: "Mapa interativo: Mapa de Pipa" })).toHaveAttribute(
+      "data-map-external-count",
+      "1",
+    );
+    expect(screen.getByText("Descoberta externa: Restaurante descoberto")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", {
+        name: "Descoberta externa: Restaurante descoberto. Abrir detalhes.",
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("marks dense maps and keeps source counts inspectable", () => {
+    const densePoints = Array.from({ length: 26 }, (_, index): TripMapPoint => ({
+      id: `external-${index}`,
+      label: `Descoberta ${index}`,
+      kind: "external-place",
+      latitude: -6.23 + index * 0.0001,
+      longitude: -35.05,
+    }));
+
+    render(<TripMap points={densePoints} title="Mapa ampliado" />);
+
+    const map = screen.getByRole("region", { name: "Mapa interativo: Mapa ampliado" });
+    expect(map).toHaveAttribute("data-map-density", "dense");
+    expect(map).toHaveAttribute("data-map-point-count", "26");
+    expect(map).toHaveAttribute("data-map-external-count", "26");
+    expect(screen.getByLabelText("Resumo do mapa")).toHaveTextContent("26 pontos representados");
   });
 });

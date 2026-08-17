@@ -152,7 +152,12 @@ export default async function TripOverviewPage({
             executar mudanças automaticamente.
           </p>
         </div>
-        <span className="trip-context-version">Contexto estrutural v{trip.contextVersion}</span>
+        <div className="section-heading-row">
+          <span className="trip-context-version">Contexto estrutural v{trip.contextVersion}</span>
+          <Link className="product-primary-action" href={`/viagens/${tripId}/lugares`}>
+            Explorar catálogo ampliado
+          </Link>
+        </div>
       </header>
 
       <dl className="trip-overview-summary">
@@ -205,7 +210,11 @@ export default async function TripOverviewPage({
         />
       ) : null}
 
-      <TripMap points={mapPoints} title={`Mapa de ${trip.destination.name}`} />
+      <TripMap
+        description={`A visão geral representa a Hospedagem e os ${publishedPlaces.length} Places publicados. As descobertas externas permanecem identificadas no catálogo ampliado, acessível pelo botão no topo.`}
+        points={mapPoints}
+        title={`Mapa dos ${publishedPlaces.length} Places publicados de ${trip.destination.name}`}
+      />
 
       <section className="traveler-context-summary" aria-labelledby="traveler-context-title">
         <div className="section-heading-row">
@@ -310,13 +319,13 @@ export default async function TripOverviewPage({
           <p className="product-eyebrow">Descoberta do destino</p>
           <h2 id="trip-next-steps-title">Explore lugares de {trip.destination.name}</h2>
           <p>
-            Consulte o catálogo publicado e mantenha uma seleção pessoal de lugares para considerar
-            durante a viagem.
+            Compare os Places publicados com descobertas externas da região, ordenadas pela mesma
+            referência de distância e sempre identificadas pela origem.
           </p>
         </div>
         <div className="section-heading-row">
           <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
-            Explorar lugares
+            Explorar catálogo ampliado
           </Link>
           <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares-salvos`}>
             Ver lugares salvos

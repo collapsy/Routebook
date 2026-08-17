@@ -1,5 +1,5 @@
 export type TripMapPointKind =
-  "accommodation" | "published-place" | "saved-place" | "itinerary-activity";
+  "accommodation" | "published-place" | "external-place" | "saved-place" | "itinerary-activity";
 
 export type TripMapPoint = {
   id: string;

@@ -16,7 +16,7 @@ import { parseMaximumDistance, parsePlaceCategory, parsePlacePriceRange } from "
 
 const pipaDiscoveryCenter = { latitude: -6.24, longitude: -35.065 } as const;
 const externalDiscoveryRadiusMeters = 8_000;
-const externalDiscoveryLimit = 40;
+const externalDiscoveryScanLimit = 200;
 
 type PromotionFeedback =
   | Readonly<{ promocao: "criada" | "existente" }>
@@ -133,7 +133,7 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
       center: discoveryCenter,
       radiusMeters,
       ...(category ? { categories: [category] } : {}),
-      limit: externalDiscoveryLimit,
+      limit: externalDiscoveryScanLimit,
     });
   } catch (error) {
     console.error("Falha ao revalidar candidato externo via Overture", error);

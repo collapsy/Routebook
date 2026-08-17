@@ -23,15 +23,22 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
     accommodationLongitude: -35.0503,
   });
 
-  await page.goto(`/viagens/${trip.id}/lugares`);
+  await page.goto(`/viagens/${trip.id}`);
+  const expandedCatalogLink = page
+    .getByRole("link", { name: "Explorar catálogo ampliado" })
+    .first();
+  await expect(expandedCatalogLink).toHaveAttribute("href", `/viagens/${trip.id}/lugares`);
+  await expandedCatalogLink.click();
+  await expect(page).toHaveURL(`/viagens/${trip.id}/lugares`, { timeout: 20_000 });
   await expect(page.getByRole("heading", { name: /Lugares em Pipa/ })).toBeVisible();
+  const options = page.getByRole("list", { name: "Opções de lugares" });
+  const publishedPlaces = options.locator('[data-place-source="published"]');
+  const externalPlaces = options.locator('[data-place-source="external"]');
+  await expect(publishedPlaces).toHaveCount(30);
+  await expect(externalPlaces.first()).toBeVisible();
+  expect(await options.getByRole("listitem").count()).toBeGreaterThan(30);
   await expect(
-    page.getByRole("list", { name: "Lugares publicados" }).getByRole("listitem"),
-  ).toHaveCount(30);
-  await expect(
-    page
-      .getByRole("list", { name: "Lugares publicados" })
-      .getByRole("img", { name: /^Imagem não disponível para / }),
+    publishedPlaces.getByRole("img", { name: /^Imagem não disponível para / }),
   ).toHaveCount(24);
   await expect(
     page.getByRole("img", {
@@ -39,21 +46,39 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
     }),
   ).toBeVisible();
   await expect(
-    page.getByRole("img", { name: "Imagem não disponível para Praia das Minas" }),
+    publishedPlaces.getByRole("img", { name: "Imagem não disponível para Praia das Minas" }),
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Ocultar descobertas atualizadas" })).toHaveAttribute(
     "href",
     `/viagens/${trip.id}/lugares?descoberta=ocultar`,
   );
-  await expect(
-    page.getByRole("heading", { name: "Descobertas atualizadas no Overture" }),
-  ).toBeVisible();
   await expect(page.getByRole("heading", { name: integratedOptionsHeading })).toBeVisible();
   await expect(page.getByText(integratedCount(30))).toBeVisible();
-  const praiaDoAmorCard = page
-    .getByRole("list", { name: "Lugares publicados" })
-    .getByRole("listitem")
-    .filter({ has: page.getByText("Praia do Amor", { exact: true }) });
+  await expect(page.getByText("Uma grade, duas fontes claramente identificadas")).toBeVisible();
+  const mapLegend = page.getByRole("list", { name: "Legenda do mapa" });
+  await expect(mapLegend).toContainText("Descoberta externa");
+  const mapLocations = page.getByRole("list", { name: "Locais exibidos no mapa" });
+  const visibleOptionTotal = await options.getByRole("listitem").count();
+  const externalTotal = await externalPlaces.count();
+  expect(await mapLocations.getByRole("listitem").count()).toBe(visibleOptionTotal + 1);
+  const discoveryMap = page.locator('[data-routebook-map="true"]');
+  await expect(discoveryMap).toHaveAttribute(
+    "data-map-point-count",
+    String(visibleOptionTotal + 1),
+  );
+  await expect(discoveryMap).toHaveAttribute("data-map-published-count", "30");
+  await expect(discoveryMap).toHaveAttribute("data-map-external-count", String(externalTotal));
+  await expect(discoveryMap).toHaveAttribute("data-map-density", "dense");
+  await expect(
+    mapLegend.getByRole("listitem").filter({ hasText: "Descoberta externa" }),
+  ).toContainText(String(externalTotal));
+  await expect(page.getByLabel("Resumo do mapa")).toContainText(
+    `${visibleOptionTotal + 1} pontos representados`,
+  );
+  const praiaDoAmorCard = publishedPlaces.filter({
+    has: page.locator("strong").filter({ hasText: /^Praia do Amor$/ }),
+  });
+  await expect(praiaDoAmorCard).toHaveCount(1);
   await expect(praiaDoAmorCard.getByRole("link", { name: "Ver mapa e fotos" })).toHaveAttribute(
     "href",
     /google\.com\/maps\/search/,
@@ -69,7 +94,7 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(page).toHaveURL(/busca=minas/);
   await expect(page.getByRole("heading", { name: integratedOptionsHeading })).toBeVisible();
   await expect(page.getByText(integratedCount(1))).toBeVisible();
-  await expect(page.getByRole("list", { name: "Lugares publicados" })).toContainText(
+  await expect(page.getByRole("list", { name: "Opções de lugares" })).toContainText(
     "Praia das Minas",
   );
   await expect(page.getByRole("list", { name: "Locais exibidos no mapa" })).toContainText(
@@ -86,7 +111,7 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(page).toHaveURL(/busca=gastronomico.*preco=moderate/);
   await expect(page.getByRole("heading", { name: integratedOptionsHeading })).toBeVisible();
   await expect(page.getByText(integratedCount(1))).toBeVisible();
-  await expect(page.getByRole("list", { name: "Lugares publicados" })).toContainText(
+  await expect(page.getByRole("list", { name: "Opções de lugares" })).toContainText(
     "Centro Gastronômico de Pipa",
   );
   await expect(page.getByRole("list", { name: "Locais exibidos no mapa" })).toContainText(
@@ -95,16 +120,21 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(page.getByLabel("Filtros ativos")).toContainText("Busca: gastronomico");
   await expect(page.getByLabel("Filtros ativos")).toContainText("Preço: Moderado");
 
-  await page.getByRole("link", { name: /Busca: gastronomico.*Remover filtro/ }).click();
-  await expect(page).not.toHaveURL(/busca=/);
-  await expect(page).toHaveURL(/preco=moderate/);
+  const removeSearchFilter = page.getByRole("link", {
+    name: /Busca: gastronomico.*Remover filtro/,
+  });
+  await expect(removeSearchFilter).toHaveAttribute(
+    "href",
+    `/viagens/${trip.id}/lugares?preco=moderate`,
+  );
+  await page.getByLabel("Nome ou termo").fill("");
 
   await page.getByLabel("Categoria").selectOption("beach");
   await page.getByLabel("Distância máxima").selectOption("3");
   await page.getByLabel("Faixa de preço").selectOption("free");
   await page.getByRole("button", { name: "Aplicar filtros" }).click();
 
-  await expect(page.getByRole("list", { name: "Lugares publicados" })).toContainText(
+  await expect(page.getByRole("list", { name: "Opções de lugares" })).toContainText(
     "Praia do Amor",
   );
   await expect(page.getByRole("list", { name: "Locais exibidos no mapa" })).toContainText(
@@ -119,6 +149,14 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
 
   await page.goto(`/viagens/${trip.id}/lugares?descoberta=ocultar`);
   await expect(page.getByRole("heading", { name: "30 lugares publicados" })).toBeVisible();
+  await expect(
+    page
+      .getByRole("list", { name: "Opções de lugares" })
+      .locator('[data-place-source="published"]'),
+  ).toHaveCount(30);
+  await expect(
+    page.getByRole("list", { name: "Opções de lugares" }).locator('[data-place-source="external"]'),
+  ).toHaveCount(0);
   await expect(
     page.getByText("Lista e mapa exibem o mesmo conjunto publicado e filtrado."),
   ).toBeVisible();

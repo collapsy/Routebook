@@ -364,6 +364,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-154 | Context Pack do RB-INC-154 — Contagem Integrada de Places e Descobertas | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-154-integrated-place-count.md](./implementation/context-packs/rb-inc-154-integrated-place-count.md) |
 | RB-INC-155 | Guia Diário Visual de Pipa | Implementation | Draft | 0.1.0 | [rb-inc-155-pipa-place-practical-guide.md](./implementation/increments/rb-inc-155-pipa-place-practical-guide.md) |
 | RB-CTX-155 | Context Pack do RB-INC-155 — Guia Diário Visual de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-155-pipa-place-practical-guide.md](./implementation/context-packs/rb-inc-155-pipa-place-practical-guide.md) |
+| RB-INC-156 | Descoberta Unificada de Lugares | Implementation | Draft | 0.1.0 | [rb-inc-156-unified-place-discovery.md](./implementation/increments/rb-inc-156-unified-place-discovery.md) |
+| RB-CTX-156 | Context Pack do RB-INC-156 — Descoberta Unificada de Lugares | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-156-unified-place-discovery.md](./implementation/context-packs/rb-inc-156-unified-place-discovery.md) |
 
 ## Status possíveis
 

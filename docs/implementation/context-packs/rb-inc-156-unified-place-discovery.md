@@ -53,6 +53,8 @@ reduza a cobertura externa a zero sem evidência operacional.
 - Place externo não é Place canônico;
 - promoção externa continua explícita, autorizada e revalidada server-side;
 - lista e mapa representam o mesmo conjunto de opções visíveis;
+- legenda do mapa informa contagens por origem e mapas com mais de 25 pontos usam rótulos sob
+  demanda para preservar legibilidade;
 - Hospedagem pode aparecer como referência adicional no mapa;
 - distância geodésica é estimativa em linha reta;
 - falha do Overture não bloqueia catálogo;

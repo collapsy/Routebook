@@ -59,6 +59,26 @@
   gap: 0.4rem;
 }
 
+.legendCount {
+  align-items: center;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--foreground);
+  display: inline-flex;
+  font-size: 0.75rem;
+  justify-content: center;
+  min-width: 1.75rem;
+  padding: 0.12rem 0.42rem;
+}
+
+.pointSummary {
+  color: var(--foreground);
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin: 0;
+}
+
 .legendDot,
 .markerDot {
   background: var(--primary);
@@ -156,6 +176,10 @@
   white-space: nowrap;
 }
 
+.denseMarker .markerLabel {
+  display: none;
+}
+
 .marker:hover .markerLabel,
 .marker:focus-visible .markerLabel {
   display: block;
@@ -247,7 +271,7 @@
     flex-direction: row;
   }
 
-  .markerLabel {
+  .marker:not(.denseMarker) .markerLabel {
     display: block;
   }
 

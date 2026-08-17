@@ -1,0 +1,63 @@
+name: RB-INC-160 finalize guide integration
+
+on:
+  push:
+    branches:
+      - codex/rb-inc-160-complete-pipa-trip-guide
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch overview and registry
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          overview_path = Path('apps/web/app/viagens/[tripId]/page.tsx')
+          overview = overview_path.read_text()
+          needle = '''          <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
+            Abrir roteiro
+          </Link>'''
+          replacement = '''          <div className="section-heading-row">
+            <Link className="product-primary-action" href={`/viagens/${tripId}/guia`}>
+              Abrir guia da viagem
+            </Link>
+            <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
+              Abrir roteiro
+            </Link>
+          </div>'''
+          if needle not in overview:
+              raise SystemExit('trip overview target not found')
+          overview_path.write_text(overview.replace(needle, replacement, 1))
+
+          registry_path = Path('docs/registry.md')
+          registry = registry_path.read_text()
+          if 'RB-INC-160' not in registry:
+              marker = '\n## Status possíveis\n'
+              rows = '''| RB-INC-160 | Guia diário completo da viagem de Pipa | Implementation | Draft | 0.1.0 | [rb-inc-160-complete-pipa-trip-guide.md](./implementation/increments/rb-inc-160-complete-pipa-trip-guide.md) |
+| RB-CTX-160 | Context Pack do RB-INC-160 — Guia diário completo da viagem de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-160-complete-pipa-trip-guide.md](./implementation/context-packs/rb-inc-160-complete-pipa-trip-guide.md) |
+'''
+              if marker not in registry:
+                  raise SystemExit('registry marker not found')
+              registry_path.write_text(registry.replace(marker, '\n' + rows + marker, 1))
+          PY
+
+      - name: Commit mechanical integration
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/app/viagens/[tripId]/page.tsx docs/registry.md
+          git commit -m "chore: finalize RB-INC-160 guide integration"
+          git push

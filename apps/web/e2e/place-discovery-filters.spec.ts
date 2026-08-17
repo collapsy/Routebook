@@ -23,7 +23,13 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
     accommodationLongitude: -35.0503,
   });
 
-  await page.goto(`/viagens/${trip.id}/lugares`);
+  await page.goto(`/viagens/${trip.id}`);
+  const expandedCatalogLink = page
+    .getByRole("link", { name: "Explorar catálogo ampliado" })
+    .first();
+  await expect(expandedCatalogLink).toHaveAttribute("href", `/viagens/${trip.id}/lugares`);
+  await expandedCatalogLink.click();
+  await expect(page).toHaveURL(`/viagens/${trip.id}/lugares`, { timeout: 20_000 });
   await expect(page.getByRole("heading", { name: /Lugares em Pipa/ })).toBeVisible();
   const options = page.getByRole("list", { name: "Opções de lugares" });
   const publishedPlaces = options.locator('[data-place-source="published"]');

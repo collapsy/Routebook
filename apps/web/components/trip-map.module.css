@@ -89,6 +89,13 @@
   box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 75%, var(--foreground));
 }
 
+.external-place .legendDot,
+.legendDot.external-place,
+.marker.external-place .markerDot {
+  background: #b45309;
+  box-shadow: 0 0 0 2px color-mix(in oklab, #b45309 78%, var(--foreground));
+}
+
 .accommodation .legendDot,
 .legendDot.accommodation,
 .marker.accommodation .markerDot {

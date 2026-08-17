@@ -25,13 +25,14 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
 
   await page.goto(`/viagens/${trip.id}/lugares`);
   await expect(page.getByRole("heading", { name: /Lugares em Pipa/ })).toBeVisible();
+  const options = page.getByRole("list", { name: "Opções de lugares" });
+  const publishedPlaces = options.locator('[data-place-source="published"]');
+  const externalPlaces = options.locator('[data-place-source="external"]');
+  await expect(publishedPlaces).toHaveCount(30);
+  await expect(externalPlaces.first()).toBeVisible();
+  expect(await options.getByRole("listitem").count()).toBeGreaterThan(30);
   await expect(
-    page.getByRole("list", { name: "Lugares publicados" }).getByRole("listitem"),
-  ).toHaveCount(30);
-  await expect(
-    page
-      .getByRole("list", { name: "Lugares publicados" })
-      .getByRole("img", { name: /^Imagem não disponível para / }),
+    publishedPlaces.getByRole("img", { name: /^Imagem não disponível para / }),
   ).toHaveCount(24);
   await expect(
     page.getByRole("img", {
@@ -50,8 +51,15 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: integratedOptionsHeading })).toBeVisible();
   await expect(page.getByText(integratedCount(30))).toBeVisible();
-  const praiaDoAmorCard = page
-    .getByRole("list", { name: "Lugares publicados" })
+  await expect(page.getByText("Uma grade, duas fontes claramente identificadas")).toBeVisible();
+  await expect(page.getByRole("list", { name: "Legenda do mapa" })).toContainText(
+    "Descoberta externa",
+  );
+  const mapLocations = page.getByRole("list", { name: "Locais exibidos no mapa" });
+  expect(await mapLocations.getByRole("listitem").count()).toBe(
+    (await options.getByRole("listitem").count()) + 1,
+  );
+  const praiaDoAmorCard = options
     .getByRole("listitem")
     .filter({ has: page.getByText("Praia do Amor", { exact: true }) });
   await expect(praiaDoAmorCard.getByRole("link", { name: "Ver mapa e fotos" })).toHaveAttribute(
@@ -69,7 +77,7 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(page).toHaveURL(/busca=minas/);
   await expect(page.getByRole("heading", { name: integratedOptionsHeading })).toBeVisible();
   await expect(page.getByText(integratedCount(1))).toBeVisible();
-  await expect(page.getByRole("list", { name: "Lugares publicados" })).toContainText(
+  await expect(page.getByRole("list", { name: "Opções de lugares" })).toContainText(
     "Praia das Minas",
   );
   await expect(page.getByRole("list", { name: "Locais exibidos no mapa" })).toContainText(
@@ -86,7 +94,7 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(page).toHaveURL(/busca=gastronomico.*preco=moderate/);
   await expect(page.getByRole("heading", { name: integratedOptionsHeading })).toBeVisible();
   await expect(page.getByText(integratedCount(1))).toBeVisible();
-  await expect(page.getByRole("list", { name: "Lugares publicados" })).toContainText(
+  await expect(page.getByRole("list", { name: "Opções de lugares" })).toContainText(
     "Centro Gastronômico de Pipa",
   );
   await expect(page.getByRole("list", { name: "Locais exibidos no mapa" })).toContainText(
@@ -104,7 +112,7 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await page.getByLabel("Faixa de preço").selectOption("free");
   await page.getByRole("button", { name: "Aplicar filtros" }).click();
 
-  await expect(page.getByRole("list", { name: "Lugares publicados" })).toContainText(
+  await expect(page.getByRole("list", { name: "Opções de lugares" })).toContainText(
     "Praia do Amor",
   );
   await expect(page.getByRole("list", { name: "Locais exibidos no mapa" })).toContainText(
@@ -119,6 +127,14 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
 
   await page.goto(`/viagens/${trip.id}/lugares?descoberta=ocultar`);
   await expect(page.getByRole("heading", { name: "30 lugares publicados" })).toBeVisible();
+  await expect(
+    page
+      .getByRole("list", { name: "Opções de lugares" })
+      .locator('[data-place-source="published"]'),
+  ).toHaveCount(30);
+  await expect(
+    page.getByRole("list", { name: "Opções de lugares" }).locator('[data-place-source="external"]'),
+  ).toHaveCount(0);
   await expect(
     page.getByText("Lista e mapa exibem o mesmo conjunto publicado e filtrado."),
   ).toBeVisible();

@@ -138,9 +138,9 @@ function loadLeaflet(): Promise<LeafletNamespace> {
   return leafletLoader;
 }
 
-function createMarkerContent(point: TripMapPoint): HTMLElement {
+function createMarkerContent(point: TripMapPoint, dense: boolean): HTMLElement {
   const marker = document.createElement(point.href ? "a" : "span");
-  marker.className = `${styles.marker} ${styles[point.kind]}`;
+  marker.className = `${styles.marker} ${styles[point.kind]} ${dense ? styles.denseMarker : ""}`;
   marker.dataset.mapPointId = point.id;
   marker.dataset.mapPointKind = point.kind;
   marker.dataset.latitude = String(point.latitude);
@@ -191,10 +191,17 @@ export function TripMap({
   const mapElementRef = useRef<HTMLDivElement>(null);
   const [mapState, setMapState] = useState<MapState>("loading");
   const validPoints = useMemo(() => points.filter(isValidTripMapPoint), [points]);
-  const visibleKinds = useMemo(
-    () => Array.from(new Set(validPoints.map((point) => point.kind))),
-    [validPoints],
-  );
+  const mapComposition = useMemo(() => {
+    const counts = new Map<TripMapPointKind, number>();
+    for (const point of validPoints) {
+      counts.set(point.kind, (counts.get(point.kind) ?? 0) + 1);
+    }
+    return {
+      counts,
+      dense: validPoints.length > 25,
+      visibleKinds: Array.from(counts.keys()),
+    };
+  }, [validPoints]);
 
   useEffect(() => {
     const mapElement = mapElementRef.current;
@@ -236,7 +243,7 @@ export function TripMap({
         }
 
         for (const point of validPoints) {
-          const markerContent = createMarkerContent(point);
+          const markerContent = createMarkerContent(point, mapComposition.dense);
           const icon = leaflet.divIcon({
             className: styles.leafletMarkerIcon!,
             html: markerContent,
@@ -277,7 +284,7 @@ export function TripMap({
       map?.remove();
       mapElement.replaceChildren();
     };
-  }, [validPoints]);
+  }, [mapComposition.dense, validPoints]);
 
   if (validPoints.length === 0) {
     return (
@@ -298,19 +305,30 @@ export function TripMap({
           <p>{description}</p>
         </div>
         <ul aria-label="Legenda do mapa" className={styles.legend}>
-          {visibleKinds.map((kind) => (
+          {mapComposition.visibleKinds.map((kind) => (
             <li key={kind}>
               <span aria-hidden="true" className={`${styles.legendDot} ${styles[kind]}`} />
               {kindLabels[kind]}
+              <strong className={styles.legendCount}>{mapComposition.counts.get(kind)}</strong>
             </li>
           ))}
         </ul>
       </div>
 
+      <p aria-label="Resumo do mapa" className={styles.pointSummary}>
+        {validPoints.length}{" "}
+        {validPoints.length === 1 ? "ponto representado" : "pontos representados"}
+        no mapa
+      </p>
+
       <div className={styles.mapShell}>
         <div
           aria-label={`Mapa interativo: ${title}`}
           className={styles.mapCanvas}
+          data-map-density={mapComposition.dense ? "dense" : "standard"}
+          data-map-external-count={mapComposition.counts.get("external-place") ?? 0}
+          data-map-point-count={validPoints.length}
+          data-map-published-count={mapComposition.counts.get("published-place") ?? 0}
           data-map-state={mapState}
           data-routebook-map="true"
           ref={mapElementRef}

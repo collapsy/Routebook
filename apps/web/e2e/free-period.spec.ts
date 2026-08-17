@@ -45,7 +45,7 @@ async function createFreePeriodFixture(
 }
 
 async function openFreePeriodComposer(page: Page) {
-  await page.getByText("Adicionar período livre", { exact: true }).click();
+  await page.locator("summary").filter({ hasText: /^Adicionar período livre$/ }).click();
   await expect(page.getByRole("heading", { name: "Adicione um período livre" })).toBeVisible();
 }
 

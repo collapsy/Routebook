@@ -76,6 +76,25 @@ describe("normalizeWikimediaImageRecord", () => {
       }),
     ).toBeUndefined();
   });
+
+  it("rejeita mídia sem autoria auditável", () => {
+    const page = commonsPage();
+    const info = page.imageinfo[0]!;
+    expect(
+      normalizeWikimediaImageRecord({
+        ...page,
+        imageinfo: [
+          {
+            ...info,
+            extmetadata: {
+              ...info.extmetadata,
+              Artist: { value: "" },
+            },
+          },
+        ],
+      }),
+    ).toBeUndefined();
+  });
 });
 
 describe("classifyWikimediaImageMatch", () => {
@@ -87,6 +106,19 @@ describe("classifyWikimediaImageMatch", () => {
           fileTitle: "File:Lagoa Guaraíras.jpg",
           description:
             "Pôr do sol na Lagoa Guaraíras, vista a partir do município de Tibau do Sul/RN.",
+        },
+      ).status,
+    ).toBe("secure");
+  });
+
+  it("reconhece equivalência bilíngue de centro quando a metadata identifica Pipa", () => {
+    expect(
+      classifyWikimediaImageMatch(
+        { name: "Praia do Centro" },
+        {
+          fileTitle: "File:PipaBeachView.JPG",
+          description:
+            "A view of the centre of Pipa Beach/Praia da Pipa, as seen from the hill above Praia do Amor.",
         },
       ).status,
     ).toBe("secure");

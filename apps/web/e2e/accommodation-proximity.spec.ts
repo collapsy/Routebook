@@ -18,13 +18,20 @@ test("prioriza no Discovery o lugar mais próximo da hospedagem geocodificada", 
   await expect(
     page.getByText(/Hospedagem geocodificada.*prioriza os Lugares mais próximos/),
   ).toBeVisible();
-  const places = page.getByRole("list", { name: "Lugares publicados" }).getByRole("listitem");
-  await expect(places).toHaveCount(30);
-  await expect(places.first()).toContainText("Praia do Amor");
-  await expect(places.first()).toContainText("0 m em linha reta da hospedagem");
+  const options = page.getByRole("list", { name: "Opções de lugares" });
+  const publishedPlaces = options.locator('[data-place-source="published"]');
+  const externalPlaces = options.locator('[data-place-source="external"]');
+  await expect(publishedPlaces).toHaveCount(30);
+  await expect(externalPlaces.first()).toBeVisible();
+  await expect(publishedPlaces.first()).toContainText("Praia do Amor");
+  await expect(publishedPlaces.first()).toContainText("0 m em linha reta da hospedagem");
+  expect(await options.getByRole("listitem").count()).toBeGreaterThan(30);
   await expect(
     page.getByText(/Distâncias estimadas em linha reta.*não representam rota ou tempo/),
   ).toBeVisible();
+  await expect(page.getByRole("list", { name: "Legenda do mapa" })).toContainText(
+    "Descoberta externa",
+  );
 });
 
 test("mantém Discovery funcional sem coordenadas da hospedagem", async ({ page }) => {
@@ -39,8 +46,14 @@ test("mantém Discovery funcional sem coordenadas da hospedagem", async ({ page 
   await expect(page.getByRole("heading", { name: /\d+ opções para explorar/ })).toBeVisible();
   await expect(
     page.getByText(
-      /30 lugares publicados no RouteBook \+ \d+ descoberta(?: atualizada|s atualizadas) no Overture/,
+      /30 lugares publicados no RouteBook \+ [1-9]\d* descobertas? atualizadas? no Overture/,
     ),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("list", { name: "Opções de lugares" })
+      .locator('[data-place-source="external"]')
+      .first(),
   ).toBeVisible();
   await expect(page.getByLabel("Distância máxima")).toBeDisabled();
   await expect(page.getByText(/filtro de distância fica disponível/)).toBeVisible();

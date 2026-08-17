@@ -25,6 +25,9 @@ const PLACE_NAME_STOPWORDS = new Set([
   "baia",
   "lagoa",
 ]);
+const PLACE_TOKEN_ALIASES: Readonly<Record<string, readonly string[]>> = {
+  centro: ["centre", "center"],
+};
 
 type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 
@@ -106,6 +109,11 @@ function significantPlaceTokens(placeName: string): string[] {
     .filter((token) => token.length >= 3 && !PLACE_NAME_STOPWORDS.has(token));
 }
 
+function hasPlaceToken(combinedTokens: ReadonlySet<string>, token: string): boolean {
+  if (combinedTokens.has(token)) return true;
+  return (PLACE_TOKEN_ALIASES[token] ?? []).some((alias) => combinedTokens.has(alias));
+}
+
 function isAllowedCommonsPageUrl(value: string): boolean {
   try {
     const url = new URL(value);
@@ -173,7 +181,7 @@ export function classifyWikimediaImageMatch(
   const combinedTokens = new Set(combined.split(" ").filter(Boolean));
   const placeTokens = significantPlaceTokens(place.name);
   const hasPlaceIdentity =
-    placeTokens.length > 0 && placeTokens.every((token) => combinedTokens.has(token));
+    placeTokens.length > 0 && placeTokens.every((token) => hasPlaceToken(combinedTokens, token));
   const hasLocalContext = /\b(?:pipa|tibau do sul)\b/.test(combined);
 
   if (hasPlaceIdentity && hasLocalContext) {

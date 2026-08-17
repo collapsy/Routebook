@@ -44,14 +44,32 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   expect(await options.getByRole("listitem").count()).toBe(90);
   await expect(
     publishedPlaces.getByRole("img", { name: /^Imagem não disponível para / }),
-  ).toHaveCount(24);
+  ).toHaveCount(21);
   await expect(
     page.getByRole("img", {
       name: "Vista da Praia do Amor em Pipa, cercada por falésias e vegetação costeira.",
     }),
   ).toBeVisible();
   await expect(
+    page.getByRole("img", {
+      name: "Vista da região central da Praia de Pipa observada a partir da encosta próxima à Praia do Amor.",
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("img", {
+      name: "Vista do Santuário Ecológico de Pipa, com vegetação e litoral da Praia de Pipa.",
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("img", {
+      name: "Vista elevada da Praia de Cacimbinhas a partir das formações rochosas de Tibau do Sul.",
+    }),
+  ).toBeVisible();
+  await expect(
     publishedPlaces.getByRole("img", { name: "Imagem não disponível para Praia das Minas" }),
+  ).toBeVisible();
+  await expect(
+    publishedPlaces.getByRole("img", { name: "Imagem não disponível para Praia de Sibaúma" }),
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Ocultar descobertas atualizadas" })).toHaveAttribute(
     "href",

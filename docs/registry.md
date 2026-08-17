@@ -362,8 +362,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-153 | Context Pack do RB-INC-153 — Guia Operacional de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-153-pipa-operational-guide.md](./implementation/context-packs/rb-inc-153-pipa-operational-guide.md) |
 | RB-INC-154 | Contagem Integrada de Places e Descobertas | Implementation | Draft | 0.1.0 | [rb-inc-154-integrated-place-count.md](./implementation/increments/rb-inc-154-integrated-place-count.md) |
 | RB-CTX-154 | Context Pack do RB-INC-154 — Contagem Integrada de Places e Descobertas | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-154-integrated-place-count.md](./implementation/context-packs/rb-inc-154-integrated-place-count.md) |
-| RB-INC-155 | Guia Prático por Lugar em Pipa | Implementation | Draft | 0.1.0 | [rb-inc-155-pipa-place-practical-guide.md](./implementation/increments/rb-inc-155-pipa-place-practical-guide.md) |
-| RB-CTX-155 | Context Pack do RB-INC-155 — Guia Prático por Lugar em Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-155-pipa-place-practical-guide.md](./implementation/context-packs/rb-inc-155-pipa-place-practical-guide.md) |
+| RB-INC-155 | Guia Diário Visual de Pipa | Implementation | Draft | 0.1.0 | [rb-inc-155-pipa-place-practical-guide.md](./implementation/increments/rb-inc-155-pipa-place-practical-guide.md) |
+| RB-CTX-155 | Context Pack do RB-INC-155 — Guia Diário Visual de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-155-pipa-place-practical-guide.md](./implementation/context-packs/rb-inc-155-pipa-place-practical-guide.md) |
 
 ## Status possíveis
 

@@ -14,7 +14,9 @@ import { findTravelerProfile } from "@routebook/traveler-profile";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { ContextualRecommendationStrip } from "../../../components/contextual-recommendation-strip";
+import { TripDayGuide } from "../../../components/trip-day-guide";
 import { TripMap } from "../../../components/trip-map";
+import { buildPipaFirstDayGuide } from "../../../lib/pipa-day-guide";
 import { loadRecommendationExperience } from "../../../lib/recommendation-experience";
 import { resolveTripDestinationId } from "../../../lib/trip-destination";
 import type { TripMapPoint } from "../../../lib/trip-map";
@@ -91,6 +93,18 @@ export default async function TripOverviewPage({
   const { contextUpdated } = await searchParams;
   const owner = trip.participants.find((participant) => participant.role === "owner");
   const days = deriveTripDays(trip.period);
+  const firstDayGuide =
+    destinationId === "pipa-rn-br" && days[0]
+      ? buildPipaFirstDayGuide({
+          tripId,
+          date: days[0].date,
+          places: publishedPlaces,
+          ...(trip.accommodation?.coordinate
+            ? { accommodationCoordinate: trip.accommodation.coordinate }
+            : {}),
+          travelMode: profile?.transportPreference === "walking" ? "walking" : "driving",
+        })
+      : null;
   const savedPlaceIds = new Set(savedPlaces.map((selection) => selection.placeId));
   const mapPoints: TripMapPoint[] = [];
 
@@ -165,6 +179,23 @@ export default async function TripOverviewPage({
           <dd>{owner?.displayName ?? "Owner não identificado"}</dd>
         </div>
       </dl>
+
+      {firstDayGuide ? (
+        <TripDayGuide
+          {...(trip.accommodation?.coordinate
+            ? {
+                accommodationPoint: {
+                  id: "guide-accommodation",
+                  label: trip.accommodation.name,
+                  kind: "accommodation" as const,
+                  latitude: trip.accommodation.coordinate.latitude,
+                  longitude: trip.accommodation.coordinate.longitude,
+                },
+              }
+            : {})}
+          guide={firstDayGuide}
+        />
+      ) : null}
 
       {recommendationExperience?.destinationSupported ? (
         <ContextualRecommendationStrip

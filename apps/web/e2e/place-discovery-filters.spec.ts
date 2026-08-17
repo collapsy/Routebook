@@ -101,7 +101,9 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
     "data-map-external-count",
     String(expandedExternalTotal),
   );
-  const collapseDiscoveryLink = page.getByRole("link", { name: "Mostrar primeiras 60 descobertas" });
+  const collapseDiscoveryLink = page.getByRole("link", {
+    name: "Mostrar primeiras 60 descobertas",
+  });
   await expect(collapseDiscoveryLink).toBeVisible();
   const collapseDiscoveryHref = await collapseDiscoveryLink.getAttribute("href");
   expect(collapseDiscoveryHref).toBe(`/viagens/${trip.id}/lugares`);

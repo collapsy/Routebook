@@ -696,11 +696,11 @@ export default async function PlacesPage({
       )}
 
       <TripMap
-        description="O mapa usa exatamente as opções visíveis na lista, distinguindo Places publicados de descobertas externas. A hospedagem aparece como referência quando disponível."
+        description={`Mesmo conjunto da grade: ${filteredPlaces.length} Places publicados + ${externalResults.length} descobertas externas. A Hospedagem aparece como referência adicional quando disponível.`}
         emptyDescription="Não há lugar com coordenadas no conjunto filtrado. Limpe ou amplie os filtros para recuperar resultados."
         emptyTitle="Nenhum lugar para exibir no mapa"
         points={mapPoints}
-        title="Mapa dos lugares filtrados"
+        title={`Mapa das ${visibleOptionCount} ${visibleOptionCount === 1 ? "opção" : "opções"} filtradas`}
       />
     </section>
   );

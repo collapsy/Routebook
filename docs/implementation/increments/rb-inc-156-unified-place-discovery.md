@@ -84,6 +84,12 @@ O mapa recebe o mesmo conjunto efetivamente exibido na lista, além da Hospedage
 disponível. Marcadores de candidatos usam o tipo `Descoberta externa` e não oferecem detalhe
 interno. O mapa não promove, persiste ou transforma o candidato em Place canônico.
 
+A legenda informa a contagem de cada tipo e o resumo declara o total de pontos representados.
+Mapas com mais de 25 pontos entram em modo denso: os rótulos deixam de ficar permanentemente
+abertos e continuam disponíveis em hover/foco, reduzindo sobreposição sem esconder marcadores.
+O mapa da visão geral declara explicitamente que representa apenas os Places publicados; o mapa
+da descoberta informa no título e na descrição a composição publicada + externa.
+
 ### 3.4 Falha e ocultação
 
 Quando a fonte Overture estiver oculta ou indisponível, a grade e o mapa degradam para os
@@ -107,6 +113,7 @@ tiles, publicar automaticamente ou transformar candidato em Place.
 - janela de consulta e exibição governadas após reconciliação;
 - logs estruturados de cobertura externa;
 - candidatos externos no mapa com tipo e legenda próprios;
+- contagens por fonte, total de pontos e modo visual denso no mapa;
 - contratos unitários e E2E;
 - documentação e Registry.
 
@@ -148,6 +155,8 @@ docs/registry.md
 - [ ] origem e estado canônico são inequívocos em cada card;
 - [ ] ordenação por distância combina as fontes de forma determinística;
 - [ ] mapa contém o mesmo conjunto da lista, com marker e legenda distintos;
+- [ ] legenda e resumo do mapa tornam as contagens publicada e externa verificáveis;
+- [ ] mapas densos reduzem sobreposição de rótulos sem remover pontos;
 - [ ] busca e categoria filtram as duas fontes;
 - [ ] preço continua aplicável somente ao catálogo, com disclosure;
 - [ ] Overture oculto ou indisponível degrada para Places publicados;

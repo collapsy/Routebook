@@ -696,7 +696,7 @@ export default async function PlacesPage({
       )}
 
       <TripMap
-        description={`Mesmo conjunto da grade: ${filteredPlaces.length} Places publicados + ${externalResults.length} descobertas externas. A Hospedagem aparece como referência adicional quando disponível.`}
+        description={`Mesmo conjunto da grade: ${filteredPlaces.length} Places publicados + ${externalResults.length} descobertas externas. A legenda confirma a quantidade de cada origem; a Hospedagem aparece como referência adicional quando disponível.`}
         emptyDescription="Não há lugar com coordenadas no conjunto filtrado. Limpe ou amplie os filtros para recuperar resultados."
         emptyTitle="Nenhum lugar para exibir no mapa"
         points={mapPoints}

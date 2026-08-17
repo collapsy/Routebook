@@ -43,10 +43,14 @@ test("mantém Discovery funcional sem coordenadas da hospedagem", async ({ page 
 
   await page.goto(`/viagens/${trip.id}/lugares`);
 
-  await expect(page.getByRole("heading", { name: /\d+ opções para explorar/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: /\d+ de \d+ opç(?:ão disponível|ões disponíveis) exibidas/,
+    }),
+  ).toBeVisible();
   await expect(
     page.getByText(
-      /30 lugares publicados no RouteBook \+ [1-9]\d* descobertas? atualizadas? no Overture/,
+      /30 lugares publicados no RouteBook \+ [1-9]\d* de [1-9]\d* descobertas? atualizadas? disponíveis? no Overture/,
     ),
   ).toBeVisible();
   await expect(

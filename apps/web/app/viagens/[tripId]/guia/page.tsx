@@ -20,7 +20,8 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Guia da viagem — RouteBook",
-  description: "Consulte uma base editorial diária para organizar sua viagem sem aplicar mudanças automaticamente.",
+  description:
+    "Consulte uma base editorial diária para organizar sua viagem sem aplicar mudanças automaticamente.",
 };
 
 export default async function TripGuidePage({ params }: { params: Promise<{ tripId: string }> }) {
@@ -89,7 +90,8 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
           </div>
           {guide.totalCanonicalDays > guide.days.length ? (
             <p>
-              O piloto editorial cobre os primeiros {guide.days.length} dias desta Viagem de {guide.totalCanonicalDays} dias.
+              O piloto editorial cobre os primeiros {guide.days.length} dias desta Viagem de{" "}
+              {guide.totalCanonicalDays} dias.
             </p>
           ) : null}
         </div>
@@ -104,7 +106,7 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
 
       {guide.days.map((day, index) => (
         <TripDayGuide
-          accommodationPoint={accommodationPoint}
+          {...(accommodationPoint ? { accommodationPoint } : {})}
           guide={day}
           key={day.date}
           showDisclosure={index === 0}

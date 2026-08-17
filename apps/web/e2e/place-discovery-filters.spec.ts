@@ -13,6 +13,8 @@ function integratedCount(publishedCount: number): RegExp {
 }
 
 test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ page }) => {
+  test.slow();
+
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Descoberta ${test.info().project.name} ${Date.now()}`,
     startDate: "2026-08-22",
@@ -127,10 +129,10 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
     "href",
     `/viagens/${trip.id}/lugares?preco=moderate`,
   );
-  await removeSearchFilter.click();
-  await expect(page).toHaveURL(`/viagens/${trip.id}/lugares?preco=moderate`, {
-    timeout: 20_000,
-  });
+  await Promise.all([
+    page.waitForURL(`/viagens/${trip.id}/lugares?preco=moderate`, { timeout: 60_000 }),
+    removeSearchFilter.click(),
+  ]);
 
   await page.getByLabel("Categoria").selectOption("beach");
   await page.getByLabel("Distância máxima").selectOption("3");

@@ -64,7 +64,9 @@ test("orienta um dia vazio pela jornada antes das ações manuais", async ({ pag
     `/viagens/${trip.id}/lugares-salvos`,
   );
   await expect(page.getByText("Adicionar atividade manual", { exact: true })).toBeVisible();
-  await expect(page.getByText("Adicionar período livre", { exact: true })).toBeVisible();
+  await expect(
+    page.locator("summary").filter({ hasText: /^Adicionar período livre$/ }),
+  ).toBeVisible();
   await expect(page.getByLabel("Título")).toBeHidden();
 });
 

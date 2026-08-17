@@ -230,6 +230,7 @@ function ExternalDiscoveryCard({
   category,
   maximumDistanceMeters,
   priceRange,
+  discoveryMode,
 }: Readonly<{
   item: ExternalPlaceDiscoveryItem;
   tripId: string;
@@ -239,6 +240,7 @@ function ExternalDiscoveryCard({
   category?: (typeof PLACE_CATEGORIES)[number];
   maximumDistanceMeters?: number;
   priceRange?: (typeof PLACE_PRICE_RANGES)[number];
+  discoveryMode?: string;
 }>) {
   const { candidate, distanceMeters } = item;
   const coordinate = { latitude: candidate.latitude, longitude: candidate.longitude };
@@ -300,6 +302,7 @@ function ExternalDiscoveryCard({
           <input name="distancia" type="hidden" value={String(maximumDistanceMeters / 1_000)} />
         ) : null}
         {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
+        {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
         <button className="product-secondary-action" type="submit">
           Enviar para curadoria
         </button>
@@ -330,6 +333,8 @@ export default async function PlacesPage({
   const category = parsePlaceCategory(rawFilters.categoria);
   const priceRange = parsePlacePriceRange(rawFilters.preco);
   const discoverExternal = rawFilters.descoberta !== "ocultar";
+  const showAllExternal = rawFilters.descoberta === "todas";
+  const discoveryMode = !discoverExternal ? "ocultar" : showAllExternal ? "todas" : undefined;
   const promotionStatusMessage = promotionMessage(rawFilters.promocao);
   const promotionError = promotionErrorMessage(rawFilters.erroPromocao);
   const accommodationCoordinate = trip.accommodation?.coordinate;
@@ -354,7 +359,7 @@ export default async function PlacesPage({
     ...(category ? { categoria: category } : {}),
     ...(maximumDistanceMeters ? { distancia: String(maximumDistanceMeters / 1_000) } : {}),
     ...(priceRange ? { preco: priceRange } : {}),
-    ...(!discoverExternal ? { descoberta: "ocultar" } : {}),
+    ...(discoveryMode ? { descoberta: discoveryMode } : {}),
   };
   const activeFilters = [
     ...(search
@@ -381,6 +386,7 @@ export default async function PlacesPage({
       : []),
   ];
   let externalResults: ExternalPlaceReconciliation[] = [];
+  let externalAvailableCount = 0;
   let externalPossibleMatchCount = 0;
   let externalLinkedCount = 0;
   let externalDiscoveryError: string | undefined;
@@ -405,15 +411,18 @@ export default async function PlacesPage({
       const reconciliations = candidates.map((candidate) =>
         reconcileExternalPlaceCandidate(candidate, publishedPlaces, references),
       );
+      const availableExternalResults = reconciliations
+        .filter((result) => result.status === "new")
+        .filter((result) => matchesExternalSearch(result, search));
 
+      externalAvailableCount = availableExternalResults.length;
       externalPossibleMatchCount = reconciliations.filter(
         (result) => result.status === "possible_match",
       ).length;
       externalLinkedCount = reconciliations.filter((result) => result.status === "linked").length;
-      externalResults = reconciliations
-        .filter((result) => result.status === "new")
-        .filter((result) => matchesExternalSearch(result, search))
-        .slice(0, externalDiscoveryDisplayLimit);
+      externalResults = showAllExternal
+        ? availableExternalResults
+        : availableExternalResults.slice(0, externalDiscoveryDisplayLimit);
       console.info("[place-discovery] Overture reconciliation completed", {
         tripId,
         destinationId,
@@ -421,10 +430,12 @@ export default async function PlacesPage({
         publishedCount: publishedPlaces.length,
         candidateCount: candidates.length,
         newCandidateCount: reconciliations.filter((result) => result.status === "new").length,
+        availableExternalCount: externalAvailableCount,
         possibleMatchCount: externalPossibleMatchCount,
         linkedCount: externalLinkedCount,
         rejectedCount: reconciliations.filter((result) => result.status === "rejected").length,
         visibleExternalCount: externalResults.length,
+        expanded: showAllExternal,
       });
     } catch (error) {
       console.error("Falha ao descobrir Places externos via Overture", error);
@@ -442,6 +453,13 @@ export default async function PlacesPage({
     reference: discoveryCenter,
   });
   const visibleOptionCount = discoveryItems.length;
+  const totalAvailableOptionCount = filteredPlaces.length + externalAvailableCount;
+  const hasMoreExternalResults =
+    hasExternalCoverage && externalAvailableCount > externalResults.length;
+  const hasExpandedExternalResults =
+    hasExternalCoverage &&
+    showAllExternal &&
+    externalAvailableCount > externalDiscoveryDisplayLimit;
   const mapPoints: TripMapPoint[] = discoveryItems.map((item) => {
     if (item.kind === "published") {
       return {
@@ -493,7 +511,7 @@ export default async function PlacesPage({
       </header>
 
       <form action={`/viagens/${tripId}/lugares`} className={styles.filters} method="get">
-        {!discoverExternal ? <input name="descoberta" type="hidden" value="ocultar" /> : null}
+        {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
         <div className={styles.searchField}>
           <label htmlFor="place-search">Nome ou termo</label>
           <input
@@ -578,7 +596,7 @@ export default async function PlacesPage({
           </ul>
           <Link
             className="product-secondary-action"
-            href={discoveryHref(tripId, !discoverExternal ? { descoberta: "ocultar" } : {})}
+            href={discoveryHref(tripId, discoveryMode ? { descoberta: discoveryMode } : {})}
           >
             Limpar filtros
           </Link>
@@ -589,7 +607,9 @@ export default async function PlacesPage({
         <div>
           <h2>
             {hasExternalCoverage
-              ? `${visibleOptionCount} ${visibleOptionCount === 1 ? "opção" : "opções"} para explorar`
+              ? `${visibleOptionCount} de ${totalAvailableOptionCount} ${
+                  totalAvailableOptionCount === 1 ? "opção disponível" : "opções disponíveis"
+                } exibidas`
               : `${filteredPlaces.length} ${
                   filteredPlaces.length === 1 ? "lugar publicado" : "lugares publicados"
                 }`}
@@ -598,8 +618,10 @@ export default async function PlacesPage({
             {hasExternalCoverage
               ? `${filteredPlaces.length} ${
                   filteredPlaces.length === 1 ? "lugar publicado" : "lugares publicados"
-                } no RouteBook + ${externalResults.length} ${
-                  externalResults.length === 1 ? "descoberta atualizada" : "descobertas atualizadas"
+                } no RouteBook + ${externalResults.length} de ${externalAvailableCount} ${
+                  externalAvailableCount === 1
+                    ? "descoberta atualizada disponível"
+                    : "descobertas atualizadas disponíveis"
                 } no Overture.`
               : "Lista e mapa exibem o mesmo conjunto publicado e filtrado."}
           </p>
@@ -643,12 +665,29 @@ export default async function PlacesPage({
             <p className={styles.notice} role="status">
               {externalDiscoveryError}
             </p>
-          ) : externalResults.length > 0 ? (
-            <p>
-              {externalResults.length} candidatos novos participam da grade.{" "}
-              {externalPossibleMatchCount} possíveis correspondências foram retidas para evitar
-              duplicatas e {externalLinkedCount} já possuem vínculo canônico.
-            </p>
+          ) : externalAvailableCount > 0 ? (
+            <>
+              <p>
+                {externalResults.length} de {externalAvailableCount} candidatos novos estão visíveis
+                nesta janela. {externalPossibleMatchCount} possíveis correspondências foram retidas
+                para evitar duplicatas e {externalLinkedCount} já possuem vínculo canônico.
+              </p>
+              {hasMoreExternalResults ? (
+                <Link
+                  className="product-primary-action"
+                  href={discoveryHref(tripId, { ...canonicalParams, descoberta: "todas" })}
+                >
+                  Mostrar todas as {externalAvailableCount} descobertas
+                </Link>
+              ) : hasExpandedExternalResults ? (
+                <Link
+                  className="product-secondary-action"
+                  href={discoveryHref(tripId, { ...canonicalParams, descoberta: undefined })}
+                >
+                  Mostrar primeiras {externalDiscoveryDisplayLimit} descobertas
+                </Link>
+              ) : null}
+            </>
           ) : (
             <p role="status">
               Nenhum candidato novo corresponde ao recorte atual. Lugares já vinculados ou com
@@ -680,6 +719,7 @@ export default async function PlacesPage({
                 {...(category ? { category } : {})}
                 {...(maximumDistanceMeters ? { maximumDistanceMeters } : {})}
                 {...(priceRange ? { priceRange } : {})}
+                {...(showAllExternal ? { discoveryMode: "todas" } : {})}
               />
             ),
           )}
@@ -696,11 +736,11 @@ export default async function PlacesPage({
       )}
 
       <TripMap
-        description={`Mesmo conjunto da grade: ${filteredPlaces.length} Places publicados + ${externalResults.length} descobertas externas. A legenda confirma a quantidade de cada origem; a Hospedagem aparece como referência adicional quando disponível.`}
+        description={`Mesmo conjunto da grade: ${filteredPlaces.length} Places publicados + ${externalResults.length} descobertas externas visíveis de ${externalAvailableCount} disponíveis. A legenda confirma a quantidade de cada origem; a Hospedagem aparece como referência adicional quando disponível.`}
         emptyDescription="Não há lugar com coordenadas no conjunto filtrado. Limpe ou amplie os filtros para recuperar resultados."
         emptyTitle="Nenhum lugar para exibir no mapa"
         points={mapPoints}
-        title={`Mapa das ${visibleOptionCount} ${visibleOptionCount === 1 ? "opção" : "opções"} filtradas`}
+        title={`Mapa das ${visibleOptionCount} ${visibleOptionCount === 1 ? "opção" : "opções"} exibidas`}
       />
     </section>
   );

@@ -39,8 +39,33 @@ async function loadItinerary(tripId: string): Promise<{
   return { repository, itinerary };
 }
 
-function redirectWithItineraryError(tripId: string, error: ItineraryValidationError): never {
-  redirect(`/viagens/${tripId}/roteiro?erro=${encodeURIComponent(itineraryErrorMessage(error))}`);
+function findActivityDayDate(itinerary: Itinerary, activityId: string): string | undefined {
+  return itinerary.days.find((day) => day.activities.some((activity) => activity.id === activityId))
+    ?.date;
+}
+
+function findFreePeriodDayDate(itinerary: Itinerary, freePeriodId: string): string | undefined {
+  return itinerary.days.find((day) =>
+    day.freePeriods.some((freePeriod) => freePeriod.id === freePeriodId),
+  )?.date;
+}
+
+function redirectToItinerary(
+  tripId: string,
+  status: Readonly<Record<string, string>>,
+  dayDate?: string,
+): never {
+  const query = new URLSearchParams(status);
+  if (dayDate) query.set("dia", dayDate);
+  redirect(`/viagens/${tripId}/roteiro?${query.toString()}`);
+}
+
+function redirectWithItineraryError(
+  tripId: string,
+  error: ItineraryValidationError,
+  dayDate?: string,
+): never {
+  redirectToItinerary(tripId, { erro: itineraryErrorMessage(error) }, dayDate);
 }
 
 export async function addManualActivityAction(formData: FormData): Promise<never> {
@@ -70,7 +95,7 @@ export async function addManualActivityAction(formData: FormData): Promise<never
     });
   } catch (error) {
     if (error instanceof ItineraryValidationError) {
-      redirectWithItineraryError(tripId, error);
+      redirectWithItineraryError(tripId, error, dayDate);
     }
     throw error;
   }
@@ -78,7 +103,7 @@ export async function addManualActivityAction(formData: FormData): Promise<never
   await itineraryRepository.save(updatedItinerary);
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/roteiro`);
-  redirect(`/viagens/${tripId}/roteiro?atividadeCriada=1`);
+  redirectToItinerary(tripId, { atividadeCriada: "1" }, dayDate);
 }
 
 export async function addItineraryFreePeriodAction(formData: FormData): Promise<never> {
@@ -103,7 +128,7 @@ export async function addItineraryFreePeriodAction(formData: FormData): Promise<
     });
   } catch (error) {
     if (error instanceof ItineraryValidationError) {
-      redirectWithItineraryError(tripId, error);
+      redirectWithItineraryError(tripId, error, dayDate);
     }
     throw error;
   }
@@ -111,7 +136,7 @@ export async function addItineraryFreePeriodAction(formData: FormData): Promise<
   await repository.save(updatedItinerary);
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/roteiro`);
-  redirect(`/viagens/${tripId}/roteiro?periodoLivreCriado=1`);
+  redirectToItinerary(tripId, { periodoLivreCriado: "1" }, dayDate);
 }
 
 export async function updateItineraryFreePeriodAction(formData: FormData): Promise<never> {
@@ -126,6 +151,7 @@ export async function updateItineraryFreePeriodAction(formData: FormData): Promi
   if (!trip) notFound();
 
   const { repository, itinerary } = await loadItinerary(tripId);
+  const dayDate = findFreePeriodDayDate(itinerary, freePeriodId);
   let updatedItinerary: Itinerary;
   try {
     updatedItinerary = updateFreePeriod(itinerary, {
@@ -136,7 +162,7 @@ export async function updateItineraryFreePeriodAction(formData: FormData): Promi
     });
   } catch (error) {
     if (error instanceof ItineraryValidationError) {
-      redirectWithItineraryError(tripId, error);
+      redirectWithItineraryError(tripId, error, dayDate);
     }
     throw error;
   }
@@ -144,7 +170,7 @@ export async function updateItineraryFreePeriodAction(formData: FormData): Promi
   await repository.save(updatedItinerary);
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/roteiro`);
-  redirect(`/viagens/${tripId}/roteiro?periodoLivreEditado=1`);
+  redirectToItinerary(tripId, { periodoLivreEditado: "1" }, dayDate);
 }
 
 export async function removeItineraryFreePeriodAction(formData: FormData): Promise<never> {
@@ -155,12 +181,13 @@ export async function removeItineraryFreePeriodAction(formData: FormData): Promi
   if (!trip) notFound();
 
   const { repository, itinerary } = await loadItinerary(tripId);
+  const dayDate = findFreePeriodDayDate(itinerary, freePeriodId);
   let updatedItinerary: Itinerary;
   try {
     updatedItinerary = removeFreePeriod(itinerary, { freePeriodId });
   } catch (error) {
     if (error instanceof ItineraryValidationError) {
-      redirectWithItineraryError(tripId, error);
+      redirectWithItineraryError(tripId, error, dayDate);
     }
     throw error;
   }
@@ -168,7 +195,7 @@ export async function removeItineraryFreePeriodAction(formData: FormData): Promi
   await repository.save(updatedItinerary);
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/roteiro`);
-  redirect(`/viagens/${tripId}/roteiro?periodoLivreRemovido=1`);
+  redirectToItinerary(tripId, { periodoLivreRemovido: "1" }, dayDate);
 }
 
 export async function updateItineraryActivityAction(formData: FormData): Promise<never> {
@@ -183,6 +210,7 @@ export async function updateItineraryActivityAction(formData: FormData): Promise
   if (!trip) notFound();
 
   const { repository, itinerary } = await loadItinerary(tripId);
+  const dayDate = findActivityDayDate(itinerary, activityId);
   let updatedItinerary: Itinerary;
   try {
     updatedItinerary = updateActivity(itinerary, {
@@ -193,7 +221,7 @@ export async function updateItineraryActivityAction(formData: FormData): Promise
     });
   } catch (error) {
     if (error instanceof ItineraryValidationError) {
-      redirectWithItineraryError(tripId, error);
+      redirectWithItineraryError(tripId, error, dayDate);
     }
     throw error;
   }
@@ -201,7 +229,7 @@ export async function updateItineraryActivityAction(formData: FormData): Promise
   await repository.save(updatedItinerary);
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/roteiro`);
-  redirect(`/viagens/${tripId}/roteiro?atividadeEditada=1`);
+  redirectToItinerary(tripId, { atividadeEditada: "1" }, dayDate);
 }
 
 export async function reorderItineraryActivitiesAction(formData: FormData): Promise<never> {
@@ -213,12 +241,13 @@ export async function reorderItineraryActivitiesAction(formData: FormData): Prom
   if (!trip) notFound();
 
   const { repository, itinerary } = await loadItinerary(tripId);
+  const dayDate = findActivityDayDate(itinerary, activityId);
   let updatedItinerary: Itinerary;
   try {
     updatedItinerary = reorderActivities(itinerary, { activityId, targetActivityId });
   } catch (error) {
     if (error instanceof ItineraryValidationError) {
-      redirectWithItineraryError(tripId, error);
+      redirectWithItineraryError(tripId, error, dayDate);
     }
     throw error;
   }
@@ -226,7 +255,7 @@ export async function reorderItineraryActivitiesAction(formData: FormData): Prom
   await repository.save(updatedItinerary);
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/roteiro`);
-  redirect(`/viagens/${tripId}/roteiro?atividadeReordenada=1`);
+  redirectToItinerary(tripId, { atividadeReordenada: "1" }, dayDate);
 }
 
 export async function moveItineraryActivityAction(formData: FormData): Promise<never> {
@@ -238,12 +267,13 @@ export async function moveItineraryActivityAction(formData: FormData): Promise<n
   if (!trip) notFound();
 
   const { repository, itinerary } = await loadItinerary(tripId);
+  const sourceDayDate = findActivityDayDate(itinerary, activityId);
   let updatedItinerary: Itinerary;
   try {
     updatedItinerary = moveActivity(itinerary, { activityId, targetDayDate });
   } catch (error) {
     if (error instanceof ItineraryValidationError) {
-      redirectWithItineraryError(tripId, error);
+      redirectWithItineraryError(tripId, error, sourceDayDate);
     }
     throw error;
   }
@@ -251,7 +281,7 @@ export async function moveItineraryActivityAction(formData: FormData): Promise<n
   await repository.save(updatedItinerary);
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/roteiro`);
-  redirect(`/viagens/${tripId}/roteiro?atividadeMovida=1`);
+  redirectToItinerary(tripId, { atividadeMovida: "1" }, targetDayDate);
 }
 
 export async function removeItineraryActivityAction(formData: FormData): Promise<never> {
@@ -262,12 +292,13 @@ export async function removeItineraryActivityAction(formData: FormData): Promise
   if (!trip) notFound();
 
   const { repository, itinerary } = await loadItinerary(tripId);
+  const dayDate = findActivityDayDate(itinerary, activityId);
   let updatedItinerary: Itinerary;
   try {
     updatedItinerary = removeActivity(itinerary, { activityId });
   } catch (error) {
     if (error instanceof ItineraryValidationError) {
-      redirectWithItineraryError(tripId, error);
+      redirectWithItineraryError(tripId, error, dayDate);
     }
     throw error;
   }
@@ -275,5 +306,5 @@ export async function removeItineraryActivityAction(formData: FormData): Promise
   await repository.save(updatedItinerary);
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/roteiro`);
-  redirect(`/viagens/${tripId}/roteiro?atividadeRemovida=1`);
+  redirectToItinerary(tripId, { atividadeRemovida: "1" }, dayDate);
 }

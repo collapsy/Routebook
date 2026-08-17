@@ -44,10 +44,15 @@ function freePeriodDescription(item: FreePeriod): string {
 export function FreePeriodComposer({
   itinerary,
   tripId,
+  selectedDayDate,
 }: {
   itinerary: Itinerary;
   tripId: string;
+  selectedDayDate?: string;
 }) {
+  const defaultDayDate =
+    itinerary.days.find((day) => day.date === selectedDayDate)?.date ?? itinerary.days[0]?.date;
+
   return (
     <>
       <Suspense fallback={null}>
@@ -69,7 +74,7 @@ export function FreePeriodComposer({
           <div className={styles.field}>
             <label htmlFor="freePeriodDayDate">Dia do período livre</label>
             <select
-              defaultValue={itinerary.days[0]?.date}
+              defaultValue={defaultDayDate}
               id="freePeriodDayDate"
               name="freePeriodDayDate"
               required

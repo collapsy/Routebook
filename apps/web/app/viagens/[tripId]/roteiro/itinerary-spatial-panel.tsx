@@ -63,9 +63,11 @@ function buildMapPoints(tripId: string, context: ItineraryDaySpatialContext): Tr
 export function ItinerarySpatialPanel({
   tripId,
   days,
+  showDaySelector = true,
 }: {
   tripId: string;
   days: readonly SpatialDay[];
+  showDaySelector?: boolean;
 }) {
   const selectedDate = useSearchParams().get("dia");
   const selectedDay = days.find((day) => day.date === selectedDate) ?? days[0]!;
@@ -84,24 +86,26 @@ export function ItinerarySpatialPanel({
         <p className={styles.eyebrow}>Visualização geográfica do Dia</p>
         <h2 id="itinerary-spatial-title">Onde estão as decisões do Roteiro</h2>
         <p>
-          Selecione um Dia para relacionar a sequência das Atividades com a Hospedagem. Nenhuma
-          localização ausente é inferida.
+          O mapa acompanha o Dia em foco e relaciona a sequência das Atividades com a Hospedagem.
+          Nenhuma localização ausente é inferida.
         </p>
       </header>
 
-      <nav aria-label="Selecionar Dia para o mapa" className={styles.daySelector}>
-        {days.map((day) => (
-          <Link
-            aria-current={day.date === selectedDay.date ? "page" : undefined}
-            className={day.date === selectedDay.date ? styles.selectedDay : styles.dayLink}
-            href={`/viagens/${tripId}/roteiro?dia=${day.date}#contexto-geografico`}
-            key={day.date}
-          >
-            <span>Dia {day.position}</span>
-            <small>{day.label}</small>
-          </Link>
-        ))}
-      </nav>
+      {showDaySelector ? (
+        <nav aria-label="Selecionar Dia para o mapa" className={styles.daySelector}>
+          {days.map((day) => (
+            <Link
+              aria-current={day.date === selectedDay.date ? "page" : undefined}
+              className={day.date === selectedDay.date ? styles.selectedDay : styles.dayLink}
+              href={`/viagens/${tripId}/roteiro?dia=${day.date}#contexto-geografico`}
+              key={day.date}
+            >
+              <span>Dia {day.position}</span>
+              <small>{day.label}</small>
+            </Link>
+          ))}
+        </nav>
+      ) : null}
 
       <TripMap
         description="A Hospedagem possui símbolo próprio. As Atividades são numeradas conforme a ordem canônica do Dia."

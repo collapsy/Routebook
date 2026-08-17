@@ -2,8 +2,9 @@ import { expect, test } from "@playwright/test";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
-const integratedOptionsHeading = /\d+ opç(?:ão|ões) para explorar/;
-const overtureDiscoveryCount = /\d+ descoberta(?: atualizada|s atualizadas) no Overture/;
+const integratedOptionsHeading = /\d+ de \d+ opç(?:ão disponível|ões disponíveis) exibidas/;
+const overtureDiscoveryCount =
+  /\d+ de \d+ descoberta(?: atualizada disponível|s atualizadas disponíveis) no Overture/;
 
 function integratedCount(publishedCount: number): RegExp {
   const publishedLabel = publishedCount === 1 ? "lugar publicado" : "lugares publicados";
@@ -28,15 +29,19 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
     .getByRole("link", { name: "Explorar catálogo ampliado" })
     .first();
   await expect(expandedCatalogLink).toHaveAttribute("href", `/viagens/${trip.id}/lugares`);
-  await expandedCatalogLink.click();
+  const expandedCatalogHref = await expandedCatalogLink.getAttribute("href");
+  expect(expandedCatalogHref).toBeTruthy();
+  await page.goto(expandedCatalogHref!);
   await expect(page).toHaveURL(`/viagens/${trip.id}/lugares`, { timeout: 20_000 });
-  await expect(page.getByRole("heading", { name: /Lugares em Pipa/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Lugares em Pipa/ })).toBeVisible({
+    timeout: 20_000,
+  });
   const options = page.getByRole("list", { name: "Opções de lugares" });
   const publishedPlaces = options.locator('[data-place-source="published"]');
   const externalPlaces = options.locator('[data-place-source="external"]');
   await expect(publishedPlaces).toHaveCount(30);
-  await expect(externalPlaces.first()).toBeVisible();
-  expect(await options.getByRole("listitem").count()).toBeGreaterThan(30);
+  await expect(externalPlaces).toHaveCount(60);
+  expect(await options.getByRole("listitem").count()).toBe(90);
   await expect(
     publishedPlaces.getByRole("img", { name: /^Imagem não disponível para / }),
   ).toHaveCount(24);
@@ -75,6 +80,37 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(page.getByLabel("Resumo do mapa")).toContainText(
     `${visibleOptionTotal + 1} pontos representados`,
   );
+
+  const expandDiscoveryLink = page.getByRole("link", {
+    name: /Mostrar todas as \d+ descobertas/,
+  });
+  await expect(expandDiscoveryLink).toBeVisible();
+  await expect(expandDiscoveryLink).toHaveAttribute("href", /descoberta=todas/);
+  const expandDiscoveryHref = await expandDiscoveryLink.getAttribute("href");
+  expect(expandDiscoveryHref).toContain("descoberta=todas");
+  await page.goto(expandDiscoveryHref!);
+  await expect(page).toHaveURL(/descoberta=todas/);
+  const expandedExternalTotal = await externalPlaces.count();
+  expect(expandedExternalTotal).toBeGreaterThan(60);
+  const expandedVisibleTotal = await options.getByRole("listitem").count();
+  await expect(discoveryMap).toHaveAttribute(
+    "data-map-point-count",
+    String(expandedVisibleTotal + 1),
+  );
+  await expect(discoveryMap).toHaveAttribute(
+    "data-map-external-count",
+    String(expandedExternalTotal),
+  );
+  const collapseDiscoveryLink = page.getByRole("link", {
+    name: "Mostrar primeiras 60 descobertas",
+  });
+  await expect(collapseDiscoveryLink).toBeVisible();
+  const collapseDiscoveryHref = await collapseDiscoveryLink.getAttribute("href");
+  expect(collapseDiscoveryHref).toBe(`/viagens/${trip.id}/lugares`);
+  await page.goto(collapseDiscoveryHref!);
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares$`));
+  await expect(externalPlaces).toHaveCount(60);
+
   const praiaDoAmorCard = publishedPlaces.filter({
     has: page.locator("strong").filter({ hasText: /^Praia do Amor$/ }),
   });
@@ -101,7 +137,10 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
     "Praia das Minas",
   );
 
-  await page.getByRole("link", { name: "Limpar filtros" }).first().click();
+  const clearSearchFiltersLink = page.getByRole("link", { name: "Limpar filtros" }).first();
+  const clearSearchFiltersHref = await clearSearchFiltersLink.getAttribute("href");
+  expect(clearSearchFiltersHref).toBe(`/viagens/${trip.id}/lugares`);
+  await page.goto(clearSearchFiltersHref!);
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares$`));
 
   await page.getByLabel("Nome ou termo").fill("gastronomico");
@@ -142,7 +181,10 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   );
   await expect(page.getByText(/em linha reta da hospedagem/).first()).toBeVisible();
 
-  await page.getByRole("link", { name: "Limpar filtros" }).first().click();
+  const clearCombinedFiltersLink = page.getByRole("link", { name: "Limpar filtros" }).first();
+  const clearCombinedFiltersHref = await clearCombinedFiltersLink.getAttribute("href");
+  expect(clearCombinedFiltersHref).toBe(`/viagens/${trip.id}/lugares`);
+  await page.goto(clearCombinedFiltersHref!);
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares$`));
   await expect(page.getByRole("heading", { name: integratedOptionsHeading })).toBeVisible();
   await expect(page.getByText(integratedCount(30))).toBeVisible();

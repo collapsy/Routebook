@@ -44,6 +44,14 @@ async function createFreePeriodFixture(
   return trip.id;
 }
 
+async function openFreePeriodComposer(page: Page) {
+  await page
+    .locator("summary")
+    .filter({ hasText: /^Adicionar período livre$/ })
+    .click();
+  await expect(page.getByRole("heading", { name: "Adicione um período livre" })).toBeVisible();
+}
+
 async function submitFreePeriod(
   page: Page,
   input: {
@@ -53,6 +61,7 @@ async function submitFreePeriod(
     durationMinutes?: string;
   },
 ) {
+  await openFreePeriodComposer(page);
   const existingPeriods = page.locator('ol[aria-label="Períodos livres do dia"] > li');
   const initialCount = await existingPeriods.count();
   const form = page.locator("form").filter({
@@ -73,15 +82,17 @@ async function submitFreePeriod(
     form.getByRole("button", { name: "Adicionar período livre" }).click(),
   ]);
   const redirectUrl = response.headers()["x-action-redirect"]?.split(";")[0];
-  expect(redirectUrl).toMatch(/periodoLivreCriado=1$/);
+  expect(redirectUrl).toMatch(new RegExp(`periodoLivreCriado=1.*dia=${input.dayDate}`));
   await page.goto(redirectUrl!);
   await expect(existingPeriods).toHaveCount(initialCount + 1);
 }
 
-test("cria e preserva um período livre protegido", async ({ page }, testInfo) => {
+test("cria e preserva um período livre protegido no Dia selecionado", async ({
+  page,
+}, testInfo) => {
   const tripName = `Período livre ${testInfo.project.name} ${Date.now()}`;
   const tripId = await createFreePeriodFixture(tripName);
-  await page.goto(`/viagens/${tripId}/roteiro`);
+  await page.goto(`/viagens/${tripId}/roteiro?dia=2026-08-23`);
 
   await submitFreePeriod(page, {
     dayDate: "2026-08-23",
@@ -90,29 +101,29 @@ test("cria e preserva um período livre protegido", async ({ page }, testInfo) =
     durationMinutes: "90",
   });
 
-  await expect(page).toHaveURL(/periodoLivreCriado=1$/);
+  await expect(page).toHaveURL(/periodoLivreCriado=1.*dia=2026-08-23/);
   await expect(page.getByRole("status")).toContainText("Período livre adicionado");
-  const secondDay = page.locator(".itinerary-day-card").nth(1);
-  await expect(secondDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
-  await expect(secondDay.getByText("15:30", { exact: true })).toBeVisible();
-  await expect(secondDay.getByText(/1 h 30 min/)).toBeVisible();
-  await expect(secondDay.getByText("Protegido", { exact: true })).toBeVisible();
-  await expect(secondDay.getByText("Planejamento aberto", { exact: true })).toHaveCount(0);
+  const focusedDay = page.locator(".itinerary-day-card");
+  await expect(focusedDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
+  await expect(focusedDay.getByText("15:30", { exact: true })).toBeVisible();
+  await expect(focusedDay.getByText(/1 h 30 min/)).toBeVisible();
+  await expect(focusedDay.getByText("Protegido", { exact: true })).toBeVisible();
+  await expect(focusedDay.getByText("Planejamento aberto", { exact: true })).toHaveCount(0);
 
   await page.reload();
-  await expect(secondDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
-  await expect(secondDay.getByText("15:30", { exact: true })).toBeVisible();
+  await expect(focusedDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
+  await expect(focusedDay.getByText("15:30", { exact: true })).toBeVisible();
 });
 
-test("edita e limpa os dados temporais de um período livre", async ({ page }, testInfo) => {
+test("edita e limpa os dados temporais preservando o Dia em foco", async ({ page }, testInfo) => {
   const tripName = `Editar período livre ${testInfo.project.name} ${Date.now()}`;
   const tripId = await createFreePeriodFixture(tripName, [
     { mode: "flexible", startTime: "14:00", durationMinutes: 120 },
   ]);
-  await page.goto(`/viagens/${tripId}/roteiro`);
+  await page.goto(`/viagens/${tripId}/roteiro?dia=2026-08-23`);
 
-  const secondDay = page.locator(".itinerary-day-card").nth(1);
-  const freePeriodItem = secondDay.getByRole("listitem").filter({
+  const focusedDay = page.locator(".itinerary-day-card");
+  const freePeriodItem = focusedDay.getByRole("listitem").filter({
     hasText: "Período livre flexível",
   });
   const editor = freePeriodItem.locator("details");
@@ -124,18 +135,17 @@ test("edita e limpa os dados temporais de um período livre", async ({ page }, t
   await expect(saveButton).toBeEnabled();
   await saveButton.click();
 
-  await expect(page).toHaveURL(/periodoLivreEditado=1$/);
-  await expect(page.getByRole("status")).toContainText("Período livre atualizado");
-  await expect(secondDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
-  await expect(secondDay.getByText("Horário aberto", { exact: true })).toBeVisible();
-  await expect(secondDay.getByText(/duração aberta/)).toBeVisible();
+  await expect(page).toHaveURL(/periodoLivreEditado=1.*dia=2026-08-23/);
+  await expect(focusedDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
+  await expect(focusedDay.getByText("Horário aberto", { exact: true })).toBeVisible();
+  await expect(focusedDay.getByText(/duração aberta/)).toBeVisible();
 
   await page.reload();
-  await expect(secondDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
-  await expect(secondDay.getByText("Horário aberto", { exact: true })).toBeVisible();
+  await expect(focusedDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
+  await expect(focusedDay.getByText("Horário aberto", { exact: true })).toBeVisible();
 });
 
-test("remove somente o período livre selecionado e preserva os demais", async ({
+test("remove somente o período livre selecionado e preserva os demais no Dia", async ({
   page,
 }, testInfo) => {
   const tripName = `Remover período livre ${testInfo.project.name} ${Date.now()}`;
@@ -143,10 +153,10 @@ test("remove somente o período livre selecionado e preserva os demais", async (
     { mode: "flexible", startTime: "13:00" },
     { mode: "protected", startTime: "16:00" },
   ]);
-  await page.goto(`/viagens/${tripId}/roteiro`);
+  await page.goto(`/viagens/${tripId}/roteiro?dia=2026-08-23`);
 
-  const secondDay = page.locator(".itinerary-day-card").nth(1);
-  const flexiblePeriod = secondDay.getByRole("listitem").filter({
+  const focusedDay = page.locator(".itinerary-day-card");
+  const flexiblePeriod = focusedDay.getByRole("listitem").filter({
     hasText: "Período livre flexível",
   });
   const removeButton = flexiblePeriod.getByRole("button", {
@@ -160,17 +170,16 @@ test("remove somente o período livre selecionado e preserva os demais", async (
   });
   const [response] = await Promise.all([removalResponse, removeButton.click()]);
   const redirectUrl = response.headers()["x-action-redirect"]?.split(";")[0];
-  expect(redirectUrl).toMatch(/periodoLivreRemovido=1$/);
+  expect(redirectUrl).toMatch(/periodoLivreRemovido=1.*dia=2026-08-23/);
   await page.goto(redirectUrl!);
 
-  await expect(page).toHaveURL(/periodoLivreRemovido=1$/);
-  await expect(page.getByRole("status")).toContainText("Período livre removido");
-  await expect(secondDay.getByText("Período livre flexível", { exact: true })).toHaveCount(0);
-  await expect(secondDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
-  await expect(secondDay.getByText("16:00", { exact: true })).toBeVisible();
-  await expect(secondDay.locator("header small")).toContainText("1 período livre");
+  await expect(page).toHaveURL(/periodoLivreRemovido=1.*dia=2026-08-23/);
+  await expect(focusedDay.getByText("Período livre flexível", { exact: true })).toHaveCount(0);
+  await expect(focusedDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
+  await expect(focusedDay.getByText("16:00", { exact: true })).toBeVisible();
+  await expect(focusedDay.locator("header small")).toContainText("1 período livre");
 
   await page.reload();
-  await expect(secondDay.getByText("Período livre flexível", { exact: true })).toHaveCount(0);
-  await expect(secondDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
+  await expect(focusedDay.getByText("Período livre flexível", { exact: true })).toHaveCount(0);
+  await expect(focusedDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
 });

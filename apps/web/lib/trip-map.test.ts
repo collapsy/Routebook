@@ -48,6 +48,13 @@ describe("deriveTripMapBounds", () => {
 describe("isValidTripMapPoint", () => {
   it("accepts valid coordinates", () => {
     expect(isValidTripMapPoint(accommodation)).toBe(true);
+    expect(
+      isValidTripMapPoint({
+        ...accommodation,
+        id: "external:overture:place-1",
+        kind: "external-place",
+      }),
+    ).toBe(true);
   });
 
   it("rejects coordinates outside the globe", () => {

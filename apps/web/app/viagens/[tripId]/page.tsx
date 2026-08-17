@@ -210,7 +210,11 @@ export default async function TripOverviewPage({
         />
       ) : null}
 
-      <TripMap points={mapPoints} title={`Mapa de ${trip.destination.name}`} />
+      <TripMap
+        description={`A visão geral representa a Hospedagem e os ${publishedPlaces.length} Places publicados. As descobertas externas permanecem identificadas no catálogo ampliado, acessível pelo botão no topo.`}
+        points={mapPoints}
+        title={`Mapa dos ${publishedPlaces.length} Places publicados de ${trip.destination.name}`}
+      />
 
       <section className="traveler-context-summary" aria-labelledby="traveler-context-title">
         <div className="section-heading-row">

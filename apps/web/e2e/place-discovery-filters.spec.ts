@@ -101,9 +101,17 @@ test("pesquisa e combina filtros mantendo lista e mapa sincronizados", async ({ 
   await expect(page.getByLabel("Filtros ativos")).toContainText("Busca: gastronomico");
   await expect(page.getByLabel("Filtros ativos")).toContainText("Preço: Moderado");
 
-  await page.getByRole("link", { name: /Busca: gastronomico.*Remover filtro/ }).click();
-  await expect(page).not.toHaveURL(/busca=/);
-  await expect(page).toHaveURL(/preco=moderate/);
+  const removeSearchFilter = page.getByRole("link", {
+    name: /Busca: gastronomico.*Remover filtro/,
+  });
+  await expect(removeSearchFilter).toHaveAttribute(
+    "href",
+    `/viagens/${trip.id}/lugares?preco=moderate`,
+  );
+  await removeSearchFilter.click();
+  await expect(page).toHaveURL(`/viagens/${trip.id}/lugares?preco=moderate`, {
+    timeout: 20_000,
+  });
 
   await page.getByLabel("Categoria").selectOption("beach");
   await page.getByLabel("Distância máxima").selectOption("3");

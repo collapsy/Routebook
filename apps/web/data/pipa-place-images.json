@@ -92,6 +92,51 @@
       "sourceSha1": "b4f32490e9b78d21e8c2cbf8f58b1d4af380576c",
       "assetSha256": "338e22833f3dac6be81c8d29b7f43a2f6fd4a6c19a5311206b142a9f3c185c22",
       "assetBytes": 251283
+    },
+    {
+      "placeSlug": "santuario-ecologico-de-pipa",
+      "fileTitle": "File:Santuário Ecológico de Pipa.jpg",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Santu%C3%A1rio_Ecol%C3%B3gico_de_Pipa.jpg",
+      "expectedAuthor": "Helder da Rocha",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+      "assetPath": "/place-images/pipa/santuario-ecologico-de-pipa.jpg",
+      "altText": "Vista do Santuário Ecológico de Pipa, com vegetação e litoral da Praia de Pipa.",
+      "matchStatus": "secure",
+      "matchEvidence": "Título e descrição do Commons identificam explicitamente o Santuário Ecológico da Praia de Pipa, no Rio Grande do Norte.",
+      "sourceSha1": "3cc70953739d7a698ad7fe884b522e91bb24faf7",
+      "assetSha256": "",
+      "assetBytes": 0
+    },
+    {
+      "placeSlug": "praia-de-cacimbinhas",
+      "fileTitle": "File:A vista da Praia Cacimbinhas de acima das rochas.JPG",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:A_vista_da_Praia_Cacimbinhas_de_acima_das_rochas.JPG",
+      "expectedAuthor": "Elisabeth Kirchmayr",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "assetPath": "/place-images/pipa/praia-de-cacimbinhas.jpg",
+      "altText": "Vista elevada da Praia de Cacimbinhas a partir das formações rochosas de Tibau do Sul.",
+      "matchStatus": "secure",
+      "matchEvidence": "Título e descrição identificam diretamente a Praia de Cacimbinhas; a categoria Praia de Cacimbinhas integra Beaches in Tibau do Sul no Commons.",
+      "sourceSha1": "8987490e58727e56deacbc63bf3e6c232ef0f029",
+      "assetSha256": "",
+      "assetBytes": 0
+    },
+    {
+      "placeSlug": "praia-do-centro",
+      "fileTitle": "File:PipaBeachView.JPG",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:PipaBeachView.JPG",
+      "expectedAuthor": "Bjørn Christian Tørrissen",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "assetPath": "/place-images/pipa/praia-do-centro.jpg",
+      "altText": "Vista da região central da Praia de Pipa observada a partir da encosta próxima à Praia do Amor.",
+      "matchStatus": "secure",
+      "matchEvidence": "A descrição oficial identifica explicitamente a vista como centre of Pipa Beach/Praia da Pipa e situa o ponto de observação acima da Praia do Amor.",
+      "sourceSha1": "4c544507d3c933777e34220a1e2002338fd9c844",
+      "assetSha256": "",
+      "assetBytes": 0
     }
   ]
 }

@@ -280,9 +280,16 @@ export default async function TripOverviewPage({
             <p className="product-eyebrow">Estrutura temporal</p>
             <h2 id="trip-days-title">{days.length} dias de viagem</h2>
           </div>
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
-            Abrir roteiro
-          </Link>
+          <div className="section-heading-row">
+            {destinationId === "pipa-rn-br" ? (
+              <Link className="product-primary-action" href={`/viagens/${tripId}/guia`}>
+                Abrir guia da viagem
+              </Link>
+            ) : null}
+            <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
+              Abrir roteiro
+            </Link>
+          </div>
         </div>
 
         <ol className="trip-days-grid">

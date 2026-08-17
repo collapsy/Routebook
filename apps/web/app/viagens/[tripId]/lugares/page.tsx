@@ -457,7 +457,9 @@ export default async function PlacesPage({
   const hasMoreExternalResults =
     hasExternalCoverage && externalAvailableCount > externalResults.length;
   const hasExpandedExternalResults =
-    hasExternalCoverage && showAllExternal && externalAvailableCount > externalDiscoveryDisplayLimit;
+    hasExternalCoverage &&
+    showAllExternal &&
+    externalAvailableCount > externalDiscoveryDisplayLimit;
   const mapPoints: TripMapPoint[] = discoveryItems.map((item) => {
     if (item.kind === "published") {
       return {
@@ -594,10 +596,7 @@ export default async function PlacesPage({
           </ul>
           <Link
             className="product-secondary-action"
-            href={discoveryHref(
-              tripId,
-              discoveryMode ? { descoberta: discoveryMode } : {},
-            )}
+            href={discoveryHref(tripId, discoveryMode ? { descoberta: discoveryMode } : {})}
           >
             Limpar filtros
           </Link>

@@ -62,6 +62,8 @@ test("adiciona Place publicado ao Roteiro sem salvar automaticamente", async ({ 
   );
 
   await itineraryLink.click();
-  await expect(page.getByRole("heading", { name: /domingo, 23 de agosto/i })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Dia 2 — domingo, 23 de agosto", exact: true }),
+  ).toBeVisible();
   await expect(page.getByText("Chapadão de Pipa", { exact: true })).toBeVisible();
 });

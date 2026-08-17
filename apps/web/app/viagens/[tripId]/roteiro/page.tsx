@@ -385,7 +385,10 @@ export default async function ItineraryPage({
                 <Link className="product-primary-action" href={`/viagens/${tripId}/lugares`}>
                   Explorar Lugares
                 </Link>
-                <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares-salvos`}>
+                <Link
+                  className="product-secondary-action"
+                  href={`/viagens/${tripId}/lugares-salvos`}
+                >
                   Ver Lugares salvos
                 </Link>
               </div>
@@ -451,7 +454,9 @@ export default async function ItineraryPage({
                                   <input name="activityId" type="hidden" value={activity.id} />
 
                                   <div className="form-field">
-                                    <label htmlFor={`move-day-${activity.id}`}>Dia de destino</label>
+                                    <label htmlFor={`move-day-${activity.id}`}>
+                                      Dia de destino
+                                    </label>
                                     <select
                                       defaultValue={targetDays[0]?.date}
                                       id={`move-day-${activity.id}`}
@@ -610,7 +615,11 @@ export default async function ItineraryPage({
 
         <details className={journeyStyles.secondaryDisclosure}>
           <summary>Adicionar período livre</summary>
-          <FreePeriodComposer itinerary={itinerary} tripId={tripId} />
+          <FreePeriodComposer
+            itinerary={itinerary}
+            selectedDayDate={selectedDay.date}
+            tripId={tripId}
+          />
         </details>
       </section>
     </section>

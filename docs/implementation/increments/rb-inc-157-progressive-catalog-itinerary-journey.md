@@ -116,6 +116,7 @@ apps/web/app/viagens/[tripId]/roteiro/actions.ts
 apps/web/app/viagens/[tripId]/roteiro/free-periods.tsx
 apps/web/app/viagens/[tripId]/roteiro/itinerary-spatial-panel.tsx
 apps/web/app/viagens/[tripId]/roteiro/itinerary-journey.module.css
+apps/web/e2e/accommodation-proximity.spec.ts
 apps/web/e2e/free-period.spec.ts
 apps/web/e2e/place-discovery-filters.spec.ts
 apps/web/e2e/itinerary.spec.ts
@@ -125,7 +126,7 @@ docs/implementation/context-packs/rb-inc-157-progressive-catalog-itinerary-journ
 docs/registry.md
 ```
 
-`free-periods.tsx` foi incluído porque o compositor precisa receber o Dia em foco como seleção padrão; sem isso, a própria ação secundária poderia voltar a criar conteúdo no Dia 1 por padrão e quebrar o contrato de contexto preservado. `free-period.spec.ts` foi incluído porque a mudança de um grid de oito Dias para um único Dia em foco altera deliberadamente os seletores E2E dessa capacidade e exige regressão equivalente.
+`free-periods.tsx` foi incluído porque o compositor precisa receber o Dia em foco como seleção padrão; sem isso, a própria ação secundária poderia voltar a criar conteúdo no Dia 1 por padrão e quebrar o contrato de contexto preservado. `free-period.spec.ts` foi incluído porque a mudança de um grid de oito Dias para um único Dia em foco altera deliberadamente os seletores E2E dessa capacidade e exige regressão equivalente. `accommodation-proximity.spec.ts` foi incluído porque a nova contagem progressiva substitui deliberadamente o heading legado de Discovery e a regressão de fallback sem coordenadas precisa validar o novo contrato exibido/disponível sem alterar a semântica de proximidade.
 
 Arquivo adicional indispensável exige atualização explícita desta seção e justificativa na PR.
 

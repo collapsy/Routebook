@@ -72,6 +72,7 @@ let leafletLoader: Promise<LeafletNamespace> | undefined;
 const kindLabels: Record<TripMapPointKind, string> = {
   accommodation: "Hospedagem",
   "published-place": "Lugar publicado",
+  "external-place": "Descoberta externa",
   "saved-place": "Lugar salvo",
   "itinerary-activity": "Atividade planejada",
 };

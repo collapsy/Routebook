@@ -59,7 +59,10 @@ const curatedPipaImages = {
   "praia-do-amor": "/place-images/pipa/praia-do-amor.jpg",
   "baia-dos-golfinhos": "/place-images/pipa/baia-dos-golfinhos.jpg",
   "chapadao-de-pipa": "/place-images/pipa/chapadao-de-pipa.jpg",
+  "praia-do-centro": "/place-images/pipa/praia-do-centro.jpg",
   "praia-do-madeiro": "/place-images/pipa/praia-do-madeiro.jpg",
+  "santuario-ecologico-de-pipa": "/place-images/pipa/santuario-ecologico-de-pipa.jpg",
+  "praia-de-cacimbinhas": "/place-images/pipa/praia-de-cacimbinhas.jpg",
   "praia-de-tibau-do-sul": "/place-images/pipa/praia-de-tibau-do-sul.jpg",
   "lagoa-de-guarairas": "/place-images/pipa/lagoa-de-guarairas.jpg",
 } as const;
@@ -152,13 +155,13 @@ describe("DrizzlePlaceRepository", () => {
     }
   });
 
-  it("carrega seis imagens curadas de Pipa e mantém fallback para Places sem cobertura", async () => {
+  it("carrega nove imagens curadas de Pipa e mantém fallback quando a mídia não é segura", async () => {
     const result = await new DrizzlePlaceRepository().listPublished({
       destinationId: "pipa-rn-br",
     });
     const withImages = result.filter((place) => place.primaryImage);
 
-    expect(withImages).toHaveLength(6);
+    expect(withImages).toHaveLength(9);
     for (const [slug, assetPath] of Object.entries(curatedPipaImages)) {
       const place = result.find((candidate) => candidate.slug === slug);
       expect(place?.primaryImage).toMatchObject({
@@ -175,7 +178,7 @@ describe("DrizzlePlaceRepository", () => {
     expect(result.find((place) => place.slug === "praia-de-sibauma")).not.toHaveProperty(
       "primaryImage",
     );
-    expect(result.find((place) => place.slug === "praia-do-centro")).not.toHaveProperty(
+    expect(result.find((place) => place.slug === "praia-das-minas")).not.toHaveProperty(
       "primaryImage",
     );
   });

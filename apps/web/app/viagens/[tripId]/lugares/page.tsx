@@ -61,6 +61,8 @@ type DiscoverySearchParams = {
 const distanceOptions = [1, 3, 5, 10] as const;
 const pipaDiscoveryCenter = { latitude: -6.24, longitude: -35.065 } as const;
 const externalDiscoveryRadiusMeters = 8_000;
+const externalDiscoveryScanLimit = 200;
+const externalDiscoveryDisplayLimit = 60;
 
 function resolveDestinationId(destinationName: string): string | null {
   const normalized = destinationName.trim().toLocaleLowerCase("pt-BR");
@@ -397,7 +399,7 @@ export default async function PlacesPage({
           center: discoveryCenter,
           radiusMeters,
           ...(category ? { categories: [category] } : {}),
-          limit: 40,
+          limit: externalDiscoveryScanLimit,
         }),
       ]);
       const reconciliations = candidates.map((candidate) =>
@@ -410,7 +412,20 @@ export default async function PlacesPage({
       externalLinkedCount = reconciliations.filter((result) => result.status === "linked").length;
       externalResults = reconciliations
         .filter((result) => result.status === "new")
-        .filter((result) => matchesExternalSearch(result, search));
+        .filter((result) => matchesExternalSearch(result, search))
+        .slice(0, externalDiscoveryDisplayLimit);
+      console.info("[place-discovery] Overture reconciliation completed", {
+        tripId,
+        destinationId,
+        radiusMeters,
+        publishedCount: publishedPlaces.length,
+        candidateCount: candidates.length,
+        newCandidateCount: reconciliations.filter((result) => result.status === "new").length,
+        possibleMatchCount: externalPossibleMatchCount,
+        linkedCount: externalLinkedCount,
+        rejectedCount: reconciliations.filter((result) => result.status === "rejected").length,
+        visibleExternalCount: externalResults.length,
+      });
     } catch (error) {
       console.error("Falha ao descobrir Places externos via Overture", error);
       externalDiscoveryError =

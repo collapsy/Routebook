@@ -38,10 +38,7 @@ const dates = [
 describe("Pipa trip guide", () => {
   it("mantém primeiro e último dia mais leves que os dias centrais", () => {
     expect(PIPA_TRIP_GUIDE_SLUGS.map((day) => day.length)).toEqual([2, 3, 3, 3, 3, 3, 3, 2]);
-    expect(PIPA_FIRST_DAY_GUIDE_SLUGS).toEqual([
-      "chapadao-de-pipa",
-      "camarao-na-fazenda-pipa",
-    ]);
+    expect(PIPA_FIRST_DAY_GUIDE_SLUGS).toEqual(["chapadao-de-pipa", "camarao-na-fazenda-pipa"]);
   });
 
   it("cobre os oito dias canônicos sem aplicar estado", () => {
@@ -58,19 +55,23 @@ describe("Pipa trip guide", () => {
     expect(guide?.days.map((day) => day.index)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     expect(guide?.days.flatMap((day) => day.stops)).toHaveLength(22);
     expect(
-      guide?.days.flatMap((day) => day.stops).every((stop) =>
-        stop.planHref.includes("#adicionar-ao-roteiro"),
-      ),
+      guide?.days
+        .flatMap((day) => day.stops)
+        .every((stop) => stop.planHref.includes("#adicionar-ao-roteiro")),
     ).toBe(true);
     expect(
-      guide?.days.flatMap((day) => day.stops).every((stop) =>
-        stop.distanceFromAccommodationLabel?.includes("linha reta"),
-      ),
+      guide?.days
+        .flatMap((day) => day.stops)
+        .every((stop) => stop.distanceFromAccommodationLabel?.includes("linha reta")),
     ).toBe(true);
     expect(
-      guide?.days.flatMap((day) => day.stops).every((stop) => stop.routeHref?.includes("google.com/maps/dir")),
+      guide?.days
+        .flatMap((day) => day.stops)
+        .every((stop) => stop.routeHref?.includes("google.com/maps/dir")),
     ).toBe(true);
-    expect(guide?.days.every((day) => day.itineraryHref?.includes("google.com/maps/dir"))).toBe(true);
+    expect(guide?.days.every((day) => day.itineraryHref?.includes("google.com/maps/dir"))).toBe(
+      true,
+    );
   });
 
   it("não inventa dias quando a viagem é mais curta", () => {
@@ -96,9 +97,9 @@ describe("Pipa trip guide", () => {
 
     expect(guide).not.toBeNull();
     expect(guide?.days.every((day) => day.itineraryHref === undefined)).toBe(true);
-    expect(guide?.days.flatMap((day) => day.stops).every((stop) => stop.routeHref === undefined)).toBe(
-      true,
-    );
+    expect(
+      guide?.days.flatMap((day) => day.stops).every((stop) => stop.routeHref === undefined),
+    ).toBe(true);
   });
 
   it("falha fechado se algum Place editorial não estiver publicado no conjunto recebido", () => {

@@ -219,7 +219,8 @@ const pipaTripDays = [
         slug: "centro-gastronomico-de-pipa",
         periodLabel: "Fim da manhã",
         suggestedTime: "10:30",
-        reason: "Manter uma última opção central e fácil de abandonar se o traslado exigir saída antecipada.",
+        reason:
+          "Manter uma última opção central e fácil de abandonar se o traslado exigir saída antecipada.",
       },
     ],
     alternative:
@@ -263,7 +264,10 @@ function placeCoordinate(place: Place): GoogleMapsCoordinate {
   return { latitude: place.latitude, longitude: place.longitude };
 }
 
-function formatDistanceFromAccommodation(accommodation: GoogleMapsCoordinate, place: Place): string {
+function formatDistanceFromAccommodation(
+  accommodation: GoogleMapsCoordinate,
+  place: Place,
+): string {
   const distance = calculateGeodesicDistance(
     createGeoCoordinate(accommodation),
     createGeoCoordinate(placeCoordinate(place)),

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import {
   DrizzlePlaceExternalReferenceRepository,
   DrizzlePlaceRepository,
+  DrizzleSavedPlaceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
 import {
@@ -14,6 +15,7 @@ import {
   reconcileExternalPlaceCandidate,
   type ExternalPlaceReconciliation,
 } from "@routebook/place-catalog";
+import { listSavedPlaces } from "@routebook/saved-places";
 import { findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
@@ -29,7 +31,11 @@ import {
 } from "../../../../lib/place-discovery-feed";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
-import { promoteExternalPlaceAction } from "./actions";
+import {
+  promoteExternalPlaceAction,
+  removePublishedPlaceAction,
+  savePublishedPlaceAction,
+} from "./actions";
 import {
   categoryLabels,
   filterPlaces,
@@ -150,11 +156,13 @@ function PublishedDiscoveryCard({
   tripId,
   distanceReferenceLabel,
   accommodationCoordinate,
+  isSaved,
 }: Readonly<{
   item: PublishedPlaceDiscoveryItem;
   tripId: string;
   distanceReferenceLabel: string;
   accommodationCoordinate?: Readonly<{ latitude: number; longitude: number }>;
+  isSaved: boolean;
 }>) {
   const { place, distanceMeters } = item;
   const coordinate = { latitude: place.latitude, longitude: place.longitude };
@@ -188,6 +196,19 @@ function PublishedDiscoveryCard({
         {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
       </small>
       <div className={styles.cardActions}>
+        <form action={isSaved ? removePublishedPlaceAction : savePublishedPlaceAction}>
+          <input name="tripId" type="hidden" value={tripId} />
+          <input name="placeSlug" type="hidden" value={place.slug} />
+          <button className="product-secondary-action" type="submit">
+            {isSaved ? "Remover dos salvos" : "Salvar lugar"}
+          </button>
+        </form>
+        <Link
+          className="product-primary-action"
+          href={`/viagens/${tripId}/lugares/${place.slug}#adicionar-ao-roteiro`}
+        >
+          Adicionar ao roteiro
+        </Link>
         <Link
           className="product-secondary-action"
           href={`/viagens/${tripId}/lugares/${place.slug}`}
@@ -341,9 +362,11 @@ export default async function PlacesPage({
   const maximumDistanceMeters = accommodationCoordinate
     ? parseMaximumDistance(rawFilters.distancia)
     : undefined;
-  const publishedPlaces = destinationId
-    ? await listPublishedPlaces(new DrizzlePlaceRepository(), destinationId)
-    : [];
+  const [publishedPlaces, savedPlaces] = await Promise.all([
+    destinationId ? listPublishedPlaces(new DrizzlePlaceRepository(), destinationId) : [],
+    listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
+  ]);
+  const savedPlaceIds = new Set(savedPlaces.map((selection) => selection.placeId));
   const filteredPlaces = filterPlaces(
     publishedPlaces,
     {
@@ -465,7 +488,7 @@ export default async function PlacesPage({
       return {
         id: item.id,
         label: item.place.name,
-        kind: "published-place",
+        kind: savedPlaceIds.has(item.place.id) ? "saved-place" : "published-place",
         latitude: item.place.latitude,
         longitude: item.place.longitude,
         href: `/viagens/${tripId}/lugares/${item.place.slug}`,
@@ -704,6 +727,7 @@ export default async function PlacesPage({
               <PublishedDiscoveryCard
                 key={item.id}
                 distanceReferenceLabel={distanceReferenceLabel}
+                isSaved={savedPlaceIds.has(item.place.id)}
                 item={item}
                 tripId={tripId}
                 {...(accommodationCoordinate ? { accommodationCoordinate } : {})}

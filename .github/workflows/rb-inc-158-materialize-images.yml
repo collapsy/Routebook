@@ -1,4 +1,4 @@
-name: RB-INC-158 Image Audit
+name: RB-INC-158 Materialize Images
 
 on:
   push:
@@ -8,98 +8,55 @@ on:
       - .github/workflows/rb-inc-158-materialize-images.yml
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  audit-commons-candidates:
+  materialize-governed-images:
     runs-on: ubuntu-latest
     steps:
-      - name: Audit exact Wikimedia Commons candidates
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/rb-inc-158-pipa-visual-coverage
+
+      - name: Materialize governed Commons assets
+        run: node scripts/materialize-place-images.mjs --materialize
+
+      - name: Verify materialized assets offline
+        run: node scripts/materialize-place-images.mjs --verify
+
+      - name: Register RB-INC-158 documents
         shell: bash
         run: |
           node <<'NODE'
-          const { writeFile } = require("node:fs/promises");
-          const API = "https://commons.wikimedia.org/w/api.php";
-          const USER_AGENT = "RouteBookPlaceImageBot/0.1 (https://github.com/collapsy/Routebook)";
-          const targets = [
-            {
-              slug: "santuario-ecologico-de-pipa",
-              fileTitle: "File:Santuário Ecológico de Pipa.jpg",
-            },
-            {
-              slug: "praia-de-cacimbinhas",
-              fileTitle: "File:A vista da Praia Cacimbinhas de acima das rochas.JPG",
-            },
-            {
-              slug: "praia-do-centro",
-              fileTitle: "File:PipaBeachView.JPG",
-            },
-            {
-              slug: "praia-de-sibauma",
-              fileTitle: "File:Praia de Sibaúma.jpeg",
-            },
-          ];
-
-          function stripHtml(value = "") {
-            return value
-              .replace(/<[^>]*>/g, " ")
-              .replaceAll("&amp;", "&")
-              .replaceAll("&quot;", '"')
-              .replaceAll("&#039;", "'")
-              .replace(/\s+/g, " ")
-              .trim();
+          const fs = require("node:fs");
+          const path = "docs/registry.md";
+          let text = fs.readFileSync(path, "utf8");
+          if (!text.includes("| RB-INC-158 |")) {
+            const marker = "\n## Status possíveis";
+            const rows = [
+              "| RB-INC-158 | Expansão Governada da Cobertura Visual dos Places de Pipa | Implementation | Draft | 0.1.0 | [rb-inc-158-pipa-visual-coverage.md](./implementation/increments/rb-inc-158-pipa-visual-coverage.md) |",
+              "| RB-CTX-158 | Context Pack do RB-INC-158 — Expansão Governada da Cobertura Visual dos Places de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-158-pipa-visual-coverage.md](./implementation/context-packs/rb-inc-158-pipa-visual-coverage.md) |",
+            ].join("\n");
+            if (!text.includes(marker)) throw new Error("Registry marker not found");
+            text = text.replace(marker, `\n${rows}\n${marker}`);
+            fs.writeFileSync(path, text);
           }
-
-          (async () => {
-            const audit = [];
-            for (const target of targets) {
-              const query = new URLSearchParams({
-                action: "query",
-                format: "json",
-                formatversion: "2",
-                titles: target.fileTitle,
-                prop: "imageinfo",
-                iiprop: "url|size|mime|sha1|extmetadata",
-                iiurlwidth: "1280",
-                iiextmetadatafilter: "Artist|LicenseShortName|LicenseUrl|ImageDescription|Credit",
-                origin: "*",
-              });
-              const response = await fetch(`${API}?${query}`, {
-                headers: { "User-Agent": USER_AGENT, "Api-User-Agent": USER_AGENT },
-              });
-              if (!response.ok) throw new Error(`Commons ${target.slug}: HTTP ${response.status}`);
-              const payload = await response.json();
-              const page = payload.query?.pages?.[0];
-              const info = page?.imageinfo?.[0] ?? {};
-              const metadata = info.extmetadata ?? {};
-              audit.push({
-                ...target,
-                resolvedTitle: page?.title,
-                missing: Boolean(page?.missing),
-                descriptionUrl: info.descriptionurl,
-                originalUrl: info.url,
-                thumbnailUrl: info.thumburl,
-                width: info.width,
-                height: info.height,
-                mime: info.mime,
-                sha1: info.sha1,
-                artist: stripHtml(metadata.Artist?.value),
-                license: stripHtml(metadata.LicenseShortName?.value),
-                licenseUrl: stripHtml(metadata.LicenseUrl?.value),
-                description: stripHtml(metadata.ImageDescription?.value),
-              });
-            }
-            await writeFile("commons-audit.json", `${JSON.stringify(audit, null, 2)}\n`);
-          })().catch((error) => {
-            console.error(error);
-            process.exitCode = 1;
-          });
           NODE
 
-      - name: Upload audit artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: rb-inc-158-commons-audit
-          path: commons-audit.json
-          if-no-files-found: error
-          retention-days: 1
+      - name: Validate documentation
+        run: node scripts/validate-docs.mjs
+
+      - name: Commit governed assets and integrity
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/data/pipa-place-images.json apps/web/public/place-images/pipa docs/registry.md
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo "No materialization changes to commit."
+            exit 1
+          fi
+          git commit -m "chore: materialize RB-INC-158 place images"
+          git push origin HEAD:codex/rb-inc-158-pipa-visual-coverage

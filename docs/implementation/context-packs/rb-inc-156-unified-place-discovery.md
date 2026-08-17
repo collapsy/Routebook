@@ -25,6 +25,8 @@ ai_context:
 Eliminar a percepção de catálogo fixo em 30 Places integrando, na mesma grade e no mesmo mapa,
 os Places publicados e os candidatos Overture realmente visíveis. Preservar origem, Provenance,
 estado canônico, ações explícitas e degradação segura.
+Tornar a grade encontrável no topo da Viagem e impedir que uma janela pré-reconciliação pequena
+reduza a cobertura externa a zero sem evidência operacional.
 
 ## 2. Incremento
 
@@ -54,6 +56,10 @@ estado canônico, ações explícitas e degradação segura.
 - Hospedagem pode aparecer como referência adicional no mapa;
 - distância geodésica é estimativa em linha reta;
 - falha do Overture não bloqueia catálogo;
+- consulta externa mantém raio e tiles limitados, varre no máximo 200 candidatos e exibe até 60
+  novos após reconciliação;
+- promoção server-side revalida na mesma janela da leitura;
+- logs estruturados registram contagens sem expor dados pessoais;
 - mapa não publica, salva ou inclui candidato no Roteiro;
 - M8 exige evidência humana real separada.
 
@@ -78,7 +84,8 @@ A Engineering Validation e a Documentation Validation devem concluir no mesmo SH
 
 ## 7. Proibições
 
-- não alterar limite, raio, confiança, taxonomia ou reconciliação Overture;
+- não alterar raio, confiança, taxonomia ou reconciliação Overture;
+- não exibir mais de 60 candidatos externos por leitura;
 - não publicar, salvar ou inserir candidato no Roteiro por leitura;
 - não criar detalhe interno falso para candidato externo;
 - não apresentar capa de categoria como foto do local;

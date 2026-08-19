@@ -266,9 +266,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-106 | Context Pack do RB-INC-106 | Implementation Context | Draft | 0.1.0 | [rb-inc-106-itinerary-proposal-edit-experience.md](./implementation/context-packs/rb-inc-106-itinerary-proposal-edit-experience.md) |
 
 | RB-INC-107 | E2E Integral da Edição de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/increments/rb-inc-107-itinerary-proposal-edit-e2e.md) |
-| RB-CTX-107 | Context Pack do RB-INC-107 | Implementation Context | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/context-packs/rb-inc-107-itinerary-proposal-edit-e2e.md) |
+| RB-CTX-107 | Context Pack do RB-INC-107 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/context-packs/rb-inc-107-itinerary-proposal-edit-e2e.md) |
 | RB-INC-108 | Núcleo de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/increments/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
-| RB-CTX-108 | Context Pack do RB-INC-108 | Implementation Context | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/context-packs/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
+| RB-CTX-108 | Context Pack do RB-INC-108 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/context-packs/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
 | RB-INC-109 | Transação PostgreSQL de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md](./implementation/increments/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md) |
 | RB-CTX-109 | Context Pack do RB-INC-109 | Implementation Context | Draft | 0.1.0 | [rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md](./implementation/context-packs/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md) |
 | RB-INC-110 | Server Action Autorizada para Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-110-authorized-partial-itinerary-proposal-action.md](./implementation/increments/rb-inc-110-authorized-partial-itinerary-proposal-action.md) |
@@ -373,6 +373,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-158 | Context Pack do RB-INC-158 — Expansão Governada da Cobertura Visual dos Places de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-158-pipa-visual-coverage.md](./implementation/context-packs/rb-inc-158-pipa-visual-coverage.md) |
 | RB-INC-159 | Ações diretas de Lugar no planejamento | Implementation | Draft | 0.1.0 | [rb-inc-159-place-actions-itinerary-entry.md](./implementation/increments/rb-inc-159-place-actions-itinerary-entry.md) |
 | RB-CTX-159 | Context Pack do RB-INC-159 — Ações diretas de Lugar no planejamento | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-159-place-actions-itinerary-entry.md](./implementation/context-packs/rb-inc-159-place-actions-itinerary-entry.md) |
+| RB-INC-160 | Guia diário completo da viagem de Pipa | Implementation | Draft | 0.1.0 | [rb-inc-160-pipa-trip-guide.md](./implementation/increments/rb-inc-160-pipa-trip-guide.md) |
+| RB-CTX-160 | Context Pack do RB-INC-160 — Guia diário completo da viagem de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-160-pipa-trip-guide.md](./implementation/context-packs/rb-inc-160-pipa-trip-guide.md) |
 
 ## Status possíveis
 

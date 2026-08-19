@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import type { PipaFirstDayGuide, PipaDayGuideStop } from "../lib/pipa-day-guide";
+import type { PipaDayGuideStop, PipaTripGuide, PipaTripGuideDay } from "../lib/pipa-day-guide";
 import type { TripMapPoint } from "../lib/trip-map";
 import { PlacePrimaryImage } from "./place-primary-image";
 import { TripMap } from "./trip-map";
@@ -64,6 +64,9 @@ function StopCard({ stop }: { stop: PipaDayGuideStop }) {
           <Link className="product-secondary-action" href={stop.detailsHref}>
             Ver guia do lugar
           </Link>
+          <Link className="product-secondary-action" href={stop.planHref}>
+            Planejar neste Dia
+          </Link>
           {stop.routeHref ? (
             <a
               className="product-secondary-action"
@@ -80,19 +83,21 @@ function StopCard({ stop }: { stop: PipaDayGuideStop }) {
   );
 }
 
-export function TripDayGuide({
-  guide,
+function GuideDay({
+  day,
   accommodationPoint,
+  initiallyOpen,
 }: {
-  guide: PipaFirstDayGuide;
+  day: PipaTripGuideDay;
   accommodationPoint?: TripMapPoint;
+  initiallyOpen: boolean;
 }) {
   const mapPoints: TripMapPoint[] = [
     ...(accommodationPoint ? [accommodationPoint] : []),
-    ...guide.stops.map((stop) => ({
-      id: `guide-stop-${stop.place.id}`,
+    ...day.stops.map((stop) => ({
+      id: `guide-day-${day.index}-stop-${stop.place.id}`,
       label: stop.place.name,
-      kind: "itinerary-activity" as const,
+      kind: "published-place" as const,
       latitude: stop.place.latitude,
       longitude: stop.place.longitude,
       href: stop.detailsHref,
@@ -101,62 +106,122 @@ export function TripDayGuide({
   ];
 
   return (
-    <section className={styles.guide} aria-labelledby="first-day-guide-title">
+    <details className={styles.day} id={`guia-dia-${day.index}`} open={initiallyOpen}>
+      <summary className={styles.daySummary}>
+        <span>
+          Dia {day.index} · {formatDate(day.date)}
+        </span>
+        <strong>{day.title}</strong>
+        <small>{day.stops.length} paradas sugeridas</small>
+      </summary>
+
+      <div className={styles.dayBody}>
+        <p className={styles.dayDescription}>{day.summary}</p>
+
+        <div className={styles.layout}>
+          <ol className={styles.stops} aria-label={`Paradas sugeridas para o Dia ${day.index}`}>
+            {day.stops.map((stop) => (
+              <StopCard key={stop.place.id} stop={stop} />
+            ))}
+          </ol>
+
+          <aside className={styles.mapColumn}>
+            <TripMap
+              description="Os números do mapa seguem exatamente a ordem dos cards deste Dia. A linha entre pontos não representa uma rota calculada."
+              points={mapPoints}
+              title={`Mapa do Dia ${day.index} — ${formatDate(day.date)}`}
+            />
+            {day.itineraryHref ? (
+              <a
+                className="product-button"
+                href={day.itineraryHref}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Abrir sequência do Dia no Google Maps
+              </a>
+            ) : (
+              <p className={styles.missingRoute}>
+                Informe uma hospedagem com localização para abrir a sequência do Dia e comparar
+                deslocamentos reais.
+              </p>
+            )}
+          </aside>
+        </div>
+
+        {day.note ? (
+          <aside className={styles.alternative} aria-label={`Observação do Dia ${day.index}`}>
+            <strong>Ajuste sem culpa</strong>
+            <p>{day.note}</p>
+          </aside>
+        ) : null}
+      </div>
+    </details>
+  );
+}
+
+export function TripDayGuide({
+  guide,
+  accommodationPoint,
+}: {
+  guide: PipaTripGuide;
+  accommodationPoint?: TripMapPoint;
+}) {
+  return (
+    <section className={styles.guide} aria-labelledby="trip-guide-title">
       <header className={styles.hero}>
         <div>
-          <p className="product-eyebrow">Guia do primeiro dia · roteiro-base</p>
-          <h2 id="first-day-guide-title">
-            {formatDate(guide.date)} — {guide.title}
-          </h2>
-          <p>{guide.summary}</p>
+          <p className="product-eyebrow">Guia da viagem · sugestão editorial</p>
+          <h1 id="trip-guide-title">Guia da viagem em Pipa</h1>
+          <p>
+            Use estes Dias como ponto de partida para decidir o que faz sentido para o grupo. Nada
+            aqui altera o Roteiro até você escolher explicitamente uma ação de planejamento.
+          </p>
         </div>
         <div className={styles.heroMeta} aria-label="Resumo do guia">
-          <span>{guide.stops.length} paradas</span>
-          <span>Manhã, fim da tarde e noite</span>
+          <span>{guide.days.length} Dias cobertos</span>
+          <span>2–3 paradas por Dia</span>
         </div>
       </header>
 
       <div className={styles.disclosure} role="note">
-        <strong>O que é real e o que é estimativa:</strong> horários, duração e ordem são uma
-        orientação editorial. O Google Maps calcula rota e tempo atuais quando você abre o link;
-        distância exibida no card é apenas linha reta.
+        <strong>Editorial, não aplicado:</strong> ordem, horários e duração são orientação.
+        Distâncias nos cards são apenas em linha reta; Google Maps calcula rota e tempo atuais
+        quando você abre um link. Confirme maré, clima, funcionamento, preços e programação antes de
+        sair.
       </div>
 
-      <div className={styles.layout}>
-        <ol className={styles.stops} aria-label="Paradas sugeridas para o primeiro dia">
-          {guide.stops.map((stop) => (
-            <StopCard key={stop.place.id} stop={stop} />
+      {guide.coverageLimited ? (
+        <p className={styles.coverageNote} role="note">
+          Este piloto cobre os primeiros 8 Dias da Viagem. Os demais Dias continuam disponíveis no
+          Roteiro sem sugestão editorial automática.
+        </p>
+      ) : null}
+
+      <nav className={styles.dayNav} aria-label="Dias do Guia da viagem">
+        <ol>
+          {guide.days.map((day) => (
+            <li key={day.date}>
+              <a href={`#guia-dia-${day.index}`}>
+                <span>Dia {day.index}</span>
+                <strong>{day.title}</strong>
+                <small>{formatDate(day.date)}</small>
+              </a>
+            </li>
           ))}
         </ol>
+      </nav>
 
-        <aside className={styles.mapColumn}>
-          <TripMap
-            description="Os números do mapa seguem a mesma ordem dos cards. A linha entre os pontos não representa uma rota calculada."
-            points={mapPoints}
-            title={`Mapa do guia de ${formatDate(guide.date)}`}
+      <div className={styles.days}>
+        {guide.days.map((day, index) => (
+          <GuideDay
+            key={day.date}
+            {...(accommodationPoint ? { accommodationPoint } : {})}
+            day={day}
+            initiallyOpen={index === 0}
           />
-          {guide.itineraryHref ? (
-            <a
-              className="product-button"
-              href={guide.itineraryHref}
-              rel="noreferrer"
-              target="_blank"
-            >
-              Abrir sequência completa no Google Maps
-            </a>
-          ) : (
-            <p className={styles.missingRoute}>
-              Informe uma hospedagem com localização para abrir a sequência completa e comparar
-              deslocamentos reais.
-            </p>
-          )}
-        </aside>
+        ))}
       </div>
-
-      <aside className={styles.alternative} aria-label="Alternativa para chegada tardia">
-        <strong>Se o sábado começar mais tarde</strong>
-        <p>{guide.lateArrivalAlternative}</p>
-      </aside>
     </section>
   );
 }

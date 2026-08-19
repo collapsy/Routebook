@@ -4,10 +4,14 @@ import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 
 import {
+  DrizzlePlaceRepository,
+  DrizzleSavedPlaceRepository,
   DrizzleTripRepository,
   PlacePromotionServiceError,
   promoteExternalPlaceCandidate,
 } from "@routebook/database";
+import { findPublishedPlace } from "@routebook/place-catalog";
+import { removePlaceFromTrip, savePlaceForTrip } from "@routebook/saved-places";
 import { findTripById } from "@routebook/trip-management";
 
 import { resolveTripRouteAccess } from "../../../../lib/trip-route-access";
@@ -35,6 +39,53 @@ type PromotionFeedback =
 function resolveDestinationId(destinationName: string): string | null {
   const normalized = destinationName.trim().toLocaleLowerCase("pt-BR");
   return normalized.includes("pipa") ? "pipa-rn-br" : null;
+}
+
+async function resolvePublishedPlaceForMutation(tripId: string, placeSlug: string) {
+  const placesPath = `/viagens/${tripId}/lugares`;
+  if (!tripId) redirect("/viagens?erro=viagem-invalida");
+
+  const access = await resolveTripRouteAccess({ tripId, action: "trip:edit" });
+  if (access.status === "unauthenticated") {
+    redirect(`/entrar?next=${encodeURIComponent(placesPath)}`);
+  }
+  if (access.status === "not-found") notFound();
+
+  const trip = await findTripById(new DrizzleTripRepository(), tripId);
+  if (!trip) notFound();
+
+  const destinationId = resolveDestinationId(trip.destination.name);
+  if (!destinationId) notFound();
+
+  const place = await findPublishedPlace(new DrizzlePlaceRepository(), destinationId, placeSlug);
+  if (!place) notFound();
+
+  return place;
+}
+
+function revalidatePublishedPlaceSurfaces(tripId: string, placeSlug: string): void {
+  revalidatePath(`/viagens/${tripId}`);
+  revalidatePath(`/viagens/${tripId}/lugares`);
+  revalidatePath(`/viagens/${tripId}/lugares/${placeSlug}`);
+  revalidatePath(`/viagens/${tripId}/lugares-salvos`);
+}
+
+export async function savePublishedPlaceAction(formData: FormData): Promise<void> {
+  const tripId = String(formData.get("tripId") ?? "").trim();
+  const placeSlug = String(formData.get("placeSlug") ?? "").trim();
+  const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
+
+  await savePlaceForTrip(new DrizzleSavedPlaceRepository(), tripId, place.id);
+  revalidatePublishedPlaceSurfaces(tripId, placeSlug);
+}
+
+export async function removePublishedPlaceAction(formData: FormData): Promise<void> {
+  const tripId = String(formData.get("tripId") ?? "").trim();
+  const placeSlug = String(formData.get("placeSlug") ?? "").trim();
+  const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
+
+  await removePlaceFromTrip(new DrizzleSavedPlaceRepository(), tripId, place.id);
+  revalidatePublishedPlaceSurfaces(tripId, placeSlug);
 }
 
 function promotionReturnPath(

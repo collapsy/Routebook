@@ -375,6 +375,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-159 | Context Pack do RB-INC-159 — Ações diretas de Lugar no planejamento | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-159-place-actions-itinerary-entry.md](./implementation/context-packs/rb-inc-159-place-actions-itinerary-entry.md) |
 | RB-INC-160 | Guia diário completo da viagem de Pipa | Implementation | Draft | 0.1.0 | [rb-inc-160-pipa-trip-guide.md](./implementation/increments/rb-inc-160-pipa-trip-guide.md) |
 | RB-CTX-160 | Context Pack do RB-INC-160 — Guia diário completo da viagem de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-160-pipa-trip-guide.md](./implementation/context-packs/rb-inc-160-pipa-trip-guide.md) |
+| RB-INC-161 | Experiência de viagem ativa e navegação mobile | Implementation | Draft | 0.1.0 | [rb-inc-161-active-trip-mobile-experience.md](./implementation/increments/rb-inc-161-active-trip-mobile-experience.md) |
+| RB-CTX-161 | Context Pack do RB-INC-161 — Experiência de viagem ativa e navegação mobile | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-161-active-trip-mobile-experience.md](./implementation/context-packs/rb-inc-161-active-trip-mobile-experience.md) |
 
 ## Status possíveis
 

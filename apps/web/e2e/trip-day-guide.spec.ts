@@ -6,6 +6,25 @@ function pipaTripName(prefix: string) {
   return `${prefix} ${test.info().project.name} ${Date.now()}`;
 }
 
+function currentPipaDate(): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Fortaleza",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const part = (type: "year" | "month" | "day") =>
+    parts.find((item) => item.type === type)?.value ?? "";
+
+  return `${part("year")}-${part("month")}-${part("day")}`;
+}
+
+function canonicalOpenDayIndex(): number {
+  const today = currentPipaDate();
+  if (today < "2026-08-22" || today > "2026-08-29") return 1;
+  return Number(today.slice(-2)) - 21;
+}
+
 test("abre o Guia da viagem e cobre os oito Dias reais de Pipa", async ({ page }) => {
   const { trip } = await createAuthenticatedE2ETrip({
     name: pipaTripName("Guia completo Pipa"),
@@ -37,8 +56,11 @@ test("abre o Guia da viagem e cobre os oito Dias reais de Pipa", async ({ page }
   expect(guideMapHeadingIds).toHaveLength(8);
   expect(new Set(guideMapHeadingIds).size).toBe(8);
 
+  const openDayIndex = canonicalOpenDayIndex();
+  await expect(page.locator(`#guia-dia-${openDayIndex}`)).toHaveAttribute("open", "");
+
   const firstDay = page.locator("#guia-dia-1");
-  await expect(firstDay).toHaveAttribute("open", "");
+  if (openDayIndex !== 1) await firstDay.locator("summary").click();
   const firstDayStops = firstDay.getByRole("list", { name: "Paradas sugeridas para o Dia 1" });
   await expect(firstDayStops.getByRole("listitem")).toHaveCount(2);
   await expect(firstDayStops.getByRole("heading", { name: "Chapadão de Pipa" })).toBeVisible();
@@ -65,7 +87,7 @@ test("abre o Guia da viagem e cobre os oito Dias reais de Pipa", async ({ page }
   );
 
   const lastDay = page.locator("#guia-dia-8");
-  await lastDay.locator("summary").click();
+  if (openDayIndex !== 8) await lastDay.locator("summary").click();
   await expect(lastDay.getByText("Despedida leve no centro")).toBeVisible();
   await expect(
     lastDay.getByRole("list", { name: "Paradas sugeridas para o Dia 8" }).getByRole("listitem"),
@@ -123,7 +145,7 @@ test("mantém a ação principal utilizável em viewport mobile", async ({ page 
   await page.goto(`/viagens/${trip.id}/guia`);
 
   await expect(page.getByRole("heading", { name: "Guia da viagem em Pipa" })).toBeVisible();
-  await expect(
-    page.locator("#guia-dia-1").getByRole("link", { name: "Planejar neste Dia" }).first(),
-  ).toBeVisible();
+  const firstDay = page.locator("#guia-dia-1");
+  if ((await firstDay.getAttribute("open")) === null) await firstDay.locator("summary").click();
+  await expect(firstDay.getByRole("link", { name: "Planejar neste Dia" }).first()).toBeVisible();
 });

@@ -31,6 +31,10 @@ async function submitAndExpectActionRedirect(
 }
 
 async function openManualComposer(page: Page) {
+  if (!new URL(page.url()).searchParams.has("dia")) {
+    await page.getByRole("link", { name: /Dia 1/ }).click();
+    await expect(page).toHaveURL(/dia=2026-08-22/);
+  }
   await page.getByText("Adicionar atividade manual", { exact: true }).click();
   await expect(page.getByRole("heading", { name: "Adicione uma decisão manual" })).toBeVisible();
 }
@@ -43,7 +47,7 @@ test("orienta um dia vazio pela jornada antes das ações manuais", async ({ pag
     endDate: "2026-08-29",
   });
 
-  await page.goto(`/viagens/${trip.id}/roteiro`);
+  await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-08-22`);
 
   await expect(page.getByRole("heading", { level: 1, name: tripName })).toBeVisible();
   const journey = page.getByRole("navigation", { name: "Jornada de planejamento" });
@@ -199,7 +203,7 @@ test("reordena atividades dentro do mesmo período preservando Dia e sequência"
   itinerary = addActivity(itinerary, { dayDate: "2026-08-22", title: firstTitle }, now);
   itinerary = addActivity(itinerary, { dayDate: "2026-08-22", title: secondTitle }, now);
   await new DrizzleItineraryRepository().save(itinerary);
-  await page.goto(`/viagens/${trip.id}/roteiro`);
+  await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-08-22`);
 
   const focusedDay = page.locator(".itinerary-day-card");
   const activityTitles = focusedDay.locator(".itinerary-activity-copy strong");

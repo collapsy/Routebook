@@ -21,6 +21,7 @@ import {
 import { getItineraryProposalReviewStatus } from "../../../../lib/itinerary-proposal-experience";
 import { deriveItineraryDayLegSummary } from "../../../../lib/itinerary-leg-distances";
 import { deriveItineraryDaySpatialContext } from "../../../../lib/itinerary-spatial-context";
+import { resolvePreferredTripDay, resolveTripTodayDate } from "../../../../lib/trip-active-day";
 import {
   addManualActivityAction,
   moveItineraryActivityAction,
@@ -191,7 +192,11 @@ export default async function ItineraryPage({
     erroProposta,
     erro,
   } = await searchParams;
-  const selectedDay = itinerary.days.find((day) => day.date === dia) ?? itinerary.days[0];
+  const destinationId = resolveDestinationId(trip.destination.name);
+  const now = new Date();
+  const activeTimeZone = destinationId === "pipa-rn-br" ? "America/Fortaleza" : "UTC";
+  const todayDate = resolveTripTodayDate(itinerary.days, now, activeTimeZone);
+  const selectedDay = resolvePreferredTripDay(itinerary.days, dia, now, activeTimeZone);
   if (!selectedDay) notFound();
 
   const activityCount = itinerary.days.reduce((total, day) => total + day.activities.length, 0);
@@ -203,7 +208,6 @@ export default async function ItineraryPage({
     selectedDay.activities.length,
     selectedDay.freePeriods.length,
   );
-  const destinationId = resolveDestinationId(trip.destination.name);
   const publishedPlaces = destinationId
     ? await listPublishedPlaces(new DrizzlePlaceRepository(), destinationId)
     : [];
@@ -341,27 +345,39 @@ export default async function ItineraryPage({
         <div className={journeyStyles.focusHeader}>
           <div>
             <p className="product-eyebrow">Dia em foco</p>
-            <h2>
-              Dia {selectedDay.position} — {formatDate(selectedDay.date)}
-            </h2>
+            <div className={journeyStyles.focusTitleLine}>
+              <h2>
+                Dia {selectedDay.position} — {formatDate(selectedDay.date)}
+              </h2>
+              {selectedDay.date === todayDate ? (
+                <span className={journeyStyles.todayBadge}>Hoje</span>
+              ) : null}
+            </div>
             <p>{selectedItemCount === 0 ? "Planejamento aberto" : selectedDaySummary}</p>
           </div>
         </div>
 
         <nav aria-label="Selecionar Dia do roteiro" className={journeyStyles.daySelector}>
-          {itinerary.days.map((day) => (
-            <Link
-              aria-current={day.id === selectedDay.id ? "page" : undefined}
-              className={
-                day.id === selectedDay.id ? journeyStyles.selectedDay : journeyStyles.dayLink
-              }
-              href={`/viagens/${tripId}/roteiro?dia=${day.date}#dia-em-foco`}
-              key={day.id}
-            >
-              <span>Dia {day.position}</span>
-              <small>{formatDayLabel(day.date)}</small>
-            </Link>
-          ))}
+          {itinerary.days.map((day) => {
+            const isToday = day.date === todayDate;
+
+            return (
+              <Link
+                aria-current={day.id === selectedDay.id ? "page" : undefined}
+                className={
+                  day.id === selectedDay.id ? journeyStyles.selectedDay : journeyStyles.dayLink
+                }
+                href={`/viagens/${tripId}/roteiro?dia=${day.date}#dia-em-foco`}
+                key={day.id}
+              >
+                <span>
+                  Dia {day.position}
+                  {isToday ? <em className={journeyStyles.todayInline}>Hoje</em> : null}
+                </span>
+                <small>{formatDayLabel(day.date)}</small>
+              </Link>
+            );
+          })}
         </nav>
 
         <article className="itinerary-day-card" id={selectedDay.id} tabIndex={-1}>
@@ -417,7 +433,9 @@ export default async function ItineraryPage({
                                   : "Duração aberta"}
                               </small>
                             </div>
-                            <div className="itinerary-activity-actions">
+                            <div
+                              className={`${journeyStyles.activityActions} itinerary-activity-actions`}
+                            >
                               {previousActivity || nextActivity ? (
                                 <div
                                   aria-label={`Ordenar ${activity.title}`}

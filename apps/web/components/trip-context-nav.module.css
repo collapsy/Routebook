@@ -1,0 +1,69 @@
+.nav {
+  margin: 0 auto;
+  max-width: var(--app-content-width, 76rem);
+  padding: 0.75rem clamp(1rem, 3vw, 2rem) 0;
+  width: 100%;
+}
+
+.scroller {
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding: 0.4rem;
+  scrollbar-width: thin;
+}
+
+.link,
+.active {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius-medium) - 0.2rem);
+  color: var(--foreground-muted);
+  display: inline-flex;
+  flex: 1 0 auto;
+  font-size: 0.9rem;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 2.75rem;
+  min-width: 7rem;
+  padding: 0.65rem 0.9rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.link:hover {
+  background: var(--surface-soft);
+  color: var(--foreground);
+}
+
+.active {
+  background: var(--primary-strong);
+  border-color: var(--primary-strong);
+  color: #fff;
+}
+
+.link:focus-visible,
+.active:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (max-width: 44rem) {
+  .nav {
+    padding-inline: 0.75rem;
+  }
+
+  .scroller {
+    scroll-snap-type: x proximity;
+  }
+
+  .link,
+  .active {
+    flex: 0 0 auto;
+    min-width: 6.6rem;
+    scroll-snap-align: start;
+  }
+}

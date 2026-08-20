@@ -65,12 +65,14 @@ function isPreviewData(value: unknown): value is ExternalPlaceImagePreviewData {
   );
 }
 
-function buildPreviewEndpoint(input: Readonly<{
-  destinationId: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-}>): string {
+function buildPreviewEndpoint(
+  input: Readonly<{
+    destinationId: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+  }>,
+): string {
   const query = new URLSearchParams({
     destinationId: input.destinationId,
     name: input.name,

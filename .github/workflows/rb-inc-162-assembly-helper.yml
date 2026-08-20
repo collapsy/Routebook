@@ -58,8 +58,8 @@ jobs:
           )
           replace_exact(
               page,
-              '  tripId: string;\n  distanceReferenceLabel: string;\n  accommodationCoordinate?:',
-              '  tripId: string;\n  destinationId?: string;\n  distanceReferenceLabel: string;\n  accommodationCoordinate?:',
+              '}: Readonly<{\n  item: ExternalPlaceDiscoveryItem;\n  tripId: string;\n  distanceReferenceLabel: string;\n  accommodationCoordinate?: Readonly<{ latitude: number; longitude: number }>;',
+              '}: Readonly<{\n  item: ExternalPlaceDiscoveryItem;\n  tripId: string;\n  destinationId?: string;\n  distanceReferenceLabel: string;\n  accommodationCoordinate?: Readonly<{ latitude: number; longitude: number }>;',
           )
           replace_exact(
               page,

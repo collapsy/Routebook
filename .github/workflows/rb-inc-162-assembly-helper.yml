@@ -1,0 +1,100 @@
+name: RB-INC-162 temporary assembly helper
+
+on:
+  push:
+    branches:
+      - codex/rb-inc-162-external-place-images
+    paths:
+      - .github/workflows/rb-inc-162-assembly-helper.yml
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/rb-inc-162-external-place-images
+          fetch-depth: 0
+
+      - name: Merge current main without rewriting branch history
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git merge --no-edit origin/main
+
+      - name: Integrate external image preview and Registry
+        shell: python
+        run: |
+          from pathlib import Path
+
+          def replace_exact(path: str, old: str, new: str, count: int = 1) -> None:
+              file = Path(path)
+              text = file.read_text()
+              actual = text.count(old)
+              if actual != count:
+                  raise SystemExit(f"{path}: esperado {count} ocorrência(s), encontrado {actual}: {old!r}")
+              file.write_text(text.replace(old, new, count))
+
+          page = "apps/web/app/viagens/[tripId]/lugares/page.tsx"
+          replace_exact(
+              page,
+              'import { PlacePrimaryImage } from "../../../../components/place-primary-image";\n',
+              'import { ExternalPlaceImagePreview } from "../../../../components/external-place-image-preview";\nimport { PlacePrimaryImage } from "../../../../components/place-primary-image";\n',
+          )
+          replace_exact(
+              page,
+              'function ExternalDiscoveryCard({\n  item,\n  tripId,\n  distanceReferenceLabel,',
+              'function ExternalDiscoveryCard({\n  item,\n  tripId,\n  destinationId,\n  distanceReferenceLabel,',
+          )
+          replace_exact(
+              page,
+              '  tripId: string;\n  distanceReferenceLabel: string;\n  accommodationCoordinate?:',
+              '  tripId: string;\n  destinationId?: string;\n  distanceReferenceLabel: string;\n  accommodationCoordinate?:',
+          )
+          replace_exact(
+              page,
+              '      <PlacePrimaryImage category={candidate.category} placeName={candidate.name} />',
+              '      <ExternalPlaceImagePreview\n        category={candidate.category}\n        destinationId={destinationId}\n        latitude={candidate.latitude}\n        longitude={candidate.longitude}\n        placeName={candidate.name}\n      />',
+          )
+          replace_exact(
+              page,
+              '                item={item}\n                tripId={tripId}\n                {...(accommodationCoordinate',
+              '                item={item}\n                tripId={tripId}\n                {...(destinationId ? { destinationId } : {})}\n                {...(accommodationCoordinate',
+          )
+          replace_exact(
+              page,
+              '            marcador informa sua origem; candidato externo continua fora do catálogo até passar por\n            curadoria e publicação.',
+              '            marcador informa sua origem; candidato externo continua fora do catálogo até passar por\n            curadoria e publicação. Fotografias externas são buscadas sob demanda e só aparecem\n            quando identidade, autoria e licença puderem ser verificadas.',
+          )
+
+          registry = Path("docs/registry.md")
+          text = registry.read_text()
+          if "| RB-INC-162 |" in text or "| RB-CTX-162 |" in text:
+              raise SystemExit("Registry já contém entrada RB-162; reconciliação manual necessária")
+          lines = text.splitlines(keepends=True)
+          matches = [i for i, line in enumerate(lines) if line.startswith("| RB-CTX-161 |")]
+          if len(matches) != 1:
+              raise SystemExit(f"Esperada uma âncora RB-CTX-161, encontradas {len(matches)}")
+          insert_at = matches[0] + 1
+          rows = [
+              "| RB-INC-162 | Imagens governadas para Places externos | Implementation | Draft | 0.1.0 | [rb-inc-162-external-place-images.md](./implementation/increments/rb-inc-162-external-place-images.md) |\n",
+              "| RB-CTX-162 | Context Pack do RB-INC-162 — Imagens governadas para Places externos | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-162-external-place-images.md](./implementation/context-packs/rb-inc-162-external-place-images.md) |\n",
+          ]
+          lines[insert_at:insert_at] = rows
+          registry.write_text("".join(lines))
+
+          Path(".github/workflows/rb-inc-162-assembly-helper.yml").unlink()
+
+      - name: Commit and push deterministic result
+        run: |
+          git add -- \
+            'apps/web/app/viagens/[tripId]/lugares/page.tsx' \
+            docs/registry.md \
+            .github/workflows/rb-inc-162-assembly-helper.yml
+          git diff --cached --check
+          git commit -m "RB-162: integrate governed external image previews"
+          git push origin HEAD:codex/rb-inc-162-external-place-images

@@ -101,22 +101,21 @@ export function ExternalPlaceImagePreview({
   category?: PlaceCategory;
 }>) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [shouldLoad, setShouldLoad] = useState(false);
   const [state, setState] = useState<PreviewState>({ status: "idle" });
 
   useEffect(() => {
     const target = containerRef.current;
-    if (!target || shouldLoad || !destinationId) return;
+    if (!target || state.status !== "idle" || !destinationId) return;
 
     if (!("IntersectionObserver" in window)) {
-      setShouldLoad(true);
-      return;
+      const timer = window.setTimeout(() => setState({ status: "loading" }), 0);
+      return () => window.clearTimeout(timer);
     }
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
-          setShouldLoad(true);
+          setState({ status: "loading" });
           observer.disconnect();
         }
       },
@@ -124,13 +123,12 @@ export function ExternalPlaceImagePreview({
     );
     observer.observe(target);
     return () => observer.disconnect();
-  }, [destinationId, shouldLoad]);
+  }, [destinationId, state.status]);
 
   useEffect(() => {
-    if (!shouldLoad || !destinationId) return;
+    if (state.status !== "loading" || !destinationId) return;
 
     const controller = new AbortController();
-    setState({ status: "loading" });
 
     void fetch(
       buildPreviewEndpoint({
@@ -159,7 +157,7 @@ export function ExternalPlaceImagePreview({
       });
 
     return () => controller.abort();
-  }, [destinationId, latitude, longitude, placeName, shouldLoad]);
+  }, [destinationId, latitude, longitude, placeName, state.status]);
 
   if (state.status === "ready") {
     const { preview } = state;

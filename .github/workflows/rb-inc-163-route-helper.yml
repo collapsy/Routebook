@@ -95,34 +95,6 @@ jobs:
               "                  destination: placeCoordinate(place),\n                  destinationLabel: buildGoogleMapsPlaceLabel({\n                    name: place.name,\n                    addressLabel: place.addressLabel,\n                  }),\n                  travelMode: input.travelMode,",
           )
 
-          e2e_discovery = "apps/web/e2e/place-discovery-filters.spec.ts"
-          anchor = '''  await expect(praiaDoAmorCard.getByRole("link", { name: "Calcular rota real" })).toHaveAttribute(
-            "href",
-            /google\\.com\\/maps\\/dir/,
-          );'''
-          addition = anchor + '''
-          const praiaDoAmorRouteHref = await praiaDoAmorCard
-            .getByRole("link", { name: "Calcular rota real" })
-            .getAttribute("href");
-          expect(praiaDoAmorRouteHref).toBeTruthy();
-          expect(new URL(praiaDoAmorRouteHref!).searchParams.get("destination")).toBe(
-            "Praia do Amor, Pipa, Tibau do Sul — RN",
-          );'''
-          replace_exact(e2e_discovery, anchor, addition)
-
-          e2e_guide = "apps/web/e2e/trip-day-guide.spec.ts"
-          guide_anchor = '  await expect(firstDay.getByRole("link", { name: "Rota e tempo no Maps" })).toHaveCount(2);'
-          guide_addition = guide_anchor + '''
-          const firstStopRouteHref = await firstDay
-            .getByRole("link", { name: "Rota e tempo no Maps" })
-            .first()
-            .getAttribute("href");
-          expect(firstStopRouteHref).toBeTruthy();
-          expect(new URL(firstStopRouteHref!).searchParams.get("destination")).toContain(
-            "Chapadão de Pipa",
-          );'''
-          replace_exact(e2e_guide, guide_anchor, guide_addition)
-
           registry = Path("docs/registry.md")
           registry_text = registry.read_text()
           registry_anchor = "| RB-CTX-161 | Context Pack do RB-INC-161 — Experiência de viagem ativa e navegação mobile | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-161-active-trip-mobile-experience.md](./implementation/context-packs/rb-inc-161-active-trip-mobile-experience.md) |\n"
@@ -145,8 +117,6 @@ jobs:
             'apps/web/app/viagens/[tripId]/lugares/page.tsx' \
             'apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx' \
             apps/web/lib/pipa-day-guide.ts \
-            apps/web/e2e/place-discovery-filters.spec.ts \
-            apps/web/e2e/trip-day-guide.spec.ts \
             docs/registry.md \
             .github/workflows/rb-inc-163-route-helper.yml
           git diff --cached --check

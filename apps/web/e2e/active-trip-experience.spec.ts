@@ -52,13 +52,12 @@ test("preserva contexto entre áreas e prioriza Hoje sem sobrescrever seleção 
   const tripNav = page.getByRole("navigation", { name: "Navegação da viagem" });
   await expect(tripNav).toBeVisible();
   await expect(tripNav.getByRole("link")).toHaveCount(4);
-  await expect(tripNav.getByRole("link", { name: "Guia" })).toHaveAttribute(
-    "aria-current",
-    "page",
-  );
+  await expect(tripNav.getByRole("link", { name: "Guia" })).toHaveAttribute("aria-current", "page");
   await expect(page.locator("#guia-dia-2")).toHaveAttribute("open", "");
   await expect(
-    page.getByRole("navigation", { name: "Dias do Guia da viagem" }).locator('[aria-current="date"]'),
+    page
+      .getByRole("navigation", { name: "Dias do Guia da viagem" })
+      .locator('[aria-current="date"]'),
   ).toContainText("Hoje");
 
   await tripNav.getByRole("link", { name: "Lugares" }).click();
@@ -90,14 +89,14 @@ test("preserva contexto entre áreas e prioriza Hoje sem sobrescrever seleção 
   await page.goto(`/viagens/${trip.id}/roteiro?dia=${startDate}#dia-em-foco`);
   await expect(page.getByRole("heading", { name: /Dia 1 —/ })).toBeVisible();
   await expect(
-    page.getByRole("navigation", { name: "Selecionar Dia do roteiro" }).locator(
-      `[href*="dia=${today}"]`,
-    ),
+    page
+      .getByRole("navigation", { name: "Selecionar Dia do roteiro" })
+      .locator(`[href*="dia=${today}"]`),
   ).toContainText("Hoje");
   await expect(
-    page.getByRole("navigation", { name: "Selecionar Dia do roteiro" }).locator(
-      `[href*="dia=${startDate}"]`,
-    ),
+    page
+      .getByRole("navigation", { name: "Selecionar Dia do roteiro" })
+      .locator(`[href*="dia=${startDate}"]`),
   ).toHaveAttribute("aria-current", "page");
 });
 
@@ -121,7 +120,9 @@ test("mantém navegação e ações secundárias operáveis em viewport mobile",
 
   const activity = page.locator(".itinerary-day-card").filter({ hasText: "Passeio do Dia atual" });
   await expect(activity).toBeVisible();
-  await expect(activity.locator('summary[aria-label^="Editar Passeio do Dia atual"]')).toBeVisible();
+  await expect(
+    activity.locator('summary[aria-label^="Editar Passeio do Dia atual"]'),
+  ).toBeVisible();
   await expect(
     activity.locator('summary[aria-label^="Mover Passeio do Dia atual para outro dia"]'),
   ).toBeVisible();

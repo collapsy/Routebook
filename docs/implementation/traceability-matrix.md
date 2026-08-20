@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: "2026-08-12"
+last_updated: "2026-08-20"
 authors:
   - RouteBook Team
 tags:
@@ -68,9 +68,9 @@ ai_context:
 | RB-INC-056 | RB-BR-PRP-002–005, RB-INC-050, RB-INC-053, RB-INC-055 | #128 | `codex/rb-inc-056-ready-command`, PR pendente | comando de conclusão e persistência de Proposal `ready` | testes e validações pendentes | Em execução |
 | RB-INC-057 | RB-SCR-009, RB-INT-063–069, RB-WF-MOB-025, RB-WF-DESK-009, RB-INC-055, RB-INC-056 | #130 | `codex/rb-inc-057-ready-review`, PR #131 | revisão somente leitura da Proposal `ready` sem aplicar ao Roteiro | validações locais verdes; CI com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para revisão |
 | RB-INC-058 | RB-BR-PRP-004, RB-BR-PRP-008, ciclo oficial e RB-DATA-001 | #132 | `codex/rb-inc-058-temporal-expiration`, PR #133 | expiração temporal de Proposal `ready` no domínio | 53 testes do módulo; CI com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para revisão |
-| RB-INC-059 | RB-BR-PRP-004, RB-BR-PRP-008, RB-DATA-001–002, RB-ADR-006 e RB-INC-058 | #134 | `codex/rb-inc-059-expired-persistence`, PR #135 | migration, schema e round trip de Proposal `expired` com conteúdo preservado | validações locais verdes; run 30713827362 com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para integração |
+| RB-INC-059 | RB-BR-PRP-004, RB-BR-PRP-008, RB-DATA-001–002, RB-ADR-006 e RB-INC-058 | #134 | `codex/rb-inc-059-expired-persistence`, PR #135 | migration, schema e round trip de Proposal `expired` com snapshot preservado | validações locais verdes; run 30713827362 com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para integração |
 | RB-INC-060 | RB-BR-PRP-004, RB-BR-PRP-008, ciclo oficial e RB-INC-056, RB-INC-058–059 | #136 | `codex/rb-inc-060-expiration-command`, PR #137 | comando de aplicação para expirar e persistir Proposal `ready` | 60 testes do módulo; run 30714407588 com migrations, suíte integral, build e 50 E2E responsivos verdes | Pronto para integração |
-| RB-INC-061 | RB-BR-PRP-004, RB-BR-PRP-008, RB-SCR-009, RB-INT-063–069 e RB-INC-057–060 | #138 | `codex/rb-inc-061-expired-review`, PR #139 | revisão histórica somente leitura da Proposal `expired` sem aplicação | validações locais verdes; run 30716155284 com migrations, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
+| RB-INC-061 | RB-BR-PRP-004, RB-BR-PRP-008, RB-SCR-010, RB-INT-073 e RB-INC-057–060 | #138 | `codex/rb-inc-061-expired-review`, PR #139 | revisão histórica somente leitura da Proposal `expired` sem aplicação | validações locais verdes; run 30716155284 com migrations, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
 | RB-INC-062 | RB-BR-PRP-001, RB-BR-PRP-004, ciclo oficial, RB-DATA-001 e RB-INC-053 | #140 | `codex/rb-inc-062-reject-proposal`, PR #141 | transição pura de Proposal `ready` para `rejected` | validações locais verdes; run 30716780960 com migrations, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
 | RB-INC-063 | RB-BR-PRP-001, RB-BR-PRP-004, RB-DATA-001–002, RB-ADR-006 e RB-INC-055, RB-INC-062 | #142 | `codex/rb-inc-063-rejected-persistence`, PR #143 | migration, schema e round trip de Proposal `rejected` com snapshot preservado | validações locais verdes; run 30717630992 com migration, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
 | RB-INC-064 | RB-BR-PRP-001, RB-BR-PRP-004, ciclo oficial e RB-INC-050, RB-INC-060, RB-INC-062–063 | #144 | `codex/rb-inc-064-rejection-command`, PR #145 | comando de aplicação para rejeitar e persistir Proposal `ready` | 70 testes do módulo; run 30718348548 com migrations, suíte integral, build e 52 E2E responsivos verdes | Pronto para integração |
@@ -729,3 +729,20 @@ Ao concluir um incremento:
 | CI preliminar | Documentation Validation #1055 (`31607305678`) e Engineering Validation #1476 (`31607305719`) verdes no SHA `ffd5acb88c8892453b54c92a1a167d95e9258167` |
 | mudanças de aplicação | nenhuma; sem migration, banco, secret ou código de autenticação/autorização alterado |
 | rastreabilidade | issue #305 e PR #315; gates finais devem permanecer verdes no HEAD definitivo antes do merge |
+
+## Evidências previstas do RB-INC-136
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-136-m8-real-validation.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-136-m8-real-validation.md` |
+| requisitos e decisões | RB-PRD-002, RB-DEL-001, RB-QA-001, RB-OBS-001 e RB-PRIV-001 |
+| rastreabilidade | issue #319 e Draft PR #374 |
+| branch | `codex/rb-inc-136-m8-phase-a-reconciliation` |
+| baseline reconciliado | `main` em `bef09b68ce631073fb9d4b5a203a1ca462f1befd`, após integração do RB-INC-160 |
+| Registry | RB-INC-136 e RB-CTX-136 já registrados na `main`; nenhuma alteração adicional necessária |
+| protocolo Fase A | taxonomia, severidade, jornadas, perguntas, template de Session, privacidade e decisão M8 definidos; H1–H10 permanecem `not_measured` |
+| limite de evidência humana | aceite funcional do RB-INC-160 não é Session M8 e não sustenta H1–H10 |
+| código/Production | nenhuma mudança funcional, migration, write ou promoção nesta Fase A |
+| validação | Documentation Validation e Engineering Validation pendentes no HEAD final da PR #374 |
+| Fase B | aguardando uso humano real elegível; nenhuma Session fabricada |

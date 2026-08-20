@@ -68,8 +68,8 @@ jobs:
           )
           replace_exact(
               page,
-              '                item={item}\n                tripId={tripId}\n                {...(accommodationCoordinate',
-              '                item={item}\n                tripId={tripId}\n                {...(destinationId ? { destinationId } : {})}\n                {...(accommodationCoordinate',
+              '              <ExternalDiscoveryCard\n                key={item.id}\n                distanceReferenceLabel={distanceReferenceLabel}\n                item={item}\n                tripId={tripId}\n                {...(accommodationCoordinate',
+              '              <ExternalDiscoveryCard\n                key={item.id}\n                distanceReferenceLabel={distanceReferenceLabel}\n                item={item}\n                tripId={tripId}\n                {...(destinationId ? { destinationId } : {})}\n                {...(accommodationCoordinate',
           )
           replace_exact(
               page,

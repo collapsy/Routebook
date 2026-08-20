@@ -25,7 +25,11 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
     });
   });
   await page.route("**/api/place-image-preview?**", async (route) => {
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(preview) });
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(preview),
+    });
   });
 
   const { trip } = await createAuthenticatedE2ETrip({

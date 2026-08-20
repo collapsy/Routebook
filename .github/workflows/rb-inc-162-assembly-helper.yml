@@ -1,4 +1,4 @@
-# Trigger deterministic RB-162 assembly after workflow exists on the branch.
+# Temporary helper authorized by RB-INC-162/RB-CTX-162. Must self-remove.
 name: RB-INC-162 temporary assembly helper
 
 on:
@@ -7,12 +7,17 @@ on:
       - codex/rb-inc-162-external-place-images
     paths:
       - .github/workflows/rb-inc-162-assembly-helper.yml
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - .github/workflows/rb-inc-162-assembly-helper.yml
 
 permissions:
   contents: write
 
 jobs:
   assemble:
+    if: github.head_ref == 'codex/rb-inc-162-external-place-images' || github.ref_name == 'codex/rb-inc-162-external-place-images'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

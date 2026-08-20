@@ -3,10 +3,20 @@ import { describe, expect, it } from "vitest";
 import {
   buildGoogleMapsDirectionsUrl,
   buildGoogleMapsItineraryUrl,
+  buildGoogleMapsPlaceLabel,
   buildGoogleMapsSearchUrl,
 } from "./google-maps-links";
 
 describe("Google Maps links", () => {
+  it("cria label semântico de Place com nome e endereço", () => {
+    expect(
+      buildGoogleMapsPlaceLabel({
+        name: "Camarão na Fazenda Pipa",
+        addressLabel: "Rua dos Bem-Te-Vis, 66, Praia da Pipa — RN",
+      }),
+    ).toBe("Camarão na Fazenda Pipa, Rua dos Bem-Te-Vis, 66, Praia da Pipa — RN");
+  });
+
   it("cria busca textual codificada sem ativar SDK ou chave", () => {
     const url = new URL(
       buildGoogleMapsSearchUrl({
@@ -23,22 +33,35 @@ describe("Google Maps links", () => {
   });
 
   it.each(["walking", "driving"] as const)(
-    "cria rota pública no modo %s a partir de coordenadas validadas",
+    "prefere nome e endereço como destino da rota pública no modo %s",
     (travelMode) => {
       const url = new URL(
         buildGoogleMapsDirectionsUrl({
           origin: { latitude: -6.2302, longitude: -35.0503 },
           destination: { latitude: -6.2366, longitude: -35.0465 },
+          destinationLabel: "Praia do Amor, Pipa, Tibau do Sul — RN",
           travelMode,
         }),
       );
 
       expect(url.pathname).toBe("/maps/dir/");
       expect(url.searchParams.get("origin")).toBe("-6.2302,-35.0503");
-      expect(url.searchParams.get("destination")).toBe("-6.2366,-35.0465");
+      expect(url.searchParams.get("destination")).toBe("Praia do Amor, Pipa, Tibau do Sul — RN");
       expect(url.searchParams.get("travelmode")).toBe(travelMode);
     },
   );
+
+  it("usa coordenada validada quando o destino semântico não existe", () => {
+    const url = new URL(
+      buildGoogleMapsDirectionsUrl({
+        origin: { latitude: -6.2302, longitude: -35.0503 },
+        destination: { latitude: -6.2366, longitude: -35.0465 },
+        travelMode: "walking",
+      }),
+    );
+
+    expect(url.searchParams.get("destination")).toBe("-6.2366,-35.0465");
+  });
 
   it("recusa coordenada inválida antes de montar um link", () => {
     expect(() =>

@@ -21,10 +21,7 @@ import {
 import { getItineraryProposalReviewStatus } from "../../../../lib/itinerary-proposal-experience";
 import { deriveItineraryDayLegSummary } from "../../../../lib/itinerary-leg-distances";
 import { deriveItineraryDaySpatialContext } from "../../../../lib/itinerary-spatial-context";
-import {
-  resolvePreferredTripDay,
-  resolveTripTodayDate,
-} from "../../../../lib/trip-active-day";
+import { resolvePreferredTripDay, resolveTripTodayDate } from "../../../../lib/trip-active-day";
 import {
   addManualActivityAction,
   moveItineraryActivityAction,

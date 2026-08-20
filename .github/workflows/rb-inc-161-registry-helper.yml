@@ -1,0 +1,74 @@
+name: RB-INC-161 Registry Helper
+
+on:
+  push:
+    branches:
+      - codex/rb-inc-161-active-trip-mobile-experience
+    paths:
+      - ".github/workflows/rb-inc-161-registry-helper.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile-registry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout increment branch
+        uses: actions/checkout@v6
+        with:
+          ref: codex/rb-inc-161-active-trip-mobile-experience
+
+      - name: Reconcile only RB-INC-161 registry changes
+        shell: python
+        run: |
+          from pathlib import Path
+
+          registry = Path("docs/registry.md")
+          text = registry.read_text(encoding="utf-8")
+
+          historical_repairs = {
+              "| RB-INC-108 | Núcleo de Aceite Parcial de Itinerary Proposal | Implementation Increment | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/increments/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |":
+                  "| RB-INC-108 | Núcleo de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/increments/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |",
+              "| RB-INC-109 | Transação PostgreSQL de Aceite Parcial de Itinerary Proposal | Implementation Increment | Draft | 0.1.0 | [rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md](./implementation/increments/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md) |":
+                  "| RB-INC-109 | Transação PostgreSQL de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md](./implementation/increments/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md) |",
+              "| RB-CTX-122 | Context Pack do RB-INC-122 — Contrato de Redirect das Server Actions E2E | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-122-rsc-response-completion.md](./implementation/context-packs/rb-inc-122-rsc-response-completion.md) |":
+                  "| RB-CTX-122 | Context Pack do RB-INC-122 — Contrato de Redirect das Server Actions E2E | Implementation Context | Draft | 0.1.0 | [rb-inc-122-rsc-response-completion.md](./implementation/context-packs/rb-inc-122-rsc-response-completion.md) |",
+              "| RB-CTX-123 | Context Pack do RB-INC-123 — Preview Automático pela Integração Git Vercel | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-123-git-preview-deployment.md](./implementation/context-packs/rb-inc-123-git-preview-deployment.md) |":
+                  "| RB-CTX-123 | Context Pack do RB-INC-123 — Preview Automático pela Integração Git Vercel | Implementation Context | Draft | 0.1.0 | [rb-inc-123-git-preview-deployment.md](./implementation/context-packs/rb-inc-123-git-preview-deployment.md) |",
+              "| RB-CTX-124 | Context Pack do RB-INC-124 — Bootstrap Isolado de Production | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-124-production-bootstrap.md](./implementation/context-packs/rb-inc-124-production-bootstrap.md) |":
+                  "| RB-CTX-124 | Context Pack do RB-INC-124 — Bootstrap Isolado de Production | Implementation Context | Draft | 0.1.0 | [rb-inc-124-production-bootstrap.md](./implementation/context-packs/rb-inc-124-production-bootstrap.md) |",
+          }
+
+          for wrong, canonical in historical_repairs.items():
+              if wrong in text:
+                  text = text.replace(wrong, canonical, 1)
+              elif canonical not in text:
+                  raise SystemExit(f"Expected historical registry row not found: {canonical}")
+
+          increment = "| RB-INC-161 | Experiência de viagem ativa e navegação mobile | Implementation | Draft | 0.1.0 | [rb-inc-161-active-trip-mobile-experience.md](./implementation/increments/rb-inc-161-active-trip-mobile-experience.md) |"
+          context = "| RB-CTX-161 | Context Pack do RB-INC-161 — Experiência de viagem ativa e navegação mobile | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-161-active-trip-mobile-experience.md](./implementation/context-packs/rb-inc-161-active-trip-mobile-experience.md) |"
+
+          if increment not in text or context not in text:
+              anchor = "| RB-CTX-160 | Context Pack do RB-INC-160 — Guia diário completo da viagem de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-160-pipa-trip-guide.md](./implementation/context-packs/rb-inc-160-pipa-trip-guide.md) |\n\n## Status possíveis"
+              replacement = f"| RB-CTX-160 | Context Pack do RB-INC-160 — Guia diário completo da viagem de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-160-pipa-trip-guide.md](./implementation/context-packs/rb-inc-160-pipa-trip-guide.md) |\n{increment}\n{context}\n\n## Status possíveis"
+              if anchor not in text:
+                  raise SystemExit("RB-INC-160 registry anchor not found")
+              text = text.replace(anchor, replacement, 1)
+
+          if text.count(increment) != 1 or text.count(context) != 1:
+              raise SystemExit("RB-INC-161 registry entries must each appear exactly once")
+
+          registry.write_text(text, encoding="utf-8")
+
+      - name: Remove temporary helper and commit registry reconciliation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm --ignore-unmatch .github/workflows/rb-inc-161-registry-helper.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/registry.md
+          git diff --cached --check
+          git commit -m "docs: reconcile RB-INC-161 registry only"
+          git push origin HEAD:codex/rb-inc-161-active-trip-mobile-experience

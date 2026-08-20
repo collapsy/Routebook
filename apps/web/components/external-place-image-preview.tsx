@@ -107,9 +107,9 @@ export function ExternalPlaceImagePreview({
     const target = containerRef.current;
     if (!target || state.status !== "idle" || !destinationId) return;
 
-    if (!("IntersectionObserver" in window)) {
-      const timer = window.setTimeout(() => setState({ status: "loading" }), 0);
-      return () => window.clearTimeout(timer);
+    if (typeof IntersectionObserver === "undefined") {
+      const timer = setTimeout(() => setState({ status: "loading" }), 0);
+      return () => clearTimeout(timer);
     }
 
     const observer = new IntersectionObserver(

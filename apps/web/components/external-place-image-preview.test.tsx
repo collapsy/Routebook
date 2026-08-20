@@ -35,8 +35,7 @@ function enterViewport() {
 }
 
 const preview = {
-  previewUrl:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Pipa.jpg/640px-Pipa.jpg",
+  previewUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Pipa.jpg/640px-Pipa.jpg",
   sourceUrl: "https://commons.wikimedia.org/wiki/File:Pipa.jpg",
   sourceName: "Wikimedia Commons",
   license: "CC BY-SA 4.0",
@@ -102,7 +101,10 @@ describe("ExternalPlaceImagePreview", () => {
   });
 
   it("mantém fallback acessível quando nenhuma mídia segura é encontrada", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ error: "miss" }, { status: 404 })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json({ error: "miss" }, { status: 404 })),
+    );
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
 
     renderPreview();

@@ -79,7 +79,7 @@ Reduzir o custo de navegação durante a Viagem real, priorizando consulta rápi
 
 ## 6. Caminhos permitidos
 
-Somente os caminhos declarados no RB-INC-161 podem ser alterados. Arquivo adicional exige atualização explícita do incremento e justificativa na PR.
+Somente os caminhos declarados no RB-INC-161 podem ser alterados. O helper temporário `.github/workflows/rb-inc-161-registry-helper.yml` é a única exceção transitória autorizada e deve remover a si próprio no mesmo ciclo. Arquivo adicional exige atualização explícita do incremento e justificativa na PR.
 
 ## 7. Gates
 
@@ -125,3 +125,9 @@ Relatar:
 - riscos residuais;
 - issue e PR;
 - qualquer decisão humana ainda pendente.
+
+## 10. Exceção operacional temporária do Registry
+
+Fica autorizada exclusivamente durante a preparação desta branch a criação transitória de `.github/workflows/rb-inc-161-registry-helper.yml` para reconciliar `docs/registry.md` sem substituir manualmente o arquivo extenso pelo connector.
+
+O helper deve apenas restaurar as cinco entradas históricas inadvertidamente modificadas, assegurar `RB-INC-161`/`RB-CTX-161`, remover a si próprio e criar o commit documental resultante. Não pode modificar workflows canônicos, aplicação, domínio, dados, migrations, secrets, Preview ou Production, e não pode permanecer no diff final.

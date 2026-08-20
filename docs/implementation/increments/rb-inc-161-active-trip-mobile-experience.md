@@ -106,6 +106,7 @@ apps/web/components/trip-day-guide.tsx
 apps/web/components/trip-day-guide.module.css
 apps/web/lib/trip-active-day.ts
 apps/web/lib/trip-active-day.test.ts
+apps/web/e2e/active-trip-experience.spec.ts
 apps/web/e2e/trip-day-guide.spec.ts
 apps/web/e2e/itinerary.spec.ts
 docs/implementation/increments/rb-inc-161-active-trip-mobile-experience.md
@@ -134,9 +135,9 @@ Arquivo adicional indispensável exige atualização explícita desta seção e 
 
 - unitário cobre data atual dentro, antes e depois do Período;
 - unitário cobre timezone `America/Fortaleza` e seleção explícita;
-- E2E cobre navegação direta entre Guia, Lugares, Salvos e Roteiro;
-- E2E cobre foco e marcador `Hoje` em Viagem que contém a data de execução;
-- E2E cobre precedência de `dia` explícito no Roteiro;
+- E2E dedicado cobre navegação direta entre Guia, Lugares, Salvos e Roteiro;
+- E2E dedicado cobre foco e marcador `Hoje` em Viagem que contém a data de execução;
+- E2E dedicado cobre precedência de `dia` explícito no Roteiro;
 - E2E mobile comprova navegação e acesso às ações secundárias;
 - regressões existentes do Guia, Place Actions e Roteiro permanecem verdes;
 - `node scripts/validate-docs.mjs`;

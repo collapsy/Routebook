@@ -377,6 +377,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-160 | Context Pack do RB-INC-160 — Guia diário completo da viagem de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-160-pipa-trip-guide.md](./implementation/context-packs/rb-inc-160-pipa-trip-guide.md) |
 | RB-INC-161 | Experiência de viagem ativa e navegação mobile | Implementation | Draft | 0.1.0 | [rb-inc-161-active-trip-mobile-experience.md](./implementation/increments/rb-inc-161-active-trip-mobile-experience.md) |
 | RB-CTX-161 | Context Pack do RB-INC-161 — Experiência de viagem ativa e navegação mobile | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-161-active-trip-mobile-experience.md](./implementation/context-packs/rb-inc-161-active-trip-mobile-experience.md) |
+| RB-INC-162 | Imagens governadas para Places externos | Implementation | Draft | 0.1.0 | [rb-inc-162-external-place-images.md](./implementation/increments/rb-inc-162-external-place-images.md) |
+| RB-CTX-162 | Context Pack do RB-INC-162 — Imagens governadas para Places externos | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-162-external-place-images.md](./implementation/context-packs/rb-inc-162-external-place-images.md) |
 | RB-INC-163 | Confiabilidade dos destinos no Google Maps | Implementation | Draft | 0.1.0 | [rb-inc-163-google-maps-destination-reliability.md](./implementation/increments/rb-inc-163-google-maps-destination-reliability.md) |
 | RB-CTX-163 | Context Pack do RB-INC-163 — Confiabilidade dos destinos no Google Maps | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-163-google-maps-destination-reliability.md](./implementation/context-packs/rb-inc-163-google-maps-destination-reliability.md) |
 

@@ -76,7 +76,7 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
     preview.sourceUrl,
   );
 
-  const name = (await externalCard.locator("strong").first().innerText()).trim();
+  const name = (await externalCard.locator(":scope > strong").innerText()).trim();
   const routeHref = await externalCard
     .getByRole("link", { name: "Calcular rota real" })
     .getAttribute("href");

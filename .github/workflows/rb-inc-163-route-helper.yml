@@ -1,0 +1,231 @@
+name: RB-INC-163 temporary route helper
+
+on:
+  push:
+    branches:
+      - codex/rb-inc-163-google-maps-destination-reliability
+    paths:
+      - .github/workflows/rb-inc-163-route-helper.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/rb-inc-163-google-maps-destination-reliability
+          fetch-depth: 0
+
+      - name: Apply deterministic replacements
+        shell: python
+        run: |
+          from pathlib import Path
+
+          def replace_exact(path: str, old: str, new: str, count: int = 1) -> None:
+              file = Path(path)
+              text = file.read_text()
+              actual = text.count(old)
+              if actual != count:
+                  raise SystemExit(f"{path}: esperado {count} ocorrência(s), encontrado {actual}")
+              file.write_text(text.replace(old, new, count))
+
+          replace_exact(
+              "apps/web/app/viagens/[tripId]/lugares/page.tsx",
+              '''import {
+            buildGoogleMapsDirectionsUrl,
+            buildGoogleMapsSearchUrl,
+          } from "../../../../lib/google-maps-links";''',
+              '''import {
+            buildGoogleMapsDirectionsUrl,
+            buildGoogleMapsPlaceLabel,
+            buildGoogleMapsSearchUrl,
+          } from "../../../../lib/google-maps-links";''',
+          )
+          replace_exact(
+              "apps/web/app/viagens/[tripId]/lugares/page.tsx",
+              '''  const mapsSearchUrl = buildGoogleMapsSearchUrl({
+            name: place.name,
+            addressLabel: place.addressLabel,
+            coordinate,
+          });''',
+              '''  const mapsSearchUrl = buildGoogleMapsSearchUrl({
+            name: place.name,
+            addressLabel: place.addressLabel,
+            coordinate,
+          });
+          const destinationLabel = buildGoogleMapsPlaceLabel({
+            name: place.name,
+            addressLabel: place.addressLabel,
+          });''',
+          )
+          replace_exact(
+              "apps/web/app/viagens/[tripId]/lugares/page.tsx",
+              '''              origin: accommodationCoordinate,
+                        destination: coordinate,
+                        travelMode: "walking",''',
+              '''              origin: accommodationCoordinate,
+                        destination: coordinate,
+                        destinationLabel,
+                        travelMode: "walking",''',
+              1,
+          )
+          replace_exact(
+              "apps/web/app/viagens/[tripId]/lugares/page.tsx",
+              '''  const categoryLabel = candidate.category
+            ? categoryLabels[candidate.category]
+            : providerCategoryLabel(candidate.providerCategory);''',
+              '''  const categoryLabel = candidate.category
+            ? categoryLabels[candidate.category]
+            : providerCategoryLabel(candidate.providerCategory);
+          const destinationLabel = buildGoogleMapsPlaceLabel({
+            name: candidate.name,
+            addressLabel: candidate.addressLabel,
+          });''',
+          )
+          replace_exact(
+              "apps/web/app/viagens/[tripId]/lugares/page.tsx",
+              '''              origin: accommodationCoordinate,
+                        destination: coordinate,
+                        travelMode: "walking",''',
+              '''              origin: accommodationCoordinate,
+                        destination: coordinate,
+                        destinationLabel,
+                        travelMode: "walking",''',
+              1,
+          )
+
+          replace_exact(
+              "apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx",
+              '''import {
+            buildGoogleMapsDirectionsUrl,
+            buildGoogleMapsSearchUrl,
+          } from "../../../../../lib/google-maps-links";''',
+              '''import {
+            buildGoogleMapsDirectionsUrl,
+            buildGoogleMapsPlaceLabel,
+            buildGoogleMapsSearchUrl,
+          } from "../../../../../lib/google-maps-links";''',
+          )
+          replace_exact(
+              "apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx",
+              '''  const mapsSearchUrl = buildGoogleMapsSearchUrl({
+            name: place.name,
+            addressLabel: place.addressLabel,
+            coordinate: placeCoordinate,
+          });''',
+              '''  const mapsSearchUrl = buildGoogleMapsSearchUrl({
+            name: place.name,
+            addressLabel: place.addressLabel,
+            coordinate: placeCoordinate,
+          });
+          const destinationLabel = buildGoogleMapsPlaceLabel({
+            name: place.name,
+            addressLabel: place.addressLabel,
+          });''',
+          )
+          replace_exact(
+              "apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx",
+              '''                    origin: trip.accommodation.coordinate,
+                              destination: placeCoordinate,
+                              travelMode: "walking",''',
+              '''                    origin: trip.accommodation.coordinate,
+                              destination: placeCoordinate,
+                              destinationLabel,
+                              travelMode: "walking",''',
+          )
+          replace_exact(
+              "apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx",
+              '''                    origin: trip.accommodation.coordinate,
+                              destination: placeCoordinate,
+                              travelMode: "driving",''',
+              '''                    origin: trip.accommodation.coordinate,
+                              destination: placeCoordinate,
+                              destinationLabel,
+                              travelMode: "driving",''',
+          )
+
+          replace_exact(
+              "apps/web/lib/pipa-day-guide.ts",
+              '''import {
+            buildGoogleMapsDirectionsUrl,
+            buildGoogleMapsItineraryUrl,
+          } from "./google-maps-links";''',
+              '''import {
+            buildGoogleMapsDirectionsUrl,
+            buildGoogleMapsItineraryUrl,
+            buildGoogleMapsPlaceLabel,
+          } from "./google-maps-links";''',
+          )
+          replace_exact(
+              "apps/web/lib/pipa-day-guide.ts",
+              '''            origin: accommodationCoordinate,
+                        destination: placeCoordinate,
+                        travelMode: input.travelMode,''',
+              '''            origin: accommodationCoordinate,
+                        destination: placeCoordinate,
+                        destinationLabel: buildGoogleMapsPlaceLabel({
+                          name: place.name,
+                          addressLabel: place.addressLabel,
+                        }),
+                        travelMode: input.travelMode,''',
+          )
+
+          replace_exact(
+              "apps/web/e2e/place-discovery-filters.spec.ts",
+              '''  await expect(praiaDoAmorCard.getByRole("link", { name: "Calcular rota real" })).toHaveAttribute(
+            "href",
+            /google\\.com\\/maps\\/dir/,
+          );''',
+              '''  const praiaDoAmorRoute = praiaDoAmorCard.getByRole("link", { name: "Calcular rota real" });
+          await expect(praiaDoAmorRoute).toHaveAttribute("href", /google\\.com\\/maps\\/dir/);
+          const praiaDoAmorRouteHref = await praiaDoAmorRoute.getAttribute("href");
+          expect(praiaDoAmorRouteHref).toBeTruthy();
+          expect(new URL(praiaDoAmorRouteHref!).searchParams.get("destination")).toBe(
+            "Praia do Amor, Pipa, Tibau do Sul — RN",
+          );''',
+          )
+
+          replace_exact(
+              "apps/web/e2e/trip-day-guide.spec.ts",
+              '''  await expect(firstDay.getByRole("link", { name: "Rota e tempo no Maps" })).toHaveCount(2);''',
+              '''  const firstStopRoute = firstDay.getByRole("link", { name: "Rota e tempo no Maps" }).first();
+          await expect(firstDay.getByRole("link", { name: "Rota e tempo no Maps" })).toHaveCount(2);
+          const firstStopRouteHref = await firstStopRoute.getAttribute("href");
+          expect(firstStopRouteHref).toBeTruthy();
+          expect(new URL(firstStopRouteHref!).searchParams.get("destination")).toContain(
+            "Chapadão de Pipa",
+          );''',
+          )
+
+          registry = Path("docs/registry.md")
+          registry_text = registry.read_text()
+          anchor = "| RB-CTX-161 | Context Pack do RB-INC-161 — Experiência de viagem ativa e navegação mobile | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-161-active-trip-mobile-experience.md](./implementation/context-packs/rb-inc-161-active-trip-mobile-experience.md) |\n"
+          rows = (
+              "| RB-INC-163 | Confiabilidade dos destinos no Google Maps | Implementation | Draft | 0.1.0 | [rb-inc-163-google-maps-destination-reliability.md](./implementation/increments/rb-inc-163-google-maps-destination-reliability.md) |\n"
+              "| RB-CTX-163 | Context Pack do RB-INC-163 — Confiabilidade dos destinos no Google Maps | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-163-google-maps-destination-reliability.md](./implementation/context-packs/rb-inc-163-google-maps-destination-reliability.md) |\n"
+          )
+          if "| RB-INC-163 |" not in registry_text:
+              if registry_text.count(anchor) != 1:
+                  raise SystemExit("Âncora RB-CTX-161 ausente/duplicada no Registry")
+              registry.write_text(registry_text.replace(anchor, anchor + rows, 1))
+
+          Path(".github/workflows/rb-inc-163-route-helper.yml").unlink()
+
+      - name: Commit deterministic result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            'apps/web/app/viagens/[tripId]/lugares/page.tsx' \
+            'apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx' \
+            apps/web/lib/pipa-day-guide.ts \
+            apps/web/e2e/place-discovery-filters.spec.ts \
+            apps/web/e2e/trip-day-guide.spec.ts \
+            docs/registry.md \
+            .github/workflows/rb-inc-163-route-helper.yml
+          git diff --cached --check
+          git commit -m "RB-163: apply semantic route destinations"
+          git push origin HEAD:codex/rb-inc-163-google-maps-destination-reliability

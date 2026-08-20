@@ -169,3 +169,5 @@ Reverter o incremento remove a navegação contextual, o foco automático no Dia
 Para corrigir exclusivamente a manutenção de `docs/registry.md` sem reescrever manualmente o arquivo extenso pelo connector, fica autorizado na branch o helper transitório `.github/workflows/rb-inc-161-registry-helper.yml`, seguindo o padrão já utilizado pelo repositório em incrementos anteriores.
 
 O helper pode somente restaurar as cinco entradas históricas inadvertidamente alteradas, garantir as duas linhas de `RB-INC-161`/`RB-CTX-161`, remover o próprio workflow e criar o commit documental resultante. Ele não pode modificar workflows canônicos, aplicação, domínio, dados, migrations, secrets, Preview ou Production e não deve existir no diff final da PR.
+
+Execução concluída: o helper foi removido do head, as cinco entradas históricas foram restauradas e o patch final de `docs/registry.md` contém somente os registros de `RB-INC-161` e `RB-CTX-161`.

@@ -99,7 +99,10 @@ describe("GET /api/place-image-preview/file", () => {
   });
 
   it("isola falha da mídia remota", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => new Response("upstream", { status: 502 })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("upstream", { status: 502 })),
+    );
 
     const response = await GET(requestFor(allowedUrl));
 

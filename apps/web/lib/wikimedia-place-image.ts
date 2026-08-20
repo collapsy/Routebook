@@ -74,6 +74,17 @@ export type WikimediaImageRecord = Readonly<{
   description: string;
 }>;
 
+export type WikimediaPlaceImagePreview = Readonly<{
+  previewUrl: string;
+  sourceUrl: string;
+  sourceName: string;
+  license: string;
+  licenseUrl?: string;
+  attribution: string;
+  altText: string;
+  matchEvidence: string;
+}>;
+
 type WikimediaPlaceImageAdapterDependencies = Readonly<{
   fetcher?: FetchLike;
   now?: () => Date;
@@ -134,6 +145,12 @@ function isAllowedMediaUrl(value: string): boolean {
 
 function isReusableLicense(value: string): boolean {
   return REUSABLE_LICENSE_PATTERN.test(value.trim());
+}
+
+function previewAltText(placeName: string, description: string): string {
+  const cleanedDescription = description.trim().replace(/\s+/g, " ");
+  if (cleanedDescription.length >= 12) return cleanedDescription.slice(0, 220);
+  return `Fotografia de ${placeName} em Pipa ou Tibau do Sul.`;
 }
 
 export function normalizeWikimediaImageRecord(page: CommonsPage): WikimediaImageRecord | undefined {
@@ -226,9 +243,9 @@ export class WikimediaCommonsPlaceImageAdapter implements PlaceImagePort {
     this.now = dependencies.now ?? (() => new Date());
   }
 
-  async findCandidates(
+  private async searchRecords(
     place: Readonly<{ name: string; latitude: number; longitude: number; externalId?: string }>,
-  ): Promise<readonly ExternalPlaceImageCandidate[]> {
+  ): Promise<readonly WikimediaImageRecord[]> {
     const query = new URLSearchParams({
       action: "query",
       format: "json",
@@ -259,14 +276,43 @@ export class WikimediaCommonsPlaceImageAdapter implements PlaceImagePort {
         throw new Error(`Wikimedia Commons respondeu ${response.status}.`);
       }
       const payload = (await response.json()) as CommonsResponse;
-      const collectedAt = this.now();
       return (payload.query?.pages ?? [])
         .map(normalizeWikimediaImageRecord)
-        .filter((record): record is WikimediaImageRecord => Boolean(record))
-        .map((record) => toCandidate(record, collectedAt))
-        .filter(canPromoteExternalImageToControlledAsset);
+        .filter((record): record is WikimediaImageRecord => Boolean(record));
     } finally {
       clearTimeout(timeout);
     }
+  }
+
+  async findCandidates(
+    place: Readonly<{ name: string; latitude: number; longitude: number; externalId?: string }>,
+  ): Promise<readonly ExternalPlaceImageCandidate[]> {
+    const records = await this.searchRecords(place);
+    const collectedAt = this.now();
+    return records.map((record) => toCandidate(record, collectedAt)).filter(canPromoteExternalImageToControlledAsset);
+  }
+
+  async findSecurePreview(
+    place: Readonly<{ name: string; latitude: number; longitude: number; externalId?: string }>,
+  ): Promise<WikimediaPlaceImagePreview | undefined> {
+    const records = await this.searchRecords(place);
+
+    for (const record of records) {
+      const match = classifyWikimediaImageMatch(place, record);
+      if (match.status !== "secure") continue;
+
+      return {
+        previewUrl: record.thumbnailUrl ?? record.mediaUrl,
+        sourceUrl: record.descriptionUrl,
+        sourceName: SOURCE_NAME,
+        license: record.license,
+        ...(record.licenseUrl ? { licenseUrl: record.licenseUrl } : {}),
+        attribution: record.artist,
+        altText: previewAltText(place.name, record.description),
+        matchEvidence: match.reason,
+      };
+    }
+
+    return undefined;
   }
 }

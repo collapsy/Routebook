@@ -56,7 +56,7 @@ Reduzir o custo de navegação durante a Viagem real, priorizando consulta rápi
 - Saved Place não é Activity;
 - Recommendation não é Decision;
 - Proposal não é estado aplicado;
-- leitura de Guia, navegação ou Roteiro não cria mutation;
+- navegação contextual e derivação de Dia atual não criam mutations adicionais; o comportamento preexistente de materialização do Itinerary no Roteiro não é alterado por este incremento;
 - query de Dia representa intenção explícita de apresentação e deve vencer foco automático;
 - Dia atual é derivado em runtime e não persistido;
 - lista e mapa preservam a mesma semântica;

@@ -7,7 +7,7 @@ owner: Product and Quality Engineering
 status: Draft
 version: "0.1.0"
 created: "2026-08-14"
-last_updated: "2026-08-14"
+last_updated: "2026-08-20"
 authors: [RouteBook Team]
 tags: [implementation, mvp-validation, m8, pipa, usability, product-validation, quality]
 related_documents: [RB-CORE-0004, RB-PRD-002, RB-DEL-001, RB-QA-001, RB-OBS-001, RB-PRIV-001, RB-INC-129, RB-INC-132, RB-INC-134, RB-INC-135]
@@ -25,10 +25,11 @@ ai_context:
 | Campo | Valor |
 | --- | --- |
 | ID | RB-INC-136 |
-| Estado | In Progress — Fase A; Fase B aguardando uso real |
+| Estado | In Progress — Fase A em reconciliação; Fase B aguardando uso real |
 | Responsável | Product and Quality Engineering |
 | Issue | #319 |
-| Branch | `codex/rb-inc-136-m8-real-validation` |
+| Branch | `codex/rb-inc-136-m8-phase-a-reconciliation` |
+| Baseline da reconciliação | `bef09b68ce631073fb9d4b5a203a1ca462f1befd` |
 | Data de criação | 2026-08-14 |
 | Janela de uso real | 2026-08-22 a 2026-08-29 |
 
@@ -79,6 +80,18 @@ Ao final, o owner deverá possuir:
 - evidência técnica de preparação: CI, Vercel, Neon e health checks já consolidados pelos RB-INC-129 a RB-INC-135.
 
 Dados pessoais precisos da viagem não devem ser copiados para documentação pública quando não forem necessários à avaliação.
+
+### 4.1 Reconciliação da Fase A em 2026-08-20
+
+A preparação foi reconciliada contra a `main` atual após a integração do RB-INC-160:
+
+- baseline da reconciliação: `bef09b68ce631073fb9d4b5a203a1ca462f1befd`;
+- `RB-INC-136` e `RB-CTX-136` já estavam criados e registrados no Registry da `main`;
+- a branch histórica `codex/rb-inc-136-m8-real-validation` foi preservada porque divergiu do histórico atual; a continuação usa `codex/rb-inc-136-m8-phase-a-reconciliation` criada a partir da `main` corrente;
+- a matriz de rastreabilidade ainda não possuía evidência do RB-INC-136 e deve ser sincronizada nesta PR de preparação;
+- o aceite funcional humano do Preview do RB-INC-160 em 2026-08-20 é evidência do gate daquele incremento, não uma Session do M8 e não deve sustentar H1–H10;
+- todas as hipóteses H1–H10 continuam `not_measured` até existir uso humano real elegível para a Fase B;
+- nenhuma escrita, migration ou promoção de Production é autorizada ou inferida por esta reconciliação documental.
 
 ## 5. Escopo da Fase A — preparação
 
@@ -354,8 +367,8 @@ Problemas devem ser registrados como evidência, não corrigidos silenciosamente
 - [x] matriz H1–H10 inicia integralmente em `not_measured`;
 - [x] decisão M8 possui estados e critérios explícitos;
 - [x] privacidade e sanitização estão definidas;
-- [ ] RB-CTX-136 criado e registrado;
-- [ ] Registry sincronizado;
+- [x] RB-CTX-136 criado e registrado;
+- [x] Registry sincronizado;
 - [ ] Documentation Validation e Engineering Validation verdes no mesmo SHA;
 - [ ] PR de preparação integrada em `main`;
 - [ ] Production Release pós-merge não executa migrations pendentes;

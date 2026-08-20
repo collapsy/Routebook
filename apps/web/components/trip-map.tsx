@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { isValidTripMapPoint, type TripMapPoint, type TripMapPointKind } from "../lib/trip-map";
 
@@ -24,6 +24,7 @@ type LeafletMap = {
   ): LeafletMap;
   getCenter(): { lat: number; lng: number };
   getZoom(): number;
+  invalidateSize(options?: { animate?: boolean; pan?: boolean }): LeafletMap;
   on(event: string, handler: () => void): LeafletMap;
   remove(): void;
   setView(center: LeafletLatLng, zoom: number): LeafletMap;
@@ -80,6 +81,10 @@ const kindLabels: Record<TripMapPointKind, string> = {
 function describePoint(point: TripMapPoint): string {
   if (point.kind === "itinerary-activity" && point.sequence !== undefined) {
     return `Atividade ${point.sequence}: ${point.label}`;
+  }
+
+  if (point.kind === "published-place" && point.sequence !== undefined) {
+    return `Parada sugerida ${point.sequence}: ${point.label}`;
   }
 
   return `${kindLabels[point.kind]}: ${point.label}`;
@@ -159,7 +164,7 @@ function createMarkerContent(point: TripMapPoint, dense: boolean): HTMLElement {
   const dot = document.createElement("span");
   dot.className = styles.markerDot!;
   dot.setAttribute("aria-hidden", "true");
-  if (point.kind === "itinerary-activity" && point.sequence !== undefined) {
+  if (point.sequence !== undefined) {
     dot.textContent = String(point.sequence);
   }
 
@@ -189,6 +194,7 @@ export function TripMap({
   emptyDescription = "Informe as coordenadas da hospedagem ou aguarde a publicação de lugares com localização para visualizar o mapa. As demais áreas da viagem continuam disponíveis normalmente.",
 }: TripMapProps) {
   const mapElementRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
   const [mapState, setMapState] = useState<MapState>("loading");
   const validPoints = useMemo(() => points.filter(isValidTripMapPoint), [points]);
   const mapComposition = useMemo(() => {
@@ -209,6 +215,7 @@ export function TripMap({
 
     let disposed = false;
     let map: LeafletMap | undefined;
+    let resizeObserver: ResizeObserver | undefined;
     setMapState("loading");
     mapElement.dataset.mapState = "loading";
 
@@ -270,6 +277,26 @@ export function TripMap({
         map.on("moveend", updateViewportEvidence);
         map.on("zoomend", updateViewportEvidence);
         updateViewportEvidence();
+
+        if (typeof ResizeObserver !== "undefined") {
+          resizeObserver = new ResizeObserver((entries) => {
+            const entry = entries[0];
+            if (
+              !map ||
+              disposed ||
+              !entry ||
+              entry.contentRect.width <= 0 ||
+              entry.contentRect.height <= 0
+            ) {
+              return;
+            }
+
+            map.invalidateSize({ animate: false, pan: false });
+            updateViewportEvidence();
+          });
+          resizeObserver.observe(mapElement);
+        }
+
         mapElement.dataset.mapState = "ready";
         setMapState("ready");
       })
@@ -281,6 +308,7 @@ export function TripMap({
 
     return () => {
       disposed = true;
+      resizeObserver?.disconnect();
       map?.remove();
       mapElement.replaceChildren();
     };
@@ -288,20 +316,20 @@ export function TripMap({
 
   if (validPoints.length === 0) {
     return (
-      <section aria-labelledby="trip-map-title" className={styles.emptyState}>
+      <section aria-labelledby={titleId} className={styles.emptyState}>
         <p className={styles.eyebrow}>Contexto espacial</p>
-        <h2 id="trip-map-title">{emptyTitle}</h2>
+        <h2 id={titleId}>{emptyTitle}</h2>
         <p>{emptyDescription}</p>
       </section>
     );
   }
 
   return (
-    <section aria-labelledby="trip-map-title" className={styles.section}>
+    <section aria-labelledby={titleId} className={styles.section}>
       <div className={styles.heading}>
         <div>
           <p className={styles.eyebrow}>Contexto espacial</p>
-          <h2 id="trip-map-title">{title}</h2>
+          <h2 id={titleId}>{title}</h2>
           <p>{description}</p>
         </div>
         <ul aria-label="Legenda do mapa" className={styles.legend}>

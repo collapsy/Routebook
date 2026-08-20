@@ -14,9 +14,7 @@ import { findTravelerProfile } from "@routebook/traveler-profile";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { ContextualRecommendationStrip } from "../../../components/contextual-recommendation-strip";
-import { TripDayGuide } from "../../../components/trip-day-guide";
 import { TripMap } from "../../../components/trip-map";
-import { buildPipaFirstDayGuide } from "../../../lib/pipa-day-guide";
 import { loadRecommendationExperience } from "../../../lib/recommendation-experience";
 import { resolveTripDestinationId } from "../../../lib/trip-destination";
 import type { TripMapPoint } from "../../../lib/trip-map";
@@ -93,18 +91,6 @@ export default async function TripOverviewPage({
   const { contextUpdated } = await searchParams;
   const owner = trip.participants.find((participant) => participant.role === "owner");
   const days = deriveTripDays(trip.period);
-  const firstDayGuide =
-    destinationId === "pipa-rn-br" && days[0]
-      ? buildPipaFirstDayGuide({
-          tripId,
-          date: days[0].date,
-          places: publishedPlaces,
-          ...(trip.accommodation?.coordinate
-            ? { accommodationCoordinate: trip.accommodation.coordinate }
-            : {}),
-          travelMode: profile?.transportPreference === "walking" ? "walking" : "driving",
-        })
-      : null;
   const savedPlaceIds = new Set(savedPlaces.map((selection) => selection.placeId));
   const mapPoints: TripMapPoint[] = [];
 
@@ -185,21 +171,23 @@ export default async function TripOverviewPage({
         </div>
       </dl>
 
-      {firstDayGuide ? (
-        <TripDayGuide
-          {...(trip.accommodation?.coordinate
-            ? {
-                accommodationPoint: {
-                  id: "guide-accommodation",
-                  label: trip.accommodation.name,
-                  kind: "accommodation" as const,
-                  latitude: trip.accommodation.coordinate.latitude,
-                  longitude: trip.accommodation.coordinate.longitude,
-                },
-              }
-            : {})}
-          guide={firstDayGuide}
-        />
+      {destinationId === "pipa-rn-br" && days.length > 0 ? (
+        <section className="traveler-context-summary" aria-labelledby="trip-guide-entry-title">
+          <div className="section-heading-row">
+            <div>
+              <p className="product-eyebrow">Guia da viagem</p>
+              <h2 id="trip-guide-entry-title">Uma sugestão diária para os {days.length} Dias</h2>
+              <p>
+                Veja temas, paradas, imagens, alertas práticos, distâncias em linha reta e rotas
+                externas. O Guia é editorial e só altera o Roteiro quando você decidir planejar um
+                Place explicitamente.
+              </p>
+            </div>
+            <Link className="product-primary-action" href={`/viagens/${tripId}/guia`}>
+              Abrir Guia da viagem
+            </Link>
+          </div>
+        </section>
       ) : null}
 
       {recommendationExperience?.destinationSupported ? (

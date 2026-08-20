@@ -2,9 +2,13 @@ import { expect, test } from "@playwright/test";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
-test("apresenta um guia visual e sequenciado para 22 de agosto", async ({ page }) => {
+function pipaTripName(prefix: string) {
+  return `${prefix} ${test.info().project.name} ${Date.now()}`;
+}
+
+test("abre o Guia da viagem e cobre os oito Dias reais de Pipa", async ({ page }) => {
   const { trip } = await createAuthenticatedE2ETrip({
-    name: `Guia do dia 22 ${test.info().project.name} ${Date.now()}`,
+    name: pipaTripName("Guia completo Pipa"),
     startDate: "2026-08-22",
     endDate: "2026-08-29",
     accommodationName: "Hospedagem central",
@@ -14,45 +18,112 @@ test("apresenta um guia visual e sequenciado para 22 de agosto", async ({ page }
   });
 
   await page.goto(`/viagens/${trip.id}`);
+  const guideEntry = page.getByRole("link", { name: "Abrir Guia da viagem" });
+  await expect(guideEntry).toBeVisible();
+  await guideEntry.click();
 
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/guia$`));
+  await expect(page.getByRole("heading", { name: "Guia da viagem em Pipa" })).toBeVisible();
+  await expect(page.getByText(/Editorial, não aplicado/)).toBeVisible();
+  await expect(page.locator('[id^="guia-dia-"]')).toHaveCount(8);
   await expect(
-    page.getByRole("heading", { name: /sábado, 22 de agosto — Primeiro dia em Pipa/ }),
-  ).toBeVisible();
-  await expect(page.getByText(/O que é real e o que é estimativa/)).toBeVisible();
+    page.getByRole("navigation", { name: "Dias do Guia da viagem" }).getByRole("link"),
+  ).toHaveCount(8);
 
-  const stops = page.getByRole("list", { name: "Paradas sugeridas para o primeiro dia" });
-  await expect(stops.getByRole("listitem")).toHaveCount(3);
-  await expect(stops.getByRole("heading", { name: "Praia do Amor" })).toBeVisible();
-  await expect(stops.getByRole("heading", { name: "Chapadão de Pipa" })).toBeVisible();
-  await expect(stops.getByRole("heading", { name: "Camarão na Fazenda Pipa" })).toBeVisible();
-  await expect(stops.getByLabel("Parada 1")).toBeVisible();
-  await expect(stops.getByLabel("Parada 2")).toBeVisible();
-  await expect(stops.getByLabel("Parada 3")).toBeVisible();
-  await expect(stops.getByRole("img")).toHaveCount(3);
-  await expect(stops.locator('[data-place-image-fallback="true"]')).toHaveCount(1);
-  await expect(stops.getByText(/em linha reta/)).toHaveCount(3);
-  await expect(stops.getByRole("link", { name: "Rota e tempo no Maps" })).toHaveCount(3);
+  const guideMapHeadingIds = await page
+    .locator("h2")
+    .filter({ hasText: "Mapa do Dia" })
+    .evaluateAll((headings) => headings.map((heading) => heading.id));
+  expect(guideMapHeadingIds).toHaveLength(8);
+  expect(new Set(guideMapHeadingIds).size).toBe(8);
 
-  const itineraryLink = page.getByRole("link", {
-    name: "Abrir sequência completa no Google Maps",
+  const firstDay = page.locator("#guia-dia-1");
+  await expect(firstDay).toHaveAttribute("open", "");
+  const firstDayStops = firstDay.getByRole("list", { name: "Paradas sugeridas para o Dia 1" });
+  await expect(firstDayStops.getByRole("listitem")).toHaveCount(2);
+  await expect(firstDayStops.getByRole("heading", { name: "Chapadão de Pipa" })).toBeVisible();
+  await expect(firstDayStops.getByLabel("Parada 1")).toBeVisible();
+  await expect(firstDayStops.getByLabel("Parada 2")).toBeVisible();
+  await expect(firstDayStops.getByRole("img")).toHaveCount(2);
+  await expect(firstDayStops.getByText(/em linha reta/)).toHaveCount(2);
+  await expect(firstDay.getByRole("link", { name: "Rota e tempo no Maps" })).toHaveCount(2);
+
+  const firstDayLegend = firstDay.getByRole("list", { name: "Legenda do mapa" });
+  await expect(firstDayLegend).toContainText("Lugar publicado");
+  await expect(firstDayLegend).not.toContainText("Atividade planejada");
+  await expect(firstDay.getByRole("list", { name: "Locais exibidos no mapa" })).toContainText(
+    "Parada sugerida 1: Chapadão de Pipa",
+  );
+  await expect(
+    firstDay.getByRole("link", { name: "Abrir sequência do Dia no Google Maps" }),
+  ).toHaveAttribute("href", /google\.com\/maps\/dir/);
+
+  const planLink = firstDay.getByRole("link", { name: "Planejar neste Dia" }).first();
+  await expect(planLink).toHaveAttribute(
+    "href",
+    new RegExp(`dia=2026-08-22#adicionar-ao-roteiro$`),
+  );
+
+  const lastDay = page.locator("#guia-dia-8");
+  await lastDay.locator("summary").click();
+  await expect(lastDay.getByText("Despedida leve no centro")).toBeVisible();
+  await expect(
+    lastDay.getByRole("list", { name: "Paradas sugeridas para o Dia 8" }).getByRole("listitem"),
+  ).toHaveCount(2);
+});
+
+test("não inventa Dias ausentes e usa uma despedida leve na viagem curta", async ({ page }) => {
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: pipaTripName("Guia curto Pipa"),
+    startDate: "2026-08-22",
+    endDate: "2026-08-24",
+    accommodationName: "Hospedagem central",
+    accommodationAddress: "Pipa, Tibau do Sul — RN",
+    accommodationLatitude: -6.2302,
+    accommodationLongitude: -35.0503,
   });
-  await expect(itineraryLink).toHaveAttribute("href", /google\.com\/maps\/dir/);
-  await expect(itineraryLink).toHaveAttribute("href", /waypoints=/);
-  await expect(page.getByText(/Chegou depois do almoço/)).toBeVisible();
+
+  await page.goto(`/viagens/${trip.id}/guia`);
+
+  await expect(page.locator('[id^="guia-dia-"]')).toHaveCount(3);
+  await expect(page.locator("#guia-dia-4")).toHaveCount(0);
+  await expect(page.locator("#guia-dia-3").locator("summary")).toContainText(
+    "Despedida leve no centro",
+  );
 });
 
 test("não finge rota quando a hospedagem não está geocodificada", async ({ page }) => {
   const { trip } = await createAuthenticatedE2ETrip({
-    name: `Guia sem coordenadas ${test.info().project.name} ${Date.now()}`,
+    name: pipaTripName("Guia sem coordenadas"),
     startDate: "2026-08-22",
     endDate: "2026-08-29",
   });
 
-  await page.goto(`/viagens/${trip.id}`);
+  await page.goto(`/viagens/${trip.id}/guia`);
 
-  await expect(page.getByText("Hospedagem sem coordenadas")).toHaveCount(3);
+  await expect(page.getByText("Hospedagem sem coordenadas")).toHaveCount(22);
   await expect(page.getByRole("link", { name: "Rota e tempo no Maps" })).toHaveCount(0);
   await expect(
-    page.getByText(/Informe uma hospedagem com localização para abrir a sequência completa/),
+    page.getByText(/Informe uma hospedagem com localização para abrir a sequência do Dia/),
+  ).toHaveCount(8);
+});
+
+test("mantém a ação principal utilizável em viewport mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: pipaTripName("Guia mobile Pipa"),
+    startDate: "2026-08-22",
+    endDate: "2026-08-29",
+    accommodationName: "Hospedagem central",
+    accommodationAddress: "Pipa, Tibau do Sul — RN",
+    accommodationLatitude: -6.2302,
+    accommodationLongitude: -35.0503,
+  });
+
+  await page.goto(`/viagens/${trip.id}/guia`);
+
+  await expect(page.getByRole("heading", { name: "Guia da viagem em Pipa" })).toBeVisible();
+  await expect(
+    page.locator("#guia-dia-1").getByRole("link", { name: "Planejar neste Dia" }).first(),
   ).toBeVisible();
 });

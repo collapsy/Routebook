@@ -14,22 +14,36 @@ const preview = {
   matchEvidence: "Identidade e contexto local confirmados pelo teste.",
 } as const;
 
+const onePixelPng = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+  "base64",
+);
+
 test("enriquece candidato externo com foto licenciada sem substituir Overture nem a rota semântica", async ({
   page,
 }) => {
-  await page.route("**/api/place-image-preview/file?**", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "image/png",
-      body: Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
-    });
-  });
-  await page.route("**/api/place-image-preview?**", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify(preview),
-    });
+  await page.route("**/api/place-image-preview**", async (route) => {
+    const requestUrl = new URL(route.request().url());
+
+    if (requestUrl.pathname === "/api/place-image-preview/file") {
+      await route.fulfill({
+        status: 200,
+        contentType: "image/png",
+        body: onePixelPng,
+      });
+      return;
+    }
+
+    if (requestUrl.pathname === "/api/place-image-preview") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(preview),
+      });
+      return;
+    }
+
+    await route.fallback();
   });
 
   const { trip } = await createAuthenticatedE2ETrip({

@@ -78,14 +78,12 @@ describe("ExternalPlaceImagePreview", () => {
   });
 
   it("renderiza foto licenciada e Provenance após match seguro", async () => {
-    const fetcher = vi
-      .fn<(input: string | URL | Request) => Promise<Response>>()
-      .mockResolvedValue(
-        Response.json(preview, {
-          status: 200,
-          headers: { "content-type": "application/json" },
-        }),
-      );
+    const fetcher = vi.fn<(input: string | URL | Request) => Promise<Response>>().mockResolvedValue(
+      Response.json(preview, {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
     vi.stubGlobal("fetch", fetcher);
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
 

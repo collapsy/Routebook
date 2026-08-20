@@ -4,6 +4,7 @@ import type { Place } from "@routebook/place-catalog";
 import {
   buildGoogleMapsDirectionsUrl,
   buildGoogleMapsItineraryUrl,
+  buildGoogleMapsPlaceLabel,
   type GoogleMapsCoordinate,
   type GoogleMapsTravelMode,
 } from "./google-maps-links";
@@ -334,6 +335,10 @@ export function buildPipaTripGuide(input: {
                 routeHref: buildGoogleMapsDirectionsUrl({
                   origin: input.accommodationCoordinate,
                   destination: placeCoordinate(place),
+                  destinationLabel: buildGoogleMapsPlaceLabel({
+                    name: place.name,
+                    addressLabel: place.addressLabel,
+                  }),
                   travelMode: input.travelMode,
                 }),
               }

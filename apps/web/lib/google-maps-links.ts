@@ -20,13 +20,22 @@ function formatCoordinate(coordinate: GoogleMapsCoordinate): string {
   return `${coordinate.latitude},${coordinate.longitude}`;
 }
 
+export function buildGoogleMapsPlaceLabel(input: {
+  name: string;
+  addressLabel?: string | undefined;
+}): string | undefined {
+  const name = input.name.trim();
+  const address = input.addressLabel?.trim();
+  const label = [name, address].filter(Boolean).join(", ");
+  return label || undefined;
+}
+
 export function buildGoogleMapsSearchUrl(input: {
   name: string;
   addressLabel?: string | undefined;
   coordinate: GoogleMapsCoordinate;
 }): string {
-  const label = [input.name.trim(), input.addressLabel?.trim()].filter(Boolean).join(", ");
-  const query = label || formatCoordinate(input.coordinate);
+  const query = buildGoogleMapsPlaceLabel(input) ?? formatCoordinate(input.coordinate);
   const url = new URL("https://www.google.com/maps/search/");
   url.searchParams.set("api", "1");
   url.searchParams.set("query", query);
@@ -36,12 +45,16 @@ export function buildGoogleMapsSearchUrl(input: {
 export function buildGoogleMapsDirectionsUrl(input: {
   origin: GoogleMapsCoordinate;
   destination: GoogleMapsCoordinate;
+  destinationLabel?: string | undefined;
   travelMode: GoogleMapsTravelMode;
 }): string {
   const url = new URL("https://www.google.com/maps/dir/");
   url.searchParams.set("api", "1");
   url.searchParams.set("origin", formatCoordinate(input.origin));
-  url.searchParams.set("destination", formatCoordinate(input.destination));
+  url.searchParams.set(
+    "destination",
+    input.destinationLabel?.trim() || formatCoordinate(input.destination),
+  );
   url.searchParams.set("travelmode", input.travelMode);
   return url.toString();
 }

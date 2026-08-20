@@ -128,7 +128,7 @@ Arquivo adicional indispensável exige atualização explícita desta seção e 
 - [ ] seletor identifica o Dia atual com texto `Hoje` sem depender apenas de cor;
 - [ ] ações editar, mover, reordenar e remover continuam acessíveis;
 - [ ] ações secundárias não dominam visualmente o card de Activity em mobile;
-- [ ] leitura das superfícies não persiste estado automaticamente;
+- [ ] navegação contextual e foco em `Hoje` não introduzem persistência ou mutation adicional; o comportamento preexistente do Roteiro permanece inalterado;
 - [ ] CI completa passa no mesmo SHA e Preview Vercel correspondente fica READY.
 
 ## 8. Testes obrigatórios

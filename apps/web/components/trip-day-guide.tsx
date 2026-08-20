@@ -87,10 +87,12 @@ function GuideDay({
   day,
   accommodationPoint,
   initiallyOpen,
+  isToday,
 }: {
   day: PipaTripGuideDay;
   accommodationPoint?: TripMapPoint;
   initiallyOpen: boolean;
+  isToday: boolean;
 }) {
   const mapPoints: TripMapPoint[] = [
     ...(accommodationPoint ? [accommodationPoint] : []),
@@ -110,6 +112,7 @@ function GuideDay({
       <summary className={styles.daySummary}>
         <span>
           Dia {day.index} · {formatDate(day.date)}
+          {isToday ? <em className={styles.todayBadge}>Hoje</em> : null}
         </span>
         <strong>{day.title}</strong>
         <small>{day.stops.length} paradas sugeridas</small>
@@ -163,9 +166,11 @@ function GuideDay({
 export function TripDayGuide({
   guide,
   accommodationPoint,
+  todayDate,
 }: {
   guide: PipaTripGuide;
   accommodationPoint?: TripMapPoint;
+  todayDate?: string | null;
 }) {
   return (
     <section className={styles.guide} aria-labelledby="trip-guide-title">
@@ -181,6 +186,7 @@ export function TripDayGuide({
         <div className={styles.heroMeta} aria-label="Resumo do guia">
           <span>{guide.days.length} Dias cobertos</span>
           <span>2–3 paradas por Dia</span>
+          {todayDate ? <span>Hoje em destaque</span> : null}
         </div>
       </header>
 
@@ -200,27 +206,43 @@ export function TripDayGuide({
 
       <nav className={styles.dayNav} aria-label="Dias do Guia da viagem">
         <ol>
-          {guide.days.map((day) => (
-            <li key={day.date}>
-              <a href={`#guia-dia-${day.index}`}>
-                <span>Dia {day.index}</span>
-                <strong>{day.title}</strong>
-                <small>{formatDate(day.date)}</small>
-              </a>
-            </li>
-          ))}
+          {guide.days.map((day) => {
+            const isToday = day.date === todayDate;
+
+            return (
+              <li key={day.date}>
+                <a
+                  aria-current={isToday ? "date" : undefined}
+                  className={isToday ? styles.todayDayLink : undefined}
+                  href={`#guia-dia-${day.index}`}
+                >
+                  <span>
+                    Dia {day.index}
+                    {isToday ? <em className={styles.todayBadge}>Hoje</em> : null}
+                  </span>
+                  <strong>{day.title}</strong>
+                  <small>{formatDate(day.date)}</small>
+                </a>
+              </li>
+            );
+          })}
         </ol>
       </nav>
 
       <div className={styles.days}>
-        {guide.days.map((day, index) => (
-          <GuideDay
-            key={day.date}
-            {...(accommodationPoint ? { accommodationPoint } : {})}
-            day={day}
-            initiallyOpen={index === 0}
-          />
-        ))}
+        {guide.days.map((day, index) => {
+          const isToday = day.date === todayDate;
+
+          return (
+            <GuideDay
+              key={day.date}
+              {...(accommodationPoint ? { accommodationPoint } : {})}
+              day={day}
+              initiallyOpen={todayDate ? isToday : index === 0}
+              isToday={isToday}
+            />
+          );
+        })}
       </div>
     </section>
   );

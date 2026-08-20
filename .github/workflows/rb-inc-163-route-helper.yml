@@ -91,8 +91,8 @@ jobs:
           )
           replace_exact(
               guide,
-              "              destination: placeCoordinate,\n              travelMode: input.travelMode,",
-              "              destination: placeCoordinate,\n              destinationLabel: buildGoogleMapsPlaceLabel({\n                name: place.name,\n                addressLabel: place.addressLabel,\n              }),\n              travelMode: input.travelMode,",
+              "                  destination: placeCoordinate(place),\n                  travelMode: input.travelMode,",
+              "                  destination: placeCoordinate(place),\n                  destinationLabel: buildGoogleMapsPlaceLabel({\n                    name: place.name,\n                    addressLabel: place.addressLabel,\n                  }),\n                  travelMode: input.travelMode,",
           )
 
           e2e_discovery = "apps/web/e2e/place-discovery-filters.spec.ts"

@@ -90,7 +90,7 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
-pnpm --filter @routebook/web exec playwright test e2e/trip-day-guide.spec.ts e2e/itinerary.spec.ts e2e/place-actions.spec.ts
+pnpm --filter @routebook/web exec playwright test e2e/active-trip-experience.spec.ts e2e/trip-day-guide.spec.ts e2e/itinerary.spec.ts e2e/place-actions.spec.ts
 ```
 
 Engineering Validation e Documentation Validation devem concluir no mesmo SHA.

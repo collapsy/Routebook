@@ -94,11 +94,11 @@ export function ExternalPlaceImagePreview({
   longitude,
   category,
 }: Readonly<{
-  destinationId?: string;
+  destinationId?: string | undefined;
   placeName: string;
   latitude: number;
   longitude: number;
-  category?: PlaceCategory;
+  category?: PlaceCategory | undefined;
 }>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<PreviewState>({ status: "idle" });

@@ -81,7 +81,7 @@ describe("GET /api/place-image-preview", () => {
       licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
       attribution: "Fotógrafo RouteBook",
     });
-    expect(String(payload.matchEvidence)).toContain("Identidade");
+    expect(String(payload.matchEvidence)).toContain("contexto local de Pipa/Tibau do Sul");
   });
 
   it("mantém fallback quando a identidade é ambígua", async () => {

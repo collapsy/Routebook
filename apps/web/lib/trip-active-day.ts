@@ -2,10 +2,7 @@ export type TripDayReference = Readonly<{
   date: string;
 }>;
 
-function datePart(
-  parts: Intl.DateTimeFormatPart[],
-  type: "year" | "month" | "day",
-): string {
+function datePart(parts: Intl.DateTimeFormatPart[], type: "year" | "month" | "day"): string {
   return parts.find((part) => part.type === type)?.value ?? "";
 }
 

@@ -7,7 +7,7 @@ owner: Product and Quality Engineering
 status: Draft
 version: "0.1.0"
 created: "2026-08-14"
-last_updated: "2026-08-14"
+last_updated: "2026-08-20"
 authors: [RouteBook Team]
 tags: [context-pack, mvp-validation, m8, pipa, product-validation, privacy]
 related_documents: [RB-INC-136, RB-CORE-0004, RB-PRD-002, RB-DEL-001, RB-QA-001, RB-OBS-001, RB-PRIV-001, RB-INC-129, RB-INC-132, RB-INC-134, RB-INC-135]
@@ -28,9 +28,11 @@ Preparar e, quando existir uso humano real, registrar a validação M8 do RouteB
 
 - ID: `RB-INC-136`;
 - Issue: `#319`;
+- Draft PR de preparação: `#374`;
 - arquivo: `docs/implementation/increments/rb-inc-136-m8-real-validation.md`;
-- branch de preparação: `codex/rb-inc-136-m8-real-validation`;
-- baseline: `72d83328dc3cbcff9391ef5e5dbe3da28d052b4e`;
+- branch de preparação atual: `codex/rb-inc-136-m8-phase-a-reconciliation`;
+- baseline da reconciliação: `bef09b68ce631073fb9d4b5a203a1ca462f1befd`;
+- branch histórica preservada: `codex/rb-inc-136-m8-real-validation`, divergente da `main` atual;
 - janela canônica da viagem: 22 a 29 de agosto de 2026.
 
 ## 3. Leitura obrigatória
@@ -70,6 +72,7 @@ Antes de alterar o escopo, ler nesta ordem:
 - nenhum problema encontrado pode ser apagado para melhorar a decisão M8;
 - dados pessoais devem ser minimizados e sanitizados antes de documentação pública;
 - Product Validation de um usuário não pode ser descrita como validação universal de mercado;
+- aceite funcional de outro incremento não equivale a Session M8 nem pode sustentar H1–H10;
 - M8 não pode ser encerrado antes da existência de uso real revisado.
 
 ## 6. Decisões aplicáveis
@@ -77,7 +80,7 @@ Antes de alterar o escopo, ler nesta ordem:
 - Production permanece pública na camada Vercel e protegida pela autenticação/autorização do RouteBook;
 - Preview permanece protegido;
 - PostgreSQL/Neon e Vercel seguem como providers já aprovados; este incremento não reabre essas decisões;
-- o catálogo curado de Pipa entregue pelo RB-INC-135 é a base de dados inicial do piloto;
+- o catálogo curado de Pipa entregue pelo RB-INC-135 é a base inicial do piloto; incrementos posteriores podem ampliar a experiência, mas não substituem evidência humana do M8;
 - o piloto não exige ativação de tracking de terceiros para ser válido;
 - problemas de produto identificados devem ser tratados em issues próprias quando exigirem alteração de comportamento.
 
@@ -139,8 +142,8 @@ configuração destrutiva de Production
 - hipóteses H1–H10 do `RB-PRD-002`;
 - critérios de sucesso e conclusão do MVP;
 - cenário real 22–29/08/2026;
-- catálogo de 13 Places em Production;
-- Production health/runtime já comprovados no RB-INC-135;
+- catálogo curado de Pipa já disponível; qualquer contagem atual deve ser revalidada tecnicamente quando necessária, sem converter quantidade de Places em evidência de valor;
+- readiness técnica histórica já comprovada pelos incrementos anteriores e sujeita a smoke fresco antes da Fase B;
 - automação E2E como baseline técnico, não como evidência humana.
 
 ## 12. Saídas esperadas
@@ -174,8 +177,8 @@ configuração destrutiva de Production
 - [x] template de Session está definido;
 - [x] privacidade está explicitamente limitada;
 - [x] alterações funcionais estão fora de escopo desta fase;
-- [ ] Registry atualizado;
-- [ ] rastreabilidade atualizada;
+- [x] Registry atualizado;
+- [x] rastreabilidade atualizada;
 - [ ] Documentation Validation verde;
 - [ ] Engineering Validation verde no mesmo SHA;
 - [ ] PR integrada;

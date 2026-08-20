@@ -10,6 +10,7 @@ let intersectionCallback: IntersectionObserverCallback | undefined;
 class ControlledIntersectionObserver implements IntersectionObserver {
   readonly root = null;
   readonly rootMargin = "320px 0px";
+  readonly scrollMargin = "0px";
   readonly thresholds = [0];
 
   constructor(callback: IntersectionObserverCallback) {
@@ -77,7 +78,7 @@ describe("ExternalPlaceImagePreview", () => {
   });
 
   it("renderiza foto licenciada e Provenance após match seguro", async () => {
-    const fetcher = vi.fn(async () =>
+    const fetcher = vi.fn(async (_input: string | URL | Request) =>
       Response.json(preview, { status: 200, headers: { "content-type": "application/json" } }),
     );
     vi.stubGlobal("fetch", fetcher);

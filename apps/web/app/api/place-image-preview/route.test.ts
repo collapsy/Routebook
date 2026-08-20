@@ -63,7 +63,10 @@ describe("GET /api/place-image-preview", () => {
   });
 
   it("devolve somente preview seguro com Provenance e cache CDN", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => commonsResponse()));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => commonsResponse()),
+    );
 
     const response = await GET(new Request(requestUrl()));
     const payload = (await response.json()) as Record<string, unknown>;
@@ -85,7 +88,10 @@ describe("GET /api/place-image-preview", () => {
   });
 
   it("mantém fallback quando a identidade é ambígua", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => commonsResponse("Praia do Amor no litoral brasileiro")));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => commonsResponse("Praia do Amor no litoral brasileiro")),
+    );
 
     const response = await GET(new Request(requestUrl()));
 
@@ -96,7 +102,10 @@ describe("GET /api/place-image-preview", () => {
   });
 
   it("isola indisponibilidade do Wikimedia sem transformar erro em mídia", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => new Response("rate limited", { status: 429 })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("rate limited", { status: 429 })),
+    );
     vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
     const response = await GET(new Request(requestUrl()));

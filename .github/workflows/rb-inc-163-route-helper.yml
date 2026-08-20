@@ -7,12 +7,17 @@ on:
       - codex/rb-inc-163-google-maps-destination-reliability
     paths:
       - .github/workflows/rb-inc-163-route-helper.yml
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - .github/workflows/rb-inc-163-route-helper.yml
 
 permissions:
   contents: write
 
 jobs:
   apply:
+    if: github.head_ref == 'codex/rb-inc-163-google-maps-destination-reliability' || github.ref_name == 'codex/rb-inc-163-google-maps-destination-reliability'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

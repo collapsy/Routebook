@@ -13,6 +13,7 @@ import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { TripDayGuide } from "../../../../components/trip-day-guide";
 import { buildPipaTripGuide } from "../../../../lib/pipa-day-guide";
+import { resolveTripTodayDate } from "../../../../lib/trip-active-day";
 import { resolveTripDestinationId } from "../../../../lib/trip-destination";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +36,7 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
     listPublishedPlaces(new DrizzlePlaceRepository(), destinationId),
   ]);
   const days = deriveTripDays(trip.period);
+  const todayDate = resolveTripTodayDate(days, new Date(), "America/Fortaleza");
   const guide = buildPipaTripGuide({
     tripId,
     days,
@@ -70,6 +72,7 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
               }
             : {})}
           guide={guide}
+          todayDate={todayDate}
         />
       ) : (
         <section className="traveler-context-summary" aria-labelledby="trip-guide-unavailable">

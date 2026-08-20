@@ -2,14 +2,17 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { GET } from "./route";
 
-function commonsResponse(description = "Praia do Amor em Pipa, Tibau do Sul, Rio Grande do Norte") {
+function commonsResponse(
+  description = "Praia do Amor em Pipa, Tibau do Sul, Rio Grande do Norte",
+  title = "File:Praia do Amor Pipa.jpg",
+) {
   return new Response(
     JSON.stringify({
       query: {
         pages: [
           {
             pageid: 123,
-            title: "File:Praia do Amor Pipa.jpg",
+            title,
             imageinfo: [
               {
                 descriptionurl: "https://commons.wikimedia.org/wiki/File:Praia_do_Amor_Pipa.jpg",
@@ -90,7 +93,9 @@ describe("GET /api/place-image-preview", () => {
   it("mantém fallback quando a identidade é ambígua", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => commonsResponse("Praia do Amor no litoral brasileiro")),
+      vi.fn(async () =>
+        commonsResponse("Praia do Amor no litoral brasileiro", "File:Praia do Amor.jpg"),
+      ),
     );
 
     const response = await GET(new Request(requestUrl()));

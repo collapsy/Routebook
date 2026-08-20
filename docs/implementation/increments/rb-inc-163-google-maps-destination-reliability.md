@@ -93,6 +93,7 @@ apps/web/lib/pipa-day-guide.ts
 apps/web/lib/pipa-day-guide.test.ts
 apps/web/e2e/place-discovery-filters.spec.ts
 apps/web/e2e/trip-day-guide.spec.ts
+apps/web/e2e/route-destination-reliability.spec.ts
 docs/implementation/increments/rb-inc-163-google-maps-destination-reliability.md
 docs/implementation/context-packs/rb-inc-163-google-maps-destination-reliability.md
 docs/implementation/traceability-matrix.md

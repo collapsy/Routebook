@@ -13,6 +13,7 @@ import { deriveTripDays, findTripById } from "@routebook/trip-management";
 import { PlacePrimaryImage } from "../../../../../components/place-primary-image";
 import {
   buildGoogleMapsDirectionsUrl,
+  buildGoogleMapsPlaceLabel,
   buildGoogleMapsSearchUrl,
 } from "../../../../../lib/google-maps-links";
 import { findPipaPlacePracticalGuide } from "../../../../../lib/pipa-place-guide";
@@ -89,6 +90,10 @@ export default async function PlaceDetailsPage({
     name: place.name,
     addressLabel: place.addressLabel,
     coordinate: placeCoordinate,
+  });
+  const destinationLabel = buildGoogleMapsPlaceLabel({
+    name: place.name,
+    addressLabel: place.addressLabel,
   });
   const practicalGuide = findPipaPlacePracticalGuide(place.slug);
   const tripDays = deriveTripDays(trip.period);
@@ -301,6 +306,7 @@ export default async function PlaceDetailsPage({
                   href={buildGoogleMapsDirectionsUrl({
                     origin: trip.accommodation.coordinate,
                     destination: placeCoordinate,
+                    destinationLabel,
                     travelMode: "walking",
                   })}
                   rel="noreferrer"
@@ -313,6 +319,7 @@ export default async function PlaceDetailsPage({
                   href={buildGoogleMapsDirectionsUrl({
                     origin: trip.accommodation.coordinate,
                     destination: placeCoordinate,
+                    destinationLabel,
                     travelMode: "driving",
                   })}
                   rel="noreferrer"

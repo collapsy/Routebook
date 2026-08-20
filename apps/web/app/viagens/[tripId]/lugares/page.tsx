@@ -22,6 +22,7 @@ import { PlacePrimaryImage } from "../../../../components/place-primary-image";
 import { TripMap } from "../../../../components/trip-map";
 import {
   buildGoogleMapsDirectionsUrl,
+  buildGoogleMapsPlaceLabel,
   buildGoogleMapsSearchUrl,
 } from "../../../../lib/google-maps-links";
 import {
@@ -171,6 +172,10 @@ function PublishedDiscoveryCard({
     addressLabel: place.addressLabel,
     coordinate,
   });
+  const destinationLabel = buildGoogleMapsPlaceLabel({
+    name: place.name,
+    addressLabel: place.addressLabel,
+  });
 
   return (
     <li data-place-source="published">
@@ -229,6 +234,7 @@ function PublishedDiscoveryCard({
             href={buildGoogleMapsDirectionsUrl({
               origin: accommodationCoordinate,
               destination: coordinate,
+              destinationLabel,
               travelMode: "walking",
             })}
             rel="noreferrer"
@@ -268,6 +274,10 @@ function ExternalDiscoveryCard({
   const categoryLabel = candidate.category
     ? categoryLabels[candidate.category]
     : providerCategoryLabel(candidate.providerCategory);
+  const destinationLabel = buildGoogleMapsPlaceLabel({
+    name: candidate.name,
+    addressLabel: candidate.addressLabel,
+  });
 
   return (
     <li data-place-source="external">
@@ -305,6 +315,7 @@ function ExternalDiscoveryCard({
             href={buildGoogleMapsDirectionsUrl({
               origin: accommodationCoordinate,
               destination: coordinate,
+              destinationLabel,
               travelMode: "walking",
             })}
             rel="noreferrer"

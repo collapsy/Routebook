@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import type { PlaceCategory } from "@routebook/place-catalog";
@@ -27,7 +26,11 @@ type PreviewState =
 function isAllowedPreviewUrl(value: string): boolean {
   try {
     const url = new URL(value);
-    return url.protocol === "https:" && url.hostname === "upload.wikimedia.org";
+    return (
+      url.protocol === "https:" &&
+      url.hostname === "upload.wikimedia.org" &&
+      url.pathname.startsWith("/wikipedia/commons/thumb/")
+    );
   } catch {
     return false;
   }
@@ -75,6 +78,11 @@ function buildPreviewEndpoint(input: Readonly<{
     longitude: String(input.longitude),
   });
   return `/api/place-image-preview?${query}`;
+}
+
+function buildImageProxyEndpoint(previewUrl: string): string {
+  const query = new URLSearchParams({ url: previewUrl });
+  return `/api/place-image-preview/file?${query}`;
 }
 
 export function ExternalPlaceImagePreview({
@@ -157,13 +165,15 @@ export function ExternalPlaceImagePreview({
       <div ref={containerRef} data-external-place-image-state="ready">
         <figure className={styles.figure}>
           <div className={styles.frame}>
-            <Image
+            {/* The browser receives a RouteBook URL; the server proxy validates the Wikimedia thumbnail. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               alt={preview.altText}
               className={styles.image}
-              fill
+              decoding="async"
+              loading="lazy"
               onError={() => setState({ status: "fallback" })}
-              sizes="(max-width: 42rem) 100vw, (max-width: 70rem) 50vw, 33vw"
-              src={preview.previewUrl}
+              src={buildImageProxyEndpoint(preview.previewUrl)}
             />
           </div>
           <figcaption className={styles.caption}>

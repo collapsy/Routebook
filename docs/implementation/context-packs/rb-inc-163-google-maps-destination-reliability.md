@@ -81,8 +81,10 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
-pnpm --filter @routebook/web exec playwright test e2e/place-discovery-filters.spec.ts e2e/trip-day-guide.spec.ts
+pnpm --filter @routebook/web exec playwright test e2e/route-destination-reliability.spec.ts
 ```
+
+A suíte Playwright completa continua pertencendo ao Engineering Validation canônico. O spec focado acima valida as três superfícies de rota individual alteradas por este incremento.
 
 Documentation Validation e Engineering Validation precisam passar no mesmo SHA. Preview Vercel deve estar READY no mesmo candidato.
 

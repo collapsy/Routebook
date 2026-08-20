@@ -25,10 +25,6 @@ function canonicalOpenDayIndex(): number {
   return Number(today.slice(-2)) - 21;
 }
 
-async function ensureDayOpen(page: Parameters<typeof test>[0] extends never ? never : never) {
-  return page;
-}
-
 test("abre o Guia da viagem e cobre os oito Dias reais de Pipa", async ({ page }) => {
   const { trip } = await createAuthenticatedE2ETrip({
     name: pipaTripName("Guia completo Pipa"),

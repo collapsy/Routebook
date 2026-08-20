@@ -286,7 +286,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-116 | Aprovação Formal do RB-ADR-018 | Implementation | Draft | 0.1.0 | [rb-inc-116-approve-adr-018.md](./implementation/increments/rb-inc-116-approve-adr-018.md) |
 | RB-CTX-116 | Context Pack do RB-INC-116 — Aprovação Formal do RB-ADR-018 | Implementation Context | Draft | 0.1.0 | [rb-inc-116-approve-adr-018.md](./implementation/context-packs/rb-inc-116-approve-adr-018.md) |
 | RB-INC-117 | Bootstrap Vercel e Neon para Preview | Implementation | Draft | 0.1.0 | [rb-inc-117-vercel-neon-preview-bootstrap.md](./implementation/increments/rb-inc-117-vercel-neon-preview-bootstrap.md) |
-| RB-CTX-117 | Context Pack do RB-INC-117 — Bootstrap Vercel e Neon para Preview | Implementation Context | Draft | 0.1.0 | [rb-inc-117-vercel-neon-preview-bootstrap.md](./implementation/context-packs/rb-inc-117-vercel-neon-preview-bootstrap.md) |
+| RB-CTX-117 | Context Pack do RB-INC-117 — Bootstrap Vercel e Neon | Implementation Context | Draft | 0.1.0 | [rb-inc-117-vercel-neon-preview-bootstrap.md](./implementation/context-packs/rb-inc-117-vercel-neon-preview-bootstrap.md) |
 | RB-INC-118 | Sincronização Determinística Pós-Server Action no E2E | Implementation | Draft | 0.1.0 | [rb-inc-118-deterministic-server-action-e2e.md](./implementation/increments/rb-inc-118-deterministic-server-action-e2e.md) |
 | RB-CTX-118 | Context Pack do RB-INC-118 — Sincronização Determinística Pós-Server Action no E2E | Implementation Context | Draft | 0.1.0 | [rb-inc-118-deterministic-server-action-e2e.md](./implementation/context-packs/rb-inc-118-deterministic-server-action-e2e.md) |
 | RB-INC-119 | Navegação Determinística da Landing para Viagens | Implementation | Draft | 0.1.0 | [rb-inc-119-deterministic-landing-navigation.md](./implementation/increments/rb-inc-119-deterministic-landing-navigation.md) |
@@ -375,6 +375,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-159 | Context Pack do RB-INC-159 — Ações diretas de Lugar no planejamento | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-159-place-actions-itinerary-entry.md](./implementation/context-packs/rb-inc-159-place-actions-itinerary-entry.md) |
 | RB-INC-160 | Guia diário completo da viagem de Pipa | Implementation | Draft | 0.1.0 | [rb-inc-160-pipa-trip-guide.md](./implementation/increments/rb-inc-160-pipa-trip-guide.md) |
 | RB-CTX-160 | Context Pack do RB-INC-160 — Guia diário completo da viagem de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-160-pipa-trip-guide.md](./implementation/context-packs/rb-inc-160-pipa-trip-guide.md) |
+| RB-INC-161 | Experiência de viagem ativa e navegação mobile | Implementation | Draft | 0.1.0 | [rb-inc-161-active-trip-mobile-experience.md](./implementation/increments/rb-inc-161-active-trip-mobile-experience.md) |
+| RB-CTX-161 | Context Pack do RB-INC-161 — Experiência de viagem ativa e navegação mobile | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-161-active-trip-mobile-experience.md](./implementation/context-packs/rb-inc-161-active-trip-mobile-experience.md) |
 
 ## Status possíveis
 

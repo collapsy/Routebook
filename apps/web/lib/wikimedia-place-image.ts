@@ -289,7 +289,9 @@ export class WikimediaCommonsPlaceImageAdapter implements PlaceImagePort {
   ): Promise<readonly ExternalPlaceImageCandidate[]> {
     const records = await this.searchRecords(place);
     const collectedAt = this.now();
-    return records.map((record) => toCandidate(record, collectedAt)).filter(canPromoteExternalImageToControlledAsset);
+    return records
+      .map((record) => toCandidate(record, collectedAt))
+      .filter(canPromoteExternalImageToControlledAsset);
   }
 
   async findSecurePreview(

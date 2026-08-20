@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: "2026-08-12"
+last_updated: "2026-08-20"
 authors:
   - RouteBook Team
 tags:
@@ -729,3 +729,20 @@ Ao concluir um incremento:
 | CI preliminar | Documentation Validation #1055 (`31607305678`) e Engineering Validation #1476 (`31607305719`) verdes no SHA `ffd5acb88c8892453b54c92a1a167d95e9258167` |
 | mudanças de aplicação | nenhuma; sem migration, banco, secret ou código de autenticação/autorização alterado |
 | rastreabilidade | issue #305 e PR #315; gates finais devem permanecer verdes no HEAD definitivo antes do merge |
+
+## Evidências previstas do RB-INC-136
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-136-m8-real-validation.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-136-m8-real-validation.md` |
+| requisitos e decisões | RB-PRD-002, RB-DEL-001, RB-QA-001, RB-OBS-001 e RB-PRIV-001 |
+| rastreabilidade | issue #319 e Draft PR #374 |
+| branch | `codex/rb-inc-136-m8-phase-a-reconciliation` |
+| baseline reconciliado | `main` em `bef09b68ce631073fb9d4b5a203a1ca462f1befd`, após integração do RB-INC-160 |
+| Registry | RB-INC-136 e RB-CTX-136 já registrados na `main`; nenhuma alteração adicional necessária |
+| protocolo Fase A | taxonomia, severidade, jornadas, perguntas, template de Session, privacidade e decisão M8 definidos; H1–H10 permanecem `not_measured` |
+| limite de evidência humana | aceite funcional do RB-INC-160 não é Session M8 e não sustenta H1–H10 |
+| código/Production | nenhuma mudança funcional, migration, write ou promoção nesta Fase A |
+| validação | Documentation Validation e Engineering Validation pendentes no HEAD final da PR #374 |
+| Fase B | aguardando uso humano real elegível; nenhuma Session fabricada |

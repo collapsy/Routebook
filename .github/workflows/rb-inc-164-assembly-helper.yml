@@ -1,0 +1,93 @@
+name: RB-164 assembly helper
+
+on:
+  push:
+    branches:
+      - codex/rb-inc-164-unified-place-identity
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    if: github.ref == 'refs/heads/codex/rb-inc-164-unified-place-identity'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout RB-164 branch
+        uses: actions/checkout@v6
+        with:
+          ref: codex/rb-inc-164-unified-place-identity
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Enable Corepack and install dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - name: Register RB-164 documents and preserve RB-162 disclosure
+        shell: python
+        run: |
+          from pathlib import Path
+
+          registry = Path("docs/registry.md")
+          text = registry.read_text()
+          marker = "\n## Status possíveis\n"
+          if text.count(marker) != 1:
+              raise SystemExit("Registry status marker is not unique")
+
+          rows = [
+              "| RB-INC-164 | Identidade única e catálogo external-first de Places | Implementation | Draft | 0.1.0 | [rb-inc-164-unified-place-identity.md](./implementation/increments/rb-inc-164-unified-place-identity.md) |",
+              "| RB-CTX-164 | Context Pack do RB-INC-164 — Identidade única e catálogo external-first de Places | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-164-unified-place-identity.md](./implementation/context-packs/rb-inc-164-unified-place-identity.md) |",
+          ]
+          for row in rows:
+              if row.split(" | ", 1)[0].removeprefix("| ") not in text:
+                  text = text.replace(marker, f"{row}\n{marker}", 1)
+          registry.write_text(text)
+
+          page = Path("apps/web/app/viagens/[tripId]/lugares/page.tsx")
+          page_text = page.read_text()
+          new_disclosure = "Ainda sem conteúdo curado no RouteBook"
+          preserved_disclosure = "Candidato externo — ainda não publicado no RouteBook · sem conteúdo curado"
+          if new_disclosure in page_text:
+              page_text = page_text.replace(new_disclosure, preserved_disclosure, 1)
+          elif preserved_disclosure not in page_text:
+              raise SystemExit("External Place disclosure marker not found")
+          page.write_text(page_text)
+
+      - name: Apply repository formatting to RB-164 paths
+        run: |
+          pnpm exec prettier --write \
+            'apps/web/app/viagens/[tripId]/lugares/page.tsx' \
+            apps/web/e2e/place-discovery-filters.spec.ts \
+            apps/web/lib/place-discovery-feed.test.ts \
+            apps/web/lib/place-discovery-feed.ts \
+            docs/implementation/increments/rb-inc-164-unified-place-identity.md \
+            docs/implementation/context-packs/rb-inc-164-unified-place-identity.md \
+            docs/registry.md
+
+      - name: Remove helper and push assembled branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/rb-inc-164-assembly-helper.yml
+          git add -- \
+            'apps/web/app/viagens/[tripId]/lugares/page.tsx' \
+            apps/web/e2e/place-discovery-filters.spec.ts \
+            apps/web/lib/place-discovery-feed.test.ts \
+            apps/web/lib/place-discovery-feed.ts \
+            docs/implementation/increments/rb-inc-164-unified-place-identity.md \
+            docs/implementation/context-packs/rb-inc-164-unified-place-identity.md \
+            docs/registry.md
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo "No assembly changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: finalize RB-164 assembly"
+          git push origin HEAD:codex/rb-inc-164-unified-place-identity

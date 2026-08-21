@@ -18,6 +18,7 @@ import {
 import { listSavedPlaces } from "@routebook/saved-places";
 import { findTripById } from "@routebook/trip-management";
 
+import { ExternalPlaceImagePreview } from "../../../../components/external-place-image-preview";
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
 import { TripMap } from "../../../../components/trip-map";
 import {
@@ -251,6 +252,7 @@ function PublishedDiscoveryCard({
 function ExternalDiscoveryCard({
   item,
   tripId,
+  destinationId,
   distanceReferenceLabel,
   accommodationCoordinate,
   search,
@@ -261,6 +263,7 @@ function ExternalDiscoveryCard({
 }: Readonly<{
   item: ExternalPlaceDiscoveryItem;
   tripId: string;
+  destinationId?: string;
   distanceReferenceLabel: string;
   accommodationCoordinate?: Readonly<{ latitude: number; longitude: number }>;
   search?: string;
@@ -281,7 +284,13 @@ function ExternalDiscoveryCard({
 
   return (
     <li data-place-source="external">
-      <PlacePrimaryImage category={candidate.category} placeName={candidate.name} />
+      <ExternalPlaceImagePreview
+        category={candidate.category}
+        destinationId={destinationId}
+        latitude={candidate.latitude}
+        longitude={candidate.longitude}
+        placeName={candidate.name}
+      />
       <div className={styles.cardIdentity}>
         <span>{categoryLabel}</span>
         <strong className={`${styles.sourceBadge} ${styles.externalSource}`}>
@@ -309,21 +318,19 @@ function ExternalDiscoveryCard({
         >
           Ver mapa e fotos
         </a>
-        {accommodationCoordinate ? (
-          <a
-            className="product-secondary-action"
-            href={buildGoogleMapsDirectionsUrl({
-              origin: accommodationCoordinate,
-              destination: coordinate,
-              destinationLabel,
-              travelMode: "walking",
-            })}
-            rel="noreferrer"
-            target="_blank"
-          >
-            Calcular rota real
-          </a>
-        ) : null}
+        <a
+          className="product-secondary-action"
+          href={buildGoogleMapsDirectionsUrl({
+            ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
+            destination: coordinate,
+            destinationLabel,
+            travelMode: "walking",
+          })}
+          rel="noreferrer"
+          target="_blank"
+        >
+          Calcular rota real
+        </a>
       </div>
       <form action={promoteExternalPlaceAction} className={styles.promotionForm}>
         <input name="tripId" type="hidden" value={tripId} />
@@ -677,7 +684,8 @@ export default async function PlacesPage({
           <p>
             Places publicados e descobertas Overture aparecem juntos por proximidade. Cada card e
             marcador informa sua origem; candidato externo continua fora do catálogo até passar por
-            curadoria e publicação.
+            curadoria e publicação. Fotografias externas são buscadas sob demanda e só aparecem
+            quando identidade, autoria e licença puderem ser verificadas.
           </p>
           {promotionStatusMessage ? (
             <p className={styles.notice} role="status">
@@ -749,6 +757,7 @@ export default async function PlacesPage({
                 distanceReferenceLabel={distanceReferenceLabel}
                 item={item}
                 tripId={tripId}
+                {...(destinationId ? { destinationId } : {})}
                 {...(accommodationCoordinate ? { accommodationCoordinate } : {})}
                 {...(search ? { search } : {})}
                 {...(category ? { category } : {})}

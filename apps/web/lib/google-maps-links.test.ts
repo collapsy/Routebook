@@ -51,6 +51,21 @@ describe("Google Maps links", () => {
     },
   );
 
+  it("omite a origem para o Google Maps usar a localização atual quando a hospedagem não existe", () => {
+    const url = new URL(
+      buildGoogleMapsDirectionsUrl({
+        destination: { latitude: -6.2366, longitude: -35.0465 },
+        destinationLabel: "Praia do Amor, Pipa, Tibau do Sul — RN",
+        travelMode: "walking",
+      }),
+    );
+
+    expect(url.pathname).toBe("/maps/dir/");
+    expect(url.searchParams.has("origin")).toBe(false);
+    expect(url.searchParams.get("destination")).toBe("Praia do Amor, Pipa, Tibau do Sul — RN");
+    expect(url.searchParams.get("travelmode")).toBe("walking");
+  });
+
   it("usa coordenada validada quando o destino semântico não existe", () => {
     const url = new URL(
       buildGoogleMapsDirectionsUrl({
@@ -68,6 +83,16 @@ describe("Google Maps links", () => {
       buildGoogleMapsDirectionsUrl({
         origin: { latitude: 91, longitude: -35.0503 },
         destination: { latitude: -6.2366, longitude: -35.0465 },
+        travelMode: "walking",
+      }),
+    ).toThrow("coordenada");
+  });
+
+  it("recusa destino inválido mesmo quando existe label semântico", () => {
+    expect(() =>
+      buildGoogleMapsDirectionsUrl({
+        destination: { latitude: -91, longitude: -35.0465 },
+        destinationLabel: "Praia do Amor, Pipa, Tibau do Sul — RN",
         travelMode: "walking",
       }),
     ).toThrow("coordenada");

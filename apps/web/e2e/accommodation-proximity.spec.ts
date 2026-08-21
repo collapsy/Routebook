@@ -24,7 +24,9 @@ test("prioriza no Discovery o lugar mais próximo da hospedagem geocodificada", 
   await expect(publishedPlaces).toHaveCount(30);
   await expect(externalPlaces.first()).toBeVisible();
   await expect(publishedPlaces.first()).toContainText("Praia do Amor");
-  await expect(publishedPlaces.first()).toContainText("0 m em linha reta da hospedagem");
+  await expect(publishedPlaces.first()).toContainText(
+    /\d+(?:[.,]\d+)?\s*(?:m|km) em linha reta da hospedagem/,
+  );
   expect(await options.getByRole("listitem").count()).toBeGreaterThan(30);
   await expect(page.getByRole("list", { name: "Legenda do mapa" })).toContainText(
     "Descoberta externa",

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Place } from "./place";
 import {
   canPromoteExternalImageToControlledAsset,
+  isStrongExternalPlaceIdentityMatch,
   mapOverturePlaceCategory,
   reconcileExternalPlaceCandidate,
   validatePlaceSearchQuery,
@@ -108,6 +109,89 @@ describe("validatePlaceSearchQuery", () => {
   });
 });
 
+describe("isStrongExternalPlaceIdentityMatch", () => {
+  it("reconhece sufixo regional sem transformar Pipa em token distintivo", () => {
+    const canonical = place({
+      name: "Camarão na Fazenda",
+      slug: "camarao-na-fazenda",
+      category: "gastronomy",
+      latitude: -6.229,
+      longitude: -35.048,
+    });
+    const external = candidate({
+      name: "Camarão na Fazenda Pipa",
+      providerCategory: "restaurant",
+      category: "gastronomy",
+      latitude: -6.2292,
+      longitude: -35.0481,
+    });
+
+    expect(isStrongExternalPlaceIdentityMatch(external, canonical)).toBe(true);
+  });
+
+  it("aceita identidade distintiva curta acompanhada de descritor genérico", () => {
+    const canonical = place({
+      name: "Caxangá",
+      slug: "caxanga",
+      category: "gastronomy",
+      latitude: -6.229,
+      longitude: -35.048,
+    });
+    const external = candidate({
+      name: "Caxangá Restaurante",
+      providerCategory: "restaurant",
+      category: "gastronomy",
+      latitude: -6.2292,
+      longitude: -35.0481,
+    });
+
+    expect(isStrongExternalPlaceIdentityMatch(external, canonical)).toBe(true);
+  });
+
+  it("reconhece endereço idêntico dentro do recorte local mesmo com nomes diferentes", () => {
+    const canonical = place({
+      name: "Nome editorial",
+      category: "gastronomy",
+      addressLabel: "Av. Baía dos Golfinhos, 100, Pipa — RN",
+    });
+    const external = candidate({
+      name: "Nome comercial",
+      providerCategory: "restaurant",
+      category: "gastronomy",
+      addressLabel: "Av. Baía dos Golfinhos, 100, Pipa — RN",
+    });
+
+    expect(isStrongExternalPlaceIdentityMatch(external, canonical)).toBe(true);
+  });
+
+  it("não funde negócios vizinhos quando apenas categoria e proximidade coincidem", () => {
+    const canonical = place({
+      name: "Restaurante Horizonte",
+      category: "gastronomy",
+      latitude: -6.23,
+      longitude: -35.05,
+    });
+    const external = candidate({
+      name: "Restaurante Maré Alta",
+      providerCategory: "restaurant",
+      category: "gastronomy",
+      latitude: -6.23005,
+      longitude: -35.05005,
+    });
+
+    expect(isStrongExternalPlaceIdentityMatch(external, canonical)).toBe(false);
+  });
+
+  it("não funde praias genéricas que só compartilham a categoria nominal", () => {
+    expect(
+      isStrongExternalPlaceIdentityMatch(
+        candidate({ name: "Praia de Pipa", latitude: -6.23, longitude: -35.05 }),
+        place({ name: "Praia do Centro", latitude: -6.2301, longitude: -35.0501 }),
+      ),
+    ).toBe(false);
+  });
+});
+
 describe("reconcileExternalPlaceCandidate", () => {
   it("reconhece referência externa já vinculada", () => {
     const result = reconcileExternalPlaceCandidate(
@@ -134,6 +218,31 @@ describe("reconcileExternalPlaceCandidate", () => {
     expect(result.status).toBe("possible_match");
     expect(result.matchedPlaceId).toBe("10000000-0000-4000-8000-000000000001");
     expect(result.distanceMeters).toBeLessThan(500);
+  });
+
+  it("retém variante nominal forte como possível duplicata", () => {
+    const canonical = place({
+      name: "Camarão na Fazenda",
+      category: "gastronomy",
+      latitude: -6.229,
+      longitude: -35.048,
+    });
+    const result = reconcileExternalPlaceCandidate(
+      candidate({
+        name: "Camarão na Fazenda Pipa",
+        providerCategory: "restaurant",
+        category: "gastronomy",
+        latitude: -6.2292,
+        longitude: -35.0481,
+      }),
+      [canonical],
+    );
+
+    expect(result).toMatchObject({
+      status: "possible_match",
+      matchedPlaceId: canonical.id,
+    });
+    expect(result.reason).toContain("Identidade nominal");
   });
 
   it("classifica candidato distante e sem vínculo como novo", () => {

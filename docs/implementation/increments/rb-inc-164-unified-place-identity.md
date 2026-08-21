@@ -12,7 +12,7 @@ authors: [RouteBook Team]
 tags: [implementation, place-catalog, discovery, overture, deduplication, identity, pipa, m8]
 related_documents: [RB-CORE-0004, RB-ARC-003, RB-ADR-012, RB-INC-142, RB-INC-148, RB-INC-156, RB-INC-162, RB-INC-163, RB-INC-136, RB-CTX-164]
 prerequisites: [RB-INC-142, RB-INC-148, RB-INC-156, RB-INC-162, RB-INC-163]
-next_documents: [RB-INC-165, RB-INC-136]
+next_documents: [RB-INC-136]
 ai_context:
   priority: high
   index: true
@@ -91,7 +91,7 @@ A Fonte deixa de estruturar a lista como duas coleções concorrentes e passa a 
 
 O RB-INC-162 continua sendo a capability de imagem disponível neste incremento. Wikimedia Commons permanece fallback governado para mídia externa.
 
-Google Places Photos não é ativado aqui. O RB-ADR-012 possui status decisório interno `Proposed`; ativar Places API exige aprovação humana, billing, credencial restrita, política de cache/atribuição e observabilidade. Esse trabalho foi separado no RB-INC-165 / issue `#382`.
+Google Places Photos não é ativado aqui. O RB-ADR-012 possui status decisório interno `Proposed`; ativar Places API exige aprovação humana, billing, credencial restrita, política de cache/atribuição e observabilidade. Esse trabalho está registrado separadamente na issue `#382`.
 
 ## 8. Escopo
 
@@ -132,7 +132,10 @@ docs/implementation/increments/rb-inc-164-unified-place-identity.md
 docs/implementation/context-packs/rb-inc-164-unified-place-identity.md
 docs/implementation/traceability-matrix.md
 docs/registry.md
+.github/workflows/rb-inc-164-assembly-helper.yml
 ```
+
+A exceção `.github/workflows/rb-inc-164-assembly-helper.yml` é estritamente transitória. Pode somente registrar `RB-INC-164`/`RB-CTX-164`, aplicar Prettier aos caminhos do incremento, restaurar microcopy compatível do RB-INC-162, remover a si própria e fazer push não destrutivo na branch do RB-INC-164. Não pode usar secrets adicionais, alterar dados, migrations, billing, Provider, `main` ou Production e não pode permanecer no diff final.
 
 ## 11. Critérios de aceite
 

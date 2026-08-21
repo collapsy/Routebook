@@ -24,6 +24,8 @@ ai_context:
 
 Permitir que candidatos externos da Discovery tenham contexto visual real quando o Wikimedia Commons sustentar uma correspondência segura, sem converter mídia em estado canônico e sem degradar a Discovery quando a Fonte estiver indisponível.
 
+Também preservar a ação `Calcular rota real` do candidato externo durante o aceite: com hospedagem geocodificada a origem permanece a hospedagem; sem hospedagem, a origem é omitida para o Google Maps usar a localização atual/relevante disponível, sem mudar o destino semântico do RB-INC-163.
+
 ## 2. Unidade de trabalho
 
 - issue: `#377`;
@@ -56,7 +58,9 @@ Permitir que candidatos externos da Discovery tenham contexto visual real quando
 - candidato externo não é Place canônico;
 - Recommendation, Saved Place, Decision e Itinerary não dependem de imagem;
 - promoção de candidato continua explícita e revalidada server-side por RB-INC-148;
-- links de rota continuam usando a política semântica do RB-INC-163;
+- links de rota continuam usando a política de destino semântico do RB-INC-163;
+- `buildGoogleMapsDirectionsUrl` pode omitir `origin`, mas nunca deixa de validar a coordenada do destino;
+- no card externo, ausência de hospedagem não remove o link de rota;
 - mapa e lista continuam representando o mesmo conjunto de lugares, independentemente de mídia;
 - falha de Provider não remove o conteúdo factual do card.
 
@@ -99,7 +103,10 @@ metadata Wikimedia válida + autor + licença reutilizável
 - durante lookup: `Buscando fotografia…`;
 - sucesso: foto + atribuição + licença + `Wikimedia Commons` + `Ver fonte`;
 - miss/erro: fallback visual padrão do RouteBook;
-- nenhuma ausência de imagem remove nome, endereço, distância, fonte Overture, rota ou ação de curadoria.
+- nenhuma ausência de imagem remove nome, endereço, distância, fonte Overture, rota ou ação de curadoria;
+- `Calcular rota real` fica sempre disponível no card externo;
+- com hospedagem, o Maps recebe a hospedagem como `origin`;
+- sem hospedagem, `origin` é omitido e o Maps usa a origem disponível no aparelho ou solicita uma origem ao usuário.
 
 ## 8. Caminhos permitidos
 
@@ -121,6 +128,8 @@ pnpm test:e2e
 
 Documentation Validation e Engineering Validation precisam passar no mesmo SHA. O Preview Vercel deve estar `READY` para exatamente esse SHA antes do aceite funcional.
 
+A regressão de rota precisa incluir teste unitário do helper e E2E de candidato externo sem hospedagem, verificando ausência do parâmetro `origin` e preservação do destino semântico.
+
 ## 10. Proibições
 
 - não fazer scraping;
@@ -133,9 +142,11 @@ Documentation Validation e Engineering Validation precisam passar no mesmo SHA. 
 - não exibir match `ambiguous` ou `rejected` como fotografia do Place;
 - não remover fallback acessível;
 - não alterar os destinos de rota do RB-INC-163;
+- não substituir ausência de hospedagem por uma coordenada arbitrária de origem;
+- não ampliar o fallback de origem para outras telas neste incremento;
 - não concluir M8 por evidência técnica;
 - não mergear nem promover Production sem gate humano separado.
 
 ## 11. Handoff
 
-Relatar arquivos alterados, política de match, limites de rede/cache, estados de UI, testes efetivamente executados, SHA final, CI, Preview, riscos residuais e qualquer candidato que permaneça sem fotografia por falta de evidência segura.
+Relatar arquivos alterados, política de match, limites de rede/cache, estados de UI, comportamento de rota com e sem hospedagem, testes efetivamente executados, SHA final, CI, Preview, riscos residuais e qualquer candidato que permaneça sem fotografia por falta de evidência segura.

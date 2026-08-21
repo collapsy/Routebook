@@ -92,6 +92,55 @@ const OVERTURE_CATEGORY_MAP: Readonly<Record<string, PlaceCategory>> = Object.fr
   hiking_area: "nature",
 });
 
+const IDENTITY_STOP_WORDS = new Set([
+  "a",
+  "as",
+  "da",
+  "das",
+  "de",
+  "do",
+  "dos",
+  "e",
+  "em",
+  "na",
+  "nas",
+  "no",
+  "nos",
+  "o",
+  "os",
+  "para",
+  "por",
+  "um",
+  "uma",
+]);
+
+const REGIONAL_IDENTITY_TOKENS = new Set([
+  "brasil",
+  "brazil",
+  "grande",
+  "norte",
+  "pipa",
+  "rio",
+  "rn",
+  "sul",
+  "tibau",
+]);
+
+const GENERIC_IDENTITY_TOKENS = new Set([
+  "bar",
+  "beach",
+  "cafe",
+  "cafeteria",
+  "club",
+  "clube",
+  "hotel",
+  "mirante",
+  "pousada",
+  "praia",
+  "restaurant",
+  "restaurante",
+]);
+
 export function mapOverturePlaceCategory(
   category: string,
   hierarchy: readonly string[] = [],
@@ -205,6 +254,22 @@ function normalizeIdentity(value: string): string {
     .replace(/\s+/g, " ");
 }
 
+function identityTokens(value: string): string[] {
+  return normalizeIdentity(value)
+    .split(" ")
+    .filter(Boolean)
+    .filter((token) => !IDENTITY_STOP_WORDS.has(token) && !REGIONAL_IDENTITY_TOKENS.has(token));
+}
+
+function distinctiveIdentityTokens(tokens: readonly string[]): string[] {
+  return tokens.filter((token) => token.length >= 4 && !GENERIC_IDENTITY_TOKENS.has(token));
+}
+
+function tokenIntersection(first: readonly string[], second: readonly string[]): string[] {
+  const secondSet = new Set(second);
+  return [...new Set(first.filter((token) => secondSet.has(token)))];
+}
+
 function toRadians(value: number): number {
   return (value * Math.PI) / 180;
 }
@@ -222,6 +287,57 @@ export function placeDistanceMeters(
     Math.sin(latitudeDelta / 2) ** 2 +
     Math.cos(firstLatitude) * Math.cos(secondLatitude) * Math.sin(longitudeDelta / 2) ** 2;
   return 2 * earthRadiusMeters * Math.asin(Math.min(1, Math.sqrt(haversine)));
+}
+
+export function isStrongExternalPlaceIdentityMatch(
+  candidate: ExternalPlaceCandidate,
+  place: Place,
+): boolean {
+  if (!candidate.category || candidate.category !== place.category) return false;
+
+  const distanceMeters = placeDistanceMeters(candidate, place);
+  if (distanceMeters > 1_000) return false;
+
+  const candidateName = normalizeIdentity(candidate.name);
+  const placeName = normalizeIdentity(place.name);
+  if (candidateName === placeName) return true;
+
+  if (
+    candidate.addressLabel &&
+    place.addressLabel &&
+    normalizeIdentity(candidate.addressLabel) === normalizeIdentity(place.addressLabel)
+  ) {
+    return true;
+  }
+
+  const candidateTokens = identityTokens(candidate.name);
+  const placeTokens = identityTokens(place.name);
+  if (candidateTokens.length === 0 || placeTokens.length === 0) return false;
+
+  const sharedTokens = tokenIntersection(candidateTokens, placeTokens);
+  const sharedDistinctiveTokens = distinctiveIdentityTokens(sharedTokens);
+  if (sharedDistinctiveTokens.length === 0) return false;
+
+  const minimumTokenCount = Math.min(candidateTokens.length, placeTokens.length);
+  const unionTokenCount = new Set([...candidateTokens, ...placeTokens]).size;
+  const minimumCoverage = sharedTokens.length / minimumTokenCount;
+  const jaccard = sharedTokens.length / unionTokenCount;
+
+  if (
+    distanceMeters <= 500 &&
+    sharedTokens.length >= 2 &&
+    minimumCoverage >= 0.8 &&
+    jaccard >= 0.5
+  ) {
+    return true;
+  }
+
+  return (
+    distanceMeters <= 150 &&
+    minimumTokenCount === 1 &&
+    sharedTokens.length === 1 &&
+    minimumCoverage === 1
+  );
 }
 
 export function reconcileExternalPlaceCandidate(
@@ -266,6 +382,7 @@ export function reconcileExternalPlaceCandidate(
     .map((place) => ({
       place,
       distanceMeters: placeDistanceMeters(candidate, place),
+      strongIdentity: isStrongExternalPlaceIdentityMatch(candidate, place),
       sameName: normalizeIdentity(place.name) === normalizedCandidateName,
       sameAddress:
         Boolean(candidate.addressLabel && place.addressLabel) &&
@@ -274,11 +391,16 @@ export function reconcileExternalPlaceCandidate(
     }))
     .filter(
       (match) =>
+        match.strongIdentity ||
         (match.sameName && match.distanceMeters <= 500) ||
         (match.sameAddress && match.distanceMeters <= 500) ||
         match.distanceMeters <= 75,
     )
-    .sort((left, right) => left.distanceMeters - right.distanceMeters);
+    .sort(
+      (left, right) =>
+        Number(right.strongIdentity) - Number(left.strongIdentity) ||
+        left.distanceMeters - right.distanceMeters,
+    );
 
   const nearest = possibleMatches[0];
   if (nearest) {
@@ -286,11 +408,13 @@ export function reconcileExternalPlaceCandidate(
       candidate,
       status: "possible_match",
       matchedPlaceId: nearest.place.id,
-      reason: nearest.sameName
-        ? "Nome e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
-        : nearest.sameAddress
-          ? "Endereço e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
-          : "Proximidade extrema e mesma categoria indicam possível duplicata; exige reconciliação antes da promoção.",
+      reason: nearest.strongIdentity
+        ? "Identidade nominal ou endereço e proximidade sustentam possível duplicata; exige reconciliação antes da promoção."
+        : nearest.sameName
+          ? "Nome e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
+          : nearest.sameAddress
+            ? "Endereço e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
+            : "Proximidade extrema e mesma categoria indicam possível duplicata; exige reconciliação antes da promoção.",
       distanceMeters: nearest.distanceMeters,
     };
   }

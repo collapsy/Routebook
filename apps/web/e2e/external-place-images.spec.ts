@@ -83,3 +83,29 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
   expect(routeHref).toBeTruthy();
   expect(new URL(routeHref!).searchParams.get("destination")).toContain(name);
 });
+
+test("mantém rota real do candidato externo sem hospedagem usando a localização atual", async ({
+  page,
+}) => {
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: `Rota externa sem hospedagem ${test.info().project.name} ${Date.now()}`,
+    startDate: "2026-08-22",
+    endDate: "2026-08-24",
+  });
+
+  await page.goto(`/viagens/${trip.id}/lugares`);
+
+  const externalCard = page.locator('[data-place-source="external"]').first();
+  const routeLink = externalCard.getByRole("link", { name: "Calcular rota real" });
+  await expect(routeLink).toBeVisible({ timeout: 20_000 });
+
+  const name = (await externalCard.locator(":scope > strong").innerText()).trim();
+  const routeHref = await routeLink.getAttribute("href");
+  expect(routeHref).toBeTruthy();
+
+  const routeUrl = new URL(routeHref!);
+  expect(routeUrl.pathname).toBe("/maps/dir/");
+  expect(routeUrl.searchParams.has("origin")).toBe(false);
+  expect(routeUrl.searchParams.get("destination")).toContain(name);
+  expect(routeUrl.searchParams.get("travelmode")).toBe("walking");
+});

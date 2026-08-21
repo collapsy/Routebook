@@ -1,18 +1,16 @@
 name: RB-162 acceptance helper
 
 on:
-  pull_request:
-    types: [synchronize]
-    branches: [main]
+  push:
+    branches:
+      - codex/rb-inc-162-external-place-images
 
 permissions:
   contents: write
 
 jobs:
   patch-external-route:
-    if: >-
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.head.ref == 'codex/rb-inc-162-external-place-images'
+    if: github.ref == 'refs/heads/codex/rb-inc-162-external-place-images'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout RB-162 branch

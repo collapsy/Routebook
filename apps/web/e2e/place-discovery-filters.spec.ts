@@ -49,7 +49,7 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   expect(await options.getByRole("listitem").count()).toBe(30 + externalTotal);
   expect(await enrichedPlaces.count()).toBeGreaterThan(0);
 
-  const visibleNames = await options.locator(":scope > li > strong").allInnerTexts();
+  const visibleNames = await options.locator(":scope > li > strong:not([class])").allInnerTexts();
   const visibleKeys = visibleNames.map(visibleIdentityKey);
   expect(new Set(visibleKeys).size).toBe(visibleKeys.length);
 
@@ -75,7 +75,9 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(discoveryMap).toHaveAttribute("data-map-external-count", String(externalTotal));
 
   const enrichedCard = enrichedPlaces.first();
-  const enrichedName = (await enrichedCard.locator(":scope > strong").innerText()).trim();
+  const enrichedName = (
+    await enrichedCard.locator(":scope > strong:not([class])").innerText()
+  ).trim();
   const enrichedRouteHref = await enrichedCard
     .getByRole("link", { name: "Calcular rota real" })
     .getAttribute("href");
@@ -105,7 +107,9 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     await page.goto((await expandDiscoveryLink.getAttribute("href"))!);
     const expandedExternalTotal = await externalPlaces.count();
     expect(expandedExternalTotal).toBeGreaterThan(externalTotal);
-    const expandedNames = await options.locator(":scope > li > strong").allInnerTexts();
+    const expandedNames = await options
+      .locator(":scope > li > strong:not([class])")
+      .allInnerTexts();
     const expandedKeys = expandedNames.map(visibleIdentityKey);
     expect(new Set(expandedKeys).size).toBe(expandedKeys.length);
     await expect(

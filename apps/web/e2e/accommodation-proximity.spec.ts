@@ -16,7 +16,7 @@ test("prioriza no Discovery o lugar mais próximo da hospedagem geocodificada", 
   await page.goto(`/viagens/${trip.id}/lugares`);
 
   await expect(
-    page.getByText(/Hospedagem geocodificada.*prioriza os Lugares mais próximos/),
+    page.getByText(/Distâncias estimadas em linha reta.*não representam rota ou tempo/),
   ).toBeVisible();
   const options = page.getByRole("list", { name: "Opções de lugares" });
   const publishedPlaces = options.locator('[data-place-source="published"]');
@@ -26,9 +26,6 @@ test("prioriza no Discovery o lugar mais próximo da hospedagem geocodificada", 
   await expect(publishedPlaces.first()).toContainText("Praia do Amor");
   await expect(publishedPlaces.first()).toContainText("0 m em linha reta da hospedagem");
   expect(await options.getByRole("listitem").count()).toBeGreaterThan(30);
-  await expect(
-    page.getByText(/Distâncias estimadas em linha reta.*não representam rota ou tempo/),
-  ).toBeVisible();
   await expect(page.getByRole("list", { name: "Legenda do mapa" })).toContainText(
     "Descoberta externa",
   );
@@ -45,12 +42,12 @@ test("mantém Discovery funcional sem coordenadas da hospedagem", async ({ page 
 
   await expect(
     page.getByRole("heading", {
-      name: /\d+ de \d+ opç(?:ão disponível|ões disponíveis) exibidas/,
+      name: /\d+ de \d+ (?:lugar único|lugares únicos) exibidos/,
     }),
   ).toBeVisible();
   await expect(
     page.getByText(
-      /30 lugares publicados no RouteBook \+ [1-9]\d* de [1-9]\d* descobertas? atualizadas? disponíveis? no Overture/,
+      /30 com conteúdo curado do RouteBook.*também reconciliados com Overture.*somente na descoberta atual/,
     ),
   ).toBeVisible();
   await expect(

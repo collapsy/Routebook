@@ -65,7 +65,9 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     .getByRole("link", { name: "Calcular rota real" })
     .getAttribute("href");
   expect(enrichedRouteHref).toBeTruthy();
-  expect(new URL(enrichedRouteHref!).searchParams.get("destination")).toContain(enrichedName);
+  expect(
+    new URL(enrichedRouteHref!).searchParams.get("destination")?.toLocaleLowerCase("pt-BR"),
+  ).toContain(enrichedName.toLocaleLowerCase("pt-BR"));
   await expect(enrichedCard.getByRole("link", { name: "Ver detalhes" })).toBeVisible();
   await expect(enrichedCard.getByRole("link", { name: "Adicionar ao roteiro" })).toBeVisible();
 

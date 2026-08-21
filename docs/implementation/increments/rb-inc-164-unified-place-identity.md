@@ -127,6 +127,7 @@ apps/web/lib/place-discovery-feed.test.ts
 apps/web/app/viagens/[tripId]/lugares/page.tsx
 apps/web/app/viagens/[tripId]/lugares/place-discovery.module.css
 apps/web/e2e/place-discovery-filters.spec.ts
+apps/web/e2e/accommodation-proximity.spec.ts
 apps/web/e2e/unified-place-identity.spec.ts
 docs/implementation/increments/rb-inc-164-unified-place-identity.md
 docs/implementation/context-packs/rb-inc-164-unified-place-identity.md

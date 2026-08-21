@@ -208,7 +208,8 @@ function comparePlaceCandidatePreference(
   const byConfidence = (right.candidate.confidence ?? -1) - (left.candidate.confidence ?? -1);
   if (byConfidence) return byConfidence;
 
-  const byAddress = Number(Boolean(right.candidate.addressLabel)) - Number(Boolean(left.candidate.addressLabel));
+  const byAddress =
+    Number(Boolean(right.candidate.addressLabel)) - Number(Boolean(left.candidate.addressLabel));
   if (byAddress) return byAddress;
 
   const byDistance =
@@ -261,7 +262,12 @@ export function buildPlaceDiscoveryFeed(
 
     if (reconciliation.status === "linked" && reconciliation.matchedPlaceId) {
       const linkedPlace = placesById.get(reconciliation.matchedPlaceId);
-      if (linkedPlace) addPlaceMatch(linkedPlace, { candidate: reconciliation.candidate, matchKind: "linked" });
+      if (linkedPlace) {
+        addPlaceMatch(linkedPlace, {
+          candidate: reconciliation.candidate,
+          matchKind: "linked",
+        });
+      }
       continue;
     }
 
@@ -273,7 +279,10 @@ export function buildPlaceDiscoveryFeed(
         possiblePlace &&
         isStrongExternalPlaceIdentityMatch(reconciliation.candidate, possiblePlace)
       ) {
-        addPlaceMatch(possiblePlace, { candidate: reconciliation.candidate, matchKind: "strong" });
+        addPlaceMatch(possiblePlace, {
+          candidate: reconciliation.candidate,
+          matchKind: "strong",
+        });
       }
       // Possible matches without strong identity remain withheld rather than becoming duplicate cards.
       continue;
@@ -288,7 +297,10 @@ export function buildPlaceDiscoveryFeed(
       )[0];
 
     if (strongPlace) {
-      addPlaceMatch(strongPlace, { candidate: reconciliation.candidate, matchKind: "strong" });
+      addPlaceMatch(strongPlace, {
+        candidate: reconciliation.candidate,
+        matchKind: "strong",
+      });
     } else {
       externalCandidates.push(reconciliation.candidate);
     }
@@ -337,15 +349,18 @@ export function buildPlaceDiscoveryFeed(
     }
   }
 
-  const externalItems = externalRepresentatives
+  const allExternalItems = externalRepresentatives
     .map<ExternalPlaceDiscoveryItem>((candidate) => ({
       id: `external:${candidate.provider}:${candidate.externalId}`,
       kind: "external",
       candidate,
       distanceMeters: placeDistanceMeters(candidate, input.reference),
     }))
-    .sort(compareDiscoveryItems)
-    .slice(0, input.externalLimit);
+    .sort(compareDiscoveryItems);
+  const externalItems =
+    input.externalLimit === undefined
+      ? allExternalItems
+      : allExternalItems.slice(0, input.externalLimit);
 
   return [...canonicalItems, ...externalItems].sort(compareDiscoveryItems);
 }

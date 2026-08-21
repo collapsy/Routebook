@@ -28,10 +28,12 @@ Eliminar duplicidade perceptível na Discovery. O usuário deve enxergar um Luga
 
 - issue: `#381`;
 - branch: `codex/rb-inc-164-unified-place-identity`;
+- PR empilhada: `#385` contra `codex/rb-inc-162-external-place-images`;
 - base empilhada: `ea8d23958aa115b227ec8cbf7a6092cddfda313b` do RB-INC-162;
-- PR inicial contra `codex/rb-inc-162-external-place-images`;
 - Preview Vercel é o ambiente de aceite;
 - integrações e Production permanecem gates humanos separados.
+
+O helper transitório autorizado pelo Increment executou a montagem documental/formatação e se auto-removeu antes do candidato de validação. Ele não faz parte do diff final da PR.
 
 ## 3. Leitura obrigatória
 
@@ -92,7 +94,7 @@ Quando múltiplos candidatos equivalem à mesma identidade, a escolha é determi
 - Provenance permanece em texto secundário;
 - item enriquecido mantém detalhe, Saved Place e ação de Roteiro;
 - imagem curada vence; na ausência, pode reutilizar o preview externo do RB-INC-162;
-- Google Places Photos fica fora deste incremento e é tratado no RB-INC-165/#382.
+- Google Places Photos fica fora deste incremento e está registrado separadamente na issue `#382`.
 
 ## 9. Limites
 
@@ -138,4 +140,4 @@ Documentation Validation e Engineering Validation devem passar no mesmo SHA; Pre
 
 ## 13. Handoff
 
-Relatar política de identidade, arquivos alterados, testes executados, SHA final, CI, Preview, riscos residuais e a dependência do RB-INC-165 para ampliar cobertura de imagens.
+Relatar política de identidade, arquivos alterados, testes executados, SHA final, CI, Preview, riscos residuais e a dependência separada de `#382` para ampliar cobertura de imagens.

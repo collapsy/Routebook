@@ -318,21 +318,19 @@ function ExternalDiscoveryCard({
         >
           Ver mapa e fotos
         </a>
-        {accommodationCoordinate ? (
-          <a
-            className="product-secondary-action"
-            href={buildGoogleMapsDirectionsUrl({
-              origin: accommodationCoordinate,
-              destination: coordinate,
-              destinationLabel,
-              travelMode: "walking",
-            })}
-            rel="noreferrer"
-            target="_blank"
-          >
-            Calcular rota real
-          </a>
-        ) : null}
+        <a
+          className="product-secondary-action"
+          href={buildGoogleMapsDirectionsUrl({
+            ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
+            destination: coordinate,
+            destinationLabel,
+            travelMode: "walking",
+          })}
+          rel="noreferrer"
+          target="_blank"
+        >
+          Calcular rota real
+        </a>
       </div>
       <form action={promoteExternalPlaceAction} className={styles.promotionForm}>
         <input name="tripId" type="hidden" value={tripId} />

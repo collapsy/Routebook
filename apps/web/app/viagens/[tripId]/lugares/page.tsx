@@ -333,7 +333,7 @@ function ExternalDiscoveryCard({
         {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
       </small>
       <small>Fonte: Overture · licença da origem: {candidate.sourceLicense}</small>
-      <small>Ainda sem conteúdo curado no RouteBook</small>
+      <small>Candidato externo — ainda não publicado no RouteBook · sem conteúdo curado</small>
       <div className={styles.cardActions}>
         <a
           className="product-secondary-action"
@@ -487,7 +487,9 @@ export default async function PlacesPage({
         (result) => result.status === "possible_match",
       ).length;
       externalLinkedCount = reconciliations.filter((result) => result.status === "linked").length;
-      externalRejectedCount = reconciliations.filter((result) => result.status === "rejected").length;
+      externalRejectedCount = reconciliations.filter(
+        (result) => result.status === "rejected",
+      ).length;
       externalReconciliations = reconciliations.filter(
         (result) => result.status !== "new" || matchesExternalSearch(result, search),
       );
@@ -522,13 +524,18 @@ export default async function PlacesPage({
     : buildPlaceDiscoveryFeed({ ...feedInput, externalLimit: externalDiscoveryDisplayLimit });
   const visibleOptionCount = discoveryItems.length;
   const totalAvailableOptionCount = allDiscoveryItems.length;
-  const availableExternalCount = allDiscoveryItems.filter((item) => item.kind === "external").length;
+  const availableExternalCount = allDiscoveryItems.filter(
+    (item) => item.kind === "external",
+  ).length;
   const visibleExternalCount = discoveryItems.filter((item) => item.kind === "external").length;
   const enrichedCount = allDiscoveryItems.filter((item) => item.kind === "enriched").length;
   const curatedCount = allDiscoveryItems.filter((item) => item.kind !== "external").length;
-  const hasMoreExternalResults = hasExternalCoverage && availableExternalCount > visibleExternalCount;
+  const hasMoreExternalResults =
+    hasExternalCoverage && availableExternalCount > visibleExternalCount;
   const hasExpandedExternalResults =
-    hasExternalCoverage && showAllExternal && availableExternalCount > externalDiscoveryDisplayLimit;
+    hasExternalCoverage &&
+    showAllExternal &&
+    availableExternalCount > externalDiscoveryDisplayLimit;
   const mapPoints: TripMapPoint[] = discoveryItems.map((item) => {
     if (item.kind !== "external") {
       const coordinate =
@@ -716,9 +723,9 @@ export default async function PlacesPage({
           <p>
             {externalCandidateCount} candidatos externos foram avaliados. {enrichedCount} Lugares
             visíveis receberam contexto externo e {externalPossibleMatchCount} correspondências
-            possíveis foram tratadas de forma conservadora para evitar duplicatas. {externalLinkedCount}{" "}
-            referências já possuem vínculo canônico e {externalRejectedCount} candidatos foram
-            rejeitados pela validação da Fonte/categoria.
+            possíveis foram tratadas de forma conservadora para evitar duplicatas.{" "}
+            {externalLinkedCount} referências já possuem vínculo canônico e {externalRejectedCount}{" "}
+            candidatos foram rejeitados pela validação da Fonte/categoria.
           </p>
           {promotionStatusMessage ? (
             <p className={styles.notice} role="status">

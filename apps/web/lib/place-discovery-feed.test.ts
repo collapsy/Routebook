@@ -257,10 +257,12 @@ describe("buildPlaceDiscoveryFeed", () => {
 
     expect(result).toHaveLength(2);
     expect(result.every((item) => item.kind === "external")).toBe(true);
-    expect(result.filter((item) => item.kind === "external").map((item) => item.candidate.externalId))
-      .toContain("camarao-2");
-    expect(result.filter((item) => item.kind === "external").map((item) => item.candidate.externalId))
-      .not.toContain("camarao-1");
+    expect(
+      result.filter((item) => item.kind === "external").map((item) => item.candidate.externalId),
+    ).toContain("camarao-2");
+    expect(
+      result.filter((item) => item.kind === "external").map((item) => item.candidate.externalId),
+    ).not.toContain("camarao-1");
   });
 
   it("não aplica limite aos Places canônicos ou enriquecidos", () => {
@@ -280,9 +282,7 @@ describe("buildPlaceDiscoveryFeed", () => {
       publishedPlaces: [published],
       externalReconciliations: [
         reconciliation(external, { status: "linked", matchedPlaceId: published.id }),
-        reconciliation(
-          externalCandidate({ externalId: "new-1", name: "Lugar novo 1" }),
-        ),
+        reconciliation(externalCandidate({ externalId: "new-1", name: "Lugar novo 1" })),
       ],
       reference,
       externalLimit: 0,

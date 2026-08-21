@@ -35,9 +35,7 @@ export type ExternalPlaceDiscoveryItem = Readonly<{
 }>;
 
 export type PlaceDiscoveryItem =
-  | PublishedPlaceDiscoveryItem
-  | EnrichedPlaceDiscoveryItem
-  | ExternalPlaceDiscoveryItem;
+  PublishedPlaceDiscoveryItem | EnrichedPlaceDiscoveryItem | ExternalPlaceDiscoveryItem;
 
 type CandidateMatch = Readonly<{
   candidate: ExternalPlaceCandidate;
@@ -219,10 +217,12 @@ function comparePlaceCandidatePreference(
   return externalCandidateKey(left.candidate).localeCompare(externalCandidateKey(right.candidate));
 }
 
-function normalizeReconciliations(input: Readonly<{
-  externalCandidates?: readonly ExternalPlaceCandidate[];
-  externalReconciliations?: readonly ExternalPlaceReconciliation[];
-}>): readonly ExternalPlaceReconciliation[] {
+function normalizeReconciliations(
+  input: Readonly<{
+    externalCandidates?: readonly ExternalPlaceCandidate[];
+    externalReconciliations?: readonly ExternalPlaceReconciliation[];
+  }>,
+): readonly ExternalPlaceReconciliation[] {
   if (input.externalReconciliations) return input.externalReconciliations;
   return (input.externalCandidates ?? []).map((candidate) => ({
     candidate,

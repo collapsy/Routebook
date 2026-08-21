@@ -12,9 +12,7 @@ function visibleIdentityKey(value: string): string {
     .replace(/[^a-z0-9]+/g, " ")
     .split(" ")
     .filter(Boolean)
-    .filter(
-      (token) => !["pipa", "rn", "tibau", "sul", "rio", "grande", "norte"].includes(token),
-    )
+    .filter((token) => !["pipa", "rn", "tibau", "sul", "rio", "grande", "norte"].includes(token))
     .join(" ")
     .trim();
 }

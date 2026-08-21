@@ -381,6 +381,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-162 | Context Pack do RB-INC-162 — Imagens governadas para Places externos | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-162-external-place-images.md](./implementation/context-packs/rb-inc-162-external-place-images.md) |
 | RB-INC-163 | Confiabilidade dos destinos no Google Maps | Implementation | Draft | 0.1.0 | [rb-inc-163-google-maps-destination-reliability.md](./implementation/increments/rb-inc-163-google-maps-destination-reliability.md) |
 | RB-CTX-163 | Context Pack do RB-INC-163 — Confiabilidade dos destinos no Google Maps | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-163-google-maps-destination-reliability.md](./implementation/context-packs/rb-inc-163-google-maps-destination-reliability.md) |
+| RB-INC-164 | Identidade única e catálogo external-first de Places | Implementation | Draft | 0.1.0 | [rb-inc-164-unified-place-identity.md](./implementation/increments/rb-inc-164-unified-place-identity.md) |
+| RB-CTX-164 | Context Pack do RB-INC-164 — Identidade única e catálogo external-first de Places | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-164-unified-place-identity.md](./implementation/context-packs/rb-inc-164-unified-place-identity.md) |
 
 ## Status possíveis
 

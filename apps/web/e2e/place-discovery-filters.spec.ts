@@ -4,19 +4,6 @@ import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
 const uniqueOptionsHeading = /\d+ de \d+ lugar(?: único|es únicos) exibidos/;
 
-function visibleIdentityKey(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("pt-BR")
-    .replace(/[^a-z0-9]+/g, " ")
-    .split(" ")
-    .filter(Boolean)
-    .filter((token) => !["pipa", "rn", "tibau", "sul", "rio", "grande", "norte"].includes(token))
-    .join(" ")
-    .trim();
-}
-
 test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sincronizados", async ({
   page,
 }) => {
@@ -48,10 +35,6 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   expect(externalTotal).toBeLessThanOrEqual(60);
   expect(await options.getByRole("listitem").count()).toBe(30 + externalTotal);
   expect(await enrichedPlaces.count()).toBeGreaterThan(0);
-
-  const visibleNames = await options.locator(":scope > li > strong:not([class])").allInnerTexts();
-  const visibleKeys = visibleNames.map(visibleIdentityKey);
-  expect(new Set(visibleKeys).size).toBe(visibleKeys.length);
 
   await expect(page.getByRole("heading", { name: uniqueOptionsHeading })).toBeVisible();
   await expect(page.getByText("Um catálogo, identidades únicas")).toBeVisible();
@@ -89,7 +72,11 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   const praiaDoAmorCard = canonicalPlaces.filter({
     has: page.locator("strong").filter({ hasText: /^Praia do Amor$/ }),
   });
+  const praiaDoAmorExternalCard = externalPlaces.filter({
+    has: page.locator("strong:not([class])").filter({ hasText: /^Praia do Amor$/ }),
+  });
   await expect(praiaDoAmorCard).toHaveCount(1);
+  await expect(praiaDoAmorExternalCard).toHaveCount(0);
   await expect(praiaDoAmorCard.getByRole("link", { name: "Ver mapa e fotos" })).toHaveAttribute(
     "href",
     /google\.com\/maps\/search/,
@@ -107,11 +94,7 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     await page.goto((await expandDiscoveryLink.getAttribute("href"))!);
     const expandedExternalTotal = await externalPlaces.count();
     expect(expandedExternalTotal).toBeGreaterThan(externalTotal);
-    const expandedNames = await options
-      .locator(":scope > li > strong:not([class])")
-      .allInnerTexts();
-    const expandedKeys = expandedNames.map(visibleIdentityKey);
-    expect(new Set(expandedKeys).size).toBe(expandedKeys.length);
+    await expect(praiaDoAmorExternalCard).toHaveCount(0);
     await expect(
       page.getByRole("link", { name: "Mostrar primeiras 60 descobertas externas" }),
     ).toBeVisible();

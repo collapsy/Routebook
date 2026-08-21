@@ -43,18 +43,18 @@ export function buildGoogleMapsSearchUrl(input: {
 }
 
 export function buildGoogleMapsDirectionsUrl(input: {
-  origin: GoogleMapsCoordinate;
+  origin?: GoogleMapsCoordinate | undefined;
   destination: GoogleMapsCoordinate;
   destinationLabel?: string | undefined;
   travelMode: GoogleMapsTravelMode;
 }): string {
+  const destinationCoordinate = formatCoordinate(input.destination);
   const url = new URL("https://www.google.com/maps/dir/");
   url.searchParams.set("api", "1");
-  url.searchParams.set("origin", formatCoordinate(input.origin));
-  url.searchParams.set(
-    "destination",
-    input.destinationLabel?.trim() || formatCoordinate(input.destination),
-  );
+  if (input.origin) {
+    url.searchParams.set("origin", formatCoordinate(input.origin));
+  }
+  url.searchParams.set("destination", input.destinationLabel?.trim() || destinationCoordinate);
   url.searchParams.set("travelmode", input.travelMode);
   return url.toString();
 }

@@ -28,9 +28,11 @@ Branch: `codex/rb-inc-162-external-place-images`.
 
 Baseline original: `474ad3c8b23c10605f4223e32cc75fb7169bd947`.
 
-Durante a implementação, o RB-INC-163 foi integrado na `main` em `f49813a57e03f73aba3d768da02c0d4bc3383084`. O candidato final deste incremento deve ser validado contra essa `main` atual e preservar integralmente a correção de rotas.
+Durante a implementação, o RB-INC-163 foi integrado na `main` em `f49813a57e03f73aba3d768da02c0d4bc3383084`. O candidato final deste incremento deve ser validado contra essa `main` atual e preservar integralmente a correção de destino semântico das rotas.
 
 A Discovery unificada exibe Places publicados e candidatos Overture. Os candidatos externos possuem nome, categoria, endereço, distância, Fonte e licença, mas usam somente o fallback visual do RouteBook. A capability `PlaceImagePort` e o adapter Wikimedia Commons já existem por RB-INC-143, porém até aqui serviram ao pipeline governado de curadoria de Places publicados.
+
+Durante o aceite funcional do Preview, foi identificado um bloqueador adicional: o botão `Calcular rota real` do candidato externo desaparecia quando a viagem ainda não possuía `accommodationCoordinate`. O comportamento não era uma remoção do link no código, mas a condição de renderização produzia exatamente essa percepção para o viajante. Como Google Maps URLs permite omitir `origin` e usar a localização relevante do aparelho, o RB-162 inclui uma correção de compatibilidade restrita para manter a ação de rota sempre disponível sem alterar o destino semântico entregue pelo RB-163.
 
 ## 2. Objetivo
 
@@ -43,6 +45,12 @@ Um candidato externo pode mostrar fotografia somente quando:
 3. a correspondência de identidade é classificada como `secure`;
 4. a mídia é entregue ao browser por uma fronteira RouteBook controlada;
 5. qualquer ambiguidade, erro ou indisponibilidade mantém fallback explícito.
+
+A ação `Calcular rota real` do candidato externo deve permanecer disponível independentemente de hospedagem geocodificada:
+
+- com hospedagem, `origin` continua sendo a coordenada persistida da hospedagem;
+- sem hospedagem, `origin` é omitido e o Google Maps pode usar a localização atual/relevante do aparelho;
+- `destination` continua preferindo `nome + endereço` validado conforme RB-INC-163.
 
 ## 3. Decisão
 
@@ -66,6 +74,16 @@ ExternalPlaceCandidate (Overture)
 
 Overture continua sendo a Fonte dos fatos do candidato. Wikimedia é uma capability de mídia separada.
 
+Compatibilidade de rota:
+
+```text
+ExternalDiscoveryCard
+  -> destination = nome + endereço do candidato (RB-INC-163)
+  -> hospedagem geocodificada? sim: origin = hospedagem
+  -> hospedagem geocodificada? não: origin omitido
+  -> Google Maps directions
+```
+
 ## 4. Invariantes
 
 - candidato externo continua não-canônico até promoção explícita;
@@ -76,7 +94,10 @@ Overture continua sendo a Fonte dos fatos do candidato. Wikimedia é uma capabil
 - `ambiguous`, `rejected`, falta de autor/licença ou falha de Provider resultam em fallback;
 - browser nunca recebe URL de Provenance como `src`;
 - browser recebe bytes somente de um endpoint RouteBook que valida a URL Wikimedia permitida;
-- nenhuma busca normal escreve banco ou filesystem.
+- nenhuma busca normal escreve banco ou filesystem;
+- o botão de rota do candidato externo não depende da existência de hospedagem;
+- a ausência de hospedagem nunca substitui o destino semântico por um ponto arbitrário;
+- coordenada de destino continua validada antes da construção do link.
 
 ## 5. Limites de rede e cache
 
@@ -118,6 +139,8 @@ A UI exibe autor/atribuição, licença, `Wikimedia Commons` e link `Ver fonte`.
 - testes unitários do adapter e endpoints;
 - teste de componente para loading/ready/fallback;
 - E2E determinístico da Discovery com endpoints interceptados;
+- compatibilidade de rota do `ExternalDiscoveryCard` quando a hospedagem não possui coordenadas;
+- `buildGoogleMapsDirectionsUrl` aceita origem opcional sem relaxar validação do destino;
 - documentação, Registry e rastreabilidade.
 
 ## 8. Fora de escopo
@@ -131,7 +154,8 @@ A UI exibe autor/atribuição, licença, `Wikimedia Commons` e link `Ver fonte`.
 - promover/publicar candidato por causa da foto;
 - migration/schema;
 - alterar Overture, reconciliação, ranking ou mapa;
-- alterar rotas do RB-INC-163;
+- alterar a identidade/destino semântico das rotas entregues pelo RB-INC-163;
+- ampliar neste incremento o fallback de origem para outras telas além do card externo;
 - concluir M8;
 - promoção para Production sem gate humano separado.
 
@@ -140,6 +164,8 @@ A UI exibe autor/atribuição, licença, `Wikimedia Commons` e link `Ver fonte`.
 ```text
 apps/web/lib/wikimedia-place-image.ts
 apps/web/lib/wikimedia-place-image.test.ts
+apps/web/lib/google-maps-links.ts
+apps/web/lib/google-maps-links.test.ts
 apps/web/app/api/place-image-preview/route.ts
 apps/web/app/api/place-image-preview/route.test.ts
 apps/web/app/api/place-image-preview/file/route.ts
@@ -155,7 +181,7 @@ docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
 
-Exceção operacional transitória, somente se necessária para alinhar a branch com a `main` e aplicar substituições determinísticas no arquivo grande de Discovery:
+Exceção operacional transitória, somente se necessária para alinhar a branch com a `main` ou aplicar substituição determinística previamente verificada no arquivo grande de Discovery:
 
 ```text
 .github/workflows/rb-inc-162-assembly-helper.yml
@@ -174,7 +200,9 @@ Esse helper pode apenas: fazer merge não destrutivo de `origin/main`, substitui
 - [ ] Destination/região e inputs são validados na fronteira HTTP;
 - [ ] proxy restringe host, caminho, MIME, redirect e tamanho;
 - [ ] promoção de RB-INC-148 permanece inalterada;
-- [ ] rotas de RB-INC-163 permanecem inalteradas;
+- [ ] destino semântico de RB-INC-163 permanece inalterado;
+- [ ] candidato externo mantém `Calcular rota real` sem hospedagem, omitindo `origin`;
+- [ ] candidato externo com hospedagem continua usando a hospedagem como `origin`;
 - [ ] nenhuma migration, secret, write ou Provider pago é criado;
 - [ ] Documentation e Engineering Validation passam no mesmo SHA;
 - [ ] Preview Vercel do mesmo SHA fica READY antes do aceite humano.
@@ -189,6 +217,8 @@ Esse helper pode apenas: fazer merge não destrutivo de `origin/main`, substitui
 - proxy rejeita URL/redirect/MIME/tamanho inválidos;
 - componente não busca antes do viewport, renderiza atribuição em sucesso e fallback em erro;
 - E2E intercepta metadata/bytes e comprova foto real no card externo sem alterar a fonte factual Overture;
+- helper de Google Maps comprova origem opcional, destino semântico e validação de coordenada;
+- E2E comprova que `Calcular rota real` existe no candidato externo sem hospedagem, sem parâmetro `origin` e com o destino correto;
 - `pnpm format:check`;
 - `pnpm docs:validate`;
 - `pnpm lint`;
@@ -203,8 +233,9 @@ Esse helper pode apenas: fazer merge não destrutivo de `origin/main`, substitui
 - correspondência textual ainda pode ter falso positivo: política permanece fail-closed e exige identidade + contexto local;
 - latência externa pode atrasar foto: card nasce utilizável com fallback/loading e conteúdo factual não depende da mídia;
 - muitas descobertas podem existir: carregamento por viewport + cache evita consulta simultânea de todos os cards;
-- hotlink não é usado pelo browser; o proxy RouteBook absorve validação e cache, mas ainda depende do Commons em runtime para candidatos externos.
+- hotlink não é usado pelo browser; o proxy RouteBook absorve validação e cache, mas ainda depende do Commons em runtime para candidatos externos;
+- sem hospedagem, a origem efetiva depende da localização disponível ao Google Maps no aparelho; se o aparelho não fornecer uma origem, o Maps pode solicitar que o usuário a informe.
 
 ## 13. Rollback
 
-Todo o incremento é reversível por código. Não existe migration nem estado persistido. Em rollback, candidatos externos voltam a usar somente o fallback visual existente.
+Todo o incremento é reversível por código. Não existe migration nem estado persistido. Em rollback, candidatos externos voltam a usar somente o fallback visual existente e o comportamento de rota volta a depender de hospedagem geocodificada.

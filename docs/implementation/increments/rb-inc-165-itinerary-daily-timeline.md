@@ -95,7 +95,7 @@ Gerar/ver Proposta e Revisar conflitos permanecem acessíveis no cabeçalho comp
 - composição responsiva timeline + mapa;
 - modo compacto do painel espacial dentro do Roteiro;
 - estados vazios orientados a ação;
-- regressão E2E da hierarquia, seleção de Dia, manutenção e mapa;
+- regressão E2E da hierarquia, seleção de Dia, manutenção, mapa e Período livre afetado pela nova composição;
 - documentação, Context Pack e Registry.
 
 ## 5. Fora de escopo
@@ -120,6 +120,7 @@ apps/web/app/viagens/[tripId]/roteiro/itinerary-spatial-panel.tsx
 apps/web/app/viagens/[tripId]/roteiro/itinerary-spatial-panel.module.css
 apps/web/e2e/itinerary.spec.ts
 apps/web/e2e/active-trip-experience.spec.ts
+apps/web/e2e/free-period.spec.ts
 docs/implementation/increments/rb-inc-165-itinerary-daily-timeline.md
 docs/implementation/context-packs/rb-inc-165-itinerary-daily-timeline.md
 docs/registry.md
@@ -144,6 +145,7 @@ Arquivo adicional indispensável exige atualização explícita desta seção e 
 - [ ] mobile prioriza timeline e reduz competição de controles;
 - [ ] estado vazio oferece Explorar, Salvos e criação manual sem penalizar Dia livre;
 - [ ] Proposta e Revisão permanecem disponíveis como ações secundárias;
+- [ ] Período livre continua editável/removível e o teste valida o redirect Server Action e o estado persistido sem depender da estrutura antiga do card;
 - [ ] nenhum novo estado de domínio, migration, Provider ou secret;
 - [ ] Documentation e Engineering Validation passam no mesmo SHA;
 - [ ] Preview Vercel READY do mesmo SHA recebe aceite funcional antes de merge.
@@ -156,6 +158,7 @@ Arquivo adicional indispensável exige atualização explícita desta seção e 
 - E2E comprova ações editar, mover, reordenar e remover acessíveis pelo menu contextual;
 - E2E comprova deslocamento apresentado entre Atividades quando disponível;
 - E2E comprova mapa contextual do mesmo Dia;
+- E2E de Free Period valida resposta de Server Action + persistência sem acoplamento ao markup removido;
 - regressões de Proposal, Free Period e Place Actions permanecem verdes;
 - `node scripts/validate-docs.mjs`;
 - `pnpm format:check`;
@@ -180,4 +183,6 @@ Reverter o incremento restaura a composição visual anterior. Não existe migra
 
 ## 11. Evidência de montagem
 
-A montagem inicial foi concluída na PR `#387`. O helper transitório aplicou o Registry, alinhou os E2E ao menu contextual e foi removido da branch. A primeira Engineering Validation (`#1808`) identificou exclusivamente divergência de Prettier em `page.tsx` e `itinerary.spec.ts`; o formatter oficial do repositório foi aplicado aos dois arquivos no commit `5e6cf8bbcd47a0c29c506016a0f369c8dbbe6012`, novamente com remoção do helper no mesmo ciclo. O próximo SHA normal da branch deve ser usado como candidato para os gates completos e para o Preview de aceite.
+A montagem inicial foi concluída na PR `#387`. O helper transitório aplicou o Registry, alinhou os E2E ao menu contextual e foi removido da branch. A primeira Engineering Validation (`#1808`) identificou exclusivamente divergência de Prettier em `page.tsx` e `itinerary.spec.ts`; o formatter oficial do repositório foi aplicado aos dois arquivos no commit `5e6cf8bbcd47a0c29c506016a0f369c8dbbe6012`, novamente com remoção do helper no mesmo ciclo.
+
+No candidato `958020b0079ea0bd12986dcb85cb279d0ecc4351`, formatação, docs, lint, typecheck, políticas, migrations, testes de domínio/componentes, Overture, imagens, smoke e build passaram. O Playwright expôs duas expectativas antigas de `free-period.spec.ts`: uma dependia de `header small` removido pela nova hierarquia e outra dependia da navegação automática do Server Action, embora o contrato `x-action-redirect` e a persistência continuassem válidos. O arquivo foi incluído explicitamente no escopo para alinhar a regressão ao contrato real, sem alterar domínio ou action.

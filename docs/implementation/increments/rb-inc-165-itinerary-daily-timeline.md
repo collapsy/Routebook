@@ -123,7 +123,10 @@ apps/web/e2e/active-trip-experience.spec.ts
 docs/implementation/increments/rb-inc-165-itinerary-daily-timeline.md
 docs/implementation/context-packs/rb-inc-165-itinerary-daily-timeline.md
 docs/registry.md
+.github/workflows/rb-inc-165-assembly-helper.yml
 ```
+
+O workflow `rb-inc-165-assembly-helper.yml` é uma exceção operacional temporária autorizada apenas para montagem mecânica da branch: inserir RB-165/CTX-165 no Registry, aplicar ajustes locais de microcopy/E2E já definidos pelo incremento, executar Prettier nos arquivos tocados, remover a si próprio e criar o commit resultante. Ele não pode alterar domínio, migrations, Providers, secrets, Production ou workflows canônicos e não pode permanecer no diff final.
 
 Arquivo adicional indispensável exige atualização explícita desta seção e justificativa na PR antes da alteração.
 

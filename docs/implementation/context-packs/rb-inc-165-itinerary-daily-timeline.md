@@ -61,7 +61,8 @@ Transformar o Roteiro em uma superfície operacional do Dia, alinhada aos fluxos
 - distância interna continua geodésica/estimada e qualificada como tal;
 - rota real permanece externa quando disponível;
 - Activity manual sem Place continua válida e legível;
-- Free Period continua distinto de Activity e pode permanecer protegido;
+- Free Period continua distinto de Activity, pode permanecer protegido e mantém seus Server Actions de criação, edição e remoção;
+- redirects de Free Period continuam sendo parte do contrato Server Action e devem ser validados pela resposta quando a navegação cliente for assíncrona;
 - leitura do Roteiro não cria mutations adicionais;
 - evidência técnica não substitui M8 real.
 
@@ -79,11 +80,12 @@ Transformar o Roteiro em uma superfície operacional do Dia, alinhada aos fluxos
 - mapa deve permanecer relacionado ao Dia selecionado e complementar à timeline;
 - no mobile, timeline precede mapa;
 - estados indisponíveis devem degradar sem dados inventados;
+- Períodos livres permanecem legíveis dentro do Dia sem exigir o cabeçalho estrutural antigo do card;
 - Proposta e Revisão devem permanecer acessíveis sem transformar Roteiro em wizard linear.
 
 ## 6. Caminhos permitidos
 
-Somente os caminhos declarados no RB-INC-165 podem ser alterados. A exceção transitória `.github/workflows/rb-inc-165-assembly-helper.yml` está autorizada apenas para a montagem mecânica descrita no incremento e deve remover a si própria no mesmo ciclo. Arquivo adicional exige atualização explícita do incremento e deste Context Pack antes da mudança e justificativa na PR.
+Somente os caminhos declarados no RB-INC-165 podem ser alterados. Isso inclui `apps/web/e2e/free-period.spec.ts` apenas para alinhar as regressões ao contrato Server Action/persistência após a nova composição visual. A exceção transitória `.github/workflows/rb-inc-165-assembly-helper.yml` está autorizada apenas para a montagem mecânica descrita no incremento e deve remover a si própria no mesmo ciclo. Arquivo adicional exige atualização explícita do incremento e deste Context Pack antes da mudança e justificativa na PR.
 
 ## 7. Gates
 
@@ -94,7 +96,7 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
-pnpm --filter @routebook/web exec playwright test e2e/itinerary.spec.ts e2e/active-trip-experience.spec.ts e2e/place-actions.spec.ts
+pnpm --filter @routebook/web exec playwright test e2e/itinerary.spec.ts e2e/active-trip-experience.spec.ts e2e/free-period.spec.ts e2e/place-actions.spec.ts
 ```
 
 Engineering Validation e Documentation Validation devem concluir no mesmo SHA.
@@ -104,6 +106,7 @@ O aceite funcional exige Preview Vercel READY do head final. Merge e Production 
 ## 8. Proibições
 
 - não alterar domínio de Activity, Itinerary ou Free Period;
+- não alterar os Server Actions de Free Period apenas para satisfazer expectativa de markup ou navegação de teste;
 - não persistir estado visual, Dia atual ou ordem paralela;
 - não autoaplicar Guia, Recommendation, Decision ou Proposal;
 - não inventar distância, rota, horário ou localização;
@@ -123,6 +126,7 @@ Relatar:
 - comportamento da timeline e deslocamentos;
 - comportamento desktop/mobile do mapa;
 - ações contextuais preservadas;
+- comportamento de Free Period preservado;
 - arquivos alterados;
 - testes executados e resultados reais;
 - SHA dos gates;

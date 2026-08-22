@@ -39,7 +39,7 @@ async function openManualComposer(page: Page) {
   await expect(page.getByRole("heading", { name: "Adicione uma decisão manual" })).toBeVisible();
 }
 
-test("orienta um dia vazio pela jornada antes das ações manuais", async ({ page }, testInfo) => {
+test("prioriza a timeline do dia vazio antes das ações secundárias", async ({ page }, testInfo) => {
   const tripName = `Jornada vazia ${testInfo.project.name} ${Date.now()}`;
   const { trip } = await createAuthenticatedE2ETrip({
     name: tripName,
@@ -50,11 +50,8 @@ test("orienta um dia vazio pela jornada antes das ações manuais", async ({ pag
   await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-08-22`);
 
   await expect(page.getByRole("heading", { level: 1, name: tripName })).toBeVisible();
-  const journey = page.getByRole("navigation", { name: "Jornada de planejamento" });
-  await expect(journey).toContainText("1. Explorar");
-  await expect(journey).toContainText("2. Salvos");
-  await expect(journey).toContainText("3. Roteiro");
-  await expect(journey).toContainText("4. Revisar");
+  await expect(page.getByRole("navigation", { name: "Jornada de planejamento" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Revisar" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /Dia 1 —/ })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Escolha um Lugar para começar este Dia" }),
@@ -127,6 +124,7 @@ test("remove uma atividade e mantém o mesmo Dia em foco", async ({ page }, test
   );
 
   await expect(page.getByText(activityTitle, { exact: true })).toBeVisible();
+  await page.locator(`summary[aria-label="Opções de ${activityTitle}"]`).click();
   await submitAndExpectActionRedirect(
     page,
     () => page.getByRole("button", { name: `Remover ${activityTitle} do roteiro` }).click(),
@@ -162,6 +160,7 @@ test("edita uma atividade preservando sua identidade e Dia", async ({ page }, te
 
   await expect(page).toHaveURL(/atividadeCriada=1.*dia=2026-08-22/);
   await expect(page.getByText(activityTitle, { exact: true })).toBeVisible();
+  await page.locator(`summary[aria-label="Opções de ${activityTitle}"]`).click();
   await page.locator(`summary[aria-label="Editar ${activityTitle}"]`).click();
   const editForm = page.getByRole("form", { name: `Editar ${activityTitle}` });
   await expect(editForm).toBeVisible();
@@ -209,6 +208,7 @@ test("reordena atividades dentro do mesmo período preservando Dia e sequência"
   const activityTitles = focusedDay.locator(".itinerary-activity-copy strong");
   await expect(activityTitles).toHaveText([firstTitle, secondTitle]);
 
+  await page.locator(`summary[aria-label="Opções de ${secondTitle}"]`).click();
   await submitAndExpectActionRedirect(
     page,
     () => page.getByRole("button", { name: `Subir ${secondTitle} no roteiro` }).click(),
@@ -253,6 +253,7 @@ test("move uma atividade para outro Dia e muda o foco para o destino", async ({
     page.locator(".itinerary-day-card").getByText(activityTitle, { exact: true }),
   ).toBeVisible();
 
+  await page.locator(`summary[aria-label="Opções de ${activityTitle}"]`).click();
   await page.locator(`summary[aria-label="Mover ${activityTitle} para outro dia"]`).click();
   const moveForm = page.getByRole("form", { name: `Mover ${activityTitle} para outro dia` });
   await moveForm.getByLabel("Dia de destino").selectOption("2026-08-23");

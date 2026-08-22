@@ -133,7 +133,16 @@ test("edita e limpa os dados temporais preservando o Dia em foco", async ({ page
   await editor.getByLabel("Duração do período livre (opcional)").fill("");
   const saveButton = editor.getByRole("button", { name: "Salvar período livre" });
   await expect(saveButton).toBeEnabled();
-  await saveButton.click();
+
+  const actionPathname = new URL(page.url()).pathname;
+  const actionResponse = page.waitForResponse((response) => {
+    const request = response.request();
+    return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
+  });
+  const [response] = await Promise.all([actionResponse, saveButton.click()]);
+  const redirectUrl = response.headers()["x-action-redirect"]?.split(";")[0];
+  expect(redirectUrl).toMatch(/periodoLivreEditado=1.*dia=2026-08-23/);
+  await page.goto(redirectUrl!);
 
   await expect(page).toHaveURL(/periodoLivreEditado=1.*dia=2026-08-23/);
   await expect(focusedDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
@@ -177,7 +186,7 @@ test("remove somente o período livre selecionado e preserva os demais no Dia", 
   await expect(focusedDay.getByText("Período livre flexível", { exact: true })).toHaveCount(0);
   await expect(focusedDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
   await expect(focusedDay.getByText("16:00", { exact: true })).toBeVisible();
-  await expect(focusedDay.locator("header small")).toContainText("1 período livre");
+  await expect(page.locator("#dia-em-foco")).toContainText("0 atividades · 1 período livre");
 
   await page.reload();
   await expect(focusedDay.getByText("Período livre flexível", { exact: true })).toHaveCount(0);

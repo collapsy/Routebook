@@ -134,13 +134,7 @@ function ReorderActivityForm({
   );
 }
 
-function TimelineLeg({
-  leg,
-  label,
-}: {
-  leg: ItinerarySpatialLeg;
-  label: string;
-}) {
+function TimelineLeg({ leg, label }: { leg: ItinerarySpatialLeg; label: string }) {
   if (leg.status !== "available") {
     return (
       <div className={journeyStyles.timelineLegUnavailable} role="note">
@@ -341,7 +335,8 @@ export default async function ItineraryPage({
           <p className="product-eyebrow">Roteiro</p>
           <h1>{trip.name}</h1>
           <p className={journeyStyles.itineraryHeaderMeta}>
-            {itinerary.days.length} dias · {activityCount} {activityCount === 1 ? "atividade" : "atividades"}
+            {itinerary.days.length} dias · {activityCount}{" "}
+            {activityCount === 1 ? "atividade" : "atividades"}
             {freePeriodCount > 0
               ? ` · ${freePeriodCount} ${freePeriodCount === 1 ? "período livre" : "períodos livres"}`
               : ""}
@@ -424,7 +419,9 @@ export default async function ItineraryPage({
                 </section>
               ) : (
                 <div className={journeyStyles.timeline}>
-                  {outboundLeg ? <TimelineLeg label="Saindo da hospedagem" leg={outboundLeg} /> : null}
+                  {outboundLeg ? (
+                    <TimelineLeg label="Saindo da hospedagem" leg={outboundLeg} />
+                  ) : null}
 
                   {selectedDay.activities.map((activity, index) => {
                     const previousActivity = selectedDay.activities[index - 1];
@@ -495,7 +492,9 @@ export default async function ItineraryPage({
                                     ) : null}
 
                                     <details className="itinerary-move-disclosure">
-                                      <summary aria-label={`Mover ${activity.title} para outro dia`}>
+                                      <summary
+                                        aria-label={`Mover ${activity.title} para outro dia`}
+                                      >
                                         Mover para outro Dia
                                       </summary>
                                       <form
@@ -504,7 +503,11 @@ export default async function ItineraryPage({
                                         className="itinerary-move-form"
                                       >
                                         <input name="tripId" type="hidden" value={tripId} />
-                                        <input name="activityId" type="hidden" value={activity.id} />
+                                        <input
+                                          name="activityId"
+                                          type="hidden"
+                                          value={activity.id}
+                                        />
 
                                         <div className="form-field">
                                           <label htmlFor={`move-day-${activity.id}`}>
@@ -518,7 +521,8 @@ export default async function ItineraryPage({
                                           >
                                             {targetDays.map((targetDay) => (
                                               <option key={targetDay.id} value={targetDay.date}>
-                                                Dia {targetDay.position} — {formatDate(targetDay.date)}
+                                                Dia {targetDay.position} —{" "}
+                                                {formatDate(targetDay.date)}
                                               </option>
                                             ))}
                                           </select>
@@ -531,17 +535,25 @@ export default async function ItineraryPage({
                                     </details>
 
                                     <details className="itinerary-edit-disclosure">
-                                      <summary aria-label={`Editar ${activity.title}`}>Editar</summary>
+                                      <summary aria-label={`Editar ${activity.title}`}>
+                                        Editar
+                                      </summary>
                                       <form
                                         action={updateItineraryActivityAction}
                                         aria-label={`Editar ${activity.title}`}
                                         className="itinerary-edit-form"
                                       >
                                         <input name="tripId" type="hidden" value={tripId} />
-                                        <input name="activityId" type="hidden" value={activity.id} />
+                                        <input
+                                          name="activityId"
+                                          type="hidden"
+                                          value={activity.id}
+                                        />
 
                                         <div className="form-field itinerary-edit-title">
-                                          <label htmlFor={`edit-title-${activity.id}`}>Título</label>
+                                          <label htmlFor={`edit-title-${activity.id}`}>
+                                            Título
+                                          </label>
                                           <input
                                             defaultValue={activity.title}
                                             id={`edit-title-${activity.id}`}
@@ -628,7 +640,11 @@ export default async function ItineraryPage({
               )}
             </article>
 
-            <section className={journeyStyles.secondaryPlanning} id="planejar-dia" aria-label="Planejar este Dia">
+            <section
+              className={journeyStyles.secondaryPlanning}
+              id="planejar-dia"
+              aria-label="Planejar este Dia"
+            >
               <div className={journeyStyles.secondaryHeading}>
                 <div>
                   <p className="product-eyebrow">Planejar este Dia</p>
@@ -705,9 +721,17 @@ export default async function ItineraryPage({
             </section>
           </main>
 
-          <aside className={journeyStyles.mapColumn} aria-label={`Mapa do Dia ${selectedDay.position}`}>
+          <aside
+            className={journeyStyles.mapColumn}
+            aria-label={`Mapa do Dia ${selectedDay.position}`}
+          >
             <Suspense fallback={<p aria-live="polite">Carregando mapa do Dia…</p>}>
-              <ItinerarySpatialPanel compact days={spatialDays} showDaySelector={false} tripId={tripId} />
+              <ItinerarySpatialPanel
+                compact
+                days={spatialDays}
+                showDaySelector={false}
+                tripId={tripId}
+              />
             </Suspense>
           </aside>
         </div>

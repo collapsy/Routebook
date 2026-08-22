@@ -50,9 +50,7 @@ test("prioriza a timeline do dia vazio antes das ações secundárias", async ({
   await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-08-22`);
 
   await expect(page.getByRole("heading", { level: 1, name: tripName })).toBeVisible();
-  await expect(
-    page.getByRole("navigation", { name: "Jornada de planejamento" }),
-  ).toHaveCount(0);
+  await expect(page.getByRole("navigation", { name: "Jornada de planejamento" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Revisar" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /Dia 1 —/ })).toBeVisible();
   await expect(

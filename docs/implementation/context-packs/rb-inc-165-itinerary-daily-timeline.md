@@ -83,7 +83,7 @@ Transformar o Roteiro em uma superfície operacional do Dia, alinhada aos fluxos
 
 ## 6. Caminhos permitidos
 
-Somente os caminhos declarados no RB-INC-165 podem ser alterados. Arquivo adicional exige atualização explícita do incremento e deste Context Pack antes da mudança e justificativa na PR.
+Somente os caminhos declarados no RB-INC-165 podem ser alterados. A exceção transitória `.github/workflows/rb-inc-165-assembly-helper.yml` está autorizada apenas para a montagem mecânica descrita no incremento e deve remover a si própria no mesmo ciclo. Arquivo adicional exige atualização explícita do incremento e deste Context Pack antes da mudança e justificativa na PR.
 
 ## 7. Gates
 
@@ -130,3 +130,7 @@ Relatar:
 - riscos residuais;
 - issue e PR;
 - decisão humana pendente para merge/Production.
+
+## 10. Exceção operacional temporária
+
+O helper `.github/workflows/rb-inc-165-assembly-helper.yml` pode somente: inserir as duas entradas de RB-165 no Registry, aplicar substituições mecânicas nos E2E já autorizados para abrir o menu contextual antes das ações, trocar a categoria técnica por microcopy legível no Roteiro, executar Prettier nos arquivos afetados, remover a si próprio e criar o commit resultante. Não pode tocar domínio, dados, migrations, Providers, secrets, Production ou workflows canônicos e não pode permanecer no diff final da PR.

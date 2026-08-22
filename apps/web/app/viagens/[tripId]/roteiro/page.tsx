@@ -46,6 +46,13 @@ export const metadata: Metadata = {
   description: "Organize atividades e períodos livres por dia da viagem.",
 };
 
+const categoryLabels = {
+  beach: "Praia",
+  gastronomy: "Gastronomia",
+  nature: "Natureza",
+  nightlife: "Vida noturna",
+} as const;
+
 const proposalErrorMessages: Readonly<Record<string, string>> = {
   "referencia-invalida":
     "A referência da proposta é inválida. O Roteiro atual permanece preservado.",
@@ -446,7 +453,7 @@ export default async function ItineraryPage({
                                     {activity.durationMinutes
                                       ? formatDuration(activity.durationMinutes)
                                       : "Duração aberta"}
-                                    {place ? ` · ${place.category}` : ""}
+                                    {place ? ` · ${categoryLabels[place.category]}` : ""}
                                   </small>
                                 </div>
                                 <details className={journeyStyles.activityMenu}>

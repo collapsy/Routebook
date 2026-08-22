@@ -191,4 +191,4 @@ test("remove somente o período livre selecionado e preserva os demais no Dia", 
   await page.reload();
   await expect(focusedDay.getByText("Período livre flexível", { exact: true })).toHaveCount(0);
   await expect(focusedDay.getByText("Período livre protegido", { exact: true })).toBeVisible();
-});
+}

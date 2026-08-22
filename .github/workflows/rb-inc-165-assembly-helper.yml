@@ -1,0 +1,42 @@
+name: RB-INC-165 Assembly Helper
+
+on:
+  push:
+    branches:
+      - codex/rb-inc-165-itinerary-daily-timeline
+    paths:
+      - .github/workflows/rb-inc-165-assembly-helper.yml
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: codex/rb-inc-165-itinerary-daily-timeline
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Apply repository Prettier
+        run: >-
+          pnpm exec prettier --write
+          'apps/web/app/viagens/[tripId]/roteiro/page.tsx'
+          'apps/web/e2e/itinerary.spec.ts'
+      - name: Remove helper and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/rb-inc-165-assembly-helper.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            apps/web/app/viagens/'[tripId]'/roteiro/page.tsx \
+            apps/web/e2e/itinerary.spec.ts
+          git commit -m "chore: format RB-165 candidate"
+          git push origin HEAD:codex/rb-inc-165-itinerary-daily-timeline

@@ -177,3 +177,7 @@ Arquivo adicional indispensável exige atualização explícita desta seção e 
 ## 10. Rollback
 
 Reverter o incremento restaura a composição visual anterior. Não existe migration, Provider, secret, schema ou dado persistido novo para desfazer.
+
+## 11. Evidência de montagem
+
+A montagem inicial foi concluída na PR `#387`. O helper transitório aplicou o Registry, alinhou os E2E ao menu contextual e foi removido da branch. A primeira Engineering Validation (`#1808`) identificou exclusivamente divergência de Prettier em `page.tsx` e `itinerary.spec.ts`; o formatter oficial do repositório foi aplicado aos dois arquivos no commit `5e6cf8bbcd47a0c29c506016a0f369c8dbbe6012`, novamente com remoção do helper no mesmo ciclo. O próximo SHA normal da branch deve ser usado como candidato para os gates completos e para o Preview de aceite.

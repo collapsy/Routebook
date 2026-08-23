@@ -159,7 +159,10 @@ function haveEquivalentBeachIdentityNames(first: string, second: string): boolea
   if (firstTokens.length === 0 || firstTokens.length !== secondTokens.length) return false;
 
   const secondSet = new Set(secondTokens);
-  return new Set(firstTokens).size === secondSet.size && firstTokens.every((token) => secondSet.has(token));
+  return (
+    new Set(firstTokens).size === secondSet.size &&
+    firstTokens.every((token) => secondSet.has(token))
+  );
 }
 
 function candidatesRepresentSamePlace(
@@ -181,10 +184,7 @@ function candidatesRepresentSamePlace(
     return true;
   }
 
-  if (
-    first.category === "beach" &&
-    haveEquivalentBeachIdentityNames(first.name, second.name)
-  ) {
+  if (first.category === "beach" && haveEquivalentBeachIdentityNames(first.name, second.name)) {
     return true;
   }
 

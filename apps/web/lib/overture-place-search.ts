@@ -34,6 +34,30 @@ const KNOWN_SOURCE_LICENSES: Readonly<Record<string, string>> = Object.freeze({
   brightquery: "CDLA-Permissive-2.0",
 });
 
+const BEACH_NAME_MARKERS = new Set(["baia", "bahia", "beach", "playa", "praia"]);
+const BEACH_BUSINESS_TOKENS = new Set([
+  "apart",
+  "apartamento",
+  "apartamentos",
+  "bar",
+  "club",
+  "clube",
+  "condominio",
+  "flat",
+  "flats",
+  "hostel",
+  "hotel",
+  "pousada",
+  "residencia",
+  "residencial",
+  "residence",
+  "resort",
+  "restaurant",
+  "restaurante",
+  "suite",
+  "suites",
+]);
+
 type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 
 type OvertureArchive = Readonly<{
@@ -103,6 +127,25 @@ function sourceDatasetKey(value: unknown): string {
   return text(value)
     .toLowerCase()
     .replace(/[\s_]+/g, "-");
+}
+
+function normalizedNameTokens(value: string): string[] {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+export function isPlausibleOvertureBeachName(name: string): boolean {
+  const tokens = normalizedNameTokens(name);
+  if (tokens.length === 0 || tokens.some((token) => BEACH_BUSINESS_TOKENS.has(token))) {
+    return false;
+  }
+  return tokens.some((token) => BEACH_NAME_MARKERS.has(token));
 }
 
 export function resolveOvertureTileSourceLicense(
@@ -266,6 +309,7 @@ function normalizeTileFeature(
   if (!externalId || name.length < 2 || !providerCategory || !category || !sourceLicense) {
     return undefined;
   }
+  if (category === "beach" && !isPlausibleOvertureBeachName(name)) return undefined;
   if (confidence !== undefined && confidence < minimumConfidence) return undefined;
 
   const address = addressLabel(feature.properties);

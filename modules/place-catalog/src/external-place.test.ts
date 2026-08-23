@@ -80,6 +80,15 @@ describe("mapOverturePlaceCategory", () => {
     ).toBe("gastronomy");
   });
 
+  it("não transforma POI relacionado em praia somente por ancestral da taxonomia", () => {
+    expect(mapOverturePlaceCategory("beach_club", ["leisure", "beach"])).toBeUndefined();
+    expect(mapOverturePlaceCategory("parking", ["transportation", "beach"])).toBeUndefined();
+  });
+
+  it("mantém beach quando a evidência de categoria é direta", () => {
+    expect(mapOverturePlaceCategory("beach", ["outdoors", "natural_feature"])).toBe("beach");
+  });
+
   it("não inventa categoria canônica para categoria desconhecida", () => {
     expect(mapOverturePlaceCategory("pet_store")).toBeUndefined();
   });
@@ -164,6 +173,38 @@ describe("isStrongExternalPlaceIdentityMatch", () => {
     expect(isStrongExternalPlaceIdentityMatch(external, canonical)).toBe(true);
   });
 
+  it("reconhece alias português/inglês da mesma praia", () => {
+    const canonical = place({
+      name: "Praia do Madeiro",
+      slug: "praia-do-madeiro",
+      latitude: -6.2214,
+      longitude: -35.0573,
+    });
+    const external = candidate({
+      name: "Madeiro Beach",
+      latitude: -6.2216,
+      longitude: -35.0572,
+    });
+
+    expect(isStrongExternalPlaceIdentityMatch(external, canonical)).toBe(true);
+  });
+
+  it("preserva Pipa como âncora quando ela é o próprio nome da praia", () => {
+    const canonical = place({
+      name: "Praia de Pipa",
+      slug: "praia-de-pipa",
+      latitude: -6.2293,
+      longitude: -35.0488,
+    });
+    const external = candidate({
+      name: "Pipa Beach",
+      latitude: -6.2295,
+      longitude: -35.0487,
+    });
+
+    expect(isStrongExternalPlaceIdentityMatch(external, canonical)).toBe(true);
+  });
+
   it("não funde negócios vizinhos quando apenas categoria e proximidade coincidem", () => {
     const canonical = place({
       name: "Restaurante Horizonte",
@@ -187,6 +228,15 @@ describe("isStrongExternalPlaceIdentityMatch", () => {
       isStrongExternalPlaceIdentityMatch(
         candidate({ name: "Praia de Pipa", latitude: -6.23, longitude: -35.05 }),
         place({ name: "Praia do Centro", latitude: -6.2301, longitude: -35.0501 }),
+      ),
+    ).toBe(false);
+  });
+
+  it("não funde praias vizinhas com âncoras nominais diferentes", () => {
+    expect(
+      isStrongExternalPlaceIdentityMatch(
+        candidate({ name: "Madeiro Beach", latitude: -6.2215, longitude: -35.0573 }),
+        place({ name: "Praia de Cacimbinhas", latitude: -6.2208, longitude: -35.0571 }),
       ),
     ).toBe(false);
   });
@@ -234,6 +284,30 @@ describe("reconcileExternalPlaceCandidate", () => {
         category: "gastronomy",
         latitude: -6.2292,
         longitude: -35.0481,
+      }),
+      [canonical],
+    );
+
+    expect(result).toMatchObject({
+      status: "possible_match",
+      matchedPlaceId: canonical.id,
+    });
+    expect(result.reason).toContain("Identidade nominal");
+  });
+
+  it("retém alias de praia como possível duplicata forte", () => {
+    const canonical = place({
+      name: "Praia do Madeiro",
+      slug: "praia-do-madeiro",
+      latitude: -6.2214,
+      longitude: -35.0573,
+    });
+    const result = reconcileExternalPlaceCandidate(
+      candidate({
+        externalId: "madeiro-beach",
+        name: "Madeiro Beach",
+        latitude: -6.2216,
+        longitude: -35.0572,
       }),
       [canonical],
     );

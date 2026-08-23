@@ -91,7 +91,8 @@ const GENERIC_IDENTITY_TOKENS = new Set([
   "restaurante",
 ]);
 
-const BEACH_IDENTITY_DESCRIPTORS = new Set(["beach", "playa", "praia"]);
+const BEACH_IDENTITY_DESCRIPTORS = new Set(["baia", "bahia", "beach", "playa", "praia"]);
+const BEACH_ALIAS_MAX_DISTANCE_METERS = 10_000;
 
 function itemName(item: PlaceDiscoveryItem): string {
   return item.kind === "external" ? item.candidate.name : item.place.name;
@@ -142,27 +143,64 @@ function identityTokens(value: string): string[] {
   );
 }
 
-function beachIdentityAnchorTokens(value: string): string[] {
-  const tokens = normalizedNameTokens(value).filter(
+function beachIdentityTokens(value: string): string[] {
+  const segments = value
+    .split(/[,/\-–—]+/)
+    .map(normalizeIdentity)
+    .filter(Boolean);
+  const selectedSegment =
+    segments.find((segment) =>
+      normalizedNameTokens(segment).some((token) => BEACH_IDENTITY_DESCRIPTORS.has(token)),
+    ) ?? segments[0] ?? normalizeIdentity(value);
+
+  return normalizedNameTokens(selectedSegment).filter(
     (token) =>
       !IDENTITY_STOP_WORDS.has(token) &&
       !BEACH_IDENTITY_DESCRIPTORS.has(token) &&
-      !GENERIC_IDENTITY_TOKENS.has(token),
+      !GENERIC_IDENTITY_TOKENS.has(token) &&
+      !(token.length === 2 && /^[a-z]{2}$/.test(token)),
   );
-  const nonRegionalTokens = tokens.filter((token) => !REGIONAL_IDENTITY_TOKENS.has(token));
-  return nonRegionalTokens.length > 0 ? nonRegionalTokens : tokens;
+}
+
+function tokenEditDistance(first: string, second: string): number {
+  const previous = Array.from({ length: second.length + 1 }, (_, index) => index);
+  for (let firstIndex = 1; firstIndex <= first.length; firstIndex += 1) {
+    const current = [firstIndex];
+    for (let secondIndex = 1; secondIndex <= second.length; secondIndex += 1) {
+      current[secondIndex] = Math.min(
+        (current[secondIndex - 1] ?? 0) + 1,
+        (previous[secondIndex] ?? 0) + 1,
+        (previous[secondIndex - 1] ?? 0) +
+          (first[firstIndex - 1] === second[secondIndex - 1] ? 0 : 1),
+      );
+    }
+    previous.splice(0, previous.length, ...current);
+  }
+  return previous[second.length] ?? Number.POSITIVE_INFINITY;
 }
 
 function haveEquivalentBeachIdentityNames(first: string, second: string): boolean {
-  const firstTokens = beachIdentityAnchorTokens(first);
-  const secondTokens = beachIdentityAnchorTokens(second);
-  if (firstTokens.length === 0 || firstTokens.length !== secondTokens.length) return false;
+  const firstTokens = beachIdentityTokens(first);
+  const secondTokens = beachIdentityTokens(second);
+  if (firstTokens.length === 0 || secondTokens.length === 0) return false;
 
-  const secondSet = new Set(secondTokens);
-  return (
-    new Set(firstTokens).size === secondSet.size &&
-    firstTokens.every((token) => secondSet.has(token))
-  );
+  if (
+    firstTokens.length === secondTokens.length &&
+    firstTokens.every((token, index) => token === secondTokens[index])
+  ) {
+    return true;
+  }
+
+  if (firstTokens.length === 1 && secondTokens.length === 1) {
+    const [firstToken] = firstTokens;
+    const [secondToken] = secondTokens;
+    if (!firstToken || !secondToken || Math.min(firstToken.length, secondToken.length) < 6) {
+      return false;
+    }
+    return tokenEditDistance(firstToken, secondToken) <= 2;
+  }
+
+  return false;
 }
 
 function candidatesRepresentSamePlace(
@@ -173,6 +211,13 @@ function candidatesRepresentSamePlace(
   if (!first.category || first.category !== second.category) return false;
 
   const distanceMeters = placeDistanceMeters(first, second);
+  if (
+    first.category === "beach" &&
+    distanceMeters <= BEACH_ALIAS_MAX_DISTANCE_METERS &&
+    haveEquivalentBeachIdentityNames(first.name, second.name)
+  ) {
+    return true;
+  }
   if (distanceMeters > 500) return false;
 
   if (normalizeIdentity(first.name) === normalizeIdentity(second.name)) return true;
@@ -181,10 +226,6 @@ function candidatesRepresentSamePlace(
     second.addressLabel &&
     normalizeIdentity(first.addressLabel) === normalizeIdentity(second.addressLabel)
   ) {
-    return true;
-  }
-
-  if (first.category === "beach" && haveEquivalentBeachIdentityNames(first.name, second.name)) {
     return true;
   }
 

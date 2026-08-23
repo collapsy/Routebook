@@ -91,6 +91,8 @@ const GENERIC_IDENTITY_TOKENS = new Set([
   "restaurante",
 ]);
 
+const BEACH_IDENTITY_DESCRIPTORS = new Set(["beach", "playa", "praia"]);
+
 function itemName(item: PlaceDiscoveryItem): string {
   return item.kind === "external" ? item.candidate.name : item.place.name;
 }
@@ -130,11 +132,34 @@ function normalizeIdentity(value: string): string {
     .replace(/\s+/g, " ");
 }
 
+function normalizedNameTokens(value: string): string[] {
+  return normalizeIdentity(value).split(" ").filter(Boolean);
+}
+
 function identityTokens(value: string): string[] {
-  return normalizeIdentity(value)
-    .split(" ")
-    .filter(Boolean)
-    .filter((token) => !IDENTITY_STOP_WORDS.has(token) && !REGIONAL_IDENTITY_TOKENS.has(token));
+  return normalizedNameTokens(value).filter(
+    (token) => !IDENTITY_STOP_WORDS.has(token) && !REGIONAL_IDENTITY_TOKENS.has(token),
+  );
+}
+
+function beachIdentityAnchorTokens(value: string): string[] {
+  const tokens = normalizedNameTokens(value).filter(
+    (token) =>
+      !IDENTITY_STOP_WORDS.has(token) &&
+      !BEACH_IDENTITY_DESCRIPTORS.has(token) &&
+      !GENERIC_IDENTITY_TOKENS.has(token),
+  );
+  const nonRegionalTokens = tokens.filter((token) => !REGIONAL_IDENTITY_TOKENS.has(token));
+  return nonRegionalTokens.length > 0 ? nonRegionalTokens : tokens;
+}
+
+function haveEquivalentBeachIdentityNames(first: string, second: string): boolean {
+  const firstTokens = beachIdentityAnchorTokens(first);
+  const secondTokens = beachIdentityAnchorTokens(second);
+  if (firstTokens.length === 0 || firstTokens.length !== secondTokens.length) return false;
+
+  const secondSet = new Set(secondTokens);
+  return new Set(firstTokens).size === secondSet.size && firstTokens.every((token) => secondSet.has(token));
 }
 
 function candidatesRepresentSamePlace(
@@ -152,6 +177,13 @@ function candidatesRepresentSamePlace(
     first.addressLabel &&
     second.addressLabel &&
     normalizeIdentity(first.addressLabel) === normalizeIdentity(second.addressLabel)
+  ) {
+    return true;
+  }
+
+  if (
+    first.category === "beach" &&
+    haveEquivalentBeachIdentityNames(first.name, second.name)
   ) {
     return true;
   }

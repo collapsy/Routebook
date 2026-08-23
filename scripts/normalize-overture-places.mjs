@@ -44,6 +44,29 @@ const KNOWN_SOURCE_LICENSES = Object.freeze({
 });
 
 const OVERTURE_PLACES_SOURCE_URL = "https://docs.overturemaps.org/guides/places/";
+const BEACH_NAME_MARKERS = new Set(["baia", "bahia", "beach", "playa", "praia"]);
+const BEACH_BUSINESS_TOKENS = new Set([
+  "apart",
+  "apartamento",
+  "apartamentos",
+  "bar",
+  "club",
+  "clube",
+  "condominio",
+  "flat",
+  "flats",
+  "hostel",
+  "hotel",
+  "pousada",
+  "residencia",
+  "residencial",
+  "residence",
+  "resort",
+  "restaurant",
+  "restaurante",
+  "suite",
+  "suites",
+]);
 
 function text(value) {
   return typeof value === "string" ? value.trim() : "";
@@ -57,6 +80,25 @@ function sourceDatasetKey(value) {
   return text(value)
     .toLowerCase()
     .replace(/[\s_]+/g, "-");
+}
+
+function normalizedNameTokens(value) {
+  return text(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+export function isPlausibleOvertureBeachName(name) {
+  const tokens = normalizedNameTokens(name);
+  if (tokens.length === 0 || tokens.some((token) => BEACH_BUSINESS_TOKENS.has(token))) {
+    return false;
+  }
+  return tokens.some((token) => BEACH_NAME_MARKERS.has(token));
 }
 
 export function resolveOvertureSourceLicense(source) {
@@ -75,14 +117,17 @@ export function resolveOvertureSourceLicense(source) {
 }
 
 export function mapOvertureCategory(category, hierarchy = []) {
-  const values = [category, ...(Array.isArray(hierarchy) ? hierarchy : [])]
+  const direct = ROUTEBOOK_CATEGORY_BY_OVERTURE_CATEGORY[text(category).toLowerCase()];
+  if (direct) return direct;
+
+  const values = (Array.isArray(hierarchy) ? hierarchy : [])
     .map((value) => text(value).toLowerCase())
     .filter(Boolean)
     .reverse();
 
   for (const value of values) {
     const mapped = ROUTEBOOK_CATEGORY_BY_OVERTURE_CATEGORY[value];
-    if (mapped) return mapped;
+    if (mapped && mapped !== "beach") return mapped;
   }
   return undefined;
 }
@@ -160,6 +205,9 @@ export function normalizeOvertureFeature(feature, { collectedAt, minimumConfiden
   if (name.length < 2) return rejection("missing-name");
   if (!providerCategory) return rejection("missing-category");
   if (!category) return rejection("unsupported-category");
+  if (category === "beach" && !isPlausibleOvertureBeachName(name)) {
+    return rejection("implausible-beach-name");
+  }
   if (
     latitude === undefined ||
     longitude === undefined ||

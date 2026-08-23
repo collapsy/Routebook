@@ -142,7 +142,7 @@ const GENERIC_IDENTITY_TOKENS = new Set([
 ]);
 
 const BEACH_IDENTITY_DESCRIPTORS = new Set(["baia", "bahia", "beach", "playa", "praia"]);
-const BEACH_ALIAS_MAX_DISTANCE_METERS = 10_000;
+const BEACH_ALIAS_MAX_DISTANCE_METERS = 500;
 
 function normalizeOvertureCategory(value: string): string {
   return value.trim().toLowerCase();

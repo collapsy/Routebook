@@ -91,7 +91,7 @@ describe("buildPlanningConflictReview", () => {
       title: "Horários sobrepostos",
       dayLabel: "Dia 1 · 22 de agosto",
       activityTitles: ["Café na vila", "Passeio de barco"],
-      itineraryHref: `/viagens/trip-1/roteiro#${day.id}`,
+      itineraryHref: `/viagens/trip-1/roteiro?dia=${day.date}#dia-em-foco`,
       canIgnore: true,
     });
     expect(review.items[0]?.explanation).not.toContain(firstActivity.id);

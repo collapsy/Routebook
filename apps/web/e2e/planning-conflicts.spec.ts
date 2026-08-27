@@ -61,15 +61,16 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
   await expect(page.getByText("Nenhum conflito desta severidade", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: /Riscos 1/ }).click();
   const affectedDayLink = conflictList.getByRole("link", { name: /Ver dia no Roteiro/ });
-  await expect(affectedDayLink).toHaveAttribute("href", /\/roteiro#[^#]+$/);
+  await expect(affectedDayLink).toHaveAttribute(
+    "href",
+    /\/roteiro\?dia=2026-08-22#dia-em-foco$/,
+  );
   const affectedDayHref = await affectedDayLink.getAttribute("href");
   expect(affectedDayHref).not.toBeNull();
   await page.goto(affectedDayHref!);
-  await expect(page).toHaveURL(/\/roteiro#[^#]+$/);
+  await expect(page).toHaveURL(/\/roteiro\?dia=2026-08-22#dia-em-foco$/);
 
-  const affectedDayId = new URL(page.url()).hash.slice(1);
-  expect(affectedDayId).not.toBe("");
-  const affectedDay = page.locator(`.itinerary-day-card[id="${affectedDayId}"]`);
+  const affectedDay = page.locator(".itinerary-day-card");
   await expect(affectedDay.getByText(firstActivity, { exact: true })).toBeVisible();
   await expect(affectedDay.getByText(secondActivity, { exact: true })).toBeVisible();
 
@@ -111,6 +112,8 @@ test("ignora um risco e preserva seu histórico auditável", async ({ page }, te
   expect(itineraryHref).not.toBeNull();
   await page.goto(itineraryHref!);
   await expect(page).toHaveURL(/\/roteiro$/);
+  await page.getByRole("link", { name: /Dia 1/ }).click();
+  await expect(page).toHaveURL(/dia=2026-08-22/);
   await expect(page.getByText(firstActivity, { exact: true })).toBeVisible();
   await expect(page.getByText(secondActivity, { exact: true })).toBeVisible();
 });

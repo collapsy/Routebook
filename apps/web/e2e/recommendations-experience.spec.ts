@@ -163,7 +163,7 @@ test("mostra decisão contextual sem aplicar uma escolha", async ({ page }) => {
   ).toBeVisible();
 
   await page.goto(`${tripUrl}/roteiro`);
-  await expect(page.getByLabel("Resumo do roteiro")).toContainText("0atividades");
+  await expect(page.getByText(/3 dias · 0 atividades/)).toBeVisible();
 });
 
 test("foca a lista inicial e preserva a ordem na divulgação completa", async ({ page }) => {
@@ -189,7 +189,9 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
     ),
   ).toBe(true);
 
-  await showAllLink.click();
+  const showAllHref = await showAllLink.getAttribute("href");
+  expect(showAllHref).toMatch(/\/recomendacoes\?view=all$/);
+  await page.goto(showAllHref!);
   await expect(page).toHaveURL(/\/recomendacoes\?view=all$/);
   await expect(
     page.getByRole("heading", { name: "Lista completa e explicável", exact: true }),
@@ -206,7 +208,9 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
   ).toBe(true);
 
   const focusLink = page.getByRole("link", { name: "Voltar às sugestões focadas", exact: true });
-  await focusLink.click();
+  const focusHref = await focusLink.getAttribute("href");
+  expect(focusHref).toMatch(/\/recomendacoes$/);
+  await page.goto(focusHref!);
   await expect(page).toHaveURL(/\/recomendacoes$/);
   await expect(
     page

@@ -384,6 +384,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-164 | Identidade única e catálogo external-first de Places | Implementation | Draft | 0.1.0 | [rb-inc-164-unified-place-identity.md](./implementation/increments/rb-inc-164-unified-place-identity.md) |
 | RB-CTX-164 | Context Pack do RB-INC-164 — Identidade única e catálogo external-first de Places | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-164-unified-place-identity.md](./implementation/context-packs/rb-inc-164-unified-place-identity.md) |
 
+| RB-INC-165 | Roteiro diário operacional e timeline contextual | Implementation | Draft | 0.1.0 | [rb-inc-165-itinerary-daily-timeline.md](./implementation/increments/rb-inc-165-itinerary-daily-timeline.md) |
+| RB-CTX-165 | Context Pack do RB-INC-165 — Roteiro diário operacional e timeline contextual | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-165-itinerary-daily-timeline.md](./implementation/context-packs/rb-inc-165-itinerary-daily-timeline.md) |
 | RB-INC-168 | Ranking e qualidade contextual de Places | Implementation | Draft | 0.1.0 | [rb-inc-168-place-quality-ranking.md](./implementation/increments/rb-inc-168-place-quality-ranking.md) |
 | RB-CTX-168 | Context Pack do RB-INC-168 — Ranking e qualidade contextual de Places | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-168-place-quality-ranking.md](./implementation/context-packs/rb-inc-168-place-quality-ranking.md) |
 

@@ -125,6 +125,7 @@ test("mantém navegação e ações secundárias operáveis em viewport mobile",
 
   const activity = page.locator(".itinerary-day-card").filter({ hasText: "Passeio do Dia atual" });
   await expect(activity).toBeVisible();
+  await activity.locator('summary[aria-label="Opções de Passeio do Dia atual"]').click();
   await expect(
     activity.locator('summary[aria-label^="Editar Passeio do Dia atual"]'),
   ).toBeVisible();

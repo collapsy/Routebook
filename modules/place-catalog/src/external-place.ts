@@ -282,7 +282,9 @@ function beachIdentityTokens(value: string): string[] {
   const selectedSegment =
     segments.find((segment) =>
       normalizedNameTokens(segment).some((token) => BEACH_IDENTITY_DESCRIPTORS.has(token)),
-    ) ?? segments[0] ?? normalizeIdentity(value);
+    ) ??
+    segments[0] ??
+    normalizeIdentity(value);
 
   return normalizedNameTokens(selectedSegment).filter(
     (token) =>

@@ -215,7 +215,7 @@ export default async function ItineraryPage({
   } = await searchParams;
   const manualPrefillTitle = novaAtividade?.trim().slice(0, 180) || undefined;
   const manualPrefillTime =
-    horario && /^([01]\\d|2[0-3]):[0-5]\\d$/.test(horario) ? horario : undefined;
+    horario && /^([01]\d|2[0-3]):[0-5]\d$/.test(horario) ? horario : undefined;
   const parsedManualDuration = duracao ? Number.parseInt(duracao, 10) : Number.NaN;
   const manualPrefillDuration =
     Number.isInteger(parsedManualDuration) &&

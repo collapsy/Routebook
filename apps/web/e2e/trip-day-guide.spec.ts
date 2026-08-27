@@ -177,6 +177,7 @@ test("separa observação natural de rolês confirmados no Guia", async ({ page 
 
   const addToItinerary = eventCard.getByRole("link", { name: "Adicionar ao Roteiro" });
   await expect(addToItinerary).toHaveAttribute("href", /dia=2026-08-28/);
+  await expect(addToItinerary).toHaveAttribute("href", /horario=22%3A00/);
   await addToItinerary.click();
 
   const manualComposer = page.locator("#adicionar-atividade-manual");

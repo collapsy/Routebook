@@ -20,7 +20,7 @@
     "materialize:place-images": "node scripts/materialize-place-images.mjs --materialize",
     "promote:place-candidates": "pnpm --filter @routebook/database exec tsx ../../scripts/promote-place-candidates.mjs",
     "smoke:operational": "node scripts/operational-smoke.mjs",
-    "test": "turbo run test",
+    "test": "turbo run test && pnpm test:place-quality-provider-spike",
     "test:operational-smoke": "node --test scripts/operational-smoke.test.mjs",
     "test:overture-place-normalizer": "node --test scripts/normalize-overture-places.test.mjs",
     "test:place-images": "node --test scripts/materialize-place-images.test.mjs && node scripts/materialize-place-images.mjs --verify",
@@ -28,7 +28,9 @@
     "test:release-migration-policy": "node --test scripts/release-migration-policy.test.mjs",
     "test:vercel-staged-deployment": "node --test scripts/verify-vercel-staged-deployment.test.mjs",
     "test:e2e": "pnpm --filter @routebook/web test:e2e",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "spike:place-quality-providers": "node scripts/compare-place-quality-providers.mjs",
+    "test:place-quality-provider-spike": "node --test scripts/compare-place-quality-providers.test.mjs"
   },
   "devDependencies": {
     "prettier": "3.9.6",

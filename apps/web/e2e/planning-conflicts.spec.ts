@@ -61,10 +61,7 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
   await expect(page.getByText("Nenhum conflito desta severidade", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: /Riscos 1/ }).click();
   const affectedDayLink = conflictList.getByRole("link", { name: /Ver dia no Roteiro/ });
-  await expect(affectedDayLink).toHaveAttribute(
-    "href",
-    /\/roteiro\?dia=2026-08-22#dia-em-foco$/,
-  );
+  await expect(affectedDayLink).toHaveAttribute("href", /\/roteiro\?dia=2026-08-22#dia-em-foco$/);
   const affectedDayHref = await affectedDayLink.getAttribute("href");
   expect(affectedDayHref).not.toBeNull();
   await page.goto(affectedDayHref!);

@@ -386,6 +386,62 @@ describe("buildPlaceDiscoveryFeed", () => {
     ).toEqual(expect.arrayContaining(["madeiro", "cacimbinhas"]));
   });
 
+  it("suprime alias distante de praia sem enriquecer a coordenada canônica", () => {
+    const published = publishedPlace({
+      name: "Praia do Madeiro",
+      slug: "praia-do-madeiro",
+      latitude: -6.22271,
+      longitude: -35.07068,
+    });
+    const displacedAlias = externalCandidate({
+      externalId: "madeira-overture",
+      name: "Praia Da Madeira",
+      providerCategory: "beach",
+      category: "beach",
+      latitude: -6.236988,
+      longitude: -35.048614,
+      confidence: 0.99,
+    });
+
+    const result = buildPlaceDiscoveryFeed({
+      publishedPlaces: [published],
+      externalCandidates: [displacedAlias],
+      reference,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      kind: "published",
+      place: published,
+    });
+  });
+
+  it("suprime typo distante de praia quando a âncora canônica é inequívoca", () => {
+    const published = publishedPlace({
+      name: "Praia de Cacimbinhas",
+      slug: "praia-de-cacimbinhas",
+      latitude: -6.2137403,
+      longitude: -35.077037,
+    });
+    const displacedAlias = externalCandidate({
+      externalId: "casinbinha-overture",
+      name: "Praia De Casinbinha",
+      providerCategory: "beach",
+      category: "beach",
+      latitude: -6.228402,
+      longitude: -35.049438,
+    });
+
+    const result = buildPlaceDiscoveryFeed({
+      publishedPlaces: [published],
+      externalCandidates: [displacedAlias],
+      reference,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.kind).toBe("published");
+  });
+
   it("não aplica limite aos Places canônicos ou enriquecidos", () => {
     const published = publishedPlace({
       name: "Praia do Amor",

@@ -199,8 +199,7 @@ function haveEquivalentBeachIdentityNames(first: string, second: string): boolea
     if (!firstToken || !secondToken || Math.min(firstToken.length, secondToken.length) < 6) {
       return false;
     }
-    const maximumEditDistance =
-      Math.min(firstToken.length, secondToken.length) >= 8 ? 3 : 2;
+    const maximumEditDistance = Math.min(firstToken.length, secondToken.length) >= 8 ? 3 : 2;
     return tokenEditDistance(firstToken, secondToken) <= maximumEditDistance;
   }
 

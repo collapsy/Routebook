@@ -249,7 +249,7 @@ test("salva Recommendation sem criar Activity", async ({ page }) => {
   ).toBeVisible();
 
   await page.goto(`${tripUrl}/roteiro`);
-  await expect(page.getByLabel("Resumo do roteiro")).toContainText("0atividades");
+  await expect(page.getByText(/3 dias · 0 atividades/)).toBeVisible();
 });
 
 test("adiciona Recommendation ao Dia escolhido", async ({ page }) => {
@@ -350,5 +350,5 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
   ).toBeVisible();
 
   await page.goto(`${tripUrl}/roteiro`);
-  await expect(page.getByLabel("Resumo do roteiro")).toContainText("0atividades");
+  await expect(page.getByText(/3 dias · 0 atividades/)).toBeVisible();
 });

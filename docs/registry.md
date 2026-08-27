@@ -389,6 +389,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-168 | Ranking e qualidade contextual de Places | Implementation | Draft | 0.1.0 | [rb-inc-168-place-quality-ranking.md](./implementation/increments/rb-inc-168-place-quality-ranking.md) |
 | RB-CTX-168 | Context Pack do RB-INC-168 — Ranking e qualidade contextual de Places | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-168-place-quality-ranking.md](./implementation/context-packs/rb-inc-168-place-quality-ranking.md) |
 
+| RB-INC-169 | Experiências diárias de Pipa — céu, horizonte e rolês confirmados | Implementation | Draft | 0.1.0 | [rb-inc-169-daily-experiences.md](./implementation/increments/rb-inc-169-daily-experiences.md) |
+| RB-CTX-169 | Context Pack do RB-INC-169 — Experiências diárias de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-169-daily-experiences.md](./implementation/context-packs/rb-inc-169-daily-experiences.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

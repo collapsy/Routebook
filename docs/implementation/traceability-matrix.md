@@ -761,3 +761,20 @@ Ao concluir um incremento:
 | spike | Google Places × Foursquare key-gated, sem segredo no relatório e sem execução live automática |
 | Provider | escolha/ativação pendente de gate humano por credencial, termos, quota e eventual billing |
 | validação | Documentation Validation, Engineering Validation e Preview Vercel pendentes no HEAD final |
+
+## Evidências previstas do RB-INC-169
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-169-daily-experiences.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-169-daily-experiences.md` |
+| origem | feedback de uso humano real em 27/08/2026: separar pontos para observar Sol/Lua de luaus, festas e outros Rolês confirmados |
+| rastreabilidade | issue #395; issue permanece aberta para cobertura dinâmica e fases posteriores |
+| base de Preview | PR #387 / RB-INC-165 no SHA `379d356621f421c70a71a47cdc9b720b3c782860` |
+| astronomia | tabela governada de Pipa para 22–29/08/2026, com horário e azimute específicos por data; ausência fora da cobertura não é preenchida |
+| observação natural | Lagoa de Guaraíras e Mirante Sunset Bar curados para pôr do sol; Chapadão e Praia do Amor identificados como adequação geoespacial inferida para horizonte leste |
+| eventos | 28/08 Nihanna/Mística Weekend e 29/08 PAGOFUNK no Agora Club, somente quando o Place canônico está presente e com Provenance Sympla |
+| decisão | Guia apenas pré-preenche o compositor manual do Roteiro; persistência continua exigindo submit humano |
+| Provider/segredo | nenhum Provider novo, API key, billing, migration ou secret |
+| limitações | sem previsão live de nuvens e sem ingestão completa/contínua de eventos nesta fatia |
+| validação | testes unitários, E2E, Documentation Validation, Engineering Validation e Vercel Preview pendentes no HEAD final |

@@ -62,7 +62,11 @@ export function PipaDailyExperiences({
   const isToday = experience.date === todayDate;
 
   return (
-    <section className={styles.panel} id="experiencias-do-dia" aria-labelledby="daily-experiences-title">
+    <section
+      className={styles.panel}
+      id="experiencias-do-dia"
+      aria-labelledby="daily-experiences-title"
+    >
       <header className={styles.hero}>
         <div>
           <p className="product-eyebrow">{isToday ? "Hoje em Pipa" : "Experiências do Dia"}</p>
@@ -106,7 +110,13 @@ export function PipaDailyExperiences({
             <article className={styles.observationCard} key={observation.id}>
               <div className={styles.observationTitle}>
                 <div>
-                  <span>{observation.id === "sunset" ? "🌅" : observation.id === "moonrise" ? "🌕" : "🌄"}</span>
+                  <span>
+                    {observation.id === "sunset"
+                      ? "🌅"
+                      : observation.id === "moonrise"
+                        ? "🌕"
+                        : "🌄"}
+                  </span>
                   <h4>{observation.title}</h4>
                 </div>
                 <time dateTime={observation.time}>{observation.time}</time>

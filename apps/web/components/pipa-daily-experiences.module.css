@@ -8,7 +8,11 @@
 .hero {
   align-items: start;
   background:
-    radial-gradient(circle at 90% 10%, color-mix(in srgb, var(--accent) 25%, transparent), transparent 16rem),
+    radial-gradient(
+      circle at 90% 10%,
+      color-mix(in srgb, var(--accent) 25%, transparent),
+      transparent 16rem
+    ),
     color-mix(in srgb, var(--surface) 94%, #dcece2);
   border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border));
   border-radius: var(--radius-large);

@@ -47,9 +47,7 @@ export default async function TripGuidePage({
   const todayDate = resolveTripTodayDate(days, new Date(), "America/Fortaleza");
   const { dia } = await searchParams;
   const selectedDate =
-    (dia && days.some((day) => day.date === dia) ? dia : undefined) ??
-    todayDate ??
-    days[0]?.date;
+    (dia && days.some((day) => day.date === dia) ? dia : undefined) ?? todayDate ?? days[0]?.date;
   const travelMode = profile?.transportPreference === "walking" ? "walking" : "driving";
   const guide = buildPipaTripGuide({
     tripId,

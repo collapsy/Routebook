@@ -705,7 +705,12 @@ export default async function ItineraryPage({
 
                     <div className="form-field">
                       <label htmlFor="startTime">Horário opcional</label>
-                      <input defaultValue={manualPrefillTime} id="startTime" name="startTime" type="time" />
+                      <input
+                        defaultValue={manualPrefillTime}
+                        id="startTime"
+                        name="startTime"
+                        type="time"
+                      />
                     </div>
 
                     <div className="form-field">

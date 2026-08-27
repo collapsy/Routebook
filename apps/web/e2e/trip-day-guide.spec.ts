@@ -150,7 +150,6 @@ test("mantém a ação principal utilizável em viewport mobile", async ({ page 
   await expect(firstDay.getByRole("link", { name: "Planejar neste Dia" }).first()).toBeVisible();
 });
 
-
 test("separa observação natural de rolês confirmados no Guia", async ({ page }) => {
   const { trip } = await createAuthenticatedE2ETrip({
     name: pipaTripName("Experiências diárias Pipa"),

@@ -196,8 +196,7 @@ const westHorizonPlaces = Object.freeze([
   },
   {
     slug: "mirante-sunset-bar",
-    reason:
-      "Mirante elevado de Pipa orientado para a experiência de fim de tarde e pôr do sol.",
+    reason: "Mirante elevado de Pipa orientado para a experiência de fim de tarde e pôr do sol.",
     confidence: "curated",
   },
 ] as const satisfies readonly ObservationPlaceDefinition[]);
@@ -443,7 +442,12 @@ export function buildPipaDailyExperience(input: {
           source: event.source,
           place,
           ...(formatDistance(input.accommodationCoordinate, place)
-            ? { distanceFromAccommodationLabel: formatDistance(input.accommodationCoordinate, place) }
+            ? {
+                distanceFromAccommodationLabel: formatDistance(
+                  input.accommodationCoordinate,
+                  place,
+                ),
+              }
             : {}),
           detailsHref: `/viagens/${input.tripId}/lugares/${place.slug}`,
           planHref: buildManualPlanHref({

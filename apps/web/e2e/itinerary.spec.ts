@@ -93,10 +93,12 @@ test("cria e preserva uma atividade no Dia em foco", async ({ page }, testInfo) 
   await page.getByLabel("Título").fill("Praia ao amanhecer");
   await page.getByLabel("Horário opcional").fill("09:30");
   await page.getByLabel("Duração opcional").fill("180");
-  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
-
-  await expect(page).toHaveURL(/atividadeCriada=1.*dia=2026-08-22/);
-  await expect(page.getByRole("status")).toContainText("Atividade adicionada");
+  await submitAndExpectActionRedirect(
+    page,
+    () => page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
+    /atividadeCriada=1.*dia=2026-08-22/,
+    "Atividade adicionada",
+  );
   await expect(page.getByText("Praia ao amanhecer")).toBeVisible();
   await expect(page.getByText("09:30")).toBeVisible();
   await expect(page.getByText("3 h", { exact: true })).toBeVisible();

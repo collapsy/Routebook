@@ -8,27 +8,8 @@ import {
 import { createSavedPlace } from "@routebook/saved-places";
 import { addActivity, createItinerary } from "@routebook/trip-management";
 
+import { submitAndExpectActionRedirect } from "./support/action-redirect";
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
-
-async function submitAndExpectActionRedirect(
-  page: Page,
-  submit: () => Promise<void>,
-  expectedUrl: RegExp,
-  expectedStatus: string,
-) {
-  const actionPathname = new URL(page.url()).pathname;
-  const actionResponse = page.waitForResponse((response) => {
-    const request = response.request();
-    return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
-  });
-
-  const [response] = await Promise.all([actionResponse, submit()]);
-  const redirectUrl = response.headers()["x-action-redirect"]?.split(";")[0];
-  expect(redirectUrl).toMatch(expectedUrl);
-  await page.goto(redirectUrl!);
-  await expect(page.getByRole("status")).toContainText(expectedStatus);
-  await expect(page).toHaveURL(expectedUrl);
-}
 
 async function openManualComposer(page: Page) {
   if (!new URL(page.url()).searchParams.has("dia")) {
@@ -93,10 +74,12 @@ test("cria e preserva uma atividade no Dia em foco", async ({ page }, testInfo) 
   await page.getByLabel("Título").fill("Praia ao amanhecer");
   await page.getByLabel("Horário opcional").fill("09:30");
   await page.getByLabel("Duração opcional").fill("180");
-  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
-
-  await expect(page).toHaveURL(/atividadeCriada=1.*dia=2026-08-22/);
-  await expect(page.getByRole("status")).toContainText("Atividade adicionada");
+  await submitAndExpectActionRedirect(
+    page,
+    () => page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
+    /atividadeCriada=1.*dia=2026-08-22/,
+    "Atividade adicionada",
+  );
   await expect(page.getByText("Praia ao amanhecer")).toBeVisible();
   await expect(page.getByText("09:30")).toBeVisible();
   await expect(page.getByText("3 h", { exact: true })).toBeVisible();

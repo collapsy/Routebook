@@ -44,8 +44,12 @@ test("usa nome e endereço nos destinos individuais do catálogo, detalhe e Guia
   expect(googleMapsDestination(drivingHref)).toBe("Praia do Amor, Pipa, Tibau do Sul — RN");
 
   await page.goto(`/viagens/${trip.id}/guia`);
-  const firstGuideRoute = page.getByRole("link", { name: "Rota e tempo no Maps" }).first();
-  await expect(firstGuideRoute).toBeVisible();
-  const guideHref = await firstGuideRoute.getAttribute("href");
+  const chapadaoCard = page.locator("li").filter({
+    has: page.locator("h3").filter({ hasText: /^Chapadão de Pipa$/ }),
+  });
+  await expect(chapadaoCard).toHaveCount(1);
+  const chapadaoRoute = chapadaoCard.locator("a").filter({ hasText: "Rota e tempo no Maps" });
+  await expect(chapadaoRoute).toHaveCount(1);
+  const guideHref = await chapadaoRoute.getAttribute("href");
   expect(googleMapsDestination(guideHref)).toContain("Chapadão de Pipa");
 });

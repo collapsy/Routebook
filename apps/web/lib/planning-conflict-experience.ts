@@ -285,7 +285,7 @@ export function buildPlanningConflictReview({
         activityTitles,
         canIgnore: conflict.severity === "risk",
         ...(day && formattedDay ? { dayLabel: `Dia ${day.position} · ${formattedDay}` } : {}),
-        ...(day ? { itineraryHref: `/viagens/${tripId}/roteiro#${day.id}` } : {}),
+        ...(day ? { itineraryHref: `/viagens/${tripId}/roteiro?dia=${day.date}#dia-em-foco` } : {}),
       };
     });
 

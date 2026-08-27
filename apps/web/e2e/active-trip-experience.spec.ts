@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { submitAndExpectActionRedirect } from "./support/action-redirect";
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
 function dateInPipa(now = new Date()): string {
@@ -102,7 +103,7 @@ test("preserva contexto entre áreas e prioriza Hoje sem sobrescrever seleção 
 
 test("mantém navegação e ações secundárias operáveis em viewport mobile", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  const { trip } = await createTripAroundToday();
+  const { trip, today } = await createTripAroundToday();
 
   await page.goto(`/viagens/${trip.id}/roteiro`);
 
@@ -115,8 +116,12 @@ test("mantém navegação e ações secundárias operáveis em viewport mobile",
 
   await page.getByText("Adicionar atividade manual", { exact: true }).click();
   await page.getByLabel("Título").fill("Passeio do Dia atual");
-  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
-  await expect(page.getByRole("status")).toContainText("Atividade adicionada");
+  await submitAndExpectActionRedirect(
+    page,
+    () => page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
+    new RegExp(`atividadeCriada=1.*dia=${today}`),
+    "Atividade adicionada",
+  );
 
   const activity = page.locator(".itinerary-day-card").filter({ hasText: "Passeio do Dia atual" });
   await expect(activity).toBeVisible();

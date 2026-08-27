@@ -331,8 +331,7 @@ function haveEquivalentBeachIdentityNames(first: string, second: string): boolea
     if (!firstToken || !secondToken || Math.min(firstToken.length, secondToken.length) < 6) {
       return false;
     }
-    const maximumEditDistance =
-      Math.min(firstToken.length, secondToken.length) >= 8 ? 3 : 2;
+    const maximumEditDistance = Math.min(firstToken.length, secondToken.length) >= 8 ? 3 : 2;
     return tokenEditDistance(firstToken, secondToken) <= maximumEditDistance;
   }
 
@@ -505,10 +504,10 @@ export function reconcileExternalPlaceCandidate(
         : nearest.beachAlias
           ? "Alias nominal de praia indica possível duplicata mesmo com coordenada externa inconsistente; o Place canônico deve ser preservado."
           : nearest.sameName
-          ? "Nome e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
-          : nearest.sameAddress
-            ? "Endereço e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
-            : "Proximidade extrema e mesma categoria indicam possível duplicata; exige reconciliação antes da promoção.",
+            ? "Nome e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
+            : nearest.sameAddress
+              ? "Endereço e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
+              : "Proximidade extrema e mesma categoria indicam possível duplicata; exige reconciliação antes da promoção.",
       distanceMeters: nearest.distanceMeters,
     };
   }

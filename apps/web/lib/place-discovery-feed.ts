@@ -199,7 +199,9 @@ function haveEquivalentBeachIdentityNames(first: string, second: string): boolea
     if (!firstToken || !secondToken || Math.min(firstToken.length, secondToken.length) < 6) {
       return false;
     }
-    return tokenEditDistance(firstToken, secondToken) <= 2;
+    const maximumEditDistance =
+      Math.min(firstToken.length, secondToken.length) >= 8 ? 3 : 2;
+    return tokenEditDistance(firstToken, secondToken) <= maximumEditDistance;
   }
 
   return false;
@@ -377,7 +379,14 @@ export function buildPlaceDiscoveryFeed(
         matchKind: "strong",
       });
     } else {
-      externalCandidates.push(reconciliation.candidate);
+      const publishedBeachAlias = input.publishedPlaces.find(
+        (place) =>
+          reconciliation.candidate.category === "beach" &&
+          place.category === "beach" &&
+          placeDistanceMeters(reconciliation.candidate, place) <= BEACH_ALIAS_MAX_DISTANCE_METERS &&
+          haveEquivalentBeachIdentityNames(reconciliation.candidate.name, place.name),
+      );
+      if (!publishedBeachAlias) externalCandidates.push(reconciliation.candidate);
     }
   }
 

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  isPlausibleOvertureBeachName,
   OverturePmtilesPlaceSearchAdapter,
   parseLatestOvertureTileRelease,
   resolveOvertureTileSourceLicense,
@@ -24,6 +25,23 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
     expect(resolveOvertureTileSourceLicense({ license: "CC-BY-4.0" })).toBe("CC-BY-4.0");
     expect(resolveOvertureTileSourceLicense({ dataset: "fsq" })).toBe("Apache-2.0");
     expect(resolveOvertureTileSourceLicense({ dataset: "unknown-dataset" })).toBeUndefined();
+  });
+
+  it("aceita nomes plausíveis de praia e rejeita falsos positivos observados em Pipa", () => {
+    for (const name of ["Praia do Madeiro", "Pipa Beach", "Baía dos Golfinhos"]) {
+      expect(isPlausibleOvertureBeachName(name), name).toBe(true);
+    }
+    for (const name of [
+      "Mirante Tibau do Sul",
+      "Lagoa Guaraíras",
+      "Rio Cunhaú",
+      "Falésias do Chapadão",
+      "Solar Pipa Praia Flats",
+      "Pipa Beach Club",
+      "Amo viajar e conhecer novas culturas",
+    ]) {
+      expect(isPlausibleOvertureBeachName(name), name).toBe(false);
+    }
   });
 
   it("limita a consulta geográfica a um conjunto finito de tiles de Pipa", () => {
@@ -94,7 +112,8 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
 
   if (process.env.ROUTEBOOK_LIVE_OVERTURE === "1") {
     it("consulta o PMTiles público real pelo mesmo adapter usado na tela de Lugares", async () => {
-      const candidates = await new OverturePmtilesPlaceSearchAdapter().search({
+      const adapter = new OverturePmtilesPlaceSearchAdapter();
+      const candidates = await adapter.search({
         destinationId: "pipa-rn-br",
         center: { latitude: -6.2285, longitude: -35.0503 },
         radiusMeters: 3_000,
@@ -111,6 +130,16 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
             candidate.category !== undefined,
         ),
       ).toBe(true);
+
+      const beaches = await adapter.search({
+        destinationId: "pipa-rn-br",
+        center: { latitude: -6.2285, longitude: -35.0503 },
+        radiusMeters: 3_000,
+        categories: ["beach"],
+        limit: 40,
+      });
+      expect(beaches.length).toBeGreaterThan(0);
+      expect(beaches.every((candidate) => isPlausibleOvertureBeachName(candidate.name))).toBe(true);
     });
   }
 });

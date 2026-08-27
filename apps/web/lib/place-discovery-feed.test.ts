@@ -141,6 +141,37 @@ describe("buildPlaceDiscoveryFeed", () => {
     expect(result[0]).toMatchObject({ kind: "enriched", matchKind: "strong" });
   });
 
+  it("colapsa alias de praia publicado e externo em um único item enriquecido", () => {
+    const published = publishedPlace({
+      name: "Praia do Madeiro",
+      slug: "praia-do-madeiro",
+      latitude: -6.2214,
+      longitude: -35.0573,
+    });
+    const external = externalCandidate({
+      externalId: "madeiro-beach",
+      name: "Madeiro Beach",
+      providerCategory: "beach",
+      category: "beach",
+      latitude: -6.2216,
+      longitude: -35.0572,
+    });
+
+    const result = buildPlaceDiscoveryFeed({
+      publishedPlaces: [published],
+      externalReconciliations: [reconciliation(external)],
+      reference,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      kind: "enriched",
+      place: published,
+      candidate: external,
+      matchKind: "strong",
+    });
+  });
+
   it("retém possible match fraco sem reapresentá-lo como card externo", () => {
     const published = publishedPlace({
       name: "Restaurante Horizonte",
@@ -263,6 +294,152 @@ describe("buildPlaceDiscoveryFeed", () => {
     expect(
       result.filter((item) => item.kind === "external").map((item) => item.candidate.externalId),
     ).not.toContain("camarao-1");
+  });
+
+  it("deduplica Praia do Madeiro e Madeiro Beach como a mesma praia externa", () => {
+    const portuguese = externalCandidate({
+      externalId: "madeiro-pt",
+      name: "Praia do Madeiro",
+      providerCategory: "beach",
+      category: "beach",
+      latitude: -6.2214,
+      longitude: -35.0573,
+      confidence: 0.91,
+    });
+    const englishPreferred = externalCandidate({
+      externalId: "madeiro-en",
+      name: "Madeiro Beach",
+      providerCategory: "beach",
+      category: "beach",
+      latitude: -6.2216,
+      longitude: -35.0572,
+      confidence: 0.96,
+    });
+
+    const result = buildPlaceDiscoveryFeed({
+      publishedPlaces: [],
+      externalCandidates: [portuguese, englishPreferred],
+      reference,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      kind: "external",
+      candidate: englishPreferred,
+    });
+  });
+
+  it("deduplica Praia de Pipa e Pipa Beach preservando Pipa como âncora nominal", () => {
+    const portuguese = externalCandidate({
+      externalId: "pipa-pt",
+      name: "Praia de Pipa",
+      providerCategory: "beach",
+      category: "beach",
+      latitude: -6.2293,
+      longitude: -35.0488,
+    });
+    const english = externalCandidate({
+      externalId: "pipa-en",
+      name: "Pipa Beach",
+      providerCategory: "beach",
+      category: "beach",
+      latitude: -6.2295,
+      longitude: -35.0487,
+    });
+
+    const result = buildPlaceDiscoveryFeed({
+      publishedPlaces: [],
+      externalCandidates: [portuguese, english],
+      reference,
+    });
+
+    expect(result).toHaveLength(1);
+  });
+
+  it("mantém praias vizinhas distintas quando as âncoras nominais diferem", () => {
+    const madeiro = externalCandidate({
+      externalId: "madeiro",
+      name: "Madeiro Beach",
+      providerCategory: "beach",
+      category: "beach",
+      latitude: -6.2214,
+      longitude: -35.0573,
+    });
+    const cacimbinhas = externalCandidate({
+      externalId: "cacimbinhas",
+      name: "Praia de Cacimbinhas",
+      providerCategory: "beach",
+      category: "beach",
+      latitude: -6.2208,
+      longitude: -35.0571,
+    });
+
+    const result = buildPlaceDiscoveryFeed({
+      publishedPlaces: [],
+      externalCandidates: [madeiro, cacimbinhas],
+      reference,
+    });
+
+    expect(result).toHaveLength(2);
+    expect(
+      result.filter((item) => item.kind === "external").map((item) => item.candidate.externalId),
+    ).toEqual(expect.arrayContaining(["madeiro", "cacimbinhas"]));
+  });
+
+  it("suprime alias distante de praia sem enriquecer a coordenada canônica", () => {
+    const published = publishedPlace({
+      name: "Praia do Madeiro",
+      slug: "praia-do-madeiro",
+      latitude: -6.22271,
+      longitude: -35.07068,
+    });
+    const displacedAlias = externalCandidate({
+      externalId: "madeira-overture",
+      name: "Praia Da Madeira",
+      providerCategory: "beach",
+      category: "beach",
+      latitude: -6.236988,
+      longitude: -35.048614,
+      confidence: 0.99,
+    });
+
+    const result = buildPlaceDiscoveryFeed({
+      publishedPlaces: [published],
+      externalCandidates: [displacedAlias],
+      reference,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      kind: "published",
+      place: published,
+    });
+  });
+
+  it("suprime typo distante de praia quando a âncora canônica é inequívoca", () => {
+    const published = publishedPlace({
+      name: "Praia de Cacimbinhas",
+      slug: "praia-de-cacimbinhas",
+      latitude: -6.2137403,
+      longitude: -35.077037,
+    });
+    const displacedAlias = externalCandidate({
+      externalId: "casinbinha-overture",
+      name: "Praia De Casinbinha",
+      providerCategory: "beach",
+      category: "beach",
+      latitude: -6.228402,
+      longitude: -35.049438,
+    });
+
+    const result = buildPlaceDiscoveryFeed({
+      publishedPlaces: [published],
+      externalCandidates: [displacedAlias],
+      reference,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.kind).toBe("published");
   });
 
   it("não aplica limite aos Places canônicos ou enriquecidos", () => {

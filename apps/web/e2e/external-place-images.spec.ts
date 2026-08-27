@@ -81,7 +81,9 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
     .getByRole("link", { name: "Calcular rota real" })
     .getAttribute("href");
   expect(routeHref).toBeTruthy();
-  expect(new URL(routeHref!).searchParams.get("destination")).toContain(name);
+  expect(new URL(routeHref!).searchParams.get("destination")?.toLocaleLowerCase("pt-BR")).toContain(
+    name.toLocaleLowerCase("pt-BR"),
+  );
 });
 
 test("mantém rota real do candidato externo sem hospedagem usando a localização atual", async ({
@@ -106,6 +108,8 @@ test("mantém rota real do candidato externo sem hospedagem usando a localizaç�
   const routeUrl = new URL(routeHref!);
   expect(routeUrl.pathname).toBe("/maps/dir/");
   expect(routeUrl.searchParams.has("origin")).toBe(false);
-  expect(routeUrl.searchParams.get("destination")).toContain(name);
+  expect(routeUrl.searchParams.get("destination")?.toLocaleLowerCase("pt-BR")).toContain(
+    name.toLocaleLowerCase("pt-BR"),
+  );
   expect(routeUrl.searchParams.get("travelmode")).toBe("walking");
 });

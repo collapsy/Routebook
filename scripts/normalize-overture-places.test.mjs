@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  isPlausibleOvertureBeachName,
   mapOvertureCategory,
   normalizeOvertureFeature,
   normalizeOvertureFeatureCollection,
@@ -28,13 +29,45 @@ function feature(overrides = {}) {
   };
 }
 
-test("mapeia categoria diretamente ou por hierarquia", () => {
+function beachFeature(name, overrides = {}) {
+  return feature({
+    id: `beach-${name}`,
+    properties: {
+      ...feature().properties,
+      names: { primary: name },
+      basic_category: "beach",
+      taxonomy: { hierarchy: ["geographic_entities", "land_feature", "beach"] },
+    },
+    ...overrides,
+  });
+}
+
+test("mapeia categoria diretamente ou por hierarquia sem herdar beach ambíguo", () => {
   assert.equal(mapOvertureCategory("restaurant"), "gastronomy");
   assert.equal(
     mapOvertureCategory("sushi_restaurant", ["dining_and_drinking", "restaurant"]),
     "gastronomy",
   );
+  assert.equal(mapOvertureCategory("beach", ["geographic_entities", "beach"]), "beach");
+  assert.equal(mapOvertureCategory("beach_club", ["leisure", "beach"]), undefined);
   assert.equal(mapOvertureCategory("pet_store"), undefined);
+});
+
+test("aceita nomes plausíveis de praia e rejeita POIs ou negócios mislabeled", () => {
+  for (const name of ["Praia do Madeiro", "Pipa Beach", "Baía dos Golfinhos"]) {
+    assert.equal(isPlausibleOvertureBeachName(name), true, name);
+  }
+  for (const name of [
+    "Mirante Tibau do Sul",
+    "Lagoa Guaraíras",
+    "Rio Cunhaú",
+    "Falésias do Chapadão",
+    "Solar Pipa Praia Flats",
+    "Pipa Beach Club",
+    "Amo viajar e conhecer novas culturas",
+  ]) {
+    assert.equal(isPlausibleOvertureBeachName(name), false, name);
+  }
 });
 
 test("resolve licença explícita e fallback conhecido por dataset", () => {
@@ -65,6 +98,16 @@ test("normaliza feature licenciada como candidato RouteBook", () => {
     collectedAt: collectedAt.toISOString(),
     confidence: 0.93,
   });
+});
+
+test("normaliza praia plausível e rejeita falso positivo mesmo quando Overture marca beach", () => {
+  const valid = normalizeOvertureFeature(beachFeature("Praia do Amor"), { collectedAt });
+  const mirante = normalizeOvertureFeature(beachFeature("Mirante Tibau do Sul"), { collectedAt });
+  const flats = normalizeOvertureFeature(beachFeature("Solar Pipa Praia Flats"), { collectedAt });
+
+  assert.equal(valid.candidate?.category, "beach");
+  assert.equal(mirante.reason, "implausible-beach-name");
+  assert.equal(flats.reason, "implausible-beach-name");
 });
 
 test("filtra fechamento permanente, baixa confiança, categoria desconhecida e licença ausente", () => {

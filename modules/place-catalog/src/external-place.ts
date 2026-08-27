@@ -141,13 +141,24 @@ const GENERIC_IDENTITY_TOKENS = new Set([
   "restaurante",
 ]);
 
+const BEACH_IDENTITY_DESCRIPTORS = new Set(["baia", "bahia", "beach", "playa", "praia"]);
+const BEACH_ALIAS_MAX_DISTANCE_METERS = 500;
+const BEACH_ALIAS_RECONCILIATION_MAX_DISTANCE_METERS = 10_000;
+
+function normalizeOvertureCategory(value: string): string {
+  return value.trim().toLowerCase();
+}
+
 export function mapOverturePlaceCategory(
   category: string,
   hierarchy: readonly string[] = [],
 ): PlaceCategory | undefined {
-  for (const value of [category, ...hierarchy].map((item) => item.trim().toLowerCase()).reverse()) {
+  const direct = OVERTURE_CATEGORY_MAP[normalizeOvertureCategory(category)];
+  if (direct) return direct;
+
+  for (const value of [...hierarchy].map(normalizeOvertureCategory).reverse()) {
     const mapped = OVERTURE_CATEGORY_MAP[value];
-    if (mapped) return mapped;
+    if (mapped && mapped !== "beach") return mapped;
   }
   return undefined;
 }
@@ -254,11 +265,77 @@ function normalizeIdentity(value: string): string {
     .replace(/\s+/g, " ");
 }
 
+function normalizedNameTokens(value: string): string[] {
+  return normalizeIdentity(value).split(" ").filter(Boolean);
+}
+
 function identityTokens(value: string): string[] {
-  return normalizeIdentity(value)
-    .split(" ")
-    .filter(Boolean)
-    .filter((token) => !IDENTITY_STOP_WORDS.has(token) && !REGIONAL_IDENTITY_TOKENS.has(token));
+  return normalizedNameTokens(value).filter(
+    (token) => !IDENTITY_STOP_WORDS.has(token) && !REGIONAL_IDENTITY_TOKENS.has(token),
+  );
+}
+
+function beachIdentityTokens(value: string): string[] {
+  const segments = value
+    .split(/[,/\-–—]+/)
+    .map(normalizeIdentity)
+    .filter(Boolean);
+  const selectedSegment =
+    segments.find((segment) =>
+      normalizedNameTokens(segment).some((token) => BEACH_IDENTITY_DESCRIPTORS.has(token)),
+    ) ??
+    segments[0] ??
+    normalizeIdentity(value);
+
+  return normalizedNameTokens(selectedSegment).filter(
+    (token) =>
+      !IDENTITY_STOP_WORDS.has(token) &&
+      !BEACH_IDENTITY_DESCRIPTORS.has(token) &&
+      !GENERIC_IDENTITY_TOKENS.has(token) &&
+      !(token.length === 2 && /^[a-z]{2}$/.test(token)),
+  );
+}
+
+function tokenEditDistance(first: string, second: string): number {
+  const previous = Array.from({ length: second.length + 1 }, (_, index) => index);
+  for (let firstIndex = 1; firstIndex <= first.length; firstIndex += 1) {
+    const current = [firstIndex];
+    for (let secondIndex = 1; secondIndex <= second.length; secondIndex += 1) {
+      current[secondIndex] = Math.min(
+        (current[secondIndex - 1] ?? 0) + 1,
+        (previous[secondIndex] ?? 0) + 1,
+        (previous[secondIndex - 1] ?? 0) +
+          (first[firstIndex - 1] === second[secondIndex - 1] ? 0 : 1),
+      );
+    }
+    previous.splice(0, previous.length, ...current);
+  }
+  return previous[second.length] ?? Number.POSITIVE_INFINITY;
+}
+
+function haveEquivalentBeachIdentityNames(first: string, second: string): boolean {
+  const firstTokens = beachIdentityTokens(first);
+  const secondTokens = beachIdentityTokens(second);
+  if (firstTokens.length === 0 || secondTokens.length === 0) return false;
+
+  if (
+    firstTokens.length === secondTokens.length &&
+    firstTokens.every((token, index) => token === secondTokens[index])
+  ) {
+    return true;
+  }
+
+  if (firstTokens.length === 1 && secondTokens.length === 1) {
+    const [firstToken] = firstTokens;
+    const [secondToken] = secondTokens;
+    if (!firstToken || !secondToken || Math.min(firstToken.length, secondToken.length) < 6) {
+      return false;
+    }
+    const maximumEditDistance = Math.min(firstToken.length, secondToken.length) >= 8 ? 3 : 2;
+    return tokenEditDistance(firstToken, secondToken) <= maximumEditDistance;
+  }
+
+  return false;
 }
 
 function distinctiveIdentityTokens(tokens: readonly string[]): string[] {
@@ -296,6 +373,13 @@ export function isStrongExternalPlaceIdentityMatch(
   if (!candidate.category || candidate.category !== place.category) return false;
 
   const distanceMeters = placeDistanceMeters(candidate, place);
+  if (
+    candidate.category === "beach" &&
+    distanceMeters <= BEACH_ALIAS_MAX_DISTANCE_METERS &&
+    haveEquivalentBeachIdentityNames(candidate.name, place.name)
+  ) {
+    return true;
+  }
   if (distanceMeters > 1_000) return false;
 
   const candidateName = normalizeIdentity(candidate.name);
@@ -383,6 +467,11 @@ export function reconcileExternalPlaceCandidate(
       place,
       distanceMeters: placeDistanceMeters(candidate, place),
       strongIdentity: isStrongExternalPlaceIdentityMatch(candidate, place),
+      beachAlias:
+        candidate.category === "beach" &&
+        place.category === "beach" &&
+        placeDistanceMeters(candidate, place) <= BEACH_ALIAS_RECONCILIATION_MAX_DISTANCE_METERS &&
+        haveEquivalentBeachIdentityNames(candidate.name, place.name),
       sameName: normalizeIdentity(place.name) === normalizedCandidateName,
       sameAddress:
         Boolean(candidate.addressLabel && place.addressLabel) &&
@@ -392,6 +481,7 @@ export function reconcileExternalPlaceCandidate(
     .filter(
       (match) =>
         match.strongIdentity ||
+        match.beachAlias ||
         (match.sameName && match.distanceMeters <= 500) ||
         (match.sameAddress && match.distanceMeters <= 500) ||
         match.distanceMeters <= 75,
@@ -399,6 +489,7 @@ export function reconcileExternalPlaceCandidate(
     .sort(
       (left, right) =>
         Number(right.strongIdentity) - Number(left.strongIdentity) ||
+        Number(right.beachAlias) - Number(left.beachAlias) ||
         left.distanceMeters - right.distanceMeters,
     );
 
@@ -410,11 +501,13 @@ export function reconcileExternalPlaceCandidate(
       matchedPlaceId: nearest.place.id,
       reason: nearest.strongIdentity
         ? "Identidade nominal ou endereço e proximidade sustentam possível duplicata; exige reconciliação antes da promoção."
-        : nearest.sameName
-          ? "Nome e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
-          : nearest.sameAddress
-            ? "Endereço e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
-            : "Proximidade extrema e mesma categoria indicam possível duplicata; exige reconciliação antes da promoção.",
+        : nearest.beachAlias
+          ? "Alias nominal de praia indica possível duplicata mesmo com coordenada externa inconsistente; o Place canônico deve ser preservado."
+          : nearest.sameName
+            ? "Nome e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
+            : nearest.sameAddress
+              ? "Endereço e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
+              : "Proximidade extrema e mesma categoria indicam possível duplicata; exige reconciliação antes da promoção.",
       distanceMeters: nearest.distanceMeters,
     };
   }

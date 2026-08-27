@@ -142,7 +142,7 @@ const GENERIC_IDENTITY_TOKENS = new Set([
 ]);
 
 const BEACH_IDENTITY_DESCRIPTORS = new Set(["baia", "bahia", "beach", "playa", "praia"]);
-const BEACH_ALIAS_MAX_DISTANCE_METERS = 500;
+const BEACH_ALIAS_MAX_DISTANCE_METERS = 500;\nconst BEACH_ALIAS_RECONCILIATION_MAX_DISTANCE_METERS = 10_000;
 
 function normalizeOvertureCategory(value: string): string {
   return value.trim().toLowerCase();
@@ -330,7 +330,9 @@ function haveEquivalentBeachIdentityNames(first: string, second: string): boolea
     if (!firstToken || !secondToken || Math.min(firstToken.length, secondToken.length) < 6) {
       return false;
     }
-    return tokenEditDistance(firstToken, secondToken) <= 2;
+    const maximumEditDistance =
+      Math.min(firstToken.length, secondToken.length) >= 8 ? 3 : 2;
+    return tokenEditDistance(firstToken, secondToken) <= maximumEditDistance;
   }
 
   return false;
@@ -465,6 +467,11 @@ export function reconcileExternalPlaceCandidate(
       place,
       distanceMeters: placeDistanceMeters(candidate, place),
       strongIdentity: isStrongExternalPlaceIdentityMatch(candidate, place),
+      beachAlias:
+        candidate.category === "beach" &&
+        place.category === "beach" &&
+        placeDistanceMeters(candidate, place) <= BEACH_ALIAS_RECONCILIATION_MAX_DISTANCE_METERS &&
+        haveEquivalentBeachIdentityNames(candidate.name, place.name),
       sameName: normalizeIdentity(place.name) === normalizedCandidateName,
       sameAddress:
         Boolean(candidate.addressLabel && place.addressLabel) &&
@@ -474,6 +481,7 @@ export function reconcileExternalPlaceCandidate(
     .filter(
       (match) =>
         match.strongIdentity ||
+        match.beachAlias ||
         (match.sameName && match.distanceMeters <= 500) ||
         (match.sameAddress && match.distanceMeters <= 500) ||
         match.distanceMeters <= 75,
@@ -481,6 +489,7 @@ export function reconcileExternalPlaceCandidate(
     .sort(
       (left, right) =>
         Number(right.strongIdentity) - Number(left.strongIdentity) ||
+        Number(right.beachAlias) - Number(left.beachAlias) ||
         left.distanceMeters - right.distanceMeters,
     );
 
@@ -492,7 +501,9 @@ export function reconcileExternalPlaceCandidate(
       matchedPlaceId: nearest.place.id,
       reason: nearest.strongIdentity
         ? "Identidade nominal ou endereço e proximidade sustentam possível duplicata; exige reconciliação antes da promoção."
-        : nearest.sameName
+        : nearest.beachAlias
+          ? "Alias nominal de praia indica possível duplicata mesmo com coordenada externa inconsistente; o Place canônico deve ser preservado."
+          : nearest.sameName
           ? "Nome e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
           : nearest.sameAddress
             ? "Endereço e proximidade indicam possível duplicata; exige reconciliação antes da promoção."

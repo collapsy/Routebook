@@ -300,14 +300,13 @@ function resolveObservationPlaces(input: {
       name: place.name,
       addressLabel: place.addressLabel,
     });
+    const distanceFromAccommodationLabel = formatDistance(input.accommodationCoordinate, place);
     return [
       Object.freeze({
         place,
         reason: definition.reason,
         confidence: definition.confidence,
-        ...(formatDistance(input.accommodationCoordinate, place)
-          ? { distanceFromAccommodationLabel: formatDistance(input.accommodationCoordinate, place) }
-          : {}),
+        ...(distanceFromAccommodationLabel ? { distanceFromAccommodationLabel } : {}),
         detailsHref: `/viagens/${input.tripId}/lugares/${place.slug}`,
         planHref: buildManualPlanHref({
           tripId: input.tripId,
@@ -428,6 +427,7 @@ export function buildPipaDailyExperience(input: {
         name: place.name,
         addressLabel: place.addressLabel,
       });
+      const distanceFromAccommodationLabel = formatDistance(input.accommodationCoordinate, place);
       return [
         Object.freeze({
           id: event.id,
@@ -441,14 +441,7 @@ export function buildPipaDailyExperience(input: {
           status: "confirmed" as const,
           source: event.source,
           place,
-          ...(formatDistance(input.accommodationCoordinate, place)
-            ? {
-                distanceFromAccommodationLabel: formatDistance(
-                  input.accommodationCoordinate,
-                  place,
-                ),
-              }
-            : {}),
+          ...(distanceFromAccommodationLabel ? { distanceFromAccommodationLabel } : {}),
           detailsHref: `/viagens/${input.tripId}/lugares/${place.slug}`,
           planHref: buildManualPlanHref({
             tripId: input.tripId,

@@ -746,3 +746,18 @@ Ao concluir um incremento:
 | código/Production | nenhuma mudança funcional, migration, write ou promoção nesta Fase A |
 | validação | Documentation Validation e Engineering Validation pendentes no HEAD final da PR #374 |
 | Fase B | aguardando uso humano real elegível; nenhuma Session fabricada |
+
+## Evidências previstas do RB-INC-168
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-168-place-quality-ranking.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-168-place-quality-ranking.md` |
+| origem | feedback de uso humano real em Pipa: dificuldade para identificar melhores praias, restaurantes e vida noturna |
+| base | PR #389 / correção de classificação e identidade de praias |
+| rastreabilidade | issue #390 |
+| arquitetura | RB-ARC-003 e RB-ADR-012; ratings/popularidade externos exigem Provenance e Provider permanece desacoplado |
+| implementação | PlaceQualitySignalsPort, reputação Bayesiana, RouteBook Score e projeção de ranking provider-neutral |
+| spike | Google Places × Foursquare key-gated, sem segredo no relatório e sem execução live automática |
+| Provider | escolha/ativação pendente de gate humano por credencial, termos, quota e eventual billing |
+| validação | Documentation Validation, Engineering Validation e Preview Vercel pendentes no HEAD final |

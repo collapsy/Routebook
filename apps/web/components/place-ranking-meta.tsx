@@ -56,9 +56,13 @@ export function PlaceRankingMeta({
           #{position} · {orderLabel}
         </strong>
         {quality && categoryRank === 1 ? (
-          <strong className={styles.topBadge}>Top {categoryLabel.toLocaleLowerCase("pt-BR")}</strong>
+          <strong className={styles.topBadge}>
+            Top {categoryLabel.toLocaleLowerCase("pt-BR")}
+          </strong>
         ) : categoryRank ? (
-          <span className={styles.categoryRank}>#{categoryRank} em {categoryLabel}</span>
+          <span className={styles.categoryRank}>
+            #{categoryRank} em {categoryLabel}
+          </span>
         ) : null}
       </div>
 
@@ -77,7 +81,8 @@ export function PlaceRankingMeta({
             <span>{popularityPercent}% de popularidade relativa</span>
           ) : null}
           <span>
-            Fonte: {providerLabel(signals.provider)} · coletado em {formatCollectedAt(signals.collectedAt)}
+            Fonte: {providerLabel(signals.provider)} · coletado em{" "}
+            {formatCollectedAt(signals.collectedAt)}
           </span>
           {quality.reasons.length > 0 ? (
             <span className={styles.reason}>{quality.reasons.join(" · ")}</span>

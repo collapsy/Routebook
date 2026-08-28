@@ -152,7 +152,6 @@ describe("rankPlaceDiscoveryItems", () => {
   });
 });
 
-
 describe("buildPlaceDiscoveryQualityTargets", () => {
   it("projeta somente identidades com categoria e preserva id da Discovery", () => {
     const item = published("alvo", "Restaurante Alvo", 500);

@@ -219,8 +219,7 @@ function targetGroups(
 
 function groupSearchArea(targets: readonly PlaceQualityTarget[]) {
   const latitude = targets.reduce((total, target) => total + target.latitude, 0) / targets.length;
-  const longitude =
-    targets.reduce((total, target) => total + target.longitude, 0) / targets.length;
+  const longitude = targets.reduce((total, target) => total + target.longitude, 0) / targets.length;
   const center = { latitude, longitude };
   const maximumDistance = targets.reduce(
     (maximum, target) => Math.max(maximum, placeDistanceMeters(center, target)),
@@ -389,10 +388,7 @@ export class FoursquarePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
     url.searchParams.set("ll", `${center.latitude},${center.longitude}`);
     url.searchParams.set("radius", String(radiusMeters));
     url.searchParams.set("limit", "50");
-    url.searchParams.set(
-      "fields",
-      "fsq_place_id,name,latitude,longitude,rating,popularity",
-    );
+    url.searchParams.set("fields", "fsq_place_id,name,latitude,longitude,rating,popularity");
     url.searchParams.set("sort", "RELEVANCE");
 
     const response = await fetchWithTimeout(this.fetcher, url, {

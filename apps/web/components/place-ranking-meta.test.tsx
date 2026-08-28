@@ -5,13 +5,7 @@ import { PlaceRankingMeta } from "./place-ranking-meta";
 
 describe("PlaceRankingMeta", () => {
   it("não fabrica score ou Top quando não existem sinais", () => {
-    render(
-      <PlaceRankingMeta
-        categoryLabel="Praias"
-        orderLabel="Mais próximos"
-        position={1}
-      />,
-    );
+    render(<PlaceRankingMeta categoryLabel="Praias" orderLabel="Mais próximos" position={1} />);
 
     expect(screen.getByText("#1 · Mais próximos")).toBeInTheDocument();
     expect(screen.queryByText(/Score RouteBook/)).not.toBeInTheDocument();

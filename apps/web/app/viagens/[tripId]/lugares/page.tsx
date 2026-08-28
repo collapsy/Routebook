@@ -587,7 +587,9 @@ export default async function PlacesPage({
   if (qualityProvider.status === "configured") {
     try {
       qualityMatches = [
-        ...(await qualityProvider.port.findSignals(buildPlaceDiscoveryQualityTargets(discoveryItems))),
+        ...(await qualityProvider.port.findSignals(
+          buildPlaceDiscoveryQualityTargets(discoveryItems),
+        )),
       ];
     } catch (error) {
       console.error("Falha ao obter sinais externos de qualidade", {
@@ -802,9 +804,7 @@ export default async function PlacesPage({
               return (
                 <Link
                   aria-current={ranking.order === order ? "page" : undefined}
-                  className={
-                    ranking.order === order ? styles.rankingActive : styles.rankingControl
-                  }
+                  className={ranking.order === order ? styles.rankingActive : styles.rankingControl}
                   href={discoveryHref(tripId, {
                     ...baseParams,
                     ...(order === "distance" ? {} : { ordem: order }),

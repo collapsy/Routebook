@@ -177,7 +177,6 @@ export function rankPlaceDiscoveryItems(
   };
 }
 
-
 export function buildPlaceDiscoveryTopLists(
   items: readonly RankedPlaceDiscoveryItem[],
   limit = 5,

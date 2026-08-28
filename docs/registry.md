@@ -393,6 +393,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-169 | Context Pack do RB-INC-169 — Experiências diárias de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-169-daily-experiences.md](./implementation/context-packs/rb-inc-169-daily-experiences.md) |
 | RB-INC-170 | Fallback visual ilustrativo por categoria | Implementation | Draft | 0.1.0 | [rb-inc-170-category-visual-fallback.md](./implementation/increments/rb-inc-170-category-visual-fallback.md) |
 | RB-CTX-170 | Context Pack do RB-INC-170 — Fallback visual ilustrativo por categoria | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-170-category-visual-fallback.md](./implementation/context-packs/rb-inc-170-category-visual-fallback.md) |
+| RB-INC-171 | Navegação mobile e separação Hoje / Guia por dia | Implementation | Draft | 0.1.0 | [rb-inc-171-mobile-navigation-focus.md](./implementation/increments/rb-inc-171-mobile-navigation-focus.md) |
+| RB-CTX-171 | Context Pack do RB-INC-171 — Navegação mobile e separação Hoje / Guia por dia | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-171-mobile-navigation-focus.md](./implementation/context-packs/rb-inc-171-mobile-navigation-focus.md) |
 
 ## Status possíveis
 

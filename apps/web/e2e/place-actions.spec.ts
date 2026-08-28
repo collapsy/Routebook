@@ -100,7 +100,7 @@ test("mantém contexto visual ilustrativo em Lugar salvo sem fotografia real", a
   await discoveryCard.getByRole("button", { name: "Salvar lugar" }).click();
 
   await page.goto(`/viagens/${trip.id}/lugares-salvos`);
-  const savedCard = page.getByRole("listitem").filter({ hasText: "Praia das Minas" }).first();
+  const savedCard = page.locator(".place-card").filter({ hasText: "Praia das Minas" }).first();
   const fallback = savedCard.locator('[data-place-image-fallback="true"]');
   await expect(fallback).toBeVisible();
   await expect(fallback).toHaveAttribute("data-category-illustration", "beach");

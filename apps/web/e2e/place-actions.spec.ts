@@ -98,6 +98,7 @@ test("mantém contexto visual ilustrativo em Lugar salvo sem fotografia real", a
     "beach",
   );
   await discoveryCard.getByRole("button", { name: "Salvar lugar" }).click();
+  await expect(discoveryCard.getByRole("button", { name: "Remover dos salvos" })).toBeVisible();
 
   await page.goto(`/viagens/${trip.id}/lugares-salvos`);
   const savedCard = page.locator(".place-card").filter({ hasText: "Praia das Minas" }).first();

@@ -5,12 +5,7 @@ import { PLACE_CATEGORIES, type PlaceCategory } from "@routebook/place-catalog";
 import styles from "./category-illustration.module.css";
 
 export type CategoryIllustrationKind =
-  | PlaceCategory
-  | "place"
-  | "sunrise"
-  | "sunset"
-  | "moonrise"
-  | "event";
+  PlaceCategory | "place" | "sunrise" | "sunset" | "moonrise" | "event";
 
 const illustrationPaths: Record<CategoryIllustrationKind, string> = {
   beach: "/category-illustrations/beach.svg",

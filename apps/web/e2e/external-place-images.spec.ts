@@ -152,6 +152,8 @@ test("degrada candidato externo para ilustração de categoria quando não há f
   const fallback = externalCard.locator('[data-place-image-fallback="true"]');
   await expect(fallback).toBeVisible();
   await expect(fallback).toContainText("Ilustração de categoria — não é foto do local");
-  await expect(fallback).toHaveAttribute("data-category-illustration", /beach|gastronomy|nature|nightlife|place/);
+  await expect(fallback).toHaveAttribute(
+    "data-category-illustration",
+    /beach|gastronomy|nature|nightlife|place/,
+  );
 });
-

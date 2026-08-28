@@ -294,9 +294,7 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
     exact: true,
   });
   await expect(newRecommendation).toBeVisible();
-  const newRecommendationFallback = newRecommendation.locator(
-    '[data-place-image-fallback="true"]',
-  );
+  const newRecommendationFallback = newRecommendation.locator('[data-place-image-fallback="true"]');
   await expect(newRecommendationFallback).toBeVisible();
   await expect(newRecommendationFallback).toHaveAttribute("data-category-illustration", "beach");
   await expect(newRecommendationFallback).toContainText(

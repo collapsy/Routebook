@@ -21,7 +21,9 @@ describe("PlacePrimaryImage", () => {
     render(<PlacePrimaryImage placeName="Praia do Amor" primaryImage={primaryImage} />);
 
     expect(screen.getByRole("img", { name: primaryImage.altText })).toBeInTheDocument();
-    expect(screen.queryByText("Ilustração de categoria — não é foto do local")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Ilustração de categoria — não é foto do local"),
+    ).not.toBeInTheDocument();
   });
 
   it("usa ilustração acessível de categoria quando o Place não possui imagem", () => {
@@ -36,11 +38,7 @@ describe("PlacePrimaryImage", () => {
 
   it("troca para a mesma ilustração quando o asset governado falha ao carregar", () => {
     render(
-      <PlacePrimaryImage
-        category="beach"
-        placeName="Praia do Amor"
-        primaryImage={primaryImage}
-      />,
+      <PlacePrimaryImage category="beach" placeName="Praia do Amor" primaryImage={primaryImage} />,
     );
 
     fireEvent.error(screen.getByRole("img", { name: primaryImage.altText }));

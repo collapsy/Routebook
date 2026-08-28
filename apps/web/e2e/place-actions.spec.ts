@@ -106,4 +106,3 @@ test("mantém contexto visual ilustrativo em Lugar salvo sem fotografia real", a
   await expect(fallback).toHaveAttribute("data-category-illustration", "beach");
   await expect(fallback).toContainText("Ilustração de categoria — não é foto do local");
 });
-

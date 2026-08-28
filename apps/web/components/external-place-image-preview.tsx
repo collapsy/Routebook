@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import type { PlaceCategory } from "@routebook/place-catalog";
 
+import { CategoryIllustration } from "./category-illustration";
 import { PlacePrimaryImage } from "./place-primary-image";
 import styles from "./place-primary-image.module.css";
 
@@ -190,25 +191,21 @@ export function ExternalPlaceImagePreview({
   }
 
   if (state.status === "idle" || state.status === "loading") {
+    const isLoading = state.status === "loading";
     return (
-      <div
-        aria-label={`Buscando fotografia licenciada para ${placeName}`}
-        aria-live="polite"
-        className={styles.fallback}
-        data-external-place-image-state={state.status}
-        ref={containerRef}
-        role="status"
-      >
-        <span aria-hidden="true" className={styles.fallbackMark}>
-          ◇
-        </span>
-        <span className={styles.fallbackCategory}>Descoberta externa</span>
-        <span className={styles.fallbackText}>
-          {state.status === "loading" ? "Buscando fotografia…" : "Fotografia sob demanda"}
-        </span>
-        <span className={styles.fallbackDisclosure}>
-          A foto só aparece quando a identidade e a licença forem verificadas.
-        </span>
+      <div data-external-place-image-state={state.status} ref={containerRef}>
+        <CategoryIllustration
+          ariaLabel={
+            isLoading
+              ? `Buscando fotografia licenciada para ${placeName}`
+              : `Fotografia sob demanda para ${placeName}`
+          }
+          disclosure="Ilustração de categoria enquanto a foto real é verificada."
+          eyebrow="Descoberta externa"
+          kind={category ?? "place"}
+          label={isLoading ? "Buscando fotografia…" : "Fotografia sob demanda"}
+          live
+        />
       </div>
     );
   }

@@ -58,7 +58,11 @@ export function RecommendationCard({
       aria-labelledby={titleId}
       className={`${styles.card} ${isRejected ? styles.rejected : ""}`}
     >
-      <PlacePrimaryImage placeName={card.placeName} primaryImage={card.primaryImage} />
+      <PlacePrimaryImage
+        category={card.category}
+        placeName={card.placeName}
+        primaryImage={card.primaryImage}
+      />
 
       <header className={styles.header}>
         <p className={styles.eyebrow}>{categoryLabels[card.category]}</p>

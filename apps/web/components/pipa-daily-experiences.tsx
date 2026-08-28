@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import type { PipaDailyExperience } from "../lib/pipa-daily-experiences";
 import type { TripMapPoint } from "../lib/trip-map";
+import { CategoryIllustration } from "./category-illustration";
 import { TripMap } from "./trip-map";
 
 import styles from "./pipa-daily-experiences.module.css";
@@ -108,6 +109,13 @@ export function PipaDailyExperiences({
         <div className={styles.observationGrid}>
           {experience.skyObservations.map((observation) => (
             <article className={styles.observationCard} key={observation.id}>
+              <CategoryIllustration
+                ariaLabel={`Ilustração de ${observation.title}`}
+                disclosure="Ilustração do fenômeno — não representa as condições reais deste dia."
+                eyebrow="Céu e horizonte"
+                kind={observation.id}
+                label={observation.title}
+              />
               <div className={styles.observationTitle}>
                 <div>
                   <span>
@@ -201,6 +209,13 @@ export function PipaDailyExperiences({
         <div className={styles.eventGrid}>
           {experience.confirmedEvents.map((event) => (
             <article className={styles.eventCard} key={event.id}>
+              <CategoryIllustration
+                ariaLabel={`Ilustração genérica do evento ${event.title}`}
+                disclosure="Ilustração do rolê — não é foto do evento nem do local."
+                eyebrow="Agenda verificada"
+                kind="event"
+                label="Rolê confirmado"
+              />
               <div className={styles.eventTopline}>
                 <span className={styles.confirmedBadge}>Confirmado</span>
                 <time dateTime={event.startTime}>

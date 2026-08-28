@@ -8,7 +8,15 @@ import type {
   PlacePrimaryImage as PlacePrimaryImageContract,
 } from "@routebook/place-catalog";
 
+import { CategoryIllustration } from "./category-illustration";
 import styles from "./place-primary-image.module.css";
+
+const categoryLabels: Record<PlaceCategory, string> = {
+  beach: "Praia",
+  gastronomy: "Gastronomia",
+  nature: "Natureza",
+  nightlife: "Vida noturna",
+};
 
 export function PlacePrimaryImage({
   placeName,
@@ -26,39 +34,14 @@ export function PlacePrimaryImage({
   const [failed, setFailed] = useState(false);
 
   if (!primaryImage || failed) {
+    const fallbackLabel = category ? categoryLabels[category] : "Lugar";
     return (
-      <div
-        aria-label={`Imagem não disponível para ${placeName}`}
-        className={styles.fallback}
-        data-place-category={category ?? "unknown"}
-        data-place-image-fallback="true"
-        role="img"
-      >
-        <span aria-hidden="true" className={styles.fallbackMark}>
-          {category === "beach"
-            ? "≈"
-            : category === "nature"
-              ? "△"
-              : category === "gastronomy"
-                ? "◌"
-                : category === "nightlife"
-                  ? "✦"
-                  : "◇"}
-        </span>
-        <span className={styles.fallbackCategory}>
-          {category === "beach"
-            ? "Praia"
-            : category === "nature"
-              ? "Natureza"
-              : category === "gastronomy"
-                ? "Gastronomia"
-                : category === "nightlife"
-                  ? "Vida noturna"
-                  : "Lugar"}
-        </span>
-        <span className={styles.fallbackText}>Imagem não disponível</span>
-        <span className={styles.fallbackDisclosure}>Capa de categoria — não é foto do local</span>
-      </div>
+      <CategoryIllustration
+        ariaLabel={`Ilustração de ${fallbackLabel} para ${placeName} — não é foto do local`}
+        eyebrow={fallbackLabel}
+        kind={category ?? "place"}
+        placeFallback
+      />
     );
   }
 

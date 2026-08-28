@@ -73,3 +73,37 @@ test("adiciona Place publicado ao Roteiro sem salvar automaticamente", async ({ 
   await expect(focusedDay.getByText("16:30", { exact: true })).toBeVisible();
   await expect(chapadaoActivity.locator("small")).toContainText("1 h");
 });
+
+test("mantém contexto visual ilustrativo em Lugar salvo sem fotografia real", async ({ page }) => {
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: `Salvos com fallback visual ${test.info().project.name} ${Date.now()}`,
+    startDate: "2026-08-22",
+    endDate: "2026-08-29",
+    accommodationName: "Hospedagem central",
+    accommodationAddress: "Pipa, Tibau do Sul — RN",
+    accommodationLatitude: -6.2302,
+    accommodationLongitude: -35.0503,
+  });
+
+  await page.goto(
+    `/viagens/${trip.id}/lugares?descoberta=ocultar&busca=Praia%20das%20Minas&categoria=beach`,
+  );
+
+  const discoveryCard = page
+    .locator('[data-place-source="published"]')
+    .filter({ hasText: "Praia das Minas" })
+    .first();
+  await expect(discoveryCard.locator('[data-place-image-fallback="true"]')).toHaveAttribute(
+    "data-category-illustration",
+    "beach",
+  );
+  await discoveryCard.getByRole("button", { name: "Salvar lugar" }).click();
+
+  await page.goto(`/viagens/${trip.id}/lugares-salvos`);
+  const savedCard = page.getByRole("listitem").filter({ hasText: "Praia das Minas" }).first();
+  const fallback = savedCard.locator('[data-place-image-fallback="true"]');
+  await expect(fallback).toBeVisible();
+  await expect(fallback).toHaveAttribute("data-category-illustration", "beach");
+  await expect(fallback).toContainText("Ilustração de categoria — não é foto do local");
+});
+

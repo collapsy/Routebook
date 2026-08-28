@@ -15,6 +15,7 @@ import {
   reconcileExternalPlaceCandidate,
   type ExternalPlaceReconciliation,
   type PlaceQualityScore,
+  type PlaceQualitySignalMatch,
   type PlaceQualitySignals,
 } from "@routebook/place-catalog";
 import { listSavedPlaces } from "@routebook/saved-places";
@@ -581,7 +582,7 @@ export default async function PlacesPage({
     : buildPlaceDiscoveryFeed({ ...feedInput, externalLimit: externalDiscoveryDisplayLimit });
 
   const qualityProvider = resolveConfiguredPlaceQualityProvider();
-  let qualityMatches = [];
+  let qualityMatches: PlaceQualitySignalMatch[] = [];
   let qualityProviderError: string | undefined;
   if (qualityProvider.status === "configured") {
     try {
@@ -772,7 +773,10 @@ export default async function PlacesPage({
           </ul>
           <Link
             className="product-secondary-action"
-            href={discoveryHref(tripId, discoveryMode ? { descoberta: discoveryMode } : {})}
+            href={discoveryHref(tripId, {
+              ...(discoveryMode ? { descoberta: discoveryMode } : {}),
+              ...(ranking.order === "distance" ? {} : { ordem: ranking.order }),
+            })}
           >
             Limpar filtros
           </Link>
@@ -953,8 +957,8 @@ export default async function PlacesPage({
                 rankingPosition={position}
                 {...(quality ? { quality } : {})}
                 {...(signals ? { qualitySignals: signals } : {})}
-                {...(categoryRankByItemId.get(item.id)
-                  ? { categoryRank: categoryRankByItemId.get(item.id) }
+                {...(categoryRankByItemId.has(item.id)
+                  ? { categoryRank: categoryRankByItemId.get(item.id)! }
                   : {})}
                 distanceReferenceLabel={distanceReferenceLabel}
                 item={item}
@@ -974,8 +978,8 @@ export default async function PlacesPage({
                 rankingPosition={position}
                 {...(quality ? { quality } : {})}
                 {...(signals ? { qualitySignals: signals } : {})}
-                {...(categoryRankByItemId.get(item.id)
-                  ? { categoryRank: categoryRankByItemId.get(item.id) }
+                {...(categoryRankByItemId.has(item.id)
+                  ? { categoryRank: categoryRankByItemId.get(item.id)! }
                   : {})}
                 distanceReferenceLabel={distanceReferenceLabel}
                 isSaved={savedPlaceIds.has(item.place.id)}

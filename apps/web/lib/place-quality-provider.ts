@@ -351,18 +351,16 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
       const longitude = finiteNumber(place.location?.longitude);
       if (!externalId || !name || latitude === undefined || longitude === undefined) return [];
 
+      const rating = finiteNumber(place.rating);
+      const reviewCount = finiteNumber(place.userRatingCount);
       return [
         {
           externalId,
           name,
           latitude,
           longitude,
-          ...(finiteNumber(place.rating) === undefined
-            ? {}
-            : { rating: finiteNumber(place.rating), ratingScaleMax: 5 }),
-          ...(finiteNumber(place.userRatingCount) === undefined
-            ? {}
-            : { reviewCount: finiteNumber(place.userRatingCount) }),
+          ...(rating === undefined ? {} : { rating, ratingScaleMax: 5 }),
+          ...(reviewCount === undefined ? {} : { reviewCount }),
         },
       ];
     });
@@ -426,18 +424,16 @@ export class FoursquarePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
       const longitude = finiteNumber(place.longitude);
       if (!externalId || !name || latitude === undefined || longitude === undefined) return [];
 
+      const rating = finiteNumber(place.rating);
+      const popularity = finiteNumber(place.popularity);
       return [
         {
           externalId,
           name,
           latitude,
           longitude,
-          ...(finiteNumber(place.rating) === undefined
-            ? {}
-            : { rating: finiteNumber(place.rating), ratingScaleMax: 10 }),
-          ...(finiteNumber(place.popularity) === undefined
-            ? {}
-            : { popularity: finiteNumber(place.popularity), popularityScaleMax: 1 }),
+          ...(rating === undefined ? {} : { rating, ratingScaleMax: 10 }),
+          ...(popularity === undefined ? {} : { popularity, popularityScaleMax: 1 }),
         },
       ];
     });

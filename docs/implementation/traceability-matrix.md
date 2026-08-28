@@ -809,3 +809,20 @@ Ao concluir um incremento:
 | domínio | nenhuma mutation, migration, Provider, secret ou alteração de persistência |
 | validação | Documentation Validation, Engineering/Playwright e Vercel Preview READY pendentes no HEAD final |
 
+## Evidências previstas do RB-INC-172
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-172-place-ranking-experience.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-172-place-ranking-experience.md` |
+| origem | decisão humana desta sessão de concluir a experiência de ranking |
+| rastreabilidade | issue #401; issue raiz #390; fundação mergeada na PR #391 |
+| base de Preview | PR #400 / SHA `5145a5e59907a02c4a9370b299b6c7d60ea1a146`, empilhada sobre #398 → #396 → #387 |
+| UI | Recomendados, Melhor avaliados, Mais populares, Mais próximos, posição, score/evidência e Top 5 recolhido |
+| política de ausência | sem Provider/sinal: somente distância; nenhum score/Top fictício |
+| runtime | adapters Google Places Text Search (New) e Foursquare Places API 2025-06-17; seleção por `ROUTEBOOK_PLACE_QUALITY_PROVIDER` |
+| matching | identidade + proximidade; homônimo distante rejeitado; externalId não reutilizado |
+| segurança | secrets somente server-side; nenhum secret em UI/log/relatório |
+| Provider | ativação, credencial, termos/quota/billing e comparação live continuam gate humano material |
+| validação | Documentation, Engineering/Playwright e Vercel Preview pendentes no HEAD final |
+\n

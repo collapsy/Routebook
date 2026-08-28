@@ -42,7 +42,7 @@ describe("isConservativeQualityIdentityMatch", () => {
 
 describe("GooglePlacesQualityAdapter", () => {
   it("usa FieldMask mínimo e converte rating + volume com Provenance", async () => {
-    let request: { input: string; init?: RequestInit } | undefined;
+    let request: { input: string; init: RequestInit | undefined } | undefined;
     const fetcher = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       request = { input: String(input), init };
       return new Response(
@@ -91,7 +91,7 @@ describe("GooglePlacesQualityAdapter", () => {
 
 describe("FoursquarePlacesQualityAdapter", () => {
   it("usa endpoint atual, Service Key e versão explícita sem expor secret", async () => {
-    let request: { input: string; init?: RequestInit } | undefined;
+    let request: { input: string; init: RequestInit | undefined } | undefined;
     const fetcher = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       request = { input: String(input), init };
       return new Response(

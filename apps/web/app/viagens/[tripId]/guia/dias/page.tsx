@@ -69,11 +69,7 @@ export default async function TripGuideDaysPage({
         </Link>
       </div>
 
-      <TripGuideModeNav
-        active="days"
-        {...(selectedDate ? { selectedDate } : {})}
-        tripId={tripId}
-      />
+      <TripGuideModeNav active="days" {...(selectedDate ? { selectedDate } : {})} tripId={tripId} />
 
       {guide ? (
         <TripDayGuide

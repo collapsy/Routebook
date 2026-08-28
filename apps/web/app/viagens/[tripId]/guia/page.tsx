@@ -92,10 +92,7 @@ export default async function TripGuidePage({
             O RouteBook não possui cobertura governada para esta data. O Guia por dia e o Roteiro
             continuam disponíveis sem inventar programação.
           </p>
-          <Link
-            className="product-primary-action"
-            href={`/viagens/${tripId}/guia/dias`}
-          >
+          <Link className="product-primary-action" href={`/viagens/${tripId}/guia/dias`}>
             Abrir Guia por dia
           </Link>
         </section>

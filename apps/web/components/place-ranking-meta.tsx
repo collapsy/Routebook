@@ -51,45 +51,66 @@ export function PlaceRankingMeta({
       data-place-ranking-position={position}
       data-place-ranking-quality={quality ? "true" : "false"}
     >
-      <div className={styles.badges}>
-        <strong className={styles.position}>
-          #{position} · {orderLabel}
-        </strong>
-        {quality && categoryRank === 1 ? (
-          <strong className={styles.topBadge}>
-            Top {categoryLabel.toLocaleLowerCase("pt-BR")}
+      <div className={styles.summaryRow}>
+        <div className={styles.badges}>
+          <strong className={styles.position}>
+            #{position} · {orderLabel}
           </strong>
-        ) : categoryRank ? (
-          <span className={styles.categoryRank}>
-            #{categoryRank} em {categoryLabel}
+          {quality && categoryRank === 1 ? (
+            <strong className={styles.topBadge}>
+              Top {categoryLabel.toLocaleLowerCase("pt-BR")}
+            </strong>
+          ) : categoryRank ? (
+            <span className={styles.categoryRank}>
+              #{categoryRank} em {categoryLabel}
+            </span>
+          ) : null}
+        </div>
+
+        {signals?.rating ? (
+          <span className={styles.ratingSummary}>
+            ★ {formatDecimal(signals.rating.value)}
+            {signals.rating.reviewCount !== undefined
+              ? " · " +
+                new Intl.NumberFormat("pt-BR").format(signals.rating.reviewCount) +
+                " avaliações"
+              : ""}
           </span>
+        ) : popularityPercent !== undefined ? (
+          <span className={styles.ratingSummary}>{popularityPercent}% popularidade</span>
         ) : null}
       </div>
 
       {quality && signals ? (
-        <div className={styles.evidence}>
-          <strong>Score RouteBook {formatDecimal(quality.score)}/10</strong>
-          {signals.rating ? (
+        <details className={styles.evidenceDetails}>
+          <summary>Por que está aqui?</summary>
+          <div className={styles.evidence}>
+            <strong>Score RouteBook {formatDecimal(quality.score)}/10</strong>
+            {signals.rating ? (
+              <span>
+                Avaliação {formatDecimal(signals.rating.value)}/
+                {formatDecimal(signals.rating.scaleMax, 0)}
+                {signals.rating.reviewCount !== undefined
+                  ? " · " +
+                    new Intl.NumberFormat("pt-BR").format(signals.rating.reviewCount) +
+                    " avaliações"
+                  : ""}
+              </span>
+            ) : null}
+            {popularityPercent !== undefined ? (
+              <span>{popularityPercent}% de popularidade relativa</span>
+            ) : null}
             <span>
-              {formatDecimal(signals.rating.value)}/{formatDecimal(signals.rating.scaleMax, 0)}
-              {signals.rating.reviewCount !== undefined
-                ? ` · ${new Intl.NumberFormat("pt-BR").format(signals.rating.reviewCount)} avaliações`
-                : ""}
+              Fonte: {providerLabel(signals.provider)} · coletado em{" "}
+              {formatCollectedAt(signals.collectedAt)}
             </span>
-          ) : null}
-          {popularityPercent !== undefined ? (
-            <span>{popularityPercent}% de popularidade relativa</span>
-          ) : null}
-          <span>
-            Fonte: {providerLabel(signals.provider)} · coletado em{" "}
-            {formatCollectedAt(signals.collectedAt)}
-          </span>
-          {quality.reasons.length > 0 ? (
-            <span className={styles.reason}>{quality.reasons.join(" · ")}</span>
-          ) : (
-            <span className={styles.reason}>Score derivado somente dos sinais disponíveis.</span>
-          )}
-        </div>
+            {quality.reasons.length > 0 ? (
+              <span className={styles.reason}>{quality.reasons.join(" · ")}</span>
+            ) : (
+              <span className={styles.reason}>Score derivado somente dos sinais disponíveis.</span>
+            )}
+          </div>
+        </details>
       ) : null}
     </section>
   );

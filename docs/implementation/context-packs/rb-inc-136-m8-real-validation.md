@@ -31,6 +31,7 @@ Preparar e, quando existir uso humano real, registrar a validação M8 do RouteB
 - PR de preparação/reconciliação integrada: `#374`;
 - arquivo: `docs/implementation/increments/rb-inc-136-m8-real-validation.md`;
 - branch de closeout atual: `codex/rb-inc-136-m8-closeout`;
+- PR de closeout: `#403`;
 - baseline da reconciliação: `bef09b68ce631073fb9d4b5a203a1ca462f1befd`;
 - branch histórica preservada: `codex/rb-inc-136-m8-real-validation`, divergente da `main` atual;
 - janela canônica da viagem: 22 a 29 de agosto de 2026.

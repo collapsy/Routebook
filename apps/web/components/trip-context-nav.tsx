@@ -24,7 +24,7 @@ export function TripContextNav({ tripId, showGuide }: TripContextNavProps) {
       ? [
           {
             href: `${basePath}/guia`,
-            label: "Guia",
+            label: "Hoje",
             match: (value: string) => value.startsWith(`${basePath}/guia`),
           },
         ]
@@ -36,35 +36,43 @@ export function TripContextNav({ tripId, showGuide }: TripContextNavProps) {
         value.startsWith(`${basePath}/lugares`) && !value.startsWith(`${basePath}/lugares-salvos`),
     },
     {
+      href: `${basePath}/roteiro`,
+      label: "Roteiro",
+      match: (value) => value.startsWith(`${basePath}/roteiro`),
+    },
+    {
       href: `${basePath}/lugares-salvos`,
       label: "Salvos",
       match: (value) => value.startsWith(`${basePath}/lugares-salvos`),
     },
     {
-      href: `${basePath}/roteiro`,
-      label: "Roteiro",
-      match: (value) => value.startsWith(`${basePath}/roteiro`),
+      href: basePath,
+      label: "Viagem",
+      match: (value) => value === basePath,
     },
   ];
 
   return (
-    <nav aria-label="Navegação da viagem" className={styles.nav}>
-      <div className={styles.scroller}>
-        {items.map((item) => {
-          const active = item.match(pathname);
+    <>
+      <nav aria-label="Navegação da viagem" className={styles.nav}>
+        <div className={styles.scroller}>
+          {items.map((item) => {
+            const active = item.match(pathname);
 
-          return (
-            <Link
-              aria-current={active ? "page" : undefined}
-              className={active ? styles.active : styles.link}
-              href={item.href}
-              key={item.href}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+            return (
+              <Link
+                aria-current={active ? "page" : undefined}
+                className={active ? styles.active : styles.link}
+                href={item.href}
+                key={item.href}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+      <div aria-hidden="true" className={styles.mobileSpacer} />
+    </>
   );
 }

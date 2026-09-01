@@ -167,10 +167,12 @@ export function TripDayGuide({
   guide,
   accommodationPoint,
   todayDate,
+  selectedDate,
 }: {
   guide: PipaTripGuide;
   accommodationPoint?: TripMapPoint;
   todayDate?: string | null;
+  selectedDate?: string | null;
 }) {
   return (
     <section className={styles.guide} aria-labelledby="trip-guide-title">
@@ -212,8 +214,8 @@ export function TripDayGuide({
             return (
               <li key={day.date}>
                 <a
-                  aria-current={isToday ? "date" : undefined}
-                  className={isToday ? styles.todayDayLink : undefined}
+                  aria-current={day.date === selectedDate ? "page" : isToday ? "date" : undefined}
+                  className={day.date === selectedDate || isToday ? styles.todayDayLink : undefined}
                   href={`#guia-dia-${day.index}`}
                 >
                   <span>
@@ -238,7 +240,9 @@ export function TripDayGuide({
               key={day.date}
               {...(accommodationPoint ? { accommodationPoint } : {})}
               day={day}
-              initiallyOpen={todayDate ? isToday : index === 0}
+              initiallyOpen={
+                selectedDate ? day.date === selectedDate : todayDate ? isToday : index === 0
+              }
               isToday={isToday}
             />
           );

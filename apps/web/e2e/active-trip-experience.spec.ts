@@ -52,14 +52,17 @@ test("preserva contexto entre áreas e prioriza Hoje sem sobrescrever seleção 
 
   const tripNav = page.getByRole("navigation", { name: "Navegação da viagem" });
   await expect(tripNav).toBeVisible();
-  await expect(tripNav.getByRole("link")).toHaveCount(4);
-  await expect(tripNav.getByRole("link", { name: "Guia" })).toHaveAttribute("aria-current", "page");
+  await expect(tripNav.getByRole("link")).toHaveCount(5);
+  await expect(tripNav.getByRole("link", { name: "Hoje" })).toHaveAttribute("aria-current", "page");
+  await expect(page.locator('[id^="guia-dia-"]')).toHaveCount(0);
+  const guideMode = page.getByRole("navigation", { name: "Modo do Guia" });
+  await expect(guideMode.getByRole("link", { name: "Hoje" })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await guideMode.getByRole("link", { name: "Guia por dia" }).click();
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/guia/dias\\?dia=${today}`));
   await expect(page.locator("#guia-dia-2")).toHaveAttribute("open", "");
-  await expect(
-    page
-      .getByRole("navigation", { name: "Dias do Guia da viagem" })
-      .locator('[aria-current="date"]'),
-  ).toContainText("Hoje");
 
   await tripNav.getByRole("link", { name: "Lugares" }).click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares$`));
@@ -136,7 +139,11 @@ test("mantém navegação e ações secundárias operáveis em viewport mobile",
     activity.getByRole("button", { name: "Remover Passeio do Dia atual do roteiro" }),
   ).toBeVisible();
 
-  await tripNav.getByRole("link", { name: "Guia" }).click();
+  await expect(tripNav).toHaveCSS("position", "fixed");
+  await expect(tripNav.getByRole("link")).toHaveCount(5);
+  await expect(tripNav.getByRole("link", { name: "Viagem" })).toBeVisible();
+
+  await tripNav.getByRole("link", { name: "Hoje" }).click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/guia$`));
   await expect(page.getByText("Hoje", { exact: true }).first()).toBeVisible();
 });

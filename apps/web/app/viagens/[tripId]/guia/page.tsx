@@ -12,17 +12,16 @@ import { findTravelerProfile } from "@routebook/traveler-profile";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PipaDailyExperiences } from "../../../../components/pipa-daily-experiences";
-import { TripDayGuide } from "../../../../components/trip-day-guide";
+import { TripGuideModeNav } from "../../../../components/trip-guide-mode-nav";
 import { buildPipaDailyExperience } from "../../../../lib/pipa-daily-experiences";
-import { buildPipaTripGuide } from "../../../../lib/pipa-day-guide";
 import { resolveTripTodayDate } from "../../../../lib/trip-active-day";
 import { resolveTripDestinationId } from "../../../../lib/trip-destination";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Guia da viagem — RouteBook",
-  description: "Consulte a sugestão editorial diária da sua viagem sem alterar o Roteiro.",
+  title: "Hoje em Pipa — RouteBook",
+  description: "Consulte experiências e decisões úteis para o Dia sem carregar o guia completo.",
 };
 
 export default async function TripGuidePage({
@@ -49,15 +48,6 @@ export default async function TripGuidePage({
   const selectedDate =
     (dia && days.some((day) => day.date === dia) ? dia : undefined) ?? todayDate ?? days[0]?.date;
   const travelMode = profile?.transportPreference === "walking" ? "walking" : "driving";
-  const guide = buildPipaTripGuide({
-    tripId,
-    days,
-    places: publishedPlaces,
-    ...(trip.accommodation?.coordinate
-      ? { accommodationCoordinate: trip.accommodation.coordinate }
-      : {}),
-    travelMode,
-  });
   const dailyExperience = selectedDate
     ? buildPipaDailyExperience({
         tripId,
@@ -81,6 +71,12 @@ export default async function TripGuidePage({
         </Link>
       </div>
 
+      <TripGuideModeNav
+        active="today"
+        {...(selectedDate ? { selectedDate } : {})}
+        tripId={tripId}
+      />
+
       {dailyExperience ? (
         <PipaDailyExperiences
           availableDates={days.map((day) => day.date)}
@@ -88,40 +84,17 @@ export default async function TripGuidePage({
           todayDate={todayDate}
           tripId={tripId}
         />
-      ) : null}
-
-      {guide ? (
-        <TripDayGuide
-          {...(trip.accommodation?.coordinate
-            ? {
-                accommodationPoint: {
-                  id: "guide-accommodation",
-                  label: trip.accommodation.name,
-                  kind: "accommodation" as const,
-                  latitude: trip.accommodation.coordinate.latitude,
-                  longitude: trip.accommodation.coordinate.longitude,
-                },
-              }
-            : {})}
-          guide={guide}
-          todayDate={todayDate}
-        />
       ) : (
-        <section className="traveler-context-summary" aria-labelledby="trip-guide-unavailable">
-          <p className="product-eyebrow">Guia da viagem</p>
-          <h1 id="trip-guide-unavailable">Guia editorial temporariamente indisponível</h1>
+        <section className="traveler-context-summary" aria-labelledby="today-unavailable">
+          <p className="product-eyebrow">Hoje em Pipa</p>
+          <h1 id="today-unavailable">Experiências do Dia indisponíveis</h1>
           <p>
-            O RouteBook não encontrou todos os Places publicados necessários para apresentar uma
-            sequência íntegra. Explore o catálogo ou use o Roteiro sem inventar paradas ausentes.
+            O RouteBook não possui cobertura governada para esta data. O Guia por dia e o Roteiro
+            continuam disponíveis sem inventar programação.
           </p>
-          <div className="section-heading-row">
-            <Link className="product-primary-action" href={`/viagens/${tripId}/lugares`}>
-              Explorar Lugares
-            </Link>
-            <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
-              Abrir Roteiro
-            </Link>
-          </div>
+          <Link className="product-primary-action" href={`/viagens/${tripId}/guia/dias`}>
+            Abrir Guia por dia
+          </Link>
         </section>
       )}
     </section>

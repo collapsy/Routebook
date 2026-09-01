@@ -1,0 +1,111 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import {
+  DrizzlePlaceRepository,
+  DrizzleTravelerProfileRepository,
+  DrizzleTripRepository,
+} from "@routebook/database";
+import { listPublishedPlaces } from "@routebook/place-catalog";
+import { findTravelerProfile } from "@routebook/traveler-profile";
+import { deriveTripDays, findTripById } from "@routebook/trip-management";
+
+import { TripDayGuide } from "../../../../../components/trip-day-guide";
+import { TripGuideModeNav } from "../../../../../components/trip-guide-mode-nav";
+import { buildPipaTripGuide } from "../../../../../lib/pipa-day-guide";
+import { resolveTripTodayDate } from "../../../../../lib/trip-active-day";
+import { resolveTripDestinationId } from "../../../../../lib/trip-destination";
+
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Guia por dia em Pipa — RouteBook",
+  description: "Consulte a sugestão editorial de cada Dia sem misturar com a agenda imediata.",
+};
+
+export default async function TripGuideDaysPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ tripId: string }>;
+  searchParams: Promise<{ dia?: string }>;
+}) {
+  const { tripId } = await params;
+  const trip = await findTripById(new DrizzleTripRepository(), tripId);
+  if (!trip) notFound();
+
+  const destinationId = resolveTripDestinationId(trip.destination.name);
+  if (destinationId !== "pipa-rn-br") notFound();
+
+  const [profile, publishedPlaces] = await Promise.all([
+    findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
+    listPublishedPlaces(new DrizzlePlaceRepository(), destinationId),
+  ]);
+  const days = deriveTripDays(trip.period);
+  const todayDate = resolveTripTodayDate(days, new Date(), "America/Fortaleza");
+  const { dia } = await searchParams;
+  const selectedDate =
+    (dia && days.some((day) => day.date === dia) ? dia : undefined) ?? todayDate ?? days[0]?.date;
+  const travelMode = profile?.transportPreference === "walking" ? "walking" : "driving";
+  const guide = buildPipaTripGuide({
+    tripId,
+    days,
+    places: publishedPlaces,
+    ...(trip.accommodation?.coordinate
+      ? { accommodationCoordinate: trip.accommodation.coordinate }
+      : {}),
+    travelMode,
+  });
+
+  return (
+    <section className="app-page trip-overview-page">
+      <div className="section-heading-row">
+        <Link className="back-link" href={`/viagens/${tripId}`}>
+          ← Voltar para Visão da viagem
+        </Link>
+        <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
+          Abrir Roteiro
+        </Link>
+      </div>
+
+      <TripGuideModeNav active="days" {...(selectedDate ? { selectedDate } : {})} tripId={tripId} />
+
+      {guide ? (
+        <TripDayGuide
+          {...(trip.accommodation?.coordinate
+            ? {
+                accommodationPoint: {
+                  id: "guide-accommodation",
+                  label: trip.accommodation.name,
+                  kind: "accommodation" as const,
+                  latitude: trip.accommodation.coordinate.latitude,
+                  longitude: trip.accommodation.coordinate.longitude,
+                },
+              }
+            : {})}
+          guide={guide}
+          {...(selectedDate ? { selectedDate } : {})}
+          todayDate={todayDate}
+        />
+      ) : (
+        <section className="traveler-context-summary" aria-labelledby="trip-guide-unavailable">
+          <p className="product-eyebrow">Guia por dia</p>
+          <h1 id="trip-guide-unavailable">Guia editorial temporariamente indisponível</h1>
+          <p>
+            O RouteBook não encontrou todos os Places publicados necessários para apresentar uma
+            sequência íntegra. Explore Lugares ou use o Roteiro sem inventar paradas ausentes.
+          </p>
+          <div className="section-heading-row">
+            <Link className="product-primary-action" href={`/viagens/${tripId}/lugares`}>
+              Explorar Lugares
+            </Link>
+            <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
+              Abrir Roteiro
+            </Link>
+          </div>
+        </section>
+      )}
+    </section>
+  );
+}

@@ -797,3 +797,18 @@ Ao concluir um incremento:
 | Provider/segredo | nenhum Provider, billing, API key, migration ou secret |
 | validação | Documentation Validation, Engineering Validation e Vercel Preview READY pendentes no HEAD final |
 
+## Evidências previstas do RB-INC-171
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-171-mobile-navigation-focus.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-171-mobile-navigation-focus.md` |
+| origem | feedback funcional humano no Preview: excesso de conteúdo na mesma página e navegação confusa |
+| rastreabilidade | issue #399; follow-up direto do RB-INC-161 |
+| base de Preview | PR #398 / SHA `e37a954a7065eab67828331d9c475fcd5517696d`, empilhada sobre #396 e #387 |
+| diagnóstico | `/guia` misturava experiências do Dia com Guia editorial multi-dia; nav mobile contradizia RB-INT-001 ao permanecer no topo com scroll horizontal |
+| arquitetura | `/guia` = Hoje; `/guia/dias` = Guia por dia; subnavegação preserva `dia` |
+| mobile | cinco destinos primários: Hoje, Lugares, Roteiro, Salvos e Viagem; barra fixa inferior com safe area |
+| domínio | nenhuma mutation, migration, Provider, secret ou alteração de persistência |
+| validação | Documentation Validation, Engineering/Playwright e Vercel Preview READY pendentes no HEAD final |
+

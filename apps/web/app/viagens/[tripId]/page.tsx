@@ -175,16 +175,15 @@ export default async function TripOverviewPage({
         <section className="traveler-context-summary" aria-labelledby="trip-guide-entry-title">
           <div className="section-heading-row">
             <div>
-              <p className="product-eyebrow">Guia da viagem</p>
-              <h2 id="trip-guide-entry-title">Uma sugestão diária para os {days.length} Dias</h2>
+              <p className="product-eyebrow">Hoje em Pipa</p>
+              <h2 id="trip-guide-entry-title">Comece pelo que importa neste Dia</h2>
               <p>
-                Veja temas, paradas, imagens, alertas práticos, distâncias em linha reta e rotas
-                externas. O Guia é editorial e só altera o Roteiro quando você decidir planejar um
-                Place explicitamente.
+                Consulte céu, horizonte e Rolês confirmados para a data em foco. Quando quiser
+                planejar com calma, o Guia por dia fica disponível dentro dessa mesma área.
               </p>
             </div>
             <Link className="product-primary-action" href={`/viagens/${tripId}/guia`}>
-              Abrir Guia da viagem
+              Ver Hoje
             </Link>
           </div>
         </section>

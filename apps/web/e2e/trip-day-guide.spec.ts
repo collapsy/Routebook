@@ -37,11 +37,18 @@ test("abre o Guia da viagem e cobre os oito Dias reais de Pipa", async ({ page }
   });
 
   await page.goto(`/viagens/${trip.id}`);
-  const guideEntry = page.getByRole("link", { name: "Abrir Guia da viagem" });
+  const guideEntry = page.getByRole("link", { name: "Ver Hoje" });
   await expect(guideEntry).toBeVisible();
   await guideEntry.click();
 
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/guia$`));
+  await expect(page.locator('[id^="guia-dia-"]')).toHaveCount(0);
+  await page
+    .getByRole("navigation", { name: "Modo do Guia" })
+    .getByRole("link", { name: "Guia por dia" })
+    .click();
+
+  await expect(page).toHaveURL(/\/guia\/dias/);
   await expect(page.getByRole("heading", { name: "Guia da viagem em Pipa" })).toBeVisible();
   await expect(page.getByText(/Editorial, não aplicado/)).toBeVisible();
   await expect(page.locator('[id^="guia-dia-"]')).toHaveCount(8);
@@ -105,7 +112,7 @@ test("não inventa Dias ausentes e usa uma despedida leve na viagem curta", asyn
     accommodationLongitude: -35.0503,
   });
 
-  await page.goto(`/viagens/${trip.id}/guia`);
+  await page.goto(`/viagens/${trip.id}/guia/dias`);
 
   await expect(page.locator('[id^="guia-dia-"]')).toHaveCount(3);
   await expect(page.locator("#guia-dia-4")).toHaveCount(0);
@@ -121,7 +128,7 @@ test("não finge rota quando a hospedagem não está geocodificada", async ({ pa
     endDate: "2026-08-29",
   });
 
-  await page.goto(`/viagens/${trip.id}/guia`);
+  await page.goto(`/viagens/${trip.id}/guia/dias`);
 
   await expect(page.getByText("Hospedagem sem coordenadas")).toHaveCount(22);
   await expect(page.getByRole("link", { name: "Rota e tempo no Maps" })).toHaveCount(0);
@@ -142,7 +149,7 @@ test("mantém a ação principal utilizável em viewport mobile", async ({ page 
     accommodationLongitude: -35.0503,
   });
 
-  await page.goto(`/viagens/${trip.id}/guia`);
+  await page.goto(`/viagens/${trip.id}/guia/dias`);
 
   await expect(page.getByRole("heading", { name: "Guia da viagem em Pipa" })).toBeVisible();
   const firstDay = page.locator("#guia-dia-1");
@@ -162,6 +169,7 @@ test("separa observação natural de rolês confirmados no Guia", async ({ page 
   });
 
   await page.goto(`/viagens/${trip.id}/guia?dia=2026-08-27`);
+  await expect(page.locator('[id^="guia-dia-"]')).toHaveCount(0);
   const experiences = page.locator("#experiencias-do-dia");
   await expect(experiences.getByRole("heading", { name: "Onde ver o Sol e a Lua" })).toBeVisible();
   await expect(experiences.getByRole("heading", { name: "Nascer da lua" })).toBeVisible();

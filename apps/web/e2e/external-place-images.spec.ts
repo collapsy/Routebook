@@ -86,6 +86,73 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
   );
 });
 
+test("renderiza Google Places Photo por proxy RouteBook sem trocar a Fonte factual Overture", async ({
+  page,
+}) => {
+  const googlePreview = {
+    provider: "google-places",
+    mediaUrl: "/api/place-image-preview/google?token=e2e-opaque-token",
+    sourceUrl: "https://www.google.com/maps/place/?q=place_id:e2e",
+    sourceName: "Google Places",
+    authorAttributions: [{ displayName: "Crédito Google E2E" }],
+    altText: "Fotografia Google do candidato externo.",
+    matchEvidence: "Identidade Google revalidada no teste.",
+  } as const;
+
+  await page.route("**/api/place-image-preview**", async (route) => {
+    const requestUrl = new URL(route.request().url());
+
+    if (requestUrl.pathname === "/api/place-image-preview/google") {
+      await route.fulfill({
+        status: 200,
+        contentType: "image/png",
+        body: onePixelPng,
+      });
+      return;
+    }
+
+    if (requestUrl.pathname === "/api/place-image-preview") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(googlePreview),
+      });
+      return;
+    }
+
+    await route.fallback();
+  });
+
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: `Google Photos ${test.info().project.name} ${Date.now()}`,
+    startDate: "2026-08-22",
+    endDate: "2026-08-24",
+    accommodationName: "Hospedagem central",
+    accommodationAddress: "Pipa, Tibau do Sul — RN",
+    accommodationLatitude: -6.2302,
+    accommodationLongitude: -35.0503,
+  });
+
+  await page.goto(`/viagens/${trip.id}/lugares`);
+
+  const externalCard = page.locator('[data-place-source="external"]').first();
+  await expect(externalCard).toBeVisible({ timeout: 20_000 });
+  await externalCard.scrollIntoViewIfNeeded();
+
+  const ready = externalCard.locator(
+    '[data-external-place-image-provider="google-places"][data-external-place-image-state="ready"]',
+  );
+  await expect(ready).toBeVisible({ timeout: 20_000 });
+  await expect(externalCard.getByRole("img", { name: googlePreview.altText })).toBeVisible();
+  await expect(externalCard).toContainText("Google Places");
+  await expect(externalCard).toContainText("Crédito Google E2E");
+  await expect(externalCard).toContainText("Fonte: Overture");
+  await expect(externalCard.getByRole("link", { name: "Ver no Google Maps" })).toHaveAttribute(
+    "href",
+    googlePreview.sourceUrl,
+  );
+});
+
 test("mantém rota real do candidato externo sem hospedagem usando a localização atual", async ({
   page,
 }) => {

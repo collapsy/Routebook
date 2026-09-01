@@ -52,6 +52,11 @@ export default defineConfig({
   ],
   webServer: {
     command: "pnpm start",
+    env: {
+      ...process.env,
+      ROUTEBOOK_DESTINATION_RESOLVER: "fixture",
+      ROUTEBOOK_E2E_DESTINATION_RESOLVER: "1",
+    },
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     url: "http://127.0.0.1:3000",

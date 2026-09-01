@@ -14,7 +14,11 @@ function FieldError({ message }: { message: string | undefined }) {
   );
 }
 
-export function TripForm() {
+export function TripForm({
+  destinationAttribution,
+}: {
+  destinationAttribution?: Readonly<{ label: string; href: string }>;
+}) {
   const [state, action, pending] = useActionState(createTripAction, initialCreateTripState);
 
   return (
@@ -26,32 +30,50 @@ export function TripForm() {
       ) : null}
 
       <div className="form-field form-field-wide">
-        <label htmlFor="name">Nome da viagem</label>
+        <label htmlFor="destination">Para onde você vai?</label>
         <input
-          aria-describedby={state.fieldErrors.name ? "name-error" : undefined}
-          aria-invalid={Boolean(state.fieldErrors.name)}
+          aria-describedby={state.fieldErrors.destination ? "destination-error" : undefined}
+          aria-invalid={Boolean(state.fieldErrors.destination)}
           autoComplete="off"
-          defaultValue="Pipa em agosto"
-          id="name"
-          name="name"
+          id="destination"
+          name="destination"
+          placeholder="Ex.: Florianópolis, SC"
           required
         />
+        <div id="destination-error">
+          <FieldError message={state.fieldErrors.destination} />
+        </div>
+        {destinationAttribution ? (
+          <p className="field-hint">
+            <a href={destinationAttribution.href} rel="noreferrer" target="_blank">
+              {destinationAttribution.label}
+            </a>
+          </p>
+        ) : null}
+      </div>
+
+      <div className="form-field form-field-wide">
+        <label htmlFor="name">Nome da viagem</label>
+        <input
+          aria-describedby={state.fieldErrors.name ? "name-error" : "name-hint"}
+          aria-invalid={Boolean(state.fieldErrors.name)}
+          autoComplete="off"
+          id="name"
+          name="name"
+          placeholder="Opcional"
+        />
+        <p className="field-hint" id="name-hint">
+          Se deixar em branco, usamos o nome do destino.
+        </p>
         <div id="name-error">
           <FieldError message={state.fieldErrors.name} />
         </div>
       </div>
 
-      <div className="form-field form-field-wide">
-        <label htmlFor="destination">Destino</label>
-        <input id="destination" readOnly value="Pipa, Tibau do Sul - RN" />
-        <p className="field-hint">Pipa é o primeiro destino canônico suportado pelo MVP.</p>
-      </div>
-
       <div className="form-field">
-        <label htmlFor="startDate">Data de início</label>
+        <label htmlFor="startDate">Quando começa?</label>
         <input
           aria-invalid={Boolean(state.fieldErrors.startDate)}
-          defaultValue="2026-08-22"
           id="startDate"
           name="startDate"
           required
@@ -61,10 +83,9 @@ export function TripForm() {
       </div>
 
       <div className="form-field">
-        <label htmlFor="endDate">Data de término</label>
+        <label htmlFor="endDate">Quando termina?</label>
         <input
           aria-invalid={Boolean(state.fieldErrors.endDate)}
-          defaultValue="2026-08-29"
           id="endDate"
           name="endDate"
           required
@@ -74,12 +95,12 @@ export function TripForm() {
       </div>
 
       <div className="form-field">
-        <label htmlFor="accommodationName">Hospedagem opcional</label>
+        <label htmlFor="accommodationName">Onde vai ficar?</label>
         <input
           aria-invalid={Boolean(state.fieldErrors.accommodationName)}
-          defaultValue="Condomínio Solar Água"
           id="accommodationName"
           name="accommodationName"
+          placeholder="Nome da hospedagem, se já souber"
         />
         <FieldError message={state.fieldErrors.accommodationName} />
       </div>
@@ -87,19 +108,19 @@ export function TripForm() {
       <div className="form-field">
         <label htmlFor="accommodationAddress">Endereço da hospedagem</label>
         <input
-          defaultValue="Pipa, Tibau do Sul - RN"
           id="accommodationAddress"
           name="accommodationAddress"
+          placeholder="Opcional nesta etapa"
         />
       </div>
 
       <div className="form-actions form-field-wide">
         <button className="product-button" disabled={pending} type="submit">
-          {pending ? "Criando viagem…" : "Criar viagem"}
+          {pending ? "Criando seu guia…" : "Criar meu guia"}
         </button>
         <p>
-          O responsável é definido pela conta autenticada. Nenhum roteiro será criado
-          automaticamente.
+          Você poderá ajustar hospedagem, preferências, lugares e roteiro depois. Nada é planejado
+          automaticamente sem sua ação.
         </p>
       </div>
     </form>

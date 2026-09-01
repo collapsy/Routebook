@@ -126,6 +126,7 @@ apps/web/components/place-ranking-meta.module.css
 apps/web/app/viagens/[tripId]/lugares/page.tsx
 apps/web/app/viagens/[tripId]/lugares/place-discovery.module.css
 apps/web/e2e/external-place-images.spec.ts
+apps/web/e2e/accommodation-proximity.spec.ts
 apps/web/e2e/place-actions.spec.ts
 apps/web/e2e/place-discovery-filters.spec.ts
 turbo.json

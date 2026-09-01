@@ -149,3 +149,42 @@ test("mantém a ação principal utilizável em viewport mobile", async ({ page 
   if ((await firstDay.getAttribute("open")) === null) await firstDay.locator("summary").click();
   await expect(firstDay.getByRole("link", { name: "Planejar neste Dia" }).first()).toBeVisible();
 });
+
+test("separa observação natural de rolês confirmados no Guia", async ({ page }) => {
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: pipaTripName("Experiências diárias Pipa"),
+    startDate: "2026-08-22",
+    endDate: "2026-08-29",
+    accommodationName: "Hospedagem central",
+    accommodationAddress: "Pipa, Tibau do Sul — RN",
+    accommodationLatitude: -6.2302,
+    accommodationLongitude: -35.0503,
+  });
+
+  await page.goto(`/viagens/${trip.id}/guia?dia=2026-08-27`);
+  const experiences = page.locator("#experiencias-do-dia");
+  await expect(experiences.getByRole("heading", { name: "Onde ver o Sol e a Lua" })).toBeVisible();
+  await expect(experiences.getByRole("heading", { name: "Nascer da lua" })).toBeVisible();
+  await expect(experiences.getByText("17:01", { exact: true })).toBeVisible();
+  await expect(experiences.getByText(/Nenhum rolê foi confirmado/)).toBeVisible();
+
+  await page.goto(`/viagens/${trip.id}/guia?dia=2026-08-28`);
+  const eventCard = page.locator("#experiencias-do-dia article").filter({
+    hasText: "Nihanna · Mística Weekend",
+  });
+  await expect(eventCard).toBeVisible();
+  await expect(eventCard.getByText("Confirmado", { exact: true })).toBeVisible();
+
+  const addToItinerary = eventCard.getByRole("link", { name: "Adicionar ao Roteiro" });
+  await expect(addToItinerary).toHaveAttribute("href", /dia=2026-08-28/);
+  await expect(addToItinerary).toHaveAttribute("href", /horario=22%3A00/);
+  await addToItinerary.click();
+
+  const manualComposer = page.locator("#adicionar-atividade-manual");
+  await expect(manualComposer).toHaveAttribute("open", "");
+  await expect(manualComposer.locator("#title")).toHaveValue(
+    "Nihanna · Mística Weekend · Agora Club",
+  );
+  await expect(manualComposer.locator("#startTime")).toHaveValue("22:00");
+  await expect(manualComposer.locator("#durationMinutes")).toHaveValue("180");
+});

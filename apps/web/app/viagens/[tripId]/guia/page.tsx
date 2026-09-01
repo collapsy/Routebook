@@ -11,7 +11,9 @@ import { listPublishedPlaces } from "@routebook/place-catalog";
 import { findTravelerProfile } from "@routebook/traveler-profile";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
+import { PipaDailyExperiences } from "../../../../components/pipa-daily-experiences";
 import { TripDayGuide } from "../../../../components/trip-day-guide";
+import { buildPipaDailyExperience } from "../../../../lib/pipa-daily-experiences";
 import { buildPipaTripGuide } from "../../../../lib/pipa-day-guide";
 import { resolveTripTodayDate } from "../../../../lib/trip-active-day";
 import { resolveTripDestinationId } from "../../../../lib/trip-destination";
@@ -23,7 +25,13 @@ export const metadata: Metadata = {
   description: "Consulte a sugestão editorial diária da sua viagem sem alterar o Roteiro.",
 };
 
-export default async function TripGuidePage({ params }: { params: Promise<{ tripId: string }> }) {
+export default async function TripGuidePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ tripId: string }>;
+  searchParams: Promise<{ dia?: string }>;
+}) {
   const { tripId } = await params;
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
@@ -37,6 +45,10 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
   ]);
   const days = deriveTripDays(trip.period);
   const todayDate = resolveTripTodayDate(days, new Date(), "America/Fortaleza");
+  const { dia } = await searchParams;
+  const selectedDate =
+    (dia && days.some((day) => day.date === dia) ? dia : undefined) ?? todayDate ?? days[0]?.date;
+  const travelMode = profile?.transportPreference === "walking" ? "walking" : "driving";
   const guide = buildPipaTripGuide({
     tripId,
     days,
@@ -44,8 +56,19 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
     ...(trip.accommodation?.coordinate
       ? { accommodationCoordinate: trip.accommodation.coordinate }
       : {}),
-    travelMode: profile?.transportPreference === "walking" ? "walking" : "driving",
+    travelMode,
   });
+  const dailyExperience = selectedDate
+    ? buildPipaDailyExperience({
+        tripId,
+        date: selectedDate,
+        places: publishedPlaces,
+        ...(trip.accommodation?.coordinate
+          ? { accommodationCoordinate: trip.accommodation.coordinate }
+          : {}),
+        travelMode,
+      })
+    : null;
 
   return (
     <section className="app-page trip-overview-page">
@@ -57,6 +80,15 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
           Abrir Roteiro
         </Link>
       </div>
+
+      {dailyExperience ? (
+        <PipaDailyExperiences
+          availableDates={days.map((day) => day.date)}
+          experience={dailyExperience}
+          todayDate={todayDate}
+          tripId={tripId}
+        />
+      ) : null}
 
       {guide ? (
         <TripDayGuide

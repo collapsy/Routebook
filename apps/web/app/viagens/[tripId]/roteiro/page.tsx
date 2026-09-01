@@ -173,6 +173,9 @@ export default async function ItineraryPage({
   params: Promise<{ tripId: string }>;
   searchParams: Promise<{
     dia?: string;
+    novaAtividade?: string;
+    horario?: string;
+    duracao?: string;
     atividadeCriada?: string;
     atividadeEditada?: string;
     atividadeMovida?: string;
@@ -196,6 +199,9 @@ export default async function ItineraryPage({
   const proposalReviewStatus = getItineraryProposalReviewStatus(proposals);
   const {
     dia,
+    novaAtividade,
+    horario,
+    duracao,
     atividadeCriada,
     atividadeEditada,
     atividadeMovida,
@@ -207,6 +213,17 @@ export default async function ItineraryPage({
     erroProposta,
     erro,
   } = await searchParams;
+  const manualPrefillTitle = novaAtividade?.trim().slice(0, 180) || undefined;
+  const manualPrefillTime =
+    horario && /^([01]\d|2[0-3]):[0-5]\d$/.test(horario) ? horario : undefined;
+  const parsedManualDuration = duracao ? Number.parseInt(duracao, 10) : Number.NaN;
+  const manualPrefillDuration =
+    Number.isInteger(parsedManualDuration) &&
+    parsedManualDuration >= 1 &&
+    parsedManualDuration <= 1_440
+      ? parsedManualDuration
+      : undefined;
+
   const destinationId = resolveDestinationId(trip.destination.name);
   const now = new Date();
   const activeTimeZone = destinationId === "pipa-rn-br" ? "America/Fortaleza" : "UTC";
@@ -655,7 +672,11 @@ export default async function ItineraryPage({
                 </Link>
               </div>
 
-              <details className={journeyStyles.secondaryDisclosure}>
+              <details
+                className={journeyStyles.secondaryDisclosure}
+                id="adicionar-atividade-manual"
+                open={Boolean(manualPrefillTitle)}
+              >
                 <summary>Adicionar atividade manual</summary>
                 <section className="itinerary-composer" aria-labelledby="new-activity-title">
                   <div>
@@ -675,6 +696,7 @@ export default async function ItineraryPage({
                       <input
                         id="title"
                         maxLength={180}
+                        defaultValue={manualPrefillTitle}
                         name="title"
                         placeholder="Ex.: Caminhada na Praia do Amor"
                         required
@@ -683,12 +705,18 @@ export default async function ItineraryPage({
 
                     <div className="form-field">
                       <label htmlFor="startTime">Horário opcional</label>
-                      <input id="startTime" name="startTime" type="time" />
+                      <input
+                        defaultValue={manualPrefillTime}
+                        id="startTime"
+                        name="startTime"
+                        type="time"
+                      />
                     </div>
 
                     <div className="form-field">
                       <label htmlFor="durationMinutes">Duração opcional</label>
                       <input
+                        defaultValue={manualPrefillDuration}
                         id="durationMinutes"
                         min={1}
                         name="durationMinutes"

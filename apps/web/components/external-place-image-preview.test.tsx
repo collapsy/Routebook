@@ -100,10 +100,7 @@ describe("ExternalPlaceImagePreview", () => {
     expect(screen.getByText(/Fotógrafo RouteBook/)).toBeInTheDocument();
     expect(screen.getByText(/CC BY-SA 4.0/)).toBeInTheDocument();
     expect(screen.getByText(/Wikimedia Commons/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Fonte" })).toHaveAttribute(
-      "href",
-      preview.sourceUrl,
-    );
+    expect(screen.getByRole("link", { name: "Fonte" })).toHaveAttribute("href", preview.sourceUrl);
     expect(fetcher).toHaveBeenCalledTimes(1);
     expect(String(fetcher.mock.calls[0]?.[0])).toContain("/api/place-image-preview?");
   });

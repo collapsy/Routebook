@@ -91,7 +91,6 @@ describe("GET /api/place-image-preview", () => {
     expect(String(payload.matchEvidence)).toContain("contexto local de Pipa/Tibau do Sul");
   });
 
-
   it("prefere Google Places quando externalId seguro e configuração Preview estão disponíveis", async () => {
     vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
     vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");

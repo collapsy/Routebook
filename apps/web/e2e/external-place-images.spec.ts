@@ -71,7 +71,7 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
   await expect(externalCard).toContainText("Teste RouteBook");
   await expect(externalCard).toContainText("CC BY-SA 4.0");
   await expect(externalCard).toContainText("Wikimedia Commons");
-  await expect(externalCard.getByRole("link", { name: "Ver fonte" })).toHaveAttribute(
+  await expect(externalCard.getByRole("link", { name: "Fonte" })).toHaveAttribute(
     "href",
     preview.sourceUrl,
   );
@@ -147,7 +147,7 @@ test("renderiza Google Places Photo por proxy RouteBook sem trocar a Fonte factu
   await expect(externalCard).toContainText("Google Maps");
   await expect(externalCard).toContainText("Crédito Google E2E");
   await expect(externalCard).toContainText("Fonte: Overture");
-  await expect(externalCard.getByRole("link", { name: "Ver no Google Maps" })).toHaveAttribute(
+  await expect(externalCard.getByRole("link", { name: "Fonte" })).toHaveAttribute(
     "href",
     googlePreview.sourceUrl,
   );

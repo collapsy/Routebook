@@ -764,7 +764,7 @@ Ao concluir um incremento:
 | FieldMask | metadata: `id,displayName,location,photos`; mídia: `photos` para resolver resource name atual |
 | cache | Google metadata e mídia `no-store`; photo name não é persistido nem devolvido no contrato público |
 | segurança | API key server-side; token HMAC efêmero; browser recebe apenas URL RouteBook |
-| Provenance | `authorAttributions` exibido quando presente; link Google Maps somente quando retornado pelo Provider |
+| Provenance | atribuição visível `Google Maps` no container da fotografia; `authorAttributions` adicionais exibidos quando presentes; link Google Maps somente quando retornado pelo Provider |
 | fallback | imagem curada → Google seguro → Wikimedia secure → ilustração de categoria |
 | custo | uma foto por card + lazy load; free usage cap/preço monitorados antes de qualquer Production |
 | ADR | RB-ADR-012 permanece `Proposed`; experimento Preview não equivale a aceite definitivo |

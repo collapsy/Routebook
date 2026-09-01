@@ -84,9 +84,7 @@ describe("GET /api/place-image-preview/google", () => {
     // A rota cria uma nova instância do adapter usando o fetch global. A sequência restante
     // começa em Place Details photos e termina na mídia.
     fetcher.mockClear();
-    fetcher
-      .mockResolvedValueOnce(detailsPhoto)
-      .mockResolvedValueOnce(image);
+    fetcher.mockResolvedValueOnce(detailsPhoto).mockResolvedValueOnce(image);
 
     const response = await GET(
       new Request(

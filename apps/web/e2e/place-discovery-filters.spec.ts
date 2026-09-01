@@ -41,7 +41,7 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(enrichedPlaces.first()).toContainText("Curado + atualizado");
   await expect(enrichedPlaces.first()).toContainText("RouteBook");
   await expect(enrichedPlaces.first()).toContainText("Overture");
-  await expect(page.getByRole("link", { name: "Ocultar atualização externa" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Ocultar descobertas atuais" })).toHaveAttribute(
     "href",
     `/viagens/${trip.id}/lugares?descoberta=ocultar`,
   );

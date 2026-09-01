@@ -110,8 +110,8 @@ function isIanaTimeZone(value: string): boolean {
 }
 
 export function resolveIanaTimeZone(latitude: number, longitude: number): string {
-  const timeZone = tzLookup(latitude, longitude);
-  if (!isIanaTimeZone(timeZone))
+  const timeZone: unknown = tzLookup(latitude, longitude);
+  if (typeof timeZone !== "string" || !isIanaTimeZone(timeZone))
     throw new Error("Timezone lookup returned an invalid IANA identifier.");
   return timeZone;
 }

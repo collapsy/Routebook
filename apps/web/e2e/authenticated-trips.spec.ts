@@ -58,7 +58,6 @@ test("cria Trip autenticada e impede leitura por outro User", async ({ page }, t
   await expect(page.getByText(tripName, { exact: true })).toHaveCount(0);
 });
 
-
 test("cria Trip para Florianópolis sem destino fixo na interface", async ({ page }, testInfo) => {
   const suffix = "rb-inc-174-" + testInfo.project.name + "-" + Date.now();
   const email = suffix + "@example.com";

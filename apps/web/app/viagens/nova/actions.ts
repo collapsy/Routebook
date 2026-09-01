@@ -11,9 +11,12 @@ import { resolveConfiguredDestinationResolver } from "@/lib/destination-resolver
 
 import type { CreateTripActionState } from "./state";
 
-function resolverUnavailableMessage(reason: "disabled" | "blocked" | "invalid-configuration"): string {
+function resolverUnavailableMessage(
+  reason: "disabled" | "blocked" | "invalid-configuration",
+): string {
   if (reason === "disabled") return "A busca de destinos ainda não está habilitada neste ambiente.";
-  if (reason === "blocked") return "A busca de destinos está bloqueada neste ambiente por segurança.";
+  if (reason === "blocked")
+    return "A busca de destinos está bloqueada neste ambiente por segurança.";
   return "A busca de destinos está com uma configuração inválida.";
 }
 

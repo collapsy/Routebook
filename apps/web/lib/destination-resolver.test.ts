@@ -145,7 +145,9 @@ describe("NominatimDestinationResolver", () => {
         ]),
       timeZoneLookup: () => "America/Bahia",
     });
-    await expect(resolver.resolve("Cidade sem identidade")).resolves.toEqual({ status: "not-found" });
+    await expect(resolver.resolve("Cidade sem identidade")).resolves.toEqual({
+      status: "not-found",
+    });
   });
 
   it("degrada falha de rede sem inventar Destination", async () => {

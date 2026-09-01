@@ -37,22 +37,14 @@ export type CreateAuthenticatedTripResult = Readonly<{
 export class AuthenticatedTripCreationError extends Error {
   constructor(
     public readonly code:
-      | "user-not-found"
-      | "personal-account-invalid"
-      | "destination-provenance-invalid",
+      "user-not-found" | "personal-account-invalid" | "destination-provenance-invalid",
   ) {
     super(`Authenticated Trip creation failed: ${code}.`);
     this.name = "AuthenticatedTripCreationError";
   }
 }
 
-const DESTINATION_CONFIDENCE_LEVELS = new Set([
-  "confirmed",
-  "high",
-  "medium",
-  "low",
-  "unknown",
-]);
+const DESTINATION_CONFIDENCE_LEVELS = new Set(["confirmed", "high", "medium", "low", "unknown"]);
 
 function normalizeDestinationProvenance(
   input: DestinationResolutionProvenanceInput,

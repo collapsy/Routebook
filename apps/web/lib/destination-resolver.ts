@@ -66,8 +66,7 @@ export type ConfiguredDestinationResolver =
   | Readonly<{ status: "unavailable"; reason: "disabled" | "blocked" | "invalid-configuration" }>;
 
 const DEFAULT_NOMINATIM_ENDPOINT = "https://nominatim.openstreetmap.org";
-const DEFAULT_NOMINATIM_USER_AGENT =
-  "RouteBook/0.1 (+https://github.com/collapsy/Routebook)";
+const DEFAULT_NOMINATIM_USER_AGENT = "RouteBook/0.1 (+https://github.com/collapsy/Routebook)";
 const OSM_COPYRIGHT_URL = "https://www.openstreetmap.org/copyright";
 const OSM_LICENSE = "ODbL-1.0";
 const TIMEZONE_METHOD = "@photostructure/tz-lookup@11.6.1";
@@ -77,7 +76,9 @@ function text(value: unknown): string {
 }
 
 function asRecord(value: unknown): JsonRecord | undefined {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : undefined;
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as JsonRecord)
+    : undefined;
 }
 
 function finiteNumber(value: unknown): number | undefined {
@@ -110,7 +111,8 @@ function isIanaTimeZone(value: string): boolean {
 
 export function resolveIanaTimeZone(latitude: number, longitude: number): string {
   const timeZone = tzLookup(latitude, longitude);
-  if (!isIanaTimeZone(timeZone)) throw new Error("Timezone lookup returned an invalid IANA identifier.");
+  if (!isIanaTimeZone(timeZone))
+    throw new Error("Timezone lookup returned an invalid IANA identifier.");
   return timeZone;
 }
 
@@ -150,7 +152,8 @@ function destinationTypeFor(
     keys.some((key) => normalizeText(addressValue(address, key)) === normalizedName);
 
   if (matches(["city", "town", "municipality"])) return "city";
-  if (matches(["village", "hamlet", "suburb", "neighbourhood", "quarter", "borough", "district"])) return "district";
+  if (matches(["village", "hamlet", "suburb", "neighbourhood", "quarter", "borough", "district"]))
+    return "district";
   if (matches(["state", "county", "region", "state_district"])) return "region";
 
   const addresstype = text(candidate.addresstype).toLowerCase();
@@ -159,13 +162,20 @@ function destinationTypeFor(
   const type = addresstype || providerType;
 
   if (["city", "town", "municipality"].includes(type)) return "city";
-  if (["village", "hamlet", "suburb", "neighbourhood", "quarter", "borough", "district"].includes(type)) return "district";
-  if (["state", "county", "region", "state_district", "administrative"].includes(type)) return "region";
+  if (
+    ["village", "hamlet", "suburb", "neighbourhood", "quarter", "borough", "district"].includes(
+      type,
+    )
+  )
+    return "district";
+  if (["state", "county", "region", "state_district", "administrative"].includes(type))
+    return "region";
   if (["island", "islet"].includes(type)) return "island";
   if (
     ["park", "national_park", "nature_reserve", "protected_area"].includes(type) ||
     (providerCategory === "leisure" && providerType === "park")
-  ) return "park";
+  )
+    return "park";
   if (["locality", "archipelago"].includes(type)) return "custom-region";
   return undefined;
 }
@@ -177,9 +187,18 @@ function parseBounds(value: unknown): DestinationBounds | undefined {
   const west = finiteNumber(value[2]);
   const east = finiteNumber(value[3]);
   if (
-    south === undefined || north === undefined || west === undefined || east === undefined ||
-    south < -90 || north > 90 || west < -180 || east > 180 || south > north || west > east
-  ) return undefined;
+    south === undefined ||
+    north === undefined ||
+    west === undefined ||
+    east === undefined ||
+    south < -90 ||
+    north > 90 ||
+    west < -180 ||
+    east > 180 ||
+    south > north ||
+    west > east
+  )
+    return undefined;
   return {
     minimumLatitude: south,
     maximumLatitude: north,
@@ -188,14 +207,24 @@ function parseBounds(value: unknown): DestinationBounds | undefined {
   };
 }
 
-function osmIdentity(candidate: JsonRecord): Readonly<{ externalReference: string; sourceUrl: string }> | undefined {
+function osmIdentity(
+  candidate: JsonRecord,
+): Readonly<{ externalReference: string; sourceUrl: string }> | undefined {
   const rawType = text(candidate.osm_type).toLowerCase();
   const osmId =
     typeof candidate.osm_id === "number" && Number.isSafeInteger(candidate.osm_id)
       ? String(candidate.osm_id)
       : text(candidate.osm_id);
-  const type = rawType === "node" ? "node" : rawType === "way" ? "way" : rawType === "relation" ? "relation" : undefined;
-  const prefix = type === "node" ? "N" : type === "way" ? "W" : type === "relation" ? "R" : undefined;
+  const type =
+    rawType === "node"
+      ? "node"
+      : rawType === "way"
+        ? "way"
+        : rawType === "relation"
+          ? "relation"
+          : undefined;
+  const prefix =
+    type === "node" ? "N" : type === "way" ? "W" : type === "relation" ? "R" : undefined;
   if (!type || !prefix || !/^\d+$/.test(osmId)) return undefined;
   return {
     externalReference: prefix + osmId,
@@ -207,7 +236,9 @@ function candidateSearchText(candidate: JsonRecord, address: JsonRecord | undefi
   const addressValues = address
     ? Object.values(address).filter((value): value is string => typeof value === "string")
     : [];
-  return [candidateName(candidate), text(candidate.display_name), ...addressValues].filter(Boolean).join(" ");
+  return [candidateName(candidate), text(candidate.display_name), ...addressValues]
+    .filter(Boolean)
+    .join(" ");
 }
 
 function parseCandidate(
@@ -223,10 +254,18 @@ function parseCandidate(
   const type = destinationTypeFor(name, candidate, address);
 
   if (
-    !identity || name.length < 2 || latitude === undefined || longitude === undefined ||
-    latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180 ||
-    !/^[A-Z]{2}$/.test(countryCode) || !type
-  ) return undefined;
+    !identity ||
+    name.length < 2 ||
+    latitude === undefined ||
+    longitude === undefined ||
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180 ||
+    !/^[A-Z]{2}$/.test(countryCode) ||
+    !type
+  )
+    return undefined;
 
   let timeZone: string;
   try {
@@ -257,7 +296,11 @@ function scoreCandidate(query: string, candidate: ParsedCandidate): number {
   let score = 0;
 
   if (candidateNameNormalized === queryName) score += 4;
-  else if (candidateNameNormalized.includes(queryName) || queryName.includes(candidateNameNormalized)) score += 2.5;
+  else if (
+    candidateNameNormalized.includes(queryName) ||
+    queryName.includes(candidateNameNormalized)
+  )
+    score += 2.5;
   if (queryTokens.length > 0) {
     const matched = queryTokens.filter((token) => haystack.has(token)).length;
     score += (matched / queryTokens.length) * 3;
@@ -276,7 +319,8 @@ function ambiguousLabels(
   if (!first || !second) return undefined;
   const distance = distanceMeters(first.candidate.destination, second.candidate.destination);
   const sameName =
-    normalizeText(first.candidate.destination.name) === normalizeText(second.candidate.destination.name);
+    normalizeText(first.candidate.destination.name) ===
+    normalizeText(second.candidate.destination.name);
 
   if (sameName && !query.includes(",") && distance > 50_000) {
     return [first.candidate.searchText, second.candidate.searchText];
@@ -346,7 +390,8 @@ export class NominatimDestinationResolver implements DestinationResolver {
     const byIdentity = new Map<string, ParsedCandidate>();
     for (const candidate of parsed) {
       const previous = byIdentity.get(candidate.externalReference);
-      if (!previous || candidate.importance > previous.importance) byIdentity.set(candidate.externalReference, candidate);
+      if (!previous || candidate.importance > previous.importance)
+        byIdentity.set(candidate.externalReference, candidate);
     }
 
     const ranked = [...byIdentity.values()]
@@ -444,14 +489,18 @@ export function resolveConfiguredDestinationResolver(): ConfiguredDestinationRes
     return { status: "unavailable", reason: "disabled" };
   }
   if (configured === "nominatim") {
-    if (process.env.VERCEL_ENV === "production") return { status: "unavailable", reason: "blocked" };
+    if (process.env.VERCEL_ENV === "production")
+      return { status: "unavailable", reason: "blocked" };
     return {
       status: "configured",
       resolver: new NominatimDestinationResolver({
         endpoint: process.env.NOMINATIM_BASE_URL ?? DEFAULT_NOMINATIM_ENDPOINT,
         userAgent: process.env.ROUTEBOOK_NOMINATIM_USER_AGENT ?? DEFAULT_NOMINATIM_USER_AGENT,
       }),
-      attribution: { label: "Dados de localização © OpenStreetMap contributors", href: OSM_COPYRIGHT_URL },
+      attribution: {
+        label: "Dados de localização © OpenStreetMap contributors",
+        href: OSM_COPYRIGHT_URL,
+      },
     };
   }
   if (configured === "fixture") {

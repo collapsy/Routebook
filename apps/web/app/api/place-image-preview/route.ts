@@ -86,11 +86,14 @@ export async function GET(request: Request) {
           );
         }
       } catch (error) {
-        console.warn("[place-image-preview] Google Places Photos indisponível; tentando Wikimedia", {
-          destinationId,
-          name,
-          message: error instanceof Error ? error.message : "erro desconhecido",
-        });
+        console.warn(
+          "[place-image-preview] Google Places Photos indisponível; tentando Wikimedia",
+          {
+            destinationId,
+            name,
+            message: error instanceof Error ? error.message : "erro desconhecido",
+          },
+        );
       }
     }
   }

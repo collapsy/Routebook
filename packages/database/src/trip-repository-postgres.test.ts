@@ -16,6 +16,14 @@ function disposableTrip() {
   return createTrip(
     {
       name: "Viagem descartável RB-INC-138",
+      destination: {
+        name: "Pipa, Tibau do Sul - RN",
+        type: "district",
+        countryCode: "BR",
+        latitude: -6.2302,
+        longitude: -35.0503,
+        timeZone: "America/Fortaleza",
+      },
       startDate: "2026-08-22",
       endDate: "2026-08-29",
       ownerName: "Owner RB-INC-138",
@@ -28,7 +36,31 @@ afterAll(async () => {
   await closeDatabase();
 });
 
-describe("DrizzleTripRepository.deleteById", () => {
+describe("DrizzleTripRepository", () => {
+  it("reidrata Destination e TripPeriod usando os valores persistidos", async () => {
+    const trip = createTrip({
+      name: "Florianópolis round-trip RB-INC-173",
+      destination: {
+        name: "Florianópolis, SC",
+        type: "city",
+        countryCode: "BR",
+        latitude: -27.5949,
+        longitude: -48.5482,
+        timeZone: "America/Sao_Paulo",
+      },
+      startDate: "2026-11-10",
+      endDate: "2026-11-17",
+      ownerName: "Owner RB-INC-173",
+    });
+
+    await repository.create(trip);
+    const restored = await repository.findById(trip.id);
+
+    expect(restored?.destination).toEqual(trip.destination);
+    expect(restored?.period.timeZone).toBe("America/Sao_Paulo");
+    await repository.deleteById(trip.id);
+  });
+
   it("remove a Trip e dados dependentes protegidos por cascade", async () => {
     const trip = disposableTrip();
     const now = new Date("2026-08-15T00:00:00.000Z");

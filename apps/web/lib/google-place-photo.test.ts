@@ -76,7 +76,7 @@ describe("GooglePlacePhotoAdapter", () => {
     );
     expect(preview).toMatchObject({
       provider: "google-places",
-      sourceName: "Google Places",
+      sourceName: "Google Maps",
       authorAttributions: [
         {
           displayName: "Pessoa fotógrafa",

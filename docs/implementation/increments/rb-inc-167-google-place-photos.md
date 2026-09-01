@@ -103,7 +103,7 @@ O browser nunca recebe API key nem `photo name`.
 - Place ID é revalidado contra nome/coordenada;
 - mídia aceita somente JPEG, PNG ou WebP e possui limite de tamanho;
 - nenhuma resposta de erro imprime secret, token completo ou photo name;
-- atribuições Google são exibidas quando fornecidas;
+- atribuição de plataforma é exibida como `Google Maps` no mesmo container da fotografia e `authorAttributions` adicionais são exibidos quando fornecidos;
 - link Google Maps da fotografia é exibido somente quando retornado pelo Provider;
 - Overture continua Fonte factual dos candidatos externos;
 - Google fornece apenas mídia/Provenance de mídia nesta capability.

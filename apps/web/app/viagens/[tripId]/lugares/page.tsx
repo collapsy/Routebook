@@ -709,9 +709,8 @@ export default async function PlacesPage({
           <p className="product-eyebrow">Guia de viagem</p>
           <h1>Lugares em {trip.destination.name}</h1>
           <p>
-            Explore uma lista única de Lugares. O RouteBook combina conteúdo curado com descobertas
-            atuais da região sem mostrar o mesmo lugar duas vezes. Para distância por ruas, duração
-            e trânsito, use as ações de rota real.
+            Descubra praias, gastronomia, natureza e vida noturna com distância, fotos e sinais de
+            qualidade para decidir mais rápido.
           </p>
         </div>
       </header>
@@ -850,35 +849,32 @@ export default async function PlacesPage({
         </div>
 
         {ranking.hasQualityCoverage ? (
-          <>
+          <details className={styles.rankingDetails}>
+            <summary>Entenda o ranking{topLists.length > 0 ? " e veja Top 5" : ""}</summary>
             <p className={styles.rankingNotice}>
-              Score RouteBook é derivado de sinais externos verificados e contexto da viagem; não é
-              uma nota criada pelo usuário. Rating, popularidade e Provider continuam identificados
-              em cada card.
+              O Score RouteBook combina sinais externos verificados com o contexto da viagem. A
+              avaliação, o Provider e os motivos continuam disponíveis em cada card.
             </p>
             {topLists.length > 0 ? (
-              <details className={styles.topLists}>
-                <summary>Ver Top 5 por categoria</summary>
-                <div className={styles.topListsGrid}>
-                  {topLists.map((list) => (
-                    <section key={list.category}>
-                      <strong>{categoryLabels[list.category]}</strong>
-                      <ol>
-                        {list.items.map((entry) => (
-                          <li key={entry.item.id}>
-                            {entry.item.kind === "external"
-                              ? entry.item.candidate.name
-                              : entry.item.place.name}
-                            <small>Score {entry.quality?.score}/10</small>
-                          </li>
-                        ))}
-                      </ol>
-                    </section>
-                  ))}
-                </div>
-              </details>
+              <div className={styles.topListsGrid}>
+                {topLists.map((list) => (
+                  <section key={list.category}>
+                    <strong>{categoryLabels[list.category]}</strong>
+                    <ol>
+                      {list.items.map((entry) => (
+                        <li key={entry.item.id}>
+                          {entry.item.kind === "external"
+                            ? entry.item.candidate.name
+                            : entry.item.place.name}
+                          <small>Score {entry.quality?.score}/10</small>
+                        </li>
+                      ))}
+                    </ol>
+                  </section>
+                ))}
+              </div>
             ) : null}
-          </>
+          </details>
         ) : (
           <p className={styles.rankingNotice} role="status">
             {qualityProviderError ??
@@ -906,36 +902,37 @@ export default async function PlacesPage({
           </h2>
           <p>
             {hasExternalCoverage
-              ? `${curatedCount} com conteúdo curado do RouteBook · ${enrichedCount} também reconciliados com Overture · ${availableExternalCount} somente na descoberta atual.`
+              ? `${curatedCount} curados · ${availableExternalCount} descobertas atuais`
               : "Lista e mapa exibem o mesmo conjunto curado e filtrado."}
           </p>
         </div>
         <Link
-          className="product-secondary-action"
+          className={styles.discoveryToggle}
           href={discoveryHref(tripId, {
             ...canonicalParams,
             ...(discoverExternal ? { descoberta: "ocultar" } : { descoberta: undefined }),
           })}
         >
-          {discoverExternal ? "Ocultar atualização externa" : "Mostrar atualização externa"}
+          {discoverExternal ? "Ocultar descobertas atuais" : "Mostrar descobertas atuais"}
         </Link>
       </div>
 
       {discoverExternal ? (
         <section aria-label="Cobertura da descoberta" className={styles.discoverySummary}>
-          <strong>Um catálogo, identidades únicas</strong>
-          <p>
-            O RouteBook reconcilia a cobertura do Overture com o catálogo curado antes de montar a
-            grade. Quando as duas fontes representam o mesmo Lugar, você vê um único card com
-            conteúdo curado e contexto atualizado. A origem continua indicada para rastreabilidade.
-          </p>
-          <p>
-            {externalCandidateCount} candidatos externos foram avaliados. {enrichedCount} Lugares
-            visíveis receberam contexto externo e {externalPossibleMatchCount} correspondências
-            possíveis foram tratadas de forma conservadora para evitar duplicatas.{" "}
-            {externalLinkedCount} referências já possuem vínculo canônico e {externalRejectedCount}{" "}
-            candidatos foram rejeitados pela validação da Fonte/categoria.
-          </p>
+          <details>
+            <summary>Um catálogo, identidades únicas</summary>
+            <div className={styles.discoverySummaryContent}>
+              <p>
+                O RouteBook combina o catálogo curado com descobertas atuais sem repetir o mesmo
+                Lugar. A origem continua disponível para rastreabilidade.
+              </p>
+              <p>
+                {externalCandidateCount} candidatos avaliados · {enrichedCount} enriquecidos ·{" "}
+                {externalPossibleMatchCount} correspondências conservadoras · {externalLinkedCount}{" "}
+                vínculos existentes · {externalRejectedCount} rejeitados.
+              </p>
+            </div>
+          </details>
           {promotionStatusMessage ? (
             <p className={styles.notice} role="status">
               {promotionStatusMessage}

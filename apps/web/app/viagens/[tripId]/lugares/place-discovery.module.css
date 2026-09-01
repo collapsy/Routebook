@@ -94,7 +94,7 @@
   background: var(--surface);
 }
 
-.discoverySummary > summary {
+.discoverySummary details > summary {
   cursor: pointer;
   color: var(--foreground);
   font-size: 0.86rem;
@@ -241,6 +241,11 @@
   gap: 0.7rem;
   content-visibility: auto;
   contain-intrinsic-size: auto 34rem;
+}
+
+.optionsGrid > li > strong {
+  font-size: 1.08rem;
+  line-height: 1.25;
 }
 
 .visuallyHidden {
@@ -433,4 +438,36 @@
   .cardActions {
     grid-template-columns: 1fr;
   }
+}
+
+
+.discoveryToggle {
+  color: var(--primary-strong);
+  font-size: 0.8rem;
+  font-weight: 760;
+  text-decoration: none;
+}
+
+.discoveryToggle:hover {
+  text-decoration: underline;
+}
+
+.rankingDetails {
+  border-top: 1px solid var(--border);
+  padding-top: 0.65rem;
+}
+
+.rankingDetails > summary {
+  cursor: pointer;
+  color: var(--foreground-muted);
+  font-size: 0.8rem;
+  font-weight: 780;
+}
+
+.rankingDetails .rankingNotice {
+  margin-top: 0.6rem;
+}
+
+.rankingDetails .topListsGrid {
+  margin-top: 0.7rem;
 }

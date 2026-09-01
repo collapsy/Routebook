@@ -49,6 +49,7 @@ function requestUrl(overrides: Record<string, string> = {}): string {
 }
 
 afterEach(() => {
+  vi.unstubAllEnvs();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -88,6 +89,95 @@ describe("GET /api/place-image-preview", () => {
       attribution: "Fotógrafo RouteBook",
     });
     expect(String(payload.matchEvidence)).toContain("contexto local de Pipa/Tibau do Sul");
+  });
+
+
+  it("prefere Google Places quando externalId seguro e configuração Preview estão disponíveis", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const fetcher = vi.fn(async () =>
+      Response.json({
+        id: "ChIJPraiaDoAmor01",
+        displayName: { text: "Praia do Amor" },
+        location: { latitude: -6.2367, longitude: -35.0466 },
+        photos: [
+          {
+            name: "places/ChIJPraiaDoAmor01/photos/photo-resource-current",
+            authorAttributions: [
+              {
+                displayName: "Pessoa fotógrafa",
+                uri: "//maps.google.com/maps/contrib/123",
+              },
+            ],
+            googleMapsUri: "https://www.google.com/maps/place/?q=place_id:abc",
+          },
+        ],
+      }),
+    );
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          category: "beach",
+          googlePlaceId: "ChIJPraiaDoAmor01",
+        }),
+      ),
+    );
+    const payload = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(payload).toMatchObject({
+      provider: "google-places",
+      sourceName: "Google Places",
+      authorAttributions: [
+        {
+          displayName: "Pessoa fotógrafa",
+          uri: "https://maps.google.com/maps/contrib/123",
+        },
+      ],
+    });
+    expect(String(payload.mediaUrl)).toContain("/api/place-image-preview/google?token=");
+    expect(JSON.stringify(payload)).not.toContain("photo-resource-current");
+    expect(JSON.stringify(payload)).not.toContain("secret-google");
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it("cai para Wikimedia quando Google não confirma a identidade", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const fetcher = vi
+      .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(
+        Response.json({
+          id: "ChIJPraiaDoAmor01",
+          displayName: { text: "Praia do Amor distante" },
+          location: { latitude: -7.5, longitude: -36.5 },
+          photos: [],
+        }),
+      )
+      .mockResolvedValueOnce(commonsResponse());
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          category: "beach",
+          googlePlaceId: "ChIJPraiaDoAmor01",
+        }),
+      ),
+    );
+    const payload = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(payload).toMatchObject({
+      provider: "wikimedia-commons",
+      sourceName: "Wikimedia Commons",
+    });
+    expect(fetcher).toHaveBeenCalledTimes(2);
   });
 
   it("mantém fallback quando a identidade é ambígua", async () => {

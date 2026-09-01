@@ -35,6 +35,26 @@ export const trips = pgTable("trips", {
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
 });
 
+export const tripDestinationProvenance = pgTable(
+  "trip_destination_provenance",
+  {
+    id: uuid("id").primaryKey(),
+    tripId: uuid("trip_id")
+      .notNull()
+      .references(() => trips.id, { onDelete: "cascade" }),
+    provider: varchar("provider", { length: 80 }).notNull(),
+    externalReference: varchar("external_reference", { length: 240 }).notNull(),
+    sourceLicense: text("source_license").notNull(),
+    sourceUrl: text("source_url"),
+    collectedAt: timestamp("collected_at", { withTimezone: true, mode: "date" }).notNull(),
+    method: varchar("method", { length: 120 }).notNull(),
+    confidenceLevel: varchar("confidence_level", { length: 16 }).notNull(),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
+  },
+  (table) => [index("trip_destination_provenance_trip_id_idx").on(table.tripId)],
+);
+
 export const travelerProfiles = pgTable(
   "traveler_profiles",
   {

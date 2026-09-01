@@ -26,6 +26,7 @@ export {
   createPostgresAuthenticatedTrip,
   type CreateAuthenticatedTripInput,
   type CreateAuthenticatedTripResult,
+  type DestinationResolutionProvenanceInput,
 } from "./authenticated-trip-service";
 export { listPostgresAuthorizedTrips } from "./authenticated-trip-query";
 
@@ -46,6 +47,7 @@ export {
   recommendations,
   savedPlaces,
   travelerProfiles,
+  tripDestinationProvenance,
   trips,
 } from "./schema";
 export {

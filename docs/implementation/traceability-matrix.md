@@ -730,22 +730,25 @@ Ao concluir um incremento:
 | mudanças de aplicação | nenhuma; sem migration, banco, secret ou código de autenticação/autorização alterado |
 | rastreabilidade | issue #305 e PR #315; gates finais devem permanecer verdes no HEAD definitivo antes do merge |
 
-## Evidências previstas do RB-INC-136
+## Evidências do RB-INC-136
 
 | Evidência | Localização/resultado |
 | --- | --- |
 | definição do incremento | `docs/implementation/increments/rb-inc-136-m8-real-validation.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-136-m8-real-validation.md` |
 | requisitos e decisões | RB-PRD-002, RB-DEL-001, RB-QA-001, RB-OBS-001 e RB-PRIV-001 |
-| rastreabilidade | issue #319 e Draft PR #374 |
-| branch | `codex/rb-inc-136-m8-phase-a-reconciliation` |
-| baseline reconciliado | `main` em `bef09b68ce631073fb9d4b5a203a1ca462f1befd`, após integração do RB-INC-160 |
-| Registry | RB-INC-136 e RB-CTX-136 já registrados na `main`; nenhuma alteração adicional necessária |
-| protocolo Fase A | taxonomia, severidade, jornadas, perguntas, template de Session, privacidade e decisão M8 definidos; H1–H10 permanecem `not_measured` |
-| limite de evidência humana | aceite funcional do RB-INC-160 não é Session M8 e não sustenta H1–H10 |
-| código/Production | nenhuma mudança funcional, migration, write ou promoção nesta Fase A |
-| validação | Documentation Validation e Engineering Validation pendentes no HEAD final da PR #374 |
-| Fase B | aguardando uso humano real elegível; nenhuma Session fabricada |
+| rastreabilidade | issue #319; preparação/reconciliação #374; closeout PR #403 / `codex/rb-inc-136-m8-closeout` |
+| Fase A | concluída e integrada em 20/08/2026; CI da preparação verde |
+| uso humano real | evidências contemporâneas em #382, #390, #395, #397, #399 e #401 |
+| feedback pós-viagem | em 01/09/2026 o owner confirmou que a viagem ocorreu, o RouteBook foi útil e recebeu alterações durante o período de teste |
+| Sessions M8 | RB-M8-20260823-01, RB-M8-20260827-01, RB-M8-20260828-01 e RB-M8-20260901-01 |
+| matriz H1–H10 | H1 `partially_supported`; H10 `supported`; demais hipóteses permanecem `not_measured` por falta de evidência específica |
+| principais achados | cobertura visual, fricção do Roteiro, ranking/qualidade, temporalidade do Dia e navegação mobile |
+| backlog derivado | #382, #386/#387, #390/#401/#402, #395/#396, #397/#398 e #399/#400 |
+| decisão M8 | `partially_validated` — valor real demonstrado, com lacunas relevantes e capabilities não medidas |
+| código/Production | closeout documental; nenhuma mudança funcional, migration, Provider, secret ou promoção |
+| gate final | Documentation Validation e Engineering Validation devem permanecer verdes no SHA final da PR de closeout |
+| encerramento | #319 permanece aberta até revisão humana final e integração do closeout |
 
 ## Evidências previstas do RB-INC-168
 

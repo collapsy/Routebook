@@ -29,7 +29,7 @@ type GooglePreviewData = Readonly<{
   provider: "google-places";
   mediaUrl: string;
   sourceUrl?: string;
-  sourceName: "Google Places";
+  sourceName: "Google Maps";
   authorAttributions: readonly GoogleAuthorAttribution[];
   altText: string;
   matchEvidence: string;
@@ -109,7 +109,7 @@ function isPreviewData(value: unknown): value is ExternalPlaceImagePreviewData {
 
   if (candidate.provider === "google-places") {
     return (
-      candidate.sourceName === "Google Places" &&
+      candidate.sourceName === "Google Maps" &&
       typeof candidate.mediaUrl === "string" &&
       isAllowedGoogleMediaUrl(candidate.mediaUrl) &&
       isGoogleAttributions(candidate.authorAttributions) &&

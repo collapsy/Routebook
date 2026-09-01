@@ -8,10 +8,11 @@ import { CategoryIllustration } from "./category-illustration";
 import { PlacePrimaryImage } from "./place-primary-image";
 import styles from "./place-primary-image.module.css";
 
-type ExternalPlaceImagePreviewData = Readonly<{
+type WikimediaPreviewData = Readonly<{
+  provider?: "wikimedia-commons";
   previewUrl: string;
   sourceUrl: string;
-  sourceName: string;
+  sourceName: "Wikimedia Commons";
   license: string;
   licenseUrl?: string;
   attribution: string;
@@ -19,12 +20,29 @@ type ExternalPlaceImagePreviewData = Readonly<{
   matchEvidence: string;
 }>;
 
+type GoogleAuthorAttribution = Readonly<{
+  displayName: string;
+  uri?: string;
+}>;
+
+type GooglePreviewData = Readonly<{
+  provider: "google-places";
+  mediaUrl: string;
+  sourceUrl?: string;
+  sourceName: "Google Places";
+  authorAttributions: readonly GoogleAuthorAttribution[];
+  altText: string;
+  matchEvidence: string;
+}>;
+
+type ExternalPlaceImagePreviewData = WikimediaPreviewData | GooglePreviewData;
+
 type PreviewState =
   | Readonly<{ status: "idle" | "loading" }>
   | Readonly<{ status: "ready"; preview: ExternalPlaceImagePreviewData }>
   | Readonly<{ status: "fallback" }>;
 
-function isAllowedPreviewUrl(value: string): boolean {
+function isAllowedWikimediaPreviewUrl(value: string): boolean {
   try {
     const url = new URL(value);
     return (
@@ -37,7 +55,7 @@ function isAllowedPreviewUrl(value: string): boolean {
   }
 }
 
-function isAllowedSourceUrl(value: string): boolean {
+function isAllowedWikimediaSourceUrl(value: string): boolean {
   try {
     const url = new URL(value);
     return url.protocol === "https:" && url.hostname === "commons.wikimedia.org";
@@ -46,14 +64,69 @@ function isAllowedSourceUrl(value: string): boolean {
   }
 }
 
+function isAllowedGoogleUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      (url.hostname === "maps.google.com" || url.hostname === "www.google.com")
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isAllowedGoogleMediaUrl(value: string): boolean {
+  try {
+    const url = new URL(value, "https://routebook.local");
+    return (
+      url.origin === "https://routebook.local" &&
+      url.pathname === "/api/place-image-preview/google" &&
+      Boolean(url.searchParams.get("token"))
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isGoogleAttributions(value: unknown): value is readonly GoogleAuthorAttribution[] {
+  if (!Array.isArray(value)) return false;
+  return value.every((entry) => {
+    if (!entry || typeof entry !== "object") return false;
+    const candidate = entry as Partial<GoogleAuthorAttribution>;
+    return (
+      typeof candidate.displayName === "string" &&
+      candidate.displayName.length > 0 &&
+      (candidate.uri === undefined ||
+        (typeof candidate.uri === "string" && isAllowedGoogleUrl(candidate.uri)))
+    );
+  });
+}
+
 function isPreviewData(value: unknown): value is ExternalPlaceImagePreviewData {
   if (!value || typeof value !== "object") return false;
-  const candidate = value as Partial<ExternalPlaceImagePreviewData>;
+  const candidate = value as Partial<WikimediaPreviewData & GooglePreviewData>;
+
+  if (candidate.provider === "google-places") {
+    return (
+      candidate.sourceName === "Google Places" &&
+      typeof candidate.mediaUrl === "string" &&
+      isAllowedGoogleMediaUrl(candidate.mediaUrl) &&
+      isGoogleAttributions(candidate.authorAttributions) &&
+      (candidate.sourceUrl === undefined ||
+        (typeof candidate.sourceUrl === "string" && isAllowedGoogleUrl(candidate.sourceUrl))) &&
+      typeof candidate.altText === "string" &&
+      candidate.altText.length > 0 &&
+      typeof candidate.matchEvidence === "string" &&
+      candidate.matchEvidence.length > 0
+    );
+  }
+
   return (
     typeof candidate.previewUrl === "string" &&
-    isAllowedPreviewUrl(candidate.previewUrl) &&
+    isAllowedWikimediaPreviewUrl(candidate.previewUrl) &&
     typeof candidate.sourceUrl === "string" &&
-    isAllowedSourceUrl(candidate.sourceUrl) &&
+    isAllowedWikimediaSourceUrl(candidate.sourceUrl) &&
     candidate.sourceName === "Wikimedia Commons" &&
     typeof candidate.license === "string" &&
     candidate.license.length > 0 &&
@@ -72,6 +145,8 @@ function buildPreviewEndpoint(
     name: string;
     latitude: number;
     longitude: number;
+    category?: PlaceCategory;
+    googlePlaceId?: string;
   }>,
 ): string {
   const query = new URLSearchParams({
@@ -80,10 +155,12 @@ function buildPreviewEndpoint(
     latitude: String(input.latitude),
     longitude: String(input.longitude),
   });
+  if (input.category) query.set("category", input.category);
+  if (input.googlePlaceId) query.set("googlePlaceId", input.googlePlaceId);
   return `/api/place-image-preview?${query}`;
 }
 
-function buildImageProxyEndpoint(previewUrl: string): string {
+function buildWikimediaImageProxyEndpoint(previewUrl: string): string {
   const query = new URLSearchParams({ url: previewUrl });
   return `/api/place-image-preview/file?${query}`;
 }
@@ -94,12 +171,14 @@ export function ExternalPlaceImagePreview({
   latitude,
   longitude,
   category,
+  googlePlaceId,
 }: Readonly<{
   destinationId?: string | undefined;
   placeName: string;
   latitude: number;
   longitude: number;
   category?: PlaceCategory | undefined;
+  googlePlaceId?: string | undefined;
 }>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<PreviewState>({ status: "idle" });
@@ -137,6 +216,8 @@ export function ExternalPlaceImagePreview({
         name: placeName,
         latitude,
         longitude,
+        ...(category ? { category } : {}),
+        ...(googlePlaceId ? { googlePlaceId } : {}),
       }),
       { signal: controller.signal },
     )
@@ -158,12 +239,58 @@ export function ExternalPlaceImagePreview({
       });
 
     return () => controller.abort();
-  }, [destinationId, latitude, longitude, placeName, state.status]);
+  }, [category, destinationId, googlePlaceId, latitude, longitude, placeName, state.status]);
 
   if (state.status === "ready") {
     const { preview } = state;
+
+    if (preview.provider === "google-places") {
+      return (
+        <div
+          data-external-place-image-provider="google-places"
+          data-external-place-image-state="ready"
+          ref={containerRef}
+        >
+          <figure className={styles.figure}>
+            <div className={styles.frame}>
+              {/* A URL é interna ao RouteBook; API key e photo name permanecem server-side. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                alt={preview.altText}
+                className={styles.image}
+                decoding="async"
+                loading="lazy"
+                onError={() => setState({ status: "fallback" })}
+                src={preview.mediaUrl}
+              />
+            </div>
+            <figcaption className={styles.caption}>
+              <span>
+                Foto externa: {preview.sourceName}
+                {preview.authorAttributions.length > 0
+                  ? ` · Crédito: ${preview.authorAttributions
+                      .map((attribution) => attribution.displayName)
+                      .join(", ")}`
+                  : ""}
+                .
+              </span>{" "}
+              {preview.sourceUrl ? (
+                <a href={preview.sourceUrl} rel="noreferrer" target="_blank">
+                  Ver no Google Maps
+                </a>
+              ) : null}
+            </figcaption>
+          </figure>
+        </div>
+      );
+    }
+
     return (
-      <div ref={containerRef} data-external-place-image-state="ready">
+      <div
+        data-external-place-image-provider="wikimedia-commons"
+        data-external-place-image-state="ready"
+        ref={containerRef}
+      >
         <figure className={styles.figure}>
           <div className={styles.frame}>
             {/* The browser receives a RouteBook URL; the server proxy validates the Wikimedia thumbnail. */}
@@ -174,7 +301,7 @@ export function ExternalPlaceImagePreview({
               decoding="async"
               loading="lazy"
               onError={() => setState({ status: "fallback" })}
-              src={buildImageProxyEndpoint(preview.previewUrl)}
+              src={buildWikimediaImageProxyEndpoint(preview.previewUrl)}
             />
           </div>
           <figcaption className={styles.caption}>
@@ -197,7 +324,7 @@ export function ExternalPlaceImagePreview({
         <CategoryIllustration
           ariaLabel={
             isLoading
-              ? `Buscando fotografia licenciada para ${placeName}`
+              ? `Buscando fotografia verificada para ${placeName}`
               : `Fotografia sob demanda para ${placeName}`
           }
           disclosure="Ilustração de categoria enquanto a foto real é verificada."

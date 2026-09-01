@@ -93,7 +93,7 @@ test("renderiza Google Places Photo por proxy RouteBook sem trocar a Fonte factu
     provider: "google-places",
     mediaUrl: "/api/place-image-preview/google?token=e2e-opaque-token",
     sourceUrl: "https://www.google.com/maps/place/?q=place_id:e2e",
-    sourceName: "Google Places",
+    sourceName: "Google Maps",
     authorAttributions: [{ displayName: "Crédito Google E2E" }],
     altText: "Fotografia Google do candidato externo.",
     matchEvidence: "Identidade Google revalidada no teste.",
@@ -144,7 +144,7 @@ test("renderiza Google Places Photo por proxy RouteBook sem trocar a Fonte factu
   );
   await expect(ready).toBeVisible({ timeout: 20_000 });
   await expect(externalCard.getByRole("img", { name: googlePreview.altText })).toBeVisible();
-  await expect(externalCard).toContainText("Google Places");
+  await expect(externalCard).toContainText("Google Maps");
   await expect(externalCard).toContainText("Crédito Google E2E");
   await expect(externalCard).toContainText("Fonte: Overture");
   await expect(externalCard.getByRole("link", { name: "Ver no Google Maps" })).toHaveAttribute(

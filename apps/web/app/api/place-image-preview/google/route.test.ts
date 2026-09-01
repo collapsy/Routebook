@@ -70,7 +70,6 @@ describe("GET /api/place-image-preview/google", () => {
     const { GooglePlacePhotoAdapter } = await import("../../../../lib/google-place-photo");
     const adapter = new GooglePlacePhotoAdapter("secret-google", {
       fetcher,
-      now: () => new Date("2026-09-01T18:00:00.000Z"),
     });
     const preview = await adapter.findPreview({
       placeId: "ChIJPraiaDoAmor01",

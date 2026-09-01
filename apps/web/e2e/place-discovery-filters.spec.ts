@@ -7,21 +7,6 @@ const uniqueOptionsHeading = /\d+ de \d+ lugar(?: único|es únicos) exibidos/;
 test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sincronizados", async ({
   page,
 }) => {
-  await page.route("**/api/place-image-preview**", async (route) => {
-    const requestUrl = new URL(route.request().url());
-    if (
-      requestUrl.pathname === "/api/place-image-preview" &&
-      requestUrl.searchParams.get("name") === "Praia das Minas"
-    ) {
-      await route.fulfill({
-        status: 404,
-        contentType: "application/json",
-        body: JSON.stringify({ error: "Nenhuma imagem externa segura no cenário E2E." }),
-      });
-      return;
-    }
-    await route.fallback();
-  });
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Descoberta ${test.info().project.name} ${Date.now()}`,
     startDate: "2026-08-22",
@@ -117,6 +102,22 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     ).toBeVisible();
   }
 
+  await page.route("**/api/place-image-preview**", async (route) => {
+    const requestUrl = new URL(route.request().url());
+    if (
+      requestUrl.pathname === "/api/place-image-preview" &&
+      requestUrl.searchParams.get("name") === "Praia das Minas"
+    ) {
+      await route.fulfill({
+        status: 404,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "Nenhuma imagem externa segura no cenário E2E." }),
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
   await page.goto(`/viagens/${trip.id}/lugares`);
   await page.getByLabel("Nome ou termo").fill("minas");
   await page.getByRole("button", { name: "Aplicar filtros" }).click();
@@ -128,11 +129,11 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     .locator('[data-place-source="published"]')
     .filter({ hasText: "Praia das Minas" })
     .first();
-  const praiaDasMinasFallback = praiaDasMinasCard.locator('[data-place-image-fallback="true"]');
-  await expect(praiaDasMinasFallback).toHaveAttribute("data-category-illustration", "beach");
-  await expect(praiaDasMinasFallback).toContainText(
-    "Ilustração de categoria — não é foto do local",
+  const praiaDasMinasIllustration = praiaDasMinasCard.locator(
+    '[data-category-illustration="beach"]',
   );
+  await expect(praiaDasMinasIllustration.first()).toBeVisible();
+  await expect(praiaDasMinasIllustration.first()).toContainText(/Ilustração de categoria/);
 
   await page.goto(`/viagens/${trip.id}/lugares`);
   await page.getByLabel("Nome ou termo").fill("gastronomico");

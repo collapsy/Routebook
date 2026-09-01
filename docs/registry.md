@@ -323,8 +323,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-134 | Context Pack do RB-INC-134 — Acesso Público de Production | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-134-production-public-access.md](./implementation/context-packs/rb-inc-134-production-public-access.md) |
 | RB-INC-135 | Catálogo Real de Pipa para Validação M8 | Implementation | Draft | 0.1.0 | [rb-inc-135-pipa-catalog-m8-readiness.md](./implementation/increments/rb-inc-135-pipa-catalog-m8-readiness.md) |
 | RB-CTX-135 | Context Pack do RB-INC-135 — Catálogo Real de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-135-pipa-catalog-m8-readiness.md](./implementation/context-packs/rb-inc-135-pipa-catalog-m8-readiness.md) |
-| RB-INC-136 | Validação Real do MVP em Pipa — M8 | Implementation | Draft | 0.1.0 | [rb-inc-136-m8-real-validation.md](./implementation/increments/rb-inc-136-m8-real-validation.md) |
-| RB-CTX-136 | Context Pack do RB-INC-136 — Validação Real do MVP em Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-136-m8-real-validation.md](./implementation/context-packs/rb-inc-136-m8-real-validation.md) |
+| RB-INC-136 | Validação Real do MVP em Pipa — M8 | Implementation | Draft | 0.2.0 | [rb-inc-136-m8-real-validation.md](./implementation/increments/rb-inc-136-m8-real-validation.md) |
+| RB-CTX-136 | Context Pack do RB-INC-136 — Validação Real do MVP em Pipa | Implementation Context Pack | Draft | 0.2.0 | [rb-inc-136-m8-real-validation.md](./implementation/context-packs/rb-inc-136-m8-real-validation.md) |
 | RB-INC-137 | Expansão de Cobertura do Catálogo de Pipa para o Piloto M8 | Implementation | Draft | 0.1.0 | [rb-inc-137-pipa-catalog-coverage.md](./implementation/increments/rb-inc-137-pipa-catalog-coverage.md) |
 | RB-CTX-137 | Context Pack do RB-INC-137 — Cobertura do Catálogo de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-137-pipa-catalog-coverage.md](./implementation/context-packs/rb-inc-137-pipa-catalog-coverage.md) |
 | RB-INC-138 | Exclusão Segura de Viagem | Implementation | Draft | 0.1.0 | [rb-inc-138-delete-trip.md](./implementation/increments/rb-inc-138-delete-trip.md) |

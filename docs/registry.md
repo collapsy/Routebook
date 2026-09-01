@@ -391,6 +391,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-169 | Experiências diárias de Pipa — céu, horizonte e rolês confirmados | Implementation | Draft | 0.1.0 | [rb-inc-169-daily-experiences.md](./implementation/increments/rb-inc-169-daily-experiences.md) |
 | RB-CTX-169 | Context Pack do RB-INC-169 — Experiências diárias de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-169-daily-experiences.md](./implementation/context-packs/rb-inc-169-daily-experiences.md) |
+| RB-INC-170 | Fallback visual ilustrativo por categoria | Implementation | Draft | 0.1.0 | [rb-inc-170-category-visual-fallback.md](./implementation/increments/rb-inc-170-category-visual-fallback.md) |
+| RB-CTX-170 | Context Pack do RB-INC-170 — Fallback visual ilustrativo por categoria | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-170-category-visual-fallback.md](./implementation/context-packs/rb-inc-170-category-visual-fallback.md) |
 
 ## Status possíveis
 

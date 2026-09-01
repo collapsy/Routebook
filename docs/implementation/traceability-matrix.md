@@ -781,3 +781,19 @@ Ao concluir um incremento:
 | Provider/segredo | nenhum Provider novo, API key, billing, migration ou secret |
 | limitações | sem previsão live de nuvens e sem ingestão completa/contínua de eventos nesta fatia |
 | validação | testes unitários, E2E, Documentation Validation, Engineering Validation e Vercel Preview pendentes no HEAD final |
+
+## Evidências previstas do RB-INC-170
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-170-category-visual-fallback.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-170-category-visual-fallback.md` |
+| origem | feedback de uso humano em Pipa: cards sem fotografia continuam secos e reduzem a utilidade do guia no celular |
+| rastreabilidade | issue #397; relacionada ao gate de mídia real da issue #382 sem contorná-lo |
+| base de Preview | PR #396 / SHA `872b03c9a18e62b3273f1d48cf8ec9792c517a02`, empilhada sobre RB-INC-165/#387 |
+| precedência visual | foto governada → mídia externa segura → ilustração local da categoria |
+| superfícies | Discovery, candidato externo, Recommendations, Lugares salvos e experiências diárias |
+| semântica | ilustração não é `Place.primaryImage`, não recebe identidade do estabelecimento e possui disclosure explícito |
+| Provider/segredo | nenhum Provider, billing, API key, migration ou secret |
+| validação | Documentation Validation, Engineering Validation e Vercel Preview READY pendentes no HEAD final |
+

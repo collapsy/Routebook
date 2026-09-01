@@ -109,6 +109,15 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(page.getByRole("heading", { name: uniqueOptionsHeading })).toBeVisible();
   await expect(options).toContainText("Praia das Minas");
   await expect(mapLocations).toContainText("Praia das Minas");
+  const praiaDasMinasCard = page
+    .locator('[data-place-source="published"]')
+    .filter({ hasText: "Praia das Minas" })
+    .first();
+  const praiaDasMinasFallback = praiaDasMinasCard.locator('[data-place-image-fallback="true"]');
+  await expect(praiaDasMinasFallback).toHaveAttribute("data-category-illustration", "beach");
+  await expect(praiaDasMinasFallback).toContainText(
+    "Ilustração de categoria — não é foto do local",
+  );
 
   await page.goto(`/viagens/${trip.id}/lugares`);
   await page.getByLabel("Nome ou termo").fill("gastronomico");

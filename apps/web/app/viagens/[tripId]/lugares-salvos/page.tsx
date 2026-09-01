@@ -11,6 +11,7 @@ import { listPublishedPlaces, type PlaceCategory } from "@routebook/place-catalo
 import { listSavedPlaces } from "@routebook/saved-places";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
+import { PlacePrimaryImage } from "../../../../components/place-primary-image";
 import { TripMap } from "../../../../components/trip-map";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { presentAccommodationDistance } from "../lugares/distance";
@@ -166,6 +167,11 @@ export default async function SavedPlacesPage({
 
             return (
               <li className="place-card" key={place.id}>
+                <PlacePrimaryImage
+                  category={place.category}
+                  placeName={place.name}
+                  primaryImage={place.primaryImage}
+                />
                 <p className="product-eyebrow">{categoryLabels[place.category]}</p>
                 <h2 id={titleId}>{place.name}</h2>
                 <p>{place.summary}</p>

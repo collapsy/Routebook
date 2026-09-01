@@ -1,0 +1,61 @@
+.visual {
+  align-items: end;
+  aspect-ratio: 16 / 9;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  color: #fff;
+  display: flex;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 1rem;
+  position: relative;
+}
+
+.art {
+  object-fit: cover;
+  z-index: -2;
+}
+
+.veil {
+  background: linear-gradient(180deg, rgb(15 23 42 / 4%) 12%, rgb(15 23 42 / 76%) 100%);
+  inset: 0;
+  position: absolute;
+  z-index: -1;
+}
+
+.copy {
+  display: grid;
+  gap: 0.22rem;
+  max-width: 28rem;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 35%);
+}
+
+.eyebrow {
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.label {
+  font-size: 0.95rem;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.disclosure {
+  font-size: 0.68rem;
+  line-height: 1.35;
+  opacity: 0.9;
+}
+
+@media (max-width: 36rem) {
+  .visual {
+    padding: 0.8rem;
+  }
+
+  .label {
+    font-size: 0.9rem;
+  }
+}

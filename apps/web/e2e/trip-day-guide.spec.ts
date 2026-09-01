@@ -165,6 +165,14 @@ test("separa observação natural de rolês confirmados no Guia", async ({ page 
   const experiences = page.locator("#experiencias-do-dia");
   await expect(experiences.getByRole("heading", { name: "Onde ver o Sol e a Lua" })).toBeVisible();
   await expect(experiences.getByRole("heading", { name: "Nascer da lua" })).toBeVisible();
+  const moonriseCard = experiences.locator("article").filter({ hasText: "Nascer da lua" }).first();
+  await expect(moonriseCard.locator('[data-category-illustration="moonrise"]')).toBeVisible();
+  await expect(
+    moonriseCard.getByText(
+      "Ilustração do fenômeno — não representa as condições reais deste dia.",
+      { exact: true },
+    ),
+  ).toBeVisible();
   await expect(experiences.getByText("17:01", { exact: true })).toBeVisible();
   await expect(experiences.getByText(/Nenhum rolê foi confirmado/)).toBeVisible();
 
@@ -173,6 +181,7 @@ test("separa observação natural de rolês confirmados no Guia", async ({ page 
     hasText: "Nihanna · Mística Weekend",
   });
   await expect(eventCard).toBeVisible();
+  await expect(eventCard.locator('[data-category-illustration="event"]')).toBeVisible();
   await expect(eventCard.getByText("Confirmado", { exact: true })).toBeVisible();
 
   const addToItinerary = eventCard.getByRole("link", { name: "Adicionar ao Roteiro" });

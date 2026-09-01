@@ -200,7 +200,7 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
   const fullHeadings = fullList.getByRole("heading", { level: 2 });
   await expect(fullHeadings).toHaveCount(30);
   expect((await fullHeadings.allTextContents()).slice(0, 6)).toEqual(focusedNames);
-  await expect(fullList.getByRole("img", { name: /^Imagem não disponível para / })).toHaveCount(21);
+  await expect(fullList.locator('[data-place-image-fallback="true"]')).toHaveCount(21);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
@@ -287,16 +287,19 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
 
   const list = page.getByRole("list", { name: "Recommendations de Lugares" });
   await expect(list.getByRole("heading", { level: 2 })).toHaveCount(30);
-  await expect(list.getByRole("img", { name: /^Imagem não disponível para / })).toHaveCount(21);
+  await expect(list.locator('[data-place-image-fallback="true"]')).toHaveCount(21);
 
   const newRecommendation = page.getByRole("article", {
     name: "Praia das Minas",
     exact: true,
   });
   await expect(newRecommendation).toBeVisible();
-  await expect(
-    newRecommendation.getByRole("img", { name: "Imagem não disponível para Praia das Minas" }),
-  ).toBeVisible();
+  const newRecommendationFallback = newRecommendation.locator('[data-place-image-fallback="true"]');
+  await expect(newRecommendationFallback).toBeVisible();
+  await expect(newRecommendationFallback).toHaveAttribute("data-category-illustration", "beach");
+  await expect(newRecommendationFallback).toContainText(
+    "Ilustração de categoria — não é foto do local",
+  );
   await expect(
     newRecommendation.getByText(/categoria do Lugar corresponde a um interesse/i),
   ).toBeVisible();

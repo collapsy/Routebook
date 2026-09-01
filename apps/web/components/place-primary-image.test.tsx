@@ -21,24 +21,32 @@ describe("PlacePrimaryImage", () => {
     render(<PlacePrimaryImage placeName="Praia do Amor" primaryImage={primaryImage} />);
 
     expect(screen.getByRole("img", { name: primaryImage.altText })).toBeInTheDocument();
-    expect(screen.queryByText("Imagem não disponível")).not.toBeInTheDocument();
-  });
-
-  it("usa fallback acessível quando o Place não possui imagem", () => {
-    render(<PlacePrimaryImage placeName="Praia do Amor" />);
-
     expect(
-      screen.getByRole("img", { name: "Imagem não disponível para Praia do Amor" }),
-    ).toHaveAttribute("data-place-image-fallback", "true");
+      screen.queryByText("Ilustração de categoria — não é foto do local"),
+    ).not.toBeInTheDocument();
   });
 
-  it("troca para fallback quando o asset falha ao carregar", () => {
-    render(<PlacePrimaryImage placeName="Praia do Amor" primaryImage={primaryImage} />);
+  it("usa ilustração acessível de categoria quando o Place não possui imagem", () => {
+    render(<PlacePrimaryImage category="beach" placeName="Praia do Amor" />);
+
+    const fallback = screen.getByRole("img", {
+      name: "Ilustração de Praia para Praia do Amor — não é foto do local",
+    });
+    expect(fallback).toHaveAttribute("data-place-image-fallback", "true");
+    expect(fallback).toHaveAttribute("data-category-illustration", "beach");
+  });
+
+  it("troca para a mesma ilustração quando o asset governado falha ao carregar", () => {
+    render(
+      <PlacePrimaryImage category="beach" placeName="Praia do Amor" primaryImage={primaryImage} />,
+    );
 
     fireEvent.error(screen.getByRole("img", { name: primaryImage.altText }));
 
     expect(
-      screen.getByRole("img", { name: "Imagem não disponível para Praia do Amor" }),
+      screen.getByRole("img", {
+        name: "Ilustração de Praia para Praia do Amor — não é foto do local",
+      }),
     ).toBeInTheDocument();
   });
 

@@ -75,6 +75,9 @@ describe("ExternalPlaceImagePreview", () => {
 
     expect(fetcher).not.toHaveBeenCalled();
     expect(screen.getByText("Fotografia sob demanda")).toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "Fotografia sob demanda para Praia do Amor" }),
+    ).toHaveAttribute("data-category-illustration", "beach");
   });
 
   it("renderiza foto licenciada e Provenance após match seguro", async () => {
@@ -116,8 +119,10 @@ describe("ExternalPlaceImagePreview", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("img", { name: "Imagem não disponível para Praia do Amor" }),
-      ).toBeInTheDocument();
+        screen.getByRole("img", {
+          name: "Ilustração de Praia para Praia do Amor — não é foto do local",
+        }),
+      ).toHaveAttribute("data-category-illustration", "beach");
     });
   });
 });

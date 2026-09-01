@@ -6,19 +6,30 @@ export type TripStatus =
   "draft" | "planned" | "in-progress" | "completed" | "cancelled" | "archived";
 export type TripRole = "owner" | "editor" | "viewer";
 
+export const DESTINATION_TYPES = [
+  "city",
+  "district",
+  "region",
+  "island",
+  "park",
+  "custom-region",
+] as const;
+
+export type DestinationType = (typeof DESTINATION_TYPES)[number];
+
 export type Destination = {
   name: string;
-  type: "district";
-  countryCode: "BR";
+  type: DestinationType;
+  countryCode: string;
   latitude: number;
   longitude: number;
-  timeZone: "America/Fortaleza";
+  timeZone: string;
 };
 
 export type TripPeriod = {
   startDate: string;
   endDate: string;
-  timeZone: "America/Fortaleza";
+  timeZone: string;
 };
 
 export type Accommodation = {
@@ -48,6 +59,7 @@ export type Trip = {
 
 export type CreateTripInput = {
   name: string;
+  destination: Destination;
   startDate: string;
   endDate: string;
   ownerName: string;
@@ -76,16 +88,51 @@ export class TripValidationError extends Error {
   }
 }
 
-const PIPA_DESTINATION: Destination = {
-  name: "Pipa, Tibau do Sul - RN",
-  type: "district",
-  countryCode: "BR",
-  latitude: -6.2302,
-  longitude: -35.0503,
-  timeZone: "America/Fortaleza",
-};
-
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const DESTINATION_TYPE_SET = new Set<string>(DESTINATION_TYPES);
+
+function isIanaTimeZone(value: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: value }).format();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function normalizeDestination(input: Destination): Destination {
+  const name = input.name.trim();
+  const countryCode = input.countryCode.trim().toUpperCase();
+  const timeZone = input.timeZone.trim();
+  const fieldErrors: TripFieldErrors = {};
+
+  if (name.length < 2) fieldErrors.destination = "Informe um destino válido.";
+  if (!DESTINATION_TYPE_SET.has(input.type)) {
+    fieldErrors.destination = "Informe um tipo de destino válido.";
+  }
+  if (!/^[A-Z]{2}$/.test(countryCode)) {
+    fieldErrors.destination = "Informe um país válido para o destino.";
+  }
+  try {
+    createGeoCoordinate({ latitude: input.latitude, longitude: input.longitude });
+  } catch {
+    fieldErrors.destination = "Informe coordenadas válidas para o destino.";
+  }
+  if (!timeZone || !isIanaTimeZone(timeZone)) {
+    fieldErrors.destination = "Informe um fuso horário IANA válido para o destino.";
+  }
+
+  if (Object.keys(fieldErrors).length > 0) throw new TripValidationError(fieldErrors);
+
+  return {
+    name,
+    type: input.type,
+    countryCode,
+    latitude: input.latitude,
+    longitude: input.longitude,
+    timeZone,
+  };
+}
 
 function isLocalDate(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
@@ -138,6 +185,7 @@ function createAccommodation(input: UpdateAccommodationInput): Accommodation | u
 
 export function createTrip(input: CreateTripInput, now = new Date()): Trip {
   const name = input.name.trim();
+  const destination = normalizeDestination(input.destination);
   const ownerName = input.ownerName.trim();
   const ownerUserId = input.ownerUserId?.trim();
   const fieldErrors: TripFieldErrors = {};
@@ -179,11 +227,11 @@ export function createTrip(input: CreateTripInput, now = new Date()): Trip {
   return {
     id: randomUUID(),
     name,
-    destination: PIPA_DESTINATION,
+    destination,
     period: {
       startDate: input.startDate,
       endDate: input.endDate,
-      timeZone: PIPA_DESTINATION.timeZone,
+      timeZone: destination.timeZone,
     },
     ...(accommodation ? { accommodation } : {}),
     status: "draft",

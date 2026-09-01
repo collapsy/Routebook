@@ -401,6 +401,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-173 | Destination Foundation destination-agnostic | Implementation | Draft | 0.1.0 | [rb-inc-173-destination-foundation.md](./implementation/increments/rb-inc-173-destination-foundation.md) |
 | RB-CTX-173 | Context Pack do RB-INC-173 — Destination Foundation | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-173-destination-foundation.md](./implementation/context-packs/rb-inc-173-destination-foundation.md) |
 
+| RB-INC-174 | Destination Resolver e criação de Viagem destination-agnostic | Implementation | Draft | 0.1.0 | [rb-inc-174-destination-resolver.md](./implementation/increments/rb-inc-174-destination-resolver.md) |
+| RB-CTX-174 | Context Pack do RB-INC-174 — Destination Resolver | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-174-destination-resolver.md](./implementation/context-packs/rb-inc-174-destination-resolver.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

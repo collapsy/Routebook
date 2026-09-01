@@ -105,7 +105,7 @@ function isGoogleAttributions(value: unknown): value is readonly GoogleAuthorAtt
 
 function isPreviewData(value: unknown): value is ExternalPlaceImagePreviewData {
   if (!value || typeof value !== "object") return false;
-  const candidate = value as Partial<WikimediaPreviewData & GooglePreviewData>;
+  const candidate = value as Record<string, unknown>;
 
   if (candidate.provider === "google-places") {
     return (

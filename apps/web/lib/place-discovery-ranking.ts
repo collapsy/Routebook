@@ -53,7 +53,11 @@ function itemCoordinate(item: PlaceDiscoveryItem) {
 export function buildPlaceDiscoveryQualityTargets(
   items: readonly PlaceDiscoveryItem[],
 ): PlaceQualityTarget[] {
-  return items.flatMap((item) => {
+  const providerPriority = [...items].sort(
+    (left, right) => Number(left.kind === "external") - Number(right.kind === "external"),
+  );
+
+  return providerPriority.flatMap((item) => {
     const category = itemCategory(item);
     if (!category) return [];
     const coordinate = itemCoordinate(item);

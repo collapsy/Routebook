@@ -42,6 +42,11 @@ const GOOGLE_ENDPOINT = "https://places.googleapis.com/v1/places:searchText";
 const FOURSQUARE_ENDPOINT = "https://places-api.foursquare.com/places/search";
 const FOURSQUARE_API_VERSION = "2025-06-17";
 const REQUEST_TIMEOUT_MS = 5_000;
+const GOOGLE_TARGETED_FALLBACK_LIMIT_PER_CATEGORY = 4;
+const GOOGLE_TARGETED_FALLBACK_PAGE_SIZE = 5;
+const GOOGLE_TARGETED_FALLBACK_RADIUS_METERS = 2_500;
+const GOOGLE_FIELD_MASK =
+  "places.id,places.displayName,places.location,places.rating,places.userRatingCount";
 
 const CATEGORY_QUERY: Readonly<Record<PlaceCategory, string>> = Object.freeze({
   beach: "praias",
@@ -302,24 +307,25 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
     return "google-places";
   }
 
-  protected async searchCategory(
-    category: PlaceCategory,
-    targets: readonly PlaceQualityTarget[],
+  private async search(
+    textQuery: string,
+    center: Readonly<{ latitude: number; longitude: number }>,
+    radiusMeters: number,
+    pageSize: number,
+    context: string,
   ): Promise<readonly ProviderCandidate[]> {
-    const { center, radiusMeters } = groupSearchArea(targets);
     const response = await fetchWithTimeout(this.fetcher, GOOGLE_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": this.apiKey,
-        "X-Goog-FieldMask":
-          "places.id,places.displayName,places.location,places.rating,places.userRatingCount",
+        "X-Goog-FieldMask": GOOGLE_FIELD_MASK,
       },
       body: JSON.stringify({
-        textQuery: CATEGORY_QUERY[category],
+        textQuery,
         languageCode: "pt-BR",
         regionCode: "BR",
-        pageSize: 20,
+        pageSize,
         locationBias: {
           circle: {
             center,
@@ -330,7 +336,7 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
     });
 
     if (!response.ok) {
-      throw new Error(`Google Places respondeu HTTP ${response.status} para ${category}.`);
+      throw new Error(`Google Places respondeu HTTP ${response.status} para ${context}.`);
     }
 
     const payload = (await response.json()) as {
@@ -363,6 +369,45 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
         },
       ];
     });
+  }
+
+  protected async searchCategory(
+    category: PlaceCategory,
+    targets: readonly PlaceQualityTarget[],
+  ): Promise<readonly ProviderCandidate[]> {
+    const { center, radiusMeters } = groupSearchArea(targets);
+    const categoryCandidates = await this.search(
+      CATEGORY_QUERY[category],
+      center,
+      radiusMeters,
+      20,
+      category,
+    );
+    const targetsWithoutCategoryCandidate = targets
+      .filter(
+        (target) =>
+          !categoryCandidates.some((candidate) =>
+            isConservativeQualityIdentityMatch(target, candidate),
+          ),
+      )
+      .slice(0, GOOGLE_TARGETED_FALLBACK_LIMIT_PER_CATEGORY);
+
+    const targetedResults = await Promise.allSettled(
+      targetsWithoutCategoryCandidate.map((target) =>
+        this.search(
+          target.addressLabel ? `${target.name}, ${target.addressLabel}` : target.name,
+          { latitude: target.latitude, longitude: target.longitude },
+          GOOGLE_TARGETED_FALLBACK_RADIUS_METERS,
+          GOOGLE_TARGETED_FALLBACK_PAGE_SIZE,
+          `${category}:${target.id}`,
+        ),
+      ),
+    );
+
+    return [
+      ...categoryCandidates,
+      ...targetedResults.flatMap((result) => (result.status === "fulfilled" ? result.value : [])),
+    ];
   }
 }
 

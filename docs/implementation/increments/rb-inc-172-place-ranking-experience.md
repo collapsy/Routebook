@@ -5,9 +5,9 @@ description: Conecta o motor de qualidade à Discovery, adiciona UI de ordenaç�
 document_type: implementation-increment
 owner: Place Catalog and Decision Intelligence
 status: Draft
-version: "0.1.0"
+version: "0.2.0"
 created: "2026-08-28"
-last_updated: "2026-08-28"
+last_updated: "2026-09-01"
 authors: [RouteBook Team]
 tags: [implementation, ranking, places, discovery, google-places, foursquare, pipa]
 related_documents: [RB-CORE-0004, RB-ARC-003, RB-ADR-012, RB-INC-168, RB-INC-170, RB-INC-171, RB-CTX-172]
@@ -70,6 +70,9 @@ Sem seleção explícita, nenhuma chamada externa acontece.
 
 Provider selecionado sem secret também não realiza chamada e a UI mantém apenas `Mais próximos`.
 
+Em 01/09/2026, a decisão humana selecionou Google Places e a configuração foi provisionada somente
+no ambiente Preview. Production continua sem ativação implícita.
+
 ## 4. Google Places
 
 Adapter server-side usa Text Search (New):
@@ -91,6 +94,22 @@ places.userRatingCount
 Não solicita reviews, fotos ou Atmosphere nesta fatia.
 
 Google exige API key e billing habilitado. Rating e `userRatingCount` pertencem ao tier aplicável do Places API conforme documentação vigente; ativação continua gate humano.
+
+### 4.1 Cobertura e custo governado
+
+A comparação live mostrou que uma consulta ampla por categoria não contém necessariamente um Place
+curado entre os 20 primeiros resultados. O adapter agora:
+
+1. executa uma busca ampla por categoria;
+2. identifica quais targets continuam sem match conservador;
+3. executa busca nominal somente para até quatro targets por categoria;
+4. prioriza Places canônicos antes de candidatos externos nesse limite;
+5. mantém resultados amplos quando uma busca nominal isolada falha.
+
+A busca nominal usa o nome, o endereço quando disponível e viés geográfico de 2,5 km. O resultado
+ainda precisa passar pelo mesmo matching conservador; a busca adicional não autoriza associação por
+similaridade fraca. O limite evita custo não governado quando a Discovery contém dezenas de candidatos
+externos.
 
 ## 5. Foursquare Places
 
@@ -202,17 +221,18 @@ docs/registry.md
 - [ ] Documentation + Engineering/Playwright verdes no mesmo SHA;
 - [ ] Vercel READY no mesmo SHA.
 
-## 13. Gate humano restante
+## 13. Ativação e comparação live
 
-Para o ranking real aparecer no Preview/Production, ainda é necessária uma decisão material:
+O gate humano de Provider para Preview foi concluído em 01/09/2026:
 
-1. escolher Google Places ou Foursquare;
-2. provisionar a chave correspondente;
-3. aceitar termos/quota/billing aplicáveis;
-4. configurar `ROUTEBOOK_PLACE_QUALITY_PROVIDER` e o secret na Vercel;
-5. executar a comparação live prevista em #390 antes de declarar o Provider adotado.
+1. Provider escolhido: Google Places;
+2. secret provisionado diretamente na Vercel, sem transitar pelo chat ou repositório;
+3. variáveis restritas ao ambiente Preview;
+4. primeira chamada live confirmou rating e volume reais para Praia do Amor;
+5. a comparação revelou baixa cobertura da consulta ampla e originou o fallback nominal limitado.
 
-Até esse gate, a implementação fica pronta e verificável sem fabricar ranking.
+Ativação em Production continua fora de escopo e exige decisão humana separada. O Provider só pode ser
+declarado adotado para o Preview após CI, Vercel e nova comparação live passarem no mesmo SHA final.
 
 ## 14. Rollback
 

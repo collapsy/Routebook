@@ -820,9 +820,9 @@ Ao concluir um incremento:
 | base de Preview | PR #400 / SHA `5145a5e59907a02c4a9370b299b6c7d60ea1a146`, empilhada sobre #398 → #396 → #387 |
 | UI | Recomendados, Melhor avaliados, Mais populares, Mais próximos, posição, score/evidência e Top 5 recolhido |
 | política de ausência | sem Provider/sinal: somente distância; nenhum score/Top fictício |
-| runtime | adapters Google Places Text Search (New) e Foursquare Places API 2025-06-17; seleção por `ROUTEBOOK_PLACE_QUALITY_PROVIDER` |
+| runtime | adapters Google Places Text Search (New) e Foursquare Places API 2025-06-17; seleção por `ROUTEBOOK_PLACE_QUALITY_PROVIDER`; Google usa busca ampla + fallback nominal limitado a quatro targets por categoria |
 | matching | identidade + proximidade; homônimo distante rejeitado; externalId não reutilizado |
 | segurança | secrets somente server-side; nenhum secret em UI/log/relatório |
-| Provider | ativação, credencial, termos/quota/billing e comparação live continuam gate humano material |
+| Provider | Google Places autorizado e provisionado somente em Preview em 01/09/2026; comparação live confirmou a integração e motivou correção de cobertura; Production continua gate humano separado |
 | validação | Documentation, Engineering/Playwright e Vercel Preview pendentes no HEAD final |
 \n

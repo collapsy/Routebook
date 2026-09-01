@@ -163,6 +163,15 @@ describe("buildPlaceDiscoveryQualityTargets", () => {
       }),
     ]);
   });
+
+  it("prioriza catálogo canônico antes de candidatos externos nas buscas nominais limitadas", () => {
+    const candidate = external("externo", "Restaurante Externo", 100);
+    const canonical = published("canonico", "Restaurante Canônico", 1_000);
+
+    expect(
+      buildPlaceDiscoveryQualityTargets([candidate, canonical]).map((item) => item.id),
+    ).toEqual([canonical.id, candidate.id]);
+  });
 });
 
 describe("buildPlaceDiscoveryTopLists", () => {

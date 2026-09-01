@@ -87,6 +87,131 @@ describe("GooglePlacesQualityAdapter", () => {
     );
     expect(JSON.stringify(matches)).not.toContain("secret-google");
   });
+
+  it("faz busca nominal limitada quando a busca ampla não contém o Place curado", async () => {
+    const restaurant: PlaceQualityTarget = {
+      id: "published:camarao-na-fazenda-pipa",
+      name: "Camarão na Fazenda Pipa",
+      category: "gastronomy",
+      latitude: -6.2304,
+      longitude: -35.0497,
+      addressLabel: "Rua dos Bem-Te-Vis, 66, Praia da Pipa — RN",
+    };
+    const requestBodies: unknown[] = [];
+    const fetcher = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      requestBodies.push(JSON.parse(String(init?.body)) as unknown);
+      return new Response(
+        JSON.stringify(
+          fetcher.mock.calls.length === 1
+            ? {
+                places: [
+                  {
+                    id: "google-outro",
+                    displayName: { text: "Outro Restaurante" },
+                    location: { latitude: -6.2301, longitude: -35.0491 },
+                    rating: 4.5,
+                    userRatingCount: 500,
+                  },
+                ],
+              }
+            : {
+                places: [
+                  {
+                    id: "google-camarao",
+                    displayName: { text: "Camarão na Fazenda Pipa" },
+                    location: { latitude: -6.2305, longitude: -35.0498 },
+                    rating: 4.7,
+                    userRatingCount: 3210,
+                  },
+                ],
+              },
+        ),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    });
+
+    const adapter = new GooglePlacesQualityAdapter("secret-google", { fetcher });
+    const matches = await adapter.findSignals([restaurant]);
+
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(requestBodies).toEqual([
+      expect.objectContaining({ textQuery: "restaurantes", pageSize: 20 }),
+      expect.objectContaining({
+        textQuery: "Camarão na Fazenda Pipa, Rua dos Bem-Te-Vis, 66, Praia da Pipa — RN",
+        pageSize: 5,
+      }),
+    ]);
+    expect(matches).toEqual([
+      expect.objectContaining({
+        targetId: restaurant.id,
+        signals: expect.objectContaining({
+          externalId: "google-camarao",
+          rating: { value: 4.7, scaleMax: 5, reviewCount: 3210 },
+        }),
+      }),
+    ]);
+  });
+
+  it("limita buscas nominais adicionais a quatro alvos por categoria", async () => {
+    const targets = Array.from({ length: 6 }, (_, index): PlaceQualityTarget => ({
+      id: `published:lugar-${index}`,
+      name: `Lugar ${index}`,
+      category: "nature",
+      latitude: -6.24 + index * 0.0001,
+      longitude: -35.04,
+    }));
+    const fetcher = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ places: [] }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+    );
+
+    const adapter = new GooglePlacesQualityAdapter("secret-google", { fetcher });
+    await expect(adapter.findSignals(targets)).resolves.toEqual([]);
+
+    expect(fetcher).toHaveBeenCalledTimes(5);
+  });
+
+  it("preserva resultados amplos quando uma busca nominal adicional falha", async () => {
+    const missing: PlaceQualityTarget = {
+      id: "published:chapadao",
+      name: "Chapadão de Pipa",
+      category: "nature",
+      latitude: -6.2445,
+      longitude: -35.0407,
+    };
+    const fetcher = vi.fn(async () => {
+      if (fetcher.mock.calls.length > 1) return new Response(null, { status: 503 });
+      return new Response(
+        JSON.stringify({
+          places: [
+            {
+              id: "google-santuario",
+              displayName: { text: "Santuário Ecológico de Pipa" },
+              location: { latitude: -6.222, longitude: -35.055 },
+              rating: 4.8,
+              userRatingCount: 1800,
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    });
+    const sanctuary: PlaceQualityTarget = {
+      id: "published:santuario",
+      name: "Santuário Ecológico de Pipa",
+      category: "nature",
+      latitude: -6.222,
+      longitude: -35.055,
+    };
+
+    const adapter = new GooglePlacesQualityAdapter("secret-google", { fetcher });
+    const matches = await adapter.findSignals([sanctuary, missing]);
+
+    expect(matches.map((match) => match.targetId)).toEqual([sanctuary.id]);
+  });
 });
 
 describe("FoursquarePlacesQualityAdapter", () => {

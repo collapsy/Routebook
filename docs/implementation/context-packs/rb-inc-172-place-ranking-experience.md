@@ -1,13 +1,13 @@
 ---
 id: RB-CTX-172
 title: Context Pack do RB-INC-172 — Experiência completa de ranking de Places
-description: Delimita UI de ranking, adapters runtime Google/Foursquare, matching conservador e política de ausência sem ativar Provider automaticamente.
+description: Delimita UI de ranking, adapters runtime Google/Foursquare, matching conservador, cobertura governada e política de ausência.
 document_type: implementation-context-pack
 owner: Place Catalog and Decision Intelligence
 status: Draft
-version: "0.1.0"
+version: "0.2.0"
 created: "2026-08-28"
-last_updated: "2026-08-28"
+last_updated: "2026-09-01"
 authors: [RouteBook Team]
 tags: [implementation, context-pack, ranking, discovery, providers]
 related_documents: [RB-INC-172, RB-INC-168, RB-CORE-0004, RB-ARC-003, RB-ADR-012, RB-INC-171]
@@ -22,7 +22,8 @@ ai_context:
 
 ## 1. Missão
 
-Finalizar o ranking visível de Places sem atravessar o gate humano de Provider/secret/billing.
+Finalizar o ranking visível de Places, ativar Google Places somente no Preview após autorização humana
+e validar cobertura real sem fabricar sinais.
 
 ## 2. Unidade de trabalho
 
@@ -56,7 +57,8 @@ Finalizar o ranking visível de Places sem atravessar o gate humano de Provider/
 - navegação/ordenar não cria mutation;
 - secret nunca aparece em HTML, log estruturado ou relatório;
 - Provider não é ativado sem configuração explícita;
-- ranking indisponível degrada para distância.
+- ranking indisponível degrada para distância;
+- chamadas nominais adicionais têm limite explícito por categoria.
 
 ## 5. Provider
 
@@ -65,7 +67,11 @@ Finalizar o ranking visível de Places sem atravessar o gate humano de Provider/
 - Text Search (New);
 - FieldMask mínimo;
 - key apenas server-side;
-- billing/termos são gate humano.
+- busca ampla por categoria seguida de até quatro buscas nominais para targets ainda sem match;
+- Places canônicos têm prioridade no fallback limitado;
+- falha nominal isolada preserva os resultados amplos;
+- billing/termos e configuração de Preview foram autorizados e provisionados fora do repositório;
+- Production permanece desativado até decisão humana separada.
 
 ### Foursquare
 

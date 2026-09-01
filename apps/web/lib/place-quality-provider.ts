@@ -13,6 +13,7 @@ type ProviderCandidate = Readonly<{
   name: string;
   latitude: number;
   longitude: number;
+  targetedForId?: string;
   rating?: number;
   ratingScaleMax?: number;
   reviewCount?: number;
@@ -150,7 +151,8 @@ function selectCandidate(
     .filter(
       (candidate) =>
         !usedExternalIds.has(candidate.externalId) &&
-        isConservativeQualityIdentityMatch(target, candidate),
+        (isConservativeQualityIdentityMatch(target, candidate) ||
+          isTargetedQualityIdentityExpansionMatch(target, candidate)),
     )
     .sort((left, right) => {
       const exactLeft = normalizeIdentity(left.name) === normalizeIdentity(target.name) ? 0 : 1;
@@ -161,6 +163,25 @@ function selectCandidate(
         left.externalId.localeCompare(right.externalId)
       );
     })[0];
+}
+
+function isTargetedQualityIdentityExpansionMatch(
+  target: PlaceQualityTarget,
+  candidate: ProviderCandidate,
+): boolean {
+  if (candidate.targetedForId !== target.id || candidateDistance(target, candidate) > 1_200) {
+    return false;
+  }
+
+  const targetTokens = identityTokens(target.name);
+  const candidateTokens = identityTokens(candidate.name);
+  if (targetTokens.length === 0 || candidateTokens.length === 0) return false;
+
+  const candidateSet = new Set(candidateTokens);
+  return (
+    targetTokens.every((token) => token.length >= 6 && candidateSet.has(token)) &&
+    candidateTokens.length <= targetTokens.length + 3
+  );
 }
 
 function qualityMatchesFromCandidates(
@@ -313,6 +334,7 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
     radiusMeters: number,
     pageSize: number,
     context: string,
+    targetedForId?: string,
   ): Promise<readonly ProviderCandidate[]> {
     const response = await fetchWithTimeout(this.fetcher, GOOGLE_ENDPOINT, {
       method: "POST",
@@ -364,6 +386,7 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
           name,
           latitude,
           longitude,
+          ...(targetedForId ? { targetedForId } : {}),
           ...(rating === undefined ? {} : { rating, ratingScaleMax: 5 }),
           ...(reviewCount === undefined ? {} : { reviewCount }),
         },
@@ -400,6 +423,7 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
           GOOGLE_TARGETED_FALLBACK_RADIUS_METERS,
           GOOGLE_TARGETED_FALLBACK_PAGE_SIZE,
           `${category}:${target.id}`,
+          target.id,
         ),
       ),
     );

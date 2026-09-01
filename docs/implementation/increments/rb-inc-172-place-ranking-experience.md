@@ -111,6 +111,10 @@ ainda precisa passar pelo mesmo matching conservador; a busca adicional não aut
 similaridade fraca. O limite evita custo não governado quando a Discovery contém dezenas de candidatos
 externos.
 
+Uma expansão de nome distintiva pode ser aceita até 1,2 km somente quando o candidato veio da busca
+nominal daquele target específico. Isso cobre casos como `Chapadão de Pipa` →
+`Chapadão — Falésia da Praia de Pipa` sem ampliar o raio do matching fuzzy da consulta ampla.
+
 ## 5. Foursquare Places
 
 Adapter usa a API atual:

@@ -84,6 +84,7 @@ e validar cobertura real sem fabricar sinais.
 
 - exact match ainda exige proximidade;
 - fuzzy match exige tokens distintivos + distância curta;
+- expansão distintiva até 1,2 km exige busca nominal vinculada ao target específico;
 - externalId não pode alimentar dois targets no mesmo grupo;
 - sem match seguro, nenhum signal match.
 

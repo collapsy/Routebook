@@ -212,6 +212,56 @@ describe("GooglePlacesQualityAdapter", () => {
 
     expect(matches.map((match) => match.targetId)).toEqual([sanctuary.id]);
   });
+
+  it("aceita expansão nominal distintiva somente na busca direcionada daquele alvo", async () => {
+    const chapadao: PlaceQualityTarget = {
+      id: "published:chapadao",
+      name: "Chapadão de Pipa",
+      category: "nature",
+      latitude: -6.2445,
+      longitude: -35.0407,
+    };
+    const fetcher = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify(
+            fetcher.mock.calls.length === 1
+              ? { places: [] }
+              : {
+                  places: [
+                    {
+                      id: "google-chapadao",
+                      displayName: { text: "Chapadão - Falésia da Praia de Pipa" },
+                      location: { latitude: -6.2364, longitude: -35.0435 },
+                      rating: 4.8,
+                      userRatingCount: 11631,
+                    },
+                  ],
+                },
+          ),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+    );
+
+    expect(
+      isConservativeQualityIdentityMatch(chapadao, {
+        externalId: "google-chapadao",
+        name: "Chapadão - Falésia da Praia de Pipa",
+        latitude: -6.2364,
+        longitude: -35.0435,
+      }),
+    ).toBe(false);
+
+    const adapter = new GooglePlacesQualityAdapter("secret-google", { fetcher });
+    const matches = await adapter.findSignals([chapadao]);
+
+    expect(matches).toEqual([
+      expect.objectContaining({
+        targetId: chapadao.id,
+        signals: expect.objectContaining({ externalId: "google-chapadao" }),
+      }),
+    ]);
+  });
 });
 
 describe("FoursquarePlacesQualityAdapter", () => {

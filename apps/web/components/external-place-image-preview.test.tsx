@@ -46,7 +46,7 @@ const preview = {
   matchEvidence: "Identidade e contexto local confirmados.",
 } as const;
 
-function renderPreview() {
+function renderPreview(googlePlaceId?: string) {
   return render(
     <ExternalPlaceImagePreview
       category="beach"
@@ -54,6 +54,7 @@ function renderPreview() {
       latitude={-6.2366}
       longitude={-35.0465}
       placeName="Praia do Amor"
+      {...(googlePlaceId ? { googlePlaceId } : {})}
     />,
   );
 }
@@ -105,6 +106,47 @@ describe("ExternalPlaceImagePreview", () => {
     );
     expect(fetcher).toHaveBeenCalledTimes(1);
     expect(String(fetcher.mock.calls[0]?.[0])).toContain("/api/place-image-preview?");
+  });
+
+
+  it("renderiza Google Places Photo por URL interna e attribution sem expor Provider URL", async () => {
+    const googlePreview = {
+      provider: "google-places",
+      mediaUrl: "/api/place-image-preview/google?token=opaque-token",
+      sourceUrl: "https://www.google.com/maps/place/?q=place_id:abc",
+      sourceName: "Google Places",
+      authorAttributions: [{ displayName: "Pessoa fotógrafa" }],
+      altText: "Fotografia de Praia do Amor fornecida pelo Google Places.",
+      matchEvidence: "Google Place ID revalidado por identidade e proximidade antes da mídia.",
+    } as const;
+    const fetcher = vi.fn<(input: string | URL | Request) => Promise<Response>>().mockResolvedValue(
+      Response.json(googlePreview, {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetcher);
+    vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
+
+    renderPreview("ChIJPraiaDoAmor01");
+    enterViewport();
+
+    const image = await screen.findByRole("img", { name: googlePreview.altText });
+    expect(image).toHaveAttribute("src", googlePreview.mediaUrl);
+    expect(image.getAttribute("src")).not.toContain("places.googleapis.com");
+    expect(screen.getByText(/Google Places/)).toBeInTheDocument();
+    expect(screen.getByText(/Pessoa fotógrafa/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ver no Google Maps" })).toHaveAttribute(
+      "href",
+      googlePreview.sourceUrl,
+    );
+    expect(
+      screen.getByText(/Google Places/).closest("[data-external-place-image-provider]"),
+    ).toHaveAttribute("data-external-place-image-provider", "google-places");
+    expect(String(fetcher.mock.calls[0]?.[0])).toContain(
+      "googlePlaceId=ChIJPraiaDoAmor01",
+    );
+    expect(String(fetcher.mock.calls[0]?.[0])).toContain("category=beach");
   });
 
   it("mantém fallback acessível quando nenhuma mídia segura é encontrada", async () => {

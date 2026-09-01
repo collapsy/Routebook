@@ -47,11 +47,7 @@ test("mantém Discovery funcional sem coordenadas da hospedagem", async ({ page 
       name: /\d+ de \d+ (?:lugar único|lugares únicos) exibidos/,
     }),
   ).toBeVisible();
-  await expect(
-    page.getByText(
-      /30 com conteúdo curado do RouteBook.*também reconciliados com Overture.*somente na descoberta atual/,
-    ),
-  ).toBeVisible();
+  await expect(page.getByText(/30 curados · \d+ descobertas atuais/)).toBeVisible();
   await expect(
     page
       .getByRole("list", { name: "Opções de lugares" })

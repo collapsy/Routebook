@@ -140,6 +140,7 @@ packages/database/src/proposal-repository.test.ts
 packages/database/src/recommendation-repository.test.ts
 packages/database/src/trip-authorization-repository-postgres.test.ts
 apps/web/app/viagens/nova/actions.ts
+apps/web/e2e/support/authenticated-trip.ts
 docs/implementation/increments/rb-inc-173-destination-foundation.md
 docs/implementation/context-packs/rb-inc-173-destination-foundation.md
 docs/implementation/traceability-matrix.md

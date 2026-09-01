@@ -85,6 +85,8 @@ senão
 
 Somente os caminhos listados no RB-INC-167.
 
+O feedback humano de Preview de 01/09/2026 autorizou o refinamento mínimo de hierarquia visual dentro da mesma unidade de trabalho. Por isso o escopo passou a incluir o CSS da Discovery, o componente visual de ranking e os E2E já afetados pela cadeia lazy de mídia. O refinamento não altera regra de ranking, matching, domínio ou Provider.
+
 ## 8. Gates
 
 ```bash
@@ -110,7 +112,8 @@ Documentation e Engineering Validation devem passar no mesmo SHA. Vercel Preview
 - não ativar Production;
 - não aceitar RB-ADR-012 automaticamente;
 - não esconder attribution obrigatória;
-- não inventar licença/autoria.
+- não inventar licença/autoria;
+- não remover informação útil apenas para reduzir densidade: usar progressive disclosure para Provenance e evidência técnica.
 
 ## 10. Handoff
 

@@ -130,7 +130,7 @@ describe("GET /api/place-image-preview", () => {
     expect(response.headers.get("Cache-Control")).toBe("private, no-store");
     expect(payload).toMatchObject({
       provider: "google-places",
-      sourceName: "Google Places",
+      sourceName: "Google Maps",
       authorAttributions: [
         {
           displayName: "Pessoa fotógrafa",

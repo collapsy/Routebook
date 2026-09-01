@@ -176,8 +176,10 @@ function decodeMediaToken(
     };
     const placeId = cleanText(payload.placeId);
     if (!PLACE_ID_PATTERN.test(placeId)) return undefined;
-    if (!Number.isInteger(payload.photoIndex) || (payload.photoIndex as number) < 0) return undefined;
-    if (typeof payload.expiresAt !== "number" || payload.expiresAt <= now.getTime()) return undefined;
+    if (!Number.isInteger(payload.photoIndex) || (payload.photoIndex as number) < 0)
+      return undefined;
+    if (typeof payload.expiresAt !== "number" || payload.expiresAt <= now.getTime())
+      return undefined;
     return { placeId, photoIndex: payload.photoIndex as number };
   } catch {
     return undefined;
@@ -231,13 +233,15 @@ export class GooglePlacePhotoAdapter {
     };
   }
 
-  async findPreview(input: Readonly<{
-    placeId: string;
-    name: string;
-    category: PlaceCategory;
-    latitude: number;
-    longitude: number;
-  }>): Promise<GooglePlacePhotoPreview | undefined> {
+  async findPreview(
+    input: Readonly<{
+      placeId: string;
+      name: string;
+      category: PlaceCategory;
+      latitude: number;
+      longitude: number;
+    }>,
+  ): Promise<GooglePlacePhotoPreview | undefined> {
     const details = await this.fetchDetails(input.placeId, DETAILS_IDENTITY_FIELD_MASK);
     const externalId = cleanText(details.id);
     const name = cleanText(details.displayName?.text);

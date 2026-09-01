@@ -5,9 +5,9 @@ description: Fornece o contexto mínimo e as restrições para preparar, executa
 document_type: implementation-context-pack
 owner: Product and Quality Engineering
 status: Draft
-version: "0.1.0"
+version: "0.2.0"
 created: "2026-08-14"
-last_updated: "2026-08-20"
+last_updated: "2026-09-01"
 authors: [RouteBook Team]
 tags: [context-pack, mvp-validation, m8, pipa, product-validation, privacy]
 related_documents: [RB-INC-136, RB-CORE-0004, RB-PRD-002, RB-DEL-001, RB-QA-001, RB-OBS-001, RB-PRIV-001, RB-INC-129, RB-INC-132, RB-INC-134, RB-INC-135]
@@ -28,9 +28,9 @@ Preparar e, quando existir uso humano real, registrar a validação M8 do RouteB
 
 - ID: `RB-INC-136`;
 - Issue: `#319`;
-- Draft PR de preparação: `#374`;
+- PR de preparação/reconciliação integrada: `#374`;
 - arquivo: `docs/implementation/increments/rb-inc-136-m8-real-validation.md`;
-- branch de preparação atual: `codex/rb-inc-136-m8-phase-a-reconciliation`;
+- branch de closeout atual: `codex/rb-inc-136-m8-closeout`;
 - baseline da reconciliação: `bef09b68ce631073fb9d4b5a203a1ca462f1befd`;
 - branch histórica preservada: `codex/rb-inc-136-m8-real-validation`, divergente da `main` atual;
 - janela canônica da viagem: 22 a 29 de agosto de 2026.
@@ -179,10 +179,10 @@ configuração destrutiva de Production
 - [x] alterações funcionais estão fora de escopo desta fase;
 - [x] Registry atualizado;
 - [x] rastreabilidade atualizada;
-- [ ] Documentation Validation verde;
-- [ ] Engineering Validation verde no mesmo SHA;
-- [ ] PR integrada;
-- [ ] release pós-merge sem migration pendente.
+- [x] Documentation Validation verde na preparação;
+- [x] Engineering Validation verde no mesmo SHA da preparação;
+- [x] PR #374 integrada em 20/08/2026;
+- [x] Fase A encerrada sem pendência operacional atribuível ao protocolo.
 
 ## 14. Restrições
 
@@ -262,3 +262,39 @@ Incluir:
 ## 19. Regra para retomada da Fase B
 
 Ao iniciar uma sessão real, usar o template definido no RB-INC-136. O executor não deve pedir ao usuário para lembrar artificialmente detalhes que não foram registrados; quando a evidência for incompleta, registrar `not_measured` ou nível de confiança apropriado, preservando a incerteza.
+
+
+## 20. Retomada e closeout da Fase B — 2026-09-01
+
+A viagem canônica ocorreu entre 22 e 29/08/2026. O closeout usa somente evidências humanas que já haviam sido registradas contemporaneamente no repositório e feedback pós-viagem explícito do owner.
+
+Fontes humanas elegíveis:
+
+- #382 — uso real em 23/08: cobertura de fotografias insuficiente;
+- #390 — uso real: Discovery não respondia claramente quais Places eram os melhores;
+- #395 — uso real em 27/08: ausência de resposta temporal para “o que está rolando hoje?” e experiências naturais;
+- #397 — uso real: cards visualmente secos sem fotografia real;
+- #399 — feedback funcional: excesso de conteúdo na mesma página e navegação confusa;
+- #401 — feedback de sessão: necessidade de concluir ranking;
+- feedback pós-viagem de 01/09/2026: a viagem ocorreu, o RouteBook foi útil e houve alterações durante o período de teste.
+
+Regras de síntese:
+
+- não reconstruir duração, sequência de cliques ou decisões específicas não registradas;
+- não inferir uso de Salvos, Planning Conflicts ou Itinerary Proposals;
+- manter `not_measured` quando a evidência não responde à hipótese;
+- registrar achados já cobertos por issues existentes sem criar duplicatas;
+- decisão M8 proposta: `partially_validated`;
+- issue #319 só pode ser encerrada após revisão final e integração do closeout.
+
+## 21. Handoff do closeout
+
+O executor deve:
+
+1. atualizar RB-INC-136 com Sessions retrospectivas sanitizadas e matriz H1–H10;
+2. atualizar este Context Pack;
+3. sincronizar Registry e matriz de rastreabilidade;
+4. abrir PR documental contra `main`;
+5. aguardar Documentation/Engineering no SHA final;
+6. não alterar aplicação, banco, Providers ou Production;
+7. solicitar decisão humana apenas para integração/encerramento final, conforme AGENTS.md.

@@ -22,6 +22,14 @@ describe("DrizzleItineraryRepository com períodos livres", () => {
   it("preserva criação, edição, remoção, opcionais, ordem e cascata", async () => {
     const trip = createTrip({
       name: "Persistência de períodos livres",
+      destination: {
+        name: "Pipa, Tibau do Sul - RN",
+        type: "district",
+        countryCode: "BR",
+        latitude: -6.2302,
+        longitude: -35.0503,
+        timeZone: "America/Fortaleza",
+      },
       startDate: "2026-08-22",
       endDate: "2026-08-24",
       ownerName: "RouteBook QA",

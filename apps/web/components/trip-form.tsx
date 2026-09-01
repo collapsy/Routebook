@@ -17,7 +17,7 @@ function FieldError({ message }: { message: string | undefined }) {
 export function TripForm({
   destinationAttribution,
 }: {
-  destinationAttribution?: Readonly<{ label: string; href: string }>;
+  destinationAttribution?: Readonly<{ label: string; href: string }> | undefined;
 }) {
   const [state, action, pending] = useActionState(createTripAction, initialCreateTripState);
 

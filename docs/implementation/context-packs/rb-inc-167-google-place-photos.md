@@ -67,7 +67,7 @@ Ampliar fotografia real na Discovery usando Google Places Photos somente no Prev
 - photo name nunca cruza contrato público e nunca é cacheado;
 - Place Photos usa somente a primeira foto elegível nesta fase;
 - metadata/mídia Google usam `no-store`;
-- attribution é preservada;
+- attribution de plataforma usa `Google Maps` e `authorAttributions` adicionais são preservados;
 - token de mídia é efêmero e assinado.
 
 ## 6. Degradação

@@ -75,6 +75,21 @@ test("adiciona Place publicado ao Roteiro sem salvar automaticamente", async ({ 
 });
 
 test("mantém contexto visual ilustrativo em Lugar salvo sem fotografia real", async ({ page }) => {
+  await page.route("**/api/place-image-preview**", async (route) => {
+    const requestUrl = new URL(route.request().url());
+    if (
+      requestUrl.pathname === "/api/place-image-preview" &&
+      requestUrl.searchParams.get("name") === "Praia das Minas"
+    ) {
+      await route.fulfill({
+        status: 404,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "Nenhuma imagem externa segura no cenário E2E." }),
+      });
+      return;
+    }
+    await route.fallback();
+  });
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Salvos com fallback visual ${test.info().project.name} ${Date.now()}`,
     startDate: "2026-08-22",

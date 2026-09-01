@@ -32,3 +32,6 @@ apps/web/app/viagens/**/recomendacoes/page.tsx
 apps/web/components/recommendation-card.tsx
 packages/database/drizzle/meta/_journal.json
 packages/database/src/recommendation-decision-service.ts
+
+# Vendored, pinned timezone lookup source (RB-INC-174).
+apps/web/vendor/tz-lookup.ts

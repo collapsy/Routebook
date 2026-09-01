@@ -1,3 +1,3 @@
 import routeBookNextConfig from "@routebook/eslint-config/next";
 
-export default routeBookNextConfig;
+export default [{ ignores: ["vendor/**"] }, ...routeBookNextConfig];

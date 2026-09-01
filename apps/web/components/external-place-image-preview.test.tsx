@@ -140,7 +140,9 @@ describe("ExternalPlaceImagePreview", () => {
       googlePreview.sourceUrl,
     );
     expect(
-      screen.getByText(/Google Maps/).closest("[data-external-place-image-provider]"),
+      screen.getByRole("img", { name: googlePreview.altText }).closest(
+        "[data-external-place-image-provider]",
+      ),
     ).toHaveAttribute("data-external-place-image-provider", "google-places");
     expect(String(fetcher.mock.calls[0]?.[0])).toContain("googlePlaceId=ChIJPraiaDoAmor01");
     expect(String(fetcher.mock.calls[0]?.[0])).toContain("category=beach");

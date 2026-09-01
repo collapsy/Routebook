@@ -232,7 +232,7 @@ function CanonicalDiscoveryCard({
         {...(qualitySignals ? { signals: qualitySignals } : {})}
         {...(categoryRank ? { categoryRank } : {})}
       />
-      {place.primaryImage || !candidate ? (
+      {place.primaryImage ? (
         <PlacePrimaryImage
           category={place.category}
           placeName={place.name}
@@ -242,8 +242,11 @@ function CanonicalDiscoveryCard({
         <ExternalPlaceImagePreview
           category={place.category}
           destinationId={destinationId}
-          latitude={candidate.latitude}
-          longitude={candidate.longitude}
+          googlePlaceId={
+            qualitySignals?.provider === "google-places" ? qualitySignals.externalId : undefined
+          }
+          latitude={coordinate.latitude}
+          longitude={coordinate.longitude}
           placeName={place.name}
         />
       )}
@@ -373,6 +376,9 @@ function ExternalDiscoveryCard({
       <ExternalPlaceImagePreview
         category={candidate.category}
         destinationId={destinationId}
+        googlePlaceId={
+          qualitySignals?.provider === "google-places" ? qualitySignals.externalId : undefined
+        }
         latitude={candidate.latitude}
         longitude={candidate.longitude}
         placeName={candidate.name}

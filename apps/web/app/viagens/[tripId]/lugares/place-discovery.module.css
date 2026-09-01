@@ -87,16 +87,30 @@
 }
 
 .discoverySummary {
-  display: grid;
-  gap: 0.45rem;
   margin-bottom: 1rem;
-  padding: 1rem 1.15rem;
-  border: 1px solid color-mix(in oklab, var(--primary) 25%, var(--border));
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
   border-radius: 0.9rem;
-  background: color-mix(in oklab, var(--primary) 5%, var(--surface));
+  background: var(--surface);
 }
 
-.discoverySummary p {
+.discoverySummary > summary {
+  cursor: pointer;
+  color: var(--foreground);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.discoverySummaryContent {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+  color: var(--foreground-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.discoverySummaryContent p {
   margin: 0;
 }
 
@@ -128,16 +142,85 @@
 }
 
 .cardActions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.55rem;
   margin-top: auto;
 }
 
+.cardActions form,
+.cardActions button,
 .cardActions a {
-  flex: 1 1 9rem;
-  justify-content: center;
-  text-align: center;
+  width: 100%;
+}
+
+.cardUtilityLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+  align-items: center;
+}
+
+.cardUtilityLinks a {
+  color: var(--primary-strong);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.cardTitle {
+  font-size: 1.08rem;
+  line-height: 1.25;
+}
+
+.cardSummary {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--foreground-muted);
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.quickFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.quickFacts span {
+  display: inline-flex !important;
+  margin: 0 !important;
+  padding: 0.32rem 0.55rem;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--foreground-muted) !important;
+  font-size: 0.72rem !important;
+  font-weight: 760 !important;
+  text-transform: none !important;
+}
+
+.cardMore {
+  border-top: 1px solid var(--border);
+  padding-top: 0.55rem;
+}
+
+.cardMore > summary {
+  cursor: pointer;
+  color: var(--foreground-muted);
+  font-size: 0.76rem;
+  font-weight: 760;
+}
+
+.cardMoreContent {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+}
+
+.cardMoreContent small {
+  margin-top: 0 !important;
 }
 
 .promotionForm {
@@ -148,9 +231,16 @@
   width: 100%;
 }
 
+.optionsGrid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: 1rem;
+}
+
 .optionsGrid > li {
+  display: grid;
+  gap: 0.7rem;
   content-visibility: auto;
-  contain-intrinsic-size: auto 32rem;
+  contain-intrinsic-size: auto 34rem;
 }
 
 .visuallyHidden {
@@ -330,6 +420,17 @@
   }
 
   .topListsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+@media (max-width: 42rem) {
+  .optionsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardActions {
     grid-template-columns: 1fr;
   }
 }

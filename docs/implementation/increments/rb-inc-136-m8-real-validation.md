@@ -28,6 +28,7 @@ ai_context:
 | Estado | Closeout M8 — Fase A concluída; Fase B revisada com evidência real; decisão `partially_validated` proposta |
 | Responsável | Product and Quality Engineering |
 | Issue | #319 |
+| Pull request de closeout | #403 |
 | Branch | `codex/rb-inc-136-m8-closeout` |
 | Baseline do closeout | `main@22a84867c4fbd1596be4e905eccc560d43e42c99` |
 | Data de criação | 2026-08-14 |

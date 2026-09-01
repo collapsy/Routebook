@@ -35,3 +35,4 @@ packages/database/src/recommendation-decision-service.ts
 
 # Vendored, pinned timezone lookup source (RB-INC-174).
 apps/web/vendor/tz-lookup.ts
+apps/web/vendor/tz-lookup.LICENSE.md

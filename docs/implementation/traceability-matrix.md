@@ -847,3 +847,21 @@ Ao concluir um incremento:
 | Provider/segredo | nenhum Provider novo, API key, billing, migration ou Production |
 | validação | Documentation Validation e Engineering Validation pendentes no SHA final |
 
+
+
+## Evidências previstas do RB-INC-174
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-174-destination-resolver.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-174-destination-resolver.md` |
+| iniciativa | #411 — M9 / RouteBook Anywhere: Destination Bootstrap |
+| rastreabilidade | #414; branch `codex/rb-inc-174-destination-resolver` |
+| base | `main@e56de75a7713e76fe8e8fc51b7d7214af3cac885`; RB-INC-173 integrado |
+| resolução | porta `DestinationResolver` na aplicação; Provider fora do domínio |
+| Provider inicial | Nominatim opcional, desligado por default e bloqueado em Production |
+| timezone | lookup local vendorizado/fixado; sem chamada adicional de Provider |
+| Provenance | persistência aditiva e atômica da evidência de resolução de Destination |
+| UX | destino editável; Pipa deixa de ser default/read-only |
+| regressão | Pipa e Florianópolis passam pelo mesmo contrato de resolução |
+| validação | Documentation Validation e Engineering Validation pendentes no SHA final |

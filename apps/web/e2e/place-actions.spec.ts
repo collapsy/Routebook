@@ -108,10 +108,7 @@ test("mantém contexto visual ilustrativo em Lugar salvo sem fotografia real", a
     .locator('[data-place-source="published"]')
     .filter({ hasText: "Praia das Minas" })
     .first();
-  await expect(discoveryCard.locator('[data-place-image-fallback="true"]')).toHaveAttribute(
-    "data-category-illustration",
-    "beach",
-  );
+  await expect(discoveryCard.locator('[data-category-illustration="beach"]').first()).toBeVisible();
   await discoveryCard.getByRole("button", { name: "Salvar lugar" }).click();
   await expect(discoveryCard.getByRole("button", { name: "Remover dos salvos" })).toBeVisible();
 

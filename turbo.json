@@ -6,26 +6,41 @@
     "DATABASE_URL",
     "FOURSQUARE_PLACES_API_KEY",
     "GOOGLE_PLACES_API_KEY",
-    "ROUTEBOOK_PLACE_QUALITY_PROVIDER"
+    "ROUTEBOOK_PLACE_QUALITY_PROVIDER",
+    "ROUTEBOOK_PLACE_PHOTO_PROVIDER"
   ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**"
+      ]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": [
+        "^lint"
+      ]
     },
     "test": {
-      "dependsOn": ["^build"],
-      "outputs": ["coverage/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "coverage/**"
+      ]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": [
+        "^typecheck"
+      ]
     }
   }
 }

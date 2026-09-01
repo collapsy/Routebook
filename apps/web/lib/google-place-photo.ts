@@ -24,7 +24,7 @@ type GooglePhotoResource = Readonly<{
 
 export type GooglePlacePhotoPreview = Readonly<{
   provider: "google-places";
-  sourceName: "Google Places";
+  sourceName: "Google Maps";
   altText: string;
   authorAttributions: readonly GoogleAuthorAttribution[];
   sourceUrl?: string;
@@ -281,7 +281,7 @@ export class GooglePlacePhotoAdapter {
 
     return {
       provider: "google-places",
-      sourceName: "Google Places",
+      sourceName: "Google Maps",
       altText: `Fotografia de ${input.name} fornecida pelo Google Places.`,
       authorAttributions: photo.authorAttributions,
       ...(photo.googleMapsUri ? { sourceUrl: photo.googleMapsUri } : {}),

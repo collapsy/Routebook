@@ -190,7 +190,10 @@ function parseBounds(value: unknown): DestinationBounds | undefined {
 
 function osmIdentity(candidate: JsonRecord): Readonly<{ externalReference: string; sourceUrl: string }> | undefined {
   const rawType = text(candidate.osm_type).toLowerCase();
-  const osmId =\n    typeof candidate.osm_id === "number" && Number.isSafeInteger(candidate.osm_id)\n      ? String(candidate.osm_id)\n      : text(candidate.osm_id);
+  const osmId =
+    typeof candidate.osm_id === "number" && Number.isSafeInteger(candidate.osm_id)
+      ? String(candidate.osm_id)
+      : text(candidate.osm_id);
   const type = rawType === "node" ? "node" : rawType === "way" ? "way" : rawType === "relation" ? "relation" : undefined;
   const prefix = type === "node" ? "N" : type === "way" ? "W" : type === "relation" ? "R" : undefined;
   if (!type || !prefix || !/^\d+$/.test(osmId)) return undefined;

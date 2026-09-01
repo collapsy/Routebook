@@ -4,6 +4,14 @@ import { createTrip, TripValidationError } from "./trip";
 
 const input = {
   name: "Pipa autenticada",
+  destination: {
+    name: "Pipa, Tibau do Sul - RN",
+    type: "district" as const,
+    countryCode: "BR",
+    latitude: -6.2302,
+    longitude: -35.0503,
+    timeZone: "America/Fortaleza",
+  },
   startDate: "2026-08-22",
   endDate: "2026-08-29",
   ownerName: "Ronaldo",

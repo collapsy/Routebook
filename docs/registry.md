@@ -398,6 +398,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-172 | Experiência completa de ranking de Places | Implementation | Draft | 0.2.0 | [rb-inc-172-place-ranking-experience.md](./implementation/increments/rb-inc-172-place-ranking-experience.md) |
 | RB-CTX-172 | Context Pack do RB-INC-172 — Experiência completa de ranking de Places | Implementation Context Pack | Draft | 0.2.0 | [rb-inc-172-place-ranking-experience.md](./implementation/context-packs/rb-inc-172-place-ranking-experience.md) |
 
+| RB-INC-173 | Destination Foundation destination-agnostic | Implementation | Draft | 0.1.0 | [rb-inc-173-destination-foundation.md](./implementation/increments/rb-inc-173-destination-foundation.md) |
+| RB-CTX-173 | Context Pack do RB-INC-173 — Destination Foundation | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-173-destination-foundation.md](./implementation/context-packs/rb-inc-173-destination-foundation.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

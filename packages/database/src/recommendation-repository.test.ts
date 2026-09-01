@@ -83,6 +83,14 @@ function buildRecommendation(
 async function createFixture(publicationStatus: "published" | "draft" = "published") {
   const trip = createTrip({
     name: "Persistência de Recommendations",
+    destination: {
+      name: "Pipa, Tibau do Sul - RN",
+      type: "district",
+      countryCode: "BR",
+      latitude: -6.2302,
+      longitude: -35.0503,
+      timeZone: "America/Fortaleza",
+    },
     startDate: "2026-08-22",
     endDate: "2026-08-24",
     ownerName: "RouteBook QA",
@@ -182,6 +190,14 @@ describe("DrizzleRecommendationRepository", () => {
     const fixture = await createFixture();
     const otherTrip = createTrip({
       name: "Outra Viagem",
+      destination: {
+        name: "Pipa, Tibau do Sul - RN",
+        type: "district",
+        countryCode: "BR",
+        latitude: -6.2302,
+        longitude: -35.0503,
+        timeZone: "America/Fortaleza",
+      },
       startDate: "2026-09-01",
       endDate: "2026-09-02",
       ownerName: "RouteBook QA",

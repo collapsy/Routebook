@@ -27,6 +27,14 @@ const decidedAt = new Date("2026-08-02T21:03:00.000Z");
 async function fixture() {
   const trip = createTrip({
     name: "Application service de aceite",
+    destination: {
+      name: "Pipa, Tibau do Sul - RN",
+      type: "district",
+      countryCode: "BR",
+      latitude: -6.2302,
+      longitude: -35.0503,
+      timeZone: "America/Fortaleza",
+    },
     startDate: "2026-08-22",
     endDate: "2026-08-23",
     ownerName: "RouteBook QA",

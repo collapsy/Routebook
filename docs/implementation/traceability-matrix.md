@@ -829,3 +829,21 @@ Ao concluir um incremento:
 | Provider | Google Places autorizado e provisionado somente em Preview em 01/09/2026; comparação live confirmou a integração e motivou correção de cobertura; Production continua gate humano separado |
 | validação | Documentation, Engineering/Playwright e Vercel Preview pendentes no HEAD final |
 \n
+
+## Evidências previstas do RB-INC-173
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-173-destination-foundation.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-173-destination-foundation.md` |
+| iniciativa | #411 — M9 / RouteBook Anywhere: Destination Bootstrap |
+| rastreabilidade | #412; branch `codex/rb-inc-173-destination-foundation` |
+| base | `main@b067a688f39c1e3298e9670b6a82c9857a188f0e`; RB-INC-172 integrado |
+| domínio | Destination usa os seis tipos já definidos em RB-DOM-001; nenhum conceito canônico novo |
+| implementação | `createTrip` recebe Destination explícito; Pipa deixa de ser constante implícita no domínio |
+| persistência | reidratação usa `destination_type`, `country_code` e `time_zone` armazenados |
+| segundo destino | teste de Florianópolis, SC com `city / BR / America/Sao_Paulo` |
+| Pipa | permanece fixture/regressão e conteúdo curado; não é removida |
+| Provider/segredo | nenhum Provider novo, API key, billing, migration ou Production |
+| validação | Documentation Validation e Engineering Validation pendentes no SHA final |
+

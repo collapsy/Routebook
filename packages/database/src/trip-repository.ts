@@ -1,7 +1,12 @@
 import { desc, eq } from "drizzle-orm";
 
 import { createGeoCoordinate } from "@routebook/geo-distance";
-import type { Trip, TripParticipant, TripRepository } from "@routebook/trip-management";
+import type {
+  DestinationType,
+  Trip,
+  TripParticipant,
+  TripRepository,
+} from "@routebook/trip-management";
 
 import { getDatabase } from "./client";
 import { trips } from "./schema";
@@ -22,16 +27,16 @@ export function mapTripRow(row: TripRow): Trip {
     name: row.name,
     destination: {
       name: row.destinationName,
-      type: "district",
-      countryCode: "BR",
+      type: row.destinationType as DestinationType,
+      countryCode: row.countryCode,
       latitude: Number(row.latitude),
       longitude: Number(row.longitude),
-      timeZone: "America/Fortaleza",
+      timeZone: row.timeZone,
     },
     period: {
       startDate: row.startDate,
       endDate: row.endDate,
-      timeZone: "America/Fortaleza",
+      timeZone: row.timeZone,
     },
     ...(row.accommodationName
       ? {

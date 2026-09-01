@@ -4,6 +4,14 @@ import { createTrip, TripValidationError, updateTripAccommodation } from "./trip
 
 const validInput = {
   name: "Pipa em agosto",
+  destination: {
+    name: "Pipa, Tibau do Sul - RN",
+    type: "district" as const,
+    countryCode: "BR",
+    latitude: -6.2302,
+    longitude: -35.0503,
+    timeZone: "America/Fortaleza",
+  },
   startDate: "2026-08-22",
   endDate: "2026-08-29",
   ownerName: "Ronaldo",
@@ -25,6 +33,40 @@ describe("createTrip", () => {
     expect(trip.participants).toHaveLength(1);
     expect(trip.participants[0]?.role).toBe("owner");
     expect(trip.contextVersion).toBe(1);
+  });
+
+  it("aceita um segundo Destination sem regra específica de Pipa", () => {
+    const trip = createTrip({
+      ...validInput,
+      name: "Florianópolis em novembro",
+      destination: {
+        name: "Florianópolis, SC",
+        type: "city",
+        countryCode: "br",
+        latitude: -27.5949,
+        longitude: -48.5482,
+        timeZone: "America/Sao_Paulo",
+      },
+    });
+
+    expect(trip.destination).toEqual({
+      name: "Florianópolis, SC",
+      type: "city",
+      countryCode: "BR",
+      latitude: -27.5949,
+      longitude: -48.5482,
+      timeZone: "America/Sao_Paulo",
+    });
+    expect(trip.period.timeZone).toBe("America/Sao_Paulo");
+  });
+
+  it("rejeita Destination com fuso inválido", () => {
+    expect(() =>
+      createTrip({
+        ...validInput,
+        destination: { ...validInput.destination, timeZone: "Fortaleza" },
+      }),
+    ).toThrow(TripValidationError);
   });
 
   it("mantém hospedagem opcional", () => {

@@ -24,6 +24,14 @@ const createdAccountIds = new Set<string>();
 function tripInput(name: string) {
   return {
     name,
+    destination: {
+      name: "Pipa, Tibau do Sul - RN",
+      type: "district" as const,
+      countryCode: "BR",
+      latitude: -6.2302,
+      longitude: -35.0503,
+      timeZone: "America/Fortaleza",
+    },
     startDate: "2026-08-22",
     endDate: "2026-08-29",
     accommodationName: "Condomínio Solar Água",

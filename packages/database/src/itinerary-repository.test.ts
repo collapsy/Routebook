@@ -20,6 +20,14 @@ describe("DrizzleItineraryRepository", () => {
   it("preserva o agregado completo e acompanha a cascata da viagem", async () => {
     const trip = createTrip({
       name: "Persistência do roteiro",
+      destination: {
+        name: "Pipa, Tibau do Sul - RN",
+        type: "district",
+        countryCode: "BR",
+        latitude: -6.2302,
+        longitude: -35.0503,
+        timeZone: "America/Fortaleza",
+      },
       startDate: "2026-08-22",
       endDate: "2026-08-24",
       ownerName: "RouteBook QA",
@@ -89,6 +97,14 @@ describe("DrizzleItineraryRepository", () => {
   it("preserva a transação própria no modo global", async () => {
     const trip = createTrip({
       name: "Transação própria do Itinerary",
+      destination: {
+        name: "Pipa, Tibau do Sul - RN",
+        type: "district",
+        countryCode: "BR",
+        latitude: -6.2302,
+        longitude: -35.0503,
+        timeZone: "America/Fortaleza",
+      },
       startDate: "2026-08-22",
       endDate: "2026-08-23",
       ownerName: "RouteBook QA",
@@ -112,6 +128,14 @@ describe("DrizzleItineraryRepository", () => {
   it("usa o executor escopado sem nested transaction e participa do rollback externo", async () => {
     const trip = createTrip({
       name: "Rollback externo do Itinerary",
+      destination: {
+        name: "Pipa, Tibau do Sul - RN",
+        type: "district",
+        countryCode: "BR",
+        latitude: -6.2302,
+        longitude: -35.0503,
+        timeZone: "America/Fortaleza",
+      },
       startDate: "2026-08-22",
       endDate: "2026-08-23",
       ownerName: "RouteBook QA",

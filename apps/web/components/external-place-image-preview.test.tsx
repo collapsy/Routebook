@@ -133,7 +133,7 @@ describe("ExternalPlaceImagePreview", () => {
     const image = await screen.findByRole("img", { name: googlePreview.altText });
     expect(image).toHaveAttribute("src", googlePreview.mediaUrl);
     expect(image.getAttribute("src")).not.toContain("places.googleapis.com");
-    expect(screen.getByText(/Google Maps/)).toBeInTheDocument();
+    expect(screen.getByText(/Foto externa:/)).toHaveTextContent("Google Maps");
     expect(screen.getByText(/Pessoa fotógrafa/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ver no Google Maps" })).toHaveAttribute(
       "href",

@@ -750,6 +750,27 @@ Ao concluir um incremento:
 | gate final | Documentation Validation e Engineering Validation devem permanecer verdes no SHA final da PR de closeout |
 | encerramento | #319 permanece aberta até revisão humana final e integração do closeout |
 
+## Evidências previstas do RB-INC-167
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-167-google-place-photos.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-167-google-place-photos.md` |
+| origem | uso real em Pipa confirmou cobertura visual insuficiente, especialmente restaurantes, bares e estabelecimentos menores |
+| rastreabilidade | issue #382; desbloqueio humano registrado em 01/09/2026 somente para Preview |
+| baseline | `main@b067a688f39c1e3298e9670b6a82c9857a188f0e`, após consolidação RB-INC-165/169/170/171/172 |
+| Provider | Google Places Photos (New), ativação independente por `ROUTEBOOK_PLACE_PHOTO_PROVIDER=google` |
+| identidade | reutiliza `PlaceQualitySignals.externalId` do matching conservador RB-INC-172 e revalida nome/coordenada via Place Details |
+| FieldMask | metadata: `id,displayName,location,photos`; mídia: `photos` para resolver resource name atual |
+| cache | Google metadata e mídia `no-store`; photo name não é persistido nem devolvido no contrato público |
+| segurança | API key server-side; token HMAC efêmero; browser recebe apenas URL RouteBook |
+| Provenance | `authorAttributions` exibido quando presente; link Google Maps somente quando retornado pelo Provider |
+| fallback | imagem curada → Google seguro → Wikimedia secure → ilustração de categoria |
+| custo | uma foto por card + lazy load; free usage cap/preço monitorados antes de qualquer Production |
+| ADR | RB-ADR-012 permanece `Proposed`; experimento Preview não equivale a aceite definitivo |
+| Production | explicitamente bloqueada neste incremento; configuração Preview-only |
+| validação | unit/component/E2E + Documentation + Engineering + Vercel Preview no SHA final |
+
 ## Evidências previstas do RB-INC-168
 
 | Evidência | Localização/resultado |

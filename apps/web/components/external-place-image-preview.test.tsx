@@ -113,7 +113,7 @@ describe("ExternalPlaceImagePreview", () => {
       provider: "google-places",
       mediaUrl: "/api/place-image-preview/google?token=opaque-token",
       sourceUrl: "https://www.google.com/maps/place/?q=place_id:abc",
-      sourceName: "Google Places",
+      sourceName: "Google Maps",
       authorAttributions: [{ displayName: "Pessoa fotógrafa" }],
       altText: "Fotografia de Praia do Amor fornecida pelo Google Places.",
       matchEvidence: "Google Place ID revalidado por identidade e proximidade antes da mídia.",
@@ -133,14 +133,14 @@ describe("ExternalPlaceImagePreview", () => {
     const image = await screen.findByRole("img", { name: googlePreview.altText });
     expect(image).toHaveAttribute("src", googlePreview.mediaUrl);
     expect(image.getAttribute("src")).not.toContain("places.googleapis.com");
-    expect(screen.getByText(/Google Places/)).toBeInTheDocument();
+    expect(screen.getByText(/Google Maps/)).toBeInTheDocument();
     expect(screen.getByText(/Pessoa fotógrafa/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ver no Google Maps" })).toHaveAttribute(
       "href",
       googlePreview.sourceUrl,
     );
     expect(
-      screen.getByText(/Google Places/).closest("[data-external-place-image-provider]"),
+      screen.getByText(/Google Maps/).closest("[data-external-place-image-provider]"),
     ).toHaveAttribute("data-external-place-image-provider", "google-places");
     expect(String(fetcher.mock.calls[0]?.[0])).toContain("googlePlaceId=ChIJPraiaDoAmor01");
     expect(String(fetcher.mock.calls[0]?.[0])).toContain("category=beach");

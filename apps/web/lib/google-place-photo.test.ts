@@ -58,7 +58,7 @@ describe("resolveConfiguredGooglePlacePhotoProvider", () => {
 
 describe("GooglePlacePhotoAdapter", () => {
   it("revalida identidade com FieldMask explícito e não expõe photo name", async () => {
-    let request: { input: string; init?: RequestInit } | undefined;
+    let request: { input: string; init: RequestInit | undefined } | undefined;
     const fetcher = vi.fn(async (value: string | URL | Request, init?: RequestInit) => {
       request = { input: String(value), init };
       return detailsResponse();

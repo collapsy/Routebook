@@ -429,7 +429,6 @@
   }
 }
 
-
 @media (max-width: 42rem) {
   .optionsGrid {
     grid-template-columns: 1fr;
@@ -439,7 +438,6 @@
     grid-template-columns: 1fr;
   }
 }
-
 
 .discoveryToggle {
   color: var(--primary-strong);

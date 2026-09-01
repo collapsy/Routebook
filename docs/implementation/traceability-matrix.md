@@ -737,7 +737,7 @@ Ao concluir um incremento:
 | definição do incremento | `docs/implementation/increments/rb-inc-136-m8-real-validation.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-136-m8-real-validation.md` |
 | requisitos e decisões | RB-PRD-002, RB-DEL-001, RB-QA-001, RB-OBS-001 e RB-PRIV-001 |
-| rastreabilidade | issue #319; preparação/reconciliação #374; closeout em `codex/rb-inc-136-m8-closeout` |
+| rastreabilidade | issue #319; preparação/reconciliação #374; closeout PR #403 / `codex/rb-inc-136-m8-closeout` |
 | Fase A | concluída e integrada em 20/08/2026; CI da preparação verde |
 | uso humano real | evidências contemporâneas em #382, #390, #395, #397, #399 e #401 |
 | feedback pós-viagem | em 01/09/2026 o owner confirmou que a viagem ocorreu, o RouteBook foi útil e recebeu alterações durante o período de teste |

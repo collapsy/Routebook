@@ -224,14 +224,6 @@ function CanonicalDiscoveryCard({
       data-place-source="published"
       data-place-state={candidate ? "enriched" : "published"}
     >
-      <PlaceRankingMeta
-        categoryLabel={categoryLabels[place.category]}
-        orderLabel={rankingOrderLabel}
-        position={rankingPosition}
-        {...(quality ? { quality } : {})}
-        {...(qualitySignals ? { signals: qualitySignals } : {})}
-        {...(categoryRank ? { categoryRank } : {})}
-      />
       {place.primaryImage ? (
         <PlacePrimaryImage
           category={place.category}
@@ -250,30 +242,35 @@ function CanonicalDiscoveryCard({
           placeName={place.name}
         />
       )}
+
       <div className={styles.cardIdentity}>
         <span>{categoryLabels[place.category]}</span>
-        <strong className={`${styles.sourceBadge} ${styles.publishedSource}`}>
+        <strong className={styles.sourceBadge + " " + styles.publishedSource}>
           {candidate ? "Curado + atualizado" : "Curado pelo RouteBook"}
         </strong>
       </div>
+
       <strong>{place.name}</strong>
-      <p>{place.summary}</p>
-      <small>{addressLabel ?? "Endereço ainda não informado"}</small>
-      <small>
-        Faixa de preço aproximada:{" "}
-        {place.priceRange ? priceRangeLabels[place.priceRange] : "indisponível"}
-      </small>
-      <small>
-        {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
-      </small>
-      {candidate ? (
-        <small>
-          Conteúdo: RouteBook · contexto de localização: Overture · licença da origem:{" "}
-          {candidate.sourceLicense}
-        </small>
-      ) : (
-        <small>Conteúdo e localização: catálogo publicado do RouteBook</small>
-      )}
+      <p className={styles.cardSummary}>{place.summary}</p>
+
+      <div className={styles.quickFacts} aria-label="Resumo do lugar">
+        <span>
+          {formatDistance(distanceMeters)} {distanceReferenceLabel}
+        </span>
+        <span>
+          {place.priceRange ? priceRangeLabels[place.priceRange] : "Preço indisponível"}
+        </span>
+      </div>
+
+      <PlaceRankingMeta
+        categoryLabel={categoryLabels[place.category]}
+        orderLabel={rankingOrderLabel}
+        position={rankingPosition}
+        {...(quality ? { quality } : {})}
+        {...(qualitySignals ? { signals: qualitySignals } : {})}
+        {...(categoryRank ? { categoryRank } : {})}
+      />
+
       <div className={styles.cardActions}>
         <form action={isSaved ? removePublishedPlaceAction : savePublishedPlaceAction}>
           <input name="tripId" type="hidden" value={tripId} />
@@ -284,26 +281,18 @@ function CanonicalDiscoveryCard({
         </form>
         <Link
           className="product-primary-action"
-          href={`/viagens/${tripId}/lugares/${place.slug}#adicionar-ao-roteiro`}
+          href={"/viagens/" + tripId + "/lugares/" + place.slug + "#adicionar-ao-roteiro"}
         >
           Adicionar ao roteiro
         </Link>
-        <Link
-          className="product-secondary-action"
-          href={`/viagens/${tripId}/lugares/${place.slug}`}
-        >
-          Ver detalhes
-        </Link>
-        <a
-          className="product-secondary-action"
-          href={mapsSearchUrl}
-          rel="noreferrer"
-          target="_blank"
-        >
+      </div>
+
+      <nav aria-label={"Ações rápidas de " + place.name} className={styles.cardUtilityLinks}>
+        <Link href={"/viagens/" + tripId + "/lugares/" + place.slug}>Ver detalhes</Link>
+        <a href={mapsSearchUrl} rel="noreferrer" target="_blank">
           Ver mapa e fotos
         </a>
         <a
-          className="product-secondary-action"
           href={buildGoogleMapsDirectionsUrl({
             ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
             destination: coordinate,
@@ -315,7 +304,25 @@ function CanonicalDiscoveryCard({
         >
           Calcular rota real
         </a>
-      </div>
+      </nav>
+
+      <details className={styles.cardMore}>
+        <summary>Mais informações</summary>
+        <div className={styles.cardMoreContent}>
+          <small>{addressLabel ?? "Endereço ainda não informado"}</small>
+          {candidate ? (
+            <small>
+              Conteúdo: RouteBook · contexto de localização: Overture · licença da origem:{" "}
+              {candidate.sourceLicense}
+            </small>
+          ) : (
+            <small>Conteúdo e localização: catálogo publicado do RouteBook</small>
+          )}
+          <small>
+            Distância aproximada em linha reta; use a rota real para ruas, duração e trânsito.
+          </small>
+        </div>
+      </details>
     </li>
   );
 }
@@ -365,14 +372,6 @@ function ExternalDiscoveryCard({
 
   return (
     <li data-place-source="external" data-place-state="external">
-      <PlaceRankingMeta
-        categoryLabel={categoryLabel}
-        orderLabel={rankingOrderLabel}
-        position={rankingPosition}
-        {...(quality ? { quality } : {})}
-        {...(qualitySignals ? { signals: qualitySignals } : {})}
-        {...(categoryRank ? { categoryRank } : {})}
-      />
       <ExternalPlaceImagePreview
         category={candidate.category}
         destinationId={destinationId}
@@ -383,23 +382,37 @@ function ExternalDiscoveryCard({
         longitude={candidate.longitude}
         placeName={candidate.name}
       />
+
       <div className={styles.cardIdentity}>
         <span>{categoryLabel}</span>
-        <strong className={`${styles.sourceBadge} ${styles.externalSource}`}>
+        <strong className={styles.sourceBadge + " " + styles.externalSource}>
           Descoberta atual
         </strong>
       </div>
+
       <strong>{candidate.name}</strong>
-      <p>{candidate.addressLabel ?? "Endereço não informado pela fonte"}</p>
-      <small>Categoria na origem: {providerCategoryLabel(candidate.providerCategory)}</small>
-      <small>
-        {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
-      </small>
-      <small>Fonte: Overture · licença da origem: {candidate.sourceLicense}</small>
-      <small>Candidato externo — ainda não publicado no RouteBook · sem conteúdo curado</small>
-      <div className={styles.cardActions}>
+      <p className={styles.cardSummary}>
+        {candidate.addressLabel ?? "Endereço não informado pela fonte"}
+      </p>
+
+      <div className={styles.quickFacts} aria-label="Resumo do lugar">
+        <span>
+          {formatDistance(distanceMeters)} {distanceReferenceLabel}
+        </span>
+        <span>{providerCategoryLabel(candidate.providerCategory)}</span>
+      </div>
+
+      <PlaceRankingMeta
+        categoryLabel={categoryLabel}
+        orderLabel={rankingOrderLabel}
+        position={rankingPosition}
+        {...(quality ? { quality } : {})}
+        {...(qualitySignals ? { signals: qualitySignals } : {})}
+        {...(categoryRank ? { categoryRank } : {})}
+      />
+
+      <nav aria-label={"Ações rápidas de " + candidate.name} className={styles.cardUtilityLinks}>
         <a
-          className="product-secondary-action"
           href={buildGoogleMapsSearchUrl({
             name: candidate.name,
             addressLabel: candidate.addressLabel,
@@ -411,7 +424,6 @@ function ExternalDiscoveryCard({
           Ver mapa e fotos
         </a>
         <a
-          className="product-secondary-action"
           href={buildGoogleMapsDirectionsUrl({
             ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
             destination: coordinate,
@@ -423,25 +435,38 @@ function ExternalDiscoveryCard({
         >
           Calcular rota real
         </a>
-      </div>
-      <form action={promoteExternalPlaceAction} className={styles.promotionForm}>
-        <input name="tripId" type="hidden" value={tripId} />
-        <input name="externalId" type="hidden" value={candidate.externalId} />
-        {search ? <input name="busca" type="hidden" value={search} /> : null}
-        {category ? <input name="categoria" type="hidden" value={category} /> : null}
-        {maximumDistanceMeters ? (
-          <input name="distancia" type="hidden" value={String(maximumDistanceMeters / 1_000)} />
-        ) : null}
-        {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
-        {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
-        <button className="product-secondary-action" type="submit">
-          Enviar para curadoria
-        </button>
-      </form>
-      <small>
-        A ação cria um draft para revisão; não publica, não salva na viagem e não adiciona ao
-        roteiro.
-      </small>
+      </nav>
+
+      <details className={styles.cardMore}>
+        <summary>Sobre esta descoberta</summary>
+        <div className={styles.cardMoreContent}>
+          <small>Categoria na origem: {providerCategoryLabel(candidate.providerCategory)}</small>
+          <small>Fonte: Overture · licença da origem: {candidate.sourceLicense}</small>
+          <small>Candidato externo — ainda não publicado no RouteBook · sem conteúdo curado</small>
+          <form action={promoteExternalPlaceAction} className={styles.promotionForm}>
+            <input name="tripId" type="hidden" value={tripId} />
+            <input name="externalId" type="hidden" value={candidate.externalId} />
+            {search ? <input name="busca" type="hidden" value={search} /> : null}
+            {category ? <input name="categoria" type="hidden" value={category} /> : null}
+            {maximumDistanceMeters ? (
+              <input
+                name="distancia"
+                type="hidden"
+                value={String(maximumDistanceMeters / 1_000)}
+              />
+            ) : null}
+            {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
+            {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
+            <button className="product-secondary-action" type="submit">
+              Enviar para curadoria
+            </button>
+          </form>
+          <small>
+            A ação cria um draft para revisão; não publica, não salva na viagem e não adiciona ao
+            roteiro.
+          </small>
+        </div>
+      </details>
     </li>
   );
 }

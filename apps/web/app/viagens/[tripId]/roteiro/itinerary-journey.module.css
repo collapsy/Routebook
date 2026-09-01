@@ -1,71 +1,96 @@
-.journeyNav {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin: 1rem 0 1.5rem;
-}
-
-.journeyStep,
-.journeyCurrent {
+.pageTopbar {
+  align-items: center;
   display: flex;
-  min-height: 4.5rem;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.2rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--color-border, #d7d7d7);
-  border-radius: 0.9rem;
-  text-decoration: none;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
-.journeyStep small,
-.journeyCurrent small {
-  font-size: 0.78rem;
-  line-height: 1.3;
+.topbarActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
 }
 
-.journeyCurrent {
-  border-width: 2px;
-  font-weight: 700;
+.itineraryHeader {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  margin: 0.5rem 0 1rem;
+}
+
+.itineraryHeader h1,
+.itineraryHeader p {
+  margin-bottom: 0;
+}
+
+.itineraryHeaderMeta {
+  color: var(--foreground-muted);
+  line-height: 1.5;
+  margin-top: 0.35rem;
 }
 
 .dayFocus {
   display: grid;
   gap: 1rem;
-  margin: 1.25rem 0;
+  margin: 1rem 0;
 }
 
 .daySelector {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.55rem;
   overflow-x: auto;
-  padding: 0.2rem 0 0.35rem;
+  padding: 0.25rem 0 0.55rem;
   scrollbar-width: thin;
 }
 
 .dayLink,
 .selectedDay {
+  background: var(--surface);
+  border: 1px solid var(--border, var(--color-border, #d7d7d7));
+  border-radius: 0.85rem;
+  color: inherit;
   display: flex;
-  min-width: 7rem;
   flex: 0 0 auto;
   flex-direction: column;
-  gap: 0.15rem;
-  padding: 0.7rem 0.85rem;
-  border: 1px solid var(--color-border, #d7d7d7);
-  border-radius: 0.8rem;
+  gap: 0.12rem;
+  min-width: 6.5rem;
+  padding: 0.65rem 0.75rem;
   text-decoration: none;
 }
 
+.dayLink:hover,
 .selectedDay {
-  border-width: 2px;
-  font-weight: 700;
+  border-color: var(--primary);
+}
+
+.selectedDay {
+  background: var(--surface-soft);
+  box-shadow: inset 0 0 0 1px var(--primary);
+  font-weight: 800;
+}
+
+.dayLink:focus-visible,
+.selectedDay:focus-visible,
+.quickAddLink:focus-visible,
+.activityMenu > summary:focus-visible,
+.placeContextLink:focus-visible,
+.timelineLeg a:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.dayLink small,
+.selectedDay small {
+  color: var(--foreground-muted);
 }
 
 .focusHeader {
-  display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  display: flex;
   gap: 1rem;
+  justify-content: space-between;
 }
 
 .focusHeader p {
@@ -97,15 +122,275 @@
 }
 
 .todayInline {
-  margin-left: 0.4rem;
+  margin-left: 0.35rem;
+}
+
+.quickAddLink {
+  border: 1px solid var(--primary);
+  border-radius: 0.8rem;
+  color: var(--primary-strong);
+  font-size: 0.86rem;
+  font-weight: 850;
+  padding: 0.65rem 0.8rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dayWorkspace {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.timelineColumn {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.timelineCard {
+  background: var(--surface);
+  border: 1px solid var(--border, var(--color-border, #d7d7d7));
+  border-radius: 1rem;
+  min-width: 0;
+  padding: 1rem;
+}
+
+.timeline {
+  display: grid;
+  gap: 0;
+}
+
+.timelineGroup {
+  display: grid;
+}
+
+.activityCard {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  position: relative;
+}
+
+.activityRail {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding-top: 0.15rem;
+  position: relative;
+}
+
+.activityRail::after {
+  background: var(--border, var(--color-border, #d7d7d7));
+  bottom: -0.85rem;
+  content: "";
+  left: 50%;
+  position: absolute;
+  top: 2.35rem;
+  transform: translateX(-50%);
+  width: 1px;
+}
+
+.timelineDot {
+  background: var(--primary-strong);
+  border: 3px solid var(--surface);
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px var(--primary);
+  height: 0.85rem;
+  width: 0.85rem;
+  z-index: 1;
+}
+
+.activityCard :global(.itinerary-activity-content) {
+  border: 1px solid var(--border, var(--color-border, #d7d7d7));
+  border-radius: 0.9rem;
+  min-width: 0;
+  padding: 0.9rem 0.95rem;
+}
+
+.activityCard :global(.itinerary-activity-copy) {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.activityCard :global(.itinerary-activity-copy) > strong,
+.activityTitleRow strong {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.activityCard :global(.itinerary-activity-copy) small {
+  color: var(--foreground-muted);
+}
+
+.activityTitleRow {
+  align-items: start;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.activityTitleRow > div:first-child {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.activityMenu {
+  flex: 0 0 auto;
+  min-width: 2.5rem;
+}
+
+.activityMenu > summary {
+  align-items: center;
+  border: 1px solid var(--border, var(--color-border, #d7d7d7));
+  border-radius: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  font-size: 1.25rem;
+  font-weight: 900;
+  height: 2.5rem;
+  justify-content: center;
+  list-style: none;
+  width: 2.5rem;
+}
+
+.activityMenu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.activityMenu[open] {
+  grid-column: 1 / -1;
+  min-width: 100%;
+}
+
+.activityMenuPanel {
+  background: var(--surface-soft);
+  border: 1px solid var(--border, var(--color-border, #d7d7d7));
+  border-radius: 0.8rem;
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.6rem;
+  padding: 0.75rem;
+}
+
+.activityMenuPanel > a,
+.menuAction {
+  background: var(--surface);
+  border: 1px solid var(--border, var(--color-border, #d7d7d7));
+  border-radius: 0.65rem;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 750;
+  justify-content: center;
+  padding: 0.5rem 0.65rem;
+  text-decoration: none;
+}
+
+.activityMenuPanel :global(.itinerary-move-disclosure),
+.activityMenuPanel :global(.itinerary-edit-disclosure) {
+  border: 0;
+  padding: 0;
+}
+
+.activityMenuPanel :global(.itinerary-move-disclosure > summary),
+.activityMenuPanel :global(.itinerary-edit-disclosure > summary) {
+  background: var(--surface);
+  border: 1px solid var(--border, var(--color-border, #d7d7d7));
+  border-radius: 0.65rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 750;
+  list-style-position: inside;
+  padding: 0.5rem 0.65rem;
+  text-align: center;
+}
+
+.activityMenuPanel :global(.itinerary-move-form),
+.activityMenuPanel :global(.itinerary-edit-form) {
+  background: var(--surface);
+  border-radius: 0.75rem;
+  margin-top: 0.55rem;
+  padding: 0.75rem;
+}
+
+.activityMenuPanel :global(.itinerary-danger-action) {
+  width: 100%;
+}
+
+.reorderActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.placeContextLink,
+.manualActivityLabel {
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.placeContextLink {
+  color: var(--primary-strong);
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.manualActivityLabel {
+  color: var(--foreground-muted);
+}
+
+.timelineLeg,
+.timelineLegUnavailable {
+  align-items: center;
+  color: var(--foreground-muted);
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+  min-height: 3rem;
+}
+
+.timelineLeg > span,
+.timelineLegUnavailable > span {
+  justify-self: center;
+}
+
+.timelineLeg > div {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.timelineLeg small,
+.timelineLegUnavailable small {
+  color: var(--foreground-muted);
+}
+
+.timelineLeg strong {
+  color: var(--foreground);
+  font-size: 0.82rem;
+}
+
+.timelineLeg a {
+  color: var(--primary-strong);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.timelineLegUnavailable {
+  grid-template-columns: 4.5rem minmax(0, 1fr);
 }
 
 .emptyGuide {
   display: grid;
   gap: 0.8rem;
-  padding: 1rem;
-  border: 1px solid var(--color-border, #d7d7d7);
-  border-radius: 0.9rem;
+  padding: 0.25rem;
 }
 
 .emptyGuide h3,
@@ -113,64 +398,131 @@
   margin: 0;
 }
 
-.emptyActions,
-.secondaryActions {
+.emptyActions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.65rem;
 }
 
-.activityActions {
-  transition: border-color 120ms ease;
+.mapColumn {
+  min-width: 0;
 }
 
 .secondaryPlanning {
+  border-top: 1px solid var(--border, var(--color-border, #d7d7d7));
   display: grid;
   gap: 0.75rem;
-  margin-top: 1.5rem;
+  padding-top: 1rem;
+}
+
+.secondaryHeading {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.secondaryHeading h2,
+.secondaryHeading p {
+  margin: 0;
 }
 
 .secondaryDisclosure {
-  border: 1px solid var(--color-border, #d7d7d7);
+  border: 1px solid var(--border, var(--color-border, #d7d7d7));
   border-radius: 0.9rem;
-  padding: 0.9rem 1rem;
+  padding: 0.8rem 0.9rem;
 }
 
 .secondaryDisclosure > summary {
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 750;
 }
 
 .secondaryDisclosure[open] > summary {
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.visuallyHidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+@media (min-width: 62rem) {
+  .dayWorkspace {
+    align-items: start;
+    grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 0.85fr);
+  }
+
+  .mapColumn {
+    position: sticky;
+    top: 1rem;
+  }
 }
 
 @media (max-width: 760px) {
-  .journeyNav {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .focusHeader {
+  .pageTopbar,
+  .focusHeader,
+  .secondaryHeading {
+    align-items: stretch;
     flex-direction: column;
   }
 
-  .activityActions {
-    border-top: 1px solid color-mix(in srgb, var(--color-border, #d7d7d7) 72%, transparent);
-    margin-top: 0.2rem;
-    padding-top: 0.6rem;
+  .topbarActions {
+    justify-content: flex-start;
   }
 
-  .activityActions :global(.itinerary-danger-action),
-  .activityActions :global(.itinerary-order-action),
-  .activityActions :global(.itinerary-edit-disclosure summary),
-  .activityActions :global(.itinerary-move-disclosure summary) {
-    font-size: 0.76rem;
-    min-height: 2.25rem;
-    padding: 0.45rem 0.65rem;
+  .itineraryHeader {
+    margin-top: 0.25rem;
   }
 
-  .emptyActions,
-  .secondaryActions {
+  .focusHeader {
+    gap: 0.75rem;
+  }
+
+  .quickAddLink {
+    align-self: flex-start;
+  }
+
+  .timelineCard {
+    padding: 0.8rem;
+  }
+
+  .activityCard {
+    gap: 0.55rem;
+    grid-template-columns: 3.45rem minmax(0, 1fr);
+  }
+
+  .activityCard :global(.itinerary-activity-content) {
+    padding: 0.8rem;
+  }
+
+  .timelineLeg,
+  .timelineLegUnavailable {
+    grid-template-columns: 3.45rem minmax(0, 1fr);
+    padding: 0.25rem 0;
+  }
+
+  .timelineLeg a {
+    grid-column: 2;
+    justify-self: start;
+    padding-bottom: 0.25rem;
+  }
+
+  .activityTitleRow {
+    gap: 0.45rem;
+  }
+
+  .activityMenuPanel {
+    margin-left: -0.25rem;
+  }
+
+  .emptyActions {
+    align-items: stretch;
     flex-direction: column;
   }
 }

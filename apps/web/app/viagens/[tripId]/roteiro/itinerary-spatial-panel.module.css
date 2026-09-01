@@ -7,15 +7,62 @@
   width: 100%;
 }
 
+.compactPanel {
+  gap: 0.85rem;
+  margin: 0;
+  max-width: none;
+  padding: 0;
+}
+
 .header,
 .textualContext,
-.legSection {
+.legSection,
+.compactHeader,
+.compactDetails {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-medium);
   display: grid;
   gap: 0.75rem;
   padding: 1.25rem;
+}
+
+.compactHeader {
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 0.9rem 1rem;
+}
+
+.compactHeader h2,
+.compactHeader p {
+  margin: 0;
+}
+
+.totalDistance {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--foreground-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 0.4rem 0.55rem;
+  white-space: nowrap;
+}
+
+.compactDetails {
+  padding: 0.8rem 0.9rem;
+}
+
+.compactDetails > summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.compactDetailsBody {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
 }
 
 .header h2,
@@ -194,7 +241,8 @@
   background: var(--surface-soft);
 }
 
-.legActions a:focus-visible {
+.legActions a:focus-visible,
+.compactDetails > summary:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
 }
@@ -221,7 +269,7 @@
 }
 
 @media (min-width: 48rem) {
-  .panel {
+  .panel:not(.compactPanel) {
     padding: 0 1.5rem;
   }
 
@@ -249,5 +297,16 @@
   .legActions {
     align-items: center;
     flex-direction: row;
+  }
+}
+
+@media (max-width: 760px) {
+  .compactHeader {
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .totalDistance {
+    justify-self: start;
   }
 }

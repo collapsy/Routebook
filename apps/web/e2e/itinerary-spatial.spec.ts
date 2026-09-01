@@ -69,9 +69,9 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   await expect(
     map.getByRole("link", { name: `Atividade 2: ${secondPlaceName}. Abrir detalhes.` }),
   ).toBeVisible();
-  await expect(page.getByText("Hospedagem sem coordenadas disponíveis.")).toBeVisible();
+  await page.getByText("Ver detalhes dos deslocamentos", { exact: true }).click();
   await expect(
-    page.getByText(/Distâncias geodésicas em linha reta. Não representam trajeto por ruas/),
+    page.getByText(/Distâncias em linha reta. Não representam trajeto por ruas/),
   ).toBeVisible();
   await expect(
     page.getByText(/Distância indisponível porque existe uma lacuna geográfica/),

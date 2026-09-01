@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { GooglePlacePhotoAdapter, resolveConfiguredGooglePlacePhotoProvider } from "./google-place-photo";
+import {
+  GooglePlacePhotoAdapter,
+  resolveConfiguredGooglePlacePhotoProvider,
+} from "./google-place-photo";
 
 const input = {
   placeId: "ChIJPraiaDoAmor01",
@@ -10,9 +13,7 @@ const input = {
   longitude: -35.0465,
 };
 
-function detailsResponse(
-  overrides: Record<string, unknown> = {},
-): Response {
+function detailsResponse(overrides: Record<string, unknown> = {}): Response {
   return Response.json({
     id: input.placeId,
     displayName: { text: "Praia do Amor" },
@@ -69,9 +70,7 @@ describe("GooglePlacePhotoAdapter", () => {
 
     const preview = await adapter.findPreview(input);
 
-    expect(request?.input).toBe(
-      "https://places.googleapis.com/v1/places/ChIJPraiaDoAmor01",
-    );
+    expect(request?.input).toBe("https://places.googleapis.com/v1/places/ChIJPraiaDoAmor01");
     expect((request?.init?.headers as Record<string, string>)["X-Goog-FieldMask"]).toBe(
       "id,displayName,location,photos",
     );
@@ -133,15 +132,11 @@ describe("GooglePlacePhotoAdapter", () => {
 
     expect(media?.contentType).toBe("image/jpeg");
     expect(new Uint8Array(media!.bytes)).toEqual(new Uint8Array([1, 2, 3]));
-    expect(String(fetcher.mock.calls[1]?.[0])).toContain(
-      "/places/ChIJPraiaDoAmor01",
-    );
-    expect((fetcher.mock.calls[1]?.[1]?.headers as Record<string, string>)["X-Goog-FieldMask"]).toBe(
-      "photos",
-    );
-    expect(String(fetcher.mock.calls[2]?.[0])).toContain(
-      "photo-resource-refreshed/media",
-    );
+    expect(String(fetcher.mock.calls[1]?.[0])).toContain("/places/ChIJPraiaDoAmor01");
+    expect(
+      (fetcher.mock.calls[1]?.[1]?.headers as Record<string, string>)["X-Goog-FieldMask"],
+    ).toBe("photos");
+    expect(String(fetcher.mock.calls[2]?.[0])).toContain("photo-resource-refreshed/media");
   });
 
   it("rejeita token adulterado ou expirado sem chamada de rede", async () => {

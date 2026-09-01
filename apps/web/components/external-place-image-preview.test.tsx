@@ -108,7 +108,6 @@ describe("ExternalPlaceImagePreview", () => {
     expect(String(fetcher.mock.calls[0]?.[0])).toContain("/api/place-image-preview?");
   });
 
-
   it("renderiza Google Places Photo por URL interna e attribution sem expor Provider URL", async () => {
     const googlePreview = {
       provider: "google-places",
@@ -143,9 +142,7 @@ describe("ExternalPlaceImagePreview", () => {
     expect(
       screen.getByText(/Google Places/).closest("[data-external-place-image-provider]"),
     ).toHaveAttribute("data-external-place-image-provider", "google-places");
-    expect(String(fetcher.mock.calls[0]?.[0])).toContain(
-      "googlePlaceId=ChIJPraiaDoAmor01",
-    );
+    expect(String(fetcher.mock.calls[0]?.[0])).toContain("googlePlaceId=ChIJPraiaDoAmor01");
     expect(String(fetcher.mock.calls[0]?.[0])).toContain("category=beach");
   });
 

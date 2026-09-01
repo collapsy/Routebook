@@ -255,7 +255,7 @@ function CanonicalDiscoveryCard({
 
       <div className={styles.quickFacts} aria-label="Resumo do lugar">
         <span>
-          {formatDistance(distanceMeters)} {distanceReferenceLabel}
+          {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
         </span>
         <span>
           {place.priceRange ? priceRangeLabels[place.priceRange] : "Preço indisponível"}
@@ -397,7 +397,7 @@ function ExternalDiscoveryCard({
 
       <div className={styles.quickFacts} aria-label="Resumo do lugar">
         <span>
-          {formatDistance(distanceMeters)} {distanceReferenceLabel}
+          {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
         </span>
         <span>{providerCategoryLabel(candidate.providerCategory)}</span>
       </div>

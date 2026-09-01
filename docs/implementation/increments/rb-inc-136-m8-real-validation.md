@@ -5,9 +5,9 @@ description: Define e executa o protocolo de validação real do MVP do RouteBoo
 document_type: implementation-increment
 owner: Product and Quality Engineering
 status: Draft
-version: "0.1.0"
+version: "0.2.0"
 created: "2026-08-14"
-last_updated: "2026-08-20"
+last_updated: "2026-09-01"
 authors: [RouteBook Team]
 tags: [implementation, mvp-validation, m8, pipa, usability, product-validation, quality]
 related_documents: [RB-CORE-0004, RB-PRD-002, RB-DEL-001, RB-QA-001, RB-OBS-001, RB-PRIV-001, RB-INC-129, RB-INC-132, RB-INC-134, RB-INC-135]
@@ -25,11 +25,11 @@ ai_context:
 | Campo | Valor |
 | --- | --- |
 | ID | RB-INC-136 |
-| Estado | In Progress — Fase A em reconciliação; Fase B aguardando uso real |
+| Estado | Closeout M8 — Fase A concluída; Fase B revisada com evidência real; decisão `partially_validated` proposta |
 | Responsável | Product and Quality Engineering |
 | Issue | #319 |
-| Branch | `codex/rb-inc-136-m8-phase-a-reconciliation` |
-| Baseline da reconciliação | `bef09b68ce631073fb9d4b5a203a1ca462f1befd` |
+| Branch | `codex/rb-inc-136-m8-closeout` |
+| Baseline do closeout | `main@22a84867c4fbd1596be4e905eccc560d43e42c99` |
 | Data de criação | 2026-08-14 |
 | Janela de uso real | 2026-08-22 a 2026-08-29 |
 
@@ -258,22 +258,22 @@ Não registrar credenciais, tokens, e-mail, telefone, documento, localização e
 
 ## 14. Matriz de resultado H1–H10
 
-Esta tabela permanece `not_measured` até haver evidência humana real.
+A Fase B foi encerrada retrospectivamente com evidências contemporâneas registradas nas issues criadas durante o piloto e com feedback pós-viagem explícito. Ausência de evidência específica continua `not_measured`.
 
 | Hipótese | Status | Evidências primárias | Observação |
 | --- | --- | --- | --- |
-| H1 | `not_measured` | — | aguardando Fase B |
-| H2 | `not_measured` | — | aguardando Fase B |
-| H3 | `not_measured` | — | aguardando Fase B |
-| H4 | `not_measured` | — | aguardando Fase B |
-| H5 | `not_measured` | — | aguardando Fase B |
-| H6 | `not_measured` | — | aguardando Fase B |
-| H7 | `not_measured` | — | aguardando Fase B |
-| H8 | `not_measured` | — | aguardando Fase B |
-| H9 | `not_measured` | — | aguardando Fase B |
-| H10 | `not_measured` | — | aguardando Fase B |
+| H1 | `partially_supported` | RB-M8-20260901-01 | o usuário relatou que o RouteBook foi útil no cenário real; não foi medido quanto setup mínimo foi necessário para chegar ao valor |
+| H2 | `not_measured` | — | não há evidência primária suficiente de que o mapa, isoladamente, alterou decisões |
+| H3 | `not_measured` | — | proximidade/distância foi uma necessidade recorrente do produto, mas não há relato específico de uma escolha alterada por distância |
+| H4 | `not_measured` | — | uso e compreensão de Salvos não foram registrados com evidência suficiente |
+| H5 | `not_measured` | #386 | houve fricção real na superfície de Roteiro, mas não há evidência suficiente de que a edição em si agregou valor |
+| H6 | `not_measured` | #390 | o piloto mostrou lacuna de qualidade/ranking na Discovery; isso não prova personalização contextual |
+| H7 | `not_measured` | — | leitura/confiança nas justificativas não foi registrada |
+| H8 | `not_measured` | #399 | navegação e carga cognitiva foram problemáticas, mas não há evidência suficiente sobre a necessidade conjunta de lista + mapa |
+| H9 | `not_measured` | — | não há evidência humana suficiente sobre aceite/edição de Itinerary Proposal durante o piloto |
+| H10 | `supported` | RB-M8-20260823-01, RB-M8-20260827-01, RB-M8-20260901-01 | houve utilidade real durante a viagem sem capacidade de reserva/transação dentro do RouteBook |
 
-Status permitidos depois da observação: `supported`, `partially_supported`, `contradicted`, `not_measured`.
+Status permitidos: `supported`, `partially_supported`, `contradicted`, `not_measured`.
 
 ## 15. Critérios de decisão M8
 
@@ -369,22 +369,22 @@ Problemas devem ser registrados como evidência, não corrigidos silenciosamente
 - [x] privacidade e sanitização estão definidas;
 - [x] RB-CTX-136 criado e registrado;
 - [x] Registry sincronizado;
-- [ ] Documentation Validation e Engineering Validation verdes no mesmo SHA;
-- [ ] PR de preparação integrada em `main`;
-- [ ] Production Release pós-merge não executa migrations pendentes;
+- [x] Documentation Validation e Engineering Validation verdes no mesmo SHA;
+- [x] PR de preparação/reconciliação integrada em `main` (#374, merge `7f68a5693ba405e599c00c497c5458b0b92f8640`);
+- [x] preparação técnica/release concluída sem pendência atribuível à Fase A;
 
 ## 22. Critérios de aceite da Fase B
 
-- [ ] existe ao menos uma Session real com ações realmente realizadas;
-- [ ] decisões apoiadas e/ou limitações reais estão registradas;
-- [ ] fricções relevantes geraram issues quando aplicável;
-- [ ] uso fora do RouteBook está registrado quando ocorrer;
-- [ ] feedback qualitativo está registrado sem indução;
-- [ ] hipóteses H1–H10 foram avaliadas somente onde há evidência;
-- [ ] sinais `not_measured` permanecem explícitos quando não houve cobertura;
-- [ ] blockers/high findings possuem disposition;
-- [ ] decisão M8 está registrada com referências às evidências;
-- [ ] documentação e backlog pós-validação estão sincronizados.
+- [x] existem Sessions reais reconstruídas a partir de registros contemporâneos do piloto;
+- [x] limitações reais estão registradas e vinculadas às issues derivadas;
+- [x] fricções relevantes geraram issues próprias;
+- [x] ausência de evidência sobre tarefas feitas fora do RouteBook permanece explícita, sem fabricação;
+- [x] feedback qualitativo pós-viagem está registrado sem indução;
+- [x] hipóteses H1–H10 foram avaliadas somente onde há evidência;
+- [x] sinais `not_measured` permanecem explícitos quando não houve cobertura;
+- [x] achados relevantes possuem disposition no backlog;
+- [x] decisão M8 proposta está registrada com referências às evidências;
+- [x] documentação e backlog pós-validação estão sincronizados neste closeout.
 
 ## 23. Cenários de teste do protocolo
 
@@ -436,20 +436,133 @@ A Fase B registra evidência; evidência válida não deve ser apagada para melh
 
 ## 26. Definition of Ready da Fase B
 
-- [ ] Fase A integrada em `main`;
-- [ ] Production saudável;
-- [ ] catálogo de Pipa disponível;
-- [ ] usuário possui acesso legítimo ao RouteBook;
-- [ ] cenário real de viagem iniciado ou sessão real pré-viagem disponível;
-- [ ] nenhum bloqueador crítico conhecido impede a jornada a ser observada.
+- [x] Fase A integrada em `main`;
+- [x] Production estava saudável nos checkpoints pré-piloto;
+- [x] catálogo de Pipa estava disponível;
+- [x] usuário possuía acesso legítimo ao RouteBook;
+- [x] cenário real de viagem ocorreu entre 22 e 29/08/2026;
+- [x] nenhum S0-blocker foi registrado como impeditivo integral do piloto.
 
 ## 27. Definition of Done
 
 O RB-INC-136 somente ficará `Done` quando:
 
-- [ ] Fase A concluída;
-- [ ] Fase B contém evidência humana real;
-- [ ] achados relevantes possuem disposition;
-- [ ] decisão M8 documentada;
-- [ ] documentação sincronizada;
-- [ ] issue #319 encerrada somente após revisão final.
+- [x] Fase A concluída;
+- [x] Fase B contém evidência humana real;
+- [x] achados relevantes possuem disposition;
+- [x] decisão M8 documentada como `partially_validated`;
+- [x] documentação sincronizada no branch de closeout;
+- [ ] issue #319 encerrada somente após revisão final e integração desta PR.
+
+
+## 28. Evidências reais reconstruídas da Fase B
+
+As Sessions abaixo são registros retrospectivos e sanitizados. Elas não inventam duração, cliques, decisões ou comportamentos não registrados: cada uma consolida somente feedback contemporâneo já preservado no GitHub ou feedback explícito pós-viagem.
+
+### Session RB-M8-20260823-01
+
+- contexto: `in-trip`;
+- evidence source: `reported`;
+- fonte primária: issue #382;
+- fato registrado: durante uso humano real em Pipa, a cobertura de fotografias reais foi insuficiente, especialmente para restaurantes, bares e estabelecimentos menores;
+- impacto: a experiência visual do RouteBook como guia ficou abaixo do nível desejado;
+- disposition: #382 — Google Places Photos; #397/#398 — fallback visual ilustrativo sem fingir fotografia real;
+- hipóteses H1–H10: nenhuma recebe suporte direto apenas por esta evidência.
+
+### Session RB-M8-20260827-01
+
+- contexto: `in-trip`;
+- evidence source: `reported`;
+- fontes primárias: issues #390 e #395;
+- fatos registrados:
+  - a Discovery listava Places, mas não respondia claramente quais eram os melhores;
+  - para vida noturna, ranking estático de Place não respondia “o que está rolando hoje?”;
+  - experiências naturais dependentes de horário/direção, como pôr do sol e nascer da lua, também surgiram como necessidade temporal distinta de eventos comerciais;
+- disposition:
+  - #390 e #401/#402 — qualidade/ranking contextual;
+  - #395/#396 — experiências do dia, rolês e fenômenos naturais;
+- hipóteses H1–H10: evidência demonstra lacunas reais de decisão, mas não é suficiente para marcar H6/H7 como suportadas ou contraditas.
+
+### Session RB-M8-20260828-01
+
+- contexto: `in-trip/post-use`;
+- evidence source: `reported`;
+- fontes primárias: issues #397, #399 e #401;
+- fatos registrados:
+  - cards sem fotografia real continuavam visualmente secos;
+  - feedback explícito: “Parece que tem muita coisa na mesma página a navegação está um pouco confusa”;
+  - a experiência precisava concluir a parte visual do ranking;
+- disposition:
+  - #397/#398 — fallback visual por categoria;
+  - #399/#400 — navegação mobile e separação Hoje / Guia por dia;
+  - #401/#402 — experiência completa de ranking;
+- severidade: tratada como fricção de produto relevante, sem registro de S0-blocker.
+
+### Session RB-M8-20260901-01
+
+- contexto: `post-trip`;
+- evidence source: `reported`;
+- fonte primária: feedback pós-viagem do owner em 01/09/2026;
+- fatos registrados:
+  - a viagem de Pipa ocorreu;
+  - o RouteBook foi útil;
+  - alterações foram feitas durante o período de teste/uso;
+- limite: não foi atribuído retrospectivamente valor específico a mapa, distância, Salvos, Recommendations, Planning Conflicts ou Itinerary Proposals sem evidência mais precisa;
+- hipóteses:
+  - H1: `partially_supported` pelo valor global relatado, sem medição do esforço mínimo de configuração;
+  - H10: `supported`, pois o produto foi útil no cenário real sem oferecer reservas/transações como capacidade central.
+
+## 29. Backlog derivado do piloto
+
+| Achado real | Disposition |
+| --- | --- |
+| cobertura visual insuficiente | #382; mitigação intermediária #397/#398 |
+| Roteiro com carga cognitiva/fricção | #386/#387 |
+| falta de ranking que responda “quais são os melhores?” | #390 e #401/#402 |
+| ausência de agenda temporal “o que tem hoje?” | #395/#396 |
+| excesso de conteúdo e navegação mobile confusa | #399/#400 |
+| necessidade de ranking visível e explicável | #401/#402 |
+
+Não é aberto novo item duplicado neste closeout quando já existe issue específica para o achado.
+
+## 30. Síntese de valor, usabilidade e confiabilidade
+
+### Valor
+
+Há evidência humana suficiente de valor no cenário que originou o produto: após a viagem, o usuário classificou o RouteBook como útil. O uso real também gerou feedback específico e backlog durante vários dias do piloto, demonstrando que o produto foi utilizado como instrumento de decisão/guia e não somente executado tecnicamente.
+
+### Usabilidade
+
+O piloto não valida a experiência integral. Foram encontrados problemas relevantes de carga cognitiva no Roteiro e na navegação, além de necessidade de tornar o conteúdo do Dia mais direto no mobile.
+
+### Qualidade de dados
+
+A maior lacuna observada foi transformar cobertura em informação útil para decisão:
+
+- fotografia real insuficiente;
+- ausência inicial de sinais claros de qualidade/ranking;
+- necessidade de temporalidade para eventos e experiências do Dia.
+
+### Confiabilidade
+
+Os checkpoints técnicos de Production/Preview registraram CI, health e deployments saudáveis ao longo da preparação. Não há evidência de um S0-blocker que tenha invalidado integralmente o piloto. Isso não substitui as lacunas de evidência humana nas capabilities não exercitadas/registradas.
+
+## 31. Decisão M8
+
+**Decisão: `partially_validated`.**
+
+Justificativa:
+
+1. existe feedback humano explícito pós-viagem de que o RouteBook foi útil;
+2. uso real gerou achados concretos durante o piloto, registrados contemporaneamente em #382, #390, #395, #397, #399 e #401;
+3. as fricções descobertas originaram incrementos específicos em vez de serem escondidas;
+4. várias hipóteses centrais H1–H10 continuam sem evidência específica suficiente e permanecem `not_measured`;
+5. ranking, qualidade visual, temporalidade e navegação exigiram evolução durante/depois do piloto.
+
+Portanto, o M8 demonstra valor real, mas não sustenta a afirmação de que todo o MVP foi validado integralmente. O resultado adequado é validação parcial com backlog pós-MVP explícito.
+
+## 32. Próxima fronteira após M8
+
+O closeout não redefine o roadmap nem cria novo conceito de domínio. Após consolidar as PRs derivadas do piloto, o próximo ciclo deve validar generalização: o RouteBook precisa deixar de depender de preparação específica de Pipa e demonstrar que consegue inicializar uma experiência útil para outro Destino sem catálogo/seed manual dedicado.
+
+Essa direção deve ser aberta em incremento próprio após o fechamento do M8 e a consolidação da pilha de Preview.

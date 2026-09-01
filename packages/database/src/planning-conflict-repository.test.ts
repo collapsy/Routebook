@@ -18,6 +18,14 @@ describe("DrizzlePlanningConflictRepository", () => {
   it("preserva estado open e severidade risk no round trip", async () => {
     const trip = createTrip({
       name: "VocabulÃ¡rio canÃ´nico de Planning Conflict",
+      destination: {
+        name: "Pipa, Tibau do Sul - RN",
+        type: "district",
+        countryCode: "BR",
+        latitude: -6.2302,
+        longitude: -35.0503,
+        timeZone: "America/Fortaleza",
+      },
       startDate: "2026-08-22",
       endDate: "2026-08-24",
       ownerName: "RouteBook QA",

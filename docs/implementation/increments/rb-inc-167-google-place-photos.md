@@ -34,6 +34,8 @@ Em 01/09/2026 houve autorização humana explícita para experimentar Google Pla
 
 A documentação oficial atual exige que `photo name` não seja cacheado e pode expirar. `authorAttributions`, quando presente, deve ser exibido. O SKU Place Details Photos possui free usage cap de 1.000 solicitações/mês e preço inicial global de US$ 7/1.000 após o cap.
 
+No aceite humano de Preview em 01/09/2026, o catálogo foi percebido como visualmente poluído após acumular fotografia, ranking, distância, Provenance e ações no mesmo nível. O refinamento de aceite mantém os dados e contratos, mas aplica progressive disclosure: sinais úteis permanecem visíveis e evidências técnicas/proveniência passam para detalhes expansíveis.
+
 ## 2. Objetivo
 
 Aumentar materialmente a cobertura visual dos cards sem criar fotografia falsa, sem persistir referência temporária Google e sem duplicar a resolução de identidade já feita pelo ranking.
@@ -119,8 +121,13 @@ apps/web/app/api/place-image-preview/google/route.ts
 apps/web/app/api/place-image-preview/google/route.test.ts
 apps/web/components/external-place-image-preview.tsx
 apps/web/components/external-place-image-preview.test.tsx
+apps/web/components/place-ranking-meta.tsx
+apps/web/components/place-ranking-meta.module.css
 apps/web/app/viagens/[tripId]/lugares/page.tsx
+apps/web/app/viagens/[tripId]/lugares/place-discovery.module.css
 apps/web/e2e/external-place-images.spec.ts
+apps/web/e2e/place-actions.spec.ts
+apps/web/e2e/place-discovery-filters.spec.ts
 turbo.json
 docs/implementation/increments/rb-inc-167-google-place-photos.md
 docs/implementation/context-packs/rb-inc-167-google-place-photos.md
@@ -155,6 +162,8 @@ docs/registry.md
 - [ ] nenhuma chamada Google ocorre sem configuração explícita;
 - [ ] browser recebe somente URL RouteBook para mídia;
 - [ ] custo é limitado por lazy load + uma foto por card;
+- [ ] catálogo prioriza foto, identidade, distância/preço, rating/ranking e ações principais sem expor Provenance técnica como ruído de primeiro nível;
+- [ ] detalhes técnicos continuam acessíveis por progressive disclosure sem esconder attribution obrigatória da fotografia;
 - [ ] Documentation + Engineering/Playwright verdes no mesmo SHA;
 - [ ] Vercel Preview READY no mesmo SHA;
 - [ ] cobertura real no Preview é medida antes de qualquer Production.

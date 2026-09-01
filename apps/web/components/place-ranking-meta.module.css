@@ -1,0 +1,56 @@
+.meta {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.position,
+.topBadge,
+.categoryRank {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+.position {
+  background: var(--surface-soft);
+  color: var(--foreground-muted);
+}
+
+.topBadge {
+  background: color-mix(in oklab, var(--primary) 16%, var(--surface));
+  color: var(--primary-strong);
+}
+
+.categoryRank {
+  background: color-mix(in oklab, var(--border) 30%, var(--surface));
+  color: var(--foreground-muted);
+}
+
+.evidence {
+  display: grid;
+  gap: 0.2rem;
+  border-left: 3px solid color-mix(in oklab, var(--primary) 60%, var(--border));
+  padding-left: 0.7rem;
+  font-size: 0.78rem;
+  color: var(--foreground-muted);
+}
+
+.evidence strong {
+  color: var(--foreground);
+  font-size: 0.86rem;
+}
+
+.reason {
+  color: var(--primary-strong);
+  font-weight: 750;
+}

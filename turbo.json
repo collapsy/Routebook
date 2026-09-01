@@ -1,7 +1,13 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
-  "globalEnv": ["DATABASE_URL"],
+  "globalEnv": [
+    "BETTER_AUTH_SECRET",
+    "DATABASE_URL",
+    "FOURSQUARE_PLACES_API_KEY",
+    "GOOGLE_PLACES_API_KEY",
+    "ROUTEBOOK_PLACE_QUALITY_PROVIDER"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

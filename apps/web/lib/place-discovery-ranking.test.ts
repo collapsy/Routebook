@@ -2,7 +2,12 @@ import { createPlace, type ExternalPlaceCandidate } from "@routebook/place-catal
 import { describe, expect, it } from "vitest";
 
 import type { PlaceDiscoveryItem } from "./place-discovery-feed";
-import { parsePlaceDiscoveryOrder, rankPlaceDiscoveryItems } from "./place-discovery-ranking";
+import {
+  buildPlaceDiscoveryQualityTargets,
+  buildPlaceDiscoveryTopLists,
+  parsePlaceDiscoveryOrder,
+  rankPlaceDiscoveryItems,
+} from "./place-discovery-ranking";
 
 function published(id: string, name: string, distanceMeters: number): PlaceDiscoveryItem {
   const place = createPlace({
@@ -144,5 +149,49 @@ describe("rankPlaceDiscoveryItems", () => {
     expect(parsePlaceDiscoveryOrder("recommended")).toBe("recommended");
     expect(parsePlaceDiscoveryOrder("qualquer-coisa")).toBe("distance");
     expect(parsePlaceDiscoveryOrder()).toBe("distance");
+  });
+});
+
+describe("buildPlaceDiscoveryQualityTargets", () => {
+  it("projeta somente identidades com categoria e preserva id da Discovery", () => {
+    const item = published("alvo", "Restaurante Alvo", 500);
+    expect(buildPlaceDiscoveryQualityTargets([item])).toEqual([
+      expect.objectContaining({
+        id: item.id,
+        name: "Restaurante Alvo",
+        category: "gastronomy",
+      }),
+    ]);
+  });
+
+  it("prioriza catálogo canônico antes de candidatos externos nas buscas nominais limitadas", () => {
+    const candidate = external("externo", "Restaurante Externo", 100);
+    const canonical = published("canonico", "Restaurante Canônico", 1_000);
+
+    expect(
+      buildPlaceDiscoveryQualityTargets([candidate, canonical]).map((item) => item.id),
+    ).toEqual([canonical.id, candidate.id]);
+  });
+});
+
+describe("buildPlaceDiscoveryTopLists", () => {
+  it("gera Top por categoria somente com evidência real", () => {
+    const first = published("primeiro", "Primeiro", 500);
+    const second = published("segundo", "Segundo", 300);
+    const withoutQuality = published("sem-score", "Sem score", 100);
+    const ranking = rankPlaceDiscoveryItems({
+      items: [withoutQuality, second, first],
+      order: "recommended",
+      qualityMatches: [
+        qualityMatch(first.id, { rating: { value: 4.9, scaleMax: 5, reviewCount: 2000 } }),
+        qualityMatch(second.id, { rating: { value: 4.6, scaleMax: 5, reviewCount: 1000 } }),
+      ],
+    });
+
+    const top = buildPlaceDiscoveryTopLists(ranking.items);
+    expect(top).toHaveLength(1);
+    expect(top[0]?.category).toBe("gastronomy");
+    expect(top[0]?.items.map((entry) => entry.item.id)).toEqual([first.id, second.id]);
+    expect(top[0]?.items.some((entry) => entry.item.id === withoutQuality.id)).toBe(false);
   });
 });

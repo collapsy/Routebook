@@ -1,7 +1,10 @@
 import {
+  PLACE_CATEGORIES,
   calculatePlaceQualityScore,
+  type PlaceCategory,
   type PlaceQualityScore,
   type PlaceQualitySignalMatch,
+  type PlaceQualityTarget,
 } from "@routebook/place-catalog";
 
 import type { PlaceDiscoveryItem } from "./place-discovery-feed";
@@ -24,12 +27,57 @@ export type PlaceDiscoveryRanking = Readonly<{
   availableOrders: readonly PlaceDiscoveryOrder[];
 }>;
 
+export type PlaceDiscoveryTopList = Readonly<{
+  category: PlaceCategory;
+  items: readonly RankedPlaceDiscoveryItem[];
+}>;
+
 function itemName(item: PlaceDiscoveryItem): string {
   return item.kind === "external" ? item.candidate.name : item.place.name;
 }
 
 function itemCategory(item: PlaceDiscoveryItem) {
   return item.kind === "external" ? item.candidate.category : item.place.category;
+}
+
+function itemCoordinate(item: PlaceDiscoveryItem) {
+  if (item.kind === "external") {
+    return { latitude: item.candidate.latitude, longitude: item.candidate.longitude };
+  }
+  if (item.kind === "enriched") {
+    return { latitude: item.candidate.latitude, longitude: item.candidate.longitude };
+  }
+  return { latitude: item.place.latitude, longitude: item.place.longitude };
+}
+
+export function buildPlaceDiscoveryQualityTargets(
+  items: readonly PlaceDiscoveryItem[],
+): PlaceQualityTarget[] {
+  const providerPriority = [...items].sort(
+    (left, right) => Number(left.kind === "external") - Number(right.kind === "external"),
+  );
+
+  return providerPriority.flatMap((item) => {
+    const category = itemCategory(item);
+    if (!category) return [];
+    const coordinate = itemCoordinate(item);
+    return [
+      {
+        id: item.id,
+        name: itemName(item),
+        category,
+        latitude: coordinate.latitude,
+        longitude: coordinate.longitude,
+        ...(item.kind === "external"
+          ? item.candidate.addressLabel
+            ? { addressLabel: item.candidate.addressLabel }
+            : {}
+          : item.place.addressLabel
+            ? { addressLabel: item.place.addressLabel }
+            : {}),
+      },
+    ];
+  });
 }
 
 function compareFallback(left: RankedPlaceDiscoveryItem, right: RankedPlaceDiscoveryItem): number {
@@ -131,4 +179,25 @@ export function rankPlaceDiscoveryItems(
     hasQualityCoverage,
     availableOrders,
   };
+}
+
+export function buildPlaceDiscoveryTopLists(
+  items: readonly RankedPlaceDiscoveryItem[],
+  limit = 5,
+): PlaceDiscoveryTopList[] {
+  if (!Number.isInteger(limit) || limit <= 0) {
+    throw new RangeError("O limite do Top de Places deve ser um inteiro positivo.");
+  }
+
+  return PLACE_CATEGORIES.flatMap((category) => {
+    const categoryItems = items
+      .filter((entry) => itemCategory(entry.item) === category && entry.quality !== undefined)
+      .sort((left, right) => {
+        const byScore = compareOptionalDescending(left.quality?.score, right.quality?.score);
+        return byScore || compareFallback(left, right);
+      })
+      .slice(0, limit);
+
+    return categoryItems.length > 0 ? [{ category, items: categoryItems }] : [];
+  });
 }

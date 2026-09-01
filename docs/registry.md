@@ -395,6 +395,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-170 | Context Pack do RB-INC-170 — Fallback visual ilustrativo por categoria | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-170-category-visual-fallback.md](./implementation/context-packs/rb-inc-170-category-visual-fallback.md) |
 | RB-INC-171 | Navegação mobile e separação Hoje / Guia por dia | Implementation | Draft | 0.1.0 | [rb-inc-171-mobile-navigation-focus.md](./implementation/increments/rb-inc-171-mobile-navigation-focus.md) |
 | RB-CTX-171 | Context Pack do RB-INC-171 — Navegação mobile e separação Hoje / Guia por dia | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-171-mobile-navigation-focus.md](./implementation/context-packs/rb-inc-171-mobile-navigation-focus.md) |
+| RB-INC-172 | Experiência completa de ranking de Places | Implementation | Draft | 0.2.0 | [rb-inc-172-place-ranking-experience.md](./implementation/increments/rb-inc-172-place-ranking-experience.md) |
+| RB-CTX-172 | Context Pack do RB-INC-172 — Experiência completa de ranking de Places | Implementation Context Pack | Draft | 0.2.0 | [rb-inc-172-place-ranking-experience.md](./implementation/context-packs/rb-inc-172-place-ranking-experience.md) |
 
 ## Status possíveis
 

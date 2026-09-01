@@ -14,12 +14,16 @@ import {
   listPublishedPlaces,
   reconcileExternalPlaceCandidate,
   type ExternalPlaceReconciliation,
+  type PlaceQualityScore,
+  type PlaceQualitySignalMatch,
+  type PlaceQualitySignals,
 } from "@routebook/place-catalog";
 import { listSavedPlaces } from "@routebook/saved-places";
 import { findTripById } from "@routebook/trip-management";
 
 import { ExternalPlaceImagePreview } from "../../../../components/external-place-image-preview";
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
+import { PlaceRankingMeta } from "../../../../components/place-ranking-meta";
 import { TripMap } from "../../../../components/trip-map";
 import {
   buildGoogleMapsDirectionsUrl,
@@ -32,6 +36,15 @@ import {
   type ExternalPlaceDiscoveryItem,
   type PublishedPlaceDiscoveryItem,
 } from "../../../../lib/place-discovery-feed";
+import {
+  PLACE_DISCOVERY_ORDERS,
+  buildPlaceDiscoveryQualityTargets,
+  buildPlaceDiscoveryTopLists,
+  parsePlaceDiscoveryOrder,
+  rankPlaceDiscoveryItems,
+  type PlaceDiscoveryOrder,
+} from "../../../../lib/place-discovery-ranking";
+import { resolveConfiguredPlaceQualityProvider } from "../../../../lib/place-quality-provider";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
 import {
@@ -62,6 +75,7 @@ type DiscoverySearchParams = {
   categoria?: string;
   distancia?: string;
   preco?: string;
+  ordem?: string;
   descoberta?: string | undefined;
   promocao?: string;
   erroPromocao?: string;
@@ -72,6 +86,13 @@ const pipaDiscoveryCenter = { latitude: -6.24, longitude: -35.065 } as const;
 const externalDiscoveryRadiusMeters = 8_000;
 const externalDiscoveryScanLimit = 200;
 const externalDiscoveryDisplayLimit = 60;
+
+const orderLabels: Readonly<Record<PlaceDiscoveryOrder, string>> = Object.freeze({
+  recommended: "Recomendados",
+  rating: "Melhor avaliados",
+  popularity: "Mais populares",
+  distance: "Mais próximos",
+});
 
 function resolveDestinationId(destinationName: string): string | null {
   const normalized = destinationName.trim().toLocaleLowerCase("pt-BR");
@@ -163,6 +184,11 @@ function CanonicalDiscoveryCard({
   distanceReferenceLabel,
   accommodationCoordinate,
   isSaved,
+  rankingPosition,
+  rankingOrderLabel,
+  quality,
+  qualitySignals,
+  categoryRank,
 }: Readonly<{
   item: CanonicalDiscoveryItem;
   tripId: string;
@@ -170,6 +196,11 @@ function CanonicalDiscoveryCard({
   distanceReferenceLabel: string;
   accommodationCoordinate?: Readonly<{ latitude: number; longitude: number }>;
   isSaved: boolean;
+  rankingPosition: number;
+  rankingOrderLabel: string;
+  quality?: PlaceQualityScore;
+  qualitySignals?: PlaceQualitySignals;
+  categoryRank?: number;
 }>) {
   const { place, distanceMeters } = item;
   const candidate = item.kind === "enriched" ? item.candidate : undefined;
@@ -193,6 +224,14 @@ function CanonicalDiscoveryCard({
       data-place-source="published"
       data-place-state={candidate ? "enriched" : "published"}
     >
+      <PlaceRankingMeta
+        categoryLabel={categoryLabels[place.category]}
+        orderLabel={rankingOrderLabel}
+        position={rankingPosition}
+        {...(quality ? { quality } : {})}
+        {...(qualitySignals ? { signals: qualitySignals } : {})}
+        {...(categoryRank ? { categoryRank } : {})}
+      />
       {place.primaryImage || !candidate ? (
         <PlacePrimaryImage
           category={place.category}
@@ -289,6 +328,11 @@ function ExternalDiscoveryCard({
   maximumDistanceMeters,
   priceRange,
   discoveryMode,
+  rankingPosition,
+  rankingOrderLabel,
+  quality,
+  qualitySignals,
+  categoryRank,
 }: Readonly<{
   item: ExternalPlaceDiscoveryItem;
   tripId: string;
@@ -300,6 +344,11 @@ function ExternalDiscoveryCard({
   maximumDistanceMeters?: number;
   priceRange?: (typeof PLACE_PRICE_RANGES)[number];
   discoveryMode?: string;
+  rankingPosition: number;
+  rankingOrderLabel: string;
+  quality?: PlaceQualityScore;
+  qualitySignals?: PlaceQualitySignals;
+  categoryRank?: number;
 }>) {
   const { candidate, distanceMeters } = item;
   const coordinate = { latitude: candidate.latitude, longitude: candidate.longitude };
@@ -313,6 +362,14 @@ function ExternalDiscoveryCard({
 
   return (
     <li data-place-source="external" data-place-state="external">
+      <PlaceRankingMeta
+        categoryLabel={categoryLabel}
+        orderLabel={rankingOrderLabel}
+        position={rankingPosition}
+        {...(quality ? { quality } : {})}
+        {...(qualitySignals ? { signals: qualitySignals } : {})}
+        {...(categoryRank ? { categoryRank } : {})}
+      />
       <ExternalPlaceImagePreview
         category={candidate.category}
         destinationId={destinationId}
@@ -400,6 +457,7 @@ export default async function PlacesPage({
   const search = rawFilters.busca?.trim().slice(0, 120) || undefined;
   const category = parsePlaceCategory(rawFilters.categoria);
   const priceRange = parsePlacePriceRange(rawFilters.preco);
+  const requestedOrder = parsePlaceDiscoveryOrder(rawFilters.ordem);
   const discoverExternal = rawFilters.descoberta !== "ocultar";
   const showAllExternal = rawFilters.descoberta === "todas";
   const discoveryMode = !discoverExternal ? "ocultar" : showAllExternal ? "todas" : undefined;
@@ -424,7 +482,7 @@ export default async function PlacesPage({
     },
     accommodationCoordinate,
   );
-  const canonicalParams: DiscoverySearchParams = {
+  const baseParams: DiscoverySearchParams = {
     ...(search ? { busca: search } : {}),
     ...(category ? { categoria: category } : {}),
     ...(maximumDistanceMeters ? { distancia: String(maximumDistanceMeters / 1_000) } : {}),
@@ -522,6 +580,43 @@ export default async function PlacesPage({
   const discoveryItems = showAllExternal
     ? allDiscoveryItems
     : buildPlaceDiscoveryFeed({ ...feedInput, externalLimit: externalDiscoveryDisplayLimit });
+
+  const qualityProvider = resolveConfiguredPlaceQualityProvider();
+  let qualityMatches: PlaceQualitySignalMatch[] = [];
+  let qualityProviderError: string | undefined;
+  if (qualityProvider.status === "configured") {
+    try {
+      qualityMatches = [
+        ...(await qualityProvider.port.findSignals(
+          buildPlaceDiscoveryQualityTargets(discoveryItems),
+        )),
+      ];
+    } catch (error) {
+      console.error("Falha ao obter sinais externos de qualidade", {
+        provider: qualityProvider.provider,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      qualityProviderError =
+        "Os sinais de qualidade não responderam agora. A Discovery continua ordenada por proximidade.";
+    }
+  }
+
+  const ranking = rankPlaceDiscoveryItems({
+    items: discoveryItems,
+    qualityMatches,
+    order: requestedOrder,
+    contextualNow: true,
+  });
+  const topLists = buildPlaceDiscoveryTopLists(ranking.items);
+  const categoryRankByItemId = new Map(
+    topLists.flatMap((list) =>
+      list.items.map((entry, index) => [entry.item.id, index + 1] as const),
+    ),
+  );
+  const canonicalParams: DiscoverySearchParams = {
+    ...baseParams,
+    ...(ranking.order === "distance" ? {} : { ordem: ranking.order }),
+  };
   const visibleOptionCount = discoveryItems.length;
   const totalAvailableOptionCount = allDiscoveryItems.length;
   const availableExternalCount = allDiscoveryItems.filter(
@@ -536,7 +631,7 @@ export default async function PlacesPage({
     hasExternalCoverage &&
     showAllExternal &&
     availableExternalCount > externalDiscoveryDisplayLimit;
-  const mapPoints: TripMapPoint[] = discoveryItems.map((item) => {
+  const mapPoints: TripMapPoint[] = ranking.items.map(({ item }) => {
     if (item.kind !== "external") {
       const coordinate =
         item.kind === "enriched"
@@ -592,6 +687,9 @@ export default async function PlacesPage({
 
       <form action={`/viagens/${tripId}/lugares`} className={styles.filters} method="get">
         {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
+        {ranking.order !== "distance" ? (
+          <input name="ordem" type="hidden" value={ranking.order} />
+        ) : null}
         <div className={styles.searchField}>
           <label htmlFor="place-search">Nome ou termo</label>
           <input
@@ -677,12 +775,92 @@ export default async function PlacesPage({
           </ul>
           <Link
             className="product-secondary-action"
-            href={discoveryHref(tripId, discoveryMode ? { descoberta: discoveryMode } : {})}
+            href={discoveryHref(tripId, {
+              ...(discoveryMode ? { descoberta: discoveryMode } : {}),
+              ...(ranking.order === "distance" ? {} : { ordem: ranking.order }),
+            })}
           >
             Limpar filtros
           </Link>
         </section>
       ) : null}
+
+      <section aria-labelledby="place-ranking-title" className={styles.rankingPanel}>
+        <div className={styles.rankingHeader}>
+          <div>
+            <p className="product-eyebrow">Ranking RouteBook</p>
+            <h2 id="place-ranking-title">Como você quer ordenar?</h2>
+          </div>
+          <nav aria-label="Ordenação dos lugares" className={styles.rankingControls}>
+            {PLACE_DISCOVERY_ORDERS.map((order) => {
+              const available = ranking.availableOrders.includes(order);
+              if (!available) {
+                return (
+                  <span aria-disabled="true" className={styles.rankingDisabled} key={order}>
+                    {orderLabels[order]}
+                  </span>
+                );
+              }
+              return (
+                <Link
+                  aria-current={ranking.order === order ? "page" : undefined}
+                  className={ranking.order === order ? styles.rankingActive : styles.rankingControl}
+                  href={discoveryHref(tripId, {
+                    ...baseParams,
+                    ...(order === "distance" ? {} : { ordem: order }),
+                  })}
+                  key={order}
+                >
+                  {orderLabels[order]}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        {ranking.hasQualityCoverage ? (
+          <>
+            <p className={styles.rankingNotice}>
+              Score RouteBook é derivado de sinais externos verificados e contexto da viagem; não é
+              uma nota criada pelo usuário. Rating, popularidade e Provider continuam identificados
+              em cada card.
+            </p>
+            {topLists.length > 0 ? (
+              <details className={styles.topLists}>
+                <summary>Ver Top 5 por categoria</summary>
+                <div className={styles.topListsGrid}>
+                  {topLists.map((list) => (
+                    <section key={list.category}>
+                      <strong>{categoryLabels[list.category]}</strong>
+                      <ol>
+                        {list.items.map((entry) => (
+                          <li key={entry.item.id}>
+                            {entry.item.kind === "external"
+                              ? entry.item.candidate.name
+                              : entry.item.place.name}
+                            <small>Score {entry.quality?.score}/10</small>
+                          </li>
+                        ))}
+                      </ol>
+                    </section>
+                  ))}
+                </div>
+              </details>
+            ) : null}
+          </>
+        ) : (
+          <p className={styles.rankingNotice} role="status">
+            {qualityProviderError ??
+              (qualityProvider.status === "configured"
+                ? `${qualityProvider.providerLabel} está configurado, mas nenhum sinal foi associado com segurança a esta seleção. O RouteBook não inventa um Top.`
+                : qualityProvider.status === "missing-secret"
+                  ? `${qualityProvider.providerLabel} foi selecionado, mas a credencial ainda não está provisionada. Até lá, somente Mais próximos é real.`
+                  : qualityProvider.status === "invalid-provider"
+                    ? "A configuração do Provider de qualidade é inválida. O ranking permanece por proximidade."
+                    : "Ranking por avaliação e popularidade aguarda um Provider de qualidade explicitamente configurado. Até lá, somente Mais próximos é exibido como ordenação real.")}
+          </p>
+        )}
+      </section>
 
       <div className={styles.resultHeading}>
         <div>
@@ -765,12 +943,23 @@ export default async function PlacesPage({
         </section>
       ) : null}
 
-      {discoveryItems.length > 0 ? (
-        <ul className={`${styles.optionsGrid} trip-days-grid`} aria-label="Opções de lugares">
-          {discoveryItems.map((item) =>
+      {ranking.items.length > 0 ? (
+        <ul
+          className={`${styles.optionsGrid} trip-days-grid`}
+          aria-label="Opções de lugares"
+          data-place-ranking-order={ranking.order}
+        >
+          {ranking.items.map(({ item, position, quality, signals }) =>
             item.kind === "external" ? (
               <ExternalDiscoveryCard
                 key={item.id}
+                rankingOrderLabel={orderLabels[ranking.order]}
+                rankingPosition={position}
+                {...(quality ? { quality } : {})}
+                {...(signals ? { qualitySignals: signals } : {})}
+                {...(categoryRankByItemId.has(item.id)
+                  ? { categoryRank: categoryRankByItemId.get(item.id)! }
+                  : {})}
                 distanceReferenceLabel={distanceReferenceLabel}
                 item={item}
                 tripId={tripId}
@@ -785,6 +974,13 @@ export default async function PlacesPage({
             ) : (
               <CanonicalDiscoveryCard
                 key={item.id}
+                rankingOrderLabel={orderLabels[ranking.order]}
+                rankingPosition={position}
+                {...(quality ? { quality } : {})}
+                {...(signals ? { qualitySignals: signals } : {})}
+                {...(categoryRankByItemId.has(item.id)
+                  ? { categoryRank: categoryRankByItemId.get(item.id)! }
+                  : {})}
                 distanceReferenceLabel={distanceReferenceLabel}
                 isSaved={savedPlaceIds.has(item.place.id)}
                 item={item}

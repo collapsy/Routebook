@@ -139,6 +139,21 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(page.getByText(/em linha reta da hospedagem/).first()).toBeVisible();
 
   await page.goto(`/viagens/${trip.id}/lugares?descoberta=ocultar`);
+  const rankingNav = page.getByRole("navigation", { name: "Ordenação dos lugares" });
+  await expect(rankingNav.getByRole("link", { name: "Mais próximos" })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await expect(rankingNav.getByText("Recomendados")).toHaveAttribute("aria-disabled", "true");
+  await expect(rankingNav.getByText("Melhor avaliados")).toHaveAttribute("aria-disabled", "true");
+  await expect(rankingNav.getByText("Mais populares")).toHaveAttribute("aria-disabled", "true");
+  await expect(page.locator('[data-place-ranking-quality="true"]')).toHaveCount(0);
+  await expect(page.getByText(/^Top /)).toHaveCount(0);
+
+  await page.goto(`/viagens/${trip.id}/lugares?descoberta=ocultar&ordem=recommended`);
+  await expect(page.locator('[data-place-ranking-order="distance"]')).toBeVisible();
+
+  await page.goto(`/viagens/${trip.id}/lugares?descoberta=ocultar`);
   await expect(page.getByRole("heading", { name: "30 lugares curados" })).toBeVisible();
   await expect(options.locator('[data-place-source="published"]')).toHaveCount(30);
   await expect(options.locator('[data-place-source="external"]')).toHaveCount(0);

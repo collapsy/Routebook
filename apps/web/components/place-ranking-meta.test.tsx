@@ -36,8 +36,9 @@ describe("PlaceRankingMeta", () => {
 
     expect(screen.getByText("Top praias")).toBeInTheDocument();
     expect(screen.getByText("Score RouteBook 9,1/10")).toBeInTheDocument();
-    expect(screen.getByText(/2\.340 avaliações/)).toBeInTheDocument();
+    expect(screen.getAllByText(/2\.340 avaliações/).length).toBeGreaterThan(0);
     expect(screen.getByText(/Fonte: Google Places/)).toBeInTheDocument();
     expect(screen.getByText(/Muito bem avaliado/)).toBeInTheDocument();
+    expect(screen.getByText("Por que está aqui?")).toBeInTheDocument();
   });
 });

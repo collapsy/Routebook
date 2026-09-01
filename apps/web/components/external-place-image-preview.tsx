@@ -266,17 +266,16 @@ export function ExternalPlaceImagePreview({
             </div>
             <figcaption className={styles.caption}>
               <span>
-                Foto externa: {preview.sourceName}
+                {preview.sourceName}
                 {preview.authorAttributions.length > 0
-                  ? ` · Crédito: ${preview.authorAttributions
+                  ? ` · ${preview.authorAttributions
                       .map((attribution) => attribution.displayName)
                       .join(", ")}`
                   : ""}
-                .
               </span>{" "}
               {preview.sourceUrl ? (
                 <a href={preview.sourceUrl} rel="noreferrer" target="_blank">
-                  Ver no Google Maps
+                  Fonte
                 </a>
               ) : null}
             </figcaption>
@@ -306,10 +305,10 @@ export function ExternalPlaceImagePreview({
           </div>
           <figcaption className={styles.caption}>
             <span>
-              Foto externa: {preview.attribution} · {preview.license} · {preview.sourceName}.
+              {preview.sourceName} · {preview.attribution} · {preview.license}
             </span>{" "}
             <a href={preview.sourceUrl} rel="noreferrer" target="_blank">
-              Ver fonte
+              Fonte
             </a>
           </figcaption>
         </figure>

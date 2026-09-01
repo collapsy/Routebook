@@ -100,7 +100,7 @@ describe("ExternalPlaceImagePreview", () => {
     expect(screen.getByText(/Fotógrafo RouteBook/)).toBeInTheDocument();
     expect(screen.getByText(/CC BY-SA 4.0/)).toBeInTheDocument();
     expect(screen.getByText(/Wikimedia Commons/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Ver fonte" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Fonte" })).toHaveAttribute(
       "href",
       preview.sourceUrl,
     );
@@ -133,9 +133,9 @@ describe("ExternalPlaceImagePreview", () => {
     const image = await screen.findByRole("img", { name: googlePreview.altText });
     expect(image).toHaveAttribute("src", googlePreview.mediaUrl);
     expect(image.getAttribute("src")).not.toContain("places.googleapis.com");
-    expect(screen.getByText(/Foto externa:/)).toHaveTextContent("Google Maps");
+    expect(screen.getByText(/Google Maps/)).toBeInTheDocument();
     expect(screen.getByText(/Pessoa fotógrafa/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Ver no Google Maps" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Fonte" })).toHaveAttribute(
       "href",
       googlePreview.sourceUrl,
     );

@@ -58,6 +58,7 @@ test("mantém Discovery funcional sem coordenadas da hospedagem", async ({ page 
       .locator('[data-place-source="external"]')
       .first(),
   ).toBeVisible();
-  await expect(page.getByLabel("Distância máxima")).toBeDisabled();
-  await expect(page.getByText(/filtro de distância fica disponível/)).toBeVisible();
+  await expect(page.getByLabel("Distância máxima")).toBeEnabled();
+  await expect(page.getByText(/referência aproximada do destino/)).toBeVisible();
+  await expect(page.getByText(/em linha reta do destino/).first()).toBeVisible();
 });

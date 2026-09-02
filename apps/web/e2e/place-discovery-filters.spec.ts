@@ -229,7 +229,8 @@ test("orienta recuperação quando os filtros não retornam lugares", async ({ p
   await expect(
     page.getByRole("heading", { name: "Nenhum lugar corresponde aos filtros" }),
   ).toBeVisible();
-  await expect(page.getByText(/filtro de distância fica disponível/)).toBeVisible();
+  await expect(page.getByText(/referência aproximada do destino/)).toBeVisible();
+  await expect(page.getByLabel("Distância máxima")).toBeEnabled();
   await expect(page.getByRole("link", { name: "Limpar filtros" }).first()).toBeVisible();
   await expect(page.getByText("indisponível")).toHaveCount(0);
 });

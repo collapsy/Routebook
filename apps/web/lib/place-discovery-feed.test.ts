@@ -410,7 +410,9 @@ describe("buildPlaceDiscoveryFeed", () => {
     });
 
     expect(result).toHaveLength(2);
-    expect(result.map((item) => item.kind)).toEqual(expect.arrayContaining(["published", "external"]));
+    expect(result.map((item) => item.kind)).toEqual(
+      expect.arrayContaining(["published", "external"]),
+    );
   });
 
   it("mantém typo distante de praia como candidato separado", () => {
@@ -436,7 +438,9 @@ describe("buildPlaceDiscoveryFeed", () => {
     });
 
     expect(result).toHaveLength(2);
-    expect(result.map((item) => item.kind)).toEqual(expect.arrayContaining(["published", "external"]));
+    expect(result.map((item) => item.kind)).toEqual(
+      expect.arrayContaining(["published", "external"]),
+    );
   });
 
   it("não deduplica filiais homônimas com endereços divergentes", () => {

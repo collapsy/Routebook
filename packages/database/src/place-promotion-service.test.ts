@@ -11,6 +11,7 @@ import { placeExternalReferences, places } from "./schema";
 
 const database = getDatabase();
 const destinationId = `promotion-${randomUUID()}`;
+const otherDestinationId = `promotion-other-${randomUUID()}`;
 const existingPlaceId = randomUUID();
 const now = new Date("2026-08-15T15:40:00.000Z");
 
@@ -50,6 +51,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await database.delete(places).where(eq(places.destinationId, destinationId));
+  await database.delete(places).where(eq(places.destinationId, otherDestinationId));
   await closeDatabase();
 });
 
@@ -112,6 +114,31 @@ describe("promoteExternalPlaceCandidate", () => {
       placeId: first.placeId,
       slug: first.slug,
       publicationStatus: "draft",
+    });
+  });
+
+  it("impede reutilizar a mesma external identity em outro Destination", async () => {
+    const sharedIdentity = candidate({
+      externalId: "cross-destination-identity",
+      name: "Lugar com identidade global",
+      latitude: -6.32,
+      longitude: -35.09,
+    });
+    const first = await promoteExternalPlaceCandidate({
+      destinationId,
+      candidate: sharedIdentity,
+      promotedAt: now,
+    });
+
+    await expect(
+      promoteExternalPlaceCandidate({
+        destinationId: otherDestinationId,
+        candidate: sharedIdentity,
+        promotedAt: new Date("2026-08-15T15:50:00.000Z"),
+      }),
+    ).rejects.toMatchObject({
+      code: "destination-conflict",
+      matchedPlaceId: first.placeId,
     });
   });
 

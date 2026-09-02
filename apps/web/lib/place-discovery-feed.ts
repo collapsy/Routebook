@@ -64,18 +64,6 @@ const IDENTITY_STOP_WORDS = new Set([
   "uma",
 ]);
 
-const REGIONAL_IDENTITY_TOKENS = new Set([
-  "brasil",
-  "brazil",
-  "grande",
-  "norte",
-  "pipa",
-  "rio",
-  "rn",
-  "sul",
-  "tibau",
-]);
-
 const GENERIC_IDENTITY_TOKENS = new Set([
   "bar",
   "beach",
@@ -92,7 +80,7 @@ const GENERIC_IDENTITY_TOKENS = new Set([
 ]);
 
 const BEACH_IDENTITY_DESCRIPTORS = new Set(["baia", "bahia", "beach", "playa", "praia"]);
-const BEACH_ALIAS_MAX_DISTANCE_METERS = 10_000;
+const BEACH_ALIAS_MAX_DISTANCE_METERS = 800;
 
 function itemName(item: PlaceDiscoveryItem): string {
   return item.kind === "external" ? item.candidate.name : item.place.name;
@@ -127,7 +115,7 @@ function normalizeIdentity(value: string): string {
   return value
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("pt-BR")
+    .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .trim()
     .replace(/\s+/g, " ");
@@ -138,9 +126,7 @@ function normalizedNameTokens(value: string): string[] {
 }
 
 function identityTokens(value: string): string[] {
-  return normalizedNameTokens(value).filter(
-    (token) => !IDENTITY_STOP_WORDS.has(token) && !REGIONAL_IDENTITY_TOKENS.has(token),
-  );
+  return normalizedNameTokens(value).filter((token) => !IDENTITY_STOP_WORDS.has(token));
 }
 
 function beachIdentityTokens(value: string): string[] {
@@ -214,23 +200,24 @@ function candidatesRepresentSamePlace(
   if (!first.category || first.category !== second.category) return false;
 
   const distanceMeters = placeDistanceMeters(first, second);
+  const hasBothAddresses = Boolean(first.addressLabel && second.addressLabel);
+  const sameAddress =
+    hasBothAddresses &&
+    normalizeIdentity(first.addressLabel ?? "") === normalizeIdentity(second.addressLabel ?? "");
+  const addressConflict = hasBothAddresses && !sameAddress;
+
   if (
+    !addressConflict &&
     first.category === "beach" &&
     distanceMeters <= BEACH_ALIAS_MAX_DISTANCE_METERS &&
     haveEquivalentBeachIdentityNames(first.name, second.name)
   ) {
     return true;
   }
-  if (distanceMeters > 500) return false;
+  if (distanceMeters > 500 || addressConflict) return false;
 
   if (normalizeIdentity(first.name) === normalizeIdentity(second.name)) return true;
-  if (
-    first.addressLabel &&
-    second.addressLabel &&
-    normalizeIdentity(first.addressLabel) === normalizeIdentity(second.addressLabel)
-  ) {
-    return true;
-  }
+  if (sameAddress) return true;
 
   const firstTokens = identityTokens(first.name);
   const secondTokens = identityTokens(second.name);

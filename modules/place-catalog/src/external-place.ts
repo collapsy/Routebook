@@ -31,12 +31,22 @@ export type PlaceExternalReference = Readonly<{
 
 export type ExternalPlaceReconciliationStatus = "new" | "possible_match" | "linked" | "rejected";
 
+export type ExternalPlaceMatchEvidence = Readonly<{
+  externalReference?: Readonly<{ provider: string; externalId: string }>;
+  categoryMatch?: boolean;
+  nameMatch?: "exact" | "token-overlap" | "category-alias";
+  addressMatch?: "exact" | "conflict";
+  sharedDistinctiveTokens?: readonly string[];
+  distanceMeters?: number;
+}>;
+
 export type ExternalPlaceReconciliation = Readonly<{
   candidate: ExternalPlaceCandidate;
   status: ExternalPlaceReconciliationStatus;
   matchedPlaceId?: string;
   reason: string;
   distanceMeters?: number;
+  evidence?: ExternalPlaceMatchEvidence;
 }>;
 
 export interface PlaceSearchPort {
@@ -93,36 +103,38 @@ const OVERTURE_CATEGORY_MAP: Readonly<Record<string, PlaceCategory>> = Object.fr
 
 const IDENTITY_STOP_WORDS = new Set([
   "a",
+  "an",
+  "and",
   "as",
+  "at",
   "da",
   "das",
   "de",
+  "del",
   "do",
   "dos",
   "e",
+  "el",
   "em",
+  "en",
+  "la",
+  "las",
+  "los",
   "na",
   "nas",
   "no",
   "nos",
   "o",
+  "of",
   "os",
   "para",
   "por",
+  "the",
   "um",
+  "un",
   "uma",
-]);
-
-const REGIONAL_IDENTITY_TOKENS = new Set([
-  "brasil",
-  "brazil",
-  "grande",
-  "norte",
-  "pipa",
-  "rio",
-  "rn",
-  "sul",
-  "tibau",
+  "una",
+  "y",
 ]);
 
 const GENERIC_IDENTITY_TOKENS = new Set([
@@ -142,7 +154,12 @@ const GENERIC_IDENTITY_TOKENS = new Set([
 
 const BEACH_IDENTITY_DESCRIPTORS = new Set(["baia", "bahia", "beach", "playa", "praia"]);
 const BEACH_ALIAS_MAX_DISTANCE_METERS = 500;
-const BEACH_ALIAS_RECONCILIATION_MAX_DISTANCE_METERS = 10_000;
+const BEACH_ALIAS_RECONCILIATION_MAX_DISTANCE_METERS = 800;
+const EXACT_NAME_MAX_DISTANCE_METERS = 300;
+const EXACT_ADDRESS_MAX_DISTANCE_METERS = 500;
+const TOKEN_IDENTITY_MAX_DISTANCE_METERS = 350;
+const SINGLE_TOKEN_IDENTITY_MAX_DISTANCE_METERS = 100;
+const EXTREME_PROXIMITY_MAX_DISTANCE_METERS = 50;
 
 function normalizeOvertureCategory(value: string): string {
   return value.trim().toLowerCase();
@@ -257,7 +274,7 @@ function normalizeIdentity(value: string): string {
   return value
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("pt-BR")
+    .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .trim()
     .replace(/\s+/g, " ");
@@ -268,9 +285,7 @@ function normalizedNameTokens(value: string): string[] {
 }
 
 function identityTokens(value: string): string[] {
-  return normalizedNameTokens(value).filter(
-    (token) => !IDENTITY_STOP_WORDS.has(token) && !REGIONAL_IDENTITY_TOKENS.has(token),
-  );
+  return normalizedNameTokens(value).filter((token) => !IDENTITY_STOP_WORDS.has(token));
 }
 
 function beachIdentityTokens(value: string): string[] {
@@ -364,62 +379,99 @@ export function placeDistanceMeters(
   return 2 * earthRadiusMeters * Math.asin(Math.min(1, Math.sqrt(haversine)));
 }
 
+type IdentitySignals = Readonly<{
+  distanceMeters: number;
+  exactName: boolean;
+  exactAddress: boolean;
+  addressConflict: boolean;
+  categoryAlias: boolean;
+  sharedTokens: readonly string[];
+  sharedDistinctiveTokens: readonly string[];
+  strongIdentity: boolean;
+}>;
+
+function identitySignals(candidate: ExternalPlaceCandidate, place: Place): IdentitySignals {
+  const distanceMeters = placeDistanceMeters(candidate, place);
+  const exactName = normalizeIdentity(candidate.name) === normalizeIdentity(place.name);
+  const hasBothAddresses = Boolean(candidate.addressLabel && place.addressLabel);
+  const exactAddress =
+    hasBothAddresses &&
+    normalizeIdentity(candidate.addressLabel ?? "") === normalizeIdentity(place.addressLabel ?? "");
+  const addressConflict = hasBothAddresses && !exactAddress;
+  const categoryAlias =
+    candidate.category === "beach" &&
+    place.category === "beach" &&
+    haveEquivalentBeachIdentityNames(candidate.name, place.name);
+
+  const candidateTokens = identityTokens(candidate.name);
+  const placeTokens = identityTokens(place.name);
+  const sharedTokens = tokenIntersection(candidateTokens, placeTokens);
+  const sharedDistinctiveTokens = distinctiveIdentityTokens(sharedTokens);
+  const minimumTokenCount = Math.min(candidateTokens.length, placeTokens.length);
+  const unionTokenCount = new Set([...candidateTokens, ...placeTokens]).size;
+  const minimumCoverage = minimumTokenCount === 0 ? 0 : sharedTokens.length / minimumTokenCount;
+  const jaccard = unionTokenCount === 0 ? 0 : sharedTokens.length / unionTokenCount;
+
+  const tokenIdentity =
+    !addressConflict &&
+    sharedDistinctiveTokens.length > 0 &&
+    ((distanceMeters <= TOKEN_IDENTITY_MAX_DISTANCE_METERS &&
+      sharedTokens.length >= 2 &&
+      minimumCoverage >= 0.8 &&
+      jaccard >= 0.5) ||
+      (distanceMeters <= SINGLE_TOKEN_IDENTITY_MAX_DISTANCE_METERS &&
+        minimumTokenCount === 1 &&
+        sharedTokens.length === 1 &&
+        minimumCoverage === 1));
+
+  const strongIdentity =
+    candidate.category === place.category &&
+    !addressConflict &&
+    ((categoryAlias && distanceMeters <= BEACH_ALIAS_MAX_DISTANCE_METERS) ||
+      (exactAddress && distanceMeters <= EXACT_ADDRESS_MAX_DISTANCE_METERS) ||
+      (exactName && distanceMeters <= EXACT_NAME_MAX_DISTANCE_METERS) ||
+      tokenIdentity);
+
+  return {
+    distanceMeters,
+    exactName,
+    exactAddress,
+    addressConflict,
+    categoryAlias,
+    sharedTokens,
+    sharedDistinctiveTokens,
+    strongIdentity,
+  };
+}
+
+function matchEvidence(signals: IdentitySignals): ExternalPlaceMatchEvidence {
+  return {
+    categoryMatch: true,
+    ...(signals.exactName
+      ? { nameMatch: "exact" as const }
+      : signals.categoryAlias
+        ? { nameMatch: "category-alias" as const }
+        : signals.sharedDistinctiveTokens.length > 0
+          ? { nameMatch: "token-overlap" as const }
+          : {}),
+    ...(signals.addressConflict
+      ? { addressMatch: "conflict" as const }
+      : signals.exactAddress
+        ? { addressMatch: "exact" as const }
+        : {}),
+    ...(signals.sharedDistinctiveTokens.length > 0
+      ? { sharedDistinctiveTokens: signals.sharedDistinctiveTokens }
+      : {}),
+    distanceMeters: signals.distanceMeters,
+  };
+}
+
 export function isStrongExternalPlaceIdentityMatch(
   candidate: ExternalPlaceCandidate,
   place: Place,
 ): boolean {
   if (!candidate.category || candidate.category !== place.category) return false;
-
-  const distanceMeters = placeDistanceMeters(candidate, place);
-  if (
-    candidate.category === "beach" &&
-    distanceMeters <= BEACH_ALIAS_MAX_DISTANCE_METERS &&
-    haveEquivalentBeachIdentityNames(candidate.name, place.name)
-  ) {
-    return true;
-  }
-  if (distanceMeters > 1_000) return false;
-
-  const candidateName = normalizeIdentity(candidate.name);
-  const placeName = normalizeIdentity(place.name);
-  if (candidateName === placeName) return true;
-
-  if (
-    candidate.addressLabel &&
-    place.addressLabel &&
-    normalizeIdentity(candidate.addressLabel) === normalizeIdentity(place.addressLabel)
-  ) {
-    return true;
-  }
-
-  const candidateTokens = identityTokens(candidate.name);
-  const placeTokens = identityTokens(place.name);
-  if (candidateTokens.length === 0 || placeTokens.length === 0) return false;
-
-  const sharedTokens = tokenIntersection(candidateTokens, placeTokens);
-  const sharedDistinctiveTokens = distinctiveIdentityTokens(sharedTokens);
-  if (sharedDistinctiveTokens.length === 0) return false;
-
-  const minimumTokenCount = Math.min(candidateTokens.length, placeTokens.length);
-  const unionTokenCount = new Set([...candidateTokens, ...placeTokens]).size;
-  const minimumCoverage = sharedTokens.length / minimumTokenCount;
-  const jaccard = sharedTokens.length / unionTokenCount;
-
-  if (
-    distanceMeters <= 500 &&
-    sharedTokens.length >= 2 &&
-    minimumCoverage >= 0.8 &&
-    jaccard >= 0.5
-  ) {
-    return true;
-  }
-
-  return (
-    distanceMeters <= 150 &&
-    minimumTokenCount === 1 &&
-    sharedTokens.length === 1 &&
-    minimumCoverage === 1
-  );
+  return identitySignals(candidate, place).strongIdentity;
 }
 
 export function reconcileExternalPlaceCandidate(
@@ -455,58 +507,56 @@ export function reconcileExternalPlaceCandidate(
       status: "linked",
       matchedPlaceId: linkedReference.placeId,
       reason: "A referência externa já está vinculada a um Place canônico.",
+      evidence: {
+        externalReference: {
+          provider: linkedReference.provider,
+          externalId: linkedReference.externalId,
+        },
+      },
     };
   }
 
-  const normalizedCandidateName = normalizeIdentity(candidate.name);
   const possibleMatches = places
     .filter((place) => place.category === candidate.category)
-    .map((place) => ({
-      place,
-      distanceMeters: placeDistanceMeters(candidate, place),
-      strongIdentity: isStrongExternalPlaceIdentityMatch(candidate, place),
-      beachAlias:
-        candidate.category === "beach" &&
-        place.category === "beach" &&
-        placeDistanceMeters(candidate, place) <= BEACH_ALIAS_RECONCILIATION_MAX_DISTANCE_METERS &&
-        haveEquivalentBeachIdentityNames(candidate.name, place.name),
-      sameName: normalizeIdentity(place.name) === normalizedCandidateName,
-      sameAddress:
-        Boolean(candidate.addressLabel && place.addressLabel) &&
-        normalizeIdentity(candidate.addressLabel ?? "") ===
-          normalizeIdentity(place.addressLabel ?? ""),
-    }))
-    .filter(
-      (match) =>
-        match.strongIdentity ||
-        match.beachAlias ||
-        (match.sameName && match.distanceMeters <= 500) ||
-        (match.sameAddress && match.distanceMeters <= 500) ||
-        match.distanceMeters <= 75,
-    )
+    .map((place) => ({ place, signals: identitySignals(candidate, place) }))
+    .filter(({ signals }) => {
+      if (signals.addressConflict) return false;
+      return (
+        signals.strongIdentity ||
+        (signals.categoryAlias &&
+          signals.distanceMeters <= BEACH_ALIAS_RECONCILIATION_MAX_DISTANCE_METERS) ||
+        (signals.exactName && signals.distanceMeters <= EXACT_NAME_MAX_DISTANCE_METERS) ||
+        (signals.exactAddress && signals.distanceMeters <= EXACT_ADDRESS_MAX_DISTANCE_METERS) ||
+        signals.distanceMeters <= EXTREME_PROXIMITY_MAX_DISTANCE_METERS
+      );
+    })
     .sort(
       (left, right) =>
-        Number(right.strongIdentity) - Number(left.strongIdentity) ||
-        Number(right.beachAlias) - Number(left.beachAlias) ||
-        left.distanceMeters - right.distanceMeters,
+        Number(right.signals.strongIdentity) - Number(left.signals.strongIdentity) ||
+        Number(right.signals.exactAddress) - Number(left.signals.exactAddress) ||
+        Number(right.signals.exactName) - Number(left.signals.exactName) ||
+        Number(right.signals.categoryAlias) - Number(left.signals.categoryAlias) ||
+        left.signals.distanceMeters - right.signals.distanceMeters,
     );
 
   const nearest = possibleMatches[0];
   if (nearest) {
+    const { signals } = nearest;
     return {
       candidate,
       status: "possible_match",
       matchedPlaceId: nearest.place.id,
-      reason: nearest.strongIdentity
-        ? "Identidade nominal ou endereço e proximidade sustentam possível duplicata; exige reconciliação antes da promoção."
-        : nearest.beachAlias
-          ? "Alias nominal de praia indica possível duplicata mesmo com coordenada externa inconsistente; o Place canônico deve ser preservado."
-          : nearest.sameName
+      reason: signals.strongIdentity
+        ? "Nome ou endereço, categoria e proximidade sustentam possível duplicata; exige reconciliação antes da promoção."
+        : signals.categoryAlias
+          ? "Alias nominal de categoria e proximidade sustentam possível duplicata; exige reconciliação antes da promoção."
+          : signals.exactName
             ? "Nome e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
-            : nearest.sameAddress
+            : signals.exactAddress
               ? "Endereço e proximidade indicam possível duplicata; exige reconciliação antes da promoção."
               : "Proximidade extrema e mesma categoria indicam possível duplicata; exige reconciliação antes da promoção.",
-      distanceMeters: nearest.distanceMeters,
+      distanceMeters: signals.distanceMeters,
+      evidence: matchEvidence(signals),
     };
   }
 

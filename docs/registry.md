@@ -407,6 +407,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-175 | Discovery Region accommodation-first e Place Discovery destination-agnostic | Implementation | Draft | 0.1.0 | [rb-inc-175-discovery-region.md](./implementation/increments/rb-inc-175-discovery-region.md) |
 | RB-CTX-175 | Context Pack do RB-INC-175 — Discovery Region | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-175-discovery-region.md](./implementation/context-packs/rb-inc-175-discovery-region.md) |
 
+| RB-INC-176 | Place Identity destination-agnostic e reconciliação conservadora | Implementation | Draft | 0.1.0 | [rb-inc-176-place-identity.md](./implementation/increments/rb-inc-176-place-identity.md) |
+| RB-CTX-176 | Context Pack do RB-INC-176 — Place Identity destination-agnostic | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-176-place-identity.md](./implementation/context-packs/rb-inc-176-place-identity.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

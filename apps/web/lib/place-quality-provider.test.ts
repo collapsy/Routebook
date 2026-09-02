@@ -38,6 +38,46 @@ describe("isConservativeQualityIdentityMatch", () => {
       }),
     ).toBe(false);
   });
+
+  it("reconhece segundo destino sem stopword regional", () => {
+    const floripaTarget: PlaceQualityTarget = {
+      id: "published:projeto-tamar",
+      name: "Projeto Tamar",
+      category: "nature",
+      latitude: -27.5747,
+      longitude: -48.4242,
+    };
+
+    expect(
+      isConservativeQualityIdentityMatch(floripaTarget, {
+        externalId: "google-tamar",
+        name: "Projeto Tamar Florianópolis",
+        latitude: -27.5748,
+        longitude: -48.4241,
+      }),
+    ).toBe(true);
+  });
+
+  it("rejeita filial homônima quando o endereço diverge", () => {
+    const branchTarget: PlaceQualityTarget = {
+      id: "published:cafe-cultura-centro",
+      name: "Café Cultura",
+      category: "gastronomy",
+      latitude: -27.596,
+      longitude: -48.549,
+      addressLabel: "Rua Felipe Schmidt, 100, Florianópolis — SC",
+    };
+
+    expect(
+      isConservativeQualityIdentityMatch(branchTarget, {
+        externalId: "google-cafe-outra-filial",
+        name: "Café Cultura",
+        latitude: -27.5962,
+        longitude: -48.5491,
+        addressLabel: "Rua Bocaiúva, 200, Florianópolis — SC",
+      }),
+    ).toBe(false);
+  });
 });
 
 describe("GooglePlacesQualityAdapter", () => {
@@ -52,6 +92,7 @@ describe("GooglePlacesQualityAdapter", () => {
               id: "google-1",
               displayName: { text: "Praia do Amor" },
               location: { latitude: -6.2367, longitude: -35.0466 },
+              formattedAddress: "Pipa, Tibau do Sul — RN",
               rating: 4.8,
               userRatingCount: 2340,
             },
@@ -83,7 +124,7 @@ describe("GooglePlacesQualityAdapter", () => {
       "secret-google",
     );
     expect((request?.init?.headers as Record<string, string>)["X-Goog-FieldMask"]).toBe(
-      "places.id,places.displayName,places.location,places.rating,places.userRatingCount",
+      "places.id,places.displayName,places.location,places.formattedAddress,places.rating,places.userRatingCount",
     );
     expect(JSON.stringify(matches)).not.toContain("secret-google");
   });
@@ -261,6 +302,48 @@ describe("GooglePlacesQualityAdapter", () => {
         signals: expect.objectContaining({ externalId: "google-chapadao" }),
       }),
     ]);
+  });
+
+  it("não reutiliza a mesma external identity entre categorias", async () => {
+    const targets: PlaceQualityTarget[] = [
+      {
+        id: "published:parque-central",
+        name: "Parque Central",
+        category: "nature",
+        latitude: -27.59,
+        longitude: -48.55,
+      },
+      {
+        id: "published:parque-central-bar",
+        name: "Parque Central",
+        category: "nightlife",
+        latitude: -27.5901,
+        longitude: -48.5501,
+      },
+    ];
+    const fetcher = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            places: [
+              {
+                id: "google-shared-id",
+                displayName: { text: "Parque Central" },
+                location: { latitude: -27.59005, longitude: -48.55005 },
+                rating: 4.6,
+                userRatingCount: 1200,
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+    );
+
+    const adapter = new GooglePlacesQualityAdapter("secret-google", { fetcher });
+    const matches = await adapter.findSignals(targets);
+
+    expect(matches).toHaveLength(1);
+    expect(matches[0]?.signals.externalId).toBe("google-shared-id");
   });
 });
 

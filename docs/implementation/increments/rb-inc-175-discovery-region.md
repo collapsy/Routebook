@@ -153,6 +153,7 @@ apps/web/app/viagens/[tripId]/lugares/page.tsx
 apps/web/app/viagens/[tripId]/lugares/actions.ts
 apps/web/app/viagens/[tripId]/lugares/actions.test.ts
 apps/web/e2e/accommodation-proximity.spec.ts
+apps/web/e2e/itinerary-proposal-generation.spec.ts
 apps/web/e2e/place-actions.spec.ts
 apps/web/e2e/place-discovery-filters.spec.ts
 apps/web/e2e/place-discovery-anywhere.spec.ts

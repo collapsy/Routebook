@@ -90,6 +90,9 @@ modules/place-catalog/src/external-place.ts
 modules/place-catalog/src/external-place.test.ts
 apps/web/lib/place-quality-provider.ts
 apps/web/lib/place-quality-provider.test.ts
+apps/web/e2e/place-discovery-filters.spec.ts
+apps/web/lib/place-discovery-feed.test.ts
+apps/web/lib/place-discovery-feed.ts
 packages/database/src/place-promotion-service.test.ts
 docs/implementation/increments/rb-inc-176-place-identity.md
 docs/implementation/context-packs/rb-inc-176-place-identity.md

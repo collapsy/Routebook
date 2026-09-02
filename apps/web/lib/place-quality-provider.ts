@@ -346,7 +346,14 @@ abstract class GroupedPlaceQualityAdapter implements PlaceQualitySignalsPort {
     if (successful.length === 0 && results.some((result) => result.status === "rejected")) {
       throw new Error("O Provider de qualidade não respondeu para a seleção atual.");
     }
-    return successful;
+
+    const usedExternalIdentities = new Set<string>();
+    return successful.filter((match) => {
+      const key = `${match.signals.provider}:${match.signals.externalId}`;
+      if (usedExternalIdentities.has(key)) return false;
+      usedExternalIdentities.add(key);
+      return true;
+    });
   }
 }
 

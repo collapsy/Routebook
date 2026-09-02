@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 
+import {
+  resolvePlaceBootstrapPolicy,
+  runPlaceBootstrapStep,
+} from "../../../lib/place-bootstrap";
 import { WikimediaCommonsPlaceImageAdapter } from "../../../lib/wikimedia-place-image";
 
 const SUPPORTED_DESTINATION_ID = "pipa-rn-br";
@@ -28,6 +32,14 @@ function isInsideSupportedRegion(latitude: number, longitude: number): boolean {
 }
 
 export async function GET(request: Request) {
+  const policy = resolvePlaceBootstrapPolicy();
+  if (!policy.media.enabled) {
+    return NextResponse.json(
+      { error: "Prévia de mídia externa desabilitada para este ambiente." },
+      { status: 404, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
   const url = new URL(request.url);
   const destinationId = url.searchParams.get("destinationId")?.trim();
   const name = url.searchParams.get("name")?.trim() ?? "";
@@ -48,32 +60,53 @@ export async function GET(request: Request) {
     );
   }
 
-  try {
-    const preview = await new WikimediaCommonsPlaceImageAdapter().findSecurePreview({
-      name,
-      latitude,
-      longitude,
-    });
+  const result = await runPlaceBootstrapStep({
+    enabled: policy.media.enabled,
+    maxAttempts: policy.media.maxAttempts,
+    operation: () =>
+      new WikimediaCommonsPlaceImageAdapter().findSecurePreview({
+        name,
+        latitude,
+        longitude,
+      }),
+  });
 
-    if (!preview) {
-      return NextResponse.json(
-        { error: "Nenhuma imagem externa com correspondência segura foi encontrada." },
-        { status: 404, headers: { "Cache-Control": MISS_CACHE_CONTROL } },
-      );
-    }
-
-    return NextResponse.json(preview, {
-      headers: { "Cache-Control": SUCCESS_CACHE_CONTROL },
-    });
-  } catch (error) {
-    console.warn("[place-image-preview] Wikimedia Commons indisponível", {
-      destinationId,
-      name,
-      message: error instanceof Error ? error.message : "erro desconhecido",
+  if (result.status === "failed") {
+    console.warn("[place-bootstrap] media provider degraded", {
+      provider: "wikimedia-commons",
+      status: result.status,
+      attempts: result.attempts,
+      durationMs: result.durationMs,
+      retryable: result.retryable,
     });
     return NextResponse.json(
       { error: "A fonte de imagem externa está indisponível no momento." },
       { status: 503, headers: { "Cache-Control": "no-store" } },
     );
   }
+
+  if (result.status !== "success" || !result.value) {
+    console.info("[place-bootstrap] media preview completed", {
+      provider: "wikimedia-commons",
+      status: result.status,
+      attempts: result.attempts,
+      durationMs: result.durationMs,
+      matched: false,
+    });
+    return NextResponse.json(
+      { error: "Nenhuma imagem externa com correspondência segura foi encontrada." },
+      { status: 404, headers: { "Cache-Control": MISS_CACHE_CONTROL } },
+    );
+  }
+
+  console.info("[place-bootstrap] media preview completed", {
+    provider: "wikimedia-commons",
+    status: result.status,
+    attempts: result.attempts,
+    durationMs: result.durationMs,
+    matched: true,
+  });
+  return NextResponse.json(result.value, {
+    headers: { "Cache-Control": SUCCESS_CACHE_CONTROL },
+  });
 }

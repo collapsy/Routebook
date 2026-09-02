@@ -12,16 +12,21 @@ async function submitAndExpectRedirect(
   await expect(page).toHaveURL(expectedUrl);
 }
 
+async function fillTripCreationBasics(page: Page, tripName: string) {
+  await page.goto("/viagens/nova");
+  await page.getByLabel("Para onde você vai?").fill("Pipa, RN");
+  await page.getByLabel("Nome da viagem").fill(tripName);
+  await page.getByLabel("Quando começa?").fill("2026-08-22");
+  await page.getByLabel("Quando termina?").fill("2026-08-24");
+}
+
 async function createTripWithoutContext(page: Page) {
   const tripName = `Contexto insuficiente ${test.info().project.name} ${Date.now()}`;
 
-  await page.goto("/viagens/nova");
-  await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByLabel("Data de início").fill("2026-08-22");
-  await page.getByLabel("Data de término").fill("2026-08-24");
+  await fillTripCreationBasics(page, tripName);
   await Promise.all([
     page.waitForURL(/\/viagens\?created=1$/),
-    page.getByRole("button", { name: "Criar viagem" }).click(),
+    page.getByRole("button", { name: "Criar meu guia" }).click(),
   ]);
   await Promise.all([
     page.waitForURL(/\/viagens\/[^/?]+$/),
@@ -35,13 +40,10 @@ async function createTripWithoutContext(page: Page) {
 async function createTripWithRecommendationContext(page: Page) {
   const tripName = `Recommendations ${test.info().project.name} ${Date.now()}`;
 
-  await page.goto("/viagens/nova");
-  await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByLabel("Data de início").fill("2026-08-22");
-  await page.getByLabel("Data de término").fill("2026-08-24");
+  await fillTripCreationBasics(page, tripName);
   await Promise.all([
     page.waitForURL(/\/viagens\?created=1$/),
-    page.getByRole("button", { name: "Criar viagem" }).click(),
+    page.getByRole("button", { name: "Criar meu guia" }).click(),
   ]);
   await Promise.all([
     page.waitForURL(/\/viagens\/[^/?]+$/),

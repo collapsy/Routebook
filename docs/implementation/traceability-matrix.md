@@ -884,3 +884,23 @@ Ao concluir um incremento:
 | segunda cidade | Florianópolis zero seed/config |
 | observabilidade | source/raio/contagens/duração sem coordenadas precisas |
 | validação | Documentation/Engineering pendentes no SHA final |
+
+
+## Evidências previstas do RB-INC-176
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-176-place-identity.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-176-place-identity.md` |
+| iniciativa | #411 — M9 / RouteBook Anywhere |
+| issue | #416 |
+| branch | `codex/rb-inc-176-place-identity` |
+| base | `main@b7ee31f158a5ff7fc03033d6d6da29f45618c092` |
+| normalização | sem tokens regionais de Pipa/Tibau/RN/Brasil |
+| matching | categoria + proximidade + nome/endereço + external reference |
+| evidência | match estruturado em `ExternalPlaceReconciliation` |
+| filiais/homônimos | endereço divergente e distância bloqueiam match frouxo |
+| proteção de identidade | unique `provider + externalId` existente + falha fechada entre Destinations |
+| quality signals | externalId não reutilizado; confidence externa não vira rating |
+| regressão | Pipa + Florianópolis/segundo destino sem regra especial |
+| validação | Documentation/Engineering pendentes no SHA final |

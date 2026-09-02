@@ -11,6 +11,16 @@ import { addActivity, createItinerary } from "@routebook/trip-management";
 import { submitAndExpectActionRedirect } from "./support/action-redirect";
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
+async function createTripThroughUi(page: Page, tripName: string) {
+  await page.goto("/viagens/nova");
+  await page.getByLabel("Nome da viagem").fill(tripName);
+  await page.getByLabel("Para onde você vai?").fill("Pipa, RN");
+  await page.getByLabel("Quando começa?").fill("2026-08-22");
+  await page.getByLabel("Quando termina?").fill("2026-08-29");
+  await page.getByRole("button", { name: "Criar meu guia" }).click();
+  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+}
+
 async function openManualComposer(page: Page) {
   if (!new URL(page.url()).searchParams.has("dia")) {
     await page.getByRole("link", { name: /Dia 1/ }).click();
@@ -55,11 +65,7 @@ test("prioriza a timeline do dia vazio antes das ações secundárias", async ({
 test("cria e preserva uma atividade no Dia em foco", async ({ page }, testInfo) => {
   const tripName = `Roteiro ${testInfo.project.name} ${Date.now()}`;
 
-  await page.goto("/viagens/nova");
-  await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByRole("button", { name: "Criar viagem" }).click();
-
-  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+  await createTripThroughUi(page, tripName);
   await page.getByRole("link", { name: tripName }).click();
   await page.getByRole("link", { name: "Abrir roteiro" }).click();
 
@@ -90,9 +96,7 @@ test("remove uma atividade e mantém o mesmo Dia em foco", async ({ page }, test
   const tripName = `Remoção ${testInfo.project.name} ${Date.now()}`;
   const activityTitle = "Atividade removível";
 
-  await page.goto("/viagens/nova");
-  await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByRole("button", { name: "Criar viagem" }).click();
+  await createTripThroughUi(page, tripName);
 
   await page.getByRole("link", { name: tripName }).click();
   await page.getByRole("link", { name: "Abrir roteiro" }).click();
@@ -128,9 +132,7 @@ test("edita uma atividade preservando sua identidade e Dia", async ({ page }, te
   const activityTitle = "Passeio inicial";
   const updatedTitle = "Passeio revisado";
 
-  await page.goto("/viagens/nova");
-  await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByRole("button", { name: "Criar viagem" }).click();
+  await createTripThroughUi(page, tripName);
 
   await page.getByRole("link", { name: tripName }).click();
   await page.getByRole("link", { name: "Abrir roteiro" }).click();
@@ -212,9 +214,7 @@ test("move uma atividade para outro Dia e muda o foco para o destino", async ({
   const tripName = `Movimentação ${testInfo.project.name} ${Date.now()}`;
   const activityTitle = "Passeio para mover";
 
-  await page.goto("/viagens/nova");
-  await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByRole("button", { name: "Criar viagem" }).click();
+  await createTripThroughUi(page, tripName);
 
   await page.getByRole("link", { name: tripName }).click();
   await page.getByRole("link", { name: "Abrir roteiro" }).click();

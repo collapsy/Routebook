@@ -10,7 +10,7 @@ import {
 } from "./authenticated-trip-service";
 import { closeDatabase, getDatabase } from "./client";
 import { accountMemberships, accounts, personalAccountOwnerships } from "./identity-schema";
-import { trips } from "./schema";
+import { tripDestinationProvenance, trips } from "./schema";
 
 const database = getDatabase();
 const now = new Date("2026-08-02T23:00:00.000Z");
@@ -107,7 +107,20 @@ afterAll(async () => {
 describe("createPostgresAuthenticatedTrip", () => {
   it("provisiona uma vez e reutiliza a mesma Account pessoal", async () => {
     const first = await createPostgresAuthenticatedTrip(
-      { userId: primaryUserId, trip: tripInput("Primeira viagem autenticada") },
+      {
+        userId: primaryUserId,
+        trip: tripInput("Primeira viagem autenticada"),
+        destinationProvenance: {
+          provider: "routebook-test-provider",
+          externalReference: "fixture:destination-001",
+          sourceLicense: "test-only",
+          sourceUrl: "https://example.com/destination/001",
+          collectedAt: now,
+          method: "test-resolution",
+          confidenceLevel: "confirmed",
+          metadata: { boundsAvailable: true },
+        },
+      },
       database,
       now,
     );
@@ -132,6 +145,21 @@ describe("createPostgresAuthenticatedTrip", () => {
       .where(inArray(trips.id, [first.trip.id, second.trip.id]));
     expect(persistedTrips).toHaveLength(2);
     expect(persistedTrips.every((trip) => trip.accountId === first.accountId)).toBe(true);
+
+    const provenanceRows = await database
+      .select()
+      .from(tripDestinationProvenance)
+      .where(eq(tripDestinationProvenance.tripId, first.trip.id));
+    expect(provenanceRows).toHaveLength(1);
+    expect(provenanceRows[0]).toMatchObject({
+      tripId: first.trip.id,
+      provider: "routebook-test-provider",
+      externalReference: "fixture:destination-001",
+      sourceLicense: "test-only",
+      method: "test-resolution",
+      confidenceLevel: "confirmed",
+      metadata: { boundsAvailable: true },
+    });
   });
 
   it("mantém Accounts pessoais isoladas entre Users", async () => {

@@ -1,5 +1,16 @@
 import { expect, test } from "@playwright/test";
 
+async function createPipaTripThroughUi(page: import("@playwright/test").Page, tripName: string) {
+  await page.goto("/viagens/nova");
+  await page.getByLabel("Para onde você vai?").fill("Pipa, RN");
+  await page.getByLabel("Nome da viagem").fill(tripName);
+  await page.getByLabel("Quando começa?").fill("2026-08-22");
+  await page.getByLabel("Quando termina?").fill("2026-08-29");
+  await page.getByLabel("Onde vai ficar?").fill("Condomínio Solar Água");
+  await page.getByRole("button", { name: "Criar meu guia" }).click();
+  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+}
+
 test("exibe Minhas viagens com ação de criação", async ({ page }) => {
   await page.goto("/viagens");
 
@@ -10,11 +21,7 @@ test("exibe Minhas viagens com ação de criação", async ({ page }) => {
 test("cria, abre e mantém uma viagem persistida", async ({ page }, testInfo) => {
   const tripName = `Pipa persistida ${testInfo.project.name} ${Date.now()}`;
 
-  await page.goto("/viagens/nova");
-  await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByRole("button", { name: "Criar viagem" }).click();
-
-  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+  await createPipaTripThroughUi(page, tripName);
   await expect(page.getByRole("status")).toContainText("Viagem criada e salva");
   await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
 
@@ -33,9 +40,7 @@ test("cria, abre e mantém uma viagem persistida", async ({ page }, testInfo) =>
 test("configura e mantém o contexto progressivo da viagem", async ({ page }, testInfo) => {
   const tripName = `Contexto Pipa ${testInfo.project.name} ${Date.now()}`;
 
-  await page.goto("/viagens/nova");
-  await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByRole("button", { name: "Criar viagem" }).click();
+  await createPipaTripThroughUi(page, tripName);
   await page.getByRole("link", { name: tripName }).click();
 
   await page.getByRole("link", { name: "Configurar contexto" }).click();
@@ -64,9 +69,10 @@ test("configura e mantém o contexto progressivo da viagem", async ({ page }, te
 
 test("apresenta erro quando o período é invertido", async ({ page }) => {
   await page.goto("/viagens/nova");
-  await page.getByLabel("Data de início").fill("2026-08-29");
-  await page.getByLabel("Data de término").fill("2026-08-22");
-  await page.getByRole("button", { name: "Criar viagem" }).click();
+  await page.getByLabel("Para onde você vai?").fill("Pipa, RN");
+  await page.getByLabel("Quando começa?").fill("2026-08-29");
+  await page.getByLabel("Quando termina?").fill("2026-08-22");
+  await page.getByRole("button", { name: "Criar meu guia" }).click();
 
   await expect(page.getByText("A data final não pode ser anterior à data inicial.")).toBeVisible();
   await expect(page).toHaveURL(/\/viagens\/nova$/);

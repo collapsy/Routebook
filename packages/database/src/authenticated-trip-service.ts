@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { and, eq } from "drizzle-orm";
 
 import { createPersonalAccount } from "@routebook/identity-access";
@@ -6,11 +8,23 @@ import { createTrip, type CreateTripInput, type Trip } from "@routebook/trip-man
 import { authUsers } from "./auth-schema";
 import { getDatabase } from "./client";
 import { accountMemberships, accounts, personalAccountOwnerships } from "./identity-schema";
-import { trips } from "./schema";
+import { tripDestinationProvenance, trips } from "./schema";
+
+export type DestinationResolutionProvenanceInput = Readonly<{
+  provider: string;
+  externalReference: string;
+  sourceLicense: string;
+  sourceUrl?: string;
+  collectedAt: Date;
+  method: string;
+  confidenceLevel: "confirmed" | "high" | "medium" | "low" | "unknown";
+  metadata?: Readonly<Record<string, unknown>>;
+}>;
 
 export type CreateAuthenticatedTripInput = Readonly<{
   userId: string;
   trip: Omit<CreateTripInput, "ownerName" | "ownerUserId">;
+  destinationProvenance?: DestinationResolutionProvenanceInput;
 }>;
 
 export type CreateAuthenticatedTripResult = Readonly<{
@@ -21,10 +35,51 @@ export type CreateAuthenticatedTripResult = Readonly<{
 }>;
 
 export class AuthenticatedTripCreationError extends Error {
-  constructor(public readonly code: "user-not-found" | "personal-account-invalid") {
+  constructor(
+    public readonly code:
+      "user-not-found" | "personal-account-invalid" | "destination-provenance-invalid",
+  ) {
     super(`Authenticated Trip creation failed: ${code}.`);
     this.name = "AuthenticatedTripCreationError";
   }
+}
+
+const DESTINATION_CONFIDENCE_LEVELS = new Set(["confirmed", "high", "medium", "low", "unknown"]);
+
+function normalizeDestinationProvenance(
+  input: DestinationResolutionProvenanceInput,
+): DestinationResolutionProvenanceInput {
+  const provider = input.provider.trim();
+  const externalReference = input.externalReference.trim();
+  const sourceLicense = input.sourceLicense.trim();
+  const sourceUrl = input.sourceUrl?.trim() || undefined;
+  const method = input.method.trim();
+
+  if (
+    !provider ||
+    provider.length > 80 ||
+    !externalReference ||
+    externalReference.length > 240 ||
+    !sourceLicense ||
+    !method ||
+    method.length > 120 ||
+    !(input.collectedAt instanceof Date) ||
+    Number.isNaN(input.collectedAt.getTime()) ||
+    !DESTINATION_CONFIDENCE_LEVELS.has(input.confidenceLevel)
+  ) {
+    throw new AuthenticatedTripCreationError("destination-provenance-invalid");
+  }
+
+  return {
+    provider,
+    externalReference,
+    sourceLicense,
+    ...(sourceUrl ? { sourceUrl } : {}),
+    collectedAt: input.collectedAt,
+    method,
+    confidenceLevel: input.confidenceLevel,
+    metadata: input.metadata ?? {},
+  };
 }
 
 function personalAccountName(userName: string): string {
@@ -35,6 +90,7 @@ async function persistTrip(
   transaction: Parameters<Parameters<ReturnType<typeof getDatabase>["transaction"]>[0]>[0],
   trip: Trip,
   accountId: string,
+  destinationProvenance?: DestinationResolutionProvenanceInput,
 ): Promise<void> {
   await transaction.insert(trips).values({
     id: trip.id,
@@ -58,6 +114,22 @@ async function persistTrip(
     createdAt: trip.createdAt,
     updatedAt: trip.updatedAt,
   });
+
+  if (destinationProvenance) {
+    await transaction.insert(tripDestinationProvenance).values({
+      id: randomUUID(),
+      tripId: trip.id,
+      provider: destinationProvenance.provider,
+      externalReference: destinationProvenance.externalReference,
+      sourceLicense: destinationProvenance.sourceLicense,
+      sourceUrl: destinationProvenance.sourceUrl,
+      collectedAt: destinationProvenance.collectedAt,
+      method: destinationProvenance.method,
+      confidenceLevel: destinationProvenance.confidenceLevel,
+      metadata: { ...(destinationProvenance.metadata ?? {}) },
+      createdAt: trip.createdAt,
+    });
+  }
 }
 
 export async function createPostgresAuthenticatedTrip(
@@ -65,6 +137,10 @@ export async function createPostgresAuthenticatedTrip(
   database: ReturnType<typeof getDatabase> = getDatabase(),
   now = new Date(),
 ): Promise<CreateAuthenticatedTripResult> {
+  const destinationProvenance = input.destinationProvenance
+    ? normalizeDestinationProvenance(input.destinationProvenance)
+    : undefined;
+
   return database.transaction(async (transaction) => {
     const lockedUsers = await transaction
       .select({ id: authUsers.id, name: authUsers.name })
@@ -120,7 +196,7 @@ export async function createPostgresAuthenticatedTrip(
         throw new AuthenticatedTripCreationError("personal-account-invalid");
       }
 
-      await persistTrip(transaction, trip, ownership.accountId);
+      await persistTrip(transaction, trip, ownership.accountId, destinationProvenance);
       return Object.freeze({
         trip,
         accountId: ownership.accountId,
@@ -158,7 +234,7 @@ export async function createPostgresAuthenticatedTrip(
       accountId: personalAccount.account.id,
       createdAt: now,
     });
-    await persistTrip(transaction, trip, personalAccount.account.id);
+    await persistTrip(transaction, trip, personalAccount.account.id, destinationProvenance);
 
     return Object.freeze({
       trip,

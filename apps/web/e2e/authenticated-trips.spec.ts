@@ -24,7 +24,10 @@ test("cria Trip autenticada e impede leitura por outro User", async ({ page }, t
   await page.goto("/viagens/nova");
   await expect(page.getByLabel("Responsável pela viagem")).toHaveCount(0);
   await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByRole("button", { name: "Criar viagem" }).click();
+  await page.getByLabel("Para onde você vai?").fill("Pipa, RN");
+  await page.getByLabel("Quando começa?").fill("2026-10-10");
+  await page.getByLabel("Quando termina?").fill("2026-10-12");
+  await page.getByRole("button", { name: "Criar meu guia" }).click();
 
   await expect(page).toHaveURL(/\/viagens\?created=1$/);
   const tripLink = page.getByRole("link", { name: tripName });
@@ -55,6 +58,32 @@ test("cria Trip autenticada e impede leitura por outro User", async ({ page }, t
   await expect(page.getByText(tripName, { exact: true })).toHaveCount(0);
 });
 
+test("cria Trip para Florianópolis sem destino fixo na interface", async ({ page }, testInfo) => {
+  const suffix = "rb-inc-174-" + testInfo.project.name + "-" + Date.now();
+  const email = suffix + "@example.com";
+  const password = "routebook-e2e-password";
+  const tripName = "Florianópolis " + suffix;
+
+  await page.goto("/criar-conta?next=%2Fviagens");
+  await page.getByLabel("Nome").fill("Owner RB-INC-174");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Senha").fill(password);
+  await page.getByRole("button", { name: "Criar conta" }).click();
+  await expect(page).toHaveURL(/\/viagens$/);
+
+  await page.goto("/viagens/nova");
+  await expect(page.getByLabel("Para onde você vai?")).toBeEditable();
+  await page.getByLabel("Nome da viagem").fill(tripName);
+  await page.getByLabel("Para onde você vai?").fill("Florianópolis, SC");
+  await page.getByLabel("Quando começa?").fill("2026-11-10");
+  await page.getByLabel("Quando termina?").fill("2026-11-17");
+  await page.getByRole("button", { name: "Criar meu guia" }).click();
+
+  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+  const card = page.getByRole("article").filter({ hasText: tripName });
+  await expect(card).toContainText("Florianópolis, SC");
+});
+
 test("owner cancela ou confirma a exclusão definitiva da própria Trip", async ({
   page,
 }, testInfo) => {
@@ -72,7 +101,10 @@ test("owner cancela ou confirma a exclusão definitiva da própria Trip", async 
 
   await page.goto("/viagens/nova");
   await page.getByLabel("Nome da viagem").fill(tripName);
-  await page.getByRole("button", { name: "Criar viagem" }).click();
+  await page.getByLabel("Para onde você vai?").fill("Pipa, RN");
+  await page.getByLabel("Quando começa?").fill("2026-12-01");
+  await page.getByLabel("Quando termina?").fill("2026-12-03");
+  await page.getByRole("button", { name: "Criar meu guia" }).click();
   await expect(page).toHaveURL(/\/viagens\?created=1$/);
 
   await page.getByRole("link", { name: tripName }).click();

@@ -410,6 +410,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-176 | Place Identity destination-agnostic e reconciliação conservadora | Implementation | Draft | 0.1.0 | [rb-inc-176-place-identity.md](./implementation/increments/rb-inc-176-place-identity.md) |
 | RB-CTX-176 | Context Pack do RB-INC-176 — Place Identity destination-agnostic | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-176-place-identity.md](./implementation/context-packs/rb-inc-176-place-identity.md) |
 
+| RB-INC-177 | Destination Bootstrap progressivo, degradação e observabilidade | Implementation | Draft | 0.1.0 | [rb-inc-177-destination-bootstrap.md](./implementation/increments/rb-inc-177-destination-bootstrap.md) |
+| RB-CTX-177 | Context Pack do RB-INC-177 — Destination Bootstrap | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-177-destination-bootstrap.md](./implementation/context-packs/rb-inc-177-destination-bootstrap.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

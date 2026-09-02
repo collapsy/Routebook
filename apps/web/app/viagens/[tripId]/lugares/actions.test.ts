@@ -23,6 +23,7 @@ const databaseMocks = vi.hoisted(() => {
   }
 
   return {
+    listPublishedWithinRadius: vi.fn(),
     promote: vi.fn(),
     PlacePromotionServiceError,
   };
@@ -37,6 +38,10 @@ vi.mock("next/navigation", () => ({
   redirect: navigationMocks.redirect,
 }));
 vi.mock("@routebook/database", () => ({
+  DrizzlePlaceRepository: class {
+    listPublishedWithinRadius = databaseMocks.listPublishedWithinRadius;
+  },
+  DrizzleSavedPlaceRepository: class {},
   DrizzleTripRepository: class {
     findById = vi.fn();
   },
@@ -72,7 +77,14 @@ const candidate = Object.freeze({
 });
 const trip = {
   id: tripId,
-  destination: { name: "Pipa, Tibau do Sul - RN" },
+  destination: {
+    name: "Pipa, Tibau do Sul - RN",
+    type: "district",
+    countryCode: "BR",
+    latitude: -6.2302,
+    longitude: -35.0503,
+    timeZone: "America/Fortaleza",
+  },
   accommodation: {
     name: "Hospedagem teste",
     coordinate: { latitude: -6.2302, longitude: -35.0503 },
@@ -105,6 +117,21 @@ describe("promoteExternalPlaceAction", () => {
       },
     });
     tripMocks.findTripById.mockResolvedValue(trip);
+    databaseMocks.listPublishedWithinRadius.mockResolvedValue([
+      {
+        id: "place-1",
+        destinationId: "pipa-rn-br",
+        slug: "praia-do-amor",
+        name: "Praia do Amor",
+        summary: "Lugar publicado usado apenas como identidade editorial no teste.",
+        category: "beach",
+        latitude: -6.2386,
+        longitude: -35.0455,
+        publicationStatus: "published",
+        createdAt: new Date("2026-08-16T12:00:00Z"),
+        updatedAt: new Date("2026-08-16T12:00:00Z"),
+      },
+    ]);
     overtureMocks.search.mockResolvedValue([candidate]);
     databaseMocks.promote.mockResolvedValue({
       status: "created",
@@ -138,8 +165,11 @@ describe("promoteExternalPlaceAction", () => {
     await expect(promoteExternalPlaceAction(formData)).rejects.toThrow("NEXT_REDIRECT");
 
     expect(accessMocks.resolve).toHaveBeenCalledWith({ tripId, action: "trip:edit" });
+    expect(databaseMocks.listPublishedWithinRadius).toHaveBeenCalledWith({
+      center: { latitude: -6.2302, longitude: -35.0503 },
+      radiusMeters: 25_000,
+    });
     expect(overtureMocks.search).toHaveBeenCalledWith({
-      destinationId: "pipa-rn-br",
       center: { latitude: -6.2302, longitude: -35.0503 },
       radiusMeters: 3_000,
       categories: ["beach"],
@@ -162,6 +192,34 @@ describe("promoteExternalPlaceAction", () => {
     expect(redirectPath).not.toContain("example.invalid");
     expect(redirectPath).not.toContain("adulterado");
     expect(redirectPath).not.toContain("licenca-inventada");
+  });
+
+  it("não inventa destinationId editorial para Destination zero-seed", async () => {
+    tripMocks.findTripById.mockResolvedValue({
+      ...trip,
+      destination: {
+        name: "Florianópolis, SC",
+        type: "city",
+        countryCode: "BR",
+        latitude: -27.5949,
+        longitude: -48.5482,
+        timeZone: "America/Sao_Paulo",
+      },
+      accommodation: undefined,
+    });
+    databaseMocks.listPublishedWithinRadius.mockResolvedValue([]);
+
+    await expect(promoteExternalPlaceAction(promotionForm())).rejects.toThrow("NEXT_REDIRECT");
+
+    expect(databaseMocks.listPublishedWithinRadius).toHaveBeenCalledWith({
+      center: { latitude: -27.5949, longitude: -48.5482 },
+      radiusMeters: 25_000,
+    });
+    expect(overtureMocks.search).not.toHaveBeenCalled();
+    expect(databaseMocks.promote).not.toHaveBeenCalled();
+    expect(navigationMocks.redirect).toHaveBeenCalledWith(
+      expect.stringContaining("erroPromocao=destino-nao-suportado"),
+    );
   });
 
   it("falha fechado quando o candidato não é reencontrado", async () => {

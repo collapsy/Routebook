@@ -409,8 +409,7 @@ function identitySignals(candidate: ExternalPlaceCandidate, place: Place): Ident
   const sharedDistinctiveTokens = distinctiveIdentityTokens(sharedTokens);
   const minimumTokenCount = Math.min(candidateTokens.length, placeTokens.length);
   const unionTokenCount = new Set([...candidateTokens, ...placeTokens]).size;
-  const minimumCoverage =
-    minimumTokenCount === 0 ? 0 : sharedTokens.length / minimumTokenCount;
+  const minimumCoverage = minimumTokenCount === 0 ? 0 : sharedTokens.length / minimumTokenCount;
   const jaccard = unionTokenCount === 0 ? 0 : sharedTokens.length / unionTokenCount;
 
   const tokenIdentity =

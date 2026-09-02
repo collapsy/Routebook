@@ -44,6 +44,12 @@ import {
   rankPlaceDiscoveryItems,
   type PlaceDiscoveryOrder,
 } from "../../../../lib/place-discovery-ranking";
+import {
+  derivePlaceBootstrapStage,
+  placeBootstrapStageCopy,
+  resolvePlaceBootstrapPolicy,
+  runPlaceBootstrapStep,
+} from "../../../../lib/place-bootstrap";
 import { resolveConfiguredPlaceQualityProvider } from "../../../../lib/place-quality-provider";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
@@ -83,7 +89,6 @@ type DiscoverySearchParams = {
 };
 
 const distanceOptions = [1, 3, 5, 10] as const;
-const externalDiscoveryScanLimit = 200;
 const externalDiscoveryDisplayLimit = 60;
 
 const orderLabels: Readonly<Record<PlaceDiscoveryOrder, string>> = Object.freeze({
@@ -188,6 +193,7 @@ function CanonicalDiscoveryCard({
   quality,
   qualitySignals,
   categoryRank,
+  externalMediaEnabled,
 }: Readonly<{
   item: CanonicalDiscoveryItem;
   tripId: string;
@@ -200,6 +206,7 @@ function CanonicalDiscoveryCard({
   quality?: PlaceQualityScore;
   qualitySignals?: PlaceQualitySignals;
   categoryRank?: number;
+  externalMediaEnabled: boolean;
 }>) {
   const { place, distanceMeters } = item;
   const candidate = item.kind === "enriched" ? item.candidate : undefined;
@@ -241,6 +248,7 @@ function CanonicalDiscoveryCard({
         <ExternalPlaceImagePreview
           category={place.category}
           destinationId={destinationId}
+          enabled={externalMediaEnabled}
           latitude={candidate.latitude}
           longitude={candidate.longitude}
           placeName={place.name}
@@ -332,6 +340,7 @@ function ExternalDiscoveryCard({
   quality,
   qualitySignals,
   categoryRank,
+  externalMediaEnabled,
 }: Readonly<{
   item: ExternalPlaceDiscoveryItem;
   tripId: string;
@@ -348,6 +357,7 @@ function ExternalDiscoveryCard({
   quality?: PlaceQualityScore;
   qualitySignals?: PlaceQualitySignals;
   categoryRank?: number;
+  externalMediaEnabled: boolean;
 }>) {
   const { candidate, distanceMeters } = item;
   const coordinate = { latitude: candidate.latitude, longitude: candidate.longitude };
@@ -372,6 +382,7 @@ function ExternalDiscoveryCard({
       <ExternalPlaceImagePreview
         category={candidate.category}
         destinationId={destinationId}
+        enabled={externalMediaEnabled}
         latitude={candidate.latitude}
         longitude={candidate.longitude}
         placeName={candidate.name}
@@ -480,6 +491,15 @@ export default async function PlacesPage({
       : {}),
   });
   const region = regionResolution.status === "resolved" ? regionResolution.region : undefined;
+  const bootstrapPolicy = resolvePlaceBootstrapPolicy();
+  console.info("[place-bootstrap] started", {
+    destinationResolved: true,
+    accommodationResolved: Boolean(accommodationCoordinate),
+    regionSource: region?.source ?? "unavailable",
+    discoveryEnabled: bootstrapPolicy.discovery.enabled,
+    qualityEnabled: bootstrapPolicy.quality.enabled,
+    mediaEnabled: bootstrapPolicy.media.enabled,
+  });
   const maximumDistanceMeters = region ? requestedMaximumDistanceMeters : undefined;
   const placeRepository = new DrizzlePlaceRepository();
   const [publishedPlaces, savedPlaces] = await Promise.all([
@@ -540,21 +560,31 @@ export default async function PlacesPage({
   let externalLinkedCount = 0;
   let externalRejectedCount = 0;
   let externalDiscoveryError: string | undefined;
+  let discoveryStatus: "success" | "disabled" | "failed" = "disabled";
+  let discoveryAttempts = 0;
+  let discoveryDurationMs = 0;
 
   if (discoverExternal && region) {
-    const discoveryStartedAt = process.hrtime.bigint();
-    try {
-      const [references, candidates] = await Promise.all([
-        new DrizzlePlaceExternalReferenceRepository().listByPlaceIds(
-          publishedPlaces.map((place) => place.id),
-        ),
+    const references = await new DrizzlePlaceExternalReferenceRepository().listByPlaceIds(
+      publishedPlaces.map((place) => place.id),
+    );
+    const discoveryResult = await runPlaceBootstrapStep({
+      enabled: bootstrapPolicy.discovery.enabled,
+      maxAttempts: bootstrapPolicy.discovery.maxAttempts,
+      operation: () =>
         new OverturePmtilesPlaceSearchAdapter().search({
           center: region.center,
           radiusMeters: region.externalRadiusMeters,
           ...(category ? { categories: [category] } : {}),
-          limit: externalDiscoveryScanLimit,
+          limit: bootstrapPolicy.discovery.candidateLimit,
         }),
-      ]);
+    });
+    discoveryStatus = discoveryResult.status;
+    discoveryAttempts = discoveryResult.attempts;
+    discoveryDurationMs = discoveryResult.durationMs;
+
+    if (discoveryResult.status === "success") {
+      const candidates = discoveryResult.value;
       const reconciliations = candidates.map((candidate) =>
         reconcileExternalPlaceCandidate(candidate, publishedPlaces, references),
       );
@@ -569,32 +599,14 @@ export default async function PlacesPage({
       externalReconciliations = reconciliations.filter(
         (result) => result.status !== "new" || matchesExternalSearch(result, search),
       );
-      console.info("[place-discovery] external reconciliation completed", {
-        provider: "overture-pmtiles-preview",
-        regionSource: region.source,
-        radiusMeters: region.externalRadiusMeters,
-        durationMs: Number(process.hrtime.bigint() - discoveryStartedAt) / 1_000_000,
-        publishedCount: publishedPlaces.length,
-        candidateCount: externalCandidateCount,
-        newCandidateCount: reconciliations.filter((result) => result.status === "new").length,
-        possibleMatchCount: externalPossibleMatchCount,
-        linkedCount: externalLinkedCount,
-        rejectedCount: externalRejectedCount,
-      });
-    } catch (error) {
-      console.error("[place-discovery] external provider unavailable", {
-        provider: "overture-pmtiles-preview",
-        regionSource: region.source,
-        radiusMeters: region.externalRadiusMeters,
-        durationMs: Number(process.hrtime.bigint() - discoveryStartedAt) / 1_000_000,
-        error: error instanceof Error ? error.message : String(error),
-      });
+    } else if (discoveryResult.status === "failed") {
       externalDiscoveryError =
         "A fonte externa não respondeu agora. O catálogo curado continua disponível normalmente.";
     }
   }
 
-  const hasExternalCoverage = discoverExternal && Boolean(region) && !externalDiscoveryError;
+  const hasExternalCoverage =
+    discoverExternal && Boolean(region) && discoveryStatus === "success";
   const filteredPublishedPlaces = filteredPlaces.map(({ place }) => place);
   const allDiscoveryItems = region
     ? buildPlaceDiscoveryFeed({
@@ -616,20 +628,33 @@ export default async function PlacesPage({
   const qualityProvider = resolveConfiguredPlaceQualityProvider();
   let qualityMatches: PlaceQualitySignalMatch[] = [];
   let qualityProviderError: string | undefined;
+  let qualityStatus: "success" | "disabled" | "failed" = "disabled";
+  let qualityAttempts = 0;
+  let qualityDurationMs = 0;
   if (qualityProvider.status === "configured") {
-    try {
-      qualityMatches = [
-        ...(await qualityProvider.port.findSignals(
-          buildPlaceDiscoveryQualityTargets(discoveryItems),
-        )),
-      ];
-    } catch (error) {
-      console.error("Falha ao obter sinais externos de qualidade", {
-        provider: qualityProvider.provider,
-        error: error instanceof Error ? error.message : String(error),
-      });
+    const qualityResult = await runPlaceBootstrapStep({
+      enabled: bootstrapPolicy.quality.enabled,
+      maxAttempts: bootstrapPolicy.quality.maxAttempts,
+      operation: () =>
+        qualityProvider.port.findSignals(
+          buildPlaceDiscoveryQualityTargets(discoveryItems).slice(
+            0,
+            bootstrapPolicy.quality.targetLimit,
+          ),
+        ),
+    });
+    qualityStatus = qualityResult.status;
+    qualityAttempts = qualityResult.attempts;
+    qualityDurationMs = qualityResult.durationMs;
+
+    if (qualityResult.status === "success") {
+      qualityMatches = [...qualityResult.value];
+    } else if (qualityResult.status === "failed") {
       qualityProviderError =
         "Os sinais de qualidade não responderam agora. A Discovery continua ordenada por proximidade.";
+    } else {
+      qualityProviderError =
+        "O enriquecimento de qualidade está pausado neste ambiente. Os lugares continuam disponíveis por proximidade.";
     }
   }
 
@@ -663,6 +688,24 @@ export default async function PlacesPage({
     hasExternalCoverage &&
     showAllExternal &&
     availableExternalCount > externalDiscoveryDisplayLimit;
+  const externalMediaItemIds = new Set(
+    destinationId && bootstrapPolicy.media.enabled
+      ? ranking.items
+          .filter(({ item }) => {
+            if (item.kind === "external") return true;
+            return item.kind === "enriched" && !item.place.primaryImage;
+          })
+          .slice(0, bootstrapPolicy.media.previewBudget)
+          .map(({ item }) => item.id)
+      : [],
+  );
+  const bootstrapStage = derivePlaceBootstrapStage({
+    regionResolved: Boolean(region),
+    safePlaceCount: discoveryItems.length,
+    discoveryStatus,
+    mediaExpected: externalMediaItemIds.size > 0,
+  });
+  const bootstrapCopy = placeBootstrapStageCopy(bootstrapStage);
   const mapPoints: TripMapPoint[] = ranking.items.map(({ item }) => {
     if (item.kind !== "external") {
       const coordinate =
@@ -699,6 +742,32 @@ export default async function PlacesPage({
   }
   const distanceReferenceLabel = region?.distanceReferenceLabel ?? "da referência espacial";
 
+  console.info("[place-bootstrap] completed", {
+    destinationResolved: true,
+    accommodationResolved: Boolean(accommodationCoordinate),
+    regionSource: region?.source ?? "unavailable",
+    stage: bootstrapStage,
+    publishedCount: publishedPlaces.length,
+    candidateCount: externalCandidateCount,
+    possibleMatchCount: externalPossibleMatchCount,
+    linkedCount: externalLinkedCount,
+    rejectedCount: externalRejectedCount,
+    qualityMatchCount: qualityMatches.length,
+    mediaPreviewBudget: bootstrapPolicy.media.previewBudget,
+    mediaPreviewEligibleCount: externalMediaItemIds.size,
+    discovery: {
+      status: discoveryStatus,
+      attempts: discoveryAttempts,
+      durationMs: discoveryDurationMs,
+    },
+    quality: {
+      status: qualityStatus,
+      attempts: qualityAttempts,
+      durationMs: qualityDurationMs,
+    },
+    providerInvocationCount: discoveryAttempts + qualityAttempts,
+  });
+
   return (
     <section className="app-page trip-overview-page">
       <Link className="back-link" href={`/viagens/${tripId}`}>
@@ -716,6 +785,16 @@ export default async function PlacesPage({
           </p>
         </div>
       </header>
+
+      <section
+        aria-label="Status do guia"
+        className={styles.notice}
+        data-place-bootstrap-stage={bootstrapStage}
+        role="status"
+      >
+        <strong>{bootstrapCopy.label}</strong>
+        <p>{bootstrapCopy.description}</p>
+      </section>
 
       <form action={`/viagens/${tripId}/lugares`} className={styles.filters} method="get">
         {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
@@ -992,6 +1071,7 @@ export default async function PlacesPage({
                 key={item.id}
                 rankingOrderLabel={orderLabels[ranking.order]}
                 rankingPosition={position}
+                externalMediaEnabled={externalMediaItemIds.has(item.id)}
                 {...(quality ? { quality } : {})}
                 {...(signals ? { qualitySignals: signals } : {})}
                 {...(categoryRankByItemId.has(item.id)
@@ -1013,6 +1093,7 @@ export default async function PlacesPage({
                 key={item.id}
                 rankingOrderLabel={orderLabels[ranking.order]}
                 rankingPosition={position}
+                externalMediaEnabled={externalMediaItemIds.has(item.id)}
                 {...(quality ? { quality } : {})}
                 {...(signals ? { qualitySignals: signals } : {})}
                 {...(categoryRankByItemId.has(item.id)

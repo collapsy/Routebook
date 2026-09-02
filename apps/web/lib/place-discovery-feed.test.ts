@@ -386,7 +386,7 @@ describe("buildPlaceDiscoveryFeed", () => {
     ).toEqual(expect.arrayContaining(["madeiro", "cacimbinhas"]));
   });
 
-  it("suprime alias distante de praia sem enriquecer a coordenada canônica", () => {
+  it("mantém alias distante de praia como candidato separado", () => {
     const published = publishedPlace({
       name: "Praia do Madeiro",
       slug: "praia-do-madeiro",
@@ -409,14 +409,11 @@ describe("buildPlaceDiscoveryFeed", () => {
       reference,
     });
 
-    expect(result).toHaveLength(1);
-    expect(result[0]).toMatchObject({
-      kind: "published",
-      place: published,
-    });
+    expect(result).toHaveLength(2);
+    expect(result.map((item) => item.kind)).toEqual(expect.arrayContaining(["published", "external"]));
   });
 
-  it("suprime typo distante de praia quando a âncora canônica é inequívoca", () => {
+  it("mantém typo distante de praia como candidato separado", () => {
     const published = publishedPlace({
       name: "Praia de Cacimbinhas",
       slug: "praia-de-cacimbinhas",
@@ -438,8 +435,40 @@ describe("buildPlaceDiscoveryFeed", () => {
       reference,
     });
 
-    expect(result).toHaveLength(1);
-    expect(result[0]?.kind).toBe("published");
+    expect(result).toHaveLength(2);
+    expect(result.map((item) => item.kind)).toEqual(expect.arrayContaining(["published", "external"]));
+  });
+
+  it("não deduplica filiais homônimas com endereços divergentes", () => {
+    const first = externalCandidate({
+      externalId: "cafe-centro",
+      name: "Café Cultura",
+      providerCategory: "cafe",
+      category: "gastronomy",
+      latitude: -27.596,
+      longitude: -48.549,
+      addressLabel: "Rua Felipe Schmidt, 100, Florianópolis — SC",
+    });
+    const second = externalCandidate({
+      externalId: "cafe-bocaiuva",
+      name: "Café Cultura",
+      providerCategory: "cafe",
+      category: "gastronomy",
+      latitude: -27.5962,
+      longitude: -48.5491,
+      addressLabel: "Rua Bocaiúva, 200, Florianópolis — SC",
+    });
+
+    const result = buildPlaceDiscoveryFeed({
+      publishedPlaces: [],
+      externalCandidates: [first, second],
+      reference: { latitude: -27.596, longitude: -48.549 },
+    });
+
+    expect(result).toHaveLength(2);
+    expect(
+      result.filter((item) => item.kind === "external").map((item) => item.candidate.externalId),
+    ).toEqual(expect.arrayContaining(["cafe-centro", "cafe-bocaiuva"]));
   });
 
   it("não aplica limite aos Places canônicos ou enriquecidos", () => {

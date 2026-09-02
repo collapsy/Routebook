@@ -125,7 +125,11 @@ test("permanece neutra quando o contexto é insuficiente", async ({ page }) => {
   await expect(
     page.getByRole("link", { name: "Configurar dados para recomendações", exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Informar hospedagem" })).toBeVisible();
+  await expect(
+    page
+      .getByLabel("O que vale a pena considerar?")
+      .getByRole("link", { name: "Informar hospedagem" }),
+  ).toBeVisible();
 });
 
 test("mostra decisão contextual sem aplicar uma escolha", async ({ page }) => {

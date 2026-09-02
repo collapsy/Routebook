@@ -58,6 +58,10 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
 
   await page.goto(`/viagens/${trip.id}/lugares`);
 
+  const bootstrapStatus = page.getByLabel("Status do guia");
+  await expect(bootstrapStatus).toHaveAttribute("data-place-bootstrap-stage", "enriching");
+  await expect(bootstrapStatus).toContainText("Enriquecendo seu guia");
+
   const externalCard = page.locator('[data-place-source="external"]').first();
   await expect(externalCard).toBeVisible({ timeout: 20_000 });
   await externalCard.scrollIntoViewIfNeeded();

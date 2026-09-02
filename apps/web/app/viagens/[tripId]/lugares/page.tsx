@@ -542,7 +542,7 @@ export default async function PlacesPage({
   let externalDiscoveryError: string | undefined;
 
   if (discoverExternal && region) {
-    const discoveryStartedAt = Date.now();
+    const discoveryStartedAt = process.hrtime.bigint();
     try {
       const [references, candidates] = await Promise.all([
         new DrizzlePlaceExternalReferenceRepository().listByPlaceIds(
@@ -573,7 +573,7 @@ export default async function PlacesPage({
         provider: "overture-pmtiles-preview",
         regionSource: region.source,
         radiusMeters: region.externalRadiusMeters,
-        durationMs: Date.now() - discoveryStartedAt,
+        durationMs: Number(process.hrtime.bigint() - discoveryStartedAt) / 1_000_000,
         publishedCount: publishedPlaces.length,
         candidateCount: externalCandidateCount,
         newCandidateCount: reconciliations.filter((result) => result.status === "new").length,
@@ -586,7 +586,7 @@ export default async function PlacesPage({
         provider: "overture-pmtiles-preview",
         regionSource: region.source,
         radiusMeters: region.externalRadiusMeters,
-        durationMs: Date.now() - discoveryStartedAt,
+        durationMs: Number(process.hrtime.bigint() - discoveryStartedAt) / 1_000_000,
         error: error instanceof Error ? error.message : String(error),
       });
       externalDiscoveryError =

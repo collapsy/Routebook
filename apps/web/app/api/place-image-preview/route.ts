@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 
-import {
-  resolvePlaceBootstrapPolicy,
-  runPlaceBootstrapStep,
-} from "../../../lib/place-bootstrap";
+import { resolvePlaceBootstrapPolicy, runPlaceBootstrapStep } from "../../../lib/place-bootstrap";
 import { WikimediaCommonsPlaceImageAdapter } from "../../../lib/wikimedia-place-image";
 
 const SUPPORTED_DESTINATION_ID = "pipa-rn-br";

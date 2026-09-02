@@ -605,8 +605,7 @@ export default async function PlacesPage({
     }
   }
 
-  const hasExternalCoverage =
-    discoverExternal && Boolean(region) && discoveryStatus === "success";
+  const hasExternalCoverage = discoverExternal && Boolean(region) && discoveryStatus === "success";
   const filteredPublishedPlaces = filteredPlaces.map(({ place }) => place);
   const allDiscoveryItems = region
     ? buildPlaceDiscoveryFeed({

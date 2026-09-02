@@ -120,7 +120,8 @@ export function resolvePlaceBootstrapPolicy(
 }
 
 export function isRetryablePlaceProviderError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+  const message =
+    error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
   return [
     "429",
     "500",
@@ -151,9 +152,7 @@ export async function runPlaceBootstrapStep<T>(
 ): Promise<PlaceBootstrapStepResult<T>> {
   if (!input.enabled) return { status: "disabled", attempts: 0, durationMs: 0 };
 
-  const now =
-    input.now ??
-    (() => Number(process.hrtime.bigint()) / 1_000_000);
+  const now = input.now ?? (() => Number(process.hrtime.bigint()) / 1_000_000);
   const sleep =
     input.sleep ??
     ((milliseconds: number) =>
@@ -196,12 +195,14 @@ export async function runPlaceBootstrapStep<T>(
   };
 }
 
-export function derivePlaceBootstrapStage(input: Readonly<{
-  regionResolved: boolean;
-  safePlaceCount: number;
-  discoveryStatus: PlaceBootstrapStepResult<unknown>["status"];
-  mediaExpected: boolean;
-}>): PlaceBootstrapStage {
+export function derivePlaceBootstrapStage(
+  input: Readonly<{
+    regionResolved: boolean;
+    safePlaceCount: number;
+    discoveryStatus: PlaceBootstrapStepResult<unknown>["status"];
+    mediaExpected: boolean;
+  }>,
+): PlaceBootstrapStage {
   if (!input.regionResolved) return "preparing";
   if (input.safePlaceCount === 0 && input.discoveryStatus === "failed") return "discovering";
   if (input.safePlaceCount > 0 && input.mediaExpected) return "enriching";

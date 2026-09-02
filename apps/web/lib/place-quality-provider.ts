@@ -13,6 +13,7 @@ type ProviderCandidate = Readonly<{
   name: string;
   latitude: number;
   longitude: number;
+  addressLabel?: string;
   targetedForId?: string;
   rating?: number;
   ratingScaleMax?: number;
@@ -47,7 +48,7 @@ const GOOGLE_TARGETED_FALLBACK_LIMIT_PER_CATEGORY = 4;
 const GOOGLE_TARGETED_FALLBACK_PAGE_SIZE = 5;
 const GOOGLE_TARGETED_FALLBACK_RADIUS_METERS = 2_500;
 const GOOGLE_FIELD_MASK =
-  "places.id,places.displayName,places.location,places.rating,places.userRatingCount";
+  "places.id,places.displayName,places.location,places.formattedAddress,places.rating,places.userRatingCount";
 
 const CATEGORY_QUERY: Readonly<Record<PlaceCategory, string>> = Object.freeze({
   beach: "praias",
@@ -58,7 +59,10 @@ const CATEGORY_QUERY: Readonly<Record<PlaceCategory, string>> = Object.freeze({
 
 const IDENTITY_STOPWORDS = new Set([
   "a",
+  "an",
+  "and",
   "as",
+  "at",
   "bar",
   "bares",
   "cafe",
@@ -68,25 +72,33 @@ const IDENTITY_STOPWORDS = new Set([
   "da",
   "das",
   "de",
+  "del",
   "do",
   "dos",
   "e",
+  "el",
   "em",
+  "en",
+  "la",
+  "las",
+  "los",
   "na",
   "nas",
   "no",
   "nos",
   "o",
+  "of",
   "os",
-  "pipa",
   "praia",
   "restaurant",
   "restaurante",
   "restaurantes",
-  "rn",
-  "tibau",
-  "sul",
+  "the",
+  "y",
 ]);
+
+const EXACT_NAME_MAX_DISTANCE_METERS = 300;
+const TOKEN_MATCH_MAX_DISTANCE_METERS = 700;
 
 function cleanText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -100,7 +112,7 @@ function normalizeIdentity(value: string): string {
   return value
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("pt-BR")
+    .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .trim()
     .replace(/\s+/g, " ");
@@ -116,6 +128,16 @@ function candidateDistance(target: PlaceQualityTarget, candidate: ProviderCandid
   return placeDistanceMeters(target, candidate);
 }
 
+function addressRelationship(
+  target: PlaceQualityTarget,
+  candidate: ProviderCandidate,
+): "same" | "different" | "unknown" {
+  if (!target.addressLabel || !candidate.addressLabel) return "unknown";
+  return normalizeIdentity(target.addressLabel) === normalizeIdentity(candidate.addressLabel)
+    ? "same"
+    : "different";
+}
+
 export function isConservativeQualityIdentityMatch(
   target: PlaceQualityTarget,
   candidate: ProviderCandidate,
@@ -123,9 +145,13 @@ export function isConservativeQualityIdentityMatch(
   const distanceMeters = candidateDistance(target, candidate);
   const targetIdentity = normalizeIdentity(target.name);
   const candidateIdentity = normalizeIdentity(candidate.name);
+  const address = addressRelationship(target, candidate);
 
-  if (targetIdentity === candidateIdentity) return distanceMeters <= 2_500;
-  if (distanceMeters > 700) return false;
+  if (address === "different") return false;
+  if (targetIdentity === candidateIdentity) {
+    return distanceMeters <= EXACT_NAME_MAX_DISTANCE_METERS;
+  }
+  if (distanceMeters > TOKEN_MATCH_MAX_DISTANCE_METERS) return false;
 
   const targetTokens = identityTokens(target.name);
   const candidateTokens = identityTokens(candidate.name);
@@ -139,7 +165,11 @@ export function isConservativeQualityIdentityMatch(
   const minimumCoverage = shared.length / Math.min(targetTokens.length, candidateTokens.length);
   const unionCoverage = shared.length / new Set([...targetTokens, ...candidateTokens]).size;
 
-  return minimumCoverage >= 0.8 && unionCoverage >= 0.5;
+  return (
+    minimumCoverage >= 0.8 &&
+    unionCoverage >= 0.5 &&
+    (address === "same" || distanceMeters <= TOKEN_MATCH_MAX_DISTANCE_METERS)
+  );
 }
 
 function selectCandidate(
@@ -169,7 +199,11 @@ function isTargetedQualityIdentityExpansionMatch(
   target: PlaceQualityTarget,
   candidate: ProviderCandidate,
 ): boolean {
-  if (candidate.targetedForId !== target.id || candidateDistance(target, candidate) > 1_200) {
+  if (
+    candidate.targetedForId !== target.id ||
+    candidateDistance(target, candidate) > 1_200 ||
+    addressRelationship(target, candidate) === "different"
+  ) {
     return false;
   }
 
@@ -366,6 +400,7 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
         id?: string;
         displayName?: Readonly<{ text?: string }>;
         location?: Readonly<{ latitude?: number; longitude?: number }>;
+        formattedAddress?: string;
         rating?: number;
         userRatingCount?: number;
       }[];
@@ -378,6 +413,7 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
       const longitude = finiteNumber(place.location?.longitude);
       if (!externalId || !name || latitude === undefined || longitude === undefined) return [];
 
+      const addressLabel = cleanText(place.formattedAddress);
       const rating = finiteNumber(place.rating);
       const reviewCount = finiteNumber(place.userRatingCount);
       return [
@@ -386,6 +422,7 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
           name,
           latitude,
           longitude,
+          ...(addressLabel ? { addressLabel } : {}),
           ...(targetedForId ? { targetedForId } : {}),
           ...(rating === undefined ? {} : { rating, ratingScaleMax: 5 }),
           ...(reviewCount === undefined ? {} : { reviewCount }),

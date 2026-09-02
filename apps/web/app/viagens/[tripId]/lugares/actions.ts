@@ -156,9 +156,7 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
   if (!trip) notFound();
 
   if (!externalId || externalId.length > 200) {
-    redirect(
-      promotionReturnPath(tripId, formData, { erroPromocao: "candidato-invalido" }),
-    );
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "candidato-invalido" }));
   }
 
   const category = parsePlaceCategory(String(formData.get("categoria") ?? ""));
@@ -171,9 +169,7 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
     ...(maximumDistanceMeters ? { requestedRadiusMeters: maximumDistanceMeters } : {}),
   });
   if (regionResolution.status !== "resolved") {
-    redirect(
-      promotionReturnPath(tripId, formData, { erroPromocao: "destino-nao-suportado" }),
-    );
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "destino-nao-suportado" }));
   }
 
   const publishedPlaces = await new DrizzlePlaceRepository().listPublishedWithinRadius({
@@ -182,9 +178,7 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
   });
   const destinationId = resolveCuratedDestinationId(publishedPlaces);
   if (!destinationId) {
-    redirect(
-      promotionReturnPath(tripId, formData, { erroPromocao: "destino-nao-suportado" }),
-    );
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "destino-nao-suportado" }));
   }
 
   let candidates;
@@ -200,16 +194,12 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
       regionSource: regionResolution.region.source,
       error: error instanceof Error ? error.message : String(error),
     });
-    redirect(
-      promotionReturnPath(tripId, formData, { erroPromocao: "fonte-indisponivel" }),
-    );
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "fonte-indisponivel" }));
   }
 
   const candidate = candidates.find((item) => item.externalId === externalId);
   if (!candidate) {
-    redirect(
-      promotionReturnPath(tripId, formData, { erroPromocao: "candidato-nao-encontrado" }),
-    );
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "candidato-nao-encontrado" }));
   }
 
   let feedback: PromotionFeedback;

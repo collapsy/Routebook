@@ -83,7 +83,7 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
 
     await expect(
       adapter.search({
-          center: { latitude: -6.2285, longitude: -35.0503 },
+        center: { latitude: -6.2285, longitude: -35.0503 },
         radiusMeters: 8_001,
         limit: 10,
       }),
@@ -100,7 +100,7 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
 
     await expect(
       adapter.search({
-          center: { latitude: -6.2285, longitude: -35.0503 },
+        center: { latitude: -6.2285, longitude: -35.0503 },
         radiusMeters: 1_000,
         limit: 10,
       }),
@@ -111,7 +111,7 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
     it("consulta o PMTiles público real pelo mesmo adapter usado na tela de Lugares", async () => {
       const adapter = new OverturePmtilesPlaceSearchAdapter();
       const candidates = await adapter.search({
-          center: { latitude: -6.2285, longitude: -35.0503 },
+        center: { latitude: -6.2285, longitude: -35.0503 },
         radiusMeters: 3_000,
         limit: 10,
       });
@@ -128,7 +128,7 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
       ).toBe(true);
 
       const beaches = await adapter.search({
-          center: { latitude: -6.2285, longitude: -35.0503 },
+        center: { latitude: -6.2285, longitude: -35.0503 },
         radiusMeters: 3_000,
         categories: ["beach"],
         limit: 40,

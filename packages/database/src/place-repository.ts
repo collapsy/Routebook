@@ -40,10 +40,7 @@ function validateRegionQuery(query: ListPublishedPlacesWithinRadiusQuery): void 
 
 function regionBounds(query: ListPublishedPlacesWithinRadiusQuery) {
   const latitudeDelta = query.radiusMeters / 111_320;
-  const longitudeScale = Math.max(
-    0.1,
-    Math.cos((query.center.latitude * Math.PI) / 180),
-  );
+  const longitudeScale = Math.max(0.1, Math.cos((query.center.latitude * Math.PI) / 180));
   const longitudeDelta = query.radiusMeters / (111_320 * longitudeScale);
   return {
     south: Math.max(-90, query.center.latitude - latitudeDelta),
@@ -75,9 +72,7 @@ function mapPlace(row: PlaceRow): Place {
 }
 
 export class DrizzlePlaceRepository implements PlaceRepository {
-  async listPublishedWithinRadius(
-    query: ListPublishedPlacesWithinRadiusQuery,
-  ): Promise<Place[]> {
+  async listPublishedWithinRadius(query: ListPublishedPlacesWithinRadiusQuery): Promise<Place[]> {
     validateRegionQuery(query);
     const bounds = regionBounds(query);
     const rows = await getDatabase()

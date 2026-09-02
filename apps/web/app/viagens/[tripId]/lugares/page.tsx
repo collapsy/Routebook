@@ -425,11 +425,7 @@ function ExternalDiscoveryCard({
             {search ? <input name="busca" type="hidden" value={search} /> : null}
             {category ? <input name="categoria" type="hidden" value={category} /> : null}
             {maximumDistanceMeters ? (
-              <input
-                name="distancia"
-                type="hidden"
-                value={String(maximumDistanceMeters / 1_000)}
-              />
+              <input name="distancia" type="hidden" value={String(maximumDistanceMeters / 1_000)} />
             ) : null}
             {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
             {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}

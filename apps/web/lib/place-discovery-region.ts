@@ -20,20 +20,22 @@ export type PlaceDiscoveryRegionResolution =
 function validCoordinate(value: Coordinate | undefined): value is Coordinate {
   return Boolean(
     value &&
-      Number.isFinite(value.latitude) &&
-      value.latitude >= -90 &&
-      value.latitude <= 90 &&
-      Number.isFinite(value.longitude) &&
-      value.longitude >= -180 &&
-      value.longitude <= 180,
+    Number.isFinite(value.latitude) &&
+    value.latitude >= -90 &&
+    value.latitude <= 90 &&
+    Number.isFinite(value.longitude) &&
+    value.longitude >= -180 &&
+    value.longitude <= 180,
   );
 }
 
-export function resolvePlaceDiscoveryRegion(input: Readonly<{
-  destination?: Pick<Destination, "latitude" | "longitude">;
-  accommodationCoordinate?: Coordinate;
-  requestedRadiusMeters?: number;
-}>): PlaceDiscoveryRegionResolution {
+export function resolvePlaceDiscoveryRegion(
+  input: Readonly<{
+    destination?: Pick<Destination, "latitude" | "longitude">;
+    accommodationCoordinate?: Coordinate;
+    requestedRadiusMeters?: number;
+  }>,
+): PlaceDiscoveryRegionResolution {
   const accommodation = validCoordinate(input.accommodationCoordinate)
     ? input.accommodationCoordinate
     : undefined;

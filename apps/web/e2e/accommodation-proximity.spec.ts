@@ -25,9 +25,7 @@ test("prioriza no Discovery o lugar mais próximo da hospedagem geocodificada", 
   expect(publishedTotal).toBeGreaterThanOrEqual(30);
   await expect(externalPlaces.first()).toBeVisible();
   const praiaDoAmorCard = publishedPlaces.filter({
-    has: page.locator(
-      `a[href="/viagens/${trip.id}/lugares/praia-do-amor#adicionar-ao-roteiro"]`,
-    ),
+    has: page.locator(`a[href="/viagens/${trip.id}/lugares/praia-do-amor#adicionar-ao-roteiro"]`),
   });
   await expect(praiaDoAmorCard).toHaveCount(1);
   await expect(praiaDoAmorCard).toContainText(

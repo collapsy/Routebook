@@ -117,7 +117,7 @@ describe("validatePlaceSearchQuery", () => {
 });
 
 describe("isStrongExternalPlaceIdentityMatch", () => {
-  it("reconhece sufixo regional sem transformar Pipa em token distintivo", () => {
+  it("reconhece sufixo local sem depender de stopword regional", () => {
     const canonical = place({
       name: "Camarão na Fazenda",
       slug: "camarao-na-fazenda",
@@ -134,6 +134,71 @@ describe("isStrongExternalPlaceIdentityMatch", () => {
     });
 
     expect(isStrongExternalPlaceIdentityMatch(external, canonical)).toBe(true);
+  });
+
+  it("reconhece segundo destino sem remover o nome da cidade da identidade", () => {
+    const canonical = place({
+      destinationId: "florianopolis-sc-br",
+      slug: "projeto-tamar",
+      name: "Projeto Tamar",
+      category: "nature",
+      latitude: -27.5747,
+      longitude: -48.4242,
+    });
+    const external = candidate({
+      externalId: "tamar-floripa",
+      name: "Projeto Tamar Florianópolis",
+      providerCategory: "tourist_attraction",
+      category: "nature",
+      latitude: -27.5748,
+      longitude: -48.4241,
+    });
+
+    expect(isStrongExternalPlaceIdentityMatch(external, canonical)).toBe(true);
+  });
+
+  it("não funde filial homônima quando os endereços divergem", () => {
+    const canonical = place({
+      destinationId: "florianopolis-sc-br",
+      slug: "cafe-cultura-centro",
+      name: "Café Cultura",
+      category: "gastronomy",
+      latitude: -27.596,
+      longitude: -48.549,
+      addressLabel: "Rua Felipe Schmidt, 100, Florianópolis — SC",
+    });
+    const external = candidate({
+      externalId: "cafe-cultura-outra-filial",
+      name: "Café Cultura",
+      providerCategory: "cafe",
+      category: "gastronomy",
+      latitude: -27.5963,
+      longitude: -48.5492,
+      addressLabel: "Rua Bocaiúva, 200, Florianópolis — SC",
+    });
+
+    expect(isStrongExternalPlaceIdentityMatch(external, canonical)).toBe(false);
+  });
+
+  it("rejeita homônimo distante mesmo com nome exatamente igual", () => {
+    const canonical = place({
+      destinationId: "florianopolis-sc-br",
+      slug: "cafe-cultura-centro",
+      name: "Café Cultura",
+      category: "gastronomy",
+      latitude: -27.596,
+      longitude: -48.549,
+    });
+    const external = candidate({
+      externalId: "cafe-cultura-distante",
+      name: "Café Cultura",
+      providerCategory: "cafe",
+      category: "gastronomy",
+      latitude: -27.61,
+      longitude: -48.549,
+    });
+
+    expect(isStrongExternalPlaceIdentityMatch(external, canonical)).toBe(false);
   });
 
   it("aceita identidade distintiva curta acompanhada de descritor genérico", () => {
@@ -257,6 +322,12 @@ describe("reconcileExternalPlaceCandidate", () => {
     expect(result).toMatchObject({
       status: "linked",
       matchedPlaceId: "10000000-0000-4000-8000-000000000001",
+      evidence: {
+        externalReference: {
+          provider: "overture",
+          externalId: "08b2-example",
+        },
+      },
     });
   });
 
@@ -266,6 +337,10 @@ describe("reconcileExternalPlaceCandidate", () => {
     expect(result.status).toBe("possible_match");
     expect(result.matchedPlaceId).toBe("10000000-0000-4000-8000-000000000001");
     expect(result.distanceMeters).toBeLessThan(500);
+    expect(result.evidence).toMatchObject({
+      categoryMatch: true,
+      nameMatch: "exact",
+    });
   });
 
   it("retém variante nominal forte como possível duplicata", () => {
@@ -289,8 +364,11 @@ describe("reconcileExternalPlaceCandidate", () => {
     expect(result).toMatchObject({
       status: "possible_match",
       matchedPlaceId: canonical.id,
+      evidence: {
+        categoryMatch: true,
+        nameMatch: "token-overlap",
+      },
     });
-    expect(result.reason).toContain("Identidade nominal");
   });
 
   it("retém alias de praia como possível duplicata forte", () => {
@@ -313,11 +391,14 @@ describe("reconcileExternalPlaceCandidate", () => {
     expect(result).toMatchObject({
       status: "possible_match",
       matchedPlaceId: canonical.id,
+      evidence: {
+        categoryMatch: true,
+        nameMatch: "category-alias",
+      },
     });
-    expect(result.reason).toContain("Identidade nominal");
   });
 
-  it("retém alias distante de praia para reconciliação sem confiar na coordenada externa", () => {
+  it("rejeita alias distante quando só o texto coincide", () => {
     const canonical = place({
       name: "Praia do Madeiro",
       slug: "praia-do-madeiro",
@@ -334,15 +415,10 @@ describe("reconcileExternalPlaceCandidate", () => {
     expect(isStrongExternalPlaceIdentityMatch(external, canonical)).toBe(false);
 
     const result = reconcileExternalPlaceCandidate(external, [canonical]);
-    expect(result).toMatchObject({
-      status: "possible_match",
-      matchedPlaceId: canonical.id,
-    });
-    expect(result.distanceMeters).toBeGreaterThan(500);
-    expect(result.reason).toContain("Alias nominal de praia");
+    expect(result.status).toBe("new");
   });
 
-  it("reconhece typo longo de praia mesmo quando a coordenada externa está deslocada", () => {
+  it("rejeita typo nominal distante sem evidência geográfica suficiente", () => {
     const canonical = place({
       name: "Praia de Cacimbinhas",
       slug: "praia-de-cacimbinhas",
@@ -359,11 +435,64 @@ describe("reconcileExternalPlaceCandidate", () => {
       [canonical],
     );
 
+    expect(result.status).toBe("new");
+  });
+
+  it("mantém filial homônima com endereço divergente como nova", () => {
+    const canonical = place({
+      destinationId: "florianopolis-sc-br",
+      name: "Café Cultura",
+      slug: "cafe-cultura-centro",
+      category: "gastronomy",
+      latitude: -27.596,
+      longitude: -48.549,
+      addressLabel: "Rua Felipe Schmidt, 100, Florianópolis — SC",
+    });
+    const result = reconcileExternalPlaceCandidate(
+      candidate({
+        externalId: "cafe-cultura-filial",
+        name: "Café Cultura",
+        providerCategory: "cafe",
+        category: "gastronomy",
+        latitude: -27.5962,
+        longitude: -48.5491,
+        addressLabel: "Rua Bocaiúva, 200, Florianópolis — SC",
+      }),
+      [canonical],
+    );
+
+    expect(result.status).toBe("new");
+  });
+
+  it("reconcilia segundo destino por tokens distintivos + proximidade", () => {
+    const canonical = place({
+      destinationId: "florianopolis-sc-br",
+      name: "Projeto Tamar",
+      slug: "projeto-tamar",
+      category: "nature",
+      latitude: -27.5747,
+      longitude: -48.4242,
+    });
+    const result = reconcileExternalPlaceCandidate(
+      candidate({
+        externalId: "tamar-floripa",
+        name: "Projeto Tamar Florianópolis",
+        providerCategory: "tourist_attraction",
+        category: "nature",
+        latitude: -27.5748,
+        longitude: -48.4241,
+      }),
+      [canonical],
+    );
+
     expect(result).toMatchObject({
       status: "possible_match",
       matchedPlaceId: canonical.id,
+      evidence: {
+        categoryMatch: true,
+        nameMatch: "token-overlap",
+      },
     });
-    expect(result.reason).toContain("Alias nominal de praia");
   });
 
   it("classifica candidato distante e sem vínculo como novo", () => {

@@ -17,15 +17,16 @@ test("salva no catálogo preservando filtros e abre o compositor do Lugar", asyn
     `/viagens/${trip.id}/lugares?descoberta=ocultar&busca=Praia%20do%20Amor&categoria=beach`,
   );
 
+  const targetHref = `/viagens/${trip.id}/lugares/praia-do-amor#adicionar-ao-roteiro`;
   const card = page
     .getByRole("list", { name: "Opções de lugares" })
     .locator('[data-place-source="published"]')
-    .filter({ hasText: "Praia do Amor" })
-    .first();
+    .filter({ has: page.locator(`a[href="${targetHref}"]`) });
+  await expect(card).toHaveCount(1);
   await expect(card.getByRole("button", { name: "Salvar lugar" })).toBeVisible();
   await expect(card.getByRole("link", { name: "Adicionar ao roteiro" })).toHaveAttribute(
     "href",
-    `/viagens/${trip.id}/lugares/praia-do-amor#adicionar-ao-roteiro`,
+    targetHref,
   );
 
   await card.getByRole("button", { name: "Salvar lugar" }).click();

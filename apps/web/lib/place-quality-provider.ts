@@ -212,8 +212,10 @@ function isTargetedQualityIdentityExpansionMatch(
   if (targetTokens.length === 0 || candidateTokens.length === 0) return false;
 
   const candidateSet = new Set(candidateTokens);
+  const distinctiveTargetTokens = targetTokens.filter((token) => token.length >= 6);
   return (
-    targetTokens.every((token) => token.length >= 6 && candidateSet.has(token)) &&
+    distinctiveTargetTokens.length > 0 &&
+    distinctiveTargetTokens.every((token) => candidateSet.has(token)) &&
     candidateTokens.length <= targetTokens.length + 3
   );
 }

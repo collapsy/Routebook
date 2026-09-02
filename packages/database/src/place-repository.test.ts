@@ -99,6 +99,21 @@ beforeAll(async () => {
       createdAt: now,
       updatedAt: now,
     },
+    {
+      id: randomUUID(),
+      destinationId,
+      slug: "lugar-distante",
+      name: "Lugar distante",
+      summary: "Lugar publicado fora da Region de teste para validar o recorte espacial.",
+      category: "nature",
+      latitude: -27.5949,
+      longitude: -48.5482,
+      priceRange: null,
+      primaryImage: null,
+      publicationStatus: "published",
+      createdAt: now,
+      updatedAt: now,
+    },
   ]);
 });
 
@@ -108,6 +123,18 @@ afterAll(async () => {
 });
 
 describe("DrizzlePlaceRepository", () => {
+  it("lista Places publicados por proximidade sem depender de destinationId", async () => {
+    const result = await new DrizzlePlaceRepository().listPublishedWithinRadius({
+      center: { latitude: -6.23, longitude: -35.05 },
+      radiusMeters: 3_000,
+    });
+
+    expect(result.some((place) => place.slug === "lugar-com-faixa")).toBe(true);
+    expect(result.some((place) => place.slug === "lugar-sem-faixa")).toBe(true);
+    expect(result.some((place) => place.slug === "lugar-distante")).toBe(false);
+    expect(result.every((place) => place.publicationStatus === "published")).toBe(true);
+  });
+
   it("mapeia Price Range qualitativo e omite o estado desconhecido", async () => {
     const result = await new DrizzlePlaceRepository().listPublished({ destinationId });
 

@@ -44,7 +44,7 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
     }
   });
 
-  it("limita a consulta geográfica a um conjunto finito de tiles de Pipa", () => {
+  it("limita qualquer Region a um conjunto finito de tiles", () => {
     const tiles = tileCoordinatesForRadius({ latitude: -6.2285, longitude: -35.0503 }, 8_000, 14);
 
     expect(tiles.length).toBeGreaterThan(0);
@@ -64,7 +64,6 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
     });
 
     const candidates = await adapter.search({
-      destinationId: "pipa-rn-br",
       center: { latitude: -6.2285, longitude: -35.0503 },
       radiusMeters: 1_000,
       categories: ["beach"],
@@ -84,8 +83,7 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
 
     await expect(
       adapter.search({
-        destinationId: "pipa-rn-br",
-        center: { latitude: -6.2285, longitude: -35.0503 },
+          center: { latitude: -6.2285, longitude: -35.0503 },
         radiusMeters: 8_001,
         limit: 10,
       }),
@@ -102,8 +100,7 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
 
     await expect(
       adapter.search({
-        destinationId: "pipa-rn-br",
-        center: { latitude: -6.2285, longitude: -35.0503 },
+          center: { latitude: -6.2285, longitude: -35.0503 },
         radiusMeters: 1_000,
         limit: 10,
       }),
@@ -114,8 +111,7 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
     it("consulta o PMTiles público real pelo mesmo adapter usado na tela de Lugares", async () => {
       const adapter = new OverturePmtilesPlaceSearchAdapter();
       const candidates = await adapter.search({
-        destinationId: "pipa-rn-br",
-        center: { latitude: -6.2285, longitude: -35.0503 },
+          center: { latitude: -6.2285, longitude: -35.0503 },
         radiusMeters: 3_000,
         limit: 10,
       });
@@ -132,8 +128,7 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
       ).toBe(true);
 
       const beaches = await adapter.search({
-        destinationId: "pipa-rn-br",
-        center: { latitude: -6.2285, longitude: -35.0503 },
+          center: { latitude: -6.2285, longitude: -35.0503 },
         radiusMeters: 3_000,
         categories: ["beach"],
         limit: 40,

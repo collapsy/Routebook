@@ -76,8 +76,8 @@ beforeAll(async () => {
       name: "Lugar com faixa",
       summary: "Lugar publicado com uma faixa qualitativa aproximada para teste.",
       category: "gastronomy",
-      latitude: -6.23,
-      longitude: -35.05,
+      latitude: 37.7749,
+      longitude: -122.4194,
       priceRange: "moderate",
       primaryImage,
       publicationStatus: "published",
@@ -91,8 +91,23 @@ beforeAll(async () => {
       name: "Lugar sem faixa",
       summary: "Lugar publicado sem informação de preço para preservar o estado desconhecido.",
       category: "nature",
-      latitude: -6.24,
-      longitude: -35.04,
+      latitude: 37.78,
+      longitude: -122.42,
+      priceRange: null,
+      primaryImage: null,
+      publicationStatus: "published",
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: randomUUID(),
+      destinationId,
+      slug: "lugar-distante",
+      name: "Lugar distante",
+      summary: "Lugar publicado fora da Region de teste para validar o recorte espacial.",
+      category: "nature",
+      latitude: 40.7128,
+      longitude: -74.006,
       priceRange: null,
       primaryImage: null,
       publicationStatus: "published",
@@ -108,6 +123,18 @@ afterAll(async () => {
 });
 
 describe("DrizzlePlaceRepository", () => {
+  it("lista Places publicados por proximidade sem depender de destinationId", async () => {
+    const result = await new DrizzlePlaceRepository().listPublishedWithinRadius({
+      center: { latitude: 37.7749, longitude: -122.4194 },
+      radiusMeters: 3_000,
+    });
+
+    expect(result.some((place) => place.slug === "lugar-com-faixa")).toBe(true);
+    expect(result.some((place) => place.slug === "lugar-sem-faixa")).toBe(true);
+    expect(result.some((place) => place.slug === "lugar-distante")).toBe(false);
+    expect(result.every((place) => place.publicationStatus === "published")).toBe(true);
+  });
+
   it("mapeia Price Range qualitativo e omite o estado desconhecido", async () => {
     const result = await new DrizzlePlaceRepository().listPublished({ destinationId });
 

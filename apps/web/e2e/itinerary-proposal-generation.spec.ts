@@ -14,6 +14,11 @@ import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
 test.setTimeout(120_000);
 
+const PROPOSAL_FIXTURE_CENTER = Object.freeze({
+  latitude: 1,
+  longitude: 1,
+});
+
 type GenerationFixture = Readonly<{
   tripId: string;
   placeId?: string;
@@ -51,8 +56,8 @@ async function createGenerationFixture(
     name: placeTitle,
     summary: "Praia com falésias e ondas para validar a geração integral.",
     category: "beach",
-    latitude: -6.235,
-    longitude: -35.045,
+    latitude: PROPOSAL_FIXTURE_CENTER.latitude,
+    longitude: PROPOSAL_FIXTURE_CENTER.longitude,
     addressLabel: "Pipa, Tibau do Sul - RN",
     publicationStatus: "published",
     createdAt: now,
@@ -130,8 +135,8 @@ async function createDensityFixture(tripName: string, candidateCount: number): P
       name: `Lugar de densidade ${index + 1}`,
       summary: "Opção elegível para validar o teto diário da Proposal.",
       category: "beach",
-      latitude: -6.23 - index * 0.001,
-      longitude: -35.04 - index * 0.001,
+      latitude: PROPOSAL_FIXTURE_CENTER.latitude + index * 0.001,
+      longitude: PROPOSAL_FIXTURE_CENTER.longitude + index * 0.001,
       addressLabel: "Pipa, Tibau do Sul - RN",
       publicationStatus: "published",
       createdAt: now,

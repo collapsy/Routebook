@@ -34,6 +34,23 @@ afterAll(async () => {
 });
 
 describe("DrizzlePlaceExternalReferenceRepository", () => {
+  it("lista referências somente para os PlaceIds participantes da Region", async () => {
+    const repository = new DrizzlePlaceExternalReferenceRepository();
+    const externalId = `place-set-${randomUUID()}`;
+    const created = await repository.create({
+      placeId,
+      provider: "overture",
+      externalId,
+      sourceLicense: "Apache-2.0",
+      collectedAt: now,
+      now,
+    });
+
+    await expect(repository.listByPlaceIds([])).resolves.toEqual([]);
+    await expect(repository.listByPlaceIds([placeId])).resolves.toContainEqual(created);
+    await expect(repository.listByPlaceIds([randomUUID()])).resolves.not.toContainEqual(created);
+  });
+
   it("persiste e recupera Provenance pela identidade externa", async () => {
     const repository = new DrizzlePlaceExternalReferenceRepository();
     const created = await repository.create({

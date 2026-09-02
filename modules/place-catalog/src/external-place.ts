@@ -1,7 +1,6 @@
 import type { Place, PlaceCategory } from "./place";
 
 export type PlaceSearchQuery = Readonly<{
-  destinationId: string;
   center: Readonly<{ latitude: number; longitude: number }>;
   radiusMeters: number;
   categories?: readonly PlaceCategory[];
@@ -164,7 +163,6 @@ export function mapOverturePlaceCategory(
 }
 
 export function validatePlaceSearchQuery(query: PlaceSearchQuery): void {
-  if (!query.destinationId.trim()) throw new Error("O destino da busca externa é obrigatório.");
   if (
     !Number.isFinite(query.center.latitude) ||
     query.center.latitude < -90 ||

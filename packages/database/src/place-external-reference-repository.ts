@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 import type { PlaceExternalReference } from "@routebook/place-catalog";
 
@@ -64,6 +64,15 @@ export class DrizzlePlaceExternalReferenceRepository {
       .limit(1);
 
     return row ? mapReference(row) : null;
+  }
+
+  async listByPlaceIds(placeIds: readonly string[]): Promise<PersistedPlaceExternalReference[]> {
+    if (placeIds.length === 0) return [];
+    const rows = await this.database
+      .select()
+      .from(placeExternalReferences)
+      .where(inArray(placeExternalReferences.placeId, [...new Set(placeIds)]));
+    return rows.map(mapReference);
   }
 
   async listByDestination(destinationId: string): Promise<PersistedPlaceExternalReference[]> {

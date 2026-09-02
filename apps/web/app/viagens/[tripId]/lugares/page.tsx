@@ -11,8 +11,8 @@ import {
 import {
   PLACE_CATEGORIES,
   PLACE_PRICE_RANGES,
-  listPublishedPlaces,
   reconcileExternalPlaceCandidate,
+  type Place,
   type ExternalPlaceReconciliation,
   type PlaceQualityScore,
   type PlaceQualitySignalMatch,
@@ -47,6 +47,7 @@ import {
 import { resolveConfiguredPlaceQualityProvider } from "../../../../lib/place-quality-provider";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
+import { resolvePlaceDiscoveryRegion } from "../../../../lib/place-discovery-region";
 import {
   promoteExternalPlaceAction,
   removePublishedPlaceAction,
@@ -82,8 +83,6 @@ type DiscoverySearchParams = {
 };
 
 const distanceOptions = [1, 3, 5, 10] as const;
-const pipaDiscoveryCenter = { latitude: -6.24, longitude: -35.065 } as const;
-const externalDiscoveryRadiusMeters = 8_000;
 const externalDiscoveryScanLimit = 200;
 const externalDiscoveryDisplayLimit = 60;
 
@@ -94,9 +93,9 @@ const orderLabels: Readonly<Record<PlaceDiscoveryOrder, string>> = Object.freeze
   distance: "Mais próximos",
 });
 
-function resolveDestinationId(destinationName: string): string | null {
-  const normalized = destinationName.trim().toLocaleLowerCase("pt-BR");
-  return normalized.includes("pipa") ? "pipa-rn-br" : null;
+function resolveCuratedDestinationId(places: readonly Place[]): string | undefined {
+  const destinationIds = [...new Set(places.map((place) => place.destinationId))];
+  return destinationIds.length === 1 ? destinationIds[0] : undefined;
 }
 
 function discoveryHref(tripId: string, values: DiscoverySearchParams): string {
@@ -418,24 +417,33 @@ function ExternalDiscoveryCard({
           Calcular rota real
         </a>
       </div>
-      <form action={promoteExternalPlaceAction} className={styles.promotionForm}>
-        <input name="tripId" type="hidden" value={tripId} />
-        <input name="externalId" type="hidden" value={candidate.externalId} />
-        {search ? <input name="busca" type="hidden" value={search} /> : null}
-        {category ? <input name="categoria" type="hidden" value={category} /> : null}
-        {maximumDistanceMeters ? (
-          <input name="distancia" type="hidden" value={String(maximumDistanceMeters / 1_000)} />
-        ) : null}
-        {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
-        {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
-        <button className="product-secondary-action" type="submit">
-          Enviar para curadoria
-        </button>
-      </form>
-      <small>
-        A ação cria um draft para revisão; não publica, não salva na viagem e não adiciona ao
-        roteiro.
-      </small>
+      {destinationId ? (
+        <>
+          <form action={promoteExternalPlaceAction} className={styles.promotionForm}>
+            <input name="tripId" type="hidden" value={tripId} />
+            <input name="externalId" type="hidden" value={candidate.externalId} />
+            {search ? <input name="busca" type="hidden" value={search} /> : null}
+            {category ? <input name="categoria" type="hidden" value={category} /> : null}
+            {maximumDistanceMeters ? (
+              <input name="distancia" type="hidden" value={String(maximumDistanceMeters / 1_000)} />
+            ) : null}
+            {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
+            {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
+            <button className="product-secondary-action" type="submit">
+              Enviar para curadoria
+            </button>
+          </form>
+          <small>
+            A ação cria um draft para revisão; não publica, não salva na viagem e não adiciona ao
+            roteiro.
+          </small>
+        </>
+      ) : (
+        <small>
+          Candidato externo disponível para exploração. A promoção editorial aguarda uma identidade
+          canônica deste Destino e não ocorre automaticamente.
+        </small>
+      )}
     </li>
   );
 }
@@ -452,7 +460,6 @@ export default async function PlacesPage({
 
   if (!trip) notFound();
 
-  const destinationId = resolveDestinationId(trip.destination.name);
   const rawFilters = await searchParams;
   const search = rawFilters.busca?.trim().slice(0, 120) || undefined;
   const category = parsePlaceCategory(rawFilters.categoria);
@@ -464,13 +471,27 @@ export default async function PlacesPage({
   const promotionStatusMessage = promotionMessage(rawFilters.promocao);
   const promotionError = promotionErrorMessage(rawFilters.erroPromocao);
   const accommodationCoordinate = trip.accommodation?.coordinate;
-  const maximumDistanceMeters = accommodationCoordinate
-    ? parseMaximumDistance(rawFilters.distancia)
-    : undefined;
+  const requestedMaximumDistanceMeters = parseMaximumDistance(rawFilters.distancia);
+  const regionResolution = resolvePlaceDiscoveryRegion({
+    destination: trip.destination,
+    ...(accommodationCoordinate ? { accommodationCoordinate } : {}),
+    ...(requestedMaximumDistanceMeters
+      ? { requestedRadiusMeters: requestedMaximumDistanceMeters }
+      : {}),
+  });
+  const region = regionResolution.status === "resolved" ? regionResolution.region : undefined;
+  const maximumDistanceMeters = region ? requestedMaximumDistanceMeters : undefined;
+  const placeRepository = new DrizzlePlaceRepository();
   const [publishedPlaces, savedPlaces] = await Promise.all([
-    destinationId ? listPublishedPlaces(new DrizzlePlaceRepository(), destinationId) : [],
+    region
+      ? placeRepository.listPublishedWithinRadius({
+          center: region.center,
+          radiusMeters: region.curatedRadiusMeters,
+        })
+      : [],
     listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
   ]);
+  const destinationId = resolveCuratedDestinationId(publishedPlaces);
   const savedPlaceIds = new Set(savedPlaces.map((selection) => selection.placeId));
   const filteredPlaces = filterPlaces(
     publishedPlaces,
@@ -480,7 +501,7 @@ export default async function PlacesPage({
       ...(priceRange ? { priceRange } : {}),
       ...(maximumDistanceMeters ? { maximumDistanceMeters } : {}),
     },
-    accommodationCoordinate,
+    region?.center,
   );
   const baseParams: DiscoverySearchParams = {
     ...(search ? { busca: search } : {}),
@@ -501,11 +522,11 @@ export default async function PlacesPage({
     ...(category
       ? [{ key: "categoria" as const, label: `Categoria: ${categoryLabels[category]}` }]
       : []),
-    ...(maximumDistanceMeters
+    ...(maximumDistanceMeters && region
       ? [
           {
             key: "distancia" as const,
-            label: `Até ${maximumDistanceMeters / 1_000} km da hospedagem`,
+            label: `Até ${maximumDistanceMeters / 1_000} km ${region.distanceReferenceLabel}`,
           },
         ]
       : []),
@@ -519,20 +540,17 @@ export default async function PlacesPage({
   let externalLinkedCount = 0;
   let externalRejectedCount = 0;
   let externalDiscoveryError: string | undefined;
-  const discoveryCenter = accommodationCoordinate ?? pipaDiscoveryCenter;
 
-  if (discoverExternal && destinationId) {
+  if (discoverExternal && region) {
+    const discoveryStartedAt = process.hrtime.bigint();
     try {
-      const radiusMeters = Math.min(
-        maximumDistanceMeters ?? externalDiscoveryRadiusMeters,
-        externalDiscoveryRadiusMeters,
-      );
       const [references, candidates] = await Promise.all([
-        new DrizzlePlaceExternalReferenceRepository().listByDestination(destinationId),
+        new DrizzlePlaceExternalReferenceRepository().listByPlaceIds(
+          publishedPlaces.map((place) => place.id),
+        ),
         new OverturePmtilesPlaceSearchAdapter().search({
-          destinationId,
-          center: discoveryCenter,
-          radiusMeters,
+          center: region.center,
+          radiusMeters: region.externalRadiusMeters,
           ...(category ? { categories: [category] } : {}),
           limit: externalDiscoveryScanLimit,
         }),
@@ -551,10 +569,11 @@ export default async function PlacesPage({
       externalReconciliations = reconciliations.filter(
         (result) => result.status !== "new" || matchesExternalSearch(result, search),
       );
-      console.info("[place-discovery] Overture reconciliation completed", {
-        tripId,
-        destinationId,
-        radiusMeters,
+      console.info("[place-discovery] external reconciliation completed", {
+        provider: "overture-pmtiles-preview",
+        regionSource: region.source,
+        radiusMeters: region.externalRadiusMeters,
+        durationMs: Number(process.hrtime.bigint() - discoveryStartedAt) / 1_000_000,
         publishedCount: publishedPlaces.length,
         candidateCount: externalCandidateCount,
         newCandidateCount: reconciliations.filter((result) => result.status === "new").length,
@@ -563,23 +582,36 @@ export default async function PlacesPage({
         rejectedCount: externalRejectedCount,
       });
     } catch (error) {
-      console.error("Falha ao descobrir Places externos via Overture", error);
+      console.error("[place-discovery] external provider unavailable", {
+        provider: "overture-pmtiles-preview",
+        regionSource: region.source,
+        radiusMeters: region.externalRadiusMeters,
+        durationMs: Number(process.hrtime.bigint() - discoveryStartedAt) / 1_000_000,
+        error: error instanceof Error ? error.message : String(error),
+      });
       externalDiscoveryError =
         "A fonte externa não respondeu agora. O catálogo curado continua disponível normalmente.";
     }
   }
 
-  const hasExternalCoverage = discoverExternal && !externalDiscoveryError;
+  const hasExternalCoverage = discoverExternal && Boolean(region) && !externalDiscoveryError;
   const filteredPublishedPlaces = filteredPlaces.map(({ place }) => place);
-  const feedInput = {
-    publishedPlaces: filteredPublishedPlaces,
-    externalReconciliations: hasExternalCoverage ? externalReconciliations : [],
-    reference: discoveryCenter,
-  } as const;
-  const allDiscoveryItems = buildPlaceDiscoveryFeed(feedInput);
-  const discoveryItems = showAllExternal
-    ? allDiscoveryItems
-    : buildPlaceDiscoveryFeed({ ...feedInput, externalLimit: externalDiscoveryDisplayLimit });
+  const allDiscoveryItems = region
+    ? buildPlaceDiscoveryFeed({
+        publishedPlaces: filteredPublishedPlaces,
+        externalReconciliations: hasExternalCoverage ? externalReconciliations : [],
+        reference: region.center,
+      })
+    : [];
+  const discoveryItems =
+    showAllExternal || !region
+      ? allDiscoveryItems
+      : buildPlaceDiscoveryFeed({
+          publishedPlaces: filteredPublishedPlaces,
+          externalReconciliations: hasExternalCoverage ? externalReconciliations : [],
+          reference: region.center,
+          externalLimit: externalDiscoveryDisplayLimit,
+        });
 
   const qualityProvider = resolveConfiguredPlaceQualityProvider();
   let qualityMatches: PlaceQualitySignalMatch[] = [];
@@ -665,7 +697,7 @@ export default async function PlacesPage({
       longitude: accommodationCoordinate.longitude,
     });
   }
-  const distanceReferenceLabel = accommodationCoordinate ? "da hospedagem" : "do centro de Pipa";
+  const distanceReferenceLabel = region?.distanceReferenceLabel ?? "da referência espacial";
 
   return (
     <section className="app-page trip-overview-page">
@@ -716,7 +748,7 @@ export default async function PlacesPage({
           <label htmlFor="place-distance">Distância máxima</label>
           <select
             defaultValue={maximumDistanceMeters ? String(maximumDistanceMeters / 1_000) : ""}
-            disabled={!accommodationCoordinate}
+            disabled={!region}
             id="place-distance"
             name="distancia"
           >
@@ -744,15 +776,20 @@ export default async function PlacesPage({
         </button>
       </form>
 
-      {!accommodationCoordinate ? (
+      {!region ? (
         <p className={styles.notice} role="status">
-          O filtro de distância fica disponível após informar a localização da hospedagem. As rotas
-          individuais continuam disponíveis usando sua localização atual no Google Maps.
+          Não há uma referência espacial confiável para esta viagem. O RouteBook não inventa centro,
+          distância ou cobertura de Discovery.
         </p>
-      ) : (
+      ) : region.source === "accommodation" ? (
         <p className={styles.notice}>
           Distâncias estimadas em linha reta a partir da hospedagem; não representam rota ou tempo
           de deslocamento.
+        </p>
+      ) : (
+        <p className={styles.notice} role="status">
+          Sem hospedagem geocodificada, as distâncias usam a referência aproximada do destino. Elas
+          são estimativas em linha reta e não representam rota ou tempo de deslocamento.
         </p>
       )}
 

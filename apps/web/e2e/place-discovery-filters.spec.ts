@@ -30,10 +30,11 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   const externalPlaces = options.locator('[data-place-source="external"]');
   const enrichedPlaces = options.locator('[data-place-state="enriched"]');
 
-  await expect(canonicalPlaces).toHaveCount(30);
+  const canonicalTotal = await canonicalPlaces.count();
+  expect(canonicalTotal).toBeGreaterThanOrEqual(30);
   const externalTotal = await externalPlaces.count();
   expect(externalTotal).toBeLessThanOrEqual(60);
-  expect(await options.getByRole("listitem").count()).toBe(30 + externalTotal);
+  expect(await options.getByRole("listitem").count()).toBe(canonicalTotal + externalTotal);
   expect(await enrichedPlaces.count()).toBeGreaterThan(0);
 
   await expect(page.getByRole("heading", { name: uniqueOptionsHeading })).toBeVisible();
@@ -54,7 +55,7 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     "data-map-point-count",
     String(visibleOptionTotal + 1),
   );
-  await expect(discoveryMap).toHaveAttribute("data-map-published-count", "30");
+  await expect(discoveryMap).toHaveAttribute("data-map-published-count", String(canonicalTotal));
   await expect(discoveryMap).toHaveAttribute("data-map-external-count", String(externalTotal));
 
   const enrichedCard = enrichedPlaces.first();
@@ -154,8 +155,9 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(page.locator('[data-place-ranking-order="distance"]')).toBeVisible();
 
   await page.goto(`/viagens/${trip.id}/lugares?descoberta=ocultar`);
-  await expect(page.getByRole("heading", { name: "30 lugares curados" })).toBeVisible();
-  await expect(options.locator('[data-place-source="published"]')).toHaveCount(30);
+  await expect(page.getByRole("heading", { name: /\d+ lugares curados/ })).toBeVisible();
+  const hiddenPublishedTotal = await options.locator('[data-place-source="published"]').count();
+  expect(hiddenPublishedTotal).toBe(canonicalTotal);
   await expect(options.locator('[data-place-source="external"]')).toHaveCount(0);
   await expect(
     page.getByText("Lista e mapa exibem o mesmo conjunto curado e filtrado."),
@@ -229,7 +231,8 @@ test("orienta recuperação quando os filtros não retornam lugares", async ({ p
   await expect(
     page.getByRole("heading", { name: "Nenhum lugar corresponde aos filtros" }),
   ).toBeVisible();
-  await expect(page.getByText(/filtro de distância fica disponível/)).toBeVisible();
+  await expect(page.getByText(/referência aproximada do destino/)).toBeVisible();
+  await expect(page.getByLabel("Distância máxima")).toBeEnabled();
   await expect(page.getByRole("link", { name: "Limpar filtros" }).first()).toBeVisible();
   await expect(page.getByText("indisponível")).toHaveCount(0);
 });

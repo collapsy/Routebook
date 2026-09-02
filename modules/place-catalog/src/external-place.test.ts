@@ -98,7 +98,6 @@ describe("validatePlaceSearchQuery", () => {
   it("aceita uma busca geográfica limitada", () => {
     expect(() =>
       validatePlaceSearchQuery({
-        destinationId: "pipa-rn-br",
         center: { latitude: -6.23, longitude: -35.05 },
         radiusMeters: 15_000,
         categories: ["beach", "gastronomy"],
@@ -110,7 +109,6 @@ describe("validatePlaceSearchQuery", () => {
   it("rejeita raio que permitiria varredura não governada", () => {
     expect(() =>
       validatePlaceSearchQuery({
-        destinationId: "pipa-rn-br",
         center: { latitude: -6.23, longitude: -35.05 },
         radiusMeters: 100_000,
       }),

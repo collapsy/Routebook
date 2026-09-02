@@ -10,16 +10,15 @@ import {
   PlacePromotionServiceError,
   promoteExternalPlaceCandidate,
 } from "@routebook/database";
-import { findPublishedPlace } from "@routebook/place-catalog";
+import type { Place } from "@routebook/place-catalog";
 import { removePlaceFromTrip, savePlaceForTrip } from "@routebook/saved-places";
 import { findTripById } from "@routebook/trip-management";
 
-import { resolveTripRouteAccess } from "../../../../lib/trip-route-access";
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
+import { resolvePlaceDiscoveryRegion } from "../../../../lib/place-discovery-region";
+import { resolveTripRouteAccess } from "../../../../lib/trip-route-access";
 import { parseMaximumDistance, parsePlaceCategory, parsePlacePriceRange } from "./filters";
 
-const pipaDiscoveryCenter = { latitude: -6.24, longitude: -35.065 } as const;
-const externalDiscoveryRadiusMeters = 8_000;
 const externalDiscoveryScanLimit = 200;
 
 type PromotionFeedback =
@@ -36,9 +35,26 @@ type PromotionFeedback =
         | "erro-tecnico";
     }>;
 
-function resolveDestinationId(destinationName: string): string | null {
-  const normalized = destinationName.trim().toLocaleLowerCase("pt-BR");
-  return normalized.includes("pipa") ? "pipa-rn-br" : null;
+function resolveCuratedDestinationId(places: readonly Place[]): string | undefined {
+  const destinationIds = [...new Set(places.map((place) => place.destinationId))];
+  return destinationIds.length === 1 ? destinationIds[0] : undefined;
+}
+
+async function listPublishedPlacesForTrip(
+  trip: NonNullable<Awaited<ReturnType<typeof findTripById>>>,
+): Promise<Place[]> {
+  const regionResolution = resolvePlaceDiscoveryRegion({
+    destination: trip.destination,
+    ...(trip.accommodation?.coordinate
+      ? { accommodationCoordinate: trip.accommodation.coordinate }
+      : {}),
+  });
+  if (regionResolution.status !== "resolved") return [];
+
+  return new DrizzlePlaceRepository().listPublishedWithinRadius({
+    center: regionResolution.region.center,
+    radiusMeters: regionResolution.region.curatedRadiusMeters,
+  });
 }
 
 async function resolvePublishedPlaceForMutation(tripId: string, placeSlug: string) {
@@ -54,13 +70,12 @@ async function resolvePublishedPlaceForMutation(tripId: string, placeSlug: strin
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const destinationId = resolveDestinationId(trip.destination.name);
-  if (!destinationId) notFound();
+  const matches = (await listPublishedPlacesForTrip(trip)).filter(
+    (place) => place.slug === placeSlug,
+  );
+  if (matches.length !== 1) notFound();
 
-  const place = await findPublishedPlace(new DrizzlePlaceRepository(), destinationId, placeSlug);
-  if (!place) notFound();
-
-  return place;
+  return matches[0]!;
 }
 
 function revalidatePublishedPlaceSurfaces(tripId: string, placeSlug: string): void {
@@ -92,7 +107,6 @@ function promotionReturnPath(
   tripId: string,
   formData: FormData,
   feedback: PromotionFeedback,
-  hasAccommodationCoordinate: boolean,
 ): string {
   const query = new URLSearchParams({ descoberta: "externa" });
   const search = String(formData.get("busca") ?? "")
@@ -100,9 +114,7 @@ function promotionReturnPath(
     .slice(0, 120);
   const category = parsePlaceCategory(String(formData.get("categoria") ?? ""));
   const priceRange = parsePlacePriceRange(String(formData.get("preco") ?? ""));
-  const maximumDistanceMeters = hasAccommodationCoordinate
-    ? parseMaximumDistance(String(formData.get("distancia") ?? ""))
-    : undefined;
+  const maximumDistanceMeters = parseMaximumDistance(String(formData.get("distancia") ?? ""));
 
   if (search) query.set("busca", search);
   if (category) query.set("categoria", category);
@@ -143,71 +155,51 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const hasAccommodationCoordinate = Boolean(trip.accommodation?.coordinate);
   if (!externalId || externalId.length > 200) {
-    redirect(
-      promotionReturnPath(
-        tripId,
-        formData,
-        { erroPromocao: "candidato-invalido" },
-        hasAccommodationCoordinate,
-      ),
-    );
-  }
-
-  const destinationId = resolveDestinationId(trip.destination.name);
-  if (!destinationId) {
-    redirect(
-      promotionReturnPath(
-        tripId,
-        formData,
-        { erroPromocao: "destino-nao-suportado" },
-        hasAccommodationCoordinate,
-      ),
-    );
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "candidato-invalido" }));
   }
 
   const category = parsePlaceCategory(String(formData.get("categoria") ?? ""));
-  const maximumDistanceMeters = hasAccommodationCoordinate
-    ? parseMaximumDistance(String(formData.get("distancia") ?? ""))
-    : undefined;
-  const discoveryCenter = trip.accommodation?.coordinate ?? pipaDiscoveryCenter;
-  const radiusMeters = Math.min(
-    maximumDistanceMeters ?? externalDiscoveryRadiusMeters,
-    externalDiscoveryRadiusMeters,
-  );
+  const maximumDistanceMeters = parseMaximumDistance(String(formData.get("distancia") ?? ""));
+  const regionResolution = resolvePlaceDiscoveryRegion({
+    destination: trip.destination,
+    ...(trip.accommodation?.coordinate
+      ? { accommodationCoordinate: trip.accommodation.coordinate }
+      : {}),
+    ...(maximumDistanceMeters ? { requestedRadiusMeters: maximumDistanceMeters } : {}),
+  });
+  if (regionResolution.status !== "resolved") {
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "destino-nao-suportado" }));
+  }
+
+  const publishedPlaces = await new DrizzlePlaceRepository().listPublishedWithinRadius({
+    center: regionResolution.region.center,
+    radiusMeters: regionResolution.region.curatedRadiusMeters,
+  });
+  const destinationId = resolveCuratedDestinationId(publishedPlaces);
+  if (!destinationId) {
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "destino-nao-suportado" }));
+  }
 
   let candidates;
   try {
     candidates = await new OverturePmtilesPlaceSearchAdapter().search({
-      destinationId,
-      center: discoveryCenter,
-      radiusMeters,
+      center: regionResolution.region.center,
+      radiusMeters: regionResolution.region.externalRadiusMeters,
       ...(category ? { categories: [category] } : {}),
       limit: externalDiscoveryScanLimit,
     });
   } catch (error) {
-    console.error("Falha ao revalidar candidato externo via Overture", error);
-    redirect(
-      promotionReturnPath(
-        tripId,
-        formData,
-        { erroPromocao: "fonte-indisponivel" },
-        hasAccommodationCoordinate,
-      ),
-    );
+    console.error("Falha ao revalidar candidato externo via Overture", {
+      regionSource: regionResolution.region.source,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "fonte-indisponivel" }));
   }
 
   const candidate = candidates.find((item) => item.externalId === externalId);
   if (!candidate) {
-    redirect(
-      promotionReturnPath(
-        tripId,
-        formData,
-        { erroPromocao: "candidato-nao-encontrado" },
-        hasAccommodationCoordinate,
-      ),
-    );
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "candidato-nao-encontrado" }));
   }
 
   let feedback: PromotionFeedback;
@@ -224,5 +216,5 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
     }
   }
 
-  redirect(promotionReturnPath(tripId, formData, feedback, hasAccommodationCoordinate));
+  redirect(promotionReturnPath(tripId, formData, feedback));
 }

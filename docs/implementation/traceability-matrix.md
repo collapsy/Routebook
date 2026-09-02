@@ -865,3 +865,22 @@ Ao concluir um incremento:
 | UX | destino editável; Pipa deixa de ser default/read-only |
 | regressão | Pipa e Florianópolis passam pelo mesmo contrato de resolução |
 | validação | Documentation Validation e Engineering Validation pendentes no SHA final |
+
+
+## Evidências previstas do RB-INC-175
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-175-discovery-region.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-175-discovery-region.md` |
+| iniciativa | #411 — M9 / RouteBook Anywhere |
+| issue | #415 |
+| branch | `codex/rb-inc-175-discovery-region` |
+| base | `main@82020064fa39e096484b844d6bb0a0c060f4c43b` |
+| Region | Hospedagem → Destination → indisponível |
+| catálogo | leitura publicada por proximidade espacial |
+| PlaceSearchPort | query espacial sem `destinationId` |
+| Overture | PMTiles transitório em Preview/teste; GeoParquet + STAC como direção sustentável |
+| segunda cidade | Florianópolis zero seed/config |
+| observabilidade | source/raio/contagens/duração sem coordenadas precisas |
+| validação | Documentation/Engineering pendentes no SHA final |

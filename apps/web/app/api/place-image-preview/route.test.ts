@@ -49,11 +49,24 @@ function requestUrl(overrides: Record<string, string> = {}): string {
 }
 
 afterEach(() => {
+  vi.unstubAllEnvs();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
 
 describe("GET /api/place-image-preview", () => {
+  it("honra kill switch de Media sem consultar a Fonte", async () => {
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    vi.stubEnv("ROUTEBOOK_PLACE_MEDIA_ENABLED", "false");
+
+    const response = await GET(new Request(requestUrl()));
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
   it("rejeita recorte geográfico ou Destination inválido sem consultar a Fonte", async () => {
     const fetcher = vi.fn();
     vi.stubGlobal("fetch", fetcher);
@@ -106,16 +119,15 @@ describe("GET /api/place-image-preview", () => {
     );
   });
 
-  it("isola indisponibilidade do Wikimedia sem transformar erro em mídia", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => new Response("rate limited", { status: 429 })),
-    );
+  it("repete falha transitória no limite e mantém fallback sem inventar mídia", async () => {
+    const fetcher = vi.fn(async () => new Response("rate limited", { status: 429 }));
+    vi.stubGlobal("fetch", fetcher);
     vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
     const response = await GET(new Request(requestUrl()));
 
     expect(response.status).toBe(503);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(fetcher).toHaveBeenCalledTimes(2);
   });
 });

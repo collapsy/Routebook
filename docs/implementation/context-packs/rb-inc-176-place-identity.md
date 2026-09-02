@@ -33,6 +33,7 @@ Remover vocabulário regional da identidade de Place e impedir matches frouxos e
 - endereço divergente é evidência contrária quando ambos existem;
 - proximidade não funde negócios vizinhos sem evidência nominal/endereço;
 - `confidence` do Provider não é rating;
+- Place Discovery feed não pode reintroduzir heurística regional paralela;
 - ausência de evidência suficiente permanece ausência de match;
 - nenhum token regional específico pode ser necessário.
 

@@ -274,13 +274,14 @@ export async function saveExternalPlaceAction(formData: FormData): Promise<never
   try {
     const result = await promoteExternalPlaceCandidate({ candidate });
     await savePlaceForTrip(new DrizzleSavedPlaceRepository(), tripId, result.placeId);
-    revalidatePath(placesPath);
-    revalidatePath(`/viagens/${tripId}/lugares-salvos`);
-    redirect(promotionReturnPath(tripId, formData, { promocao: "salva" }));
   } catch (error) {
     if (error instanceof PlacePromotionServiceError) {
       redirect(promotionReturnPath(tripId, formData, promotionErrorFeedback(error)));
     }
     throw error;
   }
+
+  revalidatePath(placesPath);
+  revalidatePath(`/viagens/${tripId}/lugares-salvos`);
+  redirect(`/viagens/${tripId}/lugares-salvos?salvo=1`);
 }

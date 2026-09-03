@@ -1,9 +1,27 @@
+import type { ReactNode } from "react";
+
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { addActivity, createItinerary, deriveTripDays } from "@routebook/trip-management";
 
 import { DestinationTripGuide } from "./destination-trip-guide";
+
+vi.mock("next/link", () => ({
+  default: ({
+    children,
+    className,
+    href,
+  }: {
+    children: ReactNode;
+    className?: string;
+    href: string;
+  }) => (
+    <a className={className} href={href}>
+      {children}
+    </a>
+  ),
+}));
 
 const period = {
   startDate: "2026-11-10",

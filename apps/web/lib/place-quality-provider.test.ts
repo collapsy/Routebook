@@ -215,6 +215,18 @@ describe("GooglePlacesQualityAdapter", () => {
     expect(fetcher).toHaveBeenCalledTimes(5);
   });
 
+  it("preserva as causas de uma falha total para a política de retry", async () => {
+    const fetcher = vi.fn(async () => new Response(null, { status: 503 }));
+    const adapter = new GooglePlacesQualityAdapter("secret-google", { fetcher });
+
+    const error = await adapter.findSignals([target]).catch((cause: unknown) => cause);
+
+    expect(error).toBeInstanceOf(AggregateError);
+    expect((error as AggregateError).errors).toEqual([
+      expect.objectContaining({ message: expect.stringContaining("HTTP 503") }),
+    ]);
+  });
+
   it("preserva resultados amplos quando uma busca nominal adicional falha", async () => {
     const missing: PlaceQualityTarget = {
       id: "published:chapadao",

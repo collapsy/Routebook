@@ -94,19 +94,21 @@ export function ExternalPlaceImagePreview({
   latitude,
   longitude,
   category,
+  enabled = true,
 }: Readonly<{
   destinationId?: string | undefined;
   placeName: string;
   latitude: number;
   longitude: number;
   category?: PlaceCategory | undefined;
+  enabled?: boolean | undefined;
 }>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<PreviewState>({ status: "idle" });
 
   useEffect(() => {
     const target = containerRef.current;
-    if (!target || state.status !== "idle" || !destinationId) return;
+    if (!target || state.status !== "idle" || !destinationId || !enabled) return;
 
     if (typeof IntersectionObserver === "undefined") {
       const timer = setTimeout(() => setState({ status: "loading" }), 0);
@@ -124,10 +126,10 @@ export function ExternalPlaceImagePreview({
     );
     observer.observe(target);
     return () => observer.disconnect();
-  }, [destinationId, state.status]);
+  }, [destinationId, enabled, state.status]);
 
   useEffect(() => {
-    if (state.status !== "loading" || !destinationId) return;
+    if (state.status !== "loading" || !destinationId || !enabled) return;
 
     const controller = new AbortController();
 
@@ -158,7 +160,15 @@ export function ExternalPlaceImagePreview({
       });
 
     return () => controller.abort();
-  }, [destinationId, latitude, longitude, placeName, state.status]);
+  }, [destinationId, enabled, latitude, longitude, placeName, state.status]);
+
+  if (!enabled || !destinationId) {
+    return (
+      <div ref={containerRef} data-external-place-image-state="fallback">
+        <PlacePrimaryImage category={category} placeName={placeName} />
+      </div>
+    );
+  }
 
   if (state.status === "ready") {
     const { preview } = state;

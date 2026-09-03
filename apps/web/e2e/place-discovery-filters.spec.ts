@@ -25,6 +25,10 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     timeout: 20_000,
   });
 
+  const bootstrapStatus = page.getByLabel("Status do guia");
+  await expect(bootstrapStatus).toHaveAttribute("data-place-bootstrap-stage", /enriching|ready/);
+  await expect(bootstrapStatus).toContainText(/Enriquecendo seu guia|Guia pronto/);
+
   const options = page.getByRole("list", { name: "Opções de lugares" });
   const canonicalPlaces = options.locator('[data-place-source="published"]');
   const externalPlaces = options.locator('[data-place-source="external"]');

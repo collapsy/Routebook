@@ -904,3 +904,23 @@ Ao concluir um incremento:
 | quality signals | externalId não reutilizado; confidence externa não vira rating |
 | regressão | Pipa + Florianópolis/segundo destino sem regra especial |
 | validação | Documentation/Engineering pendentes no SHA final |
+
+
+## Evidências previstas do RB-INC-177
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-177-destination-bootstrap.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-177-destination-bootstrap.md` |
+| iniciativa | #411 — M9 / RouteBook Anywhere |
+| issue | #417 |
+| branch | `codex/rb-inc-177-destination-bootstrap` |
+| base | `main@30bcae1a1574f14d48ba15995d7baf1097315bd5` |
+| ADR assíncrono | RB-ADR-015 permanece Proposed; Inngest não adotado |
+| bootstrap | Destination → Region → Discovery → Identity → Quality → Media → Guide |
+| partial success | Quality/Media não invalidam Discovery |
+| resiliência | retries read-only limitados + kill switches |
+| budgets | Discovery 200 candidatos; Quality 60 targets; Media 12 previews por render |
+| observabilidade | booleanos, contagens, tentativas e duração; sem coordenadas/secrets |
+| custo | request units máximas documentadas; billing/Production fora do escopo |
+| validação | Documentation/Engineering pendentes no SHA final |

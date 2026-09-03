@@ -1,9 +1,12 @@
 export default function PlaceCatalogLoading() {
   return (
     <section className="app-page" aria-busy="true" aria-live="polite">
-      <p className="product-eyebrow">Catálogo de lugares</p>
-      <h1>Carregando lugares...</h1>
-      <p>Estamos consultando os lugares publicados para esta viagem.</p>
+      <p className="product-eyebrow">Preparando seu guia</p>
+      <h1>Descobrindo lugares...</h1>
+      <p>
+        Estamos resolvendo a região e buscando opções seguras. Enriquecimentos opcionais não
+        bloqueiam o primeiro conjunto utilizável.
+      </p>
     </section>
   );
 }

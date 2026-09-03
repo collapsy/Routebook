@@ -24,6 +24,10 @@ test("descobre candidatos em Florianópolis com zero seed regional", async ({ pa
   await expect(page.getByRole("heading", { name: /Lugares em Florianópolis/ })).toBeVisible({
     timeout: 20_000,
   });
+  const bootstrapStatus = page.getByLabel("Status do guia");
+  await expect(bootstrapStatus).toHaveAttribute("data-place-bootstrap-stage", "ready");
+  await expect(bootstrapStatus).toContainText("Guia pronto");
+
   const options = page.getByRole("list", { name: "Opções de lugares" });
   const published = options.locator('[data-place-source="published"]');
   const external = options.locator('[data-place-source="external"]');
@@ -31,6 +35,9 @@ test("descobre candidatos em Florianópolis com zero seed regional", async ({ pa
   await expect(published).toHaveCount(0);
   await expect(external.first()).toBeVisible({ timeout: 30_000 });
   expect(await external.count()).toBeGreaterThan(0);
+  await expect(
+    external.first().locator('[data-external-place-image-state="fallback"]'),
+  ).toBeVisible();
   await expect(external.first()).toContainText(/em linha reta do destino/);
   await expect(page.getByLabel("Distância máxima")).toBeEnabled();
   await expect(page.getByText(/referência aproximada do destino/)).toBeVisible();

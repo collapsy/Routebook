@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 
-import { and, eq, gte, lte } from "drizzle-orm";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 
 import {
   createPlace,
@@ -92,15 +92,22 @@ export async function promoteExternalPlaceCandidate(
 ): Promise<PromoteExternalPlaceCandidateResult> {
   const destinationId = input.destinationId?.trim() || undefined;
   const promotedAt = input.promotedAt ?? new Date();
+  const provider = input.candidate.provider.trim();
+  const externalId = input.candidate.externalId.trim();
+  const externalIdentityKey = `${provider}:${externalId}`;
 
   return getDatabase().transaction(async (transaction) => {
+    await transaction.execute(
+      sql`select pg_advisory_xact_lock(hashtext(${externalIdentityKey}))`,
+    );
+
     const [linkedReference] = await transaction
       .select()
       .from(placeExternalReferences)
       .where(
         and(
-          eq(placeExternalReferences.provider, input.candidate.provider),
-          eq(placeExternalReferences.externalId, input.candidate.externalId),
+          eq(placeExternalReferences.provider, provider),
+          eq(placeExternalReferences.externalId, externalId),
         ),
       )
       .limit(1);
@@ -207,8 +214,8 @@ export async function promoteExternalPlaceCandidate(
     await transaction.insert(placeExternalReferences).values({
       id: randomUUID(),
       placeId: place.id,
-      provider: input.candidate.provider.trim(),
-      externalId: input.candidate.externalId.trim(),
+      provider,
+      externalId,
       sourceLicense: input.candidate.sourceLicense.trim(),
       sourceUrl: input.candidate.sourceUrl?.trim() || null,
       collectedAt: input.candidate.collectedAt,

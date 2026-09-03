@@ -49,8 +49,12 @@ test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e G
     external.first().locator('[data-external-place-image-state="fallback"]'),
   ).toBeVisible();
 
-  const selectedName = (await external.first().locator(":scope > strong").innerText()).trim();
-  await external.first().getByRole("button", { name: "Salvar na viagem" }).click();
+  const promotable = options
+    .locator('[data-place-source="external"]:not([data-place-category="unmapped"])')
+    .first();
+  await expect(promotable).toBeVisible();
+  const selectedName = (await promotable.locator(":scope > strong").innerText()).trim();
+  await promotable.getByRole("button", { name: "Salvar na viagem" }).click();
   await expect(page.getByText(/Lugar salvo na viagem com a origem externa preservada/)).toBeVisible(
     {
       timeout: 45_000,

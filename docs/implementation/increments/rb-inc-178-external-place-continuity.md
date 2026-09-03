@@ -103,6 +103,7 @@ apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx
 apps/web/app/viagens/[tripId]/lugares/[placeSlug]/actions.ts
 apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx
 apps/web/app/viagens/[tripId]/roteiro/page.tsx
+apps/web/e2e/place-discovery-anywhere.spec.ts
 docs/domain/domain-model.md
 docs/domain/ubiquitous-language.md
 docs/implementation/increments/rb-inc-178-external-place-continuity.md

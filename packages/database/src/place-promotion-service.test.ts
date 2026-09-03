@@ -13,6 +13,7 @@ const database = getDatabase();
 const destinationId = `promotion-${randomUUID()}`;
 const otherDestinationId = `promotion-other-${randomUUID()}`;
 const existingPlaceId = randomUUID();
+let globalPlaceId: string | undefined;
 const now = new Date("2026-08-15T15:40:00.000Z");
 
 function candidate(overrides: Partial<ExternalPlaceCandidate> = {}): ExternalPlaceCandidate {
@@ -50,6 +51,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  if (globalPlaceId) await database.delete(places).where(eq(places.id, globalPlaceId));
   await database.delete(places).where(eq(places.destinationId, destinationId));
   await database.delete(places).where(eq(places.destinationId, otherDestinationId));
   await closeDatabase();
@@ -62,7 +64,6 @@ describe("promoteExternalPlaceCandidate", () => {
       candidate: candidate(),
       promotedAt: now,
     });
-
     expect(result).toMatchObject({ status: "created", publicationStatus: "draft" });
 
     const [place] = await database
@@ -117,7 +118,7 @@ describe("promoteExternalPlaceCandidate", () => {
     });
   });
 
-  it("impede reutilizar a mesma external identity em outro Destination", async () => {
+  it("reutiliza a mesma external identity global entre Viagens/Destinations", async () => {
     const sharedIdentity = candidate({
       externalId: "cross-destination-identity",
       name: "Lugar com identidade global",
@@ -136,10 +137,30 @@ describe("promoteExternalPlaceCandidate", () => {
         candidate: sharedIdentity,
         promotedAt: new Date("2026-08-15T15:50:00.000Z"),
       }),
-    ).rejects.toMatchObject({
-      code: "destination-conflict",
-      matchedPlaceId: first.placeId,
+    ).resolves.toMatchObject({
+      status: "existing",
+      placeId: first.placeId,
     });
+  });
+
+  it("materializa candidato zero-seed como Place global sem publicação", async () => {
+    const result = await promoteExternalPlaceCandidate({
+      candidate: candidate({
+        externalId: "global-zero-seed",
+        name: "Lugar Global Descoberto",
+        latitude: -27.5949,
+        longitude: -48.5482,
+      }),
+      promotedAt: now,
+    });
+    globalPlaceId = result.placeId;
+
+    const [place] = await database
+      .select()
+      .from(places)
+      .where(eq(places.id, result.placeId))
+      .limit(1);
+    expect(place).toMatchObject({ destinationId: null, publicationStatus: "draft" });
   });
 
   it("bloqueia possível duplicata em vez de criar outro Place", async () => {

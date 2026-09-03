@@ -1377,6 +1377,11 @@ Place
 - identificadores externos;
 - Proveniência das informações.
 
+Place possui identidade global. Destination e Region fornecem contexto espacial para descoberta,
+consulta e experiência, mas não são parte da identidade do agregado. O `destinationId` presente no
+catálogo curado legado é um agrupamento editorial opcional e não um requisito para materializar um
+Place descoberto.
+
 ---
 
 ### 42. Identidade do Lugar
@@ -1389,6 +1394,7 @@ A identidade interna deve:
 - sobreviver à troca de Fonte;
 - suportar fusão;
 - preservar histórico.
+- permanecer estável quando o mesmo Lugar for usado por Viagens ou Destinations diferentes.
 
 Não deve depender exclusivamente de:
 
@@ -1397,6 +1403,11 @@ Não deve depender exclusivamente de:
 - coordenada;
 - ID externo;
 - categoria.
+- Destination.
+
+Um candidato externo revalidado pode originar um Place global em rascunho para continuidade em
+Saved Place e Activity. Isso não publica o Lugar nem o transforma em Recommendation. Promoção
+editorial permanece uma decisão separada e explícita.
 
 ---
 

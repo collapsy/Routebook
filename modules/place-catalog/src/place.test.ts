@@ -41,6 +41,12 @@ describe("createPlace", () => {
     expect(createPlace(withoutAddress)).not.toHaveProperty("addressLabel");
   });
 
+  it("cria Place global sem agrupamento editorial de Destination", () => {
+    const { destinationId, ...globalInput } = validInput;
+    expect(destinationId).toBe("pipa-rn-br");
+    expect(createPlace(globalInput)).not.toHaveProperty("destinationId");
+  });
+
   it("rejeita slug não canônico", () => {
     expect(() => createPlace({ ...validInput, slug: "Praia do Amor" })).toThrow(
       PlaceValidationError,

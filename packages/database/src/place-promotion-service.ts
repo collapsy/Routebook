@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, gte, lte } from "drizzle-orm";
 
 import {
   createPlace,
@@ -25,7 +25,7 @@ export class PlacePromotionServiceError extends Error {
 }
 
 export type PromoteExternalPlaceCandidateInput = Readonly<{
-  destinationId: string;
+  destinationId?: string;
   candidate: ExternalPlaceCandidate;
   promotedAt?: Date;
 }>;
@@ -42,7 +42,7 @@ type PlaceRow = typeof places.$inferSelect;
 function rowForReconciliation(row: PlaceRow): Place {
   return {
     id: row.id,
-    destinationId: row.destinationId,
+    ...(row.destinationId ? { destinationId: row.destinationId } : {}),
     slug: row.slug,
     name: row.name,
     summary: row.summary,
@@ -90,15 +90,8 @@ function technicalSummary(candidate: ExternalPlaceCandidate): string {
 export async function promoteExternalPlaceCandidate(
   input: PromoteExternalPlaceCandidateInput,
 ): Promise<PromoteExternalPlaceCandidateResult> {
-  const destinationId = input.destinationId.trim();
+  const destinationId = input.destinationId?.trim() || undefined;
   const promotedAt = input.promotedAt ?? new Date();
-
-  if (!destinationId) {
-    throw new PlacePromotionServiceError(
-      "O destino da promoção é obrigatório.",
-      "candidate-rejected",
-    );
-  }
 
   return getDatabase().transaction(async (transaction) => {
     const [linkedReference] = await transaction
@@ -125,13 +118,6 @@ export async function promoteExternalPlaceCandidate(
           linkedReference.placeId,
         );
       }
-      if (linkedPlace.destinationId !== destinationId) {
-        throw new PlacePromotionServiceError(
-          "A identidade externa já pertence a outro Destination.",
-          "destination-conflict",
-          linkedPlace.id,
-        );
-      }
       return {
         status: "existing",
         placeId: linkedPlace.id,
@@ -140,13 +126,23 @@ export async function promoteExternalPlaceCandidate(
       };
     }
 
-    const destinationRows = await transaction
+    const latitudeDelta = 10_000 / 111_320;
+    const longitudeDelta =
+      10_000 / (111_320 * Math.max(0.1, Math.cos((input.candidate.latitude * Math.PI) / 180)));
+    const nearbyRows = await transaction
       .select()
       .from(places)
-      .where(eq(places.destinationId, destinationId));
+      .where(
+        and(
+          gte(places.latitude, input.candidate.latitude - latitudeDelta),
+          lte(places.latitude, input.candidate.latitude + latitudeDelta),
+          gte(places.longitude, input.candidate.longitude - longitudeDelta),
+          lte(places.longitude, input.candidate.longitude + longitudeDelta),
+        ),
+      );
     const reconciliation = reconcileExternalPlaceCandidate(
       input.candidate,
-      destinationRows.map(rowForReconciliation),
+      nearbyRows.map(rowForReconciliation),
     );
 
     if (reconciliation.status === "rejected") {
@@ -175,10 +171,10 @@ export async function promoteExternalPlaceCandidate(
       );
     }
 
-    const slug = promotionSlug(input.candidate, new Set(destinationRows.map((row) => row.slug)));
+    const slug = promotionSlug(input.candidate, new Set(nearbyRows.map((row) => row.slug)));
     const place = createPlace(
       {
-        destinationId,
+        ...(destinationId ? { destinationId } : {}),
         slug,
         name: input.candidate.name,
         summary: technicalSummary(input.candidate),
@@ -193,7 +189,7 @@ export async function promoteExternalPlaceCandidate(
 
     await transaction.insert(places).values({
       id: place.id,
-      destinationId: place.destinationId,
+      destinationId: place.destinationId ?? null,
       slug: place.slug,
       name: place.name,
       summary: place.summary,

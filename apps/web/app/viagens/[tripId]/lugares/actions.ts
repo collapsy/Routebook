@@ -22,7 +22,7 @@ import { parseMaximumDistance, parsePlaceCategory, parsePlacePriceRange } from "
 const externalDiscoveryScanLimit = 200;
 
 type PromotionFeedback =
-  | Readonly<{ promocao: "criada" | "existente" }>
+  | Readonly<{ promocao: "criada" | "existente" | "salva" }>
   | Readonly<{
       erroPromocao:
         | "candidato-invalido"
@@ -36,7 +36,9 @@ type PromotionFeedback =
     }>;
 
 function resolveCuratedDestinationId(places: readonly Place[]): string | undefined {
-  const destinationIds = [...new Set(places.map((place) => place.destinationId))];
+  const destinationIds = [
+    ...new Set(places.flatMap((place) => (place.destinationId ? [place.destinationId] : []))),
+  ];
   return destinationIds.length === 1 ? destinationIds[0] : undefined;
 }
 
@@ -177,10 +179,6 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
     radiusMeters: regionResolution.region.curatedRadiusMeters,
   });
   const destinationId = resolveCuratedDestinationId(publishedPlaces);
-  if (!destinationId) {
-    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "destino-nao-suportado" }));
-  }
-
   let candidates;
   try {
     candidates = await new OverturePmtilesPlaceSearchAdapter().search({
@@ -204,7 +202,10 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
 
   let feedback: PromotionFeedback;
   try {
-    const result = await promoteExternalPlaceCandidate({ destinationId, candidate });
+    const result = await promoteExternalPlaceCandidate({
+      ...(destinationId ? { destinationId } : {}),
+      candidate,
+    });
     feedback = { promocao: result.status === "created" ? "criada" : "existente" };
     if (result.status === "created") revalidatePath(placesPath);
   } catch (error) {
@@ -217,4 +218,69 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
   }
 
   redirect(promotionReturnPath(tripId, formData, feedback));
+}
+
+export async function saveExternalPlaceAction(formData: FormData): Promise<never> {
+  const tripId = String(formData.get("tripId") ?? "").trim();
+  const externalId = String(formData.get("externalId") ?? "").trim();
+  const placesPath = `/viagens/${tripId}/lugares`;
+
+  if (!tripId) redirect("/viagens?erro=viagem-invalida");
+  const access = await resolveTripRouteAccess({ tripId, action: "trip:edit" });
+  if (access.status === "unauthenticated") {
+    redirect(`/entrar?next=${encodeURIComponent(placesPath)}`);
+  }
+  if (access.status === "not-found") notFound();
+
+  const trip = await findTripById(new DrizzleTripRepository(), tripId);
+  if (!trip) notFound();
+  if (!externalId || externalId.length > 200) {
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "candidato-invalido" }));
+  }
+
+  const category = parsePlaceCategory(String(formData.get("categoria") ?? ""));
+  const maximumDistanceMeters = parseMaximumDistance(String(formData.get("distancia") ?? ""));
+  const regionResolution = resolvePlaceDiscoveryRegion({
+    destination: trip.destination,
+    ...(trip.accommodation?.coordinate
+      ? { accommodationCoordinate: trip.accommodation.coordinate }
+      : {}),
+    ...(maximumDistanceMeters ? { requestedRadiusMeters: maximumDistanceMeters } : {}),
+  });
+  if (regionResolution.status !== "resolved") {
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "destino-nao-suportado" }));
+  }
+
+  let candidates;
+  try {
+    candidates = await new OverturePmtilesPlaceSearchAdapter().search({
+      center: regionResolution.region.center,
+      radiusMeters: regionResolution.region.externalRadiusMeters,
+      ...(category ? { categories: [category] } : {}),
+      limit: externalDiscoveryScanLimit,
+    });
+  } catch (error) {
+    console.error("Falha ao revalidar candidato externo antes de salvar", {
+      regionSource: regionResolution.region.source,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "fonte-indisponivel" }));
+  }
+  const candidate = candidates.find((item) => item.externalId === externalId);
+  if (!candidate) {
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "candidato-nao-encontrado" }));
+  }
+
+  try {
+    const result = await promoteExternalPlaceCandidate({ candidate });
+    await savePlaceForTrip(new DrizzleSavedPlaceRepository(), tripId, result.placeId);
+    revalidatePath(placesPath);
+    revalidatePath(`/viagens/${tripId}/lugares-salvos`);
+    redirect(promotionReturnPath(tripId, formData, { promocao: "salva" }));
+  } catch (error) {
+    if (error instanceof PlacePromotionServiceError) {
+      redirect(promotionReturnPath(tripId, formData, promotionErrorFeedback(error)));
+    }
+    throw error;
+  }
 }

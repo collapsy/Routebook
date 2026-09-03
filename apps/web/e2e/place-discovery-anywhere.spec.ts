@@ -41,9 +41,12 @@ test("descobre candidatos em Florianópolis com zero seed regional", async ({ pa
   await expect(external.first()).toContainText(/em linha reta do destino/);
   await expect(page.getByLabel("Distância máxima")).toBeEnabled();
   await expect(page.getByText(/referência aproximada do destino/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Salvar na viagem" }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Enviar para curadoria" })).toHaveCount(0);
   await expect(
-    page.getByText(/promoção editorial aguarda uma identidade canônica deste Destino/).first(),
+    page
+      .getByText(/curadoria editorial permanece separada e não é necessária para planejar/)
+      .first(),
   ).toBeVisible();
 
   const map = page.locator('[data-routebook-map="true"]');

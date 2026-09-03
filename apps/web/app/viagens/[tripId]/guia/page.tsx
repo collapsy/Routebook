@@ -3,25 +3,27 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
-  DrizzlePlaceRepository,
+  DrizzleItineraryRepository,
+  DrizzleSavedPlaceRepository,
   DrizzleTravelerProfileRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
-import { listPublishedPlaces } from "@routebook/place-catalog";
+import { listSavedPlaces } from "@routebook/saved-places";
 import { findTravelerProfile } from "@routebook/traveler-profile";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PipaDailyExperiences } from "../../../../components/pipa-daily-experiences";
+import { DestinationTripGuide } from "../../../../components/destination-trip-guide";
 import { TripGuideModeNav } from "../../../../components/trip-guide-mode-nav";
 import { buildPipaDailyExperience } from "../../../../lib/pipa-daily-experiences";
 import { resolveTripTodayDate } from "../../../../lib/trip-active-day";
-import { resolveTripDestinationId } from "../../../../lib/trip-destination";
+import { loadTripCuratedCatalog } from "../../../../lib/trip-curated-catalog";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Hoje em Pipa — RouteBook",
-  description: "Consulte experiências e decisões úteis para o Dia sem carregar o guia completo.",
+  title: "Hoje na viagem — RouteBook",
+  description: "Consulte decisões úteis para o Dia sem carregar o guia completo.",
 };
 
 export default async function TripGuidePage({
@@ -35,30 +37,31 @@ export default async function TripGuidePage({
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const destinationId = resolveTripDestinationId(trip.destination.name);
-  if (destinationId !== "pipa-rn-br") notFound();
-
-  const [profile, publishedPlaces] = await Promise.all([
+  const [profile, curatedCatalog, itinerary, savedPlaces] = await Promise.all([
     findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
-    listPublishedPlaces(new DrizzlePlaceRepository(), destinationId),
+    loadTripCuratedCatalog(trip),
+    new DrizzleItineraryRepository().findByTripId(tripId),
+    listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
   ]);
+  const publishedPlaces = curatedCatalog.places;
   const days = deriveTripDays(trip.period);
-  const todayDate = resolveTripTodayDate(days, new Date(), "America/Fortaleza");
+  const todayDate = resolveTripTodayDate(days, new Date(), trip.destination.timeZone);
   const { dia } = await searchParams;
   const selectedDate =
     (dia && days.some((day) => day.date === dia) ? dia : undefined) ?? todayDate ?? days[0]?.date;
   const travelMode = profile?.transportPreference === "walking" ? "walking" : "driving";
-  const dailyExperience = selectedDate
-    ? buildPipaDailyExperience({
-        tripId,
-        date: selectedDate,
-        places: publishedPlaces,
-        ...(trip.accommodation?.coordinate
-          ? { accommodationCoordinate: trip.accommodation.coordinate }
-          : {}),
-        travelMode,
-      })
-    : null;
+  const dailyExperience =
+    selectedDate && curatedCatalog.destinationId === "pipa-rn-br"
+      ? buildPipaDailyExperience({
+          tripId,
+          date: selectedDate,
+          places: publishedPlaces,
+          ...(trip.accommodation?.coordinate
+            ? { accommodationCoordinate: trip.accommodation.coordinate }
+            : {}),
+          travelMode,
+        })
+      : null;
 
   return (
     <section className="app-page trip-overview-page">
@@ -85,17 +88,16 @@ export default async function TripGuidePage({
           tripId={tripId}
         />
       ) : (
-        <section className="traveler-context-summary" aria-labelledby="today-unavailable">
-          <p className="product-eyebrow">Hoje em Pipa</p>
-          <h1 id="today-unavailable">Experiências do Dia indisponíveis</h1>
-          <p>
-            O RouteBook não possui cobertura governada para esta data. O Guia por dia e o Roteiro
-            continuam disponíveis sem inventar programação.
-          </p>
-          <Link className="product-primary-action" href={`/viagens/${tripId}/guia/dias`}>
-            Abrir Guia por dia
-          </Link>
-        </section>
+        <DestinationTripGuide
+          days={days}
+          destinationName={trip.destination.name}
+          itinerary={itinerary}
+          mode="today"
+          savedPlaceCount={savedPlaces.length}
+          {...(selectedDate ? { selectedDate } : {})}
+          {...(todayDate ? { todayDate } : {})}
+          tripId={tripId}
+        />
       )}
     </section>
   );

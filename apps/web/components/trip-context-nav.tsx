@@ -7,7 +7,6 @@ import styles from "./trip-context-nav.module.css";
 
 type TripContextNavProps = Readonly<{
   tripId: string;
-  showGuide: boolean;
 }>;
 
 type NavItem = Readonly<{
@@ -16,19 +15,15 @@ type NavItem = Readonly<{
   match: (pathname: string) => boolean;
 }>;
 
-export function TripContextNav({ tripId, showGuide }: TripContextNavProps) {
+export function TripContextNav({ tripId }: TripContextNavProps) {
   const pathname = usePathname();
   const basePath = `/viagens/${tripId}`;
   const items: NavItem[] = [
-    ...(showGuide
-      ? [
-          {
-            href: `${basePath}/guia`,
-            label: "Hoje",
-            match: (value: string) => value.startsWith(`${basePath}/guia`),
-          },
-        ]
-      : []),
+    {
+      href: `${basePath}/guia`,
+      label: "Hoje",
+      match: (value: string) => value.startsWith(`${basePath}/guia`),
+    },
     {
       href: `${basePath}/lugares`,
       label: "Lugares",

@@ -125,6 +125,35 @@ describe("DrizzleItineraryRepository", () => {
     }
   });
 
+  it("restaura o fuso persistido sem assumir o fuso de Pipa", async () => {
+    const trip = createTrip({
+      name: "Roteiro em São Paulo",
+      destination: {
+        name: "São Paulo, SP",
+        type: "city",
+        countryCode: "BR",
+        latitude: -23.5505,
+        longitude: -46.6333,
+        timeZone: "America/Sao_Paulo",
+      },
+      startDate: "2026-11-10",
+      endDate: "2026-11-12",
+      ownerName: "RouteBook QA",
+    });
+    const database = getDatabase();
+    const repository = new DrizzleItineraryRepository();
+
+    try {
+      await new DrizzleTripRepository().create(trip);
+      const itinerary = createItinerary({ tripId: trip.id, period: trip.period });
+      await repository.save(itinerary);
+
+      expect((await repository.findByTripId(trip.id))?.period.timeZone).toBe("America/Sao_Paulo");
+    } finally {
+      await database.delete(trips).where(eq(trips.id, trip.id));
+    }
+  });
+
   it("usa o executor escopado sem nested transaction e participa do rollback externo", async () => {
     const trip = createTrip({
       name: "Rollback externo do Itinerary",

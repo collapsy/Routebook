@@ -199,6 +199,7 @@ function CanonicalDiscoveryCard({
   qualitySignals,
   categoryRank,
   externalMediaEnabled,
+  timeZone,
 }: Readonly<{
   item: CanonicalDiscoveryItem;
   tripId: string;
@@ -212,6 +213,7 @@ function CanonicalDiscoveryCard({
   qualitySignals?: PlaceQualitySignals;
   categoryRank?: number;
   externalMediaEnabled: boolean;
+  timeZone: string;
 }>) {
   const { place, distanceMeters } = item;
   const candidate = item.kind === "enriched" ? item.candidate : undefined;
@@ -239,6 +241,7 @@ function CanonicalDiscoveryCard({
         categoryLabel={categoryLabels[place.category]}
         orderLabel={rankingOrderLabel}
         position={rankingPosition}
+        timeZone={timeZone}
         {...(quality ? { quality } : {})}
         {...(qualitySignals ? { signals: qualitySignals } : {})}
         {...(categoryRank ? { categoryRank } : {})}
@@ -346,6 +349,7 @@ function ExternalDiscoveryCard({
   qualitySignals,
   categoryRank,
   externalMediaEnabled,
+  timeZone,
 }: Readonly<{
   item: ExternalPlaceDiscoveryItem;
   tripId: string;
@@ -363,6 +367,7 @@ function ExternalDiscoveryCard({
   qualitySignals?: PlaceQualitySignals;
   categoryRank?: number;
   externalMediaEnabled: boolean;
+  timeZone: string;
 }>) {
   const { candidate, distanceMeters } = item;
   const coordinate = { latitude: candidate.latitude, longitude: candidate.longitude };
@@ -380,6 +385,7 @@ function ExternalDiscoveryCard({
         categoryLabel={categoryLabel}
         orderLabel={rankingOrderLabel}
         position={rankingPosition}
+        timeZone={timeZone}
         {...(quality ? { quality } : {})}
         {...(qualitySignals ? { signals: qualitySignals } : {})}
         {...(categoryRank ? { categoryRank } : {})}
@@ -1100,6 +1106,7 @@ export default async function PlacesPage({
                   : {})}
                 distanceReferenceLabel={distanceReferenceLabel}
                 item={item}
+                timeZone={trip.destination.timeZone}
                 tripId={tripId}
                 {...(destinationId ? { destinationId } : {})}
                 {...(accommodationCoordinate ? { accommodationCoordinate } : {})}
@@ -1123,6 +1130,7 @@ export default async function PlacesPage({
                 distanceReferenceLabel={distanceReferenceLabel}
                 isSaved={savedPlaceIds.has(item.place.id)}
                 item={item}
+                timeZone={trip.destination.timeZone}
                 tripId={tripId}
                 {...(destinationId ? { destinationId } : {})}
                 {...(accommodationCoordinate ? { accommodationCoordinate } : {})}

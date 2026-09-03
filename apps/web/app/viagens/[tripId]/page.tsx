@@ -3,12 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
-  DrizzlePlaceRepository,
   DrizzleSavedPlaceRepository,
   DrizzleTravelerProfileRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
-import { listPublishedPlaces } from "@routebook/place-catalog";
 import { listSavedPlaces } from "@routebook/saved-places";
 import { findTravelerProfile } from "@routebook/traveler-profile";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
@@ -16,7 +14,7 @@ import { deriveTripDays, findTripById } from "@routebook/trip-management";
 import { ContextualRecommendationStrip } from "../../../components/contextual-recommendation-strip";
 import { TripMap } from "../../../components/trip-map";
 import { loadRecommendationExperience } from "../../../lib/recommendation-experience";
-import { resolveTripDestinationId } from "../../../lib/trip-destination";
+import { loadTripCuratedCatalog } from "../../../lib/trip-curated-catalog";
 import type { TripMapPoint } from "../../../lib/trip-map";
 import { resolveTripRouteAccess } from "../../../lib/trip-route-access";
 import { DeleteTripControl } from "./delete-trip-control";
@@ -79,15 +77,15 @@ export default async function TripOverviewPage({
 
   if (!trip) notFound();
 
-  const destinationId = resolveTripDestinationId(trip.destination.name);
-  const [profile, publishedPlaces, savedPlaces, deleteAccess, recommendationExperience] =
+  const [profile, curatedCatalog, savedPlaces, deleteAccess, recommendationExperience] =
     await Promise.all([
       findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
-      destinationId ? listPublishedPlaces(new DrizzlePlaceRepository(), destinationId) : [],
+      loadTripCuratedCatalog(trip),
       listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
       resolveTripRouteAccess({ tripId, action: "trip:delete" }),
       loadRecommendationExperience(tripId, new Date(), { persist: false }),
     ]);
+  const publishedPlaces = curatedCatalog.places;
   const { contextUpdated } = await searchParams;
   const owner = trip.participants.find((participant) => participant.role === "owner");
   const days = deriveTripDays(trip.period);
@@ -171,15 +169,15 @@ export default async function TripOverviewPage({
         </div>
       </dl>
 
-      {destinationId === "pipa-rn-br" && days.length > 0 ? (
+      {days.length > 0 ? (
         <section className="traveler-context-summary" aria-labelledby="trip-guide-entry-title">
           <div className="section-heading-row">
             <div>
-              <p className="product-eyebrow">Hoje em Pipa</p>
+              <p className="product-eyebrow">Hoje em {trip.destination.name}</p>
               <h2 id="trip-guide-entry-title">Comece pelo que importa neste Dia</h2>
               <p>
-                Consulte céu, horizonte e Rolês confirmados para a data em foco. Quando quiser
-                planejar com calma, o Guia por dia fica disponível dentro dessa mesma área.
+                Consulte o que já foi confirmado para a data em foco. Onde houver cobertura
+                editorial governada, o RouteBook acrescenta contexto sem substituir suas decisões.
               </p>
             </div>
             <Link className="product-primary-action" href={`/viagens/${tripId}/guia`}>

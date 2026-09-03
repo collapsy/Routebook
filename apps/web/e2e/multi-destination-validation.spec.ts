@@ -55,10 +55,9 @@ test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e G
   await expect(promotable).toBeVisible();
   const selectedName = (await promotable.locator(":scope > strong").innerText()).trim();
   await promotable.getByRole("button", { name: "Salvar na viagem" }).click();
-  await expect(page).toHaveURL(
-    new RegExp("/viagens/" + trip.id + "/lugares-salvos\\?salvo=1"),
-    { timeout: 45_000 },
-  );
+  await expect(page).toHaveURL(new RegExp("/viagens/" + trip.id + "/lugares-salvos\\?salvo=1"), {
+    timeout: 45_000,
+  });
   await expect(
     page.getByText(/Lugar salvo na viagem com a origem externa preservada/),
   ).toBeVisible();

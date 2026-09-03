@@ -10,6 +10,7 @@ import { places } from "./schema";
 const database = getDatabase();
 const destinationId = `test-${randomUUID()}`;
 const globalPlaceId = randomUUID();
+const missingPlaceId = randomUUID();
 const now = new Date("2026-08-11T00:00:00Z");
 const primaryImage = {
   assetPath: "/place-images/tests/lugar-com-faixa.webp",
@@ -144,7 +145,7 @@ describe("DrizzlePlaceRepository", () => {
     const result = await new DrizzlePlaceRepository().listByIds([
       globalPlaceId,
       globalPlaceId,
-      "inexistente",
+      missingPlaceId,
     ]);
 
     expect(result).toHaveLength(1);

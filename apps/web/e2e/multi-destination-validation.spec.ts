@@ -54,21 +54,69 @@ test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e G
     .first();
   await expect(promotable).toBeVisible();
   const selectedName = (await promotable.locator(":scope > strong").innerText()).trim();
-  const selectedExternalId = await promotable.locator('input[name="externalId"]').inputValue();
   await promotable.getByRole("button", { name: "Salvar na viagem" }).click();
-  await expect(page, `Falha ao salvar "${selectedName}" (${selectedExternalId})`).toHaveURL(
-    /(?:promocao=salva|erroPromocao=)/,
+  await expect(page).toHaveURL(
+    new RegExp(`/viagens/${trip.id}/lugares-salvos\\?salvo=1import { expect, test } from "@playwright/test";
+
+import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
+
+test.setTimeout(180_000);
+
+test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e Guia", async ({
+  page,
+}) => {
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: `Anywhere São Paulo ${test.info().project.name} ${Date.now()}`,
+    destination: {
+      name: "São Paulo, SP",
+      type: "city",
+      countryCode: "BR",
+      latitude: -23.5505,
+      longitude: -46.6333,
+      timeZone: "America/Sao_Paulo",
+    },
+    startDate: "2026-11-10",
+    endDate: "2026-11-12",
+    accommodationName: "Hospedagem na Avenida Paulista",
+    accommodationAddress: "Avenida Paulista, São Paulo — SP",
+    accommodationLatitude: -23.5615,
+    accommodationLongitude: -46.6559,
+  });
+
+  await page.goto(`/viagens/${trip.id}`);
+  await expect(page.getByText("São Paulo, SP", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("definition").filter({ hasText: "Hospedagem na Avenida Paulista" }),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Hoje", exact: true })).toBeVisible();
+  await expect(page.getByText(/Hoje em São Paulo, SP/)).toBeVisible();
+
+  await page.goto(`/viagens/${trip.id}/lugares`);
+  await expect(page.getByRole("heading", { name: /Lugares em São Paulo/ })).toBeVisible({
+    timeout: 30_000,
+  });
+  const options = page.getByRole("list", { name: "Opções de lugares" });
+  const published = options.locator('[data-place-source="published"]');
+  const external = options.locator('[data-place-source="external"]');
+  await expect(published).toHaveCount(0);
+  await expect(external.first()).toBeVisible({ timeout: 45_000 });
+  expect(await external.count()).toBeGreaterThan(0);
+  await expect(options).toContainText(/Gastronomia|Vida noturna/);
+  await expect(external.first()).toContainText(/em linha reta da hospedagem/);
+  await expect(
+    external.first().locator('[data-external-place-image-state="fallback"]'),
+  ).toBeVisible();
+
+  const promotable = options
+    .locator('[data-place-source="external"]:not([data-place-category="unmapped"])')
+    .first();
+  await expect(promotable).toBeVisible();
+),
     { timeout: 45_000 },
   );
-  expect(
-    page.url(),
-    `O candidato "${selectedName}" (${selectedExternalId}) não concluiu a continuidade para Salvos.`,
-  ).toContain("promocao=salva");
   await expect(
     page.getByText(/Lugar salvo na viagem com a origem externa preservada/),
   ).toBeVisible();
-
-  await page.goto(`/viagens/${trip.id}/lugares-salvos`);
   await expect(page.getByRole("heading", { name: "Lugares salvos", exact: true })).toBeVisible();
   const savedCard = page.locator(".place-card").filter({ hasText: selectedName }).first();
   await expect(savedCard).toBeVisible();

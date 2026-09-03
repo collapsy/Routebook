@@ -53,6 +53,7 @@ Transformar a montagem do guia em processo progressivo e degradável, sem bloque
 - kill switches;
 - retry transitório;
 - erro permanente sem retry;
+- Quality preserva causas agrupadas para classificar retry sem repetir erro permanente;
 - operação read-only retorna partial failure sem lançar;
 - loading usa preparando/descobrindo;
 - Quality desabilitada preserva lista;

@@ -92,6 +92,16 @@ describe("runPlaceBootstrapStep", () => {
     expect(isRetryablePlaceProviderError(new Error("HTTP 429"))).toBe(true);
     expect(isRetryablePlaceProviderError(new Error("network failure"))).toBe(true);
     expect(isRetryablePlaceProviderError(new Error("categoria inválida"))).toBe(false);
+    expect(
+      isRetryablePlaceProviderError(
+        new AggregateError([new Error("HTTP 429"), new Error("HTTP 503")]),
+      ),
+    ).toBe(true);
+    expect(
+      isRetryablePlaceProviderError(
+        new AggregateError([new Error("HTTP 503"), new Error("HTTP 400")]),
+      ),
+    ).toBe(false);
   });
 });
 

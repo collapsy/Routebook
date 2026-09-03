@@ -173,6 +173,8 @@ Nenhum preço externo é codificado como regra porque billing/Production continu
 turbo.json
 apps/web/lib/place-bootstrap.ts
 apps/web/lib/place-bootstrap.test.ts
+apps/web/lib/place-quality-provider.ts
+apps/web/lib/place-quality-provider.test.ts
 apps/web/app/viagens/[tripId]/lugares/loading.tsx
 apps/web/app/viagens/[tripId]/lugares/page.tsx
 apps/web/components/external-place-image-preview.tsx

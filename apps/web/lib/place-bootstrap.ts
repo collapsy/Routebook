@@ -120,6 +120,9 @@ export function resolvePlaceBootstrapPolicy(
 }
 
 export function isRetryablePlaceProviderError(error: unknown): boolean {
+  if (error instanceof AggregateError) {
+    return error.errors.length > 0 && error.errors.every(isRetryablePlaceProviderError);
+  }
   const message =
     error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
   return [

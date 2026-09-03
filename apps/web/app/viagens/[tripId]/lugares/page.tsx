@@ -492,6 +492,7 @@ export default async function PlacesPage({
   });
   const region = regionResolution.status === "resolved" ? regionResolution.region : undefined;
   const bootstrapPolicy = resolvePlaceBootstrapPolicy();
+  const bootstrapStartedAt = process.hrtime.bigint();
   console.info("[place-bootstrap] started", {
     destinationResolved: true,
     accommodationResolved: Boolean(accommodationCoordinate),
@@ -746,6 +747,7 @@ export default async function PlacesPage({
     accommodationResolved: Boolean(accommodationCoordinate),
     regionSource: region?.source ?? "unavailable",
     stage: bootstrapStage,
+    durationMs: Number(process.hrtime.bigint() - bootstrapStartedAt) / 1_000_000,
     publishedCount: publishedPlaces.length,
     candidateCount: externalCandidateCount,
     possibleMatchCount: externalPossibleMatchCount,

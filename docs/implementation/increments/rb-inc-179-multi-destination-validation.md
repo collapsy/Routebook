@@ -65,7 +65,8 @@ adicionada ao produto.
 - Florianópolis continua cobrindo Discovery zero-seed com fallback visual;
 - o novo cenário São Paulo percorre Visão → Discovery → Salvos → mapa → Roteiro → Hoje → Guia por dia;
 - o teste de persistência cobre explicitamente `America/Sao_Paulo`;
-- a promoção por identidade externa é idempotente também sob concorrência, evitando corrida entre clientes que salvam o mesmo candidato.
+- a promoção por identidade externa é idempotente também sob concorrência, evitando corrida entre clientes que salvam o mesmo candidato;
+- após salvar candidato externo, a continuidade termina em Lugares salvos sem executar um segundo bootstrap do Provider apenas para confirmar a mutação.
 
 ## 5. Providers, fallback e custo
 
@@ -92,6 +93,9 @@ apps/web/app/viagens/[tripId]/page.tsx
 apps/web/app/viagens/[tripId]/guia/page.tsx
 apps/web/app/viagens/[tripId]/guia/dias/page.tsx
 apps/web/app/viagens/[tripId]/lugares/page.tsx
+apps/web/app/viagens/[tripId]/lugares/actions.ts
+apps/web/app/viagens/[tripId]/lugares/actions.test.ts
+apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx
 apps/web/components/destination-trip-guide.tsx
 apps/web/components/destination-trip-guide.test.tsx
 apps/web/components/place-ranking-meta.tsx

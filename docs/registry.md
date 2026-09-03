@@ -413,6 +413,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-177 | Destination Bootstrap progressivo, degradação e observabilidade | Implementation | Draft | 0.1.0 | [rb-inc-177-destination-bootstrap.md](./implementation/increments/rb-inc-177-destination-bootstrap.md) |
 | RB-CTX-177 | Context Pack do RB-INC-177 — Destination Bootstrap | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-177-destination-bootstrap.md](./implementation/context-packs/rb-inc-177-destination-bootstrap.md) |
 
+| RB-INC-178 | Continuidade de candidato descoberto para Salvos e Roteiro | Implementation | Draft | 0.1.0 | [rb-inc-178-external-place-continuity.md](./implementation/increments/rb-inc-178-external-place-continuity.md) |
+| RB-CTX-178 | Context Pack do RB-INC-178 — Continuidade de candidato externo | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-178-external-place-continuity.md](./implementation/context-packs/rb-inc-178-external-place-continuity.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

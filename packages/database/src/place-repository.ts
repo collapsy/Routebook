@@ -1,4 +1,4 @@
-import { and, asc, eq, gte, lte } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, lte } from "drizzle-orm";
 
 import {
   parsePlacePrimaryImage,
@@ -55,7 +55,7 @@ function mapPlace(row: PlaceRow): Place {
 
   return {
     id: row.id,
-    destinationId: row.destinationId,
+    ...(row.destinationId ? { destinationId: row.destinationId } : {}),
     slug: row.slug,
     name: row.name,
     summary: row.summary,
@@ -72,6 +72,41 @@ function mapPlace(row: PlaceRow): Place {
 }
 
 export class DrizzlePlaceRepository implements PlaceRepository {
+  async listByIds(placeIds: readonly string[]): Promise<Place[]> {
+    const ids = [...new Set(placeIds.map((id) => id.trim()).filter(Boolean))];
+    if (ids.length === 0) return [];
+    const rows = await getDatabase().select().from(places).where(inArray(places.id, ids));
+    const byId = new Map(rows.map((row) => [row.id, mapPlace(row)]));
+    return ids.flatMap((id) => {
+      const place = byId.get(id);
+      return place ? [place] : [];
+    });
+  }
+
+  async findBySlugWithinRadius(
+    slug: string,
+    query: ListPublishedPlacesWithinRadiusQuery,
+  ): Promise<Place | null> {
+    validateRegionQuery(query);
+    const bounds = regionBounds(query);
+    const [row] = await getDatabase()
+      .select()
+      .from(places)
+      .where(
+        and(
+          eq(places.slug, slug.trim()),
+          gte(places.latitude, bounds.south),
+          lte(places.latitude, bounds.north),
+          gte(places.longitude, bounds.west),
+          lte(places.longitude, bounds.east),
+        ),
+      )
+      .limit(1);
+    if (!row) return null;
+    const place = mapPlace(row);
+    return placeDistanceMeters(place, query.center) <= query.radiusMeters ? place : null;
+  }
+
   async listPublishedWithinRadius(query: ListPublishedPlacesWithinRadiusQuery): Promise<Place[]> {
     validateRegionQuery(query);
     const bounds = regionBounds(query);

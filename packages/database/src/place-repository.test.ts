@@ -9,6 +9,7 @@ import { places } from "./schema";
 
 const database = getDatabase();
 const destinationId = `test-${randomUUID()}`;
+const globalPlaceId = randomUUID();
 const now = new Date("2026-08-11T00:00:00Z");
 const primaryImage = {
   assetPath: "/place-images/tests/lugar-com-faixa.webp",
@@ -70,6 +71,21 @@ const curatedPipaImages = {
 beforeAll(async () => {
   await database.insert(places).values([
     {
+      id: globalPlaceId,
+      destinationId: null,
+      slug: "lugar-global-em-rascunho",
+      name: "Lugar global em rascunho",
+      summary: "Lugar descoberto que pode ser salvo sem publicação editorial.",
+      category: "nature",
+      latitude: 37.775,
+      longitude: -122.4195,
+      priceRange: null,
+      primaryImage: null,
+      publicationStatus: "draft",
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
       id: randomUUID(),
       destinationId,
       slug: "lugar-com-faixa",
@@ -118,11 +134,43 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await database.delete(places).where(eq(places.id, globalPlaceId));
   await database.delete(places).where(eq(places.destinationId, destinationId));
   await closeDatabase();
 });
 
 describe("DrizzlePlaceRepository", () => {
+  it("carrega Places globais por id preservando a ordem solicitada", async () => {
+    const result = await new DrizzlePlaceRepository().listByIds([
+      globalPlaceId,
+      globalPlaceId,
+      "inexistente",
+    ]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      id: globalPlaceId,
+      slug: "lugar-global-em-rascunho",
+      publicationStatus: "draft",
+    });
+    expect(result[0]).not.toHaveProperty("destinationId");
+  });
+
+  it("encontra Place global em rascunho pelo slug apenas dentro da Region", async () => {
+    const repository = new DrizzlePlaceRepository();
+    const nearby = await repository.findBySlugWithinRadius("lugar-global-em-rascunho", {
+      center: { latitude: 37.7749, longitude: -122.4194 },
+      radiusMeters: 1_000,
+    });
+    const distant = await repository.findBySlugWithinRadius("lugar-global-em-rascunho", {
+      center: { latitude: 40.7128, longitude: -74.006 },
+      radiusMeters: 1_000,
+    });
+
+    expect(nearby?.id).toBe(globalPlaceId);
+    expect(distant).toBeNull();
+  });
+
   it("lista Places publicados por proximidade sem depender de destinationId", async () => {
     const result = await new DrizzlePlaceRepository().listPublishedWithinRadius({
       center: { latitude: 37.7749, longitude: -122.4194 },

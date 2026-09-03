@@ -25,6 +25,8 @@ const databaseMocks = vi.hoisted(() => {
   return {
     listPublishedWithinRadius: vi.fn(),
     promote: vi.fn(),
+    findSaved: vi.fn(),
+    saveSelection: vi.fn(),
     PlacePromotionServiceError,
   };
 });
@@ -41,7 +43,10 @@ vi.mock("@routebook/database", () => ({
   DrizzlePlaceRepository: class {
     listPublishedWithinRadius = databaseMocks.listPublishedWithinRadius;
   },
-  DrizzleSavedPlaceRepository: class {},
+  DrizzleSavedPlaceRepository: class {
+    find = databaseMocks.findSaved;
+    save = databaseMocks.saveSelection;
+  },
   DrizzleTripRepository: class {
     findById = vi.fn();
   },
@@ -58,7 +63,7 @@ vi.mock("../../../../lib/overture-place-search", () => ({
   },
 }));
 
-import { promoteExternalPlaceAction } from "./actions";
+import { promoteExternalPlaceAction, saveExternalPlaceAction } from "./actions";
 
 const tripId = "11111111-1111-4111-8111-111111111111";
 const candidate = Object.freeze({
@@ -139,6 +144,8 @@ describe("promoteExternalPlaceAction", () => {
       slug: "praia-externa-revalidada",
       publicationStatus: "draft",
     });
+    databaseMocks.findSaved.mockResolvedValue(null);
+    databaseMocks.saveSelection.mockImplementation(async (selection) => selection);
   });
 
   it("exige trip:edit e bloqueia a promoção sem sessão", async () => {
@@ -215,10 +222,10 @@ describe("promoteExternalPlaceAction", () => {
       center: { latitude: -27.5949, longitude: -48.5482 },
       radiusMeters: 25_000,
     });
-    expect(overtureMocks.search).not.toHaveBeenCalled();
-    expect(databaseMocks.promote).not.toHaveBeenCalled();
+    expect(overtureMocks.search).toHaveBeenCalled();
+    expect(databaseMocks.promote).toHaveBeenCalledWith({ candidate });
     expect(navigationMocks.redirect).toHaveBeenCalledWith(
-      expect.stringContaining("erroPromocao=destino-nao-suportado"),
+      expect.stringContaining("promocao=criada"),
     );
   });
 
@@ -278,6 +285,35 @@ describe("promoteExternalPlaceAction", () => {
     expect(cacheMocks.revalidatePath).not.toHaveBeenCalled();
     expect(navigationMocks.redirect).toHaveBeenCalledWith(
       expect.stringContaining("promocao=existente"),
+    );
+  });
+});
+
+describe("saveExternalPlaceAction", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    accessMocks.resolve.mockResolvedValue({ status: "authorized" });
+    tripMocks.findTripById.mockResolvedValue(trip);
+    overtureMocks.search.mockResolvedValue([candidate]);
+    databaseMocks.promote.mockResolvedValue({
+      status: "created",
+      placeId: "global-place-1",
+      slug: "praia-externa-revalidada",
+      publicationStatus: "draft",
+    });
+    databaseMocks.findSaved.mockResolvedValue(null);
+    databaseMocks.saveSelection.mockImplementation(async (selection) => selection);
+  });
+
+  it("revalida, materializa como Place global e salva sem publicar", async () => {
+    await expect(saveExternalPlaceAction(promotionForm())).rejects.toThrow("NEXT_REDIRECT");
+
+    expect(databaseMocks.promote).toHaveBeenCalledWith({ candidate });
+    expect(databaseMocks.saveSelection).toHaveBeenCalledWith(
+      expect.objectContaining({ tripId, placeId: "global-place-1" }),
+    );
+    expect(navigationMocks.redirect).toHaveBeenCalledWith(
+      expect.stringContaining("promocao=salva"),
     );
   });
 });

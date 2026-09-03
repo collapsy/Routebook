@@ -57,6 +57,7 @@ import { resolvePlaceDiscoveryRegion } from "../../../../lib/place-discovery-reg
 import {
   promoteExternalPlaceAction,
   removePublishedPlaceAction,
+  saveExternalPlaceAction,
   savePublishedPlaceAction,
 } from "./actions";
 import {
@@ -99,7 +100,9 @@ const orderLabels: Readonly<Record<PlaceDiscoveryOrder, string>> = Object.freeze
 });
 
 function resolveCuratedDestinationId(places: readonly Place[]): string | undefined {
-  const destinationIds = [...new Set(places.map((place) => place.destinationId))];
+  const destinationIds = [
+    ...new Set(places.flatMap((place) => (place.destinationId ? [place.destinationId] : []))),
+  ];
   return destinationIds.length === 1 ? destinationIds[0] : undefined;
 }
 
@@ -147,6 +150,8 @@ function promotionMessage(value?: string): string | undefined {
       return "Candidato enviado para curadoria como draft. Ele só aparecerá no catálogo depois de uma publicação governada.";
     case "existente":
       return "Este candidato já havia sido enviado para curadoria. Nenhuma duplicata foi criada.";
+    case "salva":
+      return "Lugar salvo na viagem com a origem externa preservada. Nenhuma publicação editorial foi feita.";
     default:
       return undefined;
   }
@@ -428,6 +433,24 @@ function ExternalDiscoveryCard({
           Calcular rota real
         </a>
       </div>
+      <form action={saveExternalPlaceAction} className={styles.promotionForm}>
+        <input name="tripId" type="hidden" value={tripId} />
+        <input name="externalId" type="hidden" value={candidate.externalId} />
+        {search ? <input name="busca" type="hidden" value={search} /> : null}
+        {category ? <input name="categoria" type="hidden" value={category} /> : null}
+        {maximumDistanceMeters ? (
+          <input name="distancia" type="hidden" value={String(maximumDistanceMeters / 1_000)} />
+        ) : null}
+        {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
+        {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
+        <button className="product-button" type="submit">
+          Salvar na viagem
+        </button>
+      </form>
+      <small>
+        O RouteBook revalida o candidato antes de salvar e preserva a fonte. Salvar não publica o
+        Lugar nem o adiciona automaticamente ao roteiro.
+      </small>
       {destinationId ? (
         <>
           <form action={promoteExternalPlaceAction} className={styles.promotionForm}>
@@ -450,10 +473,7 @@ function ExternalDiscoveryCard({
           </small>
         </>
       ) : (
-        <small>
-          Candidato externo disponível para exploração. A promoção editorial aguarda uma identidade
-          canônica deste Destino e não ocorre automaticamente.
-        </small>
+        <small>A curadoria editorial permanece separada e não é necessária para planejar.</small>
       )}
     </li>
   );

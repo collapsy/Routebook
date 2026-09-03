@@ -9,7 +9,6 @@ import {
   DrizzleSavedPlaceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
-import { findPublishedPlace } from "@routebook/place-catalog";
 import { removePlaceFromTrip } from "@routebook/saved-places";
 import {
   addActivity,
@@ -18,11 +17,6 @@ import {
   ItineraryValidationError,
   type Itinerary,
 } from "@routebook/trip-management";
-
-function resolveDestinationId(destinationName: string): string | null {
-  const normalized = destinationName.trim().toLocaleLowerCase("pt-BR");
-  return normalized.includes("pipa") ? "pipa-rn-br" : null;
-}
 
 function optionalText(value: FormDataEntryValue | null): string | undefined {
   const normalized = typeof value === "string" ? value.trim() : "";
@@ -40,13 +34,15 @@ export async function addSavedPlaceToItineraryAction(formData: FormData): Promis
 
   if (!trip) notFound();
 
-  const destinationId = resolveDestinationId(trip.destination.name);
-  if (!destinationId) notFound();
-
-  const place = await findPublishedPlace(new DrizzlePlaceRepository(), destinationId, placeSlug);
+  const savedPlaceRepository = new DrizzleSavedPlaceRepository();
+  const savedSelections = await savedPlaceRepository.listByTripId(tripId);
+  const place = (
+    await new DrizzlePlaceRepository().listByIds(
+      savedSelections.map((selection) => selection.placeId),
+    )
+  ).find((item) => item.slug === placeSlug);
   if (!place) notFound();
 
-  const savedPlaceRepository = new DrizzleSavedPlaceRepository();
   const savedPlace = await savedPlaceRepository.find(tripId, place.id);
   if (!savedPlace) {
     redirect(
@@ -93,13 +89,16 @@ export async function removeSavedPlaceAction(formData: FormData): Promise<never>
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const destinationId = resolveDestinationId(trip.destination.name);
-  if (!destinationId) notFound();
-
-  const place = await findPublishedPlace(new DrizzlePlaceRepository(), destinationId, placeSlug);
+  const savedPlaceRepository = new DrizzleSavedPlaceRepository();
+  const savedSelections = await savedPlaceRepository.listByTripId(tripId);
+  const place = (
+    await new DrizzlePlaceRepository().listByIds(
+      savedSelections.map((selection) => selection.placeId),
+    )
+  ).find((item) => item.slug === placeSlug);
   if (!place) notFound();
 
-  await removePlaceFromTrip(new DrizzleSavedPlaceRepository(), tripId, place.id);
+  await removePlaceFromTrip(savedPlaceRepository, tripId, place.id);
 
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/lugares`);

@@ -79,7 +79,7 @@ export const places = pgTable(
   "places",
   {
     id: uuid("id").primaryKey(),
-    destinationId: varchar("destination_id", { length: 120 }).notNull(),
+    destinationId: varchar("destination_id", { length: 120 }),
     slug: varchar("slug", { length: 160 }).notNull(),
     name: varchar("name", { length: 180 }).notNull(),
     summary: text("summary").notNull(),

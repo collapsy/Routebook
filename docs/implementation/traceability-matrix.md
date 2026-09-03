@@ -924,3 +924,23 @@ Ao concluir um incremento:
 | observabilidade | booleanos, contagens, tentativas e duração; sem coordenadas/secrets |
 | custo | request units máximas documentadas; billing/Production fora do escopo |
 | validação | Documentation/Engineering pendentes no SHA final |
+
+
+## Evidências previstas do RB-INC-178
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-178-external-place-continuity.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-178-external-place-continuity.md` |
+| iniciativa | #411 — M9 / RouteBook Anywhere |
+| issue | #418 |
+| branch | `codex/rb-inc-178-external-place-continuity` |
+| base | `main@a8e6ce39b36729f48fb10715a8ed39797d8f5772` |
+| decisão de domínio | Place global; Destination/Region como contexto, autorizada em 2026-09-03 |
+| persistência | `destination_id` nullable; dados editoriais existentes preservados |
+| confiança | candidato revalidado no servidor antes de materializar/salvar |
+| continuidade | candidato seguro → Place draft → Saved Place → Activity |
+| idempotência | external identity global + Saved Place existente |
+| governança | nenhuma publicação, Recommendation ou dado inventado |
+| regressão | Pipa preservada como catálogo curado; zero-seed sem vínculo obrigatório |
+| validação | Documentation/Engineering/Vercel pendentes no SHA final |

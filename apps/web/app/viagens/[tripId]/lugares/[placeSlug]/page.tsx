@@ -7,7 +7,7 @@ import {
   DrizzleSavedPlaceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
-import { findPublishedPlace, type PlaceCategory } from "@routebook/place-catalog";
+import type { PlaceCategory } from "@routebook/place-catalog";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../../components/place-primary-image";
@@ -17,6 +17,7 @@ import {
   buildGoogleMapsSearchUrl,
 } from "../../../../../lib/google-maps-links";
 import { findPipaPlacePracticalGuide } from "../../../../../lib/pipa-place-guide";
+import { resolvePlaceDiscoveryRegion } from "../../../../../lib/place-discovery-region";
 import { presentAccommodationDistance } from "../distance";
 import { addPlaceToItineraryAction, removePlaceAction, savePlaceAction } from "./actions";
 
@@ -33,11 +34,6 @@ const categoryLabels: Record<PlaceCategory, string> = {
   nature: "Natureza",
   nightlife: "Vida noturna",
 };
-
-function resolveDestinationId(destinationName: string): string | null {
-  const normalized = destinationName.trim().toLocaleLowerCase("pt-BR");
-  return normalized.includes("pipa") ? "pipa-rn-br" : null;
-}
 
 function formatCoordinate(value: number): string {
   return new Intl.NumberFormat("pt-BR", {
@@ -74,10 +70,17 @@ export default async function PlaceDetailsPage({
 
   if (!trip) notFound();
 
-  const destinationId = resolveDestinationId(trip.destination.name);
-  if (!destinationId) notFound();
-
-  const place = await findPublishedPlace(new DrizzlePlaceRepository(), destinationId, placeSlug);
+  const regionResolution = resolvePlaceDiscoveryRegion({
+    destination: trip.destination,
+    ...(trip.accommodation?.coordinate
+      ? { accommodationCoordinate: trip.accommodation.coordinate }
+      : {}),
+  });
+  if (regionResolution.status !== "resolved") notFound();
+  const place = await new DrizzlePlaceRepository().findBySlugWithinRadius(placeSlug, {
+    center: regionResolution.region.center,
+    radiusMeters: regionResolution.region.curatedRadiusMeters,
+  });
   if (!place) notFound();
 
   const savedPlace = await new DrizzleSavedPlaceRepository().find(tripId, place.id);
@@ -95,7 +98,8 @@ export default async function PlaceDetailsPage({
     name: place.name,
     addressLabel: place.addressLabel,
   });
-  const practicalGuide = findPipaPlacePracticalGuide(place.slug);
+  const practicalGuide =
+    place.destinationId === "pipa-rn-br" ? findPipaPlacePracticalGuide(place.slug) : undefined;
   const tripDays = deriveTripDays(trip.period);
   const selectedDay = tripDays.find((day) => day.date === dia) ?? tripDays[0];
 

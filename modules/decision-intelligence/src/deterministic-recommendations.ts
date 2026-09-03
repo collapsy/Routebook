@@ -177,13 +177,17 @@ function evaluatePlace(
   confidence: RecommendationConfidence;
   geodesicDistanceMeters?: number;
 }> {
+  const destinationId = place.destinationId;
+  if (!destinationId || place.publicationStatus !== "published") {
+    throw new Error("Recommendations exigem Place publicado em um catálogo editorial.");
+  }
   const reasons: RecommendationReason[] = [
     {
       code: "published-place-in-trip-destination",
       message: "O Lugar está publicado no catálogo do Destino desta Viagem.",
       evidence: {
         placeId: place.id,
-        destinationId: place.destinationId,
+        destinationId,
         publicationStatus: place.publicationStatus,
       },
     },
@@ -266,7 +270,7 @@ export function generateDeterministicPlaceRecommendations(
         target: {
           kind: "place",
           placeId: result.place.id,
-          destinationId: result.place.destinationId,
+          destinationId: result.place.destinationId!,
           publicationStatus: "published",
         },
         reasons: result.reasons,

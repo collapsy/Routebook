@@ -9,7 +9,6 @@ import {
   DrizzlePlaceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
-import { listPublishedPlaces } from "@routebook/place-catalog";
 import {
   createItinerary,
   findTripById,
@@ -92,11 +91,6 @@ function formatDaySummary(activityCount: number, freePeriodCount: number): strin
   const activityLabel = activityCount === 1 ? "atividade" : "atividades";
   const freePeriodLabel = freePeriodCount === 1 ? "período livre" : "períodos livres";
   return `${activityCount} ${activityLabel} · ${freePeriodCount} ${freePeriodLabel}`;
-}
-
-function resolveDestinationId(destinationName: string): string | null {
-  const normalized = destinationName.trim().toLocaleLowerCase("pt-BR");
-  return normalized.includes("pipa") ? "pipa-rn-br" : null;
 }
 
 async function loadOrCreateItinerary(trip: Trip): Promise<Itinerary> {
@@ -224,9 +218,8 @@ export default async function ItineraryPage({
       ? parsedManualDuration
       : undefined;
 
-  const destinationId = resolveDestinationId(trip.destination.name);
   const now = new Date();
-  const activeTimeZone = destinationId === "pipa-rn-br" ? "America/Fortaleza" : "UTC";
+  const activeTimeZone = trip.destination.timeZone;
   const todayDate = resolveTripTodayDate(itinerary.days, now, activeTimeZone);
   const selectedDay = resolvePreferredTripDay(itinerary.days, dia, now, activeTimeZone);
   if (!selectedDay) notFound();
@@ -239,15 +232,16 @@ export default async function ItineraryPage({
     selectedDay.activities.length,
     selectedDay.freePeriods.length,
   );
-  const publishedPlaces = destinationId
-    ? await listPublishedPlaces(new DrizzlePlaceRepository(), destinationId)
-    : [];
-  const publishedPlacesById = new Map(publishedPlaces.map((place) => [place.id, place]));
+  const referencedPlaceIds = itinerary.days.flatMap((day) =>
+    day.activities.flatMap((activity) => (activity.placeId ? [activity.placeId] : [])),
+  );
+  const referencedPlaces = await new DrizzlePlaceRepository().listByIds(referencedPlaceIds);
+  const referencedPlacesById = new Map(referencedPlaces.map((place) => [place.id, place]));
   const spatialDays = itinerary.days.map((day) => {
     const context = deriveItineraryDaySpatialContext({
       itinerary,
       dayDate: day.date,
-      publishedPlaces,
+      publishedPlaces: referencedPlaces,
       ...(trip.accommodation ? { accommodation: trip.accommodation } : {}),
     });
 
@@ -444,7 +438,7 @@ export default async function ItineraryPage({
                     const previousActivity = selectedDay.activities[index - 1];
                     const nextActivity = selectedDay.activities[index + 1];
                     const place = activity.placeId
-                      ? publishedPlacesById.get(activity.placeId)
+                      ? referencedPlacesById.get(activity.placeId)
                       : undefined;
                     const betweenLeg = betweenLegs[index];
 

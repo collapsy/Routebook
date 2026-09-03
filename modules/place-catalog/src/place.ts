@@ -17,7 +17,8 @@ export type PlacePrimaryImage = Readonly<{
 
 export type Place = {
   id: string;
-  destinationId: string;
+  /** Legacy editorial grouping. Place identity is global and does not depend on a Destination. */
+  destinationId?: string;
   slug: string;
   name: string;
   summary: string;
@@ -33,7 +34,7 @@ export type Place = {
 };
 
 export type CreatePlaceInput = {
-  destinationId: string;
+  destinationId?: string;
   slug: string;
   name: string;
   summary: string;
@@ -119,14 +120,13 @@ export function parsePlacePrimaryImage(input: unknown): PlacePrimaryImage | unde
 }
 
 export function createPlace(input: CreatePlaceInput, now = new Date()): Place {
-  const destinationId = input.destinationId.trim();
+  const destinationId = input.destinationId?.trim() || undefined;
   const slug = input.slug.trim().toLowerCase();
   const name = input.name.trim();
   const summary = input.summary.trim();
   const addressLabel = input.addressLabel?.trim();
   const primaryImage = parsePlacePrimaryImage(input.primaryImage);
 
-  if (!destinationId) throw new PlaceValidationError("O destino do lugar é obrigatório.");
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
     throw new PlaceValidationError("O slug do lugar deve ser canônico.");
   }
@@ -147,7 +147,7 @@ export function createPlace(input: CreatePlaceInput, now = new Date()): Place {
 
   return {
     id: randomUUID(),
-    destinationId,
+    ...(destinationId ? { destinationId } : {}),
     slug,
     name,
     summary,

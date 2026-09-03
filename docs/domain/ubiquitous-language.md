@@ -1215,11 +1215,14 @@ flowchart TD
 | Nome canônico     | Place                                                               |
 | Português oficial | Lugar                                                               |
 | Categoria         | Agregado                                                            |
-| Definição         | Ponto de interesse potencialmente relevante para uma Viagem         |
-| Não significa     | Activity, Destination ou Location                                   |
-| Relaciona-se com  | Place Category, Location, Saved Place                               |
+| Definição         | Ponto de interesse com identidade global, potencialmente relevante para uma ou mais Viagens |
+| Não significa     | Activity, Destination, Recommendation ou Location                   |
+| Relaciona-se com  | Place Category, Location, Saved Place e Proveniência                 |
 | Termos permitidos | Local, somente em textos informais de interface                     |
 | Termos a evitar   | Atração, estabelecimento ou ponto turístico como sinônimo universal |
+
+Destination e Region contextualizam a descoberta e a consulta de um Place, mas não o identificam.
+Um vínculo editorial legado com Destination pode existir; ele é opcional e não expressa posse.
 
 ---
 

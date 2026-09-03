@@ -7,7 +7,7 @@ import {
   DrizzleSavedPlaceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
-import { listPublishedPlaces, type PlaceCategory } from "@routebook/place-catalog";
+import type { PlaceCategory } from "@routebook/place-catalog";
 import { listSavedPlaces } from "@routebook/saved-places";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
@@ -30,11 +30,6 @@ const categoryLabels: Record<PlaceCategory, string> = {
   nature: "Natureza",
   nightlife: "Vida noturna",
 };
-
-function resolveDestinationId(destinationName: string): string | null {
-  const normalized = destinationName.trim().toLocaleLowerCase("pt-BR");
-  return normalized.includes("pipa") ? "pipa-rn-br" : null;
-}
 
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -61,16 +56,10 @@ export default async function SavedPlacesPage({
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const destinationId = resolveDestinationId(trip.destination.name);
-  if (!destinationId) notFound();
-
-  const [savedPlaces, publishedPlaces] = await Promise.all([
-    listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
-    listPublishedPlaces(new DrizzlePlaceRepository(), destinationId),
-  ]);
-
-  const savedIds = new Set(savedPlaces.map((selection) => selection.placeId));
-  const places = publishedPlaces.filter((place) => savedIds.has(place.id));
+  const savedPlaces = await listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId);
+  const places = await new DrizzlePlaceRepository().listByIds(
+    savedPlaces.map((selection) => selection.placeId),
+  );
   const tripDays = deriveTripDays(trip.period);
   const mapPoints: TripMapPoint[] = places.map((place) => ({
     id: place.id,

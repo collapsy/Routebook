@@ -34,6 +34,7 @@
     { "idx": 29, "version": "7", "when": 1786807200000, "tag": "0029_create_place_external_references", "breakpoints": true },
     { "idx": 30, "version": "7", "when": 1786816500000, "tag": "0030_curate_pipa_place_primary_images", "breakpoints": true },
     { "idx": 31, "version": "7", "when": 1786981800000, "tag": "0031_expand_pipa_place_primary_images", "breakpoints": true },
-    { "idx": 32, "version": "7", "when": 1788302100000, "tag": "0032_create_trip_destination_provenance", "breakpoints": true }
+    { "idx": 32, "version": "7", "when": 1788302100000, "tag": "0032_create_trip_destination_provenance", "breakpoints": true },
+    { "idx": 33, "version": "7", "when": 1788393600000, "tag": "0033_allow_global_places", "breakpoints": true }
   ]
 }

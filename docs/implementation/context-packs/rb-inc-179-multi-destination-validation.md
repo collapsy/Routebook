@@ -51,6 +51,7 @@ curado/regressão, nunca como pré-requisito estrutural.
 - catálogo curado espacial: `apps/web/lib/trip-curated-catalog.ts`;
 - Discovery e bootstrap: página de Lugares e RB-INC-177;
 - continuidade externa: ações de Lugares e RB-INC-178;
+- idempotência concorrente da materialização externa: `packages/database/src/place-promotion-service.ts`;
 - fallback de Hoje/Guia: `DestinationTripGuide`;
 - experiência editorial preservada: módulos `pipa-*`;
 - timezone: Destination/Trip/Itinerary persistidos.
@@ -63,6 +64,7 @@ curado/regressão, nunca como pré-requisito estrutural.
 - categoria urbana visível;
 - imagem externa degrada para ilustração declarada;
 - candidato revalidado entra em Salvos e mapa;
+- duas promoções concorrentes da mesma identidade externa convergem para um único Place;
 - Saved Place entra no Roteiro;
 - Hoje reflete a Activity persistida;
 - Guia por dia abre sem conteúdo de Pipa;

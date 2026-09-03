@@ -140,7 +140,7 @@ describe("promoteExternalPlaceCandidate", () => {
     ]);
 
     expect(results.map((result) => result.status).sort()).toEqual(["created", "existing"]);
-    expect(new Set(results.map((result) => result.placeId))).toHaveSize(1);
+    expect(new Set(results.map((result) => result.placeId)).size).toBe(1);
   });
 
   it("reutiliza a mesma external identity global entre Viagens/Destinations", async () => {

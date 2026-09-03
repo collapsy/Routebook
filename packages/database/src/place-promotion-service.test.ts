@@ -118,6 +118,31 @@ describe("promoteExternalPlaceCandidate", () => {
     });
   });
 
+  it("serializa promoções concorrentes da mesma identidade externa", async () => {
+    const concurrentCandidate = candidate({
+      externalId: "concurrent-identity",
+      name: "Lugar Concorrente",
+      latitude: -6.35,
+      longitude: -35.12,
+    });
+
+    const results = await Promise.all([
+      promoteExternalPlaceCandidate({
+        destinationId,
+        candidate: concurrentCandidate,
+        promotedAt: now,
+      }),
+      promoteExternalPlaceCandidate({
+        destinationId,
+        candidate: concurrentCandidate,
+        promotedAt: new Date("2026-08-15T15:45:00.000Z"),
+      }),
+    ]);
+
+    expect(results.map((result) => result.status).sort()).toEqual(["created", "existing"]);
+    expect(new Set(results.map((result) => result.placeId))).toHaveSize(1);
+  });
+
   it("reutiliza a mesma external identity global entre Viagens/Destinations", async () => {
     const sharedIdentity = candidate({
       externalId: "cross-destination-identity",

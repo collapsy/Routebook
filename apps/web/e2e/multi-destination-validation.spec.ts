@@ -62,7 +62,7 @@ test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e G
   );
 
   await page.goto(`/viagens/${trip.id}/lugares-salvos`);
-  await expect(page.getByRole("heading", { name: "Lugares salvos" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Lugares salvos", exact: true })).toBeVisible();
   const savedCard = page.locator(".place-card").filter({ hasText: selectedName }).first();
   await expect(savedCard).toBeVisible();
   await expect(page.locator('[data-routebook-map="true"]')).toHaveAttribute(

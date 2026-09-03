@@ -64,7 +64,9 @@ test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e G
     page.url(),
     `O candidato "${selectedName}" (${selectedExternalId}) não concluiu a continuidade para Salvos.`,
   ).toContain("promocao=salva");
-  await expect(page.getByText(/Lugar salvo na viagem com a origem externa preservada/)).toBeVisible();
+  await expect(
+    page.getByText(/Lugar salvo na viagem com a origem externa preservada/),
+  ).toBeVisible();
 
   await page.goto(`/viagens/${trip.id}/lugares-salvos`);
   await expect(page.getByRole("heading", { name: "Lugares salvos", exact: true })).toBeVisible();

@@ -64,7 +64,8 @@ adicionada ao produto.
 - testes Playwright existentes de Pipa permanecem como regressão funcional;
 - Florianópolis continua cobrindo Discovery zero-seed com fallback visual;
 - o novo cenário São Paulo percorre Visão → Discovery → Salvos → mapa → Roteiro → Hoje → Guia por dia;
-- o teste de persistência cobre explicitamente `America/Sao_Paulo`.
+- o teste de persistência cobre explicitamente `America/Sao_Paulo`;
+- a promoção por identidade externa é idempotente também sob concorrência, evitando corrida entre clientes que salvam o mesmo candidato.
 
 ## 5. Providers, fallback e custo
 
@@ -102,6 +103,8 @@ apps/web/lib/trip-curated-catalog.ts
 apps/web/lib/trip-destination.ts
 packages/database/src/itinerary-repository.ts
 packages/database/src/itinerary-repository.test.ts
+packages/database/src/place-promotion-service.ts
+packages/database/src/place-promotion-service.test.ts
 docs/implementation/increments/rb-inc-179-multi-destination-validation.md
 docs/implementation/context-packs/rb-inc-179-multi-destination-validation.md
 docs/implementation/traceability-matrix.md

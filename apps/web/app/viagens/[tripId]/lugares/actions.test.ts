@@ -313,7 +313,7 @@ describe("saveExternalPlaceAction", () => {
       expect.objectContaining({ tripId, placeId: "global-place-1" }),
     );
     expect(navigationMocks.redirect).toHaveBeenCalledWith(
-      expect.stringContaining("promocao=salva"),
+      `/viagens/${tripId}/lugares-salvos?salvo=1`,
     );
   });
 });

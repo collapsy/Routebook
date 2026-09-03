@@ -97,9 +97,7 @@ export async function promoteExternalPlaceCandidate(
   const externalIdentityKey = `${provider}:${externalId}`;
 
   return getDatabase().transaction(async (transaction) => {
-    await transaction.execute(
-      sql`select pg_advisory_xact_lock(hashtext(${externalIdentityKey}))`,
-    );
+    await transaction.execute(sql`select pg_advisory_xact_lock(hashtext(${externalIdentityKey}))`);
 
     const [linkedReference] = await transaction
       .select()

@@ -35,7 +35,8 @@ function enterViewport() {
   });
 }
 
-const preview = {
+const wikimediaPreview = {
+  provider: "wikimedia-commons",
   previewUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Pipa.jpg/640px-Pipa.jpg",
   sourceUrl: "https://commons.wikimedia.org/wiki/File:Pipa.jpg",
   sourceName: "Wikimedia Commons",
@@ -46,7 +47,22 @@ const preview = {
   matchEvidence: "Identidade e contexto local confirmados.",
 } as const;
 
-function renderPreview() {
+const googlePreview = {
+  provider: "google-places",
+  mediaUrl: "/api/place-image-preview/google?token=payload.signature",
+  sourceUrl: "https://www.google.com/maps/place/?q=place_id:abc",
+  sourceName: "Google Maps",
+  authorAttributions: [
+    {
+      displayName: "Pessoa fotógrafa",
+      uri: "https://maps.google.com/maps/contrib/123",
+    },
+  ],
+  altText: "Fotografia de Avenida Paulista fornecida pelo Google Maps.",
+  matchEvidence: "Google Place ID revalidado por identidade e proximidade antes da mídia.",
+} as const;
+
+function renderWikimediaPreview() {
   return render(
     <ExternalPlaceImagePreview
       category="beach"
@@ -71,7 +87,7 @@ describe("ExternalPlaceImagePreview", () => {
     vi.stubGlobal("fetch", fetcher);
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
 
-    renderPreview();
+    renderWikimediaPreview();
 
     expect(fetcher).not.toHaveBeenCalled();
     expect(screen.getByText("Fotografia sob demanda")).toBeInTheDocument();
@@ -104,7 +120,7 @@ describe("ExternalPlaceImagePreview", () => {
     ).toHaveAttribute("data-category-illustration", "beach");
   });
 
-  it("usa fallback sem request quando o Destination não possui Media governada", () => {
+  it("usa fallback sem request quando não existe fonte de mídia governada", () => {
     const fetcher = vi.fn();
     vi.stubGlobal("fetch", fetcher);
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
@@ -126,9 +142,9 @@ describe("ExternalPlaceImagePreview", () => {
     ).toBeInTheDocument();
   });
 
-  it("renderiza foto licenciada e Provenance após match seguro", async () => {
+  it("renderiza Wikimedia licenciada após match seguro", async () => {
     const fetcher = vi.fn<(input: string | URL | Request) => Promise<Response>>().mockResolvedValue(
-      Response.json(preview, {
+      Response.json(wikimediaPreview, {
         status: 200,
         headers: { "content-type": "application/json" },
       }),
@@ -136,21 +152,50 @@ describe("ExternalPlaceImagePreview", () => {
     vi.stubGlobal("fetch", fetcher);
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
 
-    renderPreview();
+    renderWikimediaPreview();
     enterViewport();
 
-    const image = await screen.findByRole("img", { name: preview.altText });
+    const image = await screen.findByRole("img", { name: wikimediaPreview.altText });
     expect(image.getAttribute("src")).toContain("/api/place-image-preview/file?url=");
-    expect(image.getAttribute("src")).not.toContain("commons.wikimedia.org/wiki");
     expect(screen.getByText(/Fotógrafo RouteBook/)).toBeInTheDocument();
     expect(screen.getByText(/CC BY-SA 4.0/)).toBeInTheDocument();
     expect(screen.getByText(/Wikimedia Commons/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Ver fonte" })).toHaveAttribute(
-      "href",
-      preview.sourceUrl,
-    );
     expect(fetcher).toHaveBeenCalledTimes(1);
-    expect(String(fetcher.mock.calls[0]?.[0])).toContain("/api/place-image-preview?");
+  });
+
+  it("renderiza Google Maps com atribuição e link da autora sem Destination Pipa", async () => {
+    const fetcher = vi.fn<(input: string | URL | Request) => Promise<Response>>().mockResolvedValue(
+      Response.json(googlePreview, {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetcher);
+    vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
+
+    render(
+      <ExternalPlaceImagePreview
+        category="nature"
+        googlePlaceId="ChIJAvenidaPaulista01"
+        latitude={-23.5615}
+        longitude={-46.6559}
+        placeName="Avenida Paulista"
+      />,
+    );
+    enterViewport();
+
+    const image = await screen.findByRole("img", { name: googlePreview.altText });
+    expect(image).toHaveAttribute("src", googlePreview.mediaUrl);
+    expect(screen.getByText("Google Maps")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Pessoa fotógrafa" })).toHaveAttribute(
+      "href",
+      "https://maps.google.com/maps/contrib/123",
+    );
+    expect(screen.getByRole("link", { name: "Ver no Google Maps" })).toHaveAttribute(
+      "href",
+      googlePreview.sourceUrl,
+    );
+    expect(String(fetcher.mock.calls[0]?.[0])).toContain("googlePlaceId=ChIJAvenidaPaulista01");
   });
 
   it("mantém fallback acessível quando nenhuma mídia segura é encontrada", async () => {
@@ -160,7 +205,7 @@ describe("ExternalPlaceImagePreview", () => {
     );
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
 
-    renderPreview();
+    renderWikimediaPreview();
     enterViewport();
 
     await waitFor(() => {

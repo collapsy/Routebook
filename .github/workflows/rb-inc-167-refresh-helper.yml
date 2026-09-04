@@ -1,0 +1,151 @@
+name: RB-INC-167 refresh assembly
+
+on:
+  push:
+    branches:
+      - codex/rb-inc-167-google-place-photos-refresh
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply deterministic refresh patches
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_exact(path: str, old: str, new: str) -> None:
+              file = Path(path)
+              content = file.read_text()
+              count = content.count(old)
+              if count != 1:
+                  raise SystemExit(f"{path}: expected one exact match, found {count}")
+              file.write_text(content.replace(old, new, 1))
+
+          page = "apps/web/app/viagens/[tripId]/lugares/page.tsx"
+
+          replace_exact(
+              page,
+              '''      {place.primaryImage || !candidate ? (
+                <PlacePrimaryImage
+                  category={place.category}
+                  placeName={place.name}
+                  primaryImage={place.primaryImage}
+                />
+              ) : (
+                <ExternalPlaceImagePreview
+                  category={place.category}
+                  destinationId={destinationId}
+                  enabled={externalMediaEnabled}
+                  latitude={candidate.latitude}
+                  longitude={candidate.longitude}
+                  placeName={place.name}
+                />
+              )}''',
+              '''      {place.primaryImage ? (
+                <PlacePrimaryImage
+                  category={place.category}
+                  placeName={place.name}
+                  primaryImage={place.primaryImage}
+                />
+              ) : (
+                <ExternalPlaceImagePreview
+                  category={place.category}
+                  destinationId={destinationId}
+                  enabled={externalMediaEnabled}
+                  googlePlaceId={
+                    qualitySignals?.provider === "google-places"
+                      ? qualitySignals.externalId
+                      : undefined
+                  }
+                  latitude={coordinate.latitude}
+                  longitude={coordinate.longitude}
+                  placeName={place.name}
+                />
+              )}''',
+          )
+
+          replace_exact(
+              page,
+              '''      <ExternalPlaceImagePreview
+                category={candidate.category}
+                destinationId={destinationId}
+                enabled={externalMediaEnabled}
+                latitude={candidate.latitude}
+                longitude={candidate.longitude}
+                placeName={candidate.name}
+              />''',
+              '''      <ExternalPlaceImagePreview
+                category={candidate.category}
+                destinationId={destinationId}
+                enabled={externalMediaEnabled}
+                googlePlaceId={
+                  qualitySignals?.provider === "google-places"
+                    ? qualitySignals.externalId
+                    : undefined
+                }
+                latitude={candidate.latitude}
+                longitude={candidate.longitude}
+                placeName={candidate.name}
+              />''',
+          )
+
+          replace_exact(
+              page,
+              '''  const externalMediaItemIds = new Set(
+                destinationId && bootstrapPolicy.media.enabled
+                  ? ranking.items
+                      .filter(({ item }) => {
+                        if (item.kind === "external") return true;
+                        return item.kind === "enriched" && !item.place.primaryImage;
+                      })
+                      .slice(0, bootstrapPolicy.media.previewBudget)
+                      .map(({ item }) => item.id)
+                  : [],
+              );''',
+              '''  const externalMediaItemIds = new Set(
+                bootstrapPolicy.media.enabled
+                  ? ranking.items
+                      .filter(({ item, signals }) => {
+                        const hasGovernedMediaSource =
+                          Boolean(destinationId) || signals?.provider === "google-places";
+                        if (!hasGovernedMediaSource) return false;
+                        if (item.kind === "external") return true;
+                        return !item.place.primaryImage;
+                      })
+                      .slice(0, bootstrapPolicy.media.previewBudget)
+                      .map(({ item }) => item.id)
+                  : [],
+              );''',
+          )
+
+          replace_exact(
+              "turbo.json",
+              '''    "GOOGLE_PLACES_API_KEY",
+                "ROUTEBOOK_PLACE_QUALITY_PROVIDER"''',
+              '''    "GOOGLE_PLACES_API_KEY",
+                "ROUTEBOOK_PLACE_QUALITY_PROVIDER",
+                "ROUTEBOOK_PLACE_PHOTO_PROVIDER"''',
+          )
+
+          Path(".github/workflows/rb-inc-167-refresh-helper.yml").unlink()
+          PY
+      - name: Commit assembled refresh
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "chore: assemble RB-INC-167 refresh"
+          git push

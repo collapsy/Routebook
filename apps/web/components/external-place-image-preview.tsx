@@ -359,6 +359,7 @@ export function ExternalPlaceImagePreview({
           kind={category ?? "place"}
           label={isLoading ? "Buscando fotografia…" : "Fotografia sob demanda"}
           live
+          placeFallback
         />
       </div>
     );

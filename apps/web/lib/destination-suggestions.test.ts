@@ -194,7 +194,7 @@ describe("configuração de Destination suggestions", () => {
 
   it("expõe provider fixture diretamente somente para testes", async () => {
     const provider = new FixtureDestinationSuggestionProvider();
-    const result = await provider.suggest("florianopolis", "ignored");
+    const result = await provider.suggest("florianopolis");
     expect(result.status).toBe("ready");
   });
 });

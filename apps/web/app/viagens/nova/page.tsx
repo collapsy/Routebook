@@ -32,16 +32,16 @@ export default async function NewTripPage() {
           <p className="product-eyebrow">Nova viagem</p>
           <h1>Para onde você vai?</h1>
           <p>
-            Comece pelo essencial. O RouteBook usa o destino e as datas para montar o contexto da
-            viagem; hospedagem e preferências podem ser completadas progressivamente.
+            Comece digitando uma cidade ou região e escolha a opção correta quando as sugestões
+            aparecerem. O RouteBook confirma o destino antes de criar seu guia.
           </p>
         </header>
 
         <aside className="preparation-note">
           <strong>Seu guia começa com o contexto certo.</strong>
           <p>
-            Você informa o lugar como faria em um mapa. Coordenadas, país e fuso são resolvidos
-            internamente, sem exigir campos técnicos.
+            Você escolhe o lugar como faria em um mapa. Coordenadas, país e fuso são confirmados no
+            servidor, sem exigir campos técnicos nem depender de um destino pré-cadastrado.
           </p>
         </aside>
       </div>

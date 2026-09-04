@@ -258,9 +258,7 @@ function CanonicalDiscoveryCard({
           destinationId={destinationId}
           enabled={externalMediaEnabled}
           googlePlaceId={
-            qualitySignals?.provider === "google-places"
-              ? qualitySignals.externalId
-              : undefined
+            qualitySignals?.provider === "google-places" ? qualitySignals.externalId : undefined
           }
           latitude={coordinate.latitude}
           longitude={coordinate.longitude}
@@ -404,9 +402,7 @@ function ExternalDiscoveryCard({
         destinationId={destinationId}
         enabled={externalMediaEnabled}
         googlePlaceId={
-          qualitySignals?.provider === "google-places"
-            ? qualitySignals.externalId
-            : undefined
+          qualitySignals?.provider === "google-places" ? qualitySignals.externalId : undefined
         }
         latitude={candidate.latitude}
         longitude={candidate.longitude}

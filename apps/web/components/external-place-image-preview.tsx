@@ -289,7 +289,12 @@ export function ExternalPlaceImagePreview({
               <span>Google Maps</span>
               {preview.authorAttributions.map((attribution) =>
                 attribution.uri ? (
-                  <a href={attribution.uri} key={`${attribution.displayName}-${attribution.uri}`} rel="noreferrer" target="_blank">
+                  <a
+                    href={attribution.uri}
+                    key={`${attribution.displayName}-${attribution.uri}`}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
                     {attribution.displayName}
                   </a>
                 ) : (

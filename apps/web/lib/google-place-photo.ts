@@ -170,8 +170,10 @@ function decodeMediaToken(
     };
     const placeId = cleanText(payload.placeId);
     if (!PLACE_ID_PATTERN.test(placeId)) return undefined;
-    if (!Number.isInteger(payload.photoIndex) || (payload.photoIndex as number) < 0) return undefined;
-    if (typeof payload.expiresAt !== "number" || payload.expiresAt <= now.getTime()) return undefined;
+    if (!Number.isInteger(payload.photoIndex) || (payload.photoIndex as number) < 0)
+      return undefined;
+    if (typeof payload.expiresAt !== "number" || payload.expiresAt <= now.getTime())
+      return undefined;
     return { placeId, photoIndex: payload.photoIndex as number };
   } catch {
     return undefined;
@@ -283,7 +285,12 @@ export class GooglePlacePhotoAdapter {
     mediaUrl.searchParams.set("maxWidthPx", "960");
     mediaUrl.searchParams.set("key", this.apiKey);
 
-    const response = await fetchWithTimeout(this.fetcher, mediaUrl, { redirect: "follow" }, MEDIA_TIMEOUT_MS);
+    const response = await fetchWithTimeout(
+      this.fetcher,
+      mediaUrl,
+      { redirect: "follow" },
+      MEDIA_TIMEOUT_MS,
+    );
     if (!response.ok) throw new Error(`Google Place Photos respondeu HTTP ${response.status}.`);
 
     const contentType = response.headers.get("content-type")?.split(";")[0]?.trim() ?? "";

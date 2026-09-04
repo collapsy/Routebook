@@ -246,7 +246,7 @@ function CanonicalDiscoveryCard({
         {...(qualitySignals ? { signals: qualitySignals } : {})}
         {...(categoryRank ? { categoryRank } : {})}
       />
-      {place.primaryImage || !candidate ? (
+      {place.primaryImage ? (
         <PlacePrimaryImage
           category={place.category}
           placeName={place.name}
@@ -257,8 +257,13 @@ function CanonicalDiscoveryCard({
           category={place.category}
           destinationId={destinationId}
           enabled={externalMediaEnabled}
-          latitude={candidate.latitude}
-          longitude={candidate.longitude}
+          googlePlaceId={
+            qualitySignals?.provider === "google-places"
+              ? qualitySignals.externalId
+              : undefined
+          }
+          latitude={coordinate.latitude}
+          longitude={coordinate.longitude}
           placeName={place.name}
         />
       )}
@@ -398,6 +403,11 @@ function ExternalDiscoveryCard({
         category={candidate.category}
         destinationId={destinationId}
         enabled={externalMediaEnabled}
+        googlePlaceId={
+          qualitySignals?.provider === "google-places"
+            ? qualitySignals.externalId
+            : undefined
+        }
         latitude={candidate.latitude}
         longitude={candidate.longitude}
         placeName={candidate.name}
@@ -727,11 +737,14 @@ export default async function PlacesPage({
     showAllExternal &&
     availableExternalCount > externalDiscoveryDisplayLimit;
   const externalMediaItemIds = new Set(
-    destinationId && bootstrapPolicy.media.enabled
+    bootstrapPolicy.media.enabled
       ? ranking.items
-          .filter(({ item }) => {
+          .filter(({ item, signals }) => {
+            const hasGovernedMediaSource =
+              Boolean(destinationId) || signals?.provider === "google-places";
+            if (!hasGovernedMediaSource) return false;
             if (item.kind === "external") return true;
-            return item.kind === "enriched" && !item.place.primaryImage;
+            return !item.place.primaryImage;
           })
           .slice(0, bootstrapPolicy.media.previewBudget)
           .map(({ item }) => item.id)

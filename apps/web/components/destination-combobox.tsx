@@ -49,25 +49,13 @@ export function DestinationCombobox({
   const [state, setState] = useState<SuggestionState>("idle");
   const [activeIndex, setActiveIndex] = useState(-1);
   const [attribution, setAttribution] = useState<string | undefined>();
-  const sessionToken = useRef<string | undefined>();
+  const [sessionToken] = useState(createSessionToken);
   const requestSequence = useRef(0);
   const listboxId = "destination-suggestions-listbox";
 
-  const ensureSessionToken = () => {
-    sessionToken.current ??= createSessionToken();
-    return sessionToken.current;
-  };
-
   useEffect(() => {
     const query = value.trim();
-    if (selected?.label === value) return;
-    if (query.length < 3) {
-      setSuggestions([]);
-      setActiveIndex(-1);
-      setAttribution(undefined);
-      setState("idle");
-      return;
-    }
+    if (selected?.label === value || query.length < 3) return;
 
     const sequence = ++requestSequence.current;
     const controller = new AbortController();
@@ -75,7 +63,7 @@ export function DestinationCombobox({
       setState("loading");
       const queryParameters = new URLSearchParams({
         q: query,
-        sessionToken: ensureSessionToken(),
+        sessionToken,
       });
 
       void fetch(`/api/destination-suggestions?${queryParameters}`, {
@@ -119,7 +107,7 @@ export function DestinationCombobox({
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [selected, value]);
+  }, [selected?.label, sessionToken, value]);
 
   const selectSuggestion = (suggestion: DestinationSuggestion) => {
     setValue(suggestion.label);
@@ -132,7 +120,11 @@ export function DestinationCombobox({
 
   const clearSelectionForEdit = (nextValue: string) => {
     setValue(nextValue);
-    if (selected) setSelected(undefined);
+    setSelected(undefined);
+    setSuggestions([]);
+    setActiveIndex(-1);
+    setAttribution(undefined);
+    setState("idle");
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -202,7 +194,7 @@ export function DestinationCombobox({
       <input name="destinationProvider" type="hidden" value={selected?.provider ?? ""} />
       <input name="destinationReference" type="hidden" value={selected?.reference ?? ""} />
       <input name="destinationSelectedLabel" type="hidden" value={selected?.label ?? ""} />
-      <input name="destinationSessionToken" type="hidden" value={sessionToken.current ?? ""} />
+      <input name="destinationSessionToken" type="hidden" value={sessionToken} />
 
       {suggestions.length > 0 ? (
         <div

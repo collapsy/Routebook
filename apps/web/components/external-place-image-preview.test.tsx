@@ -91,9 +91,7 @@ describe("ExternalPlaceImagePreview", () => {
 
     expect(fetcher).not.toHaveBeenCalled();
     expect(screen.getByText("Fotografia sob demanda")).toBeInTheDocument();
-    expect(
-      screen.getByRole("status", { name: "Fotografia sob demanda para Praia do Amor" }),
-    )
+    expect(screen.getByRole("status", { name: "Fotografia sob demanda para Praia do Amor" }))
       .toHaveAttribute("data-category-illustration", "beach")
       .toHaveAttribute("data-place-image-fallback", "true");
   });

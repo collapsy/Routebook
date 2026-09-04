@@ -38,11 +38,14 @@ jobs:
               "{place.primaryImage ? (",
           )
 
-          canonical_name = next(
+          canonical_names = [
               index
               for index in range(canonical_start, min(canonical_start + 30, len(lines)))
               if "placeName={place.name}" in lines[index]
-          )
+          ]
+          if len(canonical_names) < 2:
+              raise SystemExit(f"expected canonical fallback and external preview names, found {len(canonical_names)}")
+          canonical_name = canonical_names[1]
           canonical_lat = next(
               index
               for index in range(canonical_start, canonical_name)

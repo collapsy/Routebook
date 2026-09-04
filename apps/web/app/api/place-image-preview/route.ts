@@ -145,7 +145,7 @@ export async function GET(request: Request) {
       },
       {
         status: googleFailed ? 503 : 404,
-        headers: { "Cache-Control": googleFailed ? "no-store" : MISS_CACHE_CONTROL },
+        headers: { "Cache-Control": GOOGLE_CACHE_CONTROL },
       },
     );
   }

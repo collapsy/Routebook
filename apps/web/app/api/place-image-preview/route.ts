@@ -60,8 +60,9 @@ export async function GET(request: Request) {
   const name = url.searchParams.get("name")?.trim() ?? "";
   const latitude = parseCoordinate(url.searchParams.get("latitude"));
   const longitude = parseCoordinate(url.searchParams.get("longitude"));
+  const requestedGooglePlaceId = url.searchParams.get("googlePlaceId")?.trim() ?? "";
   const category = parseCategory(url.searchParams.get("category"));
-  const googlePlaceId = parseGooglePlaceId(url.searchParams.get("googlePlaceId"));
+  const googlePlaceId = parseGooglePlaceId(requestedGooglePlaceId);
 
   if (
     name.length < 2 ||
@@ -78,6 +79,15 @@ export async function GET(request: Request) {
 
   const wikimediaSupported =
     destinationId === WIKIMEDIA_DESTINATION_ID && isInsidePipaRegion(latitude, longitude);
+  const hasGoogleCandidate = Boolean(googlePlaceId && category);
+
+  if (!wikimediaSupported && !hasGoogleCandidate) {
+    return NextResponse.json(
+      { error: "Parâmetros inválidos para a prévia de imagem externa." },
+      { status: 400, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
   let googleFailed = false;
 
   if (googlePlaceId && category) {

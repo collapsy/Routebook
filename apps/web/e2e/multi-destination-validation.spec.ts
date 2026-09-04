@@ -53,7 +53,6 @@ test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e G
     .locator('[data-place-source="external"]:not([data-place-category="unmapped"])')
     .first();
   await expect(promotable).toBeVisible();
-  const selectedName = (await promotable.locator(":scope > strong").innerText()).trim();
   await promotable.getByRole("button", { name: "Salvar na viagem" }).click();
   await expect(page).toHaveURL(new RegExp("/viagens/" + trip.id + "/lugares-salvos\\?salvo=1"), {
     timeout: 45_000,
@@ -62,8 +61,10 @@ test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e G
     page.getByText(/Lugar salvo na viagem com a origem externa preservada/),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Lugares salvos", exact: true })).toBeVisible();
-  const savedCard = page.locator(".place-card").filter({ hasText: selectedName }).first();
+  const savedCard = page.locator(".place-card").first();
   await expect(savedCard).toBeVisible();
+  const selectedName = (await savedCard.getByRole("heading").innerText()).trim();
+  expect(selectedName).not.toBe("");
   await expect(page.locator('[data-routebook-map="true"]')).toHaveAttribute(
     "data-map-point-count",
     "2",

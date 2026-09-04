@@ -109,6 +109,8 @@ apps/web/app/viagens/nova/actions.ts
 apps/web/app/viagens/nova/actions.test.ts
 apps/web/app/viagens/nova/page.tsx
 apps/web/app/trip-creation.css
+apps/web/components/destination-combobox.tsx
+apps/web/components/destination-combobox.test.tsx
 apps/web/components/trip-form.tsx
 apps/web/components/trip-form.test.tsx
 apps/web/e2e/authenticated-trips.spec.ts

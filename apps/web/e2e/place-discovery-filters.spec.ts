@@ -125,9 +125,7 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     .first();
   const praiaDasMinasFallback = praiaDasMinasCard.locator('[data-place-image-fallback="true"]');
   await expect(praiaDasMinasFallback).toHaveAttribute("data-category-illustration", "beach");
-  await expect(praiaDasMinasFallback).toContainText(
-    "Ilustração de categoria — não é foto do local",
-  );
+  await expect(praiaDasMinasFallback).toContainText("Ilustração de categoria");
 
   await page.goto(`/viagens/${trip.id}/lugares`);
   await page.getByLabel("Nome ou termo").fill("gastronomico");

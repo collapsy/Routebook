@@ -120,6 +120,8 @@ Isso fica registrado como gate obrigatório antes de qualquer ativação públic
 - testes unitários e de rota;
 - documentação, rastreabilidade, CI e Preview.
 
+O refresh foi normalizado pelo Prettier canônico do monorepo antes da rodada final de validação, sem alteração semântica adicional.
+
 ## 10. Fora de escopo
 
 - aceitar ou alterar RB-ADR-012;

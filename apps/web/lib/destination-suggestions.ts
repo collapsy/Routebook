@@ -16,17 +16,32 @@ export type DestinationSuggestion = Readonly<{
 
 export type DestinationSuggestionResult =
   | Readonly<{ status: "ready"; suggestions: readonly DestinationSuggestion[] }>
-  | Readonly<{ status: "unavailable"; reason: "disabled" | "blocked" | "misconfigured" | "provider-error" }>;
+  | Readonly<{
+      status: "unavailable";
+      reason: "disabled" | "blocked" | "misconfigured" | "provider-error";
+    }>;
 
 export type SelectedDestinationResult =
   | Readonly<{ status: "resolved"; value: ResolvedDestination }>
   | Readonly<{ status: "not-found" }>
-  | Readonly<{ status: "unavailable"; reason: "blocked" | "misconfigured" | "provider-error" | "invalid-response" }>;
+  | Readonly<{
+      status: "unavailable";
+      reason: "blocked" | "misconfigured" | "provider-error" | "invalid-response";
+    }>;
 
 export interface DestinationSuggestionProvider {
   suggest(input: string, sessionToken: string): Promise<DestinationSuggestionResult>;
   resolve(reference: string, sessionToken: string): Promise<SelectedDestinationResult>;
 }
+
+type ConfiguredDestinationSuggestionProvider =
+  | Readonly<{
+      status: "configured";
+      providerId: DestinationSuggestion["provider"];
+      provider: DestinationSuggestionProvider;
+      attribution: string;
+    }>
+  | Readonly<{ status: "unavailable"; reason: "disabled" | "blocked" | "misconfigured" }>;
 
 const GOOGLE_AUTOCOMPLETE_ENDPOINT = "https://places.googleapis.com/v1/places:autocomplete";
 const GOOGLE_PLACES_ENDPOINT = "https://places.googleapis.com/v1/places";
@@ -116,7 +131,9 @@ function normalizeText(value: string): string {
 }
 
 function stringArray(value: unknown): readonly string[] {
-  return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
 }
 
 function destinationTypeFromGoogle(types: readonly string[]): Destination["type"] | undefined {
@@ -171,7 +188,8 @@ function googleSuggestionFrom(value: unknown): DestinationSuggestion | undefined
   const primaryText = text(mainText?.text) || label.split(",")[0]?.trim() || label;
   const secondary = text(secondaryText?.text);
 
-  if (!reference || !label || !primaryText || !isDestinationLikeGooglePrediction(types)) return undefined;
+  if (!reference || !label || !primaryText || !isDestinationLikeGooglePrediction(types))
+    return undefined;
   return {
     reference,
     label,
@@ -185,7 +203,10 @@ function googleSuggestionFrom(value: unknown): DestinationSuggestion | undefined
 function fixtureMatches(input: string): readonly (typeof FIXTURES)[number][] {
   const normalized = normalizeText(input);
   return FIXTURES.filter((fixture) =>
-    fixture.aliases.some((alias) => normalizeText(alias).includes(normalized) || normalized.includes(normalizeText(alias))),
+    fixture.aliases.some(
+      (alias) =>
+        normalizeText(alias).includes(normalized) || normalized.includes(normalizeText(alias)),
+    ),
   );
 }
 
@@ -228,7 +249,10 @@ export class GoogleDestinationSuggestionProvider implements DestinationSuggestio
     private readonly apiKey: string,
     private readonly fetcher: FetchLike = fetch,
     private readonly now: () => Date = () => new Date(),
-    private readonly timeZoneLookup: (latitude: number, longitude: number) => string = resolveIanaTimeZone,
+    private readonly timeZoneLookup: (
+      latitude: number,
+      longitude: number,
+    ) => string = resolveIanaTimeZone,
   ) {}
 
   async suggest(input: string, sessionToken: string): Promise<DestinationSuggestionResult> {
@@ -376,9 +400,7 @@ export class GoogleDestinationSuggestionProvider implements DestinationSuggestio
   }
 }
 
-export function resolveConfiguredDestinationSuggestionProvider():
-  | Readonly<{ status: "configured"; provider: DestinationSuggestionProvider; attribution: string }>
-  | Readonly<{ status: "unavailable"; reason: "disabled" | "blocked" | "misconfigured" }> {
+export function resolveConfiguredDestinationSuggestionProvider(): ConfiguredDestinationSuggestionProvider {
   if (
     process.env.ROUTEBOOK_E2E_DESTINATION_RESOLVER === "1" &&
     process.env.ROUTEBOOK_DESTINATION_RESOLVER === "fixture" &&
@@ -386,6 +408,7 @@ export function resolveConfiguredDestinationSuggestionProvider():
   ) {
     return {
       status: "configured",
+      providerId: "fixture",
       provider: new FixtureDestinationSuggestionProvider(),
       attribution: "RouteBook test fixture",
     };
@@ -403,6 +426,7 @@ export function resolveConfiguredDestinationSuggestionProvider():
   if (!apiKey) return { status: "unavailable", reason: "misconfigured" };
   return {
     status: "configured",
+    providerId: "google",
     provider: new GoogleDestinationSuggestionProvider(apiKey),
     attribution: GOOGLE_ATTRIBUTION,
   };
@@ -418,11 +442,13 @@ export async function suggestConfiguredDestinations(
   return configured.provider.suggest(input, sessionToken);
 }
 
-export async function resolveSelectedDestination(input: Readonly<{
-  provider: string;
-  reference: string;
-  sessionToken: string;
-}>): Promise<SelectedDestinationResult> {
+export async function resolveSelectedDestination(
+  input: Readonly<{
+    provider: string;
+    reference: string;
+    sessionToken: string;
+  }>,
+): Promise<SelectedDestinationResult> {
   const configured = resolveConfiguredDestinationSuggestionProvider();
   if (configured.status !== "configured") {
     return {
@@ -431,10 +457,7 @@ export async function resolveSelectedDestination(input: Readonly<{
     };
   }
 
-  if (
-    input.provider !== (configured.attribution === "Google Maps" ? "google" : "fixture") ||
-    !input.reference.trim()
-  )
+  if (input.provider !== configured.providerId || !input.reference.trim())
     return { status: "not-found" };
   return configured.provider.resolve(input.reference, input.sessionToken);
 }

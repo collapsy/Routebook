@@ -17,10 +17,7 @@ export async function GET(request: Request) {
   const sessionToken = url.searchParams.get("sessionToken")?.trim() ?? "";
 
   if (query.length < 3) {
-    return NextResponse.json(
-      { enabled: true, suggestions: [] },
-      { headers: NO_STORE_HEADERS },
-    );
+    return NextResponse.json({ enabled: true, suggestions: [] }, { headers: NO_STORE_HEADERS });
   }
   if (query.length > 120 || !isValidSessionToken(sessionToken)) {
     return NextResponse.json(

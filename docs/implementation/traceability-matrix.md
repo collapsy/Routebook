@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: "2026-08-20"
+last_updated: "2026-09-04"
 authors:
   - RouteBook Team
 tags:
@@ -112,6 +112,8 @@ ai_context:
 | RB-INC-099 | RB-PRD-005–006, RB-ARC-003–004 e RB-INC-094–098 | #223 | `feature/rb-inc-099-authoritative-itinerary-proposal-service`, PR #224 | composition root PostgreSQL, contexto autoritativo, repository de Proposal, generator determinístico, exports e teste PostgreSQL completo | HEAD final `dcb2e46d18948d1a49f81c527af219796144b7d4`; Documentation #859 run `31200795096`; Engineering #1220 run `31200795135`; format, docs, lint, typecheck, migrations, testes, smoke, build e Playwright verdes; merge `6c13f614c4a649f1c2ae1234bef32af7b83aab9d` | Integrado |
 | RB-INC-100 | RB-SEC-001, RB-ADR-007–008, RB-ARC-003 e RB-INC-087, RB-INC-090, RB-INC-099 | #226 | `feature/rb-inc-100-authorized-itinerary-proposal-generation-action`, PR #228 | caso de uso server-side, `trip:edit`, Trip/Itinerary autoritativos, serviço PostgreSQL do RB-INC-099 e Server Action | HEAD final `9ba396937dae4b947cff1347392652d4988f6023`; Documentation #887 run `31209789690`; Engineering #1248 run `31209792591`; merge `1ef2564688da6d02d06beb1514a08a76647601a2` | Integrado |
 | RB-INC-101 | RB-UX-004–006, RB-DS-002–003, RB-SEC-001, RB-ADR-007–008 e RB-INC-092, RB-INC-100 | #229 | `feature/rb-inc-101-authorized-itinerary-proposal-generation-experience`, PR #230 | página de Proposal, affordance explícita de geração, `trip:edit`, pending/erro acessíveis e reutilização da Server Action | SHA funcional `4e0370900849e3db33c02cfedd4a48c9cabc22a8`; Documentation #894 run `31218649387`; Engineering #1255 run `31218649337`; validação final de governança requerida no HEAD da PR | Pronto para validação final |
+
+| RB-INC-167 | RB-ADR-012, RB-ARC-003, RB-INC-141, RB-INC-162, RB-INC-168, RB-INC-172, RB-INC-179 | #382 | `codex/rb-inc-167-google-place-photos-refresh`, PR substituta de #410 | Google Places Photos server-side, token efêmero, attribution, no-store e fallback | testes de adapter/rotas/componente; CI e Preview pendentes no HEAD final | Em execução |
 
 ## Evidências do RB-INC-003
 
@@ -749,6 +751,25 @@ Ao concluir um incremento:
 | código/Production | closeout documental; nenhuma mudança funcional, migration, Provider, secret ou promoção |
 | gate final | Documentation Validation e Engineering Validation devem permanecer verdes no SHA final da PR de closeout |
 | encerramento | #319 permanece aberta até revisão humana final e integração do closeout |
+
+## Evidências previstas do RB-INC-167
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| definição do incremento | `docs/implementation/increments/rb-inc-167-google-place-photos.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-167-google-place-photos.md` |
+| origem | feedback de uso humano real: cobertura Wikimedia insuficiente para estabelecimentos, issue #382 |
+| base atual | `main@604433b7eb403f577b7ca142eed12f28607d731b`, após RouteBook Anywhere / RB-INC-179 |
+| branch | `codex/rb-inc-167-google-place-photos-refresh`; substitui tecnicamente a PR antiga #410 |
+| autorização | Google Places Photos autorizado somente em Preview em 01/09/2026; Production continua gate separado |
+| identidade | reutiliza `PlaceQualitySignals.externalId` Google e revalida ID, nome e proximidade antes de liberar mídia |
+| segurança | key server-side; token HMAC efêmero; `photo name` não sai do servidor e é re-resolvido no request de mídia |
+| attribution | Google Maps + `authorAttributions` + link de fonte quando disponíveis |
+| cache | metadata/mídia Google `private, no-store`; Wikimedia mantém cache governado do RB-INC-162 |
+| fallback | `Place.primaryImage` → Google seguro → Wikimedia secure quando suportada → ilustração de categoria |
+| destination-agnostic | Google Photo pode operar fora de Pipa quando existe Google Place ID seguro; nenhum seed regional é requisito |
+| compliance | Termos/Política de Privacidade públicos permanecem gate antes de ativação pública/Production |
+| validação | testes focados, Documentation, Engineering/Playwright, Vercel Preview e medição live pendentes no HEAD final |
 
 ## Evidências previstas do RB-INC-168
 

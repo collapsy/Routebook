@@ -167,7 +167,7 @@ export function DestinationCombobox({
       : state === "empty"
         ? "Nenhum destino encontrado. Tente incluir cidade, estado ou país."
         : state === "disabled"
-          ? "As sugestões automáticas não estão disponíveis neste ambiente. Você ainda pode digitar o destino."
+          ? "As sugestões automáticas não estão disponíveis neste ambiente. Seu texto fica preservado para a busca textual disponível."
           : state === "error"
             ? "Não foi possível carregar sugestões agora. Seu texto foi preservado."
             : selected
@@ -205,7 +205,12 @@ export function DestinationCombobox({
       <input name="destinationSessionToken" type="hidden" value={sessionToken.current ?? ""} />
 
       {suggestions.length > 0 ? (
-        <div aria-label="Sugestões de destinos" className="destination-suggestions" id={listboxId} role="listbox">
+        <div
+          aria-label="Sugestões de destinos"
+          className="destination-suggestions"
+          id={listboxId}
+          role="listbox"
+        >
           {suggestions.map((suggestion, index) => (
             <button
               aria-selected={index === activeIndex}
@@ -222,15 +227,20 @@ export function DestinationCombobox({
               {suggestion.secondaryText ? <span>{suggestion.secondaryText}</span> : null}
             </button>
           ))}
-          {attribution === "Google Maps" ? (
-            <p className="destination-attribution" translate="no">
-              Google Maps
-            </p>
-          ) : null}
         </div>
       ) : null}
 
-      <p aria-live="polite" className="field-hint destination-status" id="destination-suggestions-status">
+      {attribution === "Google Maps" ? (
+        <p className="destination-attribution" translate="no">
+          Google Maps
+        </p>
+      ) : null}
+
+      <p
+        aria-live="polite"
+        className="field-hint destination-status"
+        id="destination-suggestions-status"
+      >
         {statusMessage}
       </p>
     </div>

@@ -66,9 +66,7 @@ export async function createTripAction(
   const selectedReference = String(formData.get("destinationReference") ?? "").trim();
   const selectedLabel = String(formData.get("destinationSelectedLabel") ?? "").trim();
   const selectedSessionToken = String(formData.get("destinationSessionToken") ?? "").trim();
-  const hasSelectionData = Boolean(
-    selectedProvider || selectedReference || selectedLabel || selectedSessionToken,
-  );
+  const hasSelectionData = Boolean(selectedProvider || selectedReference || selectedLabel);
 
   let resolution;
   if (hasSelectionData) {

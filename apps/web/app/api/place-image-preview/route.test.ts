@@ -37,12 +37,45 @@ function commonsResponse(
   );
 }
 
+function googleDetailsResponse(overrides: Record<string, unknown> = {}) {
+  return Response.json({
+    id: "ChIJMaspSaoPaulo01",
+    displayName: { text: "MASP" },
+    location: { latitude: -23.5614, longitude: -46.6559 },
+    photos: [
+      {
+        name: "places/ChIJMaspSaoPaulo01/photos/current-photo-name",
+        authorAttributions: [
+          {
+            displayName: "Pessoa fotógrafa",
+            uri: "https://maps.google.com/maps/contrib/123",
+          },
+        ],
+        googleMapsUri: "https://www.google.com/maps/place/?q=place_id:masp",
+      },
+    ],
+    ...overrides,
+  });
+}
+
 function requestUrl(overrides: Record<string, string> = {}): string {
   const params = new URLSearchParams({
     destinationId: "pipa-rn-br",
     name: "Praia do Amor",
     latitude: "-6.2366",
     longitude: "-35.0465",
+    ...overrides,
+  });
+  return `http://localhost/api/place-image-preview?${params}`;
+}
+
+function googleRequestUrl(overrides: Record<string, string> = {}): string {
+  const params = new URLSearchParams({
+    name: "MASP",
+    latitude: "-23.5615",
+    longitude: "-46.6559",
+    category: "nature",
+    googlePlaceId: "ChIJMaspSaoPaulo01",
     ...overrides,
   });
   return `http://localhost/api/place-image-preview?${params}`;
@@ -67,7 +100,7 @@ describe("GET /api/place-image-preview", () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
 
-  it("rejeita recorte geográfico ou Destination inválido sem consultar a Fonte", async () => {
+  it("rejeita recorte geográfico ou Destination inválido sem outra fonte governada", async () => {
     const fetcher = vi.fn();
     vi.stubGlobal("fetch", fetcher);
 
@@ -78,7 +111,7 @@ describe("GET /api/place-image-preview", () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
 
-  it("devolve somente preview seguro com Provenance e cache CDN", async () => {
+  it("devolve somente preview Wikimedia seguro com Provenance e cache CDN", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => commonsResponse()),
@@ -92,6 +125,7 @@ describe("GET /api/place-image-preview", () => {
       "public, s-maxage=86400, stale-while-revalidate=604800",
     );
     expect(payload).toMatchObject({
+      provider: "wikimedia-commons",
       previewUrl:
         "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Praia_do_Amor_Pipa.jpg/640px-Praia_do_Amor_Pipa.jpg",
       sourceUrl: "https://commons.wikimedia.org/wiki/File:Praia_do_Amor_Pipa.jpg",
@@ -103,7 +137,72 @@ describe("GET /api/place-image-preview", () => {
     expect(String(payload.matchEvidence)).toContain("contexto local de Pipa/Tibau do Sul");
   });
 
-  it("mantém fallback quando a identidade é ambígua", async () => {
+  it("resolve Google Photos fora de Pipa sem expor photo name ou secret", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const fetcher = vi.fn(async () => googleDetailsResponse());
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(new Request(googleRequestUrl()));
+    const payload = (await response.json()) as Record<string, unknown>;
+    const serialized = JSON.stringify(payload);
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(payload).toMatchObject({
+      provider: "google-places",
+      sourceName: "Google Maps",
+      sourceUrl: "https://www.google.com/maps/place/?q=place_id:masp",
+      authorAttributions: [
+        {
+          displayName: "Pessoa fotógrafa",
+          uri: "https://maps.google.com/maps/contrib/123",
+        },
+      ],
+    });
+    expect(String(payload.mediaUrl)).toMatch(/^\/api\/place-image-preview\/google\?token=/);
+    expect(serialized).not.toContain("current-photo-name");
+    expect(serialized).not.toContain("secret-google");
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it("mantém miss Google sem cache quando identidade não corresponde", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        googleDetailsResponse({
+          displayName: { text: "MASP de outro estado" },
+          location: { latitude: -7.5, longitude: -36.5 },
+        }),
+      ),
+    );
+
+    const response = await GET(new Request(googleRequestUrl()));
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+  });
+
+  it("repete falha transitória do Google no limite e degrada sem mídia inventada", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const fetcher = vi.fn(async () => new Response("rate limited", { status: 429 }));
+    vi.stubGlobal("fetch", fetcher);
+    vi.spyOn(console, "info").mockImplementation(() => undefined);
+
+    const response = await GET(new Request(googleRequestUrl()));
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+
+  it("mantém fallback Wikimedia quando a identidade é ambígua", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () =>
@@ -119,7 +218,7 @@ describe("GET /api/place-image-preview", () => {
     );
   });
 
-  it("repete falha transitória no limite e mantém fallback sem inventar mídia", async () => {
+  it("repete falha transitória Wikimedia no limite e mantém fallback sem inventar mídia", async () => {
     const fetcher = vi.fn(async () => new Response("rate limited", { status: 429 }));
     vi.stubGlobal("fetch", fetcher);
     vi.spyOn(console, "warn").mockImplementation(() => undefined);

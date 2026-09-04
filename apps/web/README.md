@@ -69,6 +69,32 @@ O incremento atual permite:
 
 O Destination é resolvido por uma porta de aplicação, persiste coordenadas, timezone e Proveniência e não possui default obrigatório de Pipa. Pipa permanece catálogo curado/regressão; destinos sem seed regional usam Discovery externa e podem continuar por Salvos, Roteiro e Guia sem conteúdo inventado.
 
+## Quality e mídia externa
+
+Quality e Media são enriquecimentos opcionais. A ausência de Provider ou uma falha externa nunca deve impedir Discovery, Salvos, Roteiro ou Guia.
+
+A experiência de ranking pode selecionar explicitamente um Provider server-side por `ROUTEBOOK_PLACE_QUALITY_PROVIDER`. Quando o Provider Google resolve uma identidade com matching conservador, o `externalId` pode também sustentar a tentativa de foto real do RB-INC-167.
+
+Google Places Photos permanece **Preview-only** nesta fase:
+
+```text
+ROUTEBOOK_PLACE_PHOTO_PROVIDER=google
+GOOGLE_PLACES_API_KEY=<server-side>
+```
+
+Regras do fluxo de fotos:
+
+- `Place.primaryImage` curada tem prioridade absoluta;
+- Google Photo só é tentada com Google Place ID já reconciliado e revalidado por nome/proximidade;
+- metadata pública e mídia Google usam `no-store`;
+- API key e `photo name` nunca são enviados ao browser;
+- `authorAttributions` são exibidos quando fornecidos pelo Google;
+- Wikimedia Commons permanece fallback seguro quando suportada;
+- ilustração de categoria é o fallback final explícito;
+- `VERCEL_ENV=production` bloqueia o adapter Google Photos nesta fase.
+
+Antes de qualquer ativação pública/Production, o RouteBook precisa de novo gate humano, revisão dos termos/quotas/billing/attribution atuais e superfícies públicas de Termos de Uso/Política de Privacidade aplicáveis.
+
 ## Validações
 
 ```bash

@@ -944,3 +944,22 @@ Ao concluir um incremento:
 | governança | nenhuma publicação, Recommendation ou dado inventado |
 | regressão | Pipa preservada como catálogo curado; zero-seed sem vínculo obrigatório |
 | validação | Documentation/Engineering/Vercel pendentes no SHA final |
+
+
+## Evidências previstas do RB-INC-179
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-179-multi-destination-validation.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-179-multi-destination-validation.md` |
+| iniciativa | #411 — M9 / RouteBook Anywhere |
+| issue | #419 |
+| branch | `codex/rb-inc-179-multi-destination-validation` |
+| base | `main@846ea72ab4d87cc3b0164cd43414343a5282ec1e` |
+| segundo destino | São Paulo, SP; urbano e zero-seed/configuração regional |
+| fluxo | Visão → Discovery → Salvos/mapa → Roteiro → Hoje → Guia por dia |
+| generalização | catálogo/Recommendation por Region; Guia disponível para qualquer Viagem |
+| evidência | somente dados persistidos; Quality/Media degradáveis e sem dado inventado |
+| regressão | Pipa preservada como catálogo/guia; Florianópolis preservada como fixture técnica |
+| custo | budgets do RB-INC-177; Guia genérico sem request adicional de Provider |
+| validação | Documentation/Engineering/Vercel pendentes no SHA final |

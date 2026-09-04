@@ -5,7 +5,14 @@ import { PlaceRankingMeta } from "./place-ranking-meta";
 
 describe("PlaceRankingMeta", () => {
   it("não fabrica score ou Top quando não existem sinais", () => {
-    render(<PlaceRankingMeta categoryLabel="Praias" orderLabel="Mais próximos" position={1} />);
+    render(
+      <PlaceRankingMeta
+        categoryLabel="Praias"
+        orderLabel="Mais próximos"
+        position={1}
+        timeZone="America/Sao_Paulo"
+      />,
+    );
 
     expect(screen.getByText("#1 · Mais próximos")).toBeInTheDocument();
     expect(screen.queryByText(/Score RouteBook/)).not.toBeInTheDocument();
@@ -19,6 +26,7 @@ describe("PlaceRankingMeta", () => {
         categoryRank={1}
         orderLabel="Recomendados"
         position={1}
+        timeZone="America/Sao_Paulo"
         quality={{
           score: 9.1,
           reputationScore: 0.91,

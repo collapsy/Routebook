@@ -17,11 +17,11 @@ function formatDecimal(value: number, maximumFractionDigits = 1): string {
   return new Intl.NumberFormat("pt-BR", { maximumFractionDigits }).format(value);
 }
 
-function formatCollectedAt(value: Date): string {
+function formatCollectedAt(value: Date, timeZone: string): string {
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
-    timeZone: "America/Fortaleza",
+    timeZone,
   }).format(value);
 }
 
@@ -32,6 +32,7 @@ export function PlaceRankingMeta({
   signals,
   categoryRank,
   categoryLabel,
+  timeZone,
 }: Readonly<{
   position: number;
   orderLabel: string;
@@ -39,6 +40,7 @@ export function PlaceRankingMeta({
   signals?: PlaceQualitySignals;
   categoryRank?: number;
   categoryLabel: string;
+  timeZone: string;
 }>) {
   const popularityPercent =
     signals?.popularity &&
@@ -82,7 +84,7 @@ export function PlaceRankingMeta({
           ) : null}
           <span>
             Fonte: {providerLabel(signals.provider)} · coletado em{" "}
-            {formatCollectedAt(signals.collectedAt)}
+            {formatCollectedAt(signals.collectedAt, timeZone)}
           </span>
           {quality.reasons.length > 0 ? (
             <span className={styles.reason}>{quality.reasons.join(" · ")}</span>

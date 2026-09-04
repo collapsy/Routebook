@@ -8,7 +8,9 @@ Aplicação web principal do RouteBook, implementada com Next.js App Router e Ty
 | --- | --- |
 | `/` | landing institucional e entrada no produto |
 | `/viagens` | listagem de Viagens persistidas ou estado vazio |
-| `/viagens/nova` | criação canônica de uma Viagem para Pipa |
+| `/viagens/nova` | criação canônica de uma Viagem com Destination resolvido |
+| `/viagens/[tripId]/lugares` | catálogo curado próximo e Discovery externa progressiva |
+| `/viagens/[tripId]/guia` | decisões do Dia e conteúdo editorial quando disponível |
 | rota inexistente | estado 404 com retorno seguro |
 
 O product shell inclui navegação global, skip link, foco visível, loading, error boundary e comportamento responsivo em desktop e mobile.
@@ -59,13 +61,13 @@ A variável `DATABASE_URL` é obrigatória. O arquivo `.env.example` contém som
 O incremento atual permite:
 
 1. abrir `/viagens/nova`;
-2. informar nome, período, owner inicial e hospedagem opcional;
+2. informar nome, Destination, período, owner inicial e hospedagem opcional;
 3. validar as invariantes do agregado `Trip`;
 4. gerar `TripId` interno;
 5. persistir a Viagem em PostgreSQL;
 6. retornar para `/viagens` e manter a Viagem visível após recarregar a página.
 
-Pipa, Tibau do Sul — RN é o único destino canônico habilitado neste recorte. O destino possui coordenadas e fuso definidos internamente; não existe geocodificação externa.
+O Destination é resolvido por uma porta de aplicação, persiste coordenadas, timezone e Proveniência e não possui default obrigatório de Pipa. Pipa permanece catálogo curado/regressão; destinos sem seed regional usam Discovery externa e podem continuar por Salvos, Roteiro e Guia sem conteúdo inventado.
 
 ## Validações
 
@@ -88,4 +90,8 @@ pnpm --filter @routebook/web exec playwright install chromium
 
 ## Limites atuais
 
-Ainda não existem autenticação real, convites, perfil de Viajantes, múltiplos destinos, mapas, catálogo de Lugares, Salvos, Roteiro, Recomendações ou IA. A participação criada no formulário representa somente o owner local inicial da Viagem.
+- Providers externos continuam governados por configuração, kill switches e gates de Production;
+- Quality e Media são enriquecimentos opcionais e podem degradar sem invalidar Discovery;
+- o conteúdo editorial diário e a mídia curada permanecem concentrados em Pipa;
+- destinos zero-seed recebem Guia derivado apenas de Salvos e Roteiro reais;
+- convites e colaboração multiusuário permanecem fora do recorte atual.

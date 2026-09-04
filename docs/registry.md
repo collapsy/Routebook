@@ -416,6 +416,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-178 | Continuidade de candidato descoberto para Salvos e Roteiro | Implementation | Draft | 0.1.0 | [rb-inc-178-external-place-continuity.md](./implementation/increments/rb-inc-178-external-place-continuity.md) |
 | RB-CTX-178 | Context Pack do RB-INC-178 — Continuidade de candidato externo | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-178-external-place-continuity.md](./implementation/context-packs/rb-inc-178-external-place-continuity.md) |
 
+| RB-INC-179 | Validação multi-destino sem seed e regressão Pipa | Implementation | Draft | 0.1.0 | [rb-inc-179-multi-destination-validation.md](./implementation/increments/rb-inc-179-multi-destination-validation.md) |
+| RB-CTX-179 | Context Pack do RB-INC-179 — Validação multi-destino | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-179-multi-destination-validation.md](./implementation/context-packs/rb-inc-179-multi-destination-validation.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

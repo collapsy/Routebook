@@ -199,6 +199,7 @@ function CanonicalDiscoveryCard({
   qualitySignals,
   categoryRank,
   externalMediaEnabled,
+  timeZone,
 }: Readonly<{
   item: CanonicalDiscoveryItem;
   tripId: string;
@@ -212,6 +213,7 @@ function CanonicalDiscoveryCard({
   qualitySignals?: PlaceQualitySignals;
   categoryRank?: number;
   externalMediaEnabled: boolean;
+  timeZone: string;
 }>) {
   const { place, distanceMeters } = item;
   const candidate = item.kind === "enriched" ? item.candidate : undefined;
@@ -239,6 +241,7 @@ function CanonicalDiscoveryCard({
         categoryLabel={categoryLabels[place.category]}
         orderLabel={rankingOrderLabel}
         position={rankingPosition}
+        timeZone={timeZone}
         {...(quality ? { quality } : {})}
         {...(qualitySignals ? { signals: qualitySignals } : {})}
         {...(categoryRank ? { categoryRank } : {})}
@@ -346,6 +349,7 @@ function ExternalDiscoveryCard({
   qualitySignals,
   categoryRank,
   externalMediaEnabled,
+  timeZone,
 }: Readonly<{
   item: ExternalPlaceDiscoveryItem;
   tripId: string;
@@ -363,6 +367,7 @@ function ExternalDiscoveryCard({
   qualitySignals?: PlaceQualitySignals;
   categoryRank?: number;
   externalMediaEnabled: boolean;
+  timeZone: string;
 }>) {
   const { candidate, distanceMeters } = item;
   const coordinate = { latitude: candidate.latitude, longitude: candidate.longitude };
@@ -375,11 +380,16 @@ function ExternalDiscoveryCard({
   });
 
   return (
-    <li data-place-source="external" data-place-state="external">
+    <li
+      data-place-category={candidate.category ?? "unmapped"}
+      data-place-source="external"
+      data-place-state="external"
+    >
       <PlaceRankingMeta
         categoryLabel={categoryLabel}
         orderLabel={rankingOrderLabel}
         position={rankingPosition}
+        timeZone={timeZone}
         {...(quality ? { quality } : {})}
         {...(qualitySignals ? { signals: qualitySignals } : {})}
         {...(categoryRank ? { categoryRank } : {})}
@@ -433,24 +443,32 @@ function ExternalDiscoveryCard({
           Calcular rota real
         </a>
       </div>
-      <form action={saveExternalPlaceAction} className={styles.promotionForm}>
-        <input name="tripId" type="hidden" value={tripId} />
-        <input name="externalId" type="hidden" value={candidate.externalId} />
-        {search ? <input name="busca" type="hidden" value={search} /> : null}
-        {category ? <input name="categoria" type="hidden" value={category} /> : null}
-        {maximumDistanceMeters ? (
-          <input name="distancia" type="hidden" value={String(maximumDistanceMeters / 1_000)} />
-        ) : null}
-        {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
-        {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
-        <button className="product-button" type="submit">
-          Salvar na viagem
-        </button>
-      </form>
-      <small>
-        O RouteBook revalida o candidato antes de salvar e preserva a fonte. Salvar não publica o
-        Lugar nem o adiciona automaticamente ao roteiro.
-      </small>
+      {candidate.category ? (
+        <>
+          <form action={saveExternalPlaceAction} className={styles.promotionForm}>
+            <input name="tripId" type="hidden" value={tripId} />
+            <input name="externalId" type="hidden" value={candidate.externalId} />
+            {search ? <input name="busca" type="hidden" value={search} /> : null}
+            {category ? <input name="categoria" type="hidden" value={category} /> : null}
+            {maximumDistanceMeters ? (
+              <input name="distancia" type="hidden" value={String(maximumDistanceMeters / 1_000)} />
+            ) : null}
+            {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
+            {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
+            <button className="product-button" type="submit">
+              Salvar na viagem
+            </button>
+          </form>
+          <small>
+            O RouteBook revalida o candidato antes de salvar e preserva a fonte. Salvar não publica
+            o Lugar nem o adiciona automaticamente ao roteiro.
+          </small>
+        </>
+      ) : (
+        <small>
+          Este candidato pode ser consultado, mas ainda não tem categoria segura para ser salvo.
+        </small>
+      )}
       {destinationId ? (
         <>
           <form action={promoteExternalPlaceAction} className={styles.promotionForm}>
@@ -1100,6 +1118,7 @@ export default async function PlacesPage({
                   : {})}
                 distanceReferenceLabel={distanceReferenceLabel}
                 item={item}
+                timeZone={trip.destination.timeZone}
                 tripId={tripId}
                 {...(destinationId ? { destinationId } : {})}
                 {...(accommodationCoordinate ? { accommodationCoordinate } : {})}
@@ -1123,6 +1142,7 @@ export default async function PlacesPage({
                 distanceReferenceLabel={distanceReferenceLabel}
                 isSaved={savedPlaceIds.has(item.place.id)}
                 item={item}
+                timeZone={trip.destination.timeZone}
                 tripId={tripId}
                 {...(destinationId ? { destinationId } : {})}
                 {...(accommodationCoordinate ? { accommodationCoordinate } : {})}

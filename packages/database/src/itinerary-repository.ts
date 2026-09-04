@@ -84,7 +84,7 @@ function mapItinerary(
     period: {
       startDate: row.startDate,
       endDate: row.endDate,
-      timeZone: "America/Fortaleza",
+      timeZone: row.timeZone,
     },
     days,
     version: row.version,

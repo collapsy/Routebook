@@ -46,13 +46,14 @@ export default async function SavedPlacesPage({
 }: {
   params: Promise<{ tripId: string }>;
   searchParams: Promise<{
+    salvo?: string;
     removed?: string;
     adicionadoAoRoteiro?: string;
     erro?: string;
   }>;
 }) {
   const { tripId } = await params;
-  const { removed, adicionadoAoRoteiro, erro } = await searchParams;
+  const { salvo, removed, adicionadoAoRoteiro, erro } = await searchParams;
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
@@ -96,6 +97,12 @@ export default async function SavedPlacesPage({
         </div>
       </div>
 
+      {salvo === "1" ? (
+        <p className="success-banner" role="status">
+          Lugar salvo na viagem com a origem externa preservada. Agora você pode adicioná-lo ao
+          roteiro.
+        </p>
+      ) : null}
       {removed === "1" ? (
         <p className="success-banner" role="status">
           Lugar removido da sua seleção.

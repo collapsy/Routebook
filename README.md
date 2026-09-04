@@ -12,7 +12,7 @@ O projeto surgiu para apoiar uma viagem real a **Pipa (RN), de 22 a 29 de agosto
 
 Esse cenário será utilizado para validar o primeiro ciclo do produto, incluindo praias, restaurantes, vida noturna, distâncias a partir da hospedagem e organização das atividades por dia.
 
-Pipa é o cenário inicial, não uma limitação estrutural. Outros destinos serão habilitados quando a resolução geográfica estiver implementada.
+Pipa permanece como catálogo curado e cenário de regressão, não como limitação estrutural. A resolução geográfica, a Discovery espacial e a continuidade de candidatos externos já permitem construir progressivamente uma Viagem para outros destinos sem seed regional.
 
 ## Proposta de valor
 
@@ -30,13 +30,13 @@ O RouteBook não é apenas um catálogo de pontos turísticos. Seu objetivo é a
 | Product shell e Minhas Viagens | Implementados pelo RB-INC-002 |
 | Agregado `Trip` | Implementado no RB-INC-003 |
 | Persistência PostgreSQL/PostGIS | Ativada no RB-INC-003 |
-| Criação e listagem de Viagens | Implementadas para Pipa |
+| Criação e listagem de Viagens | Implementadas com Destination resolvido e persistido |
 | Contexto, Hospedagem, Lugares, salvos, mapas e Roteiro | Implementados nos incrementos integrados |
 | Recommendations determinísticas, explicáveis e persistidas | Implementadas no ciclo RB-INC-038–041 |
 | Decisions explícitas sobre Recommendations | Em implementação no RB-INC-042 |
 | MVP funcional completo | Não validado |
 
-A aplicação já cria e persiste Trips, Contexto dos viajantes, Accommodation, catálogo de Places, Saved Places, mapas, distância geodésica e Itinerary manual. O ciclo RB-INC-038–041 adiciona Recommendations determinísticas com Context Snapshot, Reasons, Limitations, Confidence qualitativa, persistência e rejeição explícita, sem uso de LLM ou mutação automática do Roteiro.
+A aplicação cria e persiste Trips, Contexto dos viajantes, Accommodation, catálogo e Discovery externa de Places, Saved Places, mapas, distância geodésica e Itinerary manual. Pipa mantém conteúdo editorial; destinos zero-seed usam candidatos externos revalidados e podem continuar por Salvos e Roteiro sem publicação automática. Recommendations determinísticas preservam Context Snapshot, Reasons, Limitations e Confidence qualitativa, sem uso de LLM ou mutação automática do Roteiro.
 
 ## Execução local
 

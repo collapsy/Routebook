@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 
 import {
   DrizzleItineraryRepository,
-  DrizzlePlaceRepository,
   DrizzleRecommendationRepository,
   DrizzleSavedPlaceRepository,
   DrizzleTravelerProfileRepository,
@@ -21,17 +20,12 @@ import {
   type RecommendationStatus,
   type TravelerInterest,
 } from "@routebook/decision-intelligence";
-import {
-  listPublishedPlaces,
-  type Place,
-  type PlaceCategory,
-  type PlacePrimaryImage,
-} from "@routebook/place-catalog";
+import { type Place, type PlaceCategory, type PlacePrimaryImage } from "@routebook/place-catalog";
 import { listSavedPlaces } from "@routebook/saved-places";
 import { findTravelerProfile } from "@routebook/traveler-profile";
 import { findTripById, type Trip } from "@routebook/trip-management";
 
-import { resolveTripDestinationId } from "./trip-destination";
+import { loadTripCuratedCatalog } from "./trip-curated-catalog";
 
 export type RecommendationCardViewModel = Readonly<{
   id: RecommendationId;
@@ -212,7 +206,8 @@ export async function loadRecommendationExperience(
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) return null;
 
-  const destinationId = resolveTripDestinationId(trip.destination.name);
+  const curatedCatalog = await loadTripCuratedCatalog(trip);
+  const destinationId = curatedCatalog.destinationId;
   if (!destinationId) {
     return {
       trip,
@@ -229,15 +224,15 @@ export async function loadRecommendationExperience(
   const recommendationRepository = shouldPersist
     ? new DrizzleRecommendationRepository()
     : undefined;
-  const [profile, places, savedPlaces, itinerary, initialPersisted] = await Promise.all([
+  const [profile, savedPlaces, itinerary, initialPersisted] = await Promise.all([
     findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
-    listPublishedPlaces(new DrizzlePlaceRepository(), destinationId),
     listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
     new DrizzleItineraryRepository().findByTripId(tripId),
     recommendationRepository
       ? recommendationRepository.listByTripId(tripId)
       : Promise.resolve<readonly Recommendation[]>([]),
   ]);
+  const places = curatedCatalog.places;
 
   const currentContext = {
     tripContextVersion: trip.contextVersion,

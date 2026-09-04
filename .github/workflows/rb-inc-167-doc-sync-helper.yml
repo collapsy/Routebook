@@ -40,16 +40,16 @@ jobs:
           trace = trace_path.read_text()
           trace = trace.replace('last_updated: "2026-08-20"', 'last_updated: "2026-09-04"', 1)
 
-          matrix_marker = "| RB-INC-168 |"
+          matrix_section_end = "## Evidências do RB-INC-003"
           matrix_row = (
               "| RB-INC-167 | RB-ADR-012, RB-ARC-003, RB-INC-141, RB-INC-162, RB-INC-168, RB-INC-172, RB-INC-179 | "
               "#382 | `codex/rb-inc-167-google-place-photos-refresh`, PR substituta de #410 | Google Places Photos server-side, token efêmero, attribution, no-store e fallback | testes de adapter/rotas/componente; CI e Preview pendentes no HEAD final | Em execução |\n"
           )
           if matrix_row not in trace:
-              index = trace.find(matrix_marker)
+              index = trace.find(matrix_section_end)
               if index < 0:
-                  raise SystemExit("RB-INC-168 matrix marker not found")
-              trace = trace[:index] + matrix_row + trace[index:]
+                  raise SystemExit("traceability matrix end marker not found")
+              trace = trace[:index] + matrix_row + "\n" + trace[index:]
 
           evidence_marker = "## Evidências previstas do RB-INC-168"
           evidence_lines = [

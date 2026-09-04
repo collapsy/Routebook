@@ -90,7 +90,8 @@ export async function createTripAction(
       reference: selectedReference,
       sessionToken: selectedSessionToken,
     });
-    if (selectedResolution.status !== "resolved") return selectedDestinationError(selectedResolution);
+    if (selectedResolution.status !== "resolved")
+      return selectedDestinationError(selectedResolution);
     resolution = { status: "resolved" as const, value: selectedResolution.value };
   } else {
     const configuredResolver = resolveConfiguredDestinationResolver();

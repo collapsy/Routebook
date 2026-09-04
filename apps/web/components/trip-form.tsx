@@ -42,7 +42,7 @@ export function TripForm({
         </div>
         {destinationAttribution ? (
           <p className="field-hint">
-            Busca textual alternativa: {" "}
+            Busca textual alternativa:{" "}
             <a href={destinationAttribution.href} rel="noreferrer" target="_blank">
               {destinationAttribution.label}
             </a>

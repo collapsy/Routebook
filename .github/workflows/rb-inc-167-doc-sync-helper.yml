@@ -52,26 +52,29 @@ jobs:
               trace = trace[:index] + matrix_row + trace[index:]
 
           evidence_marker = "## Evidências previstas do RB-INC-168"
-          evidence = '''## Evidências previstas do RB-INC-167
-
-| Evidência | Localização/resultado |
-| --- | --- |
-| definição do incremento | `docs/implementation/increments/rb-inc-167-google-place-photos.md` |
-| Context Pack | `docs/implementation/context-packs/rb-inc-167-google-place-photos.md` |
-| origem | feedback de uso humano real: cobertura Wikimedia insuficiente para estabelecimentos, issue #382 |
-| base atual | `main@604433b7eb403f577b7ca142eed12f28607d731b`, após RouteBook Anywhere / RB-INC-179 |
-| branch | `codex/rb-inc-167-google-place-photos-refresh`; substitui tecnicamente a PR antiga #410 |
-| autorização | Google Places Photos autorizado somente em Preview em 01/09/2026; Production continua gate separado |
-| identidade | reutiliza `PlaceQualitySignals.externalId` Google e revalida ID, nome e proximidade antes de liberar mídia |
-| segurança | key server-side; token HMAC efêmero; `photo name` não sai do servidor e é re-resolvido no request de mídia |
-| attribution | Google Maps + `authorAttributions` + link de fonte quando disponíveis |
-| cache | metadata/mídia Google `private, no-store`; Wikimedia mantém cache governado do RB-INC-162 |
-| fallback | `Place.primaryImage` → Google seguro → Wikimedia secure quando suportada → ilustração de categoria |
-| destination-agnostic | Google Photo pode operar fora de Pipa quando existe Google Place ID seguro; nenhum seed regional é requisito |
-| compliance | Termos/Política de Privacidade públicos permanecem gate antes de ativação pública/Production |
-| validação | testes focados, Documentation, Engineering/Playwright, Vercel Preview e medição live pendentes no HEAD final |
-
-'''
+          evidence_lines = [
+              "## Evidências previstas do RB-INC-167",
+              "",
+              "| Evidência | Localização/resultado |",
+              "| --- | --- |",
+              "| definição do incremento | `docs/implementation/increments/rb-inc-167-google-place-photos.md` |",
+              "| Context Pack | `docs/implementation/context-packs/rb-inc-167-google-place-photos.md` |",
+              "| origem | feedback de uso humano real: cobertura Wikimedia insuficiente para estabelecimentos, issue #382 |",
+              "| base atual | `main@604433b7eb403f577b7ca142eed12f28607d731b`, após RouteBook Anywhere / RB-INC-179 |",
+              "| branch | `codex/rb-inc-167-google-place-photos-refresh`; substitui tecnicamente a PR antiga #410 |",
+              "| autorização | Google Places Photos autorizado somente em Preview em 01/09/2026; Production continua gate separado |",
+              "| identidade | reutiliza `PlaceQualitySignals.externalId` Google e revalida ID, nome e proximidade antes de liberar mídia |",
+              "| segurança | key server-side; token HMAC efêmero; `photo name` não sai do servidor e é re-resolvido no request de mídia |",
+              "| attribution | Google Maps + `authorAttributions` + link de fonte quando disponíveis |",
+              "| cache | metadata/mídia Google `private, no-store`; Wikimedia mantém cache governado do RB-INC-162 |",
+              "| fallback | `Place.primaryImage` → Google seguro → Wikimedia secure quando suportada → ilustração de categoria |",
+              "| destination-agnostic | Google Photo pode operar fora de Pipa quando existe Google Place ID seguro; nenhum seed regional é requisito |",
+              "| compliance | Termos/Política de Privacidade públicos permanecem gate antes de ativação pública/Production |",
+              "| validação | testes focados, Documentation, Engineering/Playwright, Vercel Preview e medição live pendentes no HEAD final |",
+              "",
+              "",
+          ]
+          evidence = "\n".join(evidence_lines)
           if "## Evidências previstas do RB-INC-167" not in trace:
               index = trace.find(evidence_marker)
               if index < 0:

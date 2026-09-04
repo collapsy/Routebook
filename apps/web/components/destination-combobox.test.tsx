@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DestinationCombobox } from "./destination-combobox";
 
+type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
+
 function jsonResponse(payload: unknown, status = 200) {
   return Promise.resolve(
     Response.json(payload, {
@@ -36,13 +38,15 @@ describe("DestinationCombobox", () => {
       provider: "google" as const,
       attribution: "Google Maps" as const,
     }));
-    const fetcher = vi.fn(() =>
+    const fetcher = vi.fn<FetchLike>();
+    fetcher.mockImplementation(() =>
       jsonResponse({ enabled: true, suggestions, attribution: "Google Maps" }),
     );
     vi.stubGlobal("fetch", fetcher);
 
-    render(<DestinationCombobox />);
-    const input = screen.getByRole("combobox", { name: "" });
+    const { container } = render(<DestinationCombobox />);
+    const input = container.querySelector<HTMLInputElement>("#destination");
+    if (!input) throw new Error("Destination input not rendered.");
 
     fireEvent.change(input, { target: { value: "sp" } });
     await debounce();
@@ -87,9 +91,9 @@ describe("DestinationCombobox", () => {
 
     fireEvent.keyDown(input, { key: "Enter" });
     expect(input).toHaveValue("São Paulo, SP, Brasil");
-    expect(container.querySelector<HTMLInputElement>('input[name="destinationProvider"]')).toHaveValue(
-      "fixture",
-    );
+    expect(
+      container.querySelector<HTMLInputElement>('input[name="destinationProvider"]'),
+    ).toHaveValue("fixture");
     expect(
       container.querySelector<HTMLInputElement>('input[name="destinationReference"]'),
     ).toHaveValue("fixture:sao-paulo-sp-br");
@@ -98,7 +102,7 @@ describe("DestinationCombobox", () => {
     expect(
       container.querySelector<HTMLInputElement>('input[name="destinationReference"]'),
     ).toHaveValue("");
-    expect(screen.getByText(/Destino selecionado/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Destino selecionado/)).not.toBeInTheDocument();
   });
 
   it("preserva o texto e informa degradação quando sugestões estão desabilitadas", async () => {
@@ -129,8 +133,8 @@ describe("DestinationCombobox", () => {
     const first = new Promise<Response>((resolve) => {
       resolveFirst = resolve;
     });
-    const fetcher = vi
-      .fn<() => Promise<Response>>()
+    const fetcher = vi.fn<FetchLike>();
+    fetcher
       .mockImplementationOnce(() => first)
       .mockImplementationOnce(() =>
         jsonResponse({

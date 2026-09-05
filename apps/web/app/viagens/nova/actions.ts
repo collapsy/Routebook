@@ -1,5 +1,7 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -22,8 +24,8 @@ function resolverUnavailableMessage(
   return "A busca de destinos está com uma configuração inválida. Selecione uma sugestão da lista ou tente novamente mais tarde.";
 }
 
-function nextDestinationSelectionRevision(state: CreateTripActionState): number {
-  return (state.destinationSelectionRevision ?? 0) + 1;
+function createDestinationSelectionResetToken(): string {
+  return randomUUID();
 }
 
 function selectedDestinationError(
@@ -33,15 +35,14 @@ function selectedDestinationError(
         status: "unavailable";
         reason: "blocked" | "misconfigured" | "provider-error" | "invalid-response";
       }>,
-  state: CreateTripActionState,
 ): CreateTripActionState {
-  const destinationSelectionRevision = nextDestinationSelectionRevision(state);
+  const destinationSelectionResetToken = createDestinationSelectionResetToken();
   if (result.status === "not-found") {
     return {
       fieldErrors: {
         destination: "Não conseguimos confirmar esse destino. Selecione novamente uma sugestão.",
       },
-      destinationSelectionRevision,
+      destinationSelectionResetToken,
     };
   }
   if (result.reason === "blocked" || result.reason === "misconfigured") {
@@ -49,18 +50,18 @@ function selectedDestinationError(
       fieldErrors: {},
       formError:
         "A seleção de destinos não está disponível neste ambiente. Seu texto foi preservado; tente novamente mais tarde.",
-      destinationSelectionRevision,
+      destinationSelectionResetToken,
     };
   }
   return {
     fieldErrors: {},
     formError: "Não foi possível confirmar o destino agora. Tente novamente em instantes.",
-    destinationSelectionRevision,
+    destinationSelectionResetToken,
   };
 }
 
 export async function createTripAction(
-  state: CreateTripActionState,
+  _state: CreateTripActionState,
   formData: FormData,
 ): Promise<CreateTripActionState> {
   const session = await getRouteBookSession();
@@ -101,7 +102,7 @@ export async function createTripAction(
       sessionToken: selectedSessionToken,
     });
     if (selectedResolution.status !== "resolved")
-      return selectedDestinationError(selectedResolution, state);
+      return selectedDestinationError(selectedResolution);
     selectedDestinationResolved = true;
     resolution = { status: "resolved" as const, value: selectedResolution.value };
   } else {
@@ -152,14 +153,14 @@ export async function createTripAction(
       },
     });
   } catch (error) {
-    const destinationSelectionRevision = selectedDestinationResolved
-      ? nextDestinationSelectionRevision(state)
+    const destinationSelectionResetToken = selectedDestinationResolved
+      ? createDestinationSelectionResetToken()
       : undefined;
 
     if (error instanceof TripValidationError) {
       return {
         fieldErrors: error.fieldErrors,
-        ...(destinationSelectionRevision !== undefined ? { destinationSelectionRevision } : {}),
+        ...(destinationSelectionResetToken ? { destinationSelectionResetToken } : {}),
       };
     }
 
@@ -167,7 +168,7 @@ export async function createTripAction(
     return {
       fieldErrors: {},
       formError: "Não foi possível salvar a viagem agora. Revise a conexão e tente novamente.",
-      ...(destinationSelectionRevision !== undefined ? { destinationSelectionRevision } : {}),
+      ...(destinationSelectionResetToken ? { destinationSelectionResetToken } : {}),
     };
   }
 

@@ -55,6 +55,7 @@ Fechar a entrada do RouteBook Anywhere: ajudar o usuário a escolher um Destinat
 - resultado ambíguo não vira identidade inventada;
 - falha de Provider não cria Trip parcial;
 - editar o texto depois da seleção invalida a identidade selecionada;
+- sessão de autocomplete encerrada/tentada não é reutilizada após uma falha posterior à resolução;
 - API keys e secrets permanecem server-side;
 - rota de sugestões exige sessão RouteBook antes de consumir quota externa;
 - Nominatim público não recebe autocomplete;
@@ -76,6 +77,7 @@ Somente os caminhos listados no RB-INC-180.
 - máximo de 5 sugestões exibidas;
 - requests obsoletos são cancelados/ignorados;
 - sessão de autocomplete possui token opaco próprio;
+- se uma tentativa encerra/tenta encerrar a sessão via resolução e a Trip não é persistida, a UI preserva o texto, limpa a referência e gera token novo antes da reconfirmação;
 - endpoint valida autenticação antes de consultar o Provider;
 - respostas da rota permanecem `private, no-store` e `noindex`;
 - API key nunca é serializada para o browser;
@@ -103,7 +105,8 @@ Somente os caminhos listados no RB-INC-180.
 - clique/touch em sugestão;
 - contexto geográfico suficiente para homônimos;
 - attribution visível quando exigida;
-- texto do usuário não desaparece em falha de rede;
+- texto do usuário não desaparece em falha de rede ou falha posterior à resolução;
+- identidade/token consumidos são renovados sem apagar o texto visível;
 - campos técnicos permanecem invisíveis.
 
 ## 8. Testes mínimos
@@ -116,8 +119,10 @@ Somente os caminhos listados no RB-INC-180.
 - componente aplica debounce e ignora resposta obsoleta;
 - componente permite seleção por teclado e mouse;
 - editar após seleção limpa referência externa;
+- falha após sessão consumida preserva texto, limpa identidade e troca token;
 - action revalida referência externa e cria Trip válida;
 - action rejeita referência adulterada/mismatch sem Trip parcial;
+- action incrementa revision de seleção quando a resolução/persistência falha após uso da seleção;
 - Pipa mantém regressão;
 - E2E cria destino não-Pipa pela nova experiência;
 - CI completo desktop/mobile.

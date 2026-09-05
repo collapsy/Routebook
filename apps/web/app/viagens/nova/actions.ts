@@ -22,6 +22,10 @@ function resolverUnavailableMessage(
   return "A busca de destinos está com uma configuração inválida. Selecione uma sugestão da lista ou tente novamente mais tarde.";
 }
 
+function nextDestinationSelectionRevision(state: CreateTripActionState): number {
+  return (state.destinationSelectionRevision ?? 0) + 1;
+}
+
 function selectedDestinationError(
   result:
     | Readonly<{ status: "not-found" }>
@@ -29,12 +33,15 @@ function selectedDestinationError(
         status: "unavailable";
         reason: "blocked" | "misconfigured" | "provider-error" | "invalid-response";
       }>,
+  state: CreateTripActionState,
 ): CreateTripActionState {
+  const destinationSelectionRevision = nextDestinationSelectionRevision(state);
   if (result.status === "not-found") {
     return {
       fieldErrors: {
         destination: "Não conseguimos confirmar esse destino. Selecione novamente uma sugestão.",
       },
+      destinationSelectionRevision,
     };
   }
   if (result.reason === "blocked" || result.reason === "misconfigured") {
@@ -42,16 +49,18 @@ function selectedDestinationError(
       fieldErrors: {},
       formError:
         "A seleção de destinos não está disponível neste ambiente. Seu texto foi preservado; tente novamente mais tarde.",
+      destinationSelectionRevision,
     };
   }
   return {
     fieldErrors: {},
     formError: "Não foi possível confirmar o destino agora. Tente novamente em instantes.",
+    destinationSelectionRevision,
   };
 }
 
 export async function createTripAction(
-  _state: CreateTripActionState,
+  state: CreateTripActionState,
   formData: FormData,
 ): Promise<CreateTripActionState> {
   const session = await getRouteBookSession();
@@ -67,6 +76,7 @@ export async function createTripAction(
   const selectedLabel = String(formData.get("destinationSelectedLabel") ?? "").trim();
   const selectedSessionToken = String(formData.get("destinationSessionToken") ?? "").trim();
   const hasSelectionData = Boolean(selectedProvider || selectedReference || selectedLabel);
+  let selectedDestinationResolved = false;
 
   let resolution;
   if (hasSelectionData) {
@@ -91,7 +101,8 @@ export async function createTripAction(
       sessionToken: selectedSessionToken,
     });
     if (selectedResolution.status !== "resolved")
-      return selectedDestinationError(selectedResolution);
+      return selectedDestinationError(selectedResolution, state);
+    selectedDestinationResolved = true;
     resolution = { status: "resolved" as const, value: selectedResolution.value };
   } else {
     const configuredResolver = resolveConfiguredDestinationResolver();
@@ -141,12 +152,22 @@ export async function createTripAction(
       },
     });
   } catch (error) {
-    if (error instanceof TripValidationError) return { fieldErrors: error.fieldErrors };
+    const destinationSelectionRevision = selectedDestinationResolved
+      ? nextDestinationSelectionRevision(state)
+      : undefined;
+
+    if (error instanceof TripValidationError) {
+      return {
+        fieldErrors: error.fieldErrors,
+        ...(destinationSelectionRevision !== undefined ? { destinationSelectionRevision } : {}),
+      };
+    }
 
     console.error("Falha ao criar viagem autenticada", error);
     return {
       fieldErrors: {},
       formError: "Não foi possível salvar a viagem agora. Revise a conexão e tente novamente.",
+      ...(destinationSelectionRevision !== undefined ? { destinationSelectionRevision } : {}),
     };
   }
 

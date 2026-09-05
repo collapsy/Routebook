@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { suggestConfiguredDestinations } from "../../../lib/destination-suggestions";
+import { getRouteBookSession } from "@/lib/auth-session";
+import { suggestConfiguredDestinations } from "@/lib/destination-suggestions";
 
 const NO_STORE_HEADERS = {
   "Cache-Control": "private, no-store",
@@ -12,6 +13,14 @@ function isValidSessionToken(value: string): boolean {
 }
 
 export async function GET(request: Request) {
+  const session = await getRouteBookSession(request.headers);
+  if (!session) {
+    return NextResponse.json(
+      { error: "Autenticação necessária para buscar destinos." },
+      { status: 401, headers: NO_STORE_HEADERS },
+    );
+  }
+
   const url = new URL(request.url);
   const query = url.searchParams.get("q")?.trim() ?? "";
   const sessionToken = url.searchParams.get("sessionToken")?.trim() ?? "";

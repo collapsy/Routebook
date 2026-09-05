@@ -22,6 +22,15 @@ async function debounce() {
   });
 }
 
+const saoPauloSuggestion = {
+  reference: "fixture:sao-paulo-sp-br",
+  label: "São Paulo, SP, Brasil",
+  primaryText: "São Paulo",
+  secondaryText: "SP, Brasil",
+  provider: "fixture" as const,
+  attribution: "RouteBook test fixture" as const,
+};
+
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
@@ -64,21 +73,7 @@ describe("DestinationCombobox", () => {
   it("permite selecionar com teclado e invalida a referência ao editar", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(() =>
-        jsonResponse({
-          enabled: true,
-          suggestions: [
-            {
-              reference: "fixture:sao-paulo-sp-br",
-              label: "São Paulo, SP, Brasil",
-              primaryText: "São Paulo",
-              secondaryText: "SP, Brasil",
-              provider: "fixture",
-              attribution: "RouteBook test fixture",
-            },
-          ],
-        }),
-      ),
+      vi.fn(() => jsonResponse({ enabled: true, suggestions: [saoPauloSuggestion] })),
     );
 
     const { container } = render(<DestinationCombobox />);
@@ -103,6 +98,41 @@ describe("DestinationCombobox", () => {
       container.querySelector<HTMLInputElement>('input[name="destinationReference"]'),
     ).toHaveValue("");
     expect(screen.queryByText(/Destino selecionado/)).not.toBeInTheDocument();
+  });
+
+  it("preserva o texto, limpa a identidade e troca o token após sessão consumida", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => jsonResponse({ enabled: true, suggestions: [saoPauloSuggestion] })),
+    );
+
+    const { container, rerender } = render(<DestinationCombobox resetSelectionRevision={0} />);
+    const input = container.querySelector<HTMLInputElement>("#destination");
+    const tokenInput = container.querySelector<HTMLInputElement>(
+      'input[name="destinationSessionToken"]',
+    );
+    if (!input || !tokenInput) throw new Error("Destination controls not rendered.");
+
+    fireEvent.change(input, { target: { value: "sao paulo" } });
+    await debounce();
+    await screen.findByRole("option", { name: /São Paulo/ });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    const consumedToken = tokenInput.value;
+    expect(consumedToken).not.toBe("");
+    expect(
+      container.querySelector<HTMLInputElement>('input[name="destinationReference"]'),
+    ).toHaveValue("fixture:sao-paulo-sp-br");
+
+    rerender(<DestinationCombobox resetSelectionRevision={1} />);
+
+    await waitFor(() => {
+      expect(input).toHaveValue("São Paulo, SP, Brasil");
+      expect(
+        container.querySelector<HTMLInputElement>('input[name="destinationReference"]'),
+      ).toHaveValue("");
+      expect(tokenInput.value).not.toBe(consumedToken);
+    });
   });
 
   it("preserva o texto e informa degradação quando sugestões estão desabilitadas", async () => {

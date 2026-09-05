@@ -39,11 +39,11 @@ function isSuggestion(value: unknown): value is DestinationSuggestion {
 export function DestinationCombobox({
   invalid = false,
   describedBy,
-  resetSelectionRevision = 0,
+  resetSelectionToken,
 }: Readonly<{
   invalid?: boolean;
   describedBy?: string | undefined;
-  resetSelectionRevision?: number | undefined;
+  resetSelectionToken?: string | undefined;
 }>) {
   const [value, setValue] = useState("");
   const [selected, setSelected] = useState<DestinationSuggestion | undefined>();
@@ -53,13 +53,13 @@ export function DestinationCombobox({
   const [attribution, setAttribution] = useState<string | undefined>();
   const [sessionToken, setSessionToken] = useState(createSessionToken);
   const requestSequence = useRef(0);
-  const lastResetSelectionRevision = useRef(resetSelectionRevision);
+  const lastResetSelectionToken = useRef(resetSelectionToken);
   const listboxId = "destination-suggestions-listbox";
 
   useEffect(() => {
-    if (resetSelectionRevision <= lastResetSelectionRevision.current) return;
+    if (!resetSelectionToken || resetSelectionToken === lastResetSelectionToken.current) return;
 
-    lastResetSelectionRevision.current = resetSelectionRevision;
+    lastResetSelectionToken.current = resetSelectionToken;
     requestSequence.current += 1;
     setSelected(undefined);
     setSuggestions([]);
@@ -67,7 +67,7 @@ export function DestinationCombobox({
     setAttribution(undefined);
     setSessionToken(createSessionToken());
     setState("idle");
-  }, [resetSelectionRevision]);
+  }, [resetSelectionToken]);
 
   useEffect(() => {
     const query = value.trim();

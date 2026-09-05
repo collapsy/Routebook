@@ -122,20 +122,22 @@ describe("createTripAction destination selection", () => {
     expect(databaseMocks.createTrip).not.toHaveBeenCalled();
   });
 
-  it("invalida a sessão quando a referência selecionada não pode ser confirmada", async () => {
+  it("emite um token de reset novo quando a referência selecionada não pode ser confirmada", async () => {
     suggestionMocks.resolveSelected.mockResolvedValue({ status: "not-found" });
 
-    const result = await createTripAction(
-      { fieldErrors: {}, destinationSelectionRevision: 4 },
-      tripForm(),
-    );
+    const first = await createTripAction({ fieldErrors: {} }, tripForm());
+    const second = await createTripAction(first, tripForm());
 
-    expect(result).toEqual({
-      fieldErrors: {
-        destination: "Não conseguimos confirmar esse destino. Selecione novamente uma sugestão.",
-      },
-      destinationSelectionRevision: 5,
+    expect(first.fieldErrors).toEqual({
+      destination: "Não conseguimos confirmar esse destino. Selecione novamente uma sugestão.",
     });
+    expect(first.destinationSelectionResetToken).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
+    expect(second.destinationSelectionResetToken).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
+    expect(second.destinationSelectionResetToken).not.toBe(first.destinationSelectionResetToken);
     expect(databaseMocks.createTrip).not.toHaveBeenCalled();
   });
 
@@ -146,11 +148,13 @@ describe("createTripAction destination selection", () => {
     const result = await createTripAction({ fieldErrors: {} }, tripForm());
 
     expect(suggestionMocks.resolveSelected).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({
-      fieldErrors: {},
-      formError: "Não foi possível salvar a viagem agora. Revise a conexão e tente novamente.",
-      destinationSelectionRevision: 1,
-    });
+    expect(result.fieldErrors).toEqual({});
+    expect(result.formError).toBe(
+      "Não foi possível salvar a viagem agora. Revise a conexão e tente novamente.",
+    );
+    expect(result.destinationSelectionResetToken).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
     expect(consoleError).toHaveBeenCalledTimes(1);
   });
 

@@ -59,6 +59,7 @@ O adapter Google pode ser habilitado por configuração explícita e reutiliza `
 
 - usa Places API (New) Autocomplete para sugestões;
 - usa token de sessão por interação e encerra a sessão na resolução selecionada via Place Details;
+- se a sessão já foi encerrada/tentada e a Trip não é persistida, a seleção é invalidada e o browser gera novo token antes de uma nova tentativa;
 - limita resultados e campos solicitados;
 - não expõe API key;
 - não persiste resposta transitória de autocomplete;
@@ -78,6 +79,8 @@ Quando existe seleção externa, a action de criação envia a identidade seleci
 
 Se o usuário alterar o texto depois de selecionar, a UI invalida a identidade anterior. Uma referência selecionada nunca pode resolver um texto diferente silenciosamente.
 
+Se a revalidação consumir a sessão e uma etapa posterior falhar, o texto digitado permanece visível, mas a referência externa é limpa e uma nova sessão é iniciada. O usuário precisa reconfirmar a sugestão, evitando reutilizar sessão encerrada ou identidade antiga.
+
 ### 3.5 Degradação
 
 - menos de 3 caracteres: nenhuma chamada externa;
@@ -85,6 +88,7 @@ Se o usuário alterar o texto depois de selecionar, a UI invalida a identidade a
 - Provider de sugestões desabilitado: campo continua editável e informa que as sugestões estão indisponíveis;
 - erro/timeout: sugestões degradam sem apagar o texto do usuário;
 - submit sem seleção pode usar o resolver textual legado quando este estiver governadamente habilitado;
+- falha posterior à resolução preserva texto, mas invalida referência/token consumidos;
 - nenhum caso inventa coordenadas nem cria Trip parcial.
 
 ## 4. UX
@@ -98,7 +102,8 @@ O campo “Para onde você vai?” passa a se comportar como combobox:
 5. anuncia estados de loading, vazio e erro para tecnologia assistiva;
 6. mostra attribution do Provider quando aplicável;
 7. ao selecionar, mantém o texto legível e a identidade externa separada;
-8. ao editar novamente, limpa a seleção anterior.
+8. ao editar novamente, limpa a seleção anterior;
+9. após uma tentativa que consumiu a sessão sem criar a Trip, preserva o texto, limpa a identidade e abre uma nova sessão para reconfirmação.
 
 O usuário não vê Place ID, coordenadas, timezone, API key ou termos técnicos internos.
 
@@ -112,6 +117,7 @@ apps/web/app/api/destination-suggestions/route.test.ts
 apps/web/app/viagens/nova/actions.ts
 apps/web/app/viagens/nova/actions.test.ts
 apps/web/app/viagens/nova/page.tsx
+apps/web/app/viagens/nova/state.ts
 apps/web/app/trip-creation.css
 apps/web/components/destination-combobox.tsx
 apps/web/components/destination-combobox.test.tsx
@@ -152,6 +158,7 @@ Mudança fora desses caminhos exige atualização deste incremento antes do comm
 - [ ] coordenadas/timezone nunca são aceitos do cliente como fonte de verdade;
 - [ ] seleção é revalidada server-side antes da persistência;
 - [ ] editar o texto invalida a seleção anterior;
+- [ ] sessão consumida não é reutilizada após falha posterior à resolução;
 - [ ] ausência/timeout/erro do Provider degrada sem perder o texto digitado;
 - [ ] submit não cria Trip parcial quando não consegue resolver Destination;
 - [ ] Pipa e destino não-Pipa usam o mesmo contrato;
@@ -168,6 +175,7 @@ Mudança fora desses caminhos exige atualização deste incremento antes do comm
 | --- | --- |
 | custo por tecla | debounce, mínimo de caracteres, limite de resultados, token de sessão e kill switch |
 | abuso anônimo de quota | autenticação RouteBook obrigatória antes de qualquer chamada ao suggestion Provider |
+| reutilização de sessão Google encerrada | revision de seleção limpa referência e gera token novo quando a criação falha após resolução |
 | seleção errada | contexto geográfico no label + Place Details server-side antes da criação |
 | stale request sobrescrever lista nova | AbortController e identidade da consulta atual |
 | Place ID adulterado | revalidação server-side e comparação com texto selecionado |

@@ -175,7 +175,7 @@ Mudança fora desses caminhos exige atualização deste incremento antes do comm
 | --- | --- |
 | custo por tecla | debounce, mínimo de caracteres, limite de resultados, token de sessão e kill switch |
 | abuso anônimo de quota | autenticação RouteBook obrigatória antes de qualquer chamada ao suggestion Provider |
-| reutilização de sessão Google encerrada | revision de seleção limpa referência e gera token novo quando a criação falha após resolução |
+| reutilização de sessão Google encerrada | token único de reset limpa referência e gera nova sessão quando a criação falha após resolução |
 | seleção errada | contexto geográfico no label + Place Details server-side antes da criação |
 | stale request sobrescrever lista nova | AbortController e identidade da consulta atual |
 | Place ID adulterado | revalidação server-side e comparação com texto selecionado |

@@ -36,7 +36,7 @@ export function TripForm({
         <DestinationCombobox
           describedBy="destination-suggestions-status destination-error"
           invalid={Boolean(state.fieldErrors.destination)}
-          resetSelectionRevision={state.destinationSelectionRevision}
+          resetSelectionToken={state.destinationSelectionResetToken}
         />
         <div id="destination-error">
           <FieldError message={state.fieldErrors.destination} />

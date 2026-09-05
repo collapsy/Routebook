@@ -7,7 +7,7 @@ owner: Trip Management
 status: Draft
 version: "0.1.0"
 created: "2026-09-04"
-last_updated: "2026-09-04"
+last_updated: "2026-09-05"
 authors: [RouteBook Team]
 tags: [implementation, trip, destination, autocomplete, routebook-anywhere, google-places]
 related_documents: [RB-CORE-0004, RB-DOM-001, RB-DOM-002, RB-ARC-001, RB-ADR-012, RB-DATA-002, RB-DATA-003, RB-OBS-001, RB-INC-174, RB-INC-179, RB-CTX-180]
@@ -51,6 +51,8 @@ A resposta pública contém apenas:
 
 Coordenadas, timezone, tipos canônicos e Provenance não são confiados ao navegador.
 
+A rota de sugestões é uma capacidade do workspace autenticado. Ela valida a sessão RouteBook antes de consultar qualquer Provider, impedindo que tráfego anônimo consuma quota externa. Todas as respostas permanecem `private, no-store` e `noindex`.
+
 ### 3.2 Google Places Autocomplete como adapter experimental
 
 O adapter Google pode ser habilitado por configuração explícita e reutiliza `GOOGLE_PLACES_API_KEY` somente server-side.
@@ -79,6 +81,7 @@ Se o usuário alterar o texto depois de selecionar, a UI invalida a identidade a
 ### 3.5 Degradação
 
 - menos de 3 caracteres: nenhuma chamada externa;
+- usuário sem sessão: rota rejeita a consulta antes do Provider;
 - Provider de sugestões desabilitado: campo continua editável e informa que as sugestões estão indisponíveis;
 - erro/timeout: sugestões degradam sem apagar o texto do usuário;
 - submit sem seleção pode usar o resolver textual legado quando este estiver governadamente habilitado;
@@ -105,6 +108,7 @@ O usuário não vê Place ID, coordenadas, timezone, API key ou termos técnicos
 .env.example
 turbo.json
 apps/web/app/api/destination-suggestions/route.ts
+apps/web/app/api/destination-suggestions/route.test.ts
 apps/web/app/viagens/nova/actions.ts
 apps/web/app/viagens/nova/actions.test.ts
 apps/web/app/viagens/nova/page.tsx
@@ -143,6 +147,7 @@ Mudança fora desses caminhos exige atualização deste incremento antes do comm
 - [ ] combobox acessível oferece sugestões enquanto o usuário digita;
 - [ ] chamadas começam somente com entrada mínima e respeitam debounce/cancelamento;
 - [ ] no máximo cinco sugestões são exibidas;
+- [ ] rota de sugestões exige sessão autenticada antes de consumir Provider;
 - [ ] API key nunca chega ao browser;
 - [ ] coordenadas/timezone nunca são aceitos do cliente como fonte de verdade;
 - [ ] seleção é revalidada server-side antes da persistência;
@@ -162,6 +167,7 @@ Mudança fora desses caminhos exige atualização deste incremento antes do comm
 | Risco | Mitigação |
 | --- | --- |
 | custo por tecla | debounce, mínimo de caracteres, limite de resultados, token de sessão e kill switch |
+| abuso anônimo de quota | autenticação RouteBook obrigatória antes de qualquer chamada ao suggestion Provider |
 | seleção errada | contexto geográfico no label + Place Details server-side antes da criação |
 | stale request sobrescrever lista nova | AbortController e identidade da consulta atual |
 | Place ID adulterado | revalidação server-side e comparação com texto selecionado |

@@ -7,7 +7,7 @@ owner: Trip Management
 status: Draft
 version: "0.1.0"
 created: "2026-09-04"
-last_updated: "2026-09-04"
+last_updated: "2026-09-05"
 authors: [RouteBook Team]
 tags: [implementation, context-pack, trip, destination, autocomplete, routebook-anywhere]
 related_documents: [RB-INC-180, RB-CORE-0004, RB-DOM-001, RB-DOM-002, RB-ARC-001, RB-ADR-012, RB-DATA-002, RB-DATA-003, RB-OBS-001, RB-INC-174, RB-INC-179]
@@ -56,6 +56,7 @@ Fechar a entrada do RouteBook Anywhere: ajudar o usuário a escolher um Destinat
 - falha de Provider não cria Trip parcial;
 - editar o texto depois da seleção invalida a identidade selecionada;
 - API keys e secrets permanecem server-side;
+- rota de sugestões exige sessão RouteBook antes de consumir quota externa;
 - Nominatim público não recebe autocomplete;
 - RB-ADR-012 continua `Proposed` na dimensão decisória;
 - Production, billing e merge permanecem gates humanos.
@@ -75,6 +76,8 @@ Somente os caminhos listados no RB-INC-180.
 - máximo de 5 sugestões exibidas;
 - requests obsoletos são cancelados/ignorados;
 - sessão de autocomplete possui token opaco próprio;
+- endpoint valida autenticação antes de consultar o Provider;
+- respostas da rota permanecem `private, no-store` e `noindex`;
 - API key nunca é serializada para o browser;
 - payload transitório não é persistido.
 
@@ -107,7 +110,8 @@ Somente os caminhos listados no RB-INC-180.
 
 - suggestion adapter normaliza Google válido e limita resultados;
 - provider ausente/secret ausente/falha/timeout degradam corretamente;
-- rota pública não vaza API key;
+- rota rejeita usuário anônimo antes de chamar Provider;
+- rota autenticada não vaza API key;
 - requests com menos de 3 caracteres não chamam Provider;
 - componente aplica debounce e ignora resposta obsoleta;
 - componente permite seleção por teclado e mouse;
@@ -134,6 +138,7 @@ O CI do GitHub e o Vercel Preview do mesmo SHA são a evidência canônica.
 
 ## 10. Gates humanos remanescentes
 
+- ativar/configurar Google Places Autocomplete/Details em Preview para prova live do Provider;
 - ativar/configurar Google Places Autocomplete/Details em Production;
 - qualquer billing/quota comercial nova;
 - aceitar ou alterar RB-ADR-012;

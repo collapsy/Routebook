@@ -122,17 +122,36 @@ describe("createTripAction destination selection", () => {
     expect(databaseMocks.createTrip).not.toHaveBeenCalled();
   });
 
-  it("não cria Trip quando a referência selecionada não pode ser confirmada", async () => {
+  it("invalida a sessão quando a referência selecionada não pode ser confirmada", async () => {
     suggestionMocks.resolveSelected.mockResolvedValue({ status: "not-found" });
 
-    const result = await createTripAction({ fieldErrors: {} }, tripForm());
+    const result = await createTripAction(
+      { fieldErrors: {}, destinationSelectionRevision: 4 },
+      tripForm(),
+    );
 
     expect(result).toEqual({
       fieldErrors: {
         destination: "Não conseguimos confirmar esse destino. Selecione novamente uma sugestão.",
       },
+      destinationSelectionRevision: 5,
     });
     expect(databaseMocks.createTrip).not.toHaveBeenCalled();
+  });
+
+  it("invalida a sessão já concluída quando a persistência da Trip falha", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    databaseMocks.createTrip.mockRejectedValue(new Error("database unavailable"));
+
+    const result = await createTripAction({ fieldErrors: {} }, tripForm());
+
+    expect(suggestionMocks.resolveSelected).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      fieldErrors: {},
+      formError: "Não foi possível salvar a viagem agora. Revise a conexão e tente novamente.",
+      destinationSelectionRevision: 1,
+    });
+    expect(consoleError).toHaveBeenCalledTimes(1);
   });
 
   it("mantém fallback textual legado quando nenhuma sugestão foi escolhida", async () => {

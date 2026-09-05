@@ -122,7 +122,7 @@ Somente os caminhos listados no RB-INC-180.
 - falha após sessão consumida preserva texto, limpa identidade e troca token;
 - action revalida referência externa e cria Trip válida;
 - action rejeita referência adulterada/mismatch sem Trip parcial;
-- action incrementa revision de seleção quando a resolução/persistência falha após uso da seleção;
+- action emite token de reset único quando resolução/persistência falha após uso da seleção;
 - Pipa mantém regressão;
 - E2E cria destino não-Pipa pela nova experiência;
 - CI completo desktop/mobile.

@@ -106,7 +106,7 @@ describe("DestinationCombobox", () => {
       vi.fn(() => jsonResponse({ enabled: true, suggestions: [saoPauloSuggestion] })),
     );
 
-    const { container, rerender } = render(<DestinationCombobox resetSelectionRevision={0} />);
+    const { container, rerender } = render(<DestinationCombobox />);
     const input = container.querySelector<HTMLInputElement>("#destination");
     const tokenInput = container.querySelector<HTMLInputElement>(
       'input[name="destinationSessionToken"]',
@@ -124,7 +124,7 @@ describe("DestinationCombobox", () => {
       container.querySelector<HTMLInputElement>('input[name="destinationReference"]'),
     ).toHaveValue("fixture:sao-paulo-sp-br");
 
-    rerender(<DestinationCombobox resetSelectionRevision={1} />);
+    rerender(<DestinationCombobox resetSelectionToken="server-reset-token-1" />);
 
     await waitFor(() => {
       expect(input).toHaveValue("São Paulo, SP, Brasil");
@@ -132,6 +132,39 @@ describe("DestinationCombobox", () => {
         container.querySelector<HTMLInputElement>('input[name="destinationReference"]'),
       ).toHaveValue("");
       expect(tokenInput.value).not.toBe(consumedToken);
+    });
+  });
+
+  it("aceita resets sucessivos mesmo quando o sinal anterior deixou de ser renderizado", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => jsonResponse({ enabled: true, suggestions: [saoPauloSuggestion] })),
+    );
+
+    const { container, rerender } = render(
+      <DestinationCombobox resetSelectionToken="server-reset-token-1" />,
+    );
+    const input = container.querySelector<HTMLInputElement>("#destination");
+    const tokenInput = container.querySelector<HTMLInputElement>(
+      'input[name="destinationSessionToken"]',
+    );
+    if (!input || !tokenInput) throw new Error("Destination controls not rendered.");
+
+    fireEvent.change(input, { target: { value: "sao paulo" } });
+    await debounce();
+    await screen.findByRole("option", { name: /São Paulo/ });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    const firstToken = tokenInput.value;
+    rerender(<DestinationCombobox />);
+    rerender(<DestinationCombobox resetSelectionToken="server-reset-token-2" />);
+
+    await waitFor(() => {
+      expect(input).toHaveValue("São Paulo, SP, Brasil");
+      expect(
+        container.querySelector<HTMLInputElement>('input[name="destinationReference"]'),
+      ).toHaveValue("");
+      expect(tokenInput.value).not.toBe(firstToken);
     });
   });
 

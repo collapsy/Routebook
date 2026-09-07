@@ -99,7 +99,7 @@ Isso é compatível com a invariante de Recommendation persistida, mas insuficie
 - `buildPlaceDiscoveryFeed`;
 - `loadRecommendationExperience` para Recommendations canônicas;
 - `buildFocusedRecommendationPresentation` para a coleção canônica;
-- `formatGeodesicDistance` para linguagem de distância.
+- linguagem de distância geodésica já usada pela experiência de Recommendations.
 
 ## 7. Projeção autorizada
 
@@ -207,6 +207,7 @@ apps/web/lib/recommendation-experience.test.ts
 apps/web/lib/recommendation-discovery-suggestions.ts
 apps/web/lib/recommendation-discovery-suggestions.test.ts
 apps/web/e2e/recommendations-experience.spec.ts
+apps/web/e2e/recommendations-anywhere.spec.ts
 docs/implementation/increments/rb-inc-184-contextual-external-suggestions.md
 docs/implementation/context-packs/rb-inc-184-contextual-external-suggestions.md
 docs/implementation/traceability-matrix.md

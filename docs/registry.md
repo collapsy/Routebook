@@ -422,6 +422,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-180 | Autocomplete de Destination e criação de Viagem sem dependência regional | Implementation | Draft | 0.1.0 | [rb-inc-180-destination-autocomplete.md](./implementation/increments/rb-inc-180-destination-autocomplete.md) |
 | RB-CTX-180 | Context Pack do RB-INC-180 — Autocomplete de Destination | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-180-destination-autocomplete.md](./implementation/context-packs/rb-inc-180-destination-autocomplete.md) |
 
+| RB-INC-181 | Geocodificação automática da Hospedagem ao salvar | Implementation | Draft | 0.1.0 | [rb-inc-181-accommodation-auto-geocoding.md](./implementation/increments/rb-inc-181-accommodation-auto-geocoding.md) |
+| RB-CTX-181 | Context Pack do RB-INC-181 — geocodificação automática da Hospedagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-181-accommodation-auto-geocoding.md](./implementation/context-packs/rb-inc-181-accommodation-auto-geocoding.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

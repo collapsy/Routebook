@@ -114,17 +114,19 @@ function resolveOverviewPlaceSearchPort(
   return new OverturePmtilesPlaceSearchAdapter();
 }
 
-export function buildTripOverviewDiscoveryMap(input: Readonly<{
-  trip: Trip;
-  publishedPlaces: readonly Place[];
-  externalReconciliations: readonly ExternalPlaceReconciliation[];
-  reference: Readonly<{ latitude: number; longitude: number }>;
-  savedPlaceIds?: ReadonlySet<string>;
-  discoveryStatus: Exclude<TripOverviewDiscoveryStatus, "unavailable">;
-  regionSource?: "accommodation" | "destination";
-  distanceReferenceLabel?: string;
-  externalLimit?: number;
-}>): TripOverviewDiscoveryMap {
+export function buildTripOverviewDiscoveryMap(
+  input: Readonly<{
+    trip: Trip;
+    publishedPlaces: readonly Place[];
+    externalReconciliations: readonly ExternalPlaceReconciliation[];
+    reference: Readonly<{ latitude: number; longitude: number }>;
+    savedPlaceIds?: ReadonlySet<string>;
+    discoveryStatus: Exclude<TripOverviewDiscoveryStatus, "unavailable">;
+    regionSource?: "accommodation" | "destination";
+    distanceReferenceLabel?: string;
+    externalLimit?: number;
+  }>,
+): TripOverviewDiscoveryMap {
   const savedPlaceIds = input.savedPlaceIds ?? new Set<string>();
   const externalLimit = input.externalLimit ?? TRIP_OVERVIEW_EXTERNAL_DISPLAY_LIMIT;
   const allItems = buildPlaceDiscoveryFeed({

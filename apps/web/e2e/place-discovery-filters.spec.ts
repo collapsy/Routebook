@@ -154,9 +154,7 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(mapLocations).toContainText("Praia do Amor");
   await expect(page.getByText(/em linha reta da hospedagem/).first()).toBeVisible();
   await expect(page.getByLabel("Categoria")).toHaveValue("beach");
-  await expect(
-    page.getByLabel("Categoria").locator('option[value="gastronomy"]'),
-  ).toHaveCount(1);
+  await expect(page.getByLabel("Categoria").locator('option[value="gastronomy"]')).toHaveCount(1);
   await expect(page.getByLabel("Categoria").locator('option[value="nature"]')).toHaveCount(1);
   await expect(page.getByLabel("Categoria").locator('option[value="nightlife"]')).toHaveCount(1);
 
@@ -185,7 +183,9 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   ).toBeVisible();
 });
 
-test("deriva categorias da cobertura de Gramado sem oferecer praia inexistente", async ({ page }) => {
+test("deriva categorias da cobertura de Gramado sem oferecer praia inexistente", async ({
+  page,
+}) => {
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Categorias Gramado ${test.info().project.name} ${Date.now()}`,
     destination: {
@@ -207,9 +207,9 @@ test("deriva categorias da cobertura de Gramado sem oferecer praia inexistente",
 
   const categoryFilter = page.getByLabel("Categoria");
   await expect(categoryFilter).toBeVisible();
-  const optionValues = await categoryFilter.locator("option").evaluateAll((options) =>
-    options.map((option) => (option as HTMLOptionElement).value),
-  );
+  const optionValues = await categoryFilter
+    .locator("option")
+    .evaluateAll((options) => options.map((option) => (option as HTMLOptionElement).value));
 
   expect(optionValues[0]).toBe("");
   expect(optionValues).not.toContain("beach");

@@ -14,7 +14,7 @@ import {
   prepareAccommodationUpdate,
   type AccommodationLocationStatus,
 } from "@/lib/accommodation-geocoding";
-import { NominatimGeocoder } from "@/lib/geocoding";
+import { resolveAccommodationGeocoder } from "@/lib/geocoding";
 
 import type { AccommodationActionState } from "./state";
 
@@ -52,7 +52,7 @@ export async function updateAccommodationAction(
       ...(accommodationAddress !== undefined ? { accommodationAddress } : {}),
       ...(accommodationLatitude !== undefined ? { manualLatitude: accommodationLatitude } : {}),
       ...(accommodationLongitude !== undefined ? { manualLongitude: accommodationLongitude } : {}),
-      geocoder: new NominatimGeocoder(),
+      geocoder: resolveAccommodationGeocoder(),
     });
     locationStatus = prepared.locationStatus;
 

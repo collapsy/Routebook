@@ -31,12 +31,15 @@ type LeafletMap = {
 };
 
 type LeafletDivIcon = object;
+
 type LeafletLayer = {
   addTo(map: LeafletMap): LeafletLayer;
 };
+
 type LeafletControl = {
   addTo(map: LeafletMap): LeafletControl;
 };
+
 type LeafletNamespace = {
   control: {
     zoom(options: {
@@ -359,25 +362,37 @@ export function TripMap({
           ref={mapElementRef}
           role="region"
         />
-        {mapState === "loading" ? <p className={styles.mapStatus}>Carregando mapa…</p> : null}
         {mapState === "error" ? (
-          <p className={styles.mapStatus} role="status">
-            Não foi possível carregar o mapa agora. Os lugares continuam disponíveis na lista.
+          <p className={styles.mapFailure} role="status">
+            A camada cartográfica está indisponível. Use a lista de locais abaixo para continuar.
           </p>
         ) : null}
       </div>
 
-      <ul className={styles.accessiblePoints}>
+      <noscript>
+        <p className={styles.notice}>Ative o JavaScript para carregar a camada cartográfica.</p>
+      </noscript>
+
+      <ul aria-label="Locais exibidos no mapa" className={styles.locationList}>
         {validPoints.map((point) => (
-          <li key={point.id}>
+          <li key={`list-${point.kind}-${point.id}`}>
+            <div>
+              <span>{describePoint(point)}</span>
+              <strong>{point.label}</strong>
+            </div>
             {point.href ? (
-              <Link href={point.href}>{describePoint(point)}</Link>
-            ) : (
-              describePoint(point)
-            )}
+              <Link aria-label={`${describePoint(point)}. Abrir detalhes.`} href={point.href}>
+                Ver detalhes
+              </Link>
+            ) : null}
           </li>
         ))}
       </ul>
+
+      <p className={styles.attribution}>
+        Camada cartográfica por OpenStreetMap. Os marcadores representam coordenadas cadastradas e
+        não indicam rota, trânsito ou tempo de deslocamento.
+      </p>
     </section>
   );
 }

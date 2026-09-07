@@ -93,7 +93,9 @@ async function openRecommendations(
       exact: true,
     }),
   ).toBeVisible();
-  await expect(page.getByText(/cada mudança exige uma ação explícita/i)).toBeVisible();
+  await expect(
+    page.getByText(/A leitura nunca salva um Lugar nem altera o Roteiro automaticamente/i),
+  ).toBeVisible();
 
   if (view === "all") {
     await expect(

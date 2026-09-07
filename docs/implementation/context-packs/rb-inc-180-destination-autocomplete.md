@@ -7,7 +7,7 @@ owner: Trip Management
 status: Draft
 version: "0.1.0"
 created: "2026-09-04"
-last_updated: "2026-09-05"
+last_updated: "2026-09-07"
 authors: [RouteBook Team]
 tags: [implementation, context-pack, trip, destination, autocomplete, routebook-anywhere]
 related_documents: [RB-INC-180, RB-CORE-0004, RB-DOM-001, RB-DOM-002, RB-ARC-001, RB-ADR-012, RB-DATA-002, RB-DATA-003, RB-OBS-001, RB-INC-174, RB-INC-179]
@@ -148,6 +148,10 @@ O CI do GitHub e o Vercel Preview do mesmo SHA são a evidência canônica.
 - qualquer billing/quota comercial nova;
 - aceitar ou alterar RB-ADR-012;
 - integrar na `main`.
+
+### 10.1 Autorização de Preview
+
+Em 2026-09-07, houve autorização humana explícita para habilitar e validar Google Places Autocomplete/Details **somente em Preview**, reutilizando a credencial server-side já governada e configurando `ROUTEBOOK_DESTINATION_SUGGESTION_PROVIDER=google` nesse ambiente. A autorização não inclui Production, novo billing/quota comercial, alteração do RB-ADR-012 ou merge na `main`.
 
 ## 11. Handoff
 

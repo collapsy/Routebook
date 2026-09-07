@@ -24,7 +24,8 @@ ai_context:
 
 - Issue: #430.
 - Branch: `codex/rb-inc-181-accommodation-auto-geocoding`.
-- Base de trabalho empilhada: RB-INC-180 em `0d4fa049e2074c925568efb8fc93d273372d1390`; após a integração da PR #429, esta branch deve ser reconciliada com `main`.
+- Base final: `main@a33d9dae75e961b4c1eecb48a26fa2c3e38ce6bf`, após integração do RB-INC-180 pela PR #429.
+- Reconciliação da branch com a base final: `e32d348cb197e48cbe6fc4a4bfc960347fa77c14`.
 - O incremento histórico associado à issue #45 introduziu `Accommodation.coordinate`, geocoding pontual e fallback manual, porém separou “salvar hospedagem”, “buscar localização” e “confirmar coordenadas”.
 - A validação humana do RouteBook Anywhere em Gramado em 2026-09-07 mostrou que o usuário pode salvar nome/endereço e continuar sem coordenadas, deixando mapa e distâncias sem âncora espacial.
 

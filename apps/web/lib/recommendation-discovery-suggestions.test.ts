@@ -181,9 +181,7 @@ describe("contextual external suggestions", () => {
     });
 
     expect(result.availableCount).toBe(1);
-    expect(result.suggestions.map((suggestion) => suggestion.name)).toEqual([
-      "Descoberta segura",
-    ]);
+    expect(result.suggestions.map((suggestion) => suggestion.name)).toEqual(["Descoberta segura"]);
   });
 
   it("degrada falha do Provider para coleção vazia sem erro fatal", async () => {

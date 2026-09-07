@@ -118,9 +118,12 @@ test("hospedagem é localizada ao salvar e habilita contexto espacial", async ({
 
   await expect(page).toHaveURL(/\/hospedagem\?saved=1&located=1$/);
   await expect(
-    page.getByText("Hospedagem salva e localização confirmada. Mapa e distâncias já podem usar esse ponto.", {
-      exact: true,
-    }),
+    page.getByText(
+      "Hospedagem salva e localização confirmada. Mapa e distâncias já podem usar esse ponto.",
+      {
+        exact: true,
+      },
+    ),
   ).toBeVisible();
 
   await page.goto(tripHref!);

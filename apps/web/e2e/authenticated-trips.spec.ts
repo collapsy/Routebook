@@ -133,7 +133,9 @@ test("hospedagem é localizada ao salvar e habilita contexto espacial", async ({
   ).toBeVisible();
   await expect(page.getByLabel("Resumo do mapa")).toContainText("4 pontos representados");
   await expect(page.getByLabel("Legenda do mapa")).toContainText("Descoberta externa");
-  await expect(page.getByText("Café próximo", { exact: true })).toBeVisible();
+  await expect(
+    page.getByLabel("Locais exibidos no mapa").getByText("Café próximo", { exact: true }),
+  ).toBeVisible();
 });
 
 test("cria Trip para São Paulo selecionando sugestão de Destination", async ({

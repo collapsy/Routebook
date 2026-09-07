@@ -62,7 +62,10 @@ function place(overrides: Partial<Place> = {}): Place {
   };
 }
 
-function candidate(index: number, overrides: Partial<ExternalPlaceCandidate> = {}): ExternalPlaceCandidate {
+function candidate(
+  index: number,
+  overrides: Partial<ExternalPlaceCandidate> = {},
+): ExternalPlaceCandidate {
   return {
     provider: "overture",
     externalId: `external-${index}`,
@@ -87,9 +90,9 @@ const bootstrapPolicy: PlaceBootstrapPolicy = {
 
 describe("trip overview discovery map", () => {
   it("usa a Hospedagem como Region e limita external-only a 20 no resumo", async () => {
-    const search = vi.fn().mockResolvedValue(
-      Array.from({ length: 25 }, (_, index) => candidate(index + 1)),
-    );
+    const search = vi
+      .fn()
+      .mockResolvedValue(Array.from({ length: 25 }, (_, index) => candidate(index + 1)));
     const listPublishedWithinRadius = vi.fn().mockResolvedValue([]);
     const listByPlaceIds = vi.fn().mockResolvedValue([]);
 
@@ -151,7 +154,10 @@ describe("trip overview discovery map", () => {
     expect(result.canonicalCount).toBe(1);
     expect(result.externalVisibleCount).toBe(0);
     expect(result.points.filter((point) => point.label === "Lago Negro")).toEqual([
-      expect.objectContaining({ kind: "saved-place", href: "/viagens/trip-gramado/lugares/lago-negro" }),
+      expect.objectContaining({
+        kind: "saved-place",
+        href: "/viagens/trip-gramado/lugares/lago-negro",
+      }),
     ]);
   });
 
@@ -191,9 +197,6 @@ describe("trip overview discovery map", () => {
     expect(result.discoveryStatus).toBe("failed");
     expect(result.canonicalCount).toBe(1);
     expect(result.externalVisibleCount).toBe(0);
-    expect(result.points.map((point) => point.kind)).toEqual([
-      "accommodation",
-      "published-place",
-    ]);
+    expect(result.points.map((point) => point.kind)).toEqual(["accommodation", "published-place"]);
   });
 });

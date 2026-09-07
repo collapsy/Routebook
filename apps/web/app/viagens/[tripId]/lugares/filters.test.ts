@@ -2,11 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Place } from "@routebook/place-catalog";
 
-import {
-  filterPlaces,
-  listAvailablePlaceCategories,
-  parseMaximumDistance,
-} from "./filters";
+import { filterPlaces, listAvailablePlaceCategories, parseMaximumDistance } from "./filters";
 
 const now = new Date("2026-08-11T00:00:00Z");
 const places: Place[] = [

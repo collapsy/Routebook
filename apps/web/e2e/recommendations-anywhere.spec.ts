@@ -43,7 +43,7 @@ test("destino zero-seed recebe sugestões externas sem criar estado canônico", 
 
   const externalList = page.getByRole("list", { name: "Sugestões externas de lugares" });
   await expect(externalList).toBeVisible();
-  await expect(externalList.getByRole("listitem")).toHaveCount(3);
+  await expect(externalList.getByRole("article")).toHaveCount(3);
   await expect(externalList.getByRole("article").first()).toHaveAccessibleName(
     "Parque descoberto próximo",
   );

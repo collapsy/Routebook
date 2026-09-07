@@ -10,8 +10,8 @@ created: "2026-09-07"
 last_updated: "2026-09-07"
 authors: [RouteBook Team]
 tags: [implementation, trip, accommodation, geocoding, map, routebook-anywhere]
-related_documents: [RB-CORE-0004, RB-DOM-001, RB-DOM-002, RB-ARC-001, RB-DATA-002, RB-DATA-003, RB-OBS-001, RB-INC-021, RB-INC-180, RB-CTX-181]
-prerequisites: [RB-INC-021, RB-INC-180]
+related_documents: [RB-CORE-0004, RB-DOM-001, RB-DOM-002, RB-ARC-001, RB-DATA-002, RB-DATA-003, RB-OBS-001, RB-INC-180, RB-CTX-181]
+prerequisites: [RB-INC-180]
 next_documents: []
 ai_context:
   priority: high
@@ -25,7 +25,7 @@ ai_context:
 - Issue: #430.
 - Branch: `codex/rb-inc-181-accommodation-auto-geocoding`.
 - Base de trabalho empilhada: RB-INC-180 em `0d4fa049e2074c925568efb8fc93d273372d1390`; após a integração da PR #429, esta branch deve ser reconciliada com `main`.
-- O RB-INC-021 introduziu `Accommodation.coordinate`, geocoding pontual e fallback manual, porém separou “salvar hospedagem”, “buscar localização” e “confirmar coordenadas”.
+- O incremento histórico associado à issue #45 introduziu `Accommodation.coordinate`, geocoding pontual e fallback manual, porém separou “salvar hospedagem”, “buscar localização” e “confirmar coordenadas”.
 - A validação humana do RouteBook Anywhere em Gramado em 2026-09-07 mostrou que o usuário pode salvar nome/endereço e continuar sem coordenadas, deixando mapa e distâncias sem âncora espacial.
 
 ## 2. Resultado vertical
@@ -144,4 +144,4 @@ Mudança fora desses caminhos exige atualização deste incremento antes do comm
 
 ## 9. Rollback
 
-A mudança não exige migration. Rollback restaura o fluxo separado do RB-INC-021; coordenadas já persistidas permanecem dados válidos da Hospedagem.
+A mudança não exige migration. Rollback restaura o fluxo separado da implementação histórica da issue #45; coordenadas já persistidas permanecem dados válidos da Hospedagem.

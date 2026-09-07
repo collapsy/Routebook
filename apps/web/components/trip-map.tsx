@@ -31,15 +31,12 @@ type LeafletMap = {
 };
 
 type LeafletDivIcon = object;
-
 type LeafletLayer = {
   addTo(map: LeafletMap): LeafletLayer;
 };
-
 type LeafletControl = {
   addTo(map: LeafletMap): LeafletControl;
 };
-
 type LeafletNamespace = {
   control: {
     zoom(options: {
@@ -191,7 +188,7 @@ export function TripMap({
   title,
   description = "Use os marcadores para localizar a hospedagem e abrir os detalhes dos lugares.",
   emptyTitle = "Mapa ainda indisponível",
-  emptyDescription = "Informe as coordenadas da hospedagem ou aguarde a publicação de lugares com localização para visualizar o mapa. As demais áreas da viagem continuam disponíveis normalmente.",
+  emptyDescription = "Adicione ou revise o nome e o endereço da hospedagem para o RouteBook tentar localizá-la automaticamente, ou aguarde a publicação de lugares com localização. As demais áreas da viagem continuam disponíveis normalmente.",
 }: TripMapProps) {
   const mapElementRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -344,8 +341,7 @@ export function TripMap({
       </div>
 
       <p aria-label="Resumo do mapa" className={styles.pointSummary}>
-        {validPoints.length}{" "}
-        {validPoints.length === 1 ? "ponto representado" : "pontos representados"}
+        {validPoints.length} {validPoints.length === 1 ? "ponto representado" : "pontos representados"}
         no mapa
       </p>
 
@@ -362,37 +358,21 @@ export function TripMap({
           ref={mapElementRef}
           role="region"
         />
+        {mapState === "loading" ? <p className={styles.mapStatus}>Carregando mapa…</p> : null}
         {mapState === "error" ? (
-          <p className={styles.mapFailure} role="status">
-            A camada cartográfica está indisponível. Use a lista de locais abaixo para continuar.
+          <p className={styles.mapStatus} role="status">
+            Não foi possível carregar o mapa agora. Os lugares continuam disponíveis na lista.
           </p>
         ) : null}
       </div>
 
-      <noscript>
-        <p className={styles.notice}>Ative o JavaScript para carregar a camada cartográfica.</p>
-      </noscript>
-
-      <ul aria-label="Locais exibidos no mapa" className={styles.locationList}>
+      <ul className={styles.accessiblePoints}>
         {validPoints.map((point) => (
-          <li key={`list-${point.kind}-${point.id}`}>
-            <div>
-              <span>{describePoint(point)}</span>
-              <strong>{point.label}</strong>
-            </div>
-            {point.href ? (
-              <Link aria-label={`${describePoint(point)}. Abrir detalhes.`} href={point.href}>
-                Ver detalhes
-              </Link>
-            ) : null}
+          <li key={point.id}>
+            {point.href ? <Link href={point.href}>{describePoint(point)}</Link> : describePoint(point)}
           </li>
         ))}
       </ul>
-
-      <p className={styles.attribution}>
-        Camada cartográfica por OpenStreetMap. Os marcadores representam coordenadas cadastradas e
-        não indicam rota, trânsito ou tempo de deslocamento.
-      </p>
     </section>
   );
 }

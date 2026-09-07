@@ -56,7 +56,7 @@ function e2eCandidate(
     latitudeOffset: number;
     longitudeOffset: number;
     providerCategory: string;
-    category: ExternalPlaceCandidate["category"];
+    category: NonNullable<ExternalPlaceCandidate["category"]>;
   }>,
 ): ExternalPlaceCandidate {
   return {

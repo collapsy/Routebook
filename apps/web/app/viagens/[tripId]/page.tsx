@@ -63,12 +63,14 @@ function formatBudget(totalCents: number): string {
   );
 }
 
-function mapDescription(input: Readonly<{
-  canonicalCount: number;
-  externalVisibleCount: number;
-  externalAvailableCount: number;
-  discoveryStatus: "unavailable" | "disabled" | "success" | "failed";
-}>): string {
+function mapDescription(
+  input: Readonly<{
+    canonicalCount: number;
+    externalVisibleCount: number;
+    externalAvailableCount: number;
+    discoveryStatus: "unavailable" | "disabled" | "success" | "failed";
+  }>,
+): string {
   const base = `A visão geral representa a Hospedagem, ${input.canonicalCount} Places canônicos e ${input.externalVisibleCount} descobertas externas próximas quando disponíveis.`;
   if (input.discoveryStatus === "failed") {
     return `${base} A fonte externa não respondeu agora; os pontos canônicos continuam disponíveis normalmente.`;

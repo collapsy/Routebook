@@ -241,29 +241,29 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-095 | Context Pack do RB-INC-095 | Implementation Context | Draft | 0.1.0 | [rb-inc-095-itinerary-proposal-generation-orchestration.md](./implementation/context-packs/rb-inc-095-itinerary-proposal-generation-orchestration.md) |
 
 | RB-INC-096 | Assembler Determinístico de Entrada para Geração de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-096-itinerary-proposal-generation-input-assembler.md](./implementation/increments/rb-inc-096-itinerary-proposal-generation-input-assembler.md) |
-| RB-CTX-096 | Context Pack do RB-INC-096 | Implementation Context | Draft | 0.1.0 | [rb-inc-096-itinerary-proposal-generation-input-assembler.md](./implementation/context-packs/rb-inc-096-itinerary-proposal-generation-input-assembler.md) |
+| RB-CTX-096 | Context Pack do RB-INC-096 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-096-itinerary-proposal-generation-input-assembler.md](./implementation/context-packs/rb-inc-096-itinerary-proposal-generation-input-assembler.md) |
 | RB-INC-097 | Composição Autoritativa da Geração de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-097-authoritative-itinerary-proposal-generation.md](./implementation/increments/rb-inc-097-authoritative-itinerary-proposal-generation.md) |
-| RB-CTX-097 | Context Pack do RB-INC-097 | Implementation Context | Draft | 0.1.0 | [rb-inc-097-authoritative-itinerary-proposal-generation.md](./implementation/context-packs/rb-inc-097-authoritative-itinerary-proposal-generation.md) |
+| RB-CTX-097 | Context Pack do RB-INC-097 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-097-authoritative-itinerary-proposal-generation.md](./implementation/context-packs/rb-inc-097-authoritative-itinerary-proposal-generation.md) |
 | RB-INC-098 | Adapter PostgreSQL do Contexto Autoritativo de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-098-postgres-authoritative-itinerary-proposal-context.md](./implementation/increments/rb-inc-098-postgres-authoritative-itinerary-proposal-context.md) |
-| RB-CTX-098 | Context Pack do RB-INC-098 | Implementation Context | Draft | 0.1.0 | [rb-inc-098-postgres-authoritative-itinerary-proposal-context.md](./implementation/context-packs/rb-inc-098-postgres-authoritative-itinerary-proposal-context.md) |
+| RB-CTX-098 | Context Pack do RB-INC-098 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-098-postgres-authoritative-itinerary-proposal-context.md](./implementation/context-packs/rb-inc-098-postgres-authoritative-itinerary-proposal-context.md) |
 | RB-INC-099 | Serviço Concreto de Geração Autoritativa de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-099-authoritative-itinerary-proposal-service.md](./implementation/increments/rb-inc-099-authoritative-itinerary-proposal-service.md) |
-| RB-CTX-099 | Context Pack do RB-INC-099 | Implementation Context | Draft | 0.1.0 | [rb-inc-099-authoritative-itinerary-proposal-service.md](./implementation/context-packs/rb-inc-099-authoritative-itinerary-proposal-service.md) |
+| RB-CTX-099 | Context Pack do RB-INC-099 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-099-authoritative-itinerary-proposal-service.md](./implementation/context-packs/rb-inc-099-authoritative-itinerary-proposal-service.md) |
 | RB-INC-100 | Server Action Autorizada para Gerar Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-100-authorized-itinerary-proposal-generation-action.md](./implementation/increments/rb-inc-100-authorized-itinerary-proposal-generation-action.md) |
-| RB-CTX-100 | Context Pack do RB-INC-100 | Implementation Context | Draft | 0.1.0 | [rb-inc-100-authorized-itinerary-proposal-generation-action.md](./implementation/context-packs/rb-inc-100-authorized-itinerary-proposal-generation-action.md) |
+| RB-CTX-100 | Context Pack do RB-INC-100 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-100-authorized-itinerary-proposal-generation-action.md](./implementation/context-packs/rb-inc-100-authorized-itinerary-proposal-generation-action.md) |
 | RB-INC-101 | Experiência Autorizada de Geração de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-101-authorized-itinerary-proposal-generation-experience.md](./implementation/increments/rb-inc-101-authorized-itinerary-proposal-generation-experience.md) |
-| RB-CTX-101 | Context Pack do RB-INC-101 | Implementation Context | Draft | 0.1.0 | [rb-inc-101-authorized-itinerary-proposal-generation-experience.md](./implementation/context-packs/rb-inc-101-authorized-itinerary-proposal-generation-experience.md) |
+| RB-CTX-101 | Context Pack do RB-INC-101 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-101-authorized-itinerary-proposal-generation-experience.md](./implementation/context-packs/rb-inc-101-authorized-itinerary-proposal-generation-experience.md) |
 | RB-INC-102 | Integração E2E da Geração Autorizada de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-102-authorized-itinerary-proposal-generation-e2e.md](./implementation/increments/rb-inc-102-authorized-itinerary-proposal-generation-e2e.md) |
-| RB-CTX-102 | Context Pack do RB-INC-102 | Implementation Context | Draft | 0.1.0 | [rb-inc-102-authorized-itinerary-proposal-generation-e2e.md](./implementation/context-packs/rb-inc-102-authorized-itinerary-proposal-generation-e2e.md) |
+| RB-CTX-102 | Context Pack do RB-INC-102 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-102-authorized-itinerary-proposal-generation-e2e.md](./implementation/context-packs/rb-inc-102-authorized-itinerary-proposal-generation-e2e.md) |
 | RB-INC-103 | Núcleo de Edição de Proposed Activity em Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-103-edit-itinerary-proposal-activity.md](./implementation/increments/rb-inc-103-edit-itinerary-proposal-activity.md) |
-| RB-CTX-103 | Context Pack do RB-INC-103 | Implementation Context | Draft | 0.1.0 | [rb-inc-103-edit-itinerary-proposal-activity.md](./implementation/context-packs/rb-inc-103-edit-itinerary-proposal-activity.md) |
+| RB-CTX-103 | Context Pack do RB-INC-103 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-103-edit-itinerary-proposal-activity.md](./implementation/context-packs/rb-inc-103-edit-itinerary-proposal-activity.md) |
 | RB-INC-104 | Serviço de Aplicação para Edição Persistida de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-104-persisted-itinerary-proposal-edit.md](./implementation/increments/rb-inc-104-persisted-itinerary-proposal-edit.md) |
-| RB-CTX-104 | Context Pack do RB-INC-104 | Implementation Context | Draft | 0.1.0 | [rb-inc-104-persisted-itinerary-proposal-edit.md](./implementation/context-packs/rb-inc-104-persisted-itinerary-proposal-edit.md) |
+| RB-CTX-104 | Context Pack do RB-INC-104 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-104-persisted-itinerary-proposal-edit.md](./implementation/context-packs/rb-inc-104-persisted-itinerary-proposal-edit.md) |
 
 | RB-INC-105 | Server Action Autorizada para Edição de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-105-authorized-itinerary-proposal-edit-action.md](./implementation/increments/rb-inc-105-authorized-itinerary-proposal-edit-action.md) |
-| RB-CTX-105 | Context Pack do RB-INC-105 | Implementation Context | Draft | 0.1.0 | [rb-inc-105-authorized-itinerary-proposal-edit-action.md](./implementation/context-packs/rb-inc-105-authorized-itinerary-proposal-edit-action.md) |
+| RB-CTX-105 | Context Pack do RB-INC-105 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-105-authorized-itinerary-proposal-edit-action.md](./implementation/context-packs/rb-inc-105-authorized-itinerary-proposal-edit-action.md) |
 
 | RB-INC-106 | Experiência de Edição de Proposed Activity na Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-106-itinerary-proposal-edit-experience.md](./implementation/increments/rb-inc-106-itinerary-proposal-edit-experience.md) |
-| RB-CTX-106 | Context Pack do RB-INC-106 | Implementation Context | Draft | 0.1.0 | [rb-inc-106-itinerary-proposal-edit-experience.md](./implementation/context-packs/rb-inc-106-itinerary-proposal-edit-experience.md) |
+| RB-CTX-106 | Context Pack do RB-INC-106 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-106-itinerary-proposal-edit-experience.md](./implementation/context-packs/rb-inc-106-itinerary-proposal-edit-experience.md) |
 
 | RB-INC-107 | E2E Integral da Edição de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/increments/rb-inc-107-itinerary-proposal-edit-e2e.md) |
 | RB-CTX-107 | Context Pack do RB-INC-107 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/context-packs/rb-inc-107-itinerary-proposal-edit-e2e.md) |
@@ -294,9 +294,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-120 | Geração de Proposal E2E Sincronizada | Implementation | Draft | 0.1.0 | [rb-inc-120-deterministic-proposal-generation.md](./implementation/increments/rb-inc-120-deterministic-proposal-generation.md) |
 | RB-CTX-120 | Context Pack do RB-INC-120 — Geração de Proposal E2E Sincronizada | Implementation Context | Draft | 0.1.0 | [rb-inc-120-deterministic-proposal-generation.md](./implementation/context-packs/rb-inc-120-deterministic-proposal-generation.md) |
 | RB-INC-121 | Mutações do Roteiro E2E Sincronizadas pelo Resultado Renderizado | Implementation | Draft | 0.1.0 | [rb-inc-121-deterministic-itinerary-mutations.md](./implementation/increments/rb-inc-121-deterministic-itinerary-mutations.md) |
-| RB-CTX-121 | Context Pack do RB-INC-121 — Mutações do Roteiro E2E Sincronizadas | Implementation Context | Draft | 0.1.0 | [rb-inc-121-deterministic-itinerary-mutations.md](./implementation/context-packs/rb-inc-121-deterministic-itinerary-mutations.md) |
+| RB-CTX-121 | Context Pack do RB-INC-121 — Mutações do Roteiro E2E Sincronizadas | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-121-deterministic-itinerary-mutations.md](./implementation/context-packs/rb-inc-121-deterministic-itinerary-mutations.md) |
 | RB-INC-122 | Contrato de Redirect das Server Actions E2E | Implementation | Draft | 0.1.0 | [rb-inc-122-rsc-response-completion.md](./implementation/increments/rb-inc-122-rsc-response-completion.md) |
-| RB-CTX-122 | Context Pack do RB-INC-122 — Contrato de Redirect das Server Actions E2E | Implementation Context | Draft | 0.1.0 | [rb-inc-122-rsc-response-completion.md](./implementation/context-packs/rb-inc-122-rsc-response-completion.md) |
+| RB-CTX-122 | Context Pack do RB-INC-122 — Contrato de Redirect das Server Actions E2E | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-122-rsc-response-completion.md](./implementation/context-packs/rb-inc-122-rsc-response-completion.md) |
 | RB-INC-123 | Preview Automático pela Integração Git Vercel | Implementation | Draft | 0.1.0 | [rb-inc-123-git-preview-deployment.md](./implementation/increments/rb-inc-123-git-preview-deployment.md) |
 | RB-CTX-123 | Context Pack do RB-INC-123 — Preview Automático pela Integração Git Vercel | Implementation Context | Draft | 0.1.0 | [rb-inc-123-git-preview-deployment.md](./implementation/context-packs/rb-inc-123-git-preview-deployment.md) |
 | RB-INC-124 | Bootstrap Isolado de Production | Implementation | Draft | 0.1.0 | [rb-inc-124-production-bootstrap.md](./implementation/increments/rb-inc-124-production-bootstrap.md) |
@@ -418,6 +418,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-179 | Validação multi-destino sem seed e regressão Pipa | Implementation | Draft | 0.1.0 | [rb-inc-179-multi-destination-validation.md](./implementation/increments/rb-inc-179-multi-destination-validation.md) |
 | RB-CTX-179 | Context Pack do RB-INC-179 — Validação multi-destino | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-179-multi-destination-validation.md](./implementation/context-packs/rb-inc-179-multi-destination-validation.md) |
+
+| RB-INC-180 | Autocomplete de Destination e criação de Viagem sem dependência regional | Implementation | Draft | 0.1.0 | [rb-inc-180-destination-autocomplete.md](./implementation/increments/rb-inc-180-destination-autocomplete.md) |
+| RB-CTX-180 | Context Pack do RB-INC-180 — Autocomplete de Destination | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-180-destination-autocomplete.md](./implementation/context-packs/rb-inc-180-destination-autocomplete.md) |
 
 ## Status possíveis
 

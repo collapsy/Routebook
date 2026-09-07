@@ -84,6 +84,42 @@ test("cria Trip para Florianópolis sem destino fixo na interface", async ({ pag
   await expect(card).toContainText("Florianópolis, SC");
 });
 
+test("cria Trip para São Paulo selecionando sugestão de Destination", async ({
+  page,
+}, testInfo) => {
+  const suffix = `rb-inc-180-${testInfo.project.name}-${Date.now()}`;
+  const email = `${suffix}@example.com`;
+  const password = "routebook-e2e-password";
+  const tripName = `São Paulo sugerida ${suffix}`;
+
+  await page.goto("/criar-conta?next=%2Fviagens");
+  await page.getByLabel("Nome").fill("Owner RB-INC-180");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Senha").fill(password);
+  await page.getByRole("button", { name: "Criar conta" }).click();
+  await expect(page).toHaveURL(/\/viagens$/);
+
+  await page.goto("/viagens/nova");
+  await page.getByLabel("Nome da viagem").fill(tripName);
+  const destination = page.getByLabel("Para onde você vai?");
+  await destination.fill("sao paulo");
+
+  const suggestions = page.getByRole("listbox", { name: "Sugestões de destinos" });
+  await expect(suggestions).toBeVisible({ timeout: 5_000 });
+  const saoPaulo = suggestions.getByRole("option", { name: /São Paulo.*SP, Brasil/ });
+  await expect(saoPaulo).toBeVisible();
+  await saoPaulo.click();
+  await expect(destination).toHaveValue("São Paulo, SP, Brasil");
+
+  await page.getByLabel("Quando começa?").fill("2026-11-10");
+  await page.getByLabel("Quando termina?").fill("2026-11-12");
+  await page.getByRole("button", { name: "Criar meu guia" }).click();
+
+  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+  const card = page.getByRole("article").filter({ hasText: tripName });
+  await expect(card).toContainText("São Paulo, SP");
+});
+
 test("owner cancela ou confirma a exclusão definitiva da própria Trip", async ({
   page,
 }, testInfo) => {

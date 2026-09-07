@@ -50,6 +50,77 @@
   border-color: var(--danger, #b42318);
 }
 
+.destination-combobox {
+  display: grid;
+  gap: 0.45rem;
+  position: relative;
+}
+
+.destination-suggestions {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  box-shadow: 0 16px 34px color-mix(in oklab, var(--foreground) 12%, transparent);
+  display: grid;
+  overflow: hidden;
+}
+
+.destination-suggestion {
+  align-items: start;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 0.2rem;
+  padding: 0.8rem 0.9rem;
+  text-align: left;
+  width: 100%;
+}
+
+.destination-suggestion:last-of-type {
+  border-bottom: 0;
+}
+
+.destination-suggestion:hover,
+.destination-suggestion[aria-selected="true"] {
+  background: var(--surface-soft);
+}
+
+.destination-suggestion:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: -3px;
+}
+
+.destination-suggestion strong {
+  font-size: 0.95rem;
+}
+
+.destination-suggestion span {
+  color: var(--foreground-muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.destination-attribution {
+  color: #5e5e5e;
+  font-family: sans-serif;
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: normal;
+  margin: 0;
+  padding: 0.45rem 0.9rem 0.55rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.destination-status {
+  min-height: 1.3em;
+}
+
 .field-hint,
 .form-actions p,
 .trip-card-id {

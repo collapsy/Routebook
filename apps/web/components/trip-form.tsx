@@ -5,6 +5,8 @@ import { useActionState } from "react";
 import { createTripAction } from "@/app/viagens/nova/actions";
 import { initialCreateTripState } from "@/app/viagens/nova/state";
 
+import { DestinationCombobox } from "./destination-combobox";
+
 function FieldError({ message }: { message: string | undefined }) {
   if (!message) return null;
   return (
@@ -31,20 +33,17 @@ export function TripForm({
 
       <div className="form-field form-field-wide">
         <label htmlFor="destination">Para onde você vai?</label>
-        <input
-          aria-describedby={state.fieldErrors.destination ? "destination-error" : undefined}
-          aria-invalid={Boolean(state.fieldErrors.destination)}
-          autoComplete="off"
-          id="destination"
-          name="destination"
-          placeholder="Ex.: Florianópolis, SC"
-          required
+        <DestinationCombobox
+          describedBy="destination-suggestions-status destination-error"
+          invalid={Boolean(state.fieldErrors.destination)}
+          resetSelectionToken={state.destinationSelectionResetToken}
         />
         <div id="destination-error">
           <FieldError message={state.fieldErrors.destination} />
         </div>
         {destinationAttribution ? (
           <p className="field-hint">
+            Busca textual alternativa:{" "}
             <a href={destinationAttribution.href} rel="noreferrer" target="_blank">
               {destinationAttribution.label}
             </a>

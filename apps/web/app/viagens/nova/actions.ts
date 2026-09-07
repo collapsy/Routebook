@@ -1,5 +1,7 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -8,16 +10,54 @@ import { TripValidationError } from "@routebook/trip-management";
 
 import { getRouteBookSession } from "@/lib/auth-session";
 import { resolveConfiguredDestinationResolver } from "@/lib/destination-resolver";
+import { resolveSelectedDestination } from "@/lib/destination-suggestions";
 
 import type { CreateTripActionState } from "./state";
 
 function resolverUnavailableMessage(
   reason: "disabled" | "blocked" | "invalid-configuration",
 ): string {
-  if (reason === "disabled") return "A busca de destinos ainda não está habilitada neste ambiente.";
+  if (reason === "disabled")
+    return "Selecione um destino sugerido ou tente novamente quando a busca de destinos estiver disponível.";
   if (reason === "blocked")
-    return "A busca de destinos está bloqueada neste ambiente por segurança.";
-  return "A busca de destinos está com uma configuração inválida.";
+    return "A busca textual de destinos está bloqueada neste ambiente por segurança. Selecione uma sugestão da lista.";
+  return "A busca de destinos está com uma configuração inválida. Selecione uma sugestão da lista ou tente novamente mais tarde.";
+}
+
+function createDestinationSelectionResetToken(): string {
+  return randomUUID();
+}
+
+function selectedDestinationError(
+  result:
+    | Readonly<{ status: "not-found" }>
+    | Readonly<{
+        status: "unavailable";
+        reason: "blocked" | "misconfigured" | "provider-error" | "invalid-response";
+      }>,
+): CreateTripActionState {
+  const destinationSelectionResetToken = createDestinationSelectionResetToken();
+  if (result.status === "not-found") {
+    return {
+      fieldErrors: {
+        destination: "Não conseguimos confirmar esse destino. Selecione novamente uma sugestão.",
+      },
+      destinationSelectionResetToken,
+    };
+  }
+  if (result.reason === "blocked" || result.reason === "misconfigured") {
+    return {
+      fieldErrors: {},
+      formError:
+        "A seleção de destinos não está disponível neste ambiente. Seu texto foi preservado; tente novamente mais tarde.",
+      destinationSelectionResetToken,
+    };
+  }
+  return {
+    fieldErrors: {},
+    formError: "Não foi possível confirmar o destino agora. Tente novamente em instantes.",
+    destinationSelectionResetToken,
+  };
 }
 
 export async function createTripAction(
@@ -32,35 +72,70 @@ export async function createTripAction(
     return { fieldErrors: { destination: "Informe para onde você vai." } };
   }
 
-  const configuredResolver = resolveConfiguredDestinationResolver();
-  if (configuredResolver.status !== "configured") {
-    return {
-      fieldErrors: {},
-      formError: resolverUnavailableMessage(configuredResolver.reason),
-    };
-  }
+  const selectedProvider = String(formData.get("destinationProvider") ?? "").trim();
+  const selectedReference = String(formData.get("destinationReference") ?? "").trim();
+  const selectedLabel = String(formData.get("destinationSelectedLabel") ?? "").trim();
+  const selectedSessionToken = String(formData.get("destinationSessionToken") ?? "").trim();
+  const hasSelectionData = Boolean(selectedProvider || selectedReference || selectedLabel);
+  let selectedDestinationResolved = false;
 
-  const resolution = await configuredResolver.resolver.resolve(destinationQuery);
-  if (resolution.status === "not-found") {
-    return {
-      fieldErrors: {
-        destination: "Não encontramos esse destino. Tente incluir cidade, estado ou país.",
-      },
-    };
-  }
-  if (resolution.status === "ambiguous") {
-    return {
-      fieldErrors: {
-        destination:
-          "Encontramos destinos parecidos. Inclua estado ou país para deixar claro qual é.",
-      },
-    };
-  }
-  if (resolution.status === "unavailable") {
-    return {
-      fieldErrors: {},
-      formError: "Não foi possível localizar o destino agora. Tente novamente em instantes.",
-    };
+  let resolution;
+  if (hasSelectionData) {
+    if (
+      !selectedProvider ||
+      !selectedReference ||
+      !selectedLabel ||
+      !selectedSessionToken ||
+      selectedLabel !== destinationQuery
+    ) {
+      return {
+        fieldErrors: {
+          destination:
+            "O destino foi alterado depois da seleção. Escolha novamente uma sugestão para continuar.",
+        },
+      };
+    }
+
+    const selectedResolution = await resolveSelectedDestination({
+      provider: selectedProvider,
+      reference: selectedReference,
+      sessionToken: selectedSessionToken,
+    });
+    if (selectedResolution.status !== "resolved")
+      return selectedDestinationError(selectedResolution);
+    selectedDestinationResolved = true;
+    resolution = { status: "resolved" as const, value: selectedResolution.value };
+  } else {
+    const configuredResolver = resolveConfiguredDestinationResolver();
+    if (configuredResolver.status !== "configured") {
+      return {
+        fieldErrors: {},
+        formError: resolverUnavailableMessage(configuredResolver.reason),
+      };
+    }
+
+    resolution = await configuredResolver.resolver.resolve(destinationQuery);
+    if (resolution.status === "not-found") {
+      return {
+        fieldErrors: {
+          destination: "Não encontramos esse destino. Tente incluir cidade, estado ou país.",
+        },
+      };
+    }
+    if (resolution.status === "ambiguous") {
+      return {
+        fieldErrors: {
+          destination:
+            "Encontramos destinos parecidos. Selecione uma sugestão ou inclua estado/país para deixar claro qual é.",
+        },
+      };
+    }
+    if (resolution.status === "unavailable") {
+      return {
+        fieldErrors: {},
+        formError: "Não foi possível localizar o destino agora. Tente novamente em instantes.",
+      };
+    }
   }
 
   try {
@@ -78,12 +153,22 @@ export async function createTripAction(
       },
     });
   } catch (error) {
-    if (error instanceof TripValidationError) return { fieldErrors: error.fieldErrors };
+    const destinationSelectionResetToken = selectedDestinationResolved
+      ? createDestinationSelectionResetToken()
+      : undefined;
+
+    if (error instanceof TripValidationError) {
+      return {
+        fieldErrors: error.fieldErrors,
+        ...(destinationSelectionResetToken ? { destinationSelectionResetToken } : {}),
+      };
+    }
 
     console.error("Falha ao criar viagem autenticada", error);
     return {
       fieldErrors: {},
       formError: "Não foi possível salvar a viagem agora. Revise a conexão e tente novamente.",
+      ...(destinationSelectionResetToken ? { destinationSelectionResetToken } : {}),
     };
   }
 

@@ -3,12 +3,7 @@ import type { Trip, UpdateAccommodationInput } from "@routebook/trip-management"
 import { GeocodingProviderError, type Geocoder } from "./geocoding";
 
 export type AccommodationLocationStatus =
-  | "removed"
-  | "manual"
-  | "preserved"
-  | "resolved"
-  | "not-found"
-  | "unavailable";
+  "removed" | "manual" | "preserved" | "resolved" | "not-found" | "unavailable";
 
 type PrepareAccommodationInput = Readonly<{
   trip: Trip;
@@ -78,7 +73,12 @@ export async function prepareAccommodationUpdate({
   const hasManualLatitude = manualLatitude !== undefined;
   const hasManualLongitude = manualLongitude !== undefined;
 
-  if (!accommodationName.trim() && !accommodationAddress?.trim() && !hasManualLatitude && !hasManualLongitude) {
+  if (
+    !accommodationName.trim() &&
+    !accommodationAddress?.trim() &&
+    !hasManualLatitude &&
+    !hasManualLongitude
+  ) {
     return { input: base, locationStatus: "removed" };
   }
 

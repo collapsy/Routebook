@@ -430,6 +430,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-183 | Descobertas externas próximas no mapa da visão geral | Implementation | Draft | 0.1.0 | [rb-inc-183-nearby-discovery-map.md](./implementation/increments/rb-inc-183-nearby-discovery-map.md) |
 | RB-CTX-183 | Context Pack do RB-INC-183 — descobertas externas próximas no mapa da visão geral | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-183-nearby-discovery-map.md](./implementation/context-packs/rb-inc-183-nearby-discovery-map.md) |
 
+| RB-INC-184 | Sugestões contextuais para Destinations sem catálogo publicado | Implementation | Draft | 0.1.0 | [rb-inc-184-contextual-external-suggestions.md](./implementation/increments/rb-inc-184-contextual-external-suggestions.md) |
+| RB-CTX-184 | Context Pack do RB-INC-184 — sugestões contextuais externas | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-184-contextual-external-suggestions.md](./implementation/context-packs/rb-inc-184-contextual-external-suggestions.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

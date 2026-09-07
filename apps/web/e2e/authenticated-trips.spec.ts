@@ -117,7 +117,11 @@ test("hospedagem é localizada ao salvar e habilita contexto espacial", async ({
   await page.getByRole("button", { name: "Salvar hospedagem" }).click();
 
   await expect(page).toHaveURL(/\/hospedagem\?saved=1&located=1$/);
-  await expect(page.getByRole("status")).toContainText("localização confirmada");
+  await expect(
+    page.getByText("Hospedagem salva e localização confirmada. Mapa e distâncias já podem usar esse ponto.", {
+      exact: true,
+    }),
+  ).toBeVisible();
 
   await page.goto(tripHref!);
   await expect(page.getByText("Mapa ainda indisponível")).toHaveCount(0);

@@ -10,8 +10,8 @@ created: "2026-09-07"
 last_updated: "2026-09-07"
 authors: [RouteBook Team]
 tags: [implementation, context-pack, trip, accommodation, geocoding, routebook-anywhere]
-related_documents: [RB-INC-181, RB-CORE-0004, RB-DOM-001, RB-DOM-002, RB-ARC-001, RB-DATA-002, RB-DATA-003, RB-OBS-001, RB-INC-021, RB-INC-180]
-prerequisites: [RB-INC-021, RB-INC-180]
+related_documents: [RB-INC-181, RB-CORE-0004, RB-DOM-001, RB-DOM-002, RB-ARC-001, RB-DATA-002, RB-DATA-003, RB-OBS-001, RB-INC-180]
+prerequisites: [RB-INC-180]
 next_documents: []
 ai_context:
   priority: high
@@ -42,7 +42,7 @@ Transformar nome/endereço da Hospedagem em contexto espacial utilizável sem pe
 5. RB-ARC-001;
 6. RB-DATA-002 / RB-DATA-003;
 7. RB-OBS-001;
-8. RB-INC-021 e issue #45;
+8. issue #45 e implementação histórica do geocoding de Hospedagem;
 9. RB-INC-180 / RB-CTX-180;
 10. RB-INC-181 / este Context Pack.
 

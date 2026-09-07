@@ -397,7 +397,6 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-171 | Context Pack do RB-INC-171 — Navegação mobile e separação Hoje / Guia por dia | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-171-mobile-navigation-focus.md](./implementation/context-packs/rb-inc-171-mobile-navigation-focus.md) |
 | RB-INC-172 | Experiência completa de ranking de Places | Implementation | Draft | 0.2.0 | [rb-inc-172-place-ranking-experience.md](./implementation/increments/rb-inc-172-place-ranking-experience.md) |
 | RB-CTX-172 | Context Pack do RB-INC-172 — Experiência completa de ranking de Places | Implementation Context Pack | Draft | 0.2.0 | [rb-inc-172-place-ranking-experience.md](./implementation/context-packs/rb-inc-172-place-ranking-experience.md) |
-
 | RB-INC-173 | Destination Foundation destination-agnostic | Implementation | Draft | 0.1.0 | [rb-inc-173-destination-foundation.md](./implementation/increments/rb-inc-173-destination-foundation.md) |
 | RB-CTX-173 | Context Pack do RB-INC-173 — Destination Foundation | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-173-destination-foundation.md](./implementation/context-packs/rb-inc-173-destination-foundation.md) |
 
@@ -427,6 +426,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-182 | Categorias contextuais na Discovery por viagem | Implementation | Draft | 0.1.0 | [rb-inc-182-contextual-place-categories.md](./implementation/increments/rb-inc-182-contextual-place-categories.md) |
 | RB-CTX-182 | Context Pack do RB-INC-182 — categorias contextuais na Discovery | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-182-contextual-place-categories.md](./implementation/context-packs/rb-inc-182-contextual-place-categories.md) |
+
+| RB-INC-183 | Descobertas externas próximas no mapa da visão geral | Implementation | Draft | 0.1.0 | [rb-inc-183-nearby-discovery-map.md](./implementation/increments/rb-inc-183-nearby-discovery-map.md) |
+| RB-CTX-183 | Context Pack do RB-INC-183 — descobertas externas próximas no mapa da visão geral | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-183-nearby-discovery-map.md](./implementation/context-packs/rb-inc-183-nearby-discovery-map.md) |
 
 ## Status possíveis
 

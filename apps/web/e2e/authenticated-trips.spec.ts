@@ -84,7 +84,9 @@ test("cria Trip para Florianópolis sem destino fixo na interface", async ({ pag
   await expect(card).toContainText("Florianópolis, SC");
 });
 
-test("hospedagem é localizada ao salvar e habilita contexto espacial", async ({ page }, testInfo) => {
+test("hospedagem é localizada ao salvar e habilita contexto espacial", async ({
+  page,
+}, testInfo) => {
   const suffix = `rb-inc-181-${testInfo.project.name}-${Date.now()}`;
   const email = `${suffix}@example.com`;
   const password = "routebook-e2e-password";

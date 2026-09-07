@@ -86,6 +86,7 @@ apps/web/components/accommodation-form.test.tsx
 apps/web/components/trip-map.tsx
 apps/web/components/trip-map.test.tsx
 apps/web/e2e/authenticated-trips.spec.ts
+apps/web/e2e/recommendations-experience.spec.ts
 apps/web/lib/accommodation-geocoding.ts
 apps/web/lib/accommodation-geocoding.test.ts
 apps/web/lib/geocoding.ts
@@ -129,6 +130,7 @@ Mudança fora desses caminhos exige atualização deste incremento antes do comm
 - [ ] Pipa, Gramado e qualquer outro Destination usam o mesmo contrato;
 - [ ] testes cobrem query contextual, sucesso, preservação, no-result e erro;
 - [ ] E2E desktop/mobile cobre Hospedagem → salvar → contexto espacial disponível;
+- [ ] E2Es legados que exercitam o fallback manual abrem explicitamente as opções avançadas, sem tornar coordenadas parte do fluxo primário;
 - [ ] Documentation e Engineering Validation verdes no mesmo SHA;
 - [ ] Vercel Preview valida a jornada real antes da integração;
 - [ ] Production permanece intocada;

@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: "2026-08-20"
+last_updated: "2026-09-07"
 authors:
   - RouteBook Team
 tags:
@@ -64,8 +64,8 @@ ai_context:
 | RB-INC-052 | RB-API-001, RB-DOM-001–004, decisão #118 | #119 | `codex/rb-inc-052-ready-contract`, PR pendente | contrato documental de Itinerary Proposal alinhado ao estado canônico `ready` | 145 documentos validados; Prettier e diff check aprovados | Em execução |
 | RB-INC-053 | RB-BR-PRP-002–010, RB-DOM-001–004, RB-DATA-001–002, decisão #118 | #121 | `codex/rb-inc-053-proposal-ready-domain`, PR pendente | conclusão de domínio `generating → ready` com conteúdo revisável | 43 testes do módulo; lint, typecheck, build, testes sem database e 147 docs aprovados | Em execução |
 | RB-INC-054 | RB-BR-PRP-004–005, RB-DATA-001–002, RB-ADR-006, decisão #123 | #124 | `codex/rb-inc-054-ready-data-contract`, PR pendente | snapshot híbrido e proveniência do conteúdo `ready` | 149 documentos validados; Prettier e diff check aprovados | Em execução |
-| RB-INC-055 | RB-BR-PRP-002–005, RB-DATA-001–002, RB-ADR-006, decisão #123 | #126 | `codex/rb-inc-055-ready-persistence`, PR #127 | migration, schema e round trip transacional do conteúdo `ready` | validações locais e CI completo verdes | Pronto para revisão |
-| RB-INC-056 | RB-BR-PRP-002–005, RB-INC-050, RB-INC-053, RB-INC-055 | #128 | `codex/rb-inc-056-ready-command`, PR pendente | comando de conclusão e persistência de Proposal `ready` | testes e validações pendentes | Em execução |
+| RB-INC-055 | RB-BR-PRP-002–005, RB-DATA-001–002, RB-ADR-006, decisão #123 | #126 | `codex/rb-inc-055-ready-persistence`, PR #127 | migration, schema e round trip de Proposal `ready` | validações locais e CI completo verdes | Pronto para revisão |
+| RB-INC-056 | RB-BR-PRP-002–005, RB-INC-050, RB-INC-053, RB-INC-055 | #128 | `codex/rb-inc-056-ready-command`, PR pendente | comando de aplicação para concluir e persistir Proposal `ready` | testes e validações pendentes | Em execução |
 | RB-INC-057 | RB-SCR-009, RB-INT-063–069, RB-WF-MOB-025, RB-WF-DESK-009, RB-INC-055, RB-INC-056 | #130 | `codex/rb-inc-057-ready-review`, PR #131 | revisão somente leitura da Proposal `ready` sem aplicar ao Roteiro | validações locais verdes; CI com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para revisão |
 | RB-INC-058 | RB-BR-PRP-004, RB-BR-PRP-008, ciclo oficial e RB-DATA-001 | #132 | `codex/rb-inc-058-temporal-expiration`, PR #133 | expiração temporal de Proposal `ready` no domínio | 53 testes do módulo; CI com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para revisão |
 | RB-INC-059 | RB-BR-PRP-004, RB-BR-PRP-008, RB-DATA-001–002, RB-ADR-006 e RB-INC-058 | #134 | `codex/rb-inc-059-expired-persistence`, PR #135 | migration, schema e round trip de Proposal `expired` com conteúdo preservado | validações locais verdes; run 30713827362 com migration, suíte integral, build e 50 E2E responsivos verdes | Pronto para integração |
@@ -828,7 +828,8 @@ Ao concluir um incremento:
 | segurança | secrets somente server-side; nenhum secret em UI/log/relatório |
 | Provider | Google Places autorizado e provisionado somente em Preview em 01/09/2026; comparação live confirmou a integração e motivou correção de cobertura; Production continua gate humano separado |
 | validação | Documentation, Engineering/Playwright e Vercel Preview pendentes no HEAD final |
-\n
+\
+
 
 ## Evidências previstas do RB-INC-173
 
@@ -963,3 +964,49 @@ Ao concluir um incremento:
 | regressão | Pipa preservada como catálogo/guia; Florianópolis preservada como fixture técnica |
 | custo | budgets do RB-INC-177; Guia genérico sem request adicional de Provider |
 | validação | Documentation/Engineering/Vercel pendentes no SHA final |
+
+## Evidências previstas do RB-INC-180
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-180-destination-autocomplete.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-180-destination-autocomplete.md` |
+| issue/PR | #428; PR #429; branch `codex/rb-inc-180-destination-autocomplete` |
+| base | `main@604433b7eb403f577b7ca142eed12f28607d731b` |
+| autocomplete | combobox acessível; mínimo 3 caracteres; debounce de 300 ms; stale requests cancelados/ignorados; até 5 sugestões |
+| segurança | rota autenticada; API key somente server-side; resposta `private, no-store` e `x-robots-tag: noindex` |
+| revalidação | referência externa opaca revalidada por Place Details antes da criação da Trip |
+| Provider | Google Places Autocomplete/Details opt-in somente em Preview; Nominatim público não é usado no autocomplete; Production bloqueada pelo adapter |
+| prova live | Gramado, RS validado manualmente em 07/09/2026 com sugestões, attribution Google Maps, revalidação e criação bem-sucedida de Trip |
+| Preview data | drift de `trip_destination_provenance` corrigido com migrations canônicas 0031–0033 somente em `routebook-preview`; Production intocada |
+| validação | SHA `0d4fa049e2074c925568efb8fc93d273372d1390`; Documentation e Engineering verdes; Vercel Preview READY no mesmo SHA |
+
+## Evidências previstas do RB-INC-181
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-181-accommodation-auto-geocoding.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-181-accommodation-auto-geocoding.md` |
+| issue/PR | #430; PR #431; branch `codex/rb-inc-181-accommodation-auto-geocoding` |
+| base empilhada | RB-INC-180 / `0d4fa049e2074c925568efb8fc93d273372d1390` |
+| fluxo | nome/endereço da Hospedagem resolvidos no submit; latitude/longitude deixam de ser obrigatórias no caminho normal |
+| confiança | localização textual inalterada preserva coordenadas; mudança exige nova resolução; falha/no-result não reaproveita ponto antigo nem inventa coordenadas |
+| fallback | coordenadas manuais permanecem em opções avançadas e o E2E legado abre explicitamente esse fallback quando necessário |
+| validação | SHA `16c1e74f04a3bac64439181c0488aa8570e5b52a`; Documentation e Engineering verdes, incluindo regressão E2E corrigida |
+| governança | nenhum Provider pago/novo, billing ou Production alterados |
+
+## Evidências previstas do RB-INC-182
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-182-contextual-place-categories.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-182-contextual-place-categories.md` |
+| issue/PR | #432; PR #434; branch `codex/rb-inc-182-contextual-place-categories` |
+| base empilhada | RB-INC-181 / `16c1e74f04a3bac64439181c0488aa8570e5b52a` |
+| facet | dropdown deriva categorias da cobertura real da Trip; `PLACE_CATEGORIES` permanece taxonomia canônica, não lista visível fixa |
+| Discovery | cobertura regional completa é conhecida antes de aplicar a categoria selecionada; nenhuma segunda chamada é feita apenas para montar facets |
+| degradação | falha/disable da Discovery externa usa categorias do catálogo publicado; nenhuma regra depende do nome/ID do Destination |
+| regressão | Pipa preserva Praia/Gastronomia/Natureza/Vida noturna quando cobertas; Gramado não oferece `beach` quando ausente |
+| validação | SHA `9c7762953d462c9e5b96aa895ff33ac58859a049`; Documentation run `34143889461` e Engineering run `34143889453` verdes; 148 Playwright passaram e 1 flaky legado do Roteiro recuperou no retry |
+| Preview | `dpl_FPkN7yijEnrmLTMUTdNer4WarHL8` READY no mesmo SHA; sem warning/error/fatal na janela consultada |
+| governança | nenhum Provider, secret, billing, migration, ADR ou Production alterados pelo RB-INC-182 |

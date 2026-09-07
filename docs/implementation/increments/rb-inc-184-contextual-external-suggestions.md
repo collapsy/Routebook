@@ -182,6 +182,7 @@ apps/web/lib/recommendation-experience.test.ts
 apps/web/lib/recommendation-discovery-suggestions.ts
 apps/web/lib/recommendation-discovery-suggestions.test.ts
 apps/web/e2e/recommendations-experience.spec.ts
+apps/web/e2e/recommendations-anywhere.spec.ts
 docs/implementation/increments/rb-inc-184-contextual-external-suggestions.md
 docs/implementation/context-packs/rb-inc-184-contextual-external-suggestions.md
 docs/implementation/traceability-matrix.md

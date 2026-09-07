@@ -132,7 +132,7 @@ test("hospedagem é localizada ao salvar e habilita contexto espacial", async ({
     page.getByRole("heading", { name: /Mapa do entorno de Florianópolis/ }),
   ).toBeVisible();
   await expect(page.getByLabel("Resumo do mapa")).toContainText("4 pontos representados");
-  await expect(page.getByLabel("Resumo do mapa")).toContainText("Descoberta externa");
+  await expect(page.getByLabel("Legenda do mapa")).toContainText("Descoberta externa");
   await expect(page.getByText("Café próximo", { exact: true })).toBeVisible();
 });
 

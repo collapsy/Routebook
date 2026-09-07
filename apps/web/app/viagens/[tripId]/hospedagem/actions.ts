@@ -10,7 +10,10 @@ import {
   updateAndPersistTripAccommodation,
 } from "@routebook/trip-management";
 
-import { prepareAccommodationUpdate } from "@/lib/accommodation-geocoding";
+import {
+  prepareAccommodationUpdate,
+  type AccommodationLocationStatus,
+} from "@/lib/accommodation-geocoding";
 import { NominatimGeocoder } from "@/lib/geocoding";
 
 import type { AccommodationActionState } from "./state";
@@ -35,6 +38,7 @@ export async function updateAccommodationAction(
   const accommodationLatitude = optionalCoordinate(formData, "accommodationLatitude");
   const accommodationLongitude = optionalCoordinate(formData, "accommodationLongitude");
   const repository = new DrizzleTripRepository();
+  let locationStatus: AccommodationLocationStatus;
 
   try {
     const trip = await repository.findById(tripId);
@@ -50,6 +54,7 @@ export async function updateAccommodationAction(
       ...(accommodationLongitude !== undefined ? { manualLongitude: accommodationLongitude } : {}),
       geocoder: new NominatimGeocoder(),
     });
+    locationStatus = prepared.locationStatus;
 
     const input: UpdateAccommodationInput = prepared.input;
     const updatedTrip = await updateAndPersistTripAccommodation(repository, tripId, input);
@@ -57,20 +62,6 @@ export async function updateAccommodationAction(
     if (!updatedTrip) {
       return { fieldErrors: {}, formError: "A viagem informada não existe." };
     }
-
-    revalidatePath(`/viagens/${tripId}`);
-    revalidatePath(`/viagens/${tripId}/hospedagem`);
-    revalidatePath(`/viagens/${tripId}/lugares`, "layout");
-    revalidatePath(`/viagens/${tripId}/lugares-salvos`);
-
-    const located = ["resolved", "preserved", "manual"].includes(prepared.locationStatus)
-      ? "1"
-      : prepared.locationStatus === "removed"
-        ? undefined
-        : "0";
-    redirect(
-      `/viagens/${tripId}/hospedagem?saved=1${located ? `&located=${located}` : ""}`,
-    );
   } catch (error) {
     if (error instanceof TripValidationError) {
       return { fieldErrors: error.fieldErrors };
@@ -82,4 +73,16 @@ export async function updateAccommodationAction(
       formError: "Não foi possível salvar a hospedagem agora. Tente novamente.",
     };
   }
+
+  revalidatePath(`/viagens/${tripId}`);
+  revalidatePath(`/viagens/${tripId}/hospedagem`);
+  revalidatePath(`/viagens/${tripId}/lugares`, "layout");
+  revalidatePath(`/viagens/${tripId}/lugares-salvos`);
+
+  const located = ["resolved", "preserved", "manual"].includes(locationStatus)
+    ? "1"
+    : locationStatus === "removed"
+      ? undefined
+      : "0";
+  redirect(`/viagens/${tripId}/hospedagem?saved=1${located ? `&located=${located}` : ""}`);
 }

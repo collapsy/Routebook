@@ -14,8 +14,7 @@ import { deriveTripDays, findTripById } from "@routebook/trip-management";
 import { ContextualRecommendationStrip } from "../../../components/contextual-recommendation-strip";
 import { TripMap } from "../../../components/trip-map";
 import { loadRecommendationExperience } from "../../../lib/recommendation-experience";
-import { loadTripCuratedCatalog } from "../../../lib/trip-curated-catalog";
-import type { TripMapPoint } from "../../../lib/trip-map";
+import { loadTripOverviewDiscoveryMap } from "../../../lib/trip-overview-discovery-map";
 import { resolveTripRouteAccess } from "../../../lib/trip-route-access";
 import { DeleteTripControl } from "./delete-trip-control";
 
@@ -64,6 +63,25 @@ function formatBudget(totalCents: number): string {
   );
 }
 
+function mapDescription(input: Readonly<{
+  canonicalCount: number;
+  externalVisibleCount: number;
+  externalAvailableCount: number;
+  discoveryStatus: "unavailable" | "disabled" | "success" | "failed";
+}>): string {
+  const base = `A visão geral representa a Hospedagem, ${input.canonicalCount} Places canônicos e ${input.externalVisibleCount} descobertas externas próximas quando disponíveis.`;
+  if (input.discoveryStatus === "failed") {
+    return `${base} A fonte externa não respondeu agora; os pontos canônicos continuam disponíveis normalmente.`;
+  }
+  if (input.discoveryStatus === "disabled") {
+    return `${base} A descoberta externa está pausada neste ambiente.`;
+  }
+  if (input.externalAvailableCount > input.externalVisibleCount) {
+    return `${base} Este resumo mostra as ${input.externalVisibleCount} descobertas externas mais próximas de ${input.externalAvailableCount} disponíveis; explore Lugares para ver a cobertura completa.`;
+  }
+  return `${base} Descobertas externas continuam identificadas pela origem e não são publicadas automaticamente.`;
+}
+
 export default async function TripOverviewPage({
   params,
   searchParams,
@@ -77,41 +95,21 @@ export default async function TripOverviewPage({
 
   if (!trip) notFound();
 
-  const [profile, curatedCatalog, savedPlaces, deleteAccess, recommendationExperience] =
-    await Promise.all([
-      findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
-      loadTripCuratedCatalog(trip),
-      listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
-      resolveTripRouteAccess({ tripId, action: "trip:delete" }),
-      loadRecommendationExperience(tripId, new Date(), { persist: false }),
-    ]);
-  const publishedPlaces = curatedCatalog.places;
+  const savedPlacesPromise = listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId);
+  const [profile, deleteAccess, recommendationExperience, overviewMap] = await Promise.all([
+    findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
+    resolveTripRouteAccess({ tripId, action: "trip:delete" }),
+    loadRecommendationExperience(tripId, new Date(), { persist: false }),
+    savedPlacesPromise.then((savedPlaces) =>
+      loadTripOverviewDiscoveryMap(
+        trip,
+        new Set(savedPlaces.map((selection) => selection.placeId)),
+      ),
+    ),
+  ]);
   const { contextUpdated } = await searchParams;
   const owner = trip.participants.find((participant) => participant.role === "owner");
   const days = deriveTripDays(trip.period);
-  const savedPlaceIds = new Set(savedPlaces.map((selection) => selection.placeId));
-  const mapPoints: TripMapPoint[] = [];
-
-  if (trip.accommodation?.coordinate) {
-    mapPoints.push({
-      id: "accommodation",
-      label: trip.accommodation.name,
-      kind: "accommodation",
-      latitude: trip.accommodation.coordinate.latitude,
-      longitude: trip.accommodation.coordinate.longitude,
-    });
-  }
-
-  for (const place of publishedPlaces) {
-    mapPoints.push({
-      id: place.id,
-      label: place.name,
-      kind: savedPlaceIds.has(place.id) ? "saved-place" : "published-place",
-      latitude: place.latitude,
-      longitude: place.longitude,
-      href: `/viagens/${tripId}/lugares/${place.slug}`,
-    });
-  }
 
   return (
     <section className="app-page trip-overview-page">
@@ -139,7 +137,7 @@ export default async function TripOverviewPage({
         <div className="section-heading-row">
           <span className="trip-context-version">Contexto estrutural v{trip.contextVersion}</span>
           <Link className="product-primary-action" href={`/viagens/${tripId}/lugares`}>
-            Explorar catálogo ampliado
+            Explorar lugares
           </Link>
         </div>
       </header>
@@ -196,9 +194,9 @@ export default async function TripOverviewPage({
       ) : null}
 
       <TripMap
-        description={`A visão geral representa a Hospedagem e os ${publishedPlaces.length} Places publicados. As descobertas externas permanecem identificadas no catálogo ampliado, acessível pelo botão no topo.`}
-        points={mapPoints}
-        title={`Mapa dos ${publishedPlaces.length} Places publicados de ${trip.destination.name}`}
+        description={mapDescription(overviewMap)}
+        points={overviewMap.points}
+        title={`Mapa do entorno de ${trip.destination.name}`}
       />
 
       <section className="traveler-context-summary" aria-labelledby="traveler-context-title">

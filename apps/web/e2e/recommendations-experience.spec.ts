@@ -93,7 +93,9 @@ async function openRecommendations(
       exact: true,
     }),
   ).toBeVisible();
-  await expect(page.getByText(/cada mudança exige uma ação explícita/i)).toBeVisible();
+  await expect(
+    page.getByText(/A leitura nunca salva um Lugar nem altera o Roteiro automaticamente/i),
+  ).toBeVisible();
 
   if (view === "all") {
     await expect(
@@ -181,7 +183,7 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
     page.getByRole("heading", { name: "Sugestões para decidir agora", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByText(/Exibindo 6 de 30 Recommendations como seleção inicial/i),
+    page.getByText(/Exibindo 6 de 30 Recommendations canônicas como seleção inicial/i),
   ).toBeVisible();
 
   const focusedList = page.getByRole("list", { name: "Recommendations de Lugares" });

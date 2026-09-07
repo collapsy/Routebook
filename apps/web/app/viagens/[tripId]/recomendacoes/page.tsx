@@ -3,12 +3,18 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { RecommendationCard } from "@/components/recommendation-card";
+import { loadRecommendationDiscoverySuggestions } from "@/lib/recommendation-discovery-suggestions";
 import {
   buildFocusedRecommendationPresentation,
   loadRecommendationExperience,
   type RecommendationCardViewModel,
 } from "@/lib/recommendation-experience";
-import { DrizzleItineraryRepository, DrizzleTripRepository } from "@routebook/database";
+import {
+  DrizzleItineraryRepository,
+  DrizzleTravelerProfileRepository,
+  DrizzleTripRepository,
+} from "@routebook/database";
+import { findTravelerProfile } from "@routebook/traveler-profile";
 import { createItinerary, findTripById } from "@routebook/trip-management";
 
 import {
@@ -23,7 +29,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Sugestões para a viagem — RouteBook",
   description:
-    "Consulte Recommendations determinísticas, seus motivos e as limitações do Contexto disponível.",
+    "Consulte Recommendations canônicas e descobertas externas contextuais, com motivos, limitações e Provenance explícitos.",
 };
 
 const errorMessages: Readonly<Record<string, string>> = {
@@ -45,6 +51,37 @@ function consideredStateLabels(card: RecommendationCardViewModel): readonly stri
     ...(card.isSaved ? ["Lugar salvo"] : []),
     ...(card.isPlanned ? ["Já está no roteiro"] : []),
   ];
+}
+
+function uncoveredDestinationCopy(
+  status: Awaited<ReturnType<typeof loadRecommendationDiscoverySuggestions>>["discoveryStatus"],
+): Readonly<{ title: string; description: string }> {
+  switch (status) {
+    case "failed":
+      return {
+        title: "Não conseguimos ampliar as sugestões agora",
+        description:
+          "A fonte externa de lugares ficou indisponível nesta tentativa. Nenhuma opção foi inventada; você pode tentar novamente mais tarde ou explorar os lugares já disponíveis.",
+      };
+    case "disabled":
+      return {
+        title: "Descoberta externa indisponível",
+        description:
+          "Não há Places publicados suficientes para esta região e a descoberta externa está desabilitada neste ambiente.",
+      };
+    case "unavailable":
+      return {
+        title: "Ainda falta uma referência espacial",
+        description:
+          "O RouteBook precisa de uma localização válida do Destino ou da Hospedagem para procurar opções próximas sem inventar precisão.",
+      };
+    case "success":
+      return {
+        title: "Ainda não encontramos opções suficientes nesta região",
+        description:
+          "A busca atual não retornou Places publicados nem descobertas externas seguras para sugerir. Nenhuma categoria ou recomendação foi inventada.",
+      };
+  }
 }
 
 export default async function RecommendationsPage({
@@ -70,10 +107,20 @@ export default async function RecommendationsPage({
   const itinerary =
     (await itineraryRepository.findByTripId(tripId)) ??
     (await itineraryRepository.save(createItinerary({ tripId, period: trip.period })));
-  const experience = await loadRecommendationExperience(tripId);
+  const [experience, travelerProfile] = await Promise.all([
+    loadRecommendationExperience(tripId),
+    findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
+  ]);
 
   if (!experience) notFound();
 
+  const discoverySuggestions = await loadRecommendationDiscoverySuggestions(
+    trip,
+    travelerProfile?.interests ?? [],
+  );
+  const externalSuggestions = discoverySuggestions.suggestions;
+  const hasExternalSuggestions = externalSuggestions.length > 0;
+  const uncoveredCopy = uncoveredDestinationCopy(discoverySuggestions.discoveryStatus);
   const errorMessage = erro ? errorMessages[erro] : undefined;
   const itineraryDays = itinerary.days.map((day) => ({ id: day.id, date: day.date }));
   const showAll = view === "all";
@@ -112,21 +159,22 @@ export default async function RecommendationsPage({
       ) : null}
 
       <header className={styles.heading}>
-        <p className={styles.eyebrow}>Decision Intelligence determinística</p>
+        <p className={styles.eyebrow}>Decision Intelligence contextual</p>
         <h1>Sugestões para {experience.trip.name}</h1>
         <p>
-          Estas sugestões usam somente o Contexto já informado e dados publicados no catálogo. Cada
-          mudança exige uma ação explícita: salvar o Lugar, escolher um Dia do Roteiro ou ignorar.
+          Estas sugestões combinam o Contexto da viagem com Places publicados e, quando necessário,
+          descobertas externas seguras da região. A leitura nunca salva um Lugar nem altera o
+          Roteiro automaticamente.
         </p>
       </header>
 
-      {!experience.destinationSupported ? (
+      {!experience.destinationSupported && !hasExternalSuggestions ? (
         <section className={styles.empty}>
-          <h2>Destino ainda não coberto</h2>
-          <p>
-            O catálogo determinístico atual não possui uma identidade canônica para este Destino.
-            Nenhuma categoria ou recomendação foi inventada.
-          </p>
+          <h2>{uncoveredCopy.title}</h2>
+          <p>{uncoveredCopy.description}</p>
+          <Link className={styles.contextLink} href={`/viagens/${tripId}/lugares`}>
+            Explorar lugares desta viagem
+          </Link>
         </section>
       ) : null}
 
@@ -134,8 +182,8 @@ export default async function RecommendationsPage({
         <section className={styles.notice} aria-labelledby="partial-context-heading">
           <h2 id="partial-context-heading">Geração parcial com Contexto incompleto</h2>
           <p>
-            A lista continua disponível, mas alguns critérios não puderam participar da ordenação.
-            Cada card identifica suas limitações de forma explícita.
+            As Recommendations canônicas continuam disponíveis, mas alguns critérios não puderam
+            participar da ordenação. Cada card identifica suas limitações de forma explícita.
           </p>
           <Link className={styles.contextLink} href={`/viagens/${tripId}/contexto`}>
             Revisar Contexto da viagem
@@ -153,12 +201,19 @@ export default async function RecommendationsPage({
         </p>
       ) : null}
 
-      {experience.destinationSupported && experience.cards.length === 0 ? (
+      {discoverySuggestions.discoveryStatus === "failed" && experience.cards.length > 0 ? (
+        <p className={styles.notice} role="status">
+          A descoberta externa ficou indisponível nesta tentativa. As Recommendations publicadas
+          continuam disponíveis normalmente.
+        </p>
+      ) : null}
+
+      {experience.destinationSupported && experience.cards.length === 0 && !hasExternalSuggestions ? (
         <section className={styles.empty}>
-          <h2>Nenhum candidato publicado disponível</h2>
+          <h2>Nenhuma sugestão disponível agora</h2>
           <p>
-            Não há Places publicados deste Destino que possam ser avaliados pelas regras atuais.
-            Nenhuma alternativa foi criada artificialmente.
+            Não há Places publicados nem descobertas externas seguras que possam ser apresentados
+            pelas regras atuais. Nenhuma alternativa foi criada artificialmente.
           </p>
         </section>
       ) : null}
@@ -171,13 +226,14 @@ export default async function RecommendationsPage({
             </h2>
             {showAll ? (
               <p>
-                Exibindo todas as {experience.cards.length} Recommendations na ordem produzida pelo
-                mecanismo determinístico. A interface não recalcula nem reordena essa lista.
+                Exibindo todas as {experience.cards.length} Recommendations canônicas na ordem
+                produzida pelo mecanismo determinístico. A interface não recalcula nem reordena essa
+                lista.
               </p>
             ) : (
               <p>
                 Exibindo {focusedPresentation.focusedCards.length} de {experience.cards.length}{" "}
-                Recommendations como seleção inicial, sempre na ordem original.
+                Recommendations canônicas como seleção inicial, sempre na ordem original.
                 {focusedPresentation.remainingPendingCount > 0
                   ? ` Há ${focusedPresentation.remainingPendingCount} outra${focusedPresentation.remainingPendingCount === 1 ? "" : "s"} sugestão${focusedPresentation.remainingPendingCount === 1 ? "" : "ões"} ainda pendente${focusedPresentation.remainingPendingCount === 1 ? "" : "s"}.`
                   : ""}
@@ -271,6 +327,80 @@ export default async function RecommendationsPage({
             </section>
           ) : null}
         </>
+      ) : null}
+
+      {hasExternalSuggestions ? (
+        <section
+          className={styles.externalSuggestions}
+          aria-labelledby="external-suggestions-heading"
+        >
+          <div className={styles.externalHeading}>
+            <div>
+              <p className={styles.externalEyebrow}>Descoberta externa · somente leitura</p>
+              <h2 id="external-suggestions-heading">Descobertas para considerar agora</h2>
+            </div>
+            <p>
+              Estas opções ainda não são Places publicados nem Recommendations persistidas. Elas
+              aparecem porque foram encontradas com segurança na região atual e são ordenadas por
+              interesses conhecidos e proximidade, sem criar uma escolha por você.
+            </p>
+          </div>
+
+          <ol className={styles.externalList} aria-label="Sugestões externas de lugares">
+            {externalSuggestions.map((suggestion) => (
+              <li key={suggestion.id}>
+                <article className={styles.externalCard} aria-label={suggestion.name}>
+                  <div className={styles.externalMeta}>
+                    <span>{suggestion.categoryLabel}</span>
+                    <span>Descoberta externa</span>
+                  </div>
+                  <div className={styles.externalTitle}>
+                    <h3>{suggestion.name}</h3>
+                    {suggestion.addressLabel ? <p>{suggestion.addressLabel}</p> : null}
+                  </div>
+                  <dl className={styles.externalFacts}>
+                    <div>
+                      <dt>Distância</dt>
+                      <dd>{suggestion.geodesicDistanceLabel}</dd>
+                    </div>
+                    <div>
+                      <dt>Fonte</dt>
+                      <dd>{suggestion.sourceLabel}</dd>
+                    </div>
+                  </dl>
+                  <div className={styles.externalExplanation}>
+                    <strong>Por que apareceu</strong>
+                    <ul>
+                      {suggestion.reasons.map((reason) => (
+                        <li key={reason}>{reason}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className={styles.externalExplanation}>
+                    <strong>Limitações</strong>
+                    <ul>
+                      {suggestion.limitations.map((limitation) => (
+                        <li key={limitation}>{limitation}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </article>
+              </li>
+            ))}
+          </ol>
+
+          <div className={styles.viewControls}>
+            <Link className={styles.modeLink} href={`/viagens/${tripId}/lugares`}>
+              Explorar todos os lugares
+            </Link>
+            {discoverySuggestions.availableCount > externalSuggestions.length ? (
+              <span className={styles.externalCount}>
+                Mostrando {externalSuggestions.length} de {discoverySuggestions.availableCount}{" "}
+                descobertas externas seguras.
+              </span>
+            ) : null}
+          </div>
+        </section>
       ) : null}
     </main>
   );

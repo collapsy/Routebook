@@ -43,6 +43,8 @@ describe("TripMap", () => {
     render(<TripMap points={[]} title="Mapa de Pipa" />);
 
     expect(screen.getByRole("heading", { name: "Mapa ainda indisponível" })).toBeInTheDocument();
+    expect(screen.getByText(/localizá-la automaticamente/i)).toBeInTheDocument();
+    expect(screen.queryByText(/informe as coordenadas/i)).not.toBeInTheDocument();
     expect(screen.getByText(/demais áreas da viagem continuam disponíveis/i)).toBeInTheDocument();
   });
 

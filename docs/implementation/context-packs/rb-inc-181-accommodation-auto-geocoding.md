@@ -28,8 +28,8 @@ Transformar nome/endereço da Hospedagem em contexto espacial utilizável sem pe
 
 - Issue: #430;
 - branch: `codex/rb-inc-181-accommodation-auto-geocoding`;
-- base empilhada: `0d4fa049e2074c925568efb8fc93d273372d1390` do RB-INC-180;
-- base final esperada: `main` após integração do RB-INC-180;
+- base final: `main@a33d9dae75e961b4c1eecb48a26fa2c3e38ce6bf` após integração do RB-INC-180 pela PR #429;
+- reconciliação da branch com a base final: `e32d348cb197e48cbe6fc4a4bfc960347fa77c14`;
 - merge: gate humano;
 - Production: fora de escopo.
 
@@ -123,7 +123,7 @@ CI e Vercel Preview do mesmo SHA são as evidências canônicas.
 
 ## 10. Gates humanos remanescentes
 
-- integrar RB-INC-180 na `main` antes da base final deste incremento;
+- validar no Vercel Preview real que nome/endereço da Hospedagem resolvem localização sem coordenadas manuais e liberam o contexto espacial;
 - qualquer mudança em Production;
 - qualquer mudança de Provider/comercialização não prevista;
 - integrar RB-INC-181 na `main`.

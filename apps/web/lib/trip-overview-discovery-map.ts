@@ -4,6 +4,7 @@ import {
 } from "@routebook/database";
 import {
   reconcileExternalPlaceCandidate,
+  type ExternalPlaceCandidate,
   type ExternalPlaceReconciliation,
   type Place,
   type PlaceSearchPort,
@@ -46,6 +47,72 @@ type TripOverviewDiscoveryDependencies = Readonly<{
   placeSearchPort?: PlaceSearchPort;
   bootstrapPolicy?: PlaceBootstrapPolicy;
 }>;
+
+function e2eCandidate(
+  query: Readonly<{ center: Readonly<{ latitude: number; longitude: number }> }>,
+  input: Readonly<{
+    id: string;
+    name: string;
+    latitudeOffset: number;
+    longitudeOffset: number;
+    providerCategory: string;
+    category: ExternalPlaceCandidate["category"];
+  }>,
+): ExternalPlaceCandidate {
+  return {
+    provider: "routebook-e2e",
+    externalId: input.id,
+    name: input.name,
+    latitude: query.center.latitude + input.latitudeOffset,
+    longitude: query.center.longitude + input.longitudeOffset,
+    providerCategory: input.providerCategory,
+    category: input.category,
+    addressLabel: "Próximo à referência espacial da viagem",
+    sourceLicense: "RouteBook test fixture",
+    collectedAt: new Date("2026-09-07T12:00:00.000Z"),
+    confidence: 0.95,
+  };
+}
+
+function resolveOverviewPlaceSearchPort(
+  configured: PlaceSearchPort | undefined,
+  environment: Readonly<Record<string, string | undefined>> = process.env,
+): PlaceSearchPort {
+  if (configured) return configured;
+  if (environment.ROUTEBOOK_E2E_DESTINATION_RESOLVER === "1" && !environment.VERCEL_ENV) {
+    return {
+      async search(query) {
+        return [
+          e2eCandidate(query, {
+            id: "nearby-cafe",
+            name: "Café próximo",
+            latitudeOffset: 0.001,
+            longitudeOffset: 0.001,
+            providerCategory: "cafe",
+            category: "gastronomy",
+          }),
+          e2eCandidate(query, {
+            id: "nearby-park",
+            name: "Parque próximo",
+            latitudeOffset: 0.002,
+            longitudeOffset: -0.001,
+            providerCategory: "park",
+            category: "nature",
+          }),
+          e2eCandidate(query, {
+            id: "nearby-bar",
+            name: "Bar próximo",
+            latitudeOffset: -0.001,
+            longitudeOffset: 0.002,
+            providerCategory: "bar",
+            category: "nightlife",
+          }),
+        ];
+      },
+    };
+  }
+  return new OverturePmtilesPlaceSearchAdapter();
+}
 
 export function buildTripOverviewDiscoveryMap(input: Readonly<{
   trip: Trip;
@@ -155,7 +222,7 @@ export async function loadTripOverviewDiscoveryMap(
   const placeRepository = dependencies.placeRepository ?? new DrizzlePlaceRepository();
   const externalReferenceRepository =
     dependencies.externalReferenceRepository ?? new DrizzlePlaceExternalReferenceRepository();
-  const placeSearchPort = dependencies.placeSearchPort ?? new OverturePmtilesPlaceSearchAdapter();
+  const placeSearchPort = resolveOverviewPlaceSearchPort(dependencies.placeSearchPort);
   const bootstrapPolicy = dependencies.bootstrapPolicy ?? resolvePlaceBootstrapPolicy();
   const publishedPlaces = await placeRepository.listPublishedWithinRadius({
     center: region.center,

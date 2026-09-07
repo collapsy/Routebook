@@ -71,7 +71,7 @@ Fluxo primário:
 5. feedback “localização encontrada” ou aviso recuperável;
 6. mapa/distâncias passam a usar a coordenada persistida quando disponível.
 
-O bloco separado “Encontrar coordenadas pelo endereço” deixa de fazer parte da jornada principal. Latitude/longitude ficam dentro de uma área avançada, não como requisito normal.
+O bloco separado “Encontrar coordenadas pelo endereço” deixa de fazer parte da jornada principal. Latitude/longitude ficam dentro de uma área avançada, não como requisito normal. O estado vazio do mapa orienta revisar nome/endereço da Hospedagem e nunca pede coordenadas ao usuário como caminho primário.
 
 ## 5. Escopo
 
@@ -83,6 +83,8 @@ apps/web/app/viagens/[tripId]/hospedagem/geocoding-state.ts
 apps/web/app/viagens/[tripId]/hospedagem/page.tsx
 apps/web/components/accommodation-form.tsx
 apps/web/components/accommodation-form.test.tsx
+apps/web/components/trip-map.tsx
+apps/web/components/trip-map.test.tsx
 apps/web/e2e/authenticated-trips.spec.ts
 apps/web/lib/accommodation-geocoding.ts
 apps/web/lib/accommodation-geocoding.test.ts
@@ -115,6 +117,7 @@ Mudança fora desses caminhos exige atualização deste incremento antes do comm
 - [ ] somente nome usa também o contexto do Destination para desambiguar;
 - [ ] coordenadas resolvidas são persistidas e sobrevivem a reload;
 - [ ] mapa passa a exibir a Hospedagem sem etapa manual adicional;
+- [ ] estado vazio do mapa não instrui o usuário a informar coordenadas no fluxo normal;
 - [ ] distâncias existentes passam a usar a coordenada persistida;
 - [ ] dados textuais inalterados com coordenada válida não disparam nova geocodificação;
 - [ ] mudança de localização textual não mantém coordenadas antigas incompatíveis;

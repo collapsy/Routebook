@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Hospedagem da viagem — RouteBook",
-  description: "Edite a hospedagem e as coordenadas usadas nas distâncias da viagem.",
+  description: "Edite a hospedagem usada como referência espacial da viagem.",
 };
 
 export default async function AccommodationPage({
@@ -19,10 +19,10 @@ export default async function AccommodationPage({
   searchParams,
 }: {
   params: Promise<{ tripId: string }>;
-  searchParams: Promise<{ saved?: string }>;
+  searchParams: Promise<{ saved?: string; located?: string }>;
 }) {
   const { tripId } = await params;
-  const { saved } = await searchParams;
+  const { saved, located } = await searchParams;
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
 
   if (!trip) notFound();
@@ -33,7 +33,17 @@ export default async function AccommodationPage({
         ← Voltar para a visão da viagem
       </Link>
 
-      {saved === "1" ? (
+      {saved === "1" && located === "1" ? (
+        <p className="success-banner" role="status">
+          Hospedagem salva e localização confirmada. Mapa e distâncias já podem usar esse ponto.
+        </p>
+      ) : saved === "1" && located === "0" ? (
+        <div className="form-error" role="status">
+          Hospedagem salva, mas não conseguimos confirmar a localização automaticamente. O restante
+          da viagem continua disponível; tente salvar novamente com um endereço mais completo ou
+          use as opções avançadas.
+        </div>
+      ) : saved === "1" ? (
         <p className="success-banner" role="status">
           Hospedagem salva com sucesso.
         </p>
@@ -43,8 +53,8 @@ export default async function AccommodationPage({
         <p className="product-eyebrow">Contexto da viagem</p>
         <h1>Hospedagem de {trip.name}</h1>
         <p>
-          Atualize nome, endereço e coordenadas. As distâncias exibidas são geodésicas, em linha
-          reta, e não representam rotas, trânsito ou tempo de deslocamento.
+          Informe onde você vai ficar. O RouteBook usa essa localização como referência para mapa e
+          distâncias e tenta encontrá-la automaticamente quando você salva.
         </p>
       </header>
 

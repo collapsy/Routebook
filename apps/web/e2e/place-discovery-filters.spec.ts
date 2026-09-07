@@ -29,6 +29,12 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(bootstrapStatus).toHaveAttribute("data-place-bootstrap-stage", /enriching|ready/);
   await expect(bootstrapStatus).toContainText(/Enriquecendo seu guia|Guia pronto/);
 
+  const categoryFilter = page.getByLabel("Categoria");
+  await expect(categoryFilter.locator('option[value="beach"]')).toHaveText("Praias");
+  await expect(categoryFilter.locator('option[value="gastronomy"]')).toHaveText("Gastronomia");
+  await expect(categoryFilter.locator('option[value="nature"]')).toHaveText("Natureza");
+  await expect(categoryFilter.locator('option[value="nightlife"]')).toHaveText("Vida noturna");
+
   const options = page.getByRole("list", { name: "Opções de lugares" });
   const canonicalPlaces = options.locator('[data-place-source="published"]');
   const externalPlaces = options.locator('[data-place-source="external"]');
@@ -147,6 +153,12 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(options).toContainText("Praia do Amor");
   await expect(mapLocations).toContainText("Praia do Amor");
   await expect(page.getByText(/em linha reta da hospedagem/).first()).toBeVisible();
+  await expect(page.getByLabel("Categoria")).toHaveValue("beach");
+  await expect(
+    page.getByLabel("Categoria").locator('option[value="gastronomy"]'),
+  ).toHaveCount(1);
+  await expect(page.getByLabel("Categoria").locator('option[value="nature"]')).toHaveCount(1);
+  await expect(page.getByLabel("Categoria").locator('option[value="nightlife"]')).toHaveCount(1);
 
   await page.goto(`/viagens/${trip.id}/lugares?descoberta=ocultar`);
   const rankingNav = page.getByRole("navigation", { name: "Ordenação dos lugares" });
@@ -171,6 +183,38 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(
     page.getByText("Lista e mapa exibem o mesmo conjunto curado e filtrado."),
   ).toBeVisible();
+});
+
+test("deriva categorias da cobertura de Gramado sem oferecer praia inexistente", async ({ page }) => {
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: `Categorias Gramado ${test.info().project.name} ${Date.now()}`,
+    destination: {
+      name: "Gramado, RS",
+      type: "city",
+      countryCode: "BR",
+      latitude: -29.378,
+      longitude: -50.873,
+      timeZone: "America/Sao_Paulo",
+    },
+    startDate: "2026-09-20",
+    endDate: "2026-09-23",
+  });
+
+  await page.goto(`/viagens/${trip.id}/lugares`);
+  await expect(page.getByRole("heading", { name: /Lugares em Gramado/ })).toBeVisible({
+    timeout: 20_000,
+  });
+
+  const categoryFilter = page.getByLabel("Categoria");
+  await expect(categoryFilter).toBeVisible();
+  const optionValues = await categoryFilter.locator("option").evaluateAll((options) =>
+    options.map((option) => (option as HTMLOptionElement).value),
+  );
+
+  expect(optionValues[0]).toBe("");
+  expect(optionValues).not.toContain("beach");
+  expect(optionValues.length).toBeGreaterThan(1);
+  await expect(categoryFilter.locator('option[value="beach"]')).toHaveCount(0);
 });
 
 test("mantém marcadores ancorados ao viewport durante pan e zoom", async ({ page }) => {

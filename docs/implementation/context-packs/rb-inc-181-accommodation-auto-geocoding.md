@@ -123,6 +123,7 @@ CI e Vercel Preview do mesmo SHA são as evidências canônicas.
 
 ## 10. Gates humanos remanescentes
 
+- em 2026-09-07, o owner confirmou que a configuração do Google Places foi ajustada para o escopo Preview sem ficar restrita à branch anterior; um novo deployment desta branch deve validar o autocomplete integrado antes da prova live da Hospedagem;
 - validar no Vercel Preview real que nome/endereço da Hospedagem resolvem localização sem coordenadas manuais e liberam o contexto espacial;
 - qualquer mudança em Production;
 - qualquer mudança de Provider/comercialização não prevista;

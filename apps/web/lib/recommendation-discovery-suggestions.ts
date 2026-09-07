@@ -83,21 +83,22 @@ function sourceLabel(provider: string): string {
   return provider;
 }
 
-function supportedInterestCategories(interests: readonly TravelerInterest[]): ReadonlySet<PlaceCategory> {
+function supportedInterestCategories(
+  interests: readonly TravelerInterest[],
+): ReadonlySet<PlaceCategory> {
   return new Set(
     interests.flatMap((interest) => {
       const category =
-        SUPPORTED_INTEREST_CATEGORY_MAP[
-          interest as keyof typeof SUPPORTED_INTEREST_CATEGORY_MAP
-        ];
+        SUPPORTED_INTEREST_CATEGORY_MAP[interest as keyof typeof SUPPORTED_INTEREST_CATEGORY_MAP];
       return category ? [category] : [];
     }),
   );
 }
 
-function isExternalWithCategory(
-  item: PlaceDiscoveryItem,
-): item is Extract<PlaceDiscoveryItem, { kind: "external" }> & {
+function isExternalWithCategory(item: PlaceDiscoveryItem): item is Extract<
+  PlaceDiscoveryItem,
+  { kind: "external" }
+> & {
   candidate: ExternalPlaceCandidate & { category: PlaceCategory };
 } {
   return item.kind === "external" && item.candidate.category !== undefined;
@@ -126,12 +127,14 @@ function compareExternalSuggestions(
   );
 }
 
-export function buildContextualExternalSuggestions(input: Readonly<{
-  tripId: string;
-  items: readonly PlaceDiscoveryItem[];
-  interests: readonly TravelerInterest[];
-  limit?: number;
-}>): readonly ContextualExternalSuggestionViewModel[] {
+export function buildContextualExternalSuggestions(
+  input: Readonly<{
+    tripId: string;
+    items: readonly PlaceDiscoveryItem[];
+    interests: readonly TravelerInterest[];
+    limit?: number;
+  }>,
+): readonly ContextualExternalSuggestionViewModel[] {
   const limit = input.limit ?? CONTEXTUAL_EXTERNAL_SUGGESTION_LIMIT;
   if (!Number.isInteger(limit) || limit <= 0) {
     throw new RangeError("external suggestion limit must be a positive integer");
@@ -246,14 +249,16 @@ function resolveRecommendationPlaceSearchPort(
   return new OverturePmtilesPlaceSearchAdapter();
 }
 
-export function buildRecommendationDiscoverySuggestions(input: Readonly<{
-  trip: Trip;
-  publishedPlaces: readonly Place[];
-  externalReconciliations: readonly ExternalPlaceReconciliation[];
-  reference: Readonly<{ latitude: number; longitude: number }>;
-  interests: readonly TravelerInterest[];
-  discoveryStatus: Exclude<RecommendationDiscoveryStatus, "unavailable">;
-}>): RecommendationDiscoverySuggestions {
+export function buildRecommendationDiscoverySuggestions(
+  input: Readonly<{
+    trip: Trip;
+    publishedPlaces: readonly Place[];
+    externalReconciliations: readonly ExternalPlaceReconciliation[];
+    reference: Readonly<{ latitude: number; longitude: number }>;
+    interests: readonly TravelerInterest[];
+    discoveryStatus: Exclude<RecommendationDiscoveryStatus, "unavailable">;
+  }>,
+): RecommendationDiscoverySuggestions {
   const items = buildPlaceDiscoveryFeed({
     publishedPlaces: input.publishedPlaces,
     externalReconciliations: input.externalReconciliations,

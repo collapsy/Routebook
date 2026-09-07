@@ -40,8 +40,8 @@ export default async function AccommodationPage({
       ) : saved === "1" && located === "0" ? (
         <div className="form-error" role="status">
           Hospedagem salva, mas não conseguimos confirmar a localização automaticamente. O restante
-          da viagem continua disponível; tente salvar novamente com um endereço mais completo ou
-          use as opções avançadas.
+          da viagem continua disponível; tente salvar novamente com um endereço mais completo ou use
+          as opções avançadas.
         </div>
       ) : saved === "1" ? (
         <p className="success-banner" role="status">

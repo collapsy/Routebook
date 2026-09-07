@@ -49,7 +49,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-SEC-001 | Arquitetura de Segurança e Privacidade | Security | Published | 0.1.0 | [security-and-privacy-architecture.md](./security/security-and-privacy-architecture.md) |
 | RB-OBS-001 | Observabilidade e Operação | Observability | Published | 0.1.0 | [observability-and-operations.md](./observability/observability-and-operations.md) |
 | RB-QA-001 | Estratégia de Qualidade e Testes | Quality | Published | 0.1.0 | [quality-and-testing-strategy.md](./quality/quality-and-testing-strategy.md) |
-| RB-OPS-001 | Runbooks e Procedimentos Operacionais | Operations | Published | 0.1.0 | [runbooks-and-operational-procedures.md](./operations/runbooks-and-operational-procedures.md) |
+| RB-OPS-001 | Runbooks e Procedimentos Operacionais | Operations Runbook | Published | 0.1.0 | [runbooks-and-operational-procedures.md](./operations/runbooks-and-operational-procedures.md) |
 | RB-SRE-001 | Estratégia de Confiabilidade e Continuidade | Reliability | Published | 0.1.0 | [reliability-and-continuity-strategy.md](./reliability/reliability-and-continuity-strategy.md) |
 | RB-AI-001 | Governança de Inteligência Artificial | AI Governance | Published | 0.1.0 | [ai-governance.md](./ai/ai-governance.md) |
 | RB-AI-002 | Estratégia de Avaliação de Inteligência Artificial | AI Evaluation | Published | 0.1.0 | [ai-evaluation-strategy.md](./ai/ai-evaluation-strategy.md) |
@@ -263,10 +263,10 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-105 | Context Pack do RB-INC-105 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-105-authorized-itinerary-proposal-edit-action.md](./implementation/context-packs/rb-inc-105-authorized-itinerary-proposal-edit-action.md) |
 
 | RB-INC-106 | Experiência de Edição de Proposed Activity na Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-106-itinerary-proposal-edit-experience.md](./implementation/increments/rb-inc-106-itinerary-proposal-edit-experience.md) |
-| RB-CTX-106 | Context Pack do RB-INC-106 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-106-itinerary-proposal-edit-experience.md](./implementation/context-packs/rb-inc-106-itinerary-proposal-edit-experience.md) |
+| RB-CTX-106 | Context Pack do RB-INC-106 — Experiência de Edição de Proposed Activity na Itinerary Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-106-itinerary-proposal-edit-experience.md](./implementation/context-packs/rb-inc-106-itinerary-proposal-edit-experience.md) |
 
 | RB-INC-107 | E2E Integral da Edição de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/increments/rb-inc-107-itinerary-proposal-edit-e2e.md) |
-| RB-CTX-107 | Context Pack do RB-INC-107 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/context-packs/rb-inc-107-itinerary-proposal-edit-e2e.md) |
+| RB-CTX-107 | Context Pack do RB-INC-107 — E2E Integral da Edição de Itinerary Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/context-packs/rb-inc-107-itinerary-proposal-edit-e2e.md) |
 | RB-INC-108 | Núcleo de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/increments/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
 | RB-CTX-108 | Context Pack do RB-INC-108 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/context-packs/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
 | RB-INC-109 | Transação PostgreSQL de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md](./implementation/increments/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md) |
@@ -424,6 +424,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-181 | Geocodificação automática da Hospedagem ao salvar | Implementation | Draft | 0.1.0 | [rb-inc-181-accommodation-auto-geocoding.md](./implementation/increments/rb-inc-181-accommodation-auto-geocoding.md) |
 | RB-CTX-181 | Context Pack do RB-INC-181 — geocodificação automática da Hospedagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-181-accommodation-auto-geocoding.md](./implementation/context-packs/rb-inc-181-accommodation-auto-geocoding.md) |
+
+| RB-INC-182 | Categorias contextuais na Discovery por viagem | Implementation | Draft | 0.1.0 | [rb-inc-182-contextual-place-categories.md](./implementation/increments/rb-inc-182-contextual-place-categories.md) |
+| RB-CTX-182 | Context Pack do RB-INC-182 — categorias contextuais na Discovery | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-182-contextual-place-categories.md](./implementation/context-packs/rb-inc-182-contextual-place-categories.md) |
 
 ## Status possíveis
 

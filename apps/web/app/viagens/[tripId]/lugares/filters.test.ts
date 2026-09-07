@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Place } from "@routebook/place-catalog";
 
-import { filterPlaces, parseMaximumDistance } from "./filters";
+import { filterPlaces, listAvailablePlaceCategories, parseMaximumDistance } from "./filters";
 
 const now = new Date("2026-08-11T00:00:00Z");
 const places: Place[] = [
@@ -36,6 +36,29 @@ const places: Place[] = [
     updatedAt: now,
   },
 ];
+
+describe("listAvailablePlaceCategories", () => {
+  it("retorna somente categorias presentes, sem duplicar e na ordem canônica", () => {
+    expect(
+      listAvailablePlaceCategories(["nightlife", "gastronomy", "gastronomy", "nature"]),
+    ).toEqual(["gastronomy", "nature", "nightlife"]);
+  });
+
+  it("não oferece praia quando a cobertura da viagem não possui beach", () => {
+    expect(listAvailablePlaceCategories(["gastronomy", "nature", "nightlife"])).toEqual([
+      "gastronomy",
+      "nature",
+      "nightlife",
+    ]);
+  });
+
+  it("inclui praia quando a cobertura real contém beach e ignora categorias ausentes", () => {
+    expect(listAvailablePlaceCategories([undefined, "beach", "gastronomy"])).toEqual([
+      "beach",
+      "gastronomy",
+    ]);
+  });
+});
 
 describe("filterPlaces", () => {
   it("pesquisa sem diferenciar acentos e preserva filtros combinados", () => {

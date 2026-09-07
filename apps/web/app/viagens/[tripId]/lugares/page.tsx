@@ -63,6 +63,7 @@ import {
 import {
   categoryLabels,
   filterPlaces,
+  listAvailablePlaceCategories,
   parseMaximumDistance,
   parsePlaceCategory,
   parsePlacePriceRange,
@@ -593,6 +594,7 @@ export default async function PlacesPage({
       ? [{ key: "preco" as const, label: `Preço: ${priceRangeLabels[priceRange]}` }]
       : []),
   ];
+  let allExternalReconciliations: ExternalPlaceReconciliation[] = [];
   let externalReconciliations: ExternalPlaceReconciliation[] = [];
   let externalCandidateCount = 0;
   let externalPossibleMatchCount = 0;
@@ -614,7 +616,6 @@ export default async function PlacesPage({
         new OverturePmtilesPlaceSearchAdapter().search({
           center: region.center,
           radiusMeters: region.externalRadiusMeters,
-          ...(category ? { categories: [category] } : {}),
           limit: bootstrapPolicy.discovery.candidateLimit,
         }),
     });
@@ -627,6 +628,7 @@ export default async function PlacesPage({
       const reconciliations = candidates.map((candidate) =>
         reconcileExternalPlaceCandidate(candidate, publishedPlaces, references),
       );
+      allExternalReconciliations = reconciliations;
       externalCandidateCount = candidates.length;
       externalPossibleMatchCount = reconciliations.filter(
         (result) => result.status === "possible_match",
@@ -635,9 +637,10 @@ export default async function PlacesPage({
       externalRejectedCount = reconciliations.filter(
         (result) => result.status === "rejected",
       ).length;
-      externalReconciliations = reconciliations.filter(
-        (result) => result.status !== "new" || matchesExternalSearch(result, search),
-      );
+      externalReconciliations = reconciliations.filter((result) => {
+        if (category && result.candidate.category !== category) return false;
+        return result.status !== "new" || matchesExternalSearch(result, search);
+      });
     } else if (discoveryResult.status === "failed") {
       externalDiscoveryError =
         "A fonte externa não respondeu agora. O catálogo curado continua disponível normalmente.";
@@ -645,6 +648,18 @@ export default async function PlacesPage({
   }
 
   const hasExternalCoverage = discoverExternal && Boolean(region) && discoveryStatus === "success";
+  const facetDiscoveryItems = region
+    ? buildPlaceDiscoveryFeed({
+        publishedPlaces,
+        externalReconciliations: hasExternalCoverage ? allExternalReconciliations : [],
+        reference: region.center,
+      })
+    : [];
+  const availableCategories = listAvailablePlaceCategories(
+    facetDiscoveryItems.map((item) =>
+      item.kind === "external" ? item.candidate.category : item.place.category,
+    ),
+  );
   const filteredPublishedPlaces = filteredPlaces.map(({ place }) => place);
   const allDiscoveryItems = region
     ? buildPlaceDiscoveryFeed({
@@ -855,7 +870,7 @@ export default async function PlacesPage({
           <label htmlFor="place-category">Categoria</label>
           <select defaultValue={category ?? ""} id="place-category" name="categoria">
             <option value="">Todas</option>
-            {PLACE_CATEGORIES.map((value) => (
+            {availableCategories.map((value) => (
               <option key={value} value={value}>
                 {categoryLabels[value]}
               </option>

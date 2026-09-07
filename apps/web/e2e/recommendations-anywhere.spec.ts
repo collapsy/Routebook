@@ -6,16 +6,7 @@ test("destino zero-seed recebe sugestões externas sem criar estado canônico", 
   page,
 }, testInfo) => {
   const suffix = `rb-inc-184-${testInfo.project.name}-${Date.now()}`;
-  const email = `${suffix}@example.com`;
-  const password = "routebook-e2e-password";
   const tripName = `Floripa sugestões ${suffix}`;
-
-  await page.goto("/criar-conta?next=%2Fviagens");
-  await page.getByLabel("Nome").fill("Owner RB-INC-184");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Senha").fill(password);
-  await page.getByRole("button", { name: "Criar conta" }).click();
-  await expect(page).toHaveURL(/\/viagens$/);
 
   await page.goto("/viagens/nova");
   await page.getByLabel("Nome da viagem").fill(tripName);

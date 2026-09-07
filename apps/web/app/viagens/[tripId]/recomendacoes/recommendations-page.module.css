@@ -19,7 +19,12 @@
 .empty h2,
 .empty p,
 .considered h2,
-.considered p {
+.considered p,
+.externalSuggestions h2,
+.externalSuggestions h3,
+.externalSuggestions p,
+.externalSuggestions dl,
+.externalSuggestions dd {
   margin: 0;
 }
 
@@ -35,7 +40,10 @@
 .summary p,
 .empty p,
 .considered p,
-.consideredCopy span {
+.consideredCopy span,
+.externalHeading > p,
+.externalTitle p,
+.externalCount {
   color: var(--foreground-muted);
   line-height: 1.6;
 }
@@ -67,7 +75,8 @@
 .error,
 .summary,
 .empty,
-.considered {
+.considered,
+.externalSuggestions {
   border: 1px solid var(--border);
   border-radius: var(--radius-medium);
   line-height: 1.55;
@@ -77,7 +86,8 @@
 .notice,
 .summary,
 .empty,
-.considered {
+.considered,
+.externalSuggestions {
   background: var(--surface-soft);
 }
 
@@ -175,6 +185,119 @@
   overflow-wrap: anywhere;
 }
 
+.externalSuggestions {
+  display: grid;
+  gap: 1rem;
+}
+
+.externalHeading {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.externalHeading > div {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.externalEyebrow {
+  color: var(--primary-strong);
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.externalList {
+  display: grid;
+  gap: 0.85rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.externalList > li {
+  min-width: 0;
+}
+
+.externalCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+  padding: 1rem;
+}
+
+.externalMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.externalMeta span {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--foreground-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+  padding: 0.25rem 0.55rem;
+}
+
+.externalTitle {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.externalTitle h3,
+.externalTitle p,
+.externalFacts dd,
+.externalExplanation li {
+  overflow-wrap: anywhere;
+}
+
+.externalFacts {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.externalFacts div {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.externalFacts dt {
+  color: var(--foreground-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.externalFacts dd {
+  font-weight: 750;
+}
+
+.externalExplanation {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.externalExplanation ul {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding-left: 1.15rem;
+}
+
+.externalExplanation li {
+  color: var(--foreground-muted);
+  line-height: 1.5;
+}
+
 .loadingCard {
   animation: pulse 1.4s ease-in-out infinite;
   background: var(--surface-soft);
@@ -198,7 +321,8 @@
     padding-inline: 1.5rem;
   }
 
-  .list {
+  .list,
+  .externalList {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

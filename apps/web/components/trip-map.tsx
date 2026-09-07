@@ -341,7 +341,8 @@ export function TripMap({
       </div>
 
       <p aria-label="Resumo do mapa" className={styles.pointSummary}>
-        {validPoints.length} {validPoints.length === 1 ? "ponto representado" : "pontos representados"}
+        {validPoints.length}{" "}
+        {validPoints.length === 1 ? "ponto representado" : "pontos representados"}
         no mapa
       </p>
 
@@ -369,7 +370,11 @@ export function TripMap({
       <ul className={styles.accessiblePoints}>
         {validPoints.map((point) => (
           <li key={point.id}>
-            {point.href ? <Link href={point.href}>{describePoint(point)}</Link> : describePoint(point)}
+            {point.href ? (
+              <Link href={point.href}>{describePoint(point)}</Link>
+            ) : (
+              describePoint(point)
+            )}
           </li>
         ))}
       </ul>

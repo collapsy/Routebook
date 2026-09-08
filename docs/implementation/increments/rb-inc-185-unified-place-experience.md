@@ -144,9 +144,10 @@ apps/web/components/trip-map.tsx
 apps/web/components/trip-map.test.tsx
 apps/web/lib/recommendation-discovery-suggestions.ts
 apps/web/lib/recommendation-discovery-suggestions.test.ts
-apps/web/e2e/place-discovery.spec.ts
+apps/web/e2e/place-discovery-anywhere.spec.ts
+apps/web/e2e/place-discovery-filters.spec.ts
 apps/web/e2e/recommendations-anywhere.spec.ts
-apps/web/e2e/trip-overview.spec.ts
+apps/web/e2e/accommodation-proximity.spec.ts
 docs/implementation/increments/rb-inc-185-unified-place-experience.md
 docs/implementation/context-packs/rb-inc-185-unified-place-experience.md
 docs/implementation/traceability-matrix.md

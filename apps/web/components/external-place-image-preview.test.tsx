@@ -66,7 +66,7 @@ afterEach(() => {
 });
 
 describe("ExternalPlaceImagePreview", () => {
-  it("não consulta mídia antes de aproximar o card do viewport e mantém fallback visual curto", () => {
+  it("não consulta mídia antes de aproximar o card do viewport e usa estado compacto", () => {
     const fetcher = vi.fn();
     vi.stubGlobal("fetch", fetcher);
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
@@ -74,12 +74,11 @@ describe("ExternalPlaceImagePreview", () => {
     renderPreview();
 
     expect(fetcher).not.toHaveBeenCalled();
-    expect(screen.getByText("Imagem ilustrativa")).toBeInTheDocument();
-    expect(screen.queryByText("Imagem do lugar")).not.toBeInTheDocument();
-    expect(screen.queryByText("Fotografia sob demanda")).not.toBeInTheDocument();
+    expect(screen.getByText("Sem foto")).toBeInTheDocument();
+    expect(screen.queryByText("Imagem ilustrativa")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("status", { name: "Imagem ilustrativa para Praia do Amor" }),
-    ).toHaveAttribute("data-category-illustration", "beach");
+      screen.getByRole("img", { name: "Foto não disponível para Praia do Amor" }),
+    ).toHaveAttribute("data-presentation", "compact");
   });
 
   it("usa fallback compacto sem request quando Media está desabilitada", () => {
@@ -101,13 +100,13 @@ describe("ExternalPlaceImagePreview", () => {
     expect(fetcher).not.toHaveBeenCalled();
     expect(
       screen.getByRole("img", {
-        name: "Imagem ilustrativa de Praia para Praia do Amor",
+        name: "Foto não disponível para Praia do Amor",
       }),
     ).toHaveAttribute("data-presentation", "compact");
   });
 
-  it("usa fallback compacto sem request quando o Destination não possui Media governada", () => {
-    const fetcher = vi.fn();
+  it("consulta Media também quando o Destination não possui id curado", async () => {
+    const fetcher = vi.fn(async () => Response.json({ error: "miss" }, { status: 404 }));
     vi.stubGlobal("fetch", fetcher);
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
 
@@ -119,11 +118,13 @@ describe("ExternalPlaceImagePreview", () => {
         placeName="Lugar em Florianópolis"
       />,
     );
+    enterViewport();
 
-    expect(fetcher).not.toHaveBeenCalled();
+    await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(1));
+    expect(String(fetcher.mock.calls[0]?.[0])).not.toContain("destinationId=");
     expect(
-      screen.getByRole("img", {
-        name: "Imagem ilustrativa de Natureza para Lugar em Florianópolis",
+      await screen.findByRole("img", {
+        name: "Foto não disponível para Lugar em Florianópolis",
       }),
     ).toHaveAttribute("data-presentation", "compact");
   });
@@ -168,7 +169,7 @@ describe("ExternalPlaceImagePreview", () => {
     await waitFor(() => {
       expect(
         screen.getByRole("img", {
-          name: "Imagem ilustrativa de Praia para Praia do Amor",
+          name: "Foto não disponível para Praia do Amor",
         }),
       ).toHaveAttribute("data-presentation", "compact");
     });

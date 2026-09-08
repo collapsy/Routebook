@@ -42,6 +42,8 @@ export function PlaceRankingMeta({
   categoryLabel: string;
   timeZone: string;
 }>) {
+  if (!quality && !signals) return null;
+
   const popularityPercent =
     signals?.popularity &&
     Math.round((signals.popularity.value / signals.popularity.scaleMax) * 100);
@@ -53,12 +55,12 @@ export function PlaceRankingMeta({
       data-place-ranking-position={position}
       data-place-ranking-quality={quality ? "true" : "false"}
     >
-      {quality || signals?.rating ? (
+      {quality || signals.rating ? (
         <div className={styles.summary}>
           {quality ? (
             <strong className={styles.score}>Score {formatDecimal(quality.score)}/10</strong>
           ) : null}
-          {signals?.rating ? (
+          {signals.rating ? (
             <span className={styles.rating}>
               Nota {formatDecimal(signals.rating.value)}/{formatDecimal(signals.rating.scaleMax, 0)}
             </span>
@@ -72,7 +74,7 @@ export function PlaceRankingMeta({
       ) : null}
 
       <details className={styles.details}>
-        <summary>Entender este ranking</summary>
+        <summary>Por que aparece assim?</summary>
         <div className={styles.evidence}>
           <span>
             #{position} · {orderLabel}
@@ -82,7 +84,7 @@ export function PlaceRankingMeta({
               #{categoryRank} em {categoryLabel}
             </span>
           ) : null}
-          {signals?.rating?.reviewCount !== undefined ? (
+          {signals.rating?.reviewCount !== undefined ? (
             <span>
               {new Intl.NumberFormat("pt-BR").format(signals.rating.reviewCount)} avaliações
             </span>
@@ -90,23 +92,13 @@ export function PlaceRankingMeta({
           {popularityPercent !== undefined ? (
             <span>{popularityPercent}% de popularidade relativa</span>
           ) : null}
-          {signals ? (
-            <span>
-              Fonte do ranking: {providerLabel(signals.provider)} · coletado em{" "}
-              {formatCollectedAt(signals.collectedAt, timeZone)}
-            </span>
+          <span>
+            Fonte: {providerLabel(signals.provider)} · atualizado em{" "}
+            {formatCollectedAt(signals.collectedAt, timeZone)}
+          </span>
+          {quality && quality.reasons.length > 0 ? (
+            <span className={styles.reason}>{quality.reasons.join(" · ")}</span>
           ) : null}
-          {quality ? (
-            quality.reasons.length > 0 ? (
-              <span className={styles.reason}>{quality.reasons.join(" · ")}</span>
-            ) : (
-              <span className={styles.reason}>Score derivado somente dos sinais disponíveis.</span>
-            )
-          ) : (
-            <span className={styles.reason}>
-              A posição reflete apenas a ordenação selecionada nesta lista.
-            </span>
-          )}
         </div>
       </details>
     </section>

@@ -286,7 +286,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-116 | Aprovação Formal do RB-ADR-018 | Implementation | Draft | 0.1.0 | [rb-inc-116-approve-adr-018.md](./implementation/increments/rb-inc-116-approve-adr-018.md) |
 | RB-CTX-116 | Context Pack do RB-INC-116 — Aprovação Formal do RB-ADR-018 | Implementation Context | Draft | 0.1.0 | [rb-inc-116-approve-adr-018.md](./implementation/context-packs/rb-inc-116-approve-adr-018.md) |
 | RB-INC-117 | Bootstrap Vercel e Neon para Preview | Implementation | Draft | 0.1.0 | [rb-inc-117-vercel-neon-preview-bootstrap.md](./implementation/increments/rb-inc-117-vercel-neon-preview-bootstrap.md) |
-| RB-CTX-117 | Context Pack do RB-INC-117 — Bootstrap Vercel e Neon para Preview | Implementation Context | Draft | 0.1.0 | [rb-inc-117-vercel-neon-preview-bootstrap.md](./implementation/context-packs/rb-inc-117-vercel-neon-preview-bootstrap.md) |
+| RB-CTX-117 | Context Pack do RB-INC-117 — Bootstrap Vercel e Neon para Preview | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-117-vercel-neon-preview-bootstrap.md](./implementation/context-packs/rb-inc-117-vercel-neon-preview-bootstrap.md) |
 | RB-INC-118 | Sincronização Determinística Pós-Server Action no E2E | Implementation | Draft | 0.1.0 | [rb-inc-118-deterministic-server-action-e2e.md](./implementation/increments/rb-inc-118-deterministic-server-action-e2e.md) |
 | RB-CTX-118 | Context Pack do RB-INC-118 — Sincronização Determinística Pós-Server Action no E2E | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-118-deterministic-server-action-e2e.md](./implementation/context-packs/rb-inc-118-deterministic-server-action-e2e.md) |
 | RB-INC-119 | Navegação Determinística da Landing para Viagens | Implementation | Draft | 0.1.0 | [rb-inc-119-deterministic-landing-navigation.md](./implementation/increments/rb-inc-119-deterministic-landing-navigation.md) |
@@ -438,6 +438,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-186 | Cards de Lugar com hierarquia visual progressiva | Implementation | Draft | 0.1.0 | [rb-inc-186-place-card-hierarchy.md](./implementation/increments/rb-inc-186-place-card-hierarchy.md) |
 | RB-CTX-186 | Context Pack do RB-INC-186 — Cards de Lugar com hierarquia visual progressiva | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-186-place-card-hierarchy.md](./implementation/context-packs/rb-inc-186-place-card-hierarchy.md) |
+
+| RB-INC-187 | Microcopy de confiança e remoção de justificativas técnicas | Implementation | Draft | 0.1.0 | [rb-inc-187-trustworthy-microcopy.md](./implementation/increments/rb-inc-187-trustworthy-microcopy.md) |
+| RB-CTX-187 | Context Pack do RB-INC-187 — Microcopy de confiança e remoção de justificativas técnicas | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-187-trustworthy-microcopy.md](./implementation/context-packs/rb-inc-187-trustworthy-microcopy.md) |
 
 ## Status possíveis
 

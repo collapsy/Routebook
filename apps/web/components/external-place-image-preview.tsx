@@ -95,7 +95,7 @@ export function ExternalPlaceImagePreview({
   longitude,
   category,
   enabled = true,
-  compactFallback = false,
+  compactFallback = true,
 }: Readonly<{
   destinationId?: string | undefined;
   placeName: string;

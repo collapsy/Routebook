@@ -53,7 +53,7 @@ test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e G
     .locator('[data-place-source="external"]:not([data-place-category="unmapped"])')
     .first();
   await expect(promotable).toBeVisible();
-  await promotable.getByRole("button", { name: "Salvar na viagem" }).click();
+  await promotable.getByRole("button", { name: "Salvar lugar" }).click();
   await expect(page).toHaveURL(new RegExp("/viagens/" + trip.id + "/lugares-salvos\\?salvo=1"), {
     timeout: 45_000,
   });

@@ -387,7 +387,9 @@ function ExternalDiscoveryCard({
       </div>
       <strong>{candidate.name}</strong>
       <p>{candidate.addressLabel ?? "Endereço não informado pela Fonte"}</p>
-      <small>Categoria informada pela Fonte: {providerCategoryLabel(candidate.providerCategory)}</small>
+      <small>
+        Categoria informada pela Fonte: {providerCategoryLabel(candidate.providerCategory)}
+      </small>
       <small>
         {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
       </small>
@@ -783,8 +785,8 @@ export default async function PlacesPage({
           <h1>Lugares em {trip.destination.name}</h1>
           <p>
             Explore uma lista única de Lugares encontrados para esta viagem. O RouteBook reconcilia
-            as Fontes disponíveis para evitar duplicatas. Para distância por ruas, duração e trânsito,
-            use as ações de rota real.
+            as Fontes disponíveis para evitar duplicatas. Para distância por ruas, duração e
+            trânsito, use as ações de rota real.
           </p>
         </div>
       </header>

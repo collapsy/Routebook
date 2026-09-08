@@ -161,6 +161,7 @@ apps/web/e2e/place-discovery-filters.spec.ts
 apps/web/e2e/place-actions.spec.ts
 apps/web/e2e/accommodation-proximity.spec.ts
 apps/web/e2e/authenticated-trips.spec.ts
+apps/web/e2e/external-place-images.spec.ts
 docs/implementation/increments/rb-inc-186-place-card-hierarchy.md
 docs/implementation/context-packs/rb-inc-186-place-card-hierarchy.md
 docs/implementation/traceability-matrix.md

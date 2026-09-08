@@ -50,7 +50,8 @@ test("abre o Guia da viagem e cobre os oito Dias reais de Pipa", async ({ page }
 
   await expect(page).toHaveURL(/\/guia\/dias/);
   await expect(page.getByRole("heading", { name: "Guia da viagem em Pipa" })).toBeVisible();
-  await expect(page.getByText(/Editorial, não aplicado/)).toBeVisible();
+  await expect(page.getByText(/Referências para planejar/)).toBeVisible();
+  await expect(page.getByText(/Editorial, não aplicado/)).toHaveCount(0);
   await expect(page.locator('[id^="guia-dia-"]')).toHaveCount(8);
   await expect(
     page.getByRole("navigation", { name: "Dias do Guia da viagem" }).getByRole("link"),
@@ -182,7 +183,7 @@ test("separa observação natural de rolês confirmados no Guia", async ({ page 
     ),
   ).toBeVisible();
   await expect(experiences.getByText("17:01", { exact: true })).toBeVisible();
-  await expect(experiences.getByText(/Nenhum rolê foi confirmado/)).toBeVisible();
+  await expect(experiences.getByText(/Nenhum evento confirmado para esta data/)).toBeVisible();
 
   await page.goto(`/viagens/${trip.id}/guia?dia=2026-08-28`);
   const eventCard = page.locator("#experiencias-do-dia article").filter({

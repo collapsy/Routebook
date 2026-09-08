@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Revisão de conflitos — RouteBook",
-  description: "Revise conflitos determinísticos identificados no Roteiro da viagem.",
+  description: "Revise riscos e inconsistências encontrados no Roteiro da viagem.",
 };
 
 export default async function PlanningConflictReviewPage({
@@ -56,17 +56,14 @@ export default async function PlanningConflictReviewPage({
   });
   const errorMessages: Readonly<Record<string, string>> = {
     "conflito-nao-encontrado":
-      "O Conflito não foi encontrado nesta Viagem. Atualize e tente novamente.",
-    "acao-cross-trip": "A ação foi rejeitada porque os dados não pertencem à mesma Viagem.",
-    "severidade-incompativel": "Somente Riscos podem receber a ação Ignorar risco.",
-    "estado-incompativel": "Este Risco já foi atualizado. A revisão abaixo mostra o estado atual.",
-    "responsavel-nao-encontrado":
-      "A Viagem não possui um Organizador persistido para registrar a Decision.",
-    "conflito-idempotencia":
-      "Esta confirmação já foi enviada com dados diferentes. Atualize a página.",
-    "falha-persistencia":
-      "Não foi possível registrar a Decision. Nenhuma alteração parcial foi mantida.",
-    "confirmacao-obrigatoria": "Confirme que compreende a permanência do Risco antes de continuar.",
+      "Este conflito não está mais disponível. Atualize e tente novamente.",
+    "acao-cross-trip": "Não foi possível concluir esta ação. Volte ao Roteiro e tente novamente.",
+    "severidade-incompativel": "Somente riscos podem ser ignorados.",
+    "estado-incompativel": "Este risco já foi atualizado. A revisão mostra o estado atual.",
+    "responsavel-nao-encontrado": "Não foi possível registrar esta escolha nesta viagem.",
+    "conflito-idempotencia": "A página ficou desatualizada. Atualize e tente novamente.",
+    "falha-persistencia": "Não foi possível ignorar este risco agora. Tente novamente.",
+    "confirmacao-obrigatoria": "Confirme que entende que o risco continuará no Roteiro.",
   };
   const errorMessage = erro ? errorMessages[erro] : undefined;
 
@@ -78,8 +75,7 @@ export default async function PlanningConflictReviewPage({
 
       {riscoIgnorado === "1" ? (
         <p className={styles.success} role="status">
-          Risco ignorado e Decision registrada. A condição não foi resolvida e o Roteiro não foi
-          alterado.
+          Risco ignorado. A condição continua no Roteiro.
         </p>
       ) : null}
 
@@ -91,16 +87,13 @@ export default async function PlanningConflictReviewPage({
 
       <header className={styles.hero}>
         <div>
-          <p className="product-eyebrow">Roteiro · análise determinística</p>
+          <p className="product-eyebrow">Revisão do Roteiro</p>
           <h1>Revisão de Conflitos</h1>
-          <p>
-            Veja inconsistências e riscos encontrados no planejamento de {trip.name}. A revisão não
-            altera nenhuma atividade automaticamente.
-          </p>
+          <p>Revise riscos e inconsistências encontrados no planejamento de {trip.name}.</p>
         </div>
         <p className={styles.freshness} role="status">
           <span aria-hidden="true">✓</span>
-          Análise recalculada agora
+          Análise atualizada agora
         </p>
       </header>
 

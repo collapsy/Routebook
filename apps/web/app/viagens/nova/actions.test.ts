@@ -149,9 +149,7 @@ describe("createTripAction destination selection", () => {
 
     expect(suggestionMocks.resolveSelected).toHaveBeenCalledTimes(1);
     expect(result.fieldErrors).toEqual({});
-    expect(result.formError).toBe(
-      "Não foi possível salvar a viagem agora. Revise a conexão e tente novamente.",
-    );
+    expect(result.formError).toBe("Não foi possível criar a viagem agora. Tente novamente.");
     expect(result.destinationSelectionResetToken).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     );
@@ -176,7 +174,7 @@ describe("createTripAction destination selection", () => {
     expect(suggestionMocks.resolveSelected).not.toHaveBeenCalled();
   });
 
-  it("substitui o erro seco por orientação recuperável quando nenhum Provider está disponível", async () => {
+  it("orienta recuperação quando a busca de destino não está disponível", async () => {
     resolverMocks.resolveConfigured.mockReturnValue({ status: "unavailable", reason: "disabled" });
     const formData = tripForm({
       destinationProvider: "",
@@ -189,8 +187,7 @@ describe("createTripAction destination selection", () => {
 
     expect(result).toEqual({
       fieldErrors: {},
-      formError:
-        "Selecione um destino sugerido ou tente novamente quando a busca de destinos estiver disponível.",
+      formError: "Não foi possível localizar esse destino agora. Tente novamente mais tarde.",
     });
     expect(databaseMocks.createTrip).not.toHaveBeenCalled();
   });

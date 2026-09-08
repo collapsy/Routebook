@@ -123,18 +123,16 @@ describe("ItinerarySpatialPanel", () => {
     expect(screen.getByText("1 Atividade não pôde ser localizada.")).toBeInTheDocument();
     expect(screen.getByText("1,9 km")).toBeInTheDocument();
     expect(
-      screen.getByText(/Distâncias geodésicas em linha reta. Não representam trajeto por ruas/),
+      screen.getByText(/Distâncias em linha reta. Não representam trajeto por ruas/),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Distância indisponível porque existe uma lacuna geográfica/),
-    ).toBeInTheDocument();
-    expect(screen.queryByText(/Total geodésico/)).not.toBeInTheDocument();
+    expect(screen.getByText("Distância indisponível entre estes pontos.")).toBeInTheDocument();
+    expect(screen.queryByText(/geodésic/i)).not.toBeInTheDocument();
 
-    const routeLinks = screen.getAllByRole("link", { name: /Abrir rota externa de/ });
+    const routeLinks = screen.getAllByRole("link", { name: /Abrir rota de/ });
     expect(routeLinks).toHaveLength(1);
 
     const routeLink = screen.getByRole("link", {
-      name: "Abrir rota externa de Condomínio Solar Água para Praia do Amor",
+      name: "Abrir rota de Condomínio Solar Água para Praia do Amor",
     });
     expect(routeLink).toHaveAttribute("target", "_blank");
     expect(routeLink).toHaveAttribute("rel", "noopener noreferrer");

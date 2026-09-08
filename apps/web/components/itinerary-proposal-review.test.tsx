@@ -92,8 +92,8 @@ describe("ItineraryProposalReview", () => {
   it("presents reviewable content and editing while keeping the Proposal separate from the Itinerary", () => {
     render(<ItineraryProposalReview {...decisionProps} review={review} />);
 
-    expect(screen.getByText("Sugestão — ainda não aplicada")).toBeInTheDocument();
-    expect(screen.getByText(/O Roteiro atual permanece preservado/i)).toBeInTheDocument();
+    expect(screen.getByText("Proposta aguardando sua decisão")).toBeInTheDocument();
+    expect(screen.getByText(/Compare as mudanças sugeridas/i)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Critérios da proposta" })).toBeInTheDocument();
     expect(screen.getByText("Proximidade entre lugares")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Limitações" })).toBeInTheDocument();
@@ -102,7 +102,7 @@ describe("ItineraryProposalReview", () => {
     expect(within(changes).getByRole("heading", { name: "Dia 1 · 22 de agosto" })).toBeVisible();
     expect(within(changes).getByRole("heading", { name: "Mirante ao pôr do sol" })).toBeVisible();
     expect(screen.getByText("Aproveita o fim da tarde.")).toBeInTheDocument();
-    expect(screen.getByText(/confirmação explícita/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Roteiro atual permanece preservado/i)).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Editar sugestão: Mirante ao pôr do sol" }),
     ).toBeVisible();
@@ -212,17 +212,17 @@ describe("ItineraryProposalReview", () => {
       />,
     );
 
-    expect(screen.getByText("Proposta expirada — somente referência")).toBeInTheDocument();
+    expect(screen.getByText("Proposta expirada")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Consulte o histórico desta proposta" }),
+      screen.getByRole("heading", { name: "Consulte esta proposta como referência" }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/não pode mais ser aplicada/i)).toBeInTheDocument();
+    expect(screen.getByRole("note")).toHaveTextContent("não pode mais ser aplicada");
     expect(screen.getByText("Expirada em")).toBeInTheDocument();
     expect(screen.getByText("2 de ago. de 2026, 10:15")).toBeInTheDocument();
     expect(screen.getByText(/A validade terminou em/)).toHaveTextContent(
       "2 de ago. de 2026, 10:15",
     );
-    expect(screen.getByRole("note")).toHaveTextContent("referência histórica");
+    expect(screen.getByRole("note")).toHaveTextContent("expirou");
     expect(screen.queryByRole("button", { name: "Descartar proposta" })).not.toBeInTheDocument();
     expect(screen.queryByText("Aceitar proposta")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Editar sugestão:/ })).not.toBeInTheDocument();

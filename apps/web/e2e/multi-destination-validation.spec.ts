@@ -58,7 +58,7 @@ test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e G
     timeout: 45_000,
   });
   await expect(
-    page.getByText(/Lugar salvo na viagem com a origem externa preservada/),
+    page.getByText("Lugar salvo. Agora você pode adicioná-lo ao roteiro."),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Lugares salvos", exact: true })).toBeVisible();
   const savedCard = page.locator(".place-card").first();

@@ -22,7 +22,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Visão da viagem — RouteBook",
-  description: "Consulte o contexto estrutural e os dias da sua viagem.",
+  description: "Consulte os principais dados e continue planejando sua viagem.",
 };
 
 const interestLabels: Record<string, string> = {
@@ -73,18 +73,18 @@ function mapDescription(
 ): string {
   const visiblePlaceCount = input.canonicalCount + input.externalVisibleCount;
   const availablePlaceCount = input.canonicalCount + input.externalAvailableCount;
-  const base = `A visão geral representa a Hospedagem e ${visiblePlaceCount} ${visiblePlaceCount === 1 ? "Lugar próximo" : "Lugares próximos"} com localização disponível.`;
+  const base = `O mapa mostra ${visiblePlaceCount} ${visiblePlaceCount === 1 ? "Lugar próximo" : "Lugares próximos"} com localização disponível.`;
 
   if (input.discoveryStatus === "failed") {
-    return `${base} A fonte de lugares não respondeu agora; os dados já disponíveis continuam acessíveis normalmente.`;
+    return `${base} Não foi possível atualizar os lugares próximos agora. Os lugares já disponíveis continuam no mapa.`;
   }
   if (input.discoveryStatus === "disabled") {
-    return `${base} A busca de novos lugares está pausada neste ambiente.`;
+    return `${base} Não foi possível buscar novos lugares agora.`;
   }
   if (availablePlaceCount > visiblePlaceCount) {
     return `${base} Este resumo mostra ${visiblePlaceCount} de ${availablePlaceCount} lugares disponíveis; explore Lugares para ver a cobertura completa.`;
   }
-  return `${base} A origem dos dados é preservada na Fonte quando essa informação é relevante.`;
+  return base;
 }
 
 export default async function TripOverviewPage({
@@ -124,7 +124,7 @@ export default async function TripOverviewPage({
 
       {contextUpdated === "1" ? (
         <p className="success-banner" role="status">
-          Contexto da viagem salvo com sucesso.
+          Preferências da viagem salvas.
         </p>
       ) : null}
 
@@ -134,13 +134,9 @@ export default async function TripOverviewPage({
             {trip.status === "draft" ? "Viagem em rascunho" : trip.status}
           </p>
           <h1>{trip.name}</h1>
-          <p>
-            Esta visão reúne a estrutura da Viagem e o contexto progressivo dos viajantes, sem
-            executar mudanças automaticamente.
-          </p>
+          <p>Veja os principais dados da viagem e continue de onde parou.</p>
         </div>
         <div className="section-heading-row">
-          <span className="trip-context-version">Contexto estrutural v{trip.contextVersion}</span>
           <Link className="product-primary-action" href={`/viagens/${tripId}/lugares`}>
             Explorar lugares
           </Link>
@@ -168,7 +164,7 @@ export default async function TripOverviewPage({
         </div>
         <div>
           <dt>Responsável</dt>
-          <dd>{owner?.displayName ?? "Owner não identificado"}</dd>
+          <dd>{owner?.displayName ?? "Responsável não informado"}</dd>
         </div>
       </dl>
 
@@ -179,8 +175,8 @@ export default async function TripOverviewPage({
               <p className="product-eyebrow">Hoje em {trip.destination.name}</p>
               <h2 id="trip-guide-entry-title">Comece pelo que importa neste Dia</h2>
               <p>
-                Consulte o que já foi confirmado para a data em foco. Quando houver dados úteis do
-                destino, o RouteBook acrescenta contexto sem substituir suas decisões.
+                Veja o que já está disponível para a data em foco e abra o Guia para continuar
+                planejando o dia.
               </p>
             </div>
             <Link className="product-primary-action" href={`/viagens/${tripId}/guia`}>
@@ -209,11 +205,11 @@ export default async function TripOverviewPage({
           <div>
             <p className="product-eyebrow">Perfil dos viajantes</p>
             <h2 id="traveler-context-title">
-              {profile ? "Contexto configurado" : "Personalização ainda não iniciada"}
+              {profile ? "Preferências informadas" : "Preferências ainda não informadas"}
             </h2>
           </div>
           <Link className="product-secondary-action" href={`/viagens/${tripId}/contexto`}>
-            {profile ? "Editar contexto" : "Configurar contexto"}
+            {profile ? "Editar preferências" : "Informar preferências"}
           </Link>
         </div>
 
@@ -249,10 +245,6 @@ export default async function TripOverviewPage({
                 {profile.budget ? formatBudget(profile.budget.totalCents) : "Ainda não informado"}
               </dd>
             </div>
-            <div>
-              <dt>Versão do perfil</dt>
-              <dd>v{profile.version}</dd>
-            </div>
           </dl>
         ) : (
           <p>
@@ -265,7 +257,7 @@ export default async function TripOverviewPage({
       <section className="trip-days-section" aria-labelledby="trip-days-title">
         <div className="section-heading-row">
           <div>
-            <p className="product-eyebrow">Estrutura temporal</p>
+            <p className="product-eyebrow">Dias da viagem</p>
             <h2 id="trip-days-title">{days.length} dias de viagem</h2>
           </div>
           <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
@@ -284,21 +276,18 @@ export default async function TripOverviewPage({
                   month: "long",
                 })}
               </strong>
-              <small>Organize atividades no roteiro manual</small>
+              <small>Organize atividades no roteiro</small>
             </li>
           ))}
         </ol>
       </section>
 
       <section className="traveler-context-summary" aria-labelledby="recommendations-title">
-        <p className="product-eyebrow">Sugestões contextualizadas</p>
-        <h2 id="recommendations-title">Transforme o Contexto em uma lista explicável</h2>
-        <p>
-          As Recommendations usam apenas dados conhecidos da Viagem. Elas não salvam Lugares nem
-          alteram o Roteiro automaticamente.
-        </p>
+        <p className="product-eyebrow">Sugestões para a viagem</p>
+        <h2 id="recommendations-title">Sugestões para sua viagem</h2>
+        <p>Compare lugares com base no que você informou sobre a viagem.</p>
         <Link className="product-secondary-action" href={`/viagens/${tripId}/recomendacoes`}>
-          Ver sugestões contextualizadas
+          Ver sugestões
         </Link>
       </section>
 
@@ -307,8 +296,8 @@ export default async function TripOverviewPage({
           <p className="product-eyebrow">Descoberta do destino</p>
           <h2 id="trip-next-steps-title">Explore lugares de {trip.destination.name}</h2>
           <p>
-            Compare lugares encontrados na região, ordenados pela mesma referência de distância. A
-            Fonte de cada dado é preservada quando relevante, sem criar tipos diferentes de Lugar.
+            Compare lugares da região e use a distância como referência para escolher o que faz
+            sentido para a viagem.
           </p>
         </div>
         <div className="section-heading-row">

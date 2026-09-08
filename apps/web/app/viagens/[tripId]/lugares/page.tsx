@@ -46,7 +46,6 @@ import {
 } from "../../../../lib/place-discovery-ranking";
 import {
   derivePlaceBootstrapStage,
-  placeBootstrapStageCopy,
   resolvePlaceBootstrapPolicy,
   runPlaceBootstrapStep,
 } from "../../../../lib/place-bootstrap";
@@ -75,7 +74,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Lugares da viagem — RouteBook",
-  description: "Explore lugares únicos e contextualizados do destino da sua viagem.",
+  description: "Explore lugares para visitar durante a sua viagem.",
 };
 
 type DiscoverySearchParams = {
@@ -146,21 +145,18 @@ function matchesExternalSearch(result: ExternalPlaceReconciliation, search?: str
 function placeActionErrorMessage(value?: string): string | undefined {
   switch (value) {
     case "candidato-invalido":
-      return "O Lugar informado é inválido. Atualize a busca antes de tentar novamente.";
+      return "Não foi possível usar este lugar. Atualize a busca e tente novamente.";
     case "candidato-nao-encontrado":
-      return "O Lugar não foi reencontrado na Fonte atual. Atualize a busca antes de tentar novamente.";
+      return "Este lugar não está mais disponível na busca atual. Atualize a busca e tente novamente.";
     case "candidato-rejeitado":
-      return "O Lugar não atende aos critérios atuais de identidade e não foi salvo.";
+      return "Não foi possível salvar este lugar. Atualize a busca ou escolha outra opção.";
     case "possivel-duplicata":
-      return "O RouteBook encontrou uma possível duplicidade e bloqueou a gravação para evitar dois registros do mesmo Lugar.";
+      return "Este lugar pode já estar disponível na viagem. Atualize a busca antes de tentar novamente.";
     case "fonte-indisponivel":
-      return "A Fonte não pôde revalidar este Lugar agora. Nenhuma alteração foi gravada.";
     case "destino-nao-suportado":
-      return "Não foi possível resolver uma região segura para este Lugar agora.";
     case "consistencia":
-      return "O Lugar possui um vínculo de identidade inconsistente. Nenhuma alteração parcial foi mantida.";
     case "erro-tecnico":
-      return "Não foi possível concluir a ação neste Lugar agora. Nenhuma alteração parcial foi mantida.";
+      return "Não foi possível salvar este lugar agora. Tente novamente.";
     default:
       return undefined;
   }
@@ -432,16 +428,10 @@ function ExternalDiscoveryCard({
       <details className={styles.cardDetails}>
         <summary>Mais informações</summary>
         <div className={styles.cardDetailsBody}>
-          <p>{candidate.addressLabel ?? "Endereço não informado pela Fonte"}</p>
-          <small>
-            Categoria informada pela Fonte: {providerCategoryLabel(candidate.providerCategory)}
-          </small>
+          <p>{candidate.addressLabel ?? "Endereço não informado"}</p>
           <small>Fonte: Overture · licença: {candidate.sourceLicense}</small>
           {!candidate.category ? (
-            <small>
-              Salvar fica disponível quando a Fonte informa uma categoria reconhecida pelo
-              RouteBook.
-            </small>
+            <small>Salvar ainda não está disponível para este lugar.</small>
           ) : null}
           <div className={styles.cardAuxiliaryActions}>
             <a
@@ -608,7 +598,7 @@ export default async function PlacesPage({
       });
     } else if (discoveryResult.status === "failed") {
       externalDiscoveryError =
-        "A Fonte de lugares não respondeu agora. Os dados já disponíveis continuam acessíveis normalmente.";
+        "Não foi possível atualizar os lugares encontrados agora. Os lugares já disponíveis continuam na lista.";
     }
   }
 
@@ -667,12 +657,9 @@ export default async function PlacesPage({
 
     if (qualityResult.status === "success") {
       qualityMatches = [...qualityResult.value];
-    } else if (qualityResult.status === "failed") {
-      qualityProviderError =
-        "Os sinais de qualidade não responderam agora. Os lugares continuam ordenados por proximidade.";
     } else {
       qualityProviderError =
-        "O enriquecimento de qualidade está pausado neste ambiente. Os lugares continuam disponíveis por proximidade.";
+        "Avaliação e popularidade não estão disponíveis agora. Use Mais próximos para ordenar.";
     }
   }
 
@@ -721,7 +708,6 @@ export default async function PlacesPage({
     discoveryStatus,
     mediaExpected: externalMediaItemIds.size > 0,
   });
-  const bootstrapCopy = placeBootstrapStageCopy(bootstrapStage);
   const mapPoints: TripMapPoint[] = ranking.items.map(({ item }) => {
     if (item.kind !== "external") {
       const coordinate =
@@ -796,22 +782,11 @@ export default async function PlacesPage({
           <p className="product-eyebrow">Guia de viagem</p>
           <h1>Lugares em {trip.destination.name}</h1>
           <p>
-            Explore uma lista única de Lugares encontrados para esta viagem. O RouteBook reconcilia
-            as Fontes disponíveis para evitar duplicatas. Para distância por ruas, duração e
-            trânsito, use as ações de rota real.
+            Compare lugares para decidir o que vale visitar. As distâncias da lista são em linha
+            reta; use as ações de rota para trajetos e tempo de deslocamento.
           </p>
         </div>
       </header>
-
-      <section
-        aria-label="Status do guia"
-        className={styles.notice}
-        data-place-bootstrap-stage={bootstrapStage}
-        role="status"
-      >
-        <strong>{bootstrapCopy.label}</strong>
-        <p>{bootstrapCopy.description}</p>
-      </section>
 
       <form action={`/viagens/${tripId}/lugares`} className={styles.filters} method="get">
         {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
@@ -874,8 +849,7 @@ export default async function PlacesPage({
 
       {!region ? (
         <p className={styles.notice} role="status">
-          Não há uma referência espacial confiável para esta viagem. O RouteBook não inventa centro,
-          distância ou cobertura de lugares.
+          Não foi possível calcular distâncias nem buscar lugares próximos agora.
         </p>
       ) : region.source === "accommodation" ? (
         <p className={styles.notice}>
@@ -884,8 +858,8 @@ export default async function PlacesPage({
         </p>
       ) : (
         <p className={styles.notice} role="status">
-          Sem hospedagem geocodificada, as distâncias usam a referência aproximada do destino. Elas
-          são estimativas em linha reta e não representam rota ou tempo de deslocamento.
+          Sem a localização da hospedagem, as distâncias usam uma referência aproximada do destino.
+          São estimativas em linha reta e não representam rota ou tempo de deslocamento.
         </p>
       )}
 
@@ -921,7 +895,7 @@ export default async function PlacesPage({
       <section aria-labelledby="place-ranking-title" className={styles.rankingPanel}>
         <div className={styles.rankingHeader}>
           <div>
-            <p className="product-eyebrow">Ranking RouteBook</p>
+            <p className="product-eyebrow">Ordenação</p>
             <h2 id="place-ranking-title">Como você quer ordenar?</h2>
           </div>
           <nav aria-label="Ordenação dos lugares" className={styles.rankingControls}>
@@ -954,9 +928,8 @@ export default async function PlacesPage({
         {ranking.hasQualityCoverage ? (
           <>
             <p className={styles.rankingNotice}>
-              Score RouteBook é derivado de sinais externos verificados e contexto da viagem; não é
-              uma nota criada pelo usuário. Rating, popularidade e Provider continuam identificados
-              em cada card.
+              O Score RouteBook combina sinais disponíveis e o contexto da viagem. Veja os detalhes
+              do ranking em cada lugar.
             </p>
             {topLists.length > 0 ? (
               <details className={styles.topLists}>
@@ -984,13 +957,7 @@ export default async function PlacesPage({
         ) : (
           <p className={styles.rankingNotice} role="status">
             {qualityProviderError ??
-              (qualityProvider.status === "configured"
-                ? `${qualityProvider.providerLabel} está configurado, mas nenhum sinal foi associado com segurança a esta seleção. O RouteBook não inventa um Top.`
-                : qualityProvider.status === "missing-secret"
-                  ? `${qualityProvider.providerLabel} foi selecionado, mas a credencial ainda não está provisionada. Até lá, somente Mais próximos é real.`
-                  : qualityProvider.status === "invalid-provider"
-                    ? "A configuração do Provider de qualidade é inválida. O ranking permanece por proximidade."
-                    : "Ranking por avaliação e popularidade aguarda um Provider de qualidade explicitamente configurado. Até lá, somente Mais próximos é exibido como ordenação real.")}
+              "Avaliação e popularidade não estão disponíveis para esta seleção. Use Mais próximos para ordenar."}
           </p>
         )}
       </section>
@@ -1006,26 +973,17 @@ export default async function PlacesPage({
                   filteredPublishedPlaces.length === 1 ? "lugar" : "lugares"
                 }`}
           </h2>
-          <p>
-            Lista e mapa usam o mesmo conjunto de Lugares. As Fontes são reconciliadas para evitar
-            duplicatas e permanecem disponíveis como Provenance quando relevante.
-          </p>
+          <p>A lista e o mapa mostram os mesmos lugares.</p>
         </div>
       </div>
 
-      {discoverExternal ? (
-        <section aria-label="Cobertura de lugares" className={styles.discoverySummary}>
-          <strong>Lugares reconciliados, sem duplicatas</strong>
-          <p>
-            O RouteBook compara identidades vindas das Fontes disponíveis antes de montar a grade.
-            Quando duas referências representam o mesmo Lugar, você vê uma única opção.
-          </p>
-          <p>
-            {externalCandidateCount} referências da Fonte foram avaliadas. {externalLinkedCount}{" "}
-            foram associadas com segurança a Lugares já conhecidos e {externalPossibleMatchCount}{" "}
-            possíveis duplicidades foram retidas de forma conservadora. {externalRejectedCount}{" "}
-            resultados foram descartados pela validação da Fonte ou categoria.
-          </p>
+      {discoverExternal &&
+      (placeActionError ||
+        priceRange ||
+        externalDiscoveryError ||
+        hasMoreExternalResults ||
+        hasExpandedExternalResults) ? (
+        <section aria-label="Mais lugares" className={styles.discoverySummary}>
           {placeActionError ? (
             <p className={styles.notice} role="alert">
               {placeActionError}
@@ -1033,8 +991,8 @@ export default async function PlacesPage({
           ) : null}
           {priceRange ? (
             <p className={styles.notice} role="status">
-              Nem todas as Fontes informam faixa de preço. O filtro é aplicado quando esse dado está
-              disponível e não exclui Lugares sem preço confirmado.
+              Alguns lugares não têm faixa de preço informada e podem continuar aparecendo nos
+              resultados.
             </p>
           ) : null}
           {externalDiscoveryError ? (
@@ -1123,7 +1081,7 @@ export default async function PlacesPage({
       )}
 
       <TripMap
-        description={`Mesmo conjunto da grade: ${visibleOptionCount} ${visibleOptionCount === 1 ? "Lugar único" : "Lugares únicos"}. A Hospedagem aparece como referência adicional quando disponível.`}
+        description={`A lista e o mapa mostram os mesmos ${visibleOptionCount} ${visibleOptionCount === 1 ? "lugar" : "lugares"}. A hospedagem aparece como referência adicional quando disponível.`}
         emptyDescription="Não há lugar com coordenadas no conjunto filtrado. Limpe ou amplie os filtros para recuperar resultados."
         emptyTitle="Nenhum lugar para exibir no mapa"
         points={mapPoints}

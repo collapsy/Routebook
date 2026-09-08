@@ -55,7 +55,7 @@ test("adiciona Place publicado ao Roteiro sem salvar automaticamente", async ({ 
 
   await page.goto(`/viagens/${trip.id}/lugares/chapadao-de-pipa#adicionar-ao-roteiro`);
 
-  await expect(page.getByRole("heading", { name: "Salvar como opção" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Salvar para depois" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Salvar lugar" })).toBeVisible();
 
   await page.getByLabel("Adicionar ao dia").selectOption("2026-08-23");
@@ -65,7 +65,7 @@ test("adiciona Place publicado ao Roteiro sem salvar automaticamente", async ({ 
 
   await expect(page.getByText(/Chapadão de Pipa foi adicionado ao Dia 2/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Salvar lugar" })).toBeVisible();
-  const itineraryLink = page.getByRole("link", { name: "Ver Dia no roteiro" });
+  const itineraryLink = page.getByRole("link", { name: "Ver dia no roteiro" });
   await expect(itineraryLink).toHaveAttribute(
     "href",
     `/viagens/${trip.id}/roteiro?dia=2026-08-23#dia-em-foco`,

@@ -171,7 +171,7 @@ describe("ItineraryProposalDecisionActions", () => {
 
     expect(screen.getByRole("button", { name: "Confirmar e aceitar proposta" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Descartar proposta" })).toBeDisabled();
-    expect(screen.getByText("Aplicando a seleção e atualizando o Roteiro…")).toBeVisible();
+    expect(screen.getByText("Aplicando seleção ao Roteiro…")).toBeVisible();
   });
 
   it("apresenta erro recuperável sem navegar", () => {

@@ -28,20 +28,19 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Sugestões para a viagem — RouteBook",
-  description:
-    "Consulte sugestões contextuais de lugares, com motivos, limitações e Provenance explícitos.",
+  description: "Compare sugestões de lugares e escolha o que faz sentido para a sua viagem.",
 };
 
 const errorMessages: Readonly<Record<string, string>> = {
   "recomendacao-nao-encontrada":
-    "A Recommendation não foi encontrada nesta Viagem. Atualize a lista e tente novamente.",
+    "Não foi possível encontrar esta sugestão. Atualize a lista e tente novamente.",
   "estado-incompativel":
-    "Esta Recommendation não pode mais receber esta ação porque seu estado foi atualizado.",
-  "acao-cross-trip": "A ação foi rejeitada porque os dados não pertencem à mesma Viagem.",
-  "lugar-nao-encontrado": "O Lugar não foi encontrado ou não está mais disponível.",
-  "responsavel-nao-encontrado": "A Viagem não possui um participante owner persistido.",
-  "dia-invalido": "Selecione explicitamente um Dia válido desta Viagem.",
-  "conflito-idempotencia": "Esta ação já foi enviada com dados diferentes. Atualize a página.",
+    "Esta sugestão mudou desde que você abriu a página. Atualize a lista e tente novamente.",
+  "acao-cross-trip": "Não foi possível concluir esta ação. Volte para a viagem e tente novamente.",
+  "lugar-nao-encontrado": "O lugar não foi encontrado ou não está mais disponível.",
+  "responsavel-nao-encontrado": "Não foi possível concluir esta ação nesta viagem.",
+  "dia-invalido": "Selecione um dia válido da viagem.",
+  "conflito-idempotencia": "A página ficou desatualizada. Atualize e tente novamente.",
 };
 
 function consideredStateLabels(card: RecommendationCardViewModel): readonly string[] {
@@ -59,27 +58,24 @@ function uncoveredDestinationCopy(
   switch (status) {
     case "failed":
       return {
-        title: "Não conseguimos atualizar os lugares agora",
-        description:
-          "A fonte de lugares ficou indisponível nesta tentativa. Nenhuma opção foi inventada; você pode tentar novamente mais tarde ou explorar os lugares já disponíveis.",
+        title: "Não foi possível atualizar os lugares agora",
+        description: "Tente novamente mais tarde ou explore os lugares já disponíveis.",
       };
     case "disabled":
       return {
-        title: "Busca de lugares indisponível",
-        description:
-          "A busca de novos lugares está desabilitada neste ambiente. Os dados já disponíveis continuam acessíveis normalmente.",
+        title: "Novos lugares estão indisponíveis agora",
+        description: "Você ainda pode explorar os lugares já disponíveis nesta viagem.",
       };
     case "unavailable":
       return {
-        title: "Ainda falta uma referência espacial",
+        title: "Informe uma localização para receber sugestões",
         description:
-          "O RouteBook precisa de uma localização válida do Destino ou da Hospedagem para procurar opções próximas sem inventar precisão.",
+          "Adicione uma localização válida do destino ou da hospedagem para encontrar lugares próximos.",
       };
     case "success":
       return {
         title: "Ainda não encontramos opções suficientes nesta região",
-        description:
-          "A busca atual não retornou lugares seguros para sugerir. Nenhuma categoria ou recomendação foi inventada.",
+        description: "Explore os lugares disponíveis ou tente novamente mais tarde.",
       };
   }
 }
@@ -136,19 +132,19 @@ export default async function RecommendationsPage({
 
       {ignorada === "1" ? (
         <p className={styles.success} role="status">
-          Recommendation ignorada. O Lugar, suas Preferências e o Roteiro não foram alterados.
+          Sugestão ignorada.
         </p>
       ) : null}
 
       {salva === "1" ? (
         <p className={styles.success} role="status">
-          Lugar salvo e escolha registrada. Nenhuma Activity foi criada automaticamente.
+          Lugar salvo. Você pode adicioná-lo ao roteiro quando quiser.
         </p>
       ) : null}
 
       {adicionada === "1" ? (
         <p className={styles.success} role="status">
-          Lugar adicionado ao Dia escolhido e Decision persistida com sucesso.
+          Lugar adicionado ao dia escolhido.
         </p>
       ) : null}
 
@@ -159,12 +155,11 @@ export default async function RecommendationsPage({
       ) : null}
 
       <header className={styles.heading}>
-        <p className={styles.eyebrow}>Decision Intelligence contextual</p>
+        <p className={styles.eyebrow}>Ideias para decidir</p>
         <h1>Sugestões para {experience.trip.name}</h1>
         <p>
-          Estas sugestões combinam o Contexto da viagem com lugares encontrados na região. A Fonte
-          dos dados é preservada quando relevante, e a leitura nunca salva um Lugar nem altera o
-          Roteiro automaticamente.
+          Compare opções sugeridas a partir do que você informou e dos lugares disponíveis na
+          região.
         </p>
       </header>
 
@@ -180,41 +175,34 @@ export default async function RecommendationsPage({
 
       {experience.destinationSupported && experience.hasContextLimitations ? (
         <section className={styles.notice} aria-labelledby="partial-context-heading">
-          <h2 id="partial-context-heading">Geração parcial com Contexto incompleto</h2>
+          <h2 id="partial-context-heading">Algumas preferências não puderam ser consideradas</h2>
           <p>
-            As sugestões continuam disponíveis, mas alguns critérios não puderam participar da
-            ordenação. Cada card identifica suas limitações de forma explícita.
+            As sugestões continuam disponíveis, mas podem ficar menos personalizadas. Revise suas
+            preferências para melhorar a seleção.
           </p>
           <Link className={styles.contextLink} href={`/viagens/${tripId}/contexto`}>
-            Revisar Contexto da viagem
+            Revisar preferências
           </Link>
         </section>
       ) : null}
 
       {experience.invalidatedCount > 0 ? (
         <p className={styles.notice} role="status">
-          O Contexto mudou. {experience.invalidatedCount} Recommendation
-          {experience.invalidatedCount === 1
-            ? " anterior foi invalidada"
-            : "s anteriores foram invalidadas"}
-          e a lista foi atualizada com os dados atuais.
+          As informações da viagem mudaram. Atualizamos a lista de sugestões.
         </p>
       ) : null}
 
       {discoverySuggestions.discoveryStatus === "failed" && experience.cards.length > 0 ? (
         <p className={styles.notice} role="status">
-          A atualização da fonte de lugares ficou indisponível nesta tentativa. As sugestões já
-          disponíveis continuam acessíveis normalmente.
+          Não foi possível buscar novos lugares agora. As sugestões já disponíveis continuam
+          acessíveis.
         </p>
       ) : null}
 
       {experience.destinationSupported && experience.cards.length === 0 && !hasExternalSuggestions ? (
         <section className={styles.empty}>
           <h2>Nenhuma sugestão disponível agora</h2>
-          <p>
-            Não há lugares seguros que possam ser apresentados pelas regras atuais. Nenhuma
-            alternativa foi criada artificialmente.
-          </p>
+          <p>Explore os lugares da viagem ou revise suas preferências para encontrar outras opções.</p>
         </section>
       ) : null}
 
@@ -222,17 +210,14 @@ export default async function RecommendationsPage({
         <>
           <section className={styles.summary} aria-labelledby="recommendation-summary-heading">
             <h2 id="recommendation-summary-heading">
-              {showAll ? "Lista completa e explicável" : "Sugestões para decidir agora"}
+              {showAll ? "Todas as sugestões" : "Sugestões para decidir agora"}
             </h2>
             {showAll ? (
-              <p>
-                Exibindo todas as {experience.cards.length} sugestões na ordem produzida pelo
-                mecanismo determinístico. A interface não recalcula nem reordena essa lista.
-              </p>
+              <p>Exibindo todas as {experience.cards.length} sugestões.</p>
             ) : (
               <p>
-                Exibindo {focusedPresentation.focusedCards.length} de {experience.cards.length}{" "}
-                sugestões como seleção inicial, sempre na ordem original.
+                Mostrando {focusedPresentation.focusedCards.length} de {experience.cards.length}{" "}
+                sugestões para começar.
                 {focusedPresentation.remainingPendingCount > 0
                   ? ` Há ${focusedPresentation.remainingPendingCount} outra${focusedPresentation.remainingPendingCount === 1 ? "" : "s"} sugestão${focusedPresentation.remainingPendingCount === 1 ? "" : "ões"} ainda pendente${focusedPresentation.remainingPendingCount === 1 ? "" : "s"}.`
                   : ""}
@@ -247,8 +232,7 @@ export default async function RecommendationsPage({
               {experience.rejectedCount > 0
                 ? ` e ${experience.rejectedCount} ignorada${experience.rejectedCount === 1 ? "" : "s"}`
                 : ""}
-              . A ordem usa correspondência de interesses e distância geodésica quando esses dados
-              estão disponíveis.
+              . Use os motivos e limitações de cada opção para comparar.
             </p>
             <div className={styles.viewControls} aria-label="Modo de visualização das sugestões">
               {showAll ? (
@@ -298,10 +282,7 @@ export default async function RecommendationsPage({
               <div className={styles.consideredHeading}>
                 <div>
                   <h2 id="considered-recommendations-heading">Opções já consideradas</h2>
-                  <p>
-                    Estes rótulos apenas resumem estados existentes. Nenhuma sugestão foi
-                    reclassificada por esta visualização.
-                  </p>
+                  <p>Você pode revisar essas opções ou abrir a lista completa.</p>
                 </div>
                 <Link
                   className={styles.modeLink}
@@ -336,9 +317,8 @@ export default async function RecommendationsPage({
               <h2 id="places-to-consider-heading">Lugares para considerar agora</h2>
             </div>
             <p>
-              Estas opções foram encontradas na região atual e são ordenadas por interesses
-              conhecidos e proximidade. A Fonte é preservada como metadado, sem criar um tipo
-              diferente de Lugar.
+              Estas opções consideram seus interesses conhecidos e a proximidade na região da
+              viagem.
             </p>
           </div>
 

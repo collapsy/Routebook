@@ -18,10 +18,10 @@ function resolverUnavailableMessage(
   reason: "disabled" | "blocked" | "invalid-configuration",
 ): string {
   if (reason === "disabled")
-    return "Selecione um destino sugerido ou tente novamente quando a busca de destinos estiver disponível.";
+    return "Não foi possível localizar esse destino agora. Tente novamente mais tarde.";
   if (reason === "blocked")
-    return "A busca textual de destinos está bloqueada neste ambiente por segurança. Selecione uma sugestão da lista.";
-  return "A busca de destinos está com uma configuração inválida. Selecione uma sugestão da lista ou tente novamente mais tarde.";
+    return "Não foi possível localizar esse destino pelo texto digitado. Selecione uma sugestão da lista.";
+  return "Não foi possível localizar esse destino agora. Selecione uma sugestão da lista ou tente novamente mais tarde.";
 }
 
 function createDestinationSelectionResetToken(): string {
@@ -48,8 +48,7 @@ function selectedDestinationError(
   if (result.reason === "blocked" || result.reason === "misconfigured") {
     return {
       fieldErrors: {},
-      formError:
-        "A seleção de destinos não está disponível neste ambiente. Seu texto foi preservado; tente novamente mais tarde.",
+      formError: "Não foi possível confirmar o destino agora. Tente novamente mais tarde.",
       destinationSelectionResetToken,
     };
   }
@@ -167,7 +166,7 @@ export async function createTripAction(
     console.error("Falha ao criar viagem autenticada", error);
     return {
       fieldErrors: {},
-      formError: "Não foi possível salvar a viagem agora. Revise a conexão e tente novamente.",
+      formError: "Não foi possível criar a viagem agora. Tente novamente.",
       ...(destinationSelectionResetToken ? { destinationSelectionResetToken } : {}),
     };
   }

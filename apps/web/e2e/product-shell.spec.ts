@@ -22,7 +22,7 @@ test("cria, abre e mantém uma viagem persistida", async ({ page }, testInfo) =>
   const tripName = `Pipa persistida ${testInfo.project.name} ${Date.now()}`;
 
   await createPipaTripThroughUi(page, tripName);
-  await expect(page.getByRole("status")).toContainText("Viagem criada e salva");
+  await expect(page.getByRole("status")).toContainText("Viagem criada.");
   await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
 
   await page.getByRole("link", { name: tripName }).click();
@@ -43,7 +43,10 @@ test("configura e mantém o contexto progressivo da viagem", async ({ page }, te
   await createPipaTripThroughUi(page, tripName);
   await page.getByRole("link", { name: tripName }).click();
 
-  await page.getByRole("link", { name: "Configurar contexto" }).click();
+  await page
+    .getByLabel("Preferências ainda não informadas")
+    .getByRole("link", { name: "Informar preferências" })
+    .click();
   await page.getByLabel("Quantidade de viajantes").fill("3");
   await page.getByLabel("Praias").check();
   await page.getByLabel("Gastronomia").check();
@@ -54,7 +57,7 @@ test("configura e mantém o contexto progressivo da viagem", async ({ page }, te
   await page.getByRole("button", { name: "Salvar contexto" }).click();
 
   await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\?contextUpdated=1$/);
-  await expect(page.getByRole("status")).toContainText("Contexto da viagem salvo");
+  await expect(page.getByRole("status")).toContainText("Preferências da viagem salvas.");
   await expect(page.getByText("Praias, Gastronomia, Vida noturna")).toBeVisible();
   await expect(page.getByText("Equilibrado", { exact: true })).toBeVisible();
   await expect(page.getByText("Aplicativos e táxi", { exact: true })).toBeVisible();
@@ -62,7 +65,10 @@ test("configura e mantém o contexto progressivo da viagem", async ({ page }, te
 
   await page.reload();
   await expect(page.getByText("Praias, Gastronomia, Vida noturna")).toBeVisible();
-  await page.getByRole("link", { name: "Editar contexto" }).click();
+  await page
+    .getByLabel("Preferências informadas")
+    .getByRole("link", { name: "Editar preferências" })
+    .click();
   await expect(page.getByLabel("Quantidade de viajantes")).toHaveValue("3");
   await expect(page.getByLabel("Praias")).toBeChecked();
 });

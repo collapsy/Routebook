@@ -40,8 +40,7 @@ export function AccommodationForm({
       <div className="form-field form-field-wide">
         <h2>Onde você vai ficar?</h2>
         <p className="field-hint">
-          Informe a hospedagem e salve. O RouteBook tenta localizar o endereço automaticamente para
-          habilitar mapa e distâncias — você não precisa procurar coordenadas.
+          Informe a hospedagem para usar o local como referência em mapas e distâncias.
         </p>
         {accommodation?.coordinate ? (
           <p className="field-hint" role="status">
@@ -61,8 +60,8 @@ export function AccommodationForm({
           placeholder="Ex.: Hotel, pousada, condomínio ou apartamento"
         />
         <p className="field-hint" id="accommodationName-hint">
-          Se você ainda não souber o endereço, tentaremos localizar pelo nome e pelo destino da
-          viagem. Deixe nome e endereço vazios para remover a hospedagem.
+          Se ainda não souber o endereço, informe só o nome. Deixe nome e endereço vazios para
+          remover a hospedagem.
         </p>
         <FieldError id="accommodationName-error" message={state.fieldErrors.accommodationName} />
       </div>
@@ -89,8 +88,8 @@ export function AccommodationForm({
       <details className="form-field form-field-wide">
         <summary>Opções avançadas de localização</summary>
         <p className="field-hint">
-          Use coordenadas manualmente somente se a localização automática não encontrar a
-          hospedagem. Informe latitude e longitude juntas.
+          Use coordenadas somente se a localização não estiver correta. Informe latitude e longitude
+          juntas.
         </p>
 
         <div className="trip-form">
@@ -105,7 +104,7 @@ export function AccommodationForm({
               placeholder="Ex.: -29,3746"
             />
             <p className="field-hint" id="accommodationLatitude-hint">
-              Preencher manualmente substitui a localização automática neste salvamento.
+              Use junto com a longitude para indicar o ponto exato.
             </p>
             <FieldError
               id="accommodationLatitude-error"
@@ -136,9 +135,9 @@ export function AccommodationForm({
 
       <div className="form-actions form-field-wide">
         <button className="product-button" disabled={pending} type="submit">
-          {pending ? "Localizando e salvando…" : "Salvar hospedagem"}
+          {pending ? "Salvando hospedagem…" : "Salvar hospedagem"}
         </button>
-        <p>Mapa e distâncias são atualizados quando a localização é confirmada.</p>
+        <p>Quando a localização estiver disponível, ela será usada no mapa e nas distâncias.</p>
       </div>
     </form>
   );

@@ -40,23 +40,18 @@ export function ItineraryProposalReview({
       >
         <div>
           <span className={styles.status}>
-            {isExpired ? "Proposta expirada — somente referência" : "Sugestão — ainda não aplicada"}
+            {isExpired ? "Proposta expirada" : "Proposta aguardando sua decisão"}
           </span>
           <h2 id="proposal-review-summary-title">
-            {isExpired
-              ? "Consulte o histórico desta proposta"
-              : "Revise antes de alterar seu Roteiro"}
+            {isExpired ? "Consulte esta proposta como referência" : "Revise antes de aplicar"}
           </h2>
           {isExpired ? (
             <p>
               A validade terminou em {review.expiredAtLabel}. Esta proposta não pode mais ser
-              aplicada. O Roteiro atual permanece preservado.
+              aplicada.
             </p>
           ) : (
-            <p>
-              Criamos uma proposta com base no contexto registrado da viagem. O Roteiro atual
-              permanece preservado e nenhuma mudança abaixo foi aplicada.
-            </p>
+            <p>Compare as mudanças sugeridas e escolha se deseja aplicá-las ao Roteiro.</p>
           )}
         </div>
         <dl aria-label="Resumo da proposta">
@@ -74,13 +69,13 @@ export function ItineraryProposalReview({
       {!review.isBasedOnCurrentItinerary ? (
         <aside className={styles.staleNotice} role="status">
           <strong>O Roteiro mudou depois desta proposta</strong>
-          <p>Use o conteúdo apenas como referência e confirme os dados no Roteiro atual.</p>
+          <p>Use o conteúdo como referência e confira o Roteiro atual antes de decidir.</p>
         </aside>
       ) : null}
 
       <section className={styles.context} aria-labelledby="proposal-review-context-title">
         <div>
-          <p className={styles.eyebrow}>Contexto usado</p>
+          <p className={styles.eyebrow}>O que foi considerado</p>
           <h2 id="proposal-review-context-title">Critérios da proposta</h2>
           <ul>
             {review.criteria.map((criterion, index) => (
@@ -94,7 +89,7 @@ export function ItineraryProposalReview({
             <dd>{review.generatedAtLabel}</dd>
           </div>
           <div>
-            <dt>Validade registrada</dt>
+            <dt>Válida até</dt>
             <dd>{review.validUntilLabel}</dd>
           </div>
           {isExpired ? (
@@ -108,7 +103,7 @@ export function ItineraryProposalReview({
 
       <section className={styles.limitations} aria-labelledby="proposal-review-limitations-title">
         <div>
-          <p className={styles.eyebrow}>Antes de considerar</p>
+          <p className={styles.eyebrow}>Antes de decidir</p>
           <h2 id="proposal-review-limitations-title">Limitações</h2>
         </div>
         {review.limitations.length > 0 ? (
@@ -134,7 +129,7 @@ export function ItineraryProposalReview({
         {review.days.length === 0 ? (
           <div className={styles.emptyChanges} role="status">
             <strong>Nenhuma mudança adequada foi proposta</strong>
-            <p>Os critérios e as justificativas continuam disponíveis para revisão.</p>
+            <p>Revise os critérios e limitações ou volte ao Roteiro para continuar manualmente.</p>
           </div>
         ) : (
           <ol className={styles.days} aria-label="Mudanças propostas por dia">
@@ -216,7 +211,7 @@ export function ItineraryProposalReview({
 
       <section className={styles.justifications} aria-labelledby="proposal-review-reasons-title">
         <div>
-          <p className={styles.eyebrow}>Transparência</p>
+          <p className={styles.eyebrow}>Por que foi sugerido</p>
           <h2 id="proposal-review-reasons-title">Justificativas</h2>
         </div>
         <ol>
@@ -226,11 +221,11 @@ export function ItineraryProposalReview({
         </ol>
       </section>
 
-      <p className={styles.preservation} role="note">
-        {isExpired
-          ? "Esta proposta expirada é somente uma referência histórica. O Roteiro confirmado não foi alterado."
-          : "Esta proposta ainda não alterou o Roteiro. Uma confirmação explícita é necessária para aplicar as mudanças."}
-      </p>
+      {isExpired ? (
+        <p className={styles.preservation} role="note">
+          Esta proposta expirou e não pode mais ser aplicada.
+        </p>
+      ) : null}
 
       {!isExpired ? (
         <ItineraryProposalDecisionActions

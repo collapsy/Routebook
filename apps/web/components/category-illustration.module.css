@@ -31,6 +31,19 @@
   text-shadow: 0 1px 8px rgb(0 0 0 / 35%);
 }
 
+.badge {
+  background: rgb(15 23 42 / 78%);
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 750;
+  line-height: 1;
+  padding: 0.48rem 0.68rem;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 40%);
+}
+
 .eyebrow {
   font-size: 0.68rem;
   font-weight: 850;

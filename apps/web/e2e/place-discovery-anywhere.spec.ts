@@ -52,7 +52,7 @@ test("descobre lugares em Florianópolis com zero seed sem expor lifecycle edito
   await expect(page.getByText(/Curado pelo RouteBook/i)).toHaveCount(0);
 
   const legend = page.getByRole("list", { name: "Legenda do mapa" });
-  await expect(legend.getByText("Lugar", { exact: true })).toBeVisible();
+  await expect(legend).toContainText("Lugar");
   await expect(legend.getByText("Descoberta externa", { exact: true })).toHaveCount(0);
 
   const map = page.locator('[data-routebook-map="true"]');

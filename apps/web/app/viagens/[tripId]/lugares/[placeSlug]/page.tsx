@@ -330,7 +330,9 @@ export default async function PlaceDetailsPage({
         <div className="section-heading-row">
           <div>
             <p className="product-eyebrow">Salvos</p>
-            <h2 id="saved-place-title">{savedPlace ? "Este lugar está salvo" : "Salvar para depois"}</h2>
+            <h2 id="saved-place-title">
+              {savedPlace ? "Este lugar está salvo" : "Salvar para depois"}
+            </h2>
             <p>
               {savedPlace
                 ? "Remover dos salvos não remove o que já estiver no roteiro."

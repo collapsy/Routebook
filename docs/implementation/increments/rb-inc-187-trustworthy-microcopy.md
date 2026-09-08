@@ -170,6 +170,30 @@ O inventário deve distinguir:
 
 Neste lote, continuam preservados nomes acessíveis, atribuição de dados de destino e validações de datas/hospedagem, pois comunicam significado ou recuperação reais.
 
+### 6.2 Lote 2 — Visão geral + Hospedagem
+
+| Superfície | Antes | Depois | Motivo |
+| --- | --- | --- | --- |
+| Visão geral — descrição | `contexto estrutural`, `contexto progressivo` e garantia de não executar mudanças | resumo dos dados da viagem + próximo passo | remove arquitetura e side-effect disclaimer sem perder orientação |
+| Visão geral — versão | `Contexto estrutural vN` | remover | metadado interno não muda nenhuma decisão do viajante |
+| Visão geral — responsável | `Owner não identificado` | `Responsável não informado` | troca jargão por linguagem humana |
+| Mapa — falha | `A fonte de lugares não respondeu... dados já disponíveis continuam acessíveis normalmente.` | `Não foi possível atualizar os lugares próximos agora. Os lugares já disponíveis continuam no mapa.` | comunica resultado observável e preserva continuidade |
+| Mapa — indisponível | `A busca de novos lugares está pausada neste ambiente.` | `Não foi possível buscar novos lugares agora.` | remove referência ao ambiente/configuração |
+| Mapa — origem | `A origem dos dados é preservada na Fonte...` | remover do resumo do mapa | Provenance continua disponível onde relevante, sem ocupar a descrição principal |
+| Perfil | `Contexto configurado`, `Configurar contexto`, `Versão do perfil` | `Preferências informadas`, `Informar preferências`; remover versão | linguagem traveler-facing e sem metadata técnica |
+| Dias | `Estrutura temporal` / `roteiro manual` | `Dias da viagem` / `Organize atividades no roteiro` | remove linguagem estrutural e distinção técnica desnecessária |
+| Sugestões | `Transforme o Contexto em uma lista explicável` + garantia de ausência de efeitos colaterais | `Sugestões para sua viagem` + base da personalização | explica o valor da lista, não sua implementação |
+| Descoberta | explicação de mesma referência de distância, Fonte e tipos de Lugar | orientação para comparar lugares e decidir | reduz justificativa interna sem remover a distância das próprias opções |
+| Hospedagem — sucesso | `salva e localização confirmada... já podem usar esse ponto` | `Hospedagem salva. Mapa e distâncias já usam essa localização.` | estado + efeito direto |
+| Hospedagem — localização não confirmada | explicação de localização automática + garantia de restante da viagem | `Hospedagem salva, mas não foi possível confirmar a localização. Tente um endereço mais completo ou use as opções avançadas.` | prioriza recuperação concreta |
+| Hospedagem — introdução | explica tentativa automática de localizar | informa que a hospedagem é referência para mapa e distâncias | explica por que o dado importa, não como é resolvido |
+| Formulário de hospedagem | `tenta localizar automaticamente`, `você não precisa procurar coordenadas` | orientação curta sobre uso em mapas e distâncias | remove pipeline e reassurance permanente |
+| Nome da hospedagem | explica tentativa por nome + destino | `Se ainda não souber o endereço, informe só o nome.` | mantém opção útil sem narrar estratégia |
+| Coordenadas avançadas | `localização automática`, `substitui... neste salvamento` | orientação manual apenas quando necessário | reduz detalhes de precedência interna |
+| Salvamento | `Localizando e salvando…` | `Salvando hospedagem…` | feedback da ação solicitada, não das etapas internas |
+
+Neste lote, a indicação de localização disponível e a relação da hospedagem com mapa/distâncias são preservadas porque afetam diretamente a interpretação das distâncias.
+
 ## 7. Linguagem e semântica
 
 - preservar os conceitos oficiais de RB-DOM-002;

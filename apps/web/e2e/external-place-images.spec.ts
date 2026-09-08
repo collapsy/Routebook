@@ -71,7 +71,7 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
   });
   await expect(externalCard.getByRole("img", { name: preview.altText })).toBeVisible();
   await expect(externalCard).toContainText("Fonte: Overture");
-  await expect(externalCard).toContainText("Candidato externo — ainda não publicado");
+  await expect(externalCard).not.toContainText("Candidato externo — ainda não publicado");
   await expect(externalCard).toContainText("Teste RouteBook");
   await expect(externalCard).toContainText("CC BY-SA 4.0");
   await expect(externalCard).toContainText("Wikimedia Commons");
@@ -80,10 +80,11 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
     preview.sourceUrl,
   );
 
-  const name = (await externalCard.locator(":scope > strong").innerText()).trim();
-  const routeHref = await externalCard
-    .getByRole("link", { name: "Calcular rota real" })
-    .getAttribute("href");
+  const name = (await externalCard.getByRole("heading", { level: 3 }).innerText()).trim();
+  await externalCard.getByText("Mais informações", { exact: true }).click();
+  const routeLink = externalCard.getByRole("link", { name: "Calcular rota real" });
+  await expect(routeLink).toBeVisible();
+  const routeHref = await routeLink.getAttribute("href");
   expect(routeHref).toBeTruthy();
   expect(new URL(routeHref!).searchParams.get("destination")?.toLocaleLowerCase("pt-BR")).toContain(
     name.toLocaleLowerCase("pt-BR"),
@@ -102,10 +103,12 @@ test("mantém rota real do candidato externo sem hospedagem usando a localizaç�
   await page.goto(`/viagens/${trip.id}/lugares`);
 
   const externalCard = page.locator('[data-place-source="external"]').first();
+  await expect(externalCard).toBeVisible({ timeout: 20_000 });
+  const name = (await externalCard.getByRole("heading", { level: 3 }).innerText()).trim();
+  await externalCard.getByText("Mais informações", { exact: true }).click();
   const routeLink = externalCard.getByRole("link", { name: "Calcular rota real" });
-  await expect(routeLink).toBeVisible({ timeout: 20_000 });
+  await expect(routeLink).toBeVisible();
 
-  const name = (await externalCard.locator(":scope > strong").innerText()).trim();
   const routeHref = await routeLink.getAttribute("href");
   expect(routeHref).toBeTruthy();
 

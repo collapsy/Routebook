@@ -298,10 +298,10 @@ test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ 
     page,
     () => page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
     /adicionadoAoRoteiro=1$/,
-    "continua salvo",
+    "Lugar adicionado ao roteiro.",
   );
 
-  await expect(page.getByRole("status")).toContainText("continua salvo");
+  await expect(page.getByRole("status")).toContainText("Lugar adicionado ao roteiro.");
   await expect(page.getByRole("heading", { name: placeName })).toBeVisible();
 
   await page.getByRole("link", { name: "Abrir roteiro" }).click();

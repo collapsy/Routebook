@@ -13,7 +13,6 @@ import styles from "./place-primary-image.module.css";
 export function PlacePrimaryImage({
   placeName,
   primaryImage,
-  category: _category,
   showProvenance = false,
   priority = false,
   compactFallback = true,

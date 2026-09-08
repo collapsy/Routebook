@@ -49,9 +49,9 @@ jobs:
           places = places_path.read_text()
           old = "Calcular rota real"
           new = "Ver rota"
-          if places.count(old) != 1:
+          if places.count(old) != 2:
               raise SystemExit(
-                  f"Esperava exatamente uma ocorrência de {old!r}; encontrei {places.count(old)}."
+                  f"Esperava exatamente duas ocorrências de {old!r}; encontrei {places.count(old)}."
               )
           places_path.write_text(places.replace(old, new))
 

@@ -68,6 +68,8 @@ A implementação atual cumpre muitos requisitos simultaneamente dentro de cada 
 
 Apesar de corretos isoladamente, esses elementos competem pelo mesmo nível de atenção. O resultado contraria RB-CMP-052, que define Nome e Distância como prioritários e determina que o Place Card não sobrecarregue ações.
 
+A validação visual humana de 2026-09-08 acrescentou um segundo problema de hierarquia: o fallback de mídia imprimia categoria, `Referência visual` e uma justificativa longa diretamente sobre a ilustração. Além de repetir informação já disponível no corpo do card, o texto tinha contraste frágil e fazia a interface parecer explicar sua implementação em vez de apoiar a decisão.
+
 ## 4. Hierarquia autorizada
 
 ### Nível 1 — decisão rápida
@@ -124,7 +126,11 @@ A diferença técnica não deve ser explicada como `externo` vs. `publicado`.
 - mobile usa uma coluna;
 - imagem mantém proporção consistente;
 - título e fatos principais usam ordem visual previsível;
-- metadados secundários não devem ter peso semelhante ao título.
+- metadados secundários não devem ter peso semelhante ao título;
+- fallback de mídia de Lugar usa a ilustração como apoio visual, não como superfície de explicação;
+- no fallback do card, a arte pode exibir apenas um selo curto `Imagem ilustrativa`, com contraste robusto e sem repetir Categoria;
+- explicações como `Referência visual`, `não é foto do local`, estado técnico da busca ou motivo do fallback não devem ocupar a arte do card;
+- o estado acessível pode continuar distinguindo ilustração e fotografia sem obrigar o usuário visual a ler justificativas técnicas.
 
 ## 7. Acessibilidade
 
@@ -133,7 +139,8 @@ A diferença técnica não deve ser explicada como `externo` vs. `publicado`.
 - não depender apenas de cor;
 - estados Salvo/Planejado continuam textuais quando exibidos;
 - alvo de toque das ações continua adequado;
-- conteúdo escondido por divulgação progressiva não pode conter a única forma de executar a ação principal.
+- conteúdo escondido por divulgação progressiva não pode conter a única forma de executar a ação principal;
+- fallback ilustrativo mantém nome acessível inequívoco, mesmo quando a apresentação visual é reduzida a um selo curto.
 
 ## 8. Fora de escopo
 
@@ -143,6 +150,7 @@ A diferença técnica não deve ser explicada como `externo` vs. `publicado`.
 - migrations ou persistência;
 - redesenhar Detalhes, Salvos ou Roteiro;
 - criar novo fluxo de materialização;
+- reescrever microcopy de outras superfícies do produto neste incremento; essa auditoria transversal deve ser tratada em incremento separado;
 - Production;
 - merge em `main` sem autorização humana.
 
@@ -154,6 +162,11 @@ apps/web/app/viagens/[tripId]/lugares/place-discovery.module.css
 apps/web/components/place-ranking-meta.tsx
 apps/web/components/place-ranking-meta.module.css
 apps/web/components/place-ranking-meta.test.tsx
+apps/web/components/category-illustration.tsx
+apps/web/components/category-illustration.module.css
+apps/web/components/category-illustration.test.tsx
+apps/web/components/place-primary-image.tsx
+apps/web/components/place-primary-image.test.tsx
 apps/web/components/external-place-image-preview.tsx
 apps/web/components/external-place-image-preview.test.tsx
 apps/web/e2e/place-discovery-anywhere.spec.ts
@@ -174,6 +187,8 @@ docs/registry.md
 
 Arquivos adicionais exigem atualização deste incremento antes da alteração.
 
+`apps/web/components/category-illustration.tsx`, `category-illustration.module.css`, `category-illustration.test.tsx`, `place-primary-image.tsx` e `place-primary-image.test.tsx` foram incluídos em 2026-09-08 após validação visual humana do Preview identificar excesso de justificativa e contraste insuficiente dentro do fallback ilustrativo dos Place Cards. A alteração autorizada é somente de apresentação para o fallback de Lugar: manter a capacidade descritiva existente para outros contextos e adicionar uma variante compacta com selo curto `Imagem ilustrativa`.
+
 `apps/web/e2e/recommendations-experience.spec.ts` foi incluído em 2026-09-08 após a suíte responsiva completa revelar uma asserção textual legada da taxonomia anterior ao RB-INC-185 (`Recomendações canônicas`/`Descobertas externas`). A correção é limitada à regressão de linguagem já autorizada pela experiência unificada de Lugar; não altera Recommendations, ranking, domínio ou persistência.
 
 `apps/web/e2e/route-destination-reliability.spec.ts` foi incluído em 2026-09-08 após a suíte responsiva revelar seletores anteriores à nova anatomia do card e uma leitura direta de `Calcular rota real`, agora corretamente protegido por `Mais informações`. A correção é limitada ao contrato E2E da hierarquia progressiva; não altera destino, roteamento, Google Maps ou dados persistidos.
@@ -191,6 +206,9 @@ Arquivos adicionais exigem atualização deste incremento antes da alteração.
 - [ ] Evidência detalhada de ranking fica disponível sem dominar o card.
 - [ ] Provenance continua consultável, mas não compete visualmente com a decisão.
 - [ ] Cards provider-first e materializados compartilham a mesma anatomia visual.
+- [ ] Fallback de mídia do Place Card mostra apenas `Imagem ilustrativa` sobre a arte e mantém contraste legível.
+- [ ] Categoria não é repetida dentro da ilustração quando já aparece no corpo do card.
+- [ ] Estados técnicos da busca/fallback não viram justificativa visual permanente no card.
 - [ ] Desktop evita cards excessivamente estreitos; mobile usa leitura em uma coluna.
 - [ ] Testes de componente e E2E cobrem hierarquia e ações críticas.
 - [ ] Documentation e Engineering Validation passam no mesmo SHA final.

@@ -220,9 +220,7 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
   await page.goto(focusHref!);
   await expect(page).toHaveURL(/\/recomendacoes$/);
   await expect(
-    page
-      .getByRole("list", { name: "Sugestões de lugares" })
-      .getByRole("heading", { level: 2 }),
+    page.getByRole("list", { name: "Sugestões de lugares" }).getByRole("heading", { level: 2 }),
   ).toHaveCount(6);
 });
 

@@ -190,9 +190,9 @@ export function TripDayGuide({
       </header>
 
       <div className={styles.disclosure} role="note">
-        <strong>Referências para planejar:</strong> horários e durações são sugestões. Distâncias nos
-        cards são em linha reta; abra o Google Maps para rota e tempo atuais. Confirme maré, clima,
-        funcionamento, preços e programação antes de sair.
+        <strong>Referências para planejar:</strong> horários e durações são sugestões. Distâncias
+        nos cards são em linha reta; abra o Google Maps para rota e tempo atuais. Confirme maré,
+        clima, funcionamento, preços e programação antes de sair.
       </div>
 
       {guide.coverageLimited ? (

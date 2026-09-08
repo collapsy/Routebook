@@ -252,7 +252,138 @@
 
 .optionsGrid > li > figure,
 .optionsGrid > li > div[data-external-place-image-state] {
+  order: -20;
+}
+
+.optionsGrid > li > .cardIdentity {
+  order: -15;
+}
+
+.optionsGrid > li > strong {
+  order: -14;
+  margin: 0;
+  font-size: clamp(1.2rem, 2vw, 1.45rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.optionsGrid > li > p {
+  order: -13;
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--foreground-muted);
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.optionsGrid > li > section[aria-label="Evidência do ranking"] {
+  order: -10;
+}
+
+.optionsGrid > li[data-place-source="published"] > small:nth-of-type(1),
+.optionsGrid > li[data-place-source="published"] > small:nth-of-type(4),
+.optionsGrid > li[data-place-source="external"] > small:nth-of-type(1),
+.optionsGrid > li[data-place-source="external"] > small:nth-of-type(3),
+.optionsGrid > li[data-place-source="external"] > small:nth-of-type(4) {
+  display: none;
+}
+
+.optionsGrid > li[data-place-source="published"] > small:nth-of-type(2) {
+  order: -12;
+  color: var(--foreground-muted);
+}
+
+.optionsGrid > li[data-place-source="published"] > small:nth-of-type(3),
+.optionsGrid > li[data-place-source="external"] > small:nth-of-type(2) {
+  order: -11;
+  display: inline-flex;
+  width: fit-content;
+  min-height: 2rem;
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--primary) 10%, var(--surface));
+  color: var(--primary-strong);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.optionsGrid > li[data-place-source="published"] .cardActions {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.optionsGrid > li[data-place-source="published"] .cardActions > :nth-child(3) {
   order: -2;
+  grid-column: 1;
+  grid-row: 1;
+  border-color: var(--primary-strong);
+  background: var(--primary-strong);
+  color: var(--primary-foreground);
+}
+
+.optionsGrid > li[data-place-source="published"] .cardActions > :nth-child(1) {
+  order: -1;
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.optionsGrid > li[data-place-source="published"] .cardActions > :nth-child(2) {
+  display: none;
+}
+
+.optionsGrid > li[data-place-source="published"] .cardActions > :nth-child(4),
+.optionsGrid > li[data-place-source="published"] .cardActions > :nth-child(5) {
+  min-height: auto;
+  padding: 0.35rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--foreground-muted);
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.optionsGrid > li[data-place-source="published"] .cardActions > :nth-child(4) {
+  grid-column: 1;
+}
+
+.optionsGrid > li[data-place-source="published"] .cardActions > :nth-child(5) {
+  grid-column: 2;
+}
+
+.optionsGrid > li[data-place-source="external"] .cardActions {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.optionsGrid > li[data-place-source="external"] .cardActions > :first-child {
+  border-color: var(--primary-strong);
+  background: var(--primary-strong);
+  color: var(--primary-foreground);
+}
+
+.optionsGrid > li[data-place-source="external"] .cardActions > :nth-child(2) {
+  min-height: auto;
+  align-self: center;
+  padding: 0.35rem 0.4rem;
+  border: 0;
+  background: transparent;
+  color: var(--foreground-muted);
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.optionsGrid > li[data-place-source="external"] .promotionForm {
+  margin-top: 0;
+}
+
+.optionsGrid > li[data-place-source="external"] .promotionForm button {
+  min-height: 2.8rem;
+  border: 1px solid var(--primary-strong);
+  background: transparent;
+  color: var(--primary-strong);
 }
 
 .visuallyHidden {
@@ -437,8 +568,18 @@
     grid-template-columns: 1fr;
   }
 
-  .cardActions {
+  .cardActions,
+  .optionsGrid > li[data-place-source="published"] .cardActions,
+  .optionsGrid > li[data-place-source="external"] .cardActions {
     grid-template-columns: 1fr;
+  }
+
+  .optionsGrid > li[data-place-source="published"] .cardActions > :nth-child(1),
+  .optionsGrid > li[data-place-source="published"] .cardActions > :nth-child(3),
+  .optionsGrid > li[data-place-source="published"] .cardActions > :nth-child(4),
+  .optionsGrid > li[data-place-source="published"] .cardActions > :nth-child(5) {
+    grid-column: 1;
+    grid-row: auto;
   }
 
   .cardAuxiliaryActions {

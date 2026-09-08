@@ -53,6 +53,9 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   if (enrichedTotal > 0) {
     const enrichedCard = enrichedPlaces.first();
     const enrichedName = (await enrichedCard.locator("h3").innerText()).trim();
+    const enrichedMoreInfo = enrichedCard.locator("summary").filter({ hasText: "Mais informações" });
+    await expect(enrichedMoreInfo).toBeVisible();
+    await enrichedMoreInfo.click();
     const enrichedRouteHref = await enrichedCard
       .getByRole("link", { name: "Calcular rota real" })
       .getAttribute("href");
@@ -88,6 +91,11 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(praiaDoAmorExternalCard).toHaveCount(0);
   await expect(praiaDoAmorCard.getByRole("link", { name: "Ver detalhes" })).toBeVisible();
   await expect(praiaDoAmorCard.getByRole("link", { name: "Adicionar ao roteiro" })).toHaveCount(0);
+  const praiaDoAmorMoreInfo = praiaDoAmorCard
+    .locator("summary")
+    .filter({ hasText: "Mais informações" });
+  await expect(praiaDoAmorMoreInfo).toBeVisible();
+  await praiaDoAmorMoreInfo.click();
   await expect(praiaDoAmorCard.getByRole("link", { name: "Ver mapa e fotos" })).toHaveAttribute(
     "href",
     /google\.com\/maps\/search/,

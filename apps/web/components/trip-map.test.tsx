@@ -220,6 +220,8 @@ describe("TripMap", () => {
     expect(map).toHaveAttribute("data-map-point-count", "26");
     expect(map).toHaveAttribute("data-map-external-count", "26");
     expect(screen.getByLabelText("Resumo do mapa")).toHaveTextContent("26 pontos representados");
-    expect(within(screen.getByRole("list", { name: "Legenda do mapa" })).getByText("Lugar")).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("list", { name: "Legenda do mapa" })).getByText("Lugar"),
+    ).toBeInTheDocument();
   });
 });

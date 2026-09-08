@@ -110,7 +110,7 @@ describe("contextual external suggestions", () => {
     );
   });
 
-  it("ignora itens canônicos e limita a projeção externa sem mutar a entrada", () => {
+  it("ignora itens já materializados e limita a projeção sem vazar lifecycle editorial", () => {
     const external = Array.from({ length: 8 }, (_, index) =>
       externalItem(
         `external-${index + 1}`,
@@ -150,8 +150,9 @@ describe("contextual external suggestions", () => {
     expect(suggestions.some((suggestion) => suggestion.name === "Place publicado")).toBe(false);
     expect(items.map((item) => item.id)).toEqual(originalIds);
     expect(suggestions[0]?.limitations).toContain(
-      "Esta é uma descoberta externa e ainda não é um Place publicado no catálogo do RouteBook.",
+      "Preço, avaliação pública, horário e disponibilidade não foram confirmados por esta sugestão.",
     );
+    expect(suggestions[0]?.limitations.join(" ")).not.toMatch(/publicad|catálogo|descoberta externa/i);
     expect(() =>
       buildContextualExternalSuggestions({
         tripId: "trip-gramado",

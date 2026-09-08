@@ -7,7 +7,7 @@ owner: Traveler Experience
 status: Draft
 version: "0.1.0"
 created: "2026-09-07"
-last_updated: "2026-09-07"
+last_updated: "2026-09-08"
 authors: [RouteBook Team]
 tags: [implementation, context-pack, places, discovery, ux, cards, progressive-disclosure]
 related_documents: [RB-INC-186, RB-CORE-0004, RB-UX-006, RB-DS-002, RB-DS-003, RB-INC-185]
@@ -37,7 +37,7 @@ Reduzir a carga cognitiva dos cards de Lugar na Discovery sem remover informaç�
 1. `AGENTS.md`;
 2. RB-CORE-0004 — valor antes de volume, visual antes de texto e linguagem clara;
 3. `docs/README.md`;
-4. RB-UX-006 — clareza, concisão e orientação do próximo passo;
+4. RB-UX-006 — clareza, concisão, informação de limitações sem insegurança desnecessária e orientação do próximo passo;
 5. RB-DS-002 — RB-CMP-023 Card, RB-CMP-052 Place Card, RB-CMP-054 Recommendation Reason;
 6. RB-DS-003 — um objetivo principal por contexto e progressão geral -> específico;
 7. RB-INC-185 — experiência unificada de Lugar provider-first;
@@ -49,6 +49,8 @@ O card atual concentra ranking completo, imagem, categoria, nome, resumo/endere�
 
 O problema é de hierarquia, não de falta de dados. A correção deve reorganizar e ocultar progressivamente o que não é necessário para a primeira decisão.
 
+A validação visual humana de 2026-09-08 confirmou também que o fallback ilustrativo estava transformando a imagem em superfície de documentação: Categoria, `Referência visual` e `Ilustração de categoria — não é foto do local` competiam com a arte, repetiam conteúdo do card e apresentavam contraste insuficiente. O fallback precisa informar sua natureza sem parecer justificativa de implementação.
+
 ## 5. Invariantes de UX
 
 - nome e Distância são prioritários;
@@ -59,12 +61,16 @@ O problema é de hierarquia, não de falta de dados. A correção deve reorganiz
 - ação de exploração não deve obrigar o usuário a entender materialização interna;
 - lista e mapa continuam semanticamente alinhados;
 - Place vindo de Provider e Place materializado usam a mesma anatomia visual;
-- o card não substitui a tela de Detalhes.
+- o card não substitui a tela de Detalhes;
+- a ilustração de fallback não repete Categoria nem explica pipeline de mídia;
+- no Place Card, o fallback visual usa apenas selo curto `Imagem ilustrativa` sobre a arte;
+- o nome acessível continua identificando explicitamente a ilustração e o Lugar, mesmo com microcopy visual reduzida.
 
 ## 6. Anatomia alvo
 
 ```text
-Imagem
+Imagem / ilustração
+  selo curto “Imagem ilustrativa” apenas quando for fallback
 Categoria / estado curto
 Nome
 Resumo curto opcional
@@ -79,6 +85,8 @@ Mais informações
 ```
 
 A ordem pode variar levemente por disponibilidade de dados, mas a hierarquia não.
+
+A mídia não deve repetir no interior da arte o que o corpo do card já informa. Estados de carregamento ou fallback podem continuar acessíveis e observáveis para testes, mas não precisam virar frases permanentes para o viajante.
 
 ## 7. Ranking
 
@@ -122,10 +130,13 @@ Não explicar essa diferença com termos `externo`, `publicado`, `candidato` ou 
 - Tablet: reduzir colunas antes de comprimir o conteúdo.
 - Mobile: uma coluna, ações com área de toque confortável e disclosure abaixo das ações principais.
 - Não truncar nome de Lugar em uma única linha; resumo pode usar clamp controlado.
+- O selo `Imagem ilustrativa` precisa manter contraste suficiente em todas as artes de categoria, sem depender do fundo específico da ilustração.
 
 ## 10. Caminhos permitidos
 
 Somente os caminhos declarados em RB-INC-186. O escopo inclui os testes de regressão e o fallback visual explicitamente registrados no incremento porque a nova linguagem de Lugar invalida contratos legados desses pontos.
+
+A variante compacta de `CategoryIllustration` é autorizada apenas para o fallback de Place Card neste incremento. Outros usos descritivos do componente não devem mudar silenciosamente; uma revisão transversal de microcopy pertence ao próximo incremento específico.
 
 ## 11. Testes mínimos
 
@@ -134,6 +145,9 @@ Somente os caminhos declarados em RB-INC-186. O escopo inclui os testes de regre
 - card provider-first não exibe CTA de curadoria nem excesso de ações primárias;
 - `Adicionar ao roteiro` não aparece na grade de Discovery;
 - Provenance continua acessível;
+- fallback do card renderiza visualmente apenas `Imagem ilustrativa`, sem Categoria/justificativa duplicada dentro da arte;
+- fallback mantém nome acessível que explicita ilustração e Lugar;
+- estado async de mídia continua observável sem expor pipeline como copy permanente;
 - E2E zero-seed, proximidade, mapa e regressão de filtros continuam operacionais;
 - mobile mantém uma coluna e os fluxos de salvar/detalhes funcionam.
 

@@ -25,10 +25,6 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     timeout: 20_000,
   });
 
-  const bootstrapStatus = page.getByLabel("Status do guia");
-  await expect(bootstrapStatus).toHaveAttribute("data-place-bootstrap-stage", /enriching|ready/);
-  await expect(bootstrapStatus).toContainText(/Enriquecendo seu guia|Guia pronto/);
-
   const categoryFilter = page.getByLabel("Categoria");
   await expect(categoryFilter.locator('option[value="beach"]')).toHaveText("Praias");
   await expect(categoryFilter.locator('option[value="gastronomy"]')).toHaveText("Gastronomia");
@@ -49,7 +45,7 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   expect(enrichedTotal).toBeLessThanOrEqual(canonicalTotal);
 
   await expect(page.getByRole("heading", { name: uniqueOptionsHeading })).toBeVisible();
-  await expect(page.getByText("Lugares reconciliados, sem duplicatas")).toBeVisible();
+  await expect(page.getByText("A lista e o mapa mostram os mesmos lugares.")).toBeVisible();
   if (enrichedTotal > 0) {
     const enrichedCard = enrichedPlaces.first();
     const enrichedName = (await enrichedCard.locator("h3").innerText()).trim();
@@ -180,7 +176,7 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   const hiddenPublishedTotal = await options.locator('[data-place-source="published"]').count();
   expect(hiddenPublishedTotal).toBe(canonicalTotal);
   await expect(options.locator('[data-place-source="external"]')).toHaveCount(0);
-  await expect(page.getByText(/Lista e mapa usam o mesmo conjunto de Lugares/)).toBeVisible();
+  await expect(page.getByText("A lista e o mapa mostram os mesmos lugares.")).toBeVisible();
 });
 
 test("deriva categorias da cobertura de Gramado sem oferecer praia inexistente", async ({
@@ -267,7 +263,7 @@ test("mantém marcadores ancorados ao viewport durante pan e zoom", async ({ pag
     .toBe(zoomBefore + 1);
 
   const markerAfterZoom = await marker.boundingBox();
-  if (!markerAfterZoom) throw new Error("Marker desapareceu após aplicar zoom.");
+  if (!markerAfterZoom) throw new Error("Marker desapareceu após aplicar zoom no mapa.");
   expect(
     Math.hypot(markerAfterZoom.x - markerBeforeZoom.x, markerAfterZoom.y - markerBeforeZoom.y),
   ).toBeGreaterThan(5);

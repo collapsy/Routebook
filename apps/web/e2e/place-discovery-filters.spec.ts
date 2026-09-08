@@ -175,7 +175,9 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(page.locator('[data-place-ranking-order="distance"]')).toBeVisible();
 
   await page.goto(`/viagens/${trip.id}/lugares?descoberta=ocultar`);
-  await expect(page.getByRole("heading", { name: `${canonicalTotal} lugares` })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: `${canonicalTotal} lugares`, exact: true }),
+  ).toBeVisible();
   const hiddenPublishedTotal = await options.locator('[data-place-source="published"]').count();
   expect(hiddenPublishedTotal).toBe(canonicalTotal);
   await expect(options.locator('[data-place-source="external"]')).toHaveCount(0);

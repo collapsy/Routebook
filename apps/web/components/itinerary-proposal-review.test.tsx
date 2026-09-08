@@ -216,7 +216,7 @@ describe("ItineraryProposalReview", () => {
     expect(
       screen.getByRole("heading", { name: "Consulte esta proposta como referência" }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/não pode mais ser aplicada/i)).toBeInTheDocument();
+    expect(screen.getByRole("note")).toHaveTextContent("não pode mais ser aplicada");
     expect(screen.getByText("Expirada em")).toBeInTheDocument();
     expect(screen.getByText("2 de ago. de 2026, 10:15")).toBeInTheDocument();
     expect(screen.getByText(/A validade terminou em/)).toHaveTextContent(

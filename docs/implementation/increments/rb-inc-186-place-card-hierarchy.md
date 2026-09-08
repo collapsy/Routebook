@@ -163,6 +163,7 @@ apps/web/e2e/accommodation-proximity.spec.ts
 apps/web/e2e/authenticated-trips.spec.ts
 apps/web/e2e/external-place-images.spec.ts
 apps/web/e2e/recommendations-experience.spec.ts
+apps/web/e2e/route-destination-reliability.spec.ts
 docs/implementation/increments/rb-inc-186-place-card-hierarchy.md
 docs/implementation/context-packs/rb-inc-186-place-card-hierarchy.md
 docs/implementation/traceability-matrix.md
@@ -172,6 +173,8 @@ docs/registry.md
 Arquivos adicionais exigem atualização deste incremento antes da alteração.
 
 `apps/web/e2e/recommendations-experience.spec.ts` foi incluído em 2026-09-08 após a suíte responsiva completa revelar uma asserção textual legada da taxonomia anterior ao RB-INC-185 (`Recomendações canônicas`/`Descobertas externas`). A correção é limitada à regressão de linguagem já autorizada pela experiência unificada de Lugar; não altera Recommendations, ranking, domínio ou persistência.
+
+`apps/web/e2e/route-destination-reliability.spec.ts` foi incluído em 2026-09-08 após a suíte responsiva revelar seletores anteriores à nova anatomia do card e uma leitura direta de `Calcular rota real`, agora corretamente protegido por `Mais informações`. A correção é limitada ao contrato E2E da hierarquia progressiva; não altera destino, roteamento, Google Maps ou dados persistidos.
 
 ## 10. Critérios de aceite
 

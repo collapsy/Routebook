@@ -1,5 +1,6 @@
 import {
   canPromoteExternalImageToControlledAsset,
+  placeDistanceMeters,
   type ExternalPlaceImageCandidate,
   type PlaceImagePort,
 } from "@routebook/place-catalog";
@@ -7,6 +8,7 @@ import {
 const COMMONS_API_URL = "https://commons.wikimedia.org/w/api.php";
 const SOURCE_NAME = "Wikimedia Commons";
 const MAX_RESULTS = 8;
+const MAX_SECURE_IMAGE_DISTANCE_METERS = 3_000;
 const USER_AGENT = "RouteBookPlaceImageBot/0.1 (https://github.com/collapsy/Routebook)";
 
 const REUSABLE_LICENSE_PATTERN = /^CC BY(?:-SA)? (?:2\.0|2\.5|3\.0|4\.0)$/i;
@@ -25,13 +27,43 @@ const PLACE_NAME_STOPWORDS = new Set([
   "baia",
   "lagoa",
 ]);
+const GENERIC_PLACE_IDENTITY_TOKENS = new Set([
+  "bar",
+  "beach",
+  "cafe",
+  "cafeteria",
+  "club",
+  "clube",
+  "dessert",
+  "food",
+  "mirante",
+  "nightclub",
+  "parque",
+  "park",
+  "postre",
+  "pub",
+  "restaurant",
+  "restaurante",
+  "sobremesa",
+  "viewpoint",
+]);
+const DESTINATION_CONTEXT_STOPWORDS = new Set([
+  "brasil",
+  "brazil",
+  "city",
+  "cidade",
+  "district",
+  "estado",
+  "region",
+  "regiao",
+]);
 const PLACE_TOKEN_ALIASES: Readonly<Record<string, readonly string[]>> = {
   centro: ["centre", "center"],
 };
 
 type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
-
 type MetadataValue = Readonly<{ value?: string }>;
+type CommonsCoordinate = Readonly<{ lat?: number; lon?: number; primary?: string }>;
 
 type CommonsImageInfo = Readonly<{
   descriptionurl?: string;
@@ -46,6 +78,7 @@ type CommonsPage = Readonly<{
   pageid?: number;
   title?: string;
   imageinfo?: readonly CommonsImageInfo[];
+  coordinates?: readonly CommonsCoordinate[];
 }>;
 
 type CommonsResponse = Readonly<{
@@ -72,6 +105,7 @@ export type WikimediaImageRecord = Readonly<{
   license: string;
   licenseUrl?: string;
   description: string;
+  coordinate?: Readonly<{ latitude: number; longitude: number }>;
 }>;
 
 export type WikimediaPlaceImagePreview = Readonly<{
@@ -88,6 +122,14 @@ export type WikimediaPlaceImagePreview = Readonly<{
 type WikimediaPlaceImageAdapterDependencies = Readonly<{
   fetcher?: FetchLike;
   now?: () => Date;
+}>;
+
+type PlaceImageLookup = Readonly<{
+  name: string;
+  latitude: number;
+  longitude: number;
+  externalId?: string;
+  contextLabel?: string;
 }>;
 
 function stripHtml(value: string): string {
@@ -120,6 +162,19 @@ function significantPlaceTokens(placeName: string): string[] {
     .filter((token) => token.length >= 3 && !PLACE_NAME_STOPWORDS.has(token));
 }
 
+function destinationContextTokens(value?: string): string[] {
+  if (!value) return [];
+  return normalizeIdentity(value)
+    .split(" ")
+    .filter(
+      (token) =>
+        token.length >= 3 &&
+        !PLACE_NAME_STOPWORDS.has(token) &&
+        !DESTINATION_CONTEXT_STOPWORDS.has(token),
+    )
+    .slice(0, 4);
+}
+
 function hasPlaceToken(combinedTokens: ReadonlySet<string>, token: string): boolean {
   if (combinedTokens.has(token)) return true;
   return (PLACE_TOKEN_ALIASES[token] ?? []).some((alias) => combinedTokens.has(alias));
@@ -150,7 +205,28 @@ function isReusableLicense(value: string): boolean {
 function previewAltText(placeName: string, description: string): string {
   const cleanedDescription = description.trim().replace(/\s+/g, " ");
   if (cleanedDescription.length >= 12) return cleanedDescription.slice(0, 220);
-  return `Fotografia de ${placeName} em Pipa ou Tibau do Sul.`;
+  return `Fotografia de ${placeName}.`;
+}
+
+function normalizeCoordinate(page: CommonsPage): Readonly<{
+  latitude: number;
+  longitude: number;
+}> | undefined {
+  const coordinate = page.coordinates?.find(({ primary }) => primary === "") ?? page.coordinates?.[0];
+  if (
+    !coordinate ||
+    typeof coordinate.lat !== "number" ||
+    !Number.isFinite(coordinate.lat) ||
+    coordinate.lat < -90 ||
+    coordinate.lat > 90 ||
+    typeof coordinate.lon !== "number" ||
+    !Number.isFinite(coordinate.lon) ||
+    coordinate.lon < -180 ||
+    coordinate.lon > 180
+  ) {
+    return undefined;
+  }
+  return { latitude: coordinate.lat, longitude: coordinate.lon };
 }
 
 export function normalizeWikimediaImageRecord(page: CommonsPage): WikimediaImageRecord | undefined {
@@ -164,6 +240,7 @@ export function normalizeWikimediaImageRecord(page: CommonsPage): WikimediaImage
   const license = info ? metadataText(info, "LicenseShortName") : "";
   const licenseUrl = info ? metadataText(info, "LicenseUrl") || undefined : undefined;
   const description = info ? metadataText(info, "ImageDescription") : "";
+  const coordinate = normalizeCoordinate(page);
 
   if (!fileTitle.startsWith("File:")) return undefined;
   if (!isAllowedCommonsPageUrl(descriptionUrl)) return undefined;
@@ -185,39 +262,63 @@ export function normalizeWikimediaImageRecord(page: CommonsPage): WikimediaImage
     license,
     ...(licenseUrl ? { licenseUrl } : {}),
     description,
+    ...(coordinate ? { coordinate } : {}),
   };
 }
 
 export function classifyWikimediaImageMatch(
-  place: Readonly<{ name: string }>,
-  image: Pick<WikimediaImageRecord, "fileTitle" | "description">,
+  place: Readonly<{
+    name: string;
+    latitude?: number;
+    longitude?: number;
+    contextLabel?: string;
+  }>,
+  image: Pick<WikimediaImageRecord, "fileTitle" | "description" | "coordinate">,
 ): WikimediaImageMatch {
   const title = normalizeIdentity(image.fileTitle.replace(/^File:/, ""));
   const description = normalizeIdentity(image.description);
   const combined = `${title} ${description}`;
   const combinedTokens = new Set(combined.split(" ").filter(Boolean));
   const placeTokens = significantPlaceTokens(place.name);
+  const hasDistinctivePlaceIdentity =
+    placeTokens.length > 0 &&
+    placeTokens.some((token) => !GENERIC_PLACE_IDENTITY_TOKENS.has(token));
   const hasPlaceIdentity =
-    placeTokens.length > 0 && placeTokens.every((token) => hasPlaceToken(combinedTokens, token));
-  const hasLocalContext = /\b(?:pipa|tibau do sul)\b/.test(combined);
+    hasDistinctivePlaceIdentity &&
+    placeTokens.every((token) => hasPlaceToken(combinedTokens, token));
 
-  if (hasPlaceIdentity && hasLocalContext) {
+  const localTokens = destinationContextTokens(place.contextLabel);
+  const hasTextualLocalContext =
+    localTokens.length > 0 && localTokens.every((token) => combinedTokens.has(token));
+
+  const hasCoordinateLocalContext =
+    image.coordinate !== undefined &&
+    typeof place.latitude === "number" &&
+    typeof place.longitude === "number" &&
+    Number.isFinite(place.latitude) &&
+    Number.isFinite(place.longitude) &&
+    placeDistanceMeters(
+      { latitude: place.latitude, longitude: place.longitude },
+      image.coordinate,
+    ) <= MAX_SECURE_IMAGE_DISTANCE_METERS;
+
+  if (hasPlaceIdentity && (hasTextualLocalContext || hasCoordinateLocalContext)) {
     return {
       status: "secure",
-      reason:
-        "Tokens distintivos do Place e contexto local de Pipa/Tibau do Sul aparecem na metadata da mídia.",
+      reason: hasCoordinateLocalContext
+        ? "A metadata identifica o Lugar e a fotografia possui localização coerente com ele."
+        : "A metadata identifica o Lugar e o contexto local informado para a viagem.",
     };
   }
-  if (hasPlaceIdentity || hasLocalContext) {
+  if (hasPlaceIdentity || hasTextualLocalContext || hasCoordinateLocalContext) {
     return {
       status: "ambiguous",
-      reason:
-        "A metadata possui apenas parte dos sinais necessários para confirmar a identidade do Place.",
+      reason: "A metadata possui apenas parte dos sinais necessários para confirmar o Lugar.",
     };
   }
   return {
     status: "rejected",
-    reason: "A metadata não sustenta correspondência entre a mídia e o Place.",
+    reason: "A metadata não sustenta correspondência entre a fotografia e o Lugar.",
   };
 }
 
@@ -234,6 +335,11 @@ function toCandidate(record: WikimediaImageRecord, collectedAt: Date): ExternalP
   };
 }
 
+function buildSearchText(placeName: string, contextLabel?: string): string {
+  const context = destinationContextTokens(contextLabel).join(" ");
+  return `\"${placeName}\"${context ? ` ${context}` : ""}`;
+}
+
 export class WikimediaCommonsPlaceImageAdapter implements PlaceImagePort {
   private readonly fetcher: FetchLike;
   private readonly now: () => Date;
@@ -243,22 +349,21 @@ export class WikimediaCommonsPlaceImageAdapter implements PlaceImagePort {
     this.now = dependencies.now ?? (() => new Date());
   }
 
-  private async searchRecords(
-    place: Readonly<{ name: string; latitude: number; longitude: number; externalId?: string }>,
-  ): Promise<readonly WikimediaImageRecord[]> {
+  private async searchRecords(place: PlaceImageLookup): Promise<readonly WikimediaImageRecord[]> {
     const query = new URLSearchParams({
       action: "query",
       format: "json",
       formatversion: "2",
       maxlag: "1",
       generator: "search",
-      gsrsearch: `\"${place.name}\" Pipa Tibau do Sul`,
+      gsrsearch: buildSearchText(place.name, place.contextLabel),
       gsrnamespace: "6",
       gsrlimit: String(MAX_RESULTS),
-      prop: "imageinfo",
+      prop: "imageinfo|coordinates",
       iiprop: "url|size|mime|sha1|extmetadata",
       iiurlwidth: "1280",
       iiextmetadatafilter: "Artist|LicenseShortName|LicenseUrl|ImageDescription|Credit",
+      colimit: String(MAX_RESULTS),
       origin: "*",
     });
 
@@ -294,9 +399,7 @@ export class WikimediaCommonsPlaceImageAdapter implements PlaceImagePort {
       .filter(canPromoteExternalImageToControlledAsset);
   }
 
-  async findSecurePreview(
-    place: Readonly<{ name: string; latitude: number; longitude: number; externalId?: string }>,
-  ): Promise<WikimediaPlaceImagePreview | undefined> {
+  async findSecurePreview(place: PlaceImageLookup): Promise<WikimediaPlaceImagePreview | undefined> {
     const records = await this.searchRecords(place);
 
     for (const record of records) {

@@ -1,11 +1,11 @@
-import { render, screen } from "@testing-library/react";
+import { render, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { PlaceRankingMeta } from "./place-ranking-meta";
 
 describe("PlaceRankingMeta", () => {
-  it("não fabrica score ou Top quando não existem sinais", () => {
-    render(
+  it("não fabrica score ou Top e mantém a posição no disclosure quando não existem sinais", () => {
+    const { container } = render(
       <PlaceRankingMeta
         categoryLabel="Praias"
         orderLabel="Mais próximos"
@@ -13,14 +13,17 @@ describe("PlaceRankingMeta", () => {
         timeZone="America/Sao_Paulo"
       />,
     );
+    const view = within(container);
 
-    expect(screen.getByText("#1 · Mais próximos")).toBeInTheDocument();
-    expect(screen.queryByText(/Score RouteBook/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Top praias/i)).not.toBeInTheDocument();
+    expect(view.queryByText(/Score/)).not.toBeInTheDocument();
+    expect(view.queryByText(/Top praias/i)).not.toBeInTheDocument();
+    expect(view.getByText("Entender este ranking")).toBeInTheDocument();
+    expect(view.getByText("#1 · Mais próximos")).toBeInTheDocument();
+    expect(view.getByText(/reflete apenas a ordenação selecionada/i)).toBeInTheDocument();
   });
 
-  it("expõe score derivado, rating, volume, Provider e motivo quando há evidência", () => {
-    render(
+  it("resume score e rating e mantém volume, Provider e motivo no disclosure", () => {
+    const { container } = render(
       <PlaceRankingMeta
         categoryLabel="Praias"
         categoryRank={1}
@@ -41,11 +44,14 @@ describe("PlaceRankingMeta", () => {
         }}
       />,
     );
+    const view = within(container);
 
-    expect(screen.getByText("Top praias")).toBeInTheDocument();
-    expect(screen.getByText("Score RouteBook 9,1/10")).toBeInTheDocument();
-    expect(screen.getByText(/2\.340 avaliações/)).toBeInTheDocument();
-    expect(screen.getByText(/Fonte: Google Places/)).toBeInTheDocument();
-    expect(screen.getByText(/Muito bem avaliado/)).toBeInTheDocument();
+    expect(view.getByText("Top praias")).toBeInTheDocument();
+    expect(view.getByText("Score 9,1/10")).toBeInTheDocument();
+    expect(view.getByText("Nota 4,8/5")).toBeInTheDocument();
+    expect(view.getByText("Entender este ranking")).toBeInTheDocument();
+    expect(view.getByText(/2\.340 avaliações/)).toBeInTheDocument();
+    expect(view.getByText(/Fonte do ranking: Google Places/)).toBeInTheDocument();
+    expect(view.getByText(/Muito bem avaliado/)).toBeInTheDocument();
   });
 });

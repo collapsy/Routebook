@@ -43,6 +43,7 @@ export function CategoryIllustration({
   disclosure = "Ilustração de categoria — não é foto do local",
   live = false,
   placeFallback = false,
+  presentation = "descriptive",
 }: Readonly<{
   kind: CategoryIllustrationKind;
   ariaLabel: string;
@@ -51,6 +52,7 @@ export function CategoryIllustration({
   disclosure?: string;
   live?: boolean;
   placeFallback?: boolean;
+  presentation?: "descriptive" | "compact";
 }>) {
   return (
     <div
@@ -61,6 +63,7 @@ export function CategoryIllustration({
       data-category-illustration={kind}
       data-place-category={isPlaceCategory(kind) ? kind : "unknown"}
       data-place-image-fallback={placeFallback ? "true" : undefined}
+      data-presentation={presentation}
       role={live ? "status" : "img"}
     >
       <Image
@@ -73,11 +76,17 @@ export function CategoryIllustration({
         unoptimized
       />
       <span aria-hidden="true" className={styles.veil} />
-      <span className={styles.copy}>
-        <span className={styles.eyebrow}>{eyebrow ?? illustrationLabels[kind]}</span>
-        <span className={styles.label}>{label}</span>
-        <span className={styles.disclosure}>{disclosure}</span>
-      </span>
+      {presentation === "compact" ? (
+        <span aria-hidden="true" className={styles.badge}>
+          Imagem ilustrativa
+        </span>
+      ) : (
+        <span className={styles.copy}>
+          <span className={styles.eyebrow}>{eyebrow ?? illustrationLabels[kind]}</span>
+          <span className={styles.label}>{label}</span>
+          <span className={styles.disclosure}>{disclosure}</span>
+        </span>
+      )}
     </div>
   );
 }

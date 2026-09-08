@@ -106,7 +106,7 @@ async function openRecommendations(
 
 function consideredRecommendationItem(page: Page, placeName: string) {
   return page
-    .getByRole("list", { name: "Recommendations já consideradas" })
+    .getByRole("list", { name: "Sugestões já consideradas" })
     .getByRole("listitem")
     .filter({ hasText: placeName });
 }
@@ -182,11 +182,9 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
   await expect(
     page.getByRole("heading", { name: "Sugestões para decidir agora", exact: true }),
   ).toBeVisible();
-  await expect(
-    page.getByText(/Exibindo 6 de 30 Recommendations canônicas como seleção inicial/i),
-  ).toBeVisible();
+  await expect(page.getByText(/Exibindo 6 de 30 sugestões como seleção inicial/i)).toBeVisible();
 
-  const focusedList = page.getByRole("list", { name: "Recommendations de Lugares" });
+  const focusedList = page.getByRole("list", { name: "Sugestões de lugares" });
   const focusedHeadings = focusedList.getByRole("heading", { level: 2 });
   await expect(focusedHeadings).toHaveCount(6);
   const focusedNames = await focusedHeadings.allTextContents();
@@ -205,7 +203,7 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
   await expect(
     page.getByRole("heading", { name: "Lista completa e explicável", exact: true }),
   ).toBeVisible();
-  const fullList = page.getByRole("list", { name: "Recommendations de Lugares" });
+  const fullList = page.getByRole("list", { name: "Sugestões de lugares" });
   const fullHeadings = fullList.getByRole("heading", { level: 2 });
   await expect(fullHeadings).toHaveCount(30);
   expect((await fullHeadings.allTextContents()).slice(0, 6)).toEqual(focusedNames);
@@ -222,9 +220,7 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
   await page.goto(focusHref!);
   await expect(page).toHaveURL(/\/recomendacoes$/);
   await expect(
-    page
-      .getByRole("list", { name: "Recommendations de Lugares" })
-      .getByRole("heading", { level: 2 }),
+    page.getByRole("list", { name: "Sugestões de lugares" }).getByRole("heading", { level: 2 }),
   ).toHaveCount(6);
 });
 
@@ -294,7 +290,7 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
   const { tripName, tripUrl } = await createTripWithRecommendationContext(page);
   await openRecommendations(page, tripUrl, tripName, "all");
 
-  const list = page.getByRole("list", { name: "Recommendations de Lugares" });
+  const list = page.getByRole("list", { name: "Sugestões de lugares" });
   await expect(list.getByRole("heading", { level: 2 })).toHaveCount(30);
   await expect(list.locator('[data-place-image-fallback="true"]')).toHaveCount(21);
 
@@ -306,9 +302,8 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
   const newRecommendationFallback = newRecommendation.locator('[data-place-image-fallback="true"]');
   await expect(newRecommendationFallback).toBeVisible();
   await expect(newRecommendationFallback).toHaveAttribute("data-category-illustration", "beach");
-  await expect(newRecommendationFallback).toContainText(
-    "Ilustração de categoria — não é foto do local",
-  );
+  await expect(newRecommendationFallback).toHaveAttribute("data-presentation", "compact");
+  await expect(newRecommendationFallback).toContainText("Imagem ilustrativa");
   await expect(
     newRecommendation.getByText(/categoria do Lugar corresponde a um interesse/i),
   ).toBeVisible();

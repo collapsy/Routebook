@@ -21,22 +21,23 @@ describe("PlacePrimaryImage", () => {
     render(<PlacePrimaryImage placeName="Praia do Amor" primaryImage={primaryImage} />);
 
     expect(screen.getByRole("img", { name: primaryImage.altText })).toBeInTheDocument();
-    expect(
-      screen.queryByText("Ilustração de categoria — não é foto do local"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Imagem ilustrativa")).not.toBeInTheDocument();
   });
 
-  it("usa ilustração acessível de categoria quando o Place não possui imagem", () => {
+  it("usa fallback compacto e acessível quando o Place não possui imagem", () => {
     render(<PlacePrimaryImage category="beach" placeName="Praia do Amor" />);
 
     const fallback = screen.getByRole("img", {
-      name: "Ilustração de Praia para Praia do Amor — não é foto do local",
+      name: "Imagem ilustrativa de Praia para Praia do Amor",
     });
     expect(fallback).toHaveAttribute("data-place-image-fallback", "true");
     expect(fallback).toHaveAttribute("data-category-illustration", "beach");
+    expect(fallback).toHaveAttribute("data-presentation", "compact");
+    expect(screen.getByText("Imagem ilustrativa")).toBeInTheDocument();
+    expect(screen.queryByText("Referência visual")).not.toBeInTheDocument();
   });
 
-  it("troca para a mesma ilustração quando o asset governado falha ao carregar", () => {
+  it("troca para o mesmo fallback compacto quando o asset governado falha ao carregar", () => {
     render(
       <PlacePrimaryImage category="beach" placeName="Praia do Amor" primaryImage={primaryImage} />,
     );
@@ -45,9 +46,18 @@ describe("PlacePrimaryImage", () => {
 
     expect(
       screen.getByRole("img", {
-        name: "Ilustração de Praia para Praia do Amor — não é foto do local",
+        name: "Imagem ilustrativa de Praia para Praia do Amor",
       }),
-    ).toBeInTheDocument();
+    ).toHaveAttribute("data-presentation", "compact");
+  });
+
+  it("permite apresentação descritiva quando um contexto explicitamente precisar dela", () => {
+    render(
+      <PlacePrimaryImage category="beach" compactFallback={false} placeName="Praia do Amor" />,
+    );
+
+    expect(screen.getByText("Referência visual")).toBeInTheDocument();
+    expect(screen.getByText("Ilustração de categoria — não é foto do local")).toBeInTheDocument();
   });
 
   it("exibe Provenance textual sem usar sourceUrl como mídia", () => {

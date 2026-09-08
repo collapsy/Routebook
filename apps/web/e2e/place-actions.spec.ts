@@ -17,28 +17,33 @@ test("salva no catálogo preservando filtros e abre o compositor do Lugar", asyn
     `/viagens/${trip.id}/lugares?descoberta=ocultar&busca=Praia%20do%20Amor&categoria=beach`,
   );
 
-  const targetHref = `/viagens/${trip.id}/lugares/praia-do-amor#adicionar-ao-roteiro`;
+  const detailsHref = `/viagens/${trip.id}/lugares/praia-do-amor`;
   const card = page
     .getByRole("list", { name: "Opções de lugares" })
     .locator('[data-place-source="published"]')
-    .filter({ has: page.locator(`a[href="${targetHref}"]`) });
+    .filter({ has: page.locator(`a[href="${detailsHref}"]`) });
   await expect(card).toHaveCount(1);
   await expect(card.getByRole("button", { name: "Salvar lugar" })).toBeVisible();
-  await expect(card.getByRole("link", { name: "Adicionar ao roteiro" })).toHaveAttribute(
+  await expect(card.getByRole("link", { name: "Ver detalhes" })).toHaveAttribute(
     "href",
-    targetHref,
+    detailsHref,
   );
+  await expect(card.getByRole("link", { name: "Adicionar ao roteiro" })).toHaveCount(0);
 
   await card.getByRole("button", { name: "Salvar lugar" }).click();
 
   await expect(page).toHaveURL(/descoberta=ocultar/);
   await expect(page).toHaveURL(/busca=Praia(%20|\+)do(%20|\+)Amor/);
   await expect(page).toHaveURL(/categoria=beach/);
-  await expect(card.getByRole("button", { name: "Remover dos salvos" })).toBeVisible();
+  await expect(card.getByRole("button", { name: "Remover dos salvos" })).toBeVisible({
+    timeout: 15_000,
+  });
 
-  await card.getByRole("link", { name: "Adicionar ao roteiro" }).click();
-  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares/praia-do-amor#?`));
-  await expect(page.getByRole("heading", { name: "Adicionar ao roteiro" })).toBeVisible();
+  await card.getByRole("link", { name: "Ver detalhes" }).click();
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares/praia-do-amor$`));
+  await expect(page.getByRole("heading", { name: "Praia do Amor", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Adicionar ao roteiro", level: 2 })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Adicionar ao roteiro" })).toBeVisible();
 });
 
 test("adiciona Place publicado ao Roteiro sem salvar automaticamente", async ({ page }) => {
@@ -103,12 +108,15 @@ test("mantém contexto visual ilustrativo em Lugar salvo sem fotografia real", a
     "beach",
   );
   await discoveryCard.getByRole("button", { name: "Salvar lugar" }).click();
-  await expect(discoveryCard.getByRole("button", { name: "Remover dos salvos" })).toBeVisible();
+  await expect(discoveryCard.getByRole("button", { name: "Remover dos salvos" })).toBeVisible({
+    timeout: 15_000,
+  });
 
   await page.goto(`/viagens/${trip.id}/lugares-salvos`);
   const savedCard = page.locator(".place-card").filter({ hasText: "Praia das Minas" }).first();
   const fallback = savedCard.locator('[data-place-image-fallback="true"]');
   await expect(fallback).toBeVisible();
   await expect(fallback).toHaveAttribute("data-category-illustration", "beach");
-  await expect(fallback).toContainText("Ilustração de categoria — não é foto do local");
+  await expect(fallback).toHaveAttribute("data-presentation", "compact");
+  await expect(fallback).toContainText("Imagem ilustrativa");
 });

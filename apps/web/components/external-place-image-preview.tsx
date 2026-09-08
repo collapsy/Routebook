@@ -95,6 +95,7 @@ export function ExternalPlaceImagePreview({
   longitude,
   category,
   enabled = true,
+  compactFallback = true,
 }: Readonly<{
   destinationId?: string | undefined;
   placeName: string;
@@ -102,6 +103,7 @@ export function ExternalPlaceImagePreview({
   longitude: number;
   category?: PlaceCategory | undefined;
   enabled?: boolean | undefined;
+  compactFallback?: boolean | undefined;
 }>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<PreviewState>({ status: "idle" });
@@ -165,7 +167,11 @@ export function ExternalPlaceImagePreview({
   if (!enabled || !destinationId) {
     return (
       <div ref={containerRef} data-external-place-image-state="fallback">
-        <PlacePrimaryImage category={category} placeName={placeName} />
+        <PlacePrimaryImage
+          category={category}
+          compactFallback={compactFallback}
+          placeName={placeName}
+        />
       </div>
     );
   }
@@ -206,15 +212,20 @@ export function ExternalPlaceImagePreview({
       <div data-external-place-image-state={state.status} ref={containerRef}>
         <CategoryIllustration
           ariaLabel={
-            isLoading
-              ? `Buscando fotografia licenciada para ${placeName}`
-              : `Fotografia sob demanda para ${placeName}`
+            compactFallback
+              ? isLoading
+                ? `Buscando foto para ${placeName}`
+                : `Imagem ilustrativa para ${placeName}`
+              : isLoading
+                ? `Buscando fotografia licenciada para ${placeName}`
+                : `Fotografia sob demanda para ${placeName}`
           }
           disclosure="Ilustração de categoria enquanto a foto real é verificada."
-          eyebrow="Descoberta externa"
+          eyebrow="Imagem do lugar"
           kind={category ?? "place"}
           label={isLoading ? "Buscando fotografia…" : "Fotografia sob demanda"}
           live
+          presentation={compactFallback ? "compact" : "descriptive"}
         />
       </div>
     );
@@ -222,7 +233,11 @@ export function ExternalPlaceImagePreview({
 
   return (
     <div ref={containerRef} data-external-place-image-state="fallback">
-      <PlacePrimaryImage category={category} placeName={placeName} />
+      <PlacePrimaryImage
+        category={category}
+        compactFallback={compactFallback}
+        placeName={placeName}
+      />
     </div>
   );
 }

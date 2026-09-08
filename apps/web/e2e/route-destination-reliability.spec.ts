@@ -26,10 +26,13 @@ test("usa nome e endereço nos destinos individuais do catálogo, detalhe e Guia
     .getByRole("list", { name: "Opções de lugares" })
     .locator('[data-place-source="published"]');
   const praiaDoAmorCard = publishedPlaces.filter({
-    has: page.locator("strong").filter({ hasText: /^Praia do Amor$/ }),
+    has: page.locator("h3").filter({ hasText: /^Praia do Amor$/ }),
   });
   await expect(praiaDoAmorCard).toHaveCount(1);
 
+  const moreInfo = praiaDoAmorCard.locator("summary").filter({ hasText: "Mais informações" });
+  await expect(moreInfo).toBeVisible();
+  await moreInfo.click();
   const cardRouteHref = await praiaDoAmorCard
     .getByRole("link", { name: "Calcular rota real" })
     .getAttribute("href");

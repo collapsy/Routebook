@@ -436,6 +436,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-185 | Experiência unificada de Lugar provider-first | Implementation | Draft | 0.1.0 | [rb-inc-185-unified-place-experience.md](./implementation/increments/rb-inc-185-unified-place-experience.md) |
 | RB-CTX-185 | Context Pack do RB-INC-185 — experiência unificada de Lugar provider-first | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-185-unified-place-experience.md](./implementation/context-packs/rb-inc-185-unified-place-experience.md) |
 
+| RB-INC-186 | Cards de Lugar com hierarquia visual progressiva | Implementation | Draft | 0.1.0 | [rb-inc-186-place-card-hierarchy.md](./implementation/increments/rb-inc-186-place-card-hierarchy.md) |
+| RB-CTX-186 | Context Pack do RB-INC-186 — Cards de Lugar com hierarquia visual progressiva | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-186-place-card-hierarchy.md](./implementation/context-packs/rb-inc-186-place-card-hierarchy.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

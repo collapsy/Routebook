@@ -24,12 +24,14 @@ export function PlacePrimaryImage({
   category,
   showProvenance = false,
   priority = false,
+  compactFallback = true,
 }: {
   placeName: string;
   primaryImage?: PlacePrimaryImageContract | undefined;
   category?: PlaceCategory | undefined;
   showProvenance?: boolean;
   priority?: boolean;
+  compactFallback?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
 
@@ -37,10 +39,10 @@ export function PlacePrimaryImage({
     const fallbackLabel = category ? categoryLabels[category] : "Lugar";
     return (
       <CategoryIllustration
-        ariaLabel={`Ilustração de ${fallbackLabel} para ${placeName} — não é foto do local`}
-        eyebrow={fallbackLabel}
+        ariaLabel={`Imagem ilustrativa de ${fallbackLabel} para ${placeName}`}
         kind={category ?? "place"}
         placeFallback
+        presentation={compactFallback ? "compact" : "descriptive"}
       />
     );
   }

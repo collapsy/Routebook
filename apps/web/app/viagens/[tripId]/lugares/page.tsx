@@ -223,15 +223,6 @@ function CanonicalDiscoveryCard({
       data-place-source="published"
       data-place-state={candidate ? "enriched" : "published"}
     >
-      <PlaceRankingMeta
-        categoryLabel={categoryLabels[place.category]}
-        orderLabel={rankingOrderLabel}
-        position={rankingPosition}
-        timeZone={timeZone}
-        {...(quality ? { quality } : {})}
-        {...(qualitySignals ? { signals: qualitySignals } : {})}
-        {...(categoryRank ? { categoryRank } : {})}
-      />
       {place.primaryImage || !candidate ? (
         <PlacePrimaryImage
           category={place.category}
@@ -248,25 +239,38 @@ function CanonicalDiscoveryCard({
           placeName={place.name}
         />
       )}
+
       <div className={styles.cardIdentity}>
         <span>{categoryLabels[place.category]}</span>
+        {isSaved ? <span>Salvo</span> : null}
       </div>
-      <strong>{place.name}</strong>
-      <p>{place.summary}</p>
-      <small>{addressLabel ?? "Endereço ainda não informado"}</small>
-      <small>
-        Faixa de preço aproximada:{" "}
-        {place.priceRange ? priceRangeLabels[place.priceRange] : "indisponível"}
-      </small>
-      <small>
-        {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
-      </small>
-      {candidate ? (
-        <small>Fonte de localização: Overture · licença: {candidate.sourceLicense}</small>
-      ) : (
-        <small>Fonte: RouteBook</small>
-      )}
+
+      <h3 className={styles.cardTitle}>{place.name}</h3>
+      {place.summary ? <p className={styles.cardSummary}>{place.summary}</p> : null}
+
+      <div className={styles.cardFacts}>
+        <span className={styles.cardFact}>
+          {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
+        </span>
+        {place.priceRange ? (
+          <span className={styles.cardPrice}>{priceRangeLabels[place.priceRange]}</span>
+        ) : null}
+      </div>
+
+      <PlaceRankingMeta
+        categoryLabel={categoryLabels[place.category]}
+        orderLabel={rankingOrderLabel}
+        position={rankingPosition}
+        timeZone={timeZone}
+        {...(quality ? { quality } : {})}
+        {...(qualitySignals ? { signals: qualitySignals } : {})}
+        {...(categoryRank ? { categoryRank } : {})}
+      />
+
       <div className={styles.cardActions}>
+        <Link className="product-primary-action" href={`/viagens/${tripId}/lugares/${place.slug}`}>
+          Ver detalhes
+        </Link>
         <form action={isSaved ? removePublishedPlaceAction : savePublishedPlaceAction}>
           <input name="tripId" type="hidden" value={tripId} />
           <input name="placeSlug" type="hidden" value={place.slug} />
@@ -274,40 +278,42 @@ function CanonicalDiscoveryCard({
             {isSaved ? "Remover dos salvos" : "Salvar lugar"}
           </button>
         </form>
-        <Link
-          className="product-primary-action"
-          href={`/viagens/${tripId}/lugares/${place.slug}#adicionar-ao-roteiro`}
-        >
-          Adicionar ao roteiro
-        </Link>
-        <Link
-          className="product-secondary-action"
-          href={`/viagens/${tripId}/lugares/${place.slug}`}
-        >
-          Ver detalhes
-        </Link>
-        <a
-          className="product-secondary-action"
-          href={mapsSearchUrl}
-          rel="noreferrer"
-          target="_blank"
-        >
-          Ver mapa e fotos
-        </a>
-        <a
-          className="product-secondary-action"
-          href={buildGoogleMapsDirectionsUrl({
-            ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
-            destination: coordinate,
-            destinationLabel,
-            travelMode: "walking",
-          })}
-          rel="noreferrer"
-          target="_blank"
-        >
-          Calcular rota real
-        </a>
       </div>
+
+      <details className={styles.cardDetails}>
+        <summary>Mais informações</summary>
+        <div className={styles.cardDetailsBody}>
+          <p>{addressLabel ?? "Endereço ainda não informado"}</p>
+          {candidate ? (
+            <small>Fonte de localização: Overture · licença: {candidate.sourceLicense}</small>
+          ) : (
+            <small>Fonte: RouteBook</small>
+          )}
+          <div className={styles.cardAuxiliaryActions}>
+            <a
+              className="product-secondary-action"
+              href={mapsSearchUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
+              Ver mapa e fotos
+            </a>
+            <a
+              className="product-secondary-action"
+              href={buildGoogleMapsDirectionsUrl({
+                ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
+                destination: coordinate,
+                destinationLabel,
+                travelMode: "walking",
+              })}
+              rel="noreferrer"
+              target="_blank"
+            >
+              Calcular rota real
+            </a>
+          </div>
+        </div>
+      </details>
     </li>
   );
 }
@@ -358,6 +364,11 @@ function ExternalDiscoveryCard({
     name: candidate.name,
     addressLabel: candidate.addressLabel,
   });
+  const mapsSearchUrl = buildGoogleMapsSearchUrl({
+    name: candidate.name,
+    addressLabel: candidate.addressLabel,
+    coordinate,
+  });
 
   return (
     <li
@@ -365,6 +376,27 @@ function ExternalDiscoveryCard({
       data-place-source="external"
       data-place-state="external"
     >
+      <ExternalPlaceImagePreview
+        category={candidate.category}
+        destinationId={destinationId}
+        enabled={externalMediaEnabled}
+        latitude={candidate.latitude}
+        longitude={candidate.longitude}
+        placeName={candidate.name}
+      />
+
+      <div className={styles.cardIdentity}>
+        <span>{categoryLabel}</span>
+      </div>
+
+      <h3 className={styles.cardTitle}>{candidate.name}</h3>
+
+      <div className={styles.cardFacts}>
+        <span className={styles.cardFact}>
+          {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
+        </span>
+      </div>
+
       <PlaceRankingMeta
         categoryLabel={categoryLabel}
         orderLabel={rankingOrderLabel}
@@ -374,55 +406,12 @@ function ExternalDiscoveryCard({
         {...(qualitySignals ? { signals: qualitySignals } : {})}
         {...(categoryRank ? { categoryRank } : {})}
       />
-      <ExternalPlaceImagePreview
-        category={candidate.category}
-        destinationId={destinationId}
-        enabled={externalMediaEnabled}
-        latitude={candidate.latitude}
-        longitude={candidate.longitude}
-        placeName={candidate.name}
-      />
-      <div className={styles.cardIdentity}>
-        <span>{categoryLabel}</span>
-      </div>
-      <strong>{candidate.name}</strong>
-      <p>{candidate.addressLabel ?? "Endereço não informado pela Fonte"}</p>
-      <small>
-        Categoria informada pela Fonte: {providerCategoryLabel(candidate.providerCategory)}
-      </small>
-      <small>
-        {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
-      </small>
-      <small>Fonte: Overture · licença: {candidate.sourceLicense}</small>
+
       <div className={styles.cardActions}>
-        <a
-          className="product-secondary-action"
-          href={buildGoogleMapsSearchUrl({
-            name: candidate.name,
-            addressLabel: candidate.addressLabel,
-            coordinate,
-          })}
-          rel="noreferrer"
-          target="_blank"
-        >
+        <a className="product-primary-action" href={mapsSearchUrl} rel="noreferrer" target="_blank">
           Ver mapa e fotos
         </a>
-        <a
-          className="product-secondary-action"
-          href={buildGoogleMapsDirectionsUrl({
-            ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
-            destination: coordinate,
-            destinationLabel,
-            travelMode: "walking",
-          })}
-          rel="noreferrer"
-          target="_blank"
-        >
-          Calcular rota real
-        </a>
-      </div>
-      {candidate.category ? (
-        <>
+        {candidate.category ? (
           <form action={saveExternalPlaceAction} className={styles.promotionForm}>
             <input name="tripId" type="hidden" value={tripId} />
             <input name="externalId" type="hidden" value={candidate.externalId} />
@@ -433,21 +422,44 @@ function ExternalDiscoveryCard({
             ) : null}
             {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
             {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
-            <button className="product-button" type="submit">
-              Salvar na viagem
+            <button className="product-secondary-action" type="submit">
+              Salvar lugar
             </button>
           </form>
+        ) : null}
+      </div>
+
+      <details className={styles.cardDetails}>
+        <summary>Mais informações</summary>
+        <div className={styles.cardDetailsBody}>
+          <p>{candidate.addressLabel ?? "Endereço não informado pela Fonte"}</p>
           <small>
-            O RouteBook revalida o Lugar antes de salvar e preserva a Fonte. Salvar não o adiciona
-            automaticamente ao roteiro.
+            Categoria informada pela Fonte: {providerCategoryLabel(candidate.providerCategory)}
           </small>
-        </>
-      ) : (
-        <small>
-          Este Lugar pode ser consultado, mas a Fonte ainda não informa uma categoria segura para
-          salvá-lo.
-        </small>
-      )}
+          <small>Fonte: Overture · licença: {candidate.sourceLicense}</small>
+          {!candidate.category ? (
+            <small>
+              Salvar fica disponível quando a Fonte informa uma categoria reconhecida pelo
+              RouteBook.
+            </small>
+          ) : null}
+          <div className={styles.cardAuxiliaryActions}>
+            <a
+              className="product-secondary-action"
+              href={buildGoogleMapsDirectionsUrl({
+                ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
+                destination: coordinate,
+                destinationLabel,
+                travelMode: "walking",
+              })}
+              rel="noreferrer"
+              target="_blank"
+            >
+              Calcular rota real
+            </a>
+          </div>
+        </div>
+      </details>
     </li>
   );
 }

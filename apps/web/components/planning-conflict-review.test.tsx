@@ -72,9 +72,7 @@ describe("PlanningConflictReview", () => {
     expect(within(errorArticle!).queryByText("Ignorar risco")).not.toBeInTheDocument();
 
     await user.click(screen.getByText("Ignorar risco"));
-    expect(
-      screen.getByText(/A condição continuará existindo no planejamento/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/O risco continuará no planejamento/i)).toBeInTheDocument();
     expect(
       screen.getByRole("checkbox", { name: /Entendo que este risco continuará/i }),
     ).toBeRequired();
@@ -106,7 +104,7 @@ describe("PlanningConflictReview", () => {
 
     expect(ignoreAction).toHaveBeenCalledOnce();
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "Não foi possível confirmar esta decisão agora",
+      "Não foi possível ignorar este risco agora",
     );
     expect(screen.getByRole("button", { name: "Confirmar e ignorar risco" })).toBeEnabled();
   });
@@ -120,7 +118,7 @@ describe("PlanningConflictReview", () => {
     });
 
     expect(screen.getByRole("heading", { name: "Nenhum conflito encontrado" })).toBeInTheDocument();
-    expect(screen.getByText(/não garante ausência de imprevistos/i)).toBeInTheDocument();
+    expect(screen.getByText(/Condições externas ainda podem mudar/i)).toBeInTheDocument();
   });
 
   it("keeps ignored Risks visible when there are no open conflicts", () => {

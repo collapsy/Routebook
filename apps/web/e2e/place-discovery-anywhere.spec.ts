@@ -44,7 +44,8 @@ test("descobre lugares em Florianópolis com zero seed sem expor lifecycle edito
   await expect(external.first()).toContainText(/Fonte: Overture/);
   await expect(page.getByLabel("Distância máxima")).toBeEnabled();
   await expect(page.getByText(/referência aproximada do destino/)).toBeVisible();
-  await expect(page.getByRole("button", { name: "Salvar na viagem" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ver mapa e fotos" }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Salvar lugar" }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Enviar para curadoria" })).toHaveCount(0);
   await expect(page.getByText(/Descoberta atual/i)).toHaveCount(0);
   await expect(page.getByText(/Candidato externo/i)).toHaveCount(0);

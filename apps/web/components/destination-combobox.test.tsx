@@ -168,7 +168,7 @@ describe("DestinationCombobox", () => {
     });
   });
 
-  it("preserva o texto e informa degradação quando sugestões estão desabilitadas", async () => {
+  it("mantém o destino digitado e orienta continuidade quando sugestões estão desabilitadas", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(() =>
@@ -188,7 +188,9 @@ describe("DestinationCombobox", () => {
     await debounce();
 
     expect(input).toHaveValue("Recife");
-    expect(screen.getByText(/sugestões automáticas não estão disponíveis/i)).toBeInTheDocument();
+    expect(
+      screen.getByText("As sugestões não estão disponíveis agora. Você pode continuar com o destino digitado."),
+    ).toBeInTheDocument();
   });
 
   it("ignora resposta antiga quando uma consulta nova já venceu", async () => {

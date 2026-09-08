@@ -106,7 +106,9 @@ describe("ExternalPlaceImagePreview", () => {
   });
 
   it("consulta Media também quando o Destination não possui id curado", async () => {
-    const fetcher = vi.fn(async () => Response.json({ error: "miss" }, { status: 404 }));
+    const fetcher = vi.fn<(input: string | URL | Request) => Promise<Response>>(async () =>
+      Response.json({ error: "miss" }, { status: 404 }),
+    );
     vi.stubGlobal("fetch", fetcher);
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
 

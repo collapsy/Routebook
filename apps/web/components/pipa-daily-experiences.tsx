@@ -191,7 +191,9 @@ export function PipaDailyExperiences({
           ))}
         </div>
       ) : (
-        <p className={styles.emptyState}>Horário astronômico ainda não disponível para esta data.</p>
+        <p className={styles.emptyState}>
+          Horário astronômico ainda não disponível para esta data.
+        </p>
       )}
 
       <div className={styles.sectionHeading}>

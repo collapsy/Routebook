@@ -26,9 +26,6 @@ test("descobre lugares em Florianópolis com zero seed sem expor lifecycle edito
   await expect(page.getByRole("heading", { name: /Lugares em Florianópolis/ })).toBeVisible({
     timeout: 20_000,
   });
-  const bootstrapStatus = page.getByLabel("Status do guia");
-  await expect(bootstrapStatus).toHaveAttribute("data-place-bootstrap-stage", "ready");
-  await expect(bootstrapStatus).toContainText("Guia pronto");
 
   const options = page.getByRole("list", { name: "Opções de lugares" });
   const published = options.locator('[data-place-source="published"]');

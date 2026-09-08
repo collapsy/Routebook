@@ -211,7 +211,7 @@ export function ExternalPlaceImagePreview({
               : `Fotografia sob demanda para ${placeName}`
           }
           disclosure="Ilustração de categoria enquanto a foto real é verificada."
-          eyebrow="Descoberta externa"
+          eyebrow="Imagem do lugar"
           kind={category ?? "place"}
           label={isLoading ? "Buscando fotografia…" : "Fotografia sob demanda"}
           live

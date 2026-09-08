@@ -25,7 +25,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Proposta de Roteiro — RouteBook",
-  description: "Revise uma sugestão separada do Roteiro atual da viagem.",
+  description: "Revise uma sugestão antes de aplicá-la ao Roteiro da viagem.",
 };
 
 export default async function ItineraryProposalReviewPage({
@@ -57,10 +57,7 @@ export default async function ItineraryProposalReviewPage({
         <div className={styles.emptyState}>
           <p className="product-eyebrow">Proposta de Roteiro</p>
           <h1>Nenhuma proposta disponível</h1>
-          <p>
-            Ainda não existe uma proposta pronta ou expirada para revisão. Seu Roteiro atual
-            continua disponível e não foi alterado.
-          </p>
+          <p>Gere uma nova proposta ou continue montando o Roteiro manualmente.</p>
           {canGenerate ? <ItineraryProposalGenerationControl action={generateAction} /> : null}
           <Link className="product-secondary-action" href={`/viagens/${trip.id}/roteiro`}>
             Continuar no Roteiro
@@ -94,15 +91,15 @@ export default async function ItineraryProposalReviewPage({
 
       <header className={styles.hero}>
         <div>
-          <p className="product-eyebrow">{trip.name} · revisão separada</p>
+          <p className="product-eyebrow">{trip.name}</p>
           <h1>Proposta de Roteiro</h1>
           <p>
             {proposal.status === "expired"
-              ? "Consulte critérios, limitações e mudanças registradas como referência histórica. Esta página não aplica alterações."
-              : "Revise, edite se necessário e só depois decida se deseja aplicar as mudanças ao Roteiro."}
+              ? "Esta proposta expirou. Consulte as sugestões como referência para planejar o Roteiro atual."
+              : "Revise as mudanças sugeridas, edite se necessário e escolha o que deseja aplicar ao Roteiro."}
           </p>
         </div>
-        <span>Roteiro atual preservado</span>
+        <span>{proposal.status === "expired" ? "Proposta expirada" : "Aguardando sua decisão"}</span>
       </header>
 
       <ItineraryProposalReview

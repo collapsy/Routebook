@@ -73,15 +73,13 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   await expect(
     page.getByText(/Distâncias em linha reta. Não representam trajeto por ruas/),
   ).toBeVisible();
-  await expect(
-    page.getByText(/Distância indisponível porque existe uma lacuna geográfica/),
-  ).toBeVisible();
-  await expect(page.getByText(/Total geodésico/)).toHaveCount(0);
+  await expect(page.getByText("Distância indisponível entre estes pontos.")).toBeVisible();
+  await expect(page.getByText(/Total em linha reta/)).toHaveCount(0);
 
-  const routeLinks = page.getByRole("link", { name: /Abrir rota externa de/ });
+  const routeLinks = page.getByRole("link", { name: /Abrir rota de/ });
   await expect(routeLinks).toHaveCount(1);
   const routeLink = page.getByRole("link", {
-    name: `Abrir rota externa de ${firstPlaceName} para ${secondPlaceName}`,
+    name: `Abrir rota de ${firstPlaceName} para ${secondPlaceName}`,
   });
   await expect(routeLink).toHaveAttribute("target", "_blank");
   await expect(routeLink).toHaveAttribute("rel", "noopener noreferrer");

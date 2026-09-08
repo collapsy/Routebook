@@ -39,8 +39,8 @@ export function DestinationTripGuide({
         <p className="product-eyebrow">Guia por dia</p>
         <h1 id="destination-guide-title">Guia da viagem em {destinationName}</h1>
         <p>
-          O guia reúne somente decisões já registradas. Descobertas e lugares salvos continuam
-          disponíveis para completar cada Dia sem inventar paradas.
+          Veja o que já está planejado em cada dia e use lugares salvos ou a descoberta para
+          completar o roteiro.
         </p>
         <ol className="trip-days-grid">
           {days.map((day) => {
@@ -97,8 +97,8 @@ export function DestinationTripGuide({
         </>
       ) : (
         <p>
-          Ainda não há atividades confirmadas para este Dia. O RouteBook preserva o espaço vazio até
-          você escolher entre os candidatos descobertos ou os {savedPlaceCount} lugares salvos.
+          Ainda não há atividades confirmadas para este Dia. Explore lugares ou abra seus salvos
+          para escolher o próximo passo.
         </p>
       )}
       <div className="section-heading-row">

@@ -27,7 +27,7 @@ async function openManualComposer(page: Page) {
     await expect(page).toHaveURL(/dia=2026-08-22/);
   }
   await page.getByText("Adicionar atividade manual", { exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Adicione uma decisão manual" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Adicionar uma atividade" })).toBeVisible();
 }
 
 test("prioriza a timeline do dia vazio antes das ações secundárias", async ({ page }, testInfo) => {

@@ -55,7 +55,8 @@ export default async function PlanningConflictReviewPage({
     tripId: trip.id,
   });
   const errorMessages: Readonly<Record<string, string>> = {
-    "conflito-nao-encontrado": "Este conflito não está mais disponível. Atualize e tente novamente.",
+    "conflito-nao-encontrado":
+      "Este conflito não está mais disponível. Atualize e tente novamente.",
     "acao-cross-trip": "Não foi possível concluir esta ação. Volte ao Roteiro e tente novamente.",
     "severidade-incompativel": "Somente riscos podem ser ignorados.",
     "estado-incompativel": "Este risco já foi atualizado. A revisão mostra o estado atual.",

@@ -118,12 +118,9 @@ test("hospedagem é localizada ao salvar e habilita contexto espacial", async ({
 
   await expect(page).toHaveURL(/\/hospedagem\?saved=1&located=1$/);
   await expect(
-    page.getByText(
-      "Hospedagem salva e localização confirmada. Mapa e distâncias já podem usar esse ponto.",
-      {
-        exact: true,
-      },
-    ),
+    page.getByText("Hospedagem salva. Mapa e distâncias já usam essa localização.", {
+      exact: true,
+    }),
   ).toBeVisible();
 
   await page.goto(tripHref!);
@@ -209,6 +206,6 @@ test("owner cancela ou confirma a exclusão definitiva da própria Trip", async 
   await page.getByRole("button", { name: "Excluir definitivamente" }).click();
 
   await expect(page).toHaveURL(/\/viagens\?deleted=1$/);
-  await expect(page.getByRole("status")).toContainText("Viagem excluída com sucesso.");
+  await expect(page.getByRole("status")).toContainText("Viagem excluída.");
   await expect(page.getByRole("link", { name: tripName })).toHaveCount(0);
 });

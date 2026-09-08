@@ -246,32 +246,33 @@ describe("WikimediaCommonsPlaceImageAdapter", () => {
   });
 
   it("usa contexto de Destination sem acoplar a busca a Pipa", async () => {
-    const fetcher = vi.fn(async () =>
-      Response.json({
-        query: {
-          pages: [
-            commonsPage({
-              title: "File:Ponte Hercilio Luz Florianopolis.jpg",
-              coordinates: [{ lat: -27.594, lon: -48.566, primary: "" }],
-              imageinfo: [
-                {
-                  descriptionurl:
-                    "https://commons.wikimedia.org/wiki/File:Ponte_Hercilio_Luz_Florianopolis.jpg",
-                  url: "https://upload.wikimedia.org/example/ponte.jpg",
-                  thumburl: "https://upload.wikimedia.org/example/1280px-ponte.jpg",
-                  mime: "image/jpeg",
-                  extmetadata: {
-                    Artist: { value: "Autor" },
-                    LicenseShortName: { value: "CC BY 4.0" },
-                    LicenseUrl: { value: "https://creativecommons.org/licenses/by/4.0/" },
-                    ImageDescription: { value: "Ponte Hercílio Luz em Florianópolis" },
+    const fetcher = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>(
+      async () =>
+        Response.json({
+          query: {
+            pages: [
+              commonsPage({
+                title: "File:Ponte Hercilio Luz Florianopolis.jpg",
+                coordinates: [{ lat: -27.594, lon: -48.566, primary: "" }],
+                imageinfo: [
+                  {
+                    descriptionurl:
+                      "https://commons.wikimedia.org/wiki/File:Ponte_Hercilio_Luz_Florianopolis.jpg",
+                    url: "https://upload.wikimedia.org/example/ponte.jpg",
+                    thumburl: "https://upload.wikimedia.org/example/1280px-ponte.jpg",
+                    mime: "image/jpeg",
+                    extmetadata: {
+                      Artist: { value: "Autor" },
+                      LicenseShortName: { value: "CC BY 4.0" },
+                      LicenseUrl: { value: "https://creativecommons.org/licenses/by/4.0/" },
+                      ImageDescription: { value: "Ponte Hercílio Luz em Florianópolis" },
+                    },
                   },
-                },
-              ],
-            }),
-          ],
-        },
-      }),
+                ],
+              }),
+            ],
+          },
+        }),
     );
     const adapter = new WikimediaCommonsPlaceImageAdapter({ fetcher });
 

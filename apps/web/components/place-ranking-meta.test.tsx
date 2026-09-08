@@ -22,7 +22,7 @@ describe("PlaceRankingMeta", () => {
     expect(view.queryByText(/ordenação selecionada/i)).not.toBeInTheDocument();
   });
 
-  it("resume score e rating e mantém volume, Fonte e motivo no disclosure", () => {
+  it("resume score e rating e mantém volume, fonte e motivo no disclosure", () => {
     const { container } = render(
       <PlaceRankingMeta
         categoryLabel="Praias"
@@ -52,6 +52,7 @@ describe("PlaceRankingMeta", () => {
     expect(view.getByText("Por que aparece assim?")).toBeInTheDocument();
     expect(view.getByText(/2\.340 avaliações/)).toBeInTheDocument();
     expect(view.getByText(/Fonte: Google Places/)).toBeInTheDocument();
+    expect(view.queryByText(/Provider/i)).not.toBeInTheDocument();
     expect(view.getByText(/Muito bem avaliado/)).toBeInTheDocument();
   });
 });

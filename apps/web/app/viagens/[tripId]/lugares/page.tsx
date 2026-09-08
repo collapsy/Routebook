@@ -305,7 +305,7 @@ function CanonicalDiscoveryCard({
               rel="noreferrer"
               target="_blank"
             >
-              Calcular rota real
+              Ver rota
             </a>
           </div>
         </div>
@@ -445,7 +445,7 @@ function ExternalDiscoveryCard({
               rel="noreferrer"
               target="_blank"
             >
-              Calcular rota real
+              Ver rota
             </a>
           </div>
         </div>

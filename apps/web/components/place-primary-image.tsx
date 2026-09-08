@@ -24,7 +24,7 @@ export function PlacePrimaryImage({
   category,
   showProvenance = false,
   priority = false,
-  compactFallback = false,
+  compactFallback = true,
 }: {
   placeName: string;
   primaryImage?: PlacePrimaryImageContract | undefined;

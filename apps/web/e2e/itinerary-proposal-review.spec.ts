@@ -533,11 +533,11 @@ test("revisa uma Proposal ready sem aplicá-la ao Roteiro", async ({ page }, tes
   );
 
   await expect(page.getByRole("heading", { level: 1, name: "Proposta de Roteiro" })).toBeVisible();
-  await expect(page.getByText("Sugestão — ainda não aplicada")).toBeVisible();
+  await expect(page.getByText("Proposta aguardando sua decisão")).toBeVisible();
   await expect(page.getByRole("heading", { name: proposedActivity })).toBeVisible();
   await expect(page.getByText("Proximidade entre lugares")).toBeVisible();
   await expect(page.getByText("Horários externos não foram confirmados.")).toBeVisible();
-  await expect(page.getByText(/O Roteiro atual permanece preservado/i)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Revise antes de aplicar" })).toBeVisible();
   await expect(page.getByRole("button", { name: /aplicar|gerar novamente/i })).toHaveCount(0);
   await expect(page.getByText("Aceitar proposta", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Descartar proposta" })).toBeVisible();
@@ -628,7 +628,7 @@ test("alcança o estado vazio de Proposal pelo Roteiro quando não existe Propos
 
   await expect(page.getByRole("heading", { name: "Nenhuma proposta disponível" })).toBeVisible();
   await expect(
-    page.getByText(/Roteiro atual continua disponível e não foi alterado/i),
+    page.getByText("Gere uma nova proposta ou continue montando o Roteiro manualmente."),
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Continuar no Roteiro" })).toHaveAttribute(
     "href",
@@ -653,14 +653,13 @@ test("consulta uma Proposal expired somente como referência histórica", async 
     /\/roteiro\/proposta$/,
   );
 
-  await expect(page.getByText("Proposta expirada — somente referência")).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Consulte o histórico desta proposta" }),
+    page.getByRole("heading", { name: "Consulte esta proposta como referência" }),
   ).toBeVisible();
-  await expect(page.getByText(/Esta proposta não pode mais ser aplicada/i)).toBeVisible();
+  await expect(page.getByRole("note")).toContainText("não pode mais ser aplicada");
   await expect(page.getByText("Expirada em")).toBeVisible();
   await expect(page.getByRole("heading", { name: proposedActivity })).toBeVisible();
-  await expect(page.getByRole("note")).toHaveText(/referência histórica/i);
+  await expect(page.getByRole("note")).toHaveText(/expirou e não pode mais ser aplicada/i);
   await expect(
     page.getByRole("button", { name: /aceitar|aplicar|descartar|gerar novamente/i }),
   ).toHaveCount(0);

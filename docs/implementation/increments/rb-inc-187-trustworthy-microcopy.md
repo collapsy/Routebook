@@ -146,6 +146,30 @@ O inventário deve distinguir:
 - copy movida para divulgação progressiva;
 - copy preservada por ser necessária à decisão, estimativa, acessibilidade ou atribuição.
 
+### 6.1 Lote 1 — Minhas viagens + criação
+
+| Superfície | Antes | Depois | Motivo |
+| --- | --- | --- | --- |
+| Minhas viagens — introdução | `Cada viagem reúne o contexto estrutural necessário para você decidir melhor ao longo do planejamento.` | `Abra uma viagem para continuar planejando lugares, roteiro e próximos passos.` | remove linguagem estrutural e prioriza a ação disponível |
+| Minhas viagens — criação | `Viagem criada e salva com sucesso.` | `Viagem criada.` | o resultado observável já comunica o sucesso sem narrar persistência |
+| Minhas viagens — exclusão | `Viagem excluída com sucesso.` | `Viagem excluída.` | reduz fórmula sem perder estado |
+| Minhas viagens — erro | `Tente novamente em instantes. Seus dados continuam intactos.` | `Tente novamente em instantes.` | evita garantia técnica irrelevante em erro de leitura |
+| Loading de viagens | `Organizando seu espaço` | `Carregando viagens` | estado factual, curto e previsível |
+| Estado vazio | `O RouteBook usará esse contexto para organizar as próximas decisões da sua viagem.` | `Comece com o destino e as datas. Você pode informar a hospedagem agora ou depois.` | orienta o próximo passo sem narrar mecanismo interno |
+| Card da viagem | `Contexto vN`, `Trip <id>`, `Owner não identificado` | remover versão e ID; usar `Responsável não informado` | remove metadados de debug e mantém informação humana útil |
+| Nova viagem — introdução | `O RouteBook confirma o destino antes de criar seu guia.` | `Digite uma cidade ou região e escolha a opção correta nas sugestões.` | explica a ação esperada, não a validação interna |
+| Nova viagem — apoio | `Destino confirmado no servidor... compõem a base inicial... evoluir o contexto...` | `Informe o que já souber. Hospedagem e preferências podem ser completadas depois.` | remove servidor e linguagem estrutural sem esconder flexibilidade |
+| Formulário — atribuição | `Busca textual alternativa: ...` | `Dados de destino: ...` | preserva a origem necessária sem expor estratégia de fallback |
+| Formulário — hospedagem | `registramos esse contexto junto com a viagem` | `Você pode informar onde vai ficar agora ou depois.` | linguagem direta e centrada na escolha do viajante |
+| Formulário — rodapé | `Nada é planejado automaticamente sem sua ação.` | remover a garantia repetida | ações continuam explícitas e a frase não muda a decisão neste ponto |
+| Sugestões de destino indisponíveis | mensagens sobre `ambiente` e `busca textual` | indisponibilidade curta + recuperação | remove configuração/pipeline sem ocultar o que fazer |
+| Erro de sugestões | `Seu texto foi preservado.` | `Não foi possível carregar sugestões agora. Tente novamente.` | prioriza recuperação em vez de garantia interna |
+| Limite de duração | `No MVP, a viagem pode ter no máximo 31 dias.` | `A viagem pode ter no máximo 31 dias.` | remove estágio interno do produto |
+| Resolver bloqueado/configuração inválida | mensagens sobre segurança/configuração | impossibilidade de localizar/confirmar + ação disponível | evita expor configuração interna e preserva recuperação |
+| Falha ao criar | `Não foi possível salvar a viagem agora. Revise a conexão e tente novamente.` | `Não foi possível criar a viagem agora. Tente novamente.` | evita especular a causa e usa a ação entendida pelo viajante |
+
+Neste lote, continuam preservados nomes acessíveis, atribuição de dados de destino e validações de datas/hospedagem, pois comunicam significado ou recuperação reais.
+
 ## 7. Linguagem e semântica
 
 - preservar os conceitos oficiais de RB-DOM-002;

@@ -117,5 +117,6 @@ test("mantém contexto visual ilustrativo em Lugar salvo sem fotografia real", a
   const fallback = savedCard.locator('[data-place-image-fallback="true"]');
   await expect(fallback).toBeVisible();
   await expect(fallback).toHaveAttribute("data-category-illustration", "beach");
-  await expect(fallback).toContainText("Ilustração de categoria — não é foto do local");
+  await expect(fallback).toHaveAttribute("data-presentation", "compact");
+  await expect(fallback).toContainText("Imagem ilustrativa");
 });

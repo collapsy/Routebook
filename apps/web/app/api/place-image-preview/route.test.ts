@@ -5,7 +5,7 @@ import { GET } from "./route";
 function commonsResponse(
   description = "Praia do Amor em Pipa, Tibau do Sul, Rio Grande do Norte",
   title = "File:Praia do Amor Pipa.jpg",
-  coordinate: Readonly<{ latitude: number; longitude: number }> | undefined = {
+  coordinate: Readonly<{ latitude: number; longitude: number }> | null = {
     latitude: -6.2366,
     longitude: -35.0465,
   },
@@ -160,7 +160,7 @@ describe("GET /api/place-image-preview", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () =>
-        commonsResponse("Praia do Amor no litoral brasileiro", "File:Praia do Amor.jpg", undefined),
+        commonsResponse("Praia do Amor no litoral brasileiro", "File:Praia do Amor.jpg", null),
       ),
     );
 

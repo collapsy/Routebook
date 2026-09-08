@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { TripMapPoint } from "../lib/trip-map";
@@ -31,6 +31,14 @@ const externalPlacePoint: TripMapPoint = {
   kind: "external-place",
   latitude: -6.231,
   longitude: -35.049,
+};
+
+const publishedPlacePoint: TripMapPoint = {
+  id: "place-1",
+  label: "Lugar já conhecido",
+  kind: "published-place",
+  latitude: -6.232,
+  longitude: -35.048,
 };
 
 afterEach(() => {
@@ -174,23 +182,26 @@ describe("TripMap", () => {
     expect(screen.getAllByText("Praia do Amor").length).toBeGreaterThan(0);
   });
 
-  it("distinguishes external discoveries in the map legend and accessible list", () => {
-    render(<TripMap points={[accommodationPoint, externalPlacePoint]} title="Mapa de Pipa" />);
+  it("presents provider and materialized places as the same Lugar in the map experience", () => {
+    render(
+      <TripMap
+        points={[accommodationPoint, externalPlacePoint, publishedPlacePoint]}
+        title="Mapa de Pipa"
+      />,
+    );
 
     const legend = screen.getByRole("list", { name: "Legenda do mapa" });
-    expect(legend).toHaveTextContent("Descoberta externa");
-    expect(screen.getByText("Descoberta externa").closest("li")).toHaveTextContent("1");
-    expect(screen.getByLabelText("Resumo do mapa")).toHaveTextContent("2 pontos representados");
+    const placeLegend = within(legend).getByText("Lugar").closest("li");
+    expect(placeLegend).toHaveTextContent("2");
+    expect(within(legend).queryByText("Descoberta externa")).not.toBeInTheDocument();
+    expect(within(legend).queryByText("Lugar publicado")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Resumo do mapa")).toHaveTextContent("3 pontos representados");
     expect(screen.getByRole("region", { name: "Mapa interativo: Mapa de Pipa" })).toHaveAttribute(
       "data-map-external-count",
       "1",
     );
-    expect(screen.getByText("Descoberta externa: Restaurante descoberto")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("link", {
-        name: "Descoberta externa: Restaurante descoberto. Abrir detalhes.",
-      }),
-    ).not.toBeInTheDocument();
+    expect(screen.getByText("Lugar: Restaurante descoberto")).toBeInTheDocument();
+    expect(screen.getByText("Lugar: Lugar já conhecido")).toBeInTheDocument();
   });
 
   it("marks dense maps and keeps source counts inspectable", () => {
@@ -209,5 +220,8 @@ describe("TripMap", () => {
     expect(map).toHaveAttribute("data-map-point-count", "26");
     expect(map).toHaveAttribute("data-map-external-count", "26");
     expect(screen.getByLabelText("Resumo do mapa")).toHaveTextContent("26 pontos representados");
+    expect(
+      within(screen.getByRole("list", { name: "Legenda do mapa" })).getByText("Lugar"),
+    ).toBeInTheDocument();
   });
 });

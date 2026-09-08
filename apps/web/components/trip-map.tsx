@@ -72,11 +72,15 @@ let leafletLoader: Promise<LeafletNamespace> | undefined;
 
 const kindLabels: Record<TripMapPointKind, string> = {
   accommodation: "Hospedagem",
-  "published-place": "Lugar publicado",
-  "external-place": "Descoberta externa",
+  "published-place": "Lugar",
+  "external-place": "Lugar",
   "saved-place": "Lugar salvo",
   "itinerary-activity": "Atividade planejada",
 };
+
+function visibleKind(kind: TripMapPointKind): TripMapPointKind {
+  return kind === "external-place" ? "published-place" : kind;
+}
 
 function describePoint(point: TripMapPoint): string {
   if (point.kind === "itinerary-activity" && point.sequence !== undefined) {
@@ -145,7 +149,7 @@ function loadLeaflet(): Promise<LeafletNamespace> {
 
 function createMarkerContent(point: TripMapPoint, dense: boolean): HTMLElement {
   const marker = document.createElement(point.href ? "a" : "span");
-  marker.className = `${styles.marker} ${styles[point.kind]} ${dense ? styles.denseMarker : ""}`;
+  marker.className = `${styles.marker} ${styles[visibleKind(point.kind)]} ${dense ? styles.denseMarker : ""}`;
   marker.dataset.mapPointId = point.id;
   marker.dataset.mapPointKind = point.kind;
   marker.dataset.latitude = String(point.latitude);
@@ -191,7 +195,7 @@ export function TripMap({
   title,
   description = "Use os marcadores para localizar a hospedagem e abrir os detalhes dos lugares.",
   emptyTitle = "Mapa ainda indisponível",
-  emptyDescription = "Adicione ou revise o nome e o endereço da hospedagem para o RouteBook tentar localizá-la automaticamente, ou aguarde a publicação de lugares com localização. As demais áreas da viagem continuam disponíveis normalmente.",
+  emptyDescription = "Adicione ou revise o nome e o endereço da hospedagem para o RouteBook tentar localizá-la automaticamente, ou aguarde lugares com localização disponível. As demais áreas da viagem continuam disponíveis normalmente.",
 }: TripMapProps) {
   const mapElementRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -199,13 +203,17 @@ export function TripMap({
   const validPoints = useMemo(() => points.filter(isValidTripMapPoint), [points]);
   const mapComposition = useMemo(() => {
     const counts = new Map<TripMapPointKind, number>();
+    const visibleCounts = new Map<TripMapPointKind, number>();
     for (const point of validPoints) {
       counts.set(point.kind, (counts.get(point.kind) ?? 0) + 1);
+      const displayKind = visibleKind(point.kind);
+      visibleCounts.set(displayKind, (visibleCounts.get(displayKind) ?? 0) + 1);
     }
     return {
       counts,
+      visibleCounts,
       dense: validPoints.length > 25,
-      visibleKinds: Array.from(counts.keys()),
+      visibleKinds: Array.from(visibleCounts.keys()),
     };
   }, [validPoints]);
 
@@ -337,7 +345,9 @@ export function TripMap({
             <li key={kind}>
               <span aria-hidden="true" className={`${styles.legendDot} ${styles[kind]}`} />
               {kindLabels[kind]}
-              <strong className={styles.legendCount}>{mapComposition.counts.get(kind)}</strong>
+              <strong className={styles.legendCount}>
+                {mapComposition.visibleCounts.get(kind)}
+              </strong>
             </li>
           ))}
         </ul>
@@ -390,7 +400,7 @@ export function TripMap({
       </ul>
 
       <p className={styles.attribution}>
-        Camada cartográfica por OpenStreetMap. Os marcadores representam coordenadas cadastradas e
+        Camada cartográfica por OpenStreetMap. Os marcadores representam coordenadas disponíveis e
         não indicam rota, trânsito ou tempo de deslocamento.
       </p>
     </section>

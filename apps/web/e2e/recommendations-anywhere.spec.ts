@@ -2,10 +2,10 @@ import { expect, test } from "@playwright/test";
 
 test.setTimeout(120_000);
 
-test("destino zero-seed recebe sugestões externas sem criar estado canônico", async ({
+test("destino zero-seed recebe sugestões de lugares sem expor lifecycle interno", async ({
   page,
 }, testInfo) => {
-  const suffix = `rb-inc-184-${testInfo.project.name}-${Date.now()}`;
+  const suffix = `rb-inc-185-${testInfo.project.name}-${Date.now()}`;
   const tripName = `Floripa sugestões ${suffix}`;
 
   await page.goto("/viagens/nova");
@@ -38,27 +38,29 @@ test("destino zero-seed recebe sugestões externas sem criar estado canônico", 
   await expect(page.getByRole("heading", { name: `Sugestões para ${tripName}` })).toBeVisible();
   await expect(page.getByText("Destino ainda não coberto", { exact: true })).toHaveCount(0);
   await expect(
-    page.getByRole("heading", { name: "Descobertas para considerar agora", exact: true }),
+    page.getByRole("heading", { name: "Lugares para considerar agora", exact: true }),
   ).toBeVisible();
 
-  const externalList = page.getByRole("list", { name: "Sugestões externas de lugares" });
-  await expect(externalList).toBeVisible();
-  await expect(externalList.getByRole("article")).toHaveCount(3);
-  await expect(externalList.getByRole("article").first()).toHaveAccessibleName(
+  const placesList = page.getByRole("list", { name: "Lugares sugeridos" });
+  await expect(placesList).toBeVisible();
+  await expect(placesList.getByRole("article")).toHaveCount(3);
+  await expect(placesList.getByRole("article").first()).toHaveAccessibleName(
     "Parque descoberto próximo",
   );
-  await expect(externalList.getByText("Descoberta externa", { exact: true })).toHaveCount(3);
-  await expect(externalList.getByText(/interesse informado para esta Viagem/)).toBeVisible();
-  await expect(externalList.getByText(/em linha reta/).first()).toBeVisible();
-  await expect(externalList.getByText("RouteBook E2E", { exact: true }).first()).toBeVisible();
-  await expect(externalList.getByRole("button", { name: /Salvar lugar/i })).toHaveCount(0);
-  await expect(externalList.getByRole("button", { name: /Adicionar ao roteiro/i })).toHaveCount(0);
-  await expect(externalList.getByRole("button", { name: /Ignorar/i })).toHaveCount(0);
+  await expect(placesList.getByText(/interesse informado para esta Viagem/)).toBeVisible();
+  await expect(placesList.getByText(/em linha reta/).first()).toBeVisible();
+  await expect(placesList.getByText("RouteBook E2E", { exact: true }).first()).toBeVisible();
+  await expect(placesList.getByRole("button", { name: /Salvar lugar/i })).toHaveCount(0);
+  await expect(placesList.getByRole("button", { name: /Adicionar ao roteiro/i })).toHaveCount(0);
+  await expect(placesList.getByRole("button", { name: /Ignorar/i })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Explorar todos os lugares" })).toBeVisible();
+  await expect(page.getByText(/Descoberta externa/i)).toHaveCount(0);
+  await expect(page.getByText(/Places publicados/i)).toHaveCount(0);
+  await expect(page.getByText(/Candidato externo/i)).toHaveCount(0);
 
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Descobertas para considerar agora", exact: true }),
+    page.getByRole("heading", { name: "Lugares para considerar agora", exact: true }),
   ).toBeVisible();
 
   await page.goto(`${tripHref}/lugares-salvos`);

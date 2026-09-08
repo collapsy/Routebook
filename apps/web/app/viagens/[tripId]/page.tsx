@@ -71,17 +71,20 @@ function mapDescription(
     discoveryStatus: "unavailable" | "disabled" | "success" | "failed";
   }>,
 ): string {
-  const base = `A visão geral representa a Hospedagem, ${input.canonicalCount} Places canônicos e ${input.externalVisibleCount} descobertas externas próximas quando disponíveis.`;
+  const visiblePlaceCount = input.canonicalCount + input.externalVisibleCount;
+  const availablePlaceCount = input.canonicalCount + input.externalAvailableCount;
+  const base = `A visão geral representa a Hospedagem e ${visiblePlaceCount} ${visiblePlaceCount === 1 ? "Lugar próximo" : "Lugares próximos"} com localização disponível.`;
+
   if (input.discoveryStatus === "failed") {
-    return `${base} A fonte externa não respondeu agora; os pontos canônicos continuam disponíveis normalmente.`;
+    return `${base} A fonte de lugares não respondeu agora; os dados já disponíveis continuam acessíveis normalmente.`;
   }
   if (input.discoveryStatus === "disabled") {
-    return `${base} A descoberta externa está pausada neste ambiente.`;
+    return `${base} A busca de novos lugares está pausada neste ambiente.`;
   }
-  if (input.externalAvailableCount > input.externalVisibleCount) {
-    return `${base} Este resumo mostra as ${input.externalVisibleCount} descobertas externas mais próximas de ${input.externalAvailableCount} disponíveis; explore Lugares para ver a cobertura completa.`;
+  if (availablePlaceCount > visiblePlaceCount) {
+    return `${base} Este resumo mostra ${visiblePlaceCount} de ${availablePlaceCount} lugares disponíveis; explore Lugares para ver a cobertura completa.`;
   }
-  return `${base} Descobertas externas continuam identificadas pela origem e não são publicadas automaticamente.`;
+  return `${base} A origem dos dados é preservada na Fonte quando essa informação é relevante.`;
 }
 
 export default async function TripOverviewPage({
@@ -176,8 +179,8 @@ export default async function TripOverviewPage({
               <p className="product-eyebrow">Hoje em {trip.destination.name}</p>
               <h2 id="trip-guide-entry-title">Comece pelo que importa neste Dia</h2>
               <p>
-                Consulte o que já foi confirmado para a data em foco. Onde houver cobertura
-                editorial governada, o RouteBook acrescenta contexto sem substituir suas decisões.
+                Consulte o que já foi confirmado para a data em foco. Quando houver dados úteis do
+                destino, o RouteBook acrescenta contexto sem substituir suas decisões.
               </p>
             </div>
             <Link className="product-primary-action" href={`/viagens/${tripId}/guia`}>
@@ -304,13 +307,13 @@ export default async function TripOverviewPage({
           <p className="product-eyebrow">Descoberta do destino</p>
           <h2 id="trip-next-steps-title">Explore lugares de {trip.destination.name}</h2>
           <p>
-            Compare os Places publicados com descobertas externas da região, ordenadas pela mesma
-            referência de distância e sempre identificadas pela origem.
+            Compare lugares encontrados na região, ordenados pela mesma referência de distância. A
+            Fonte de cada dado é preservada quando relevante, sem criar tipos diferentes de Lugar.
           </p>
         </div>
         <div className="section-heading-row">
           <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
-            Explorar catálogo ampliado
+            Explorar lugares
           </Link>
           <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares-salvos`}>
             Ver lugares salvos

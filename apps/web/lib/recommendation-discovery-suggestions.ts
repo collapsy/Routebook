@@ -156,7 +156,6 @@ export function buildContextualExternalSuggestions(
         "O Lugar foi encontrado dentro da área de descoberta desta Viagem.",
       ];
       const limitations = [
-        "Esta é uma descoberta externa e ainda não é um Place publicado no catálogo do RouteBook.",
         "Preço, avaliação pública, horário e disponibilidade não foram confirmados por esta sugestão.",
         "A distância exibida é geodésica, em linha reta, e não representa rota, trânsito ou duração.",
         ...(!hasInterests

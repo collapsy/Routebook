@@ -55,7 +55,6 @@ import type { TripMapPoint } from "../../../../lib/trip-map";
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
 import { resolvePlaceDiscoveryRegion } from "../../../../lib/place-discovery-region";
 import {
-  promoteExternalPlaceAction,
   removePublishedPlaceAction,
   saveExternalPlaceAction,
   savePublishedPlaceAction,
@@ -86,7 +85,6 @@ type DiscoverySearchParams = {
   preco?: string;
   ordem?: string;
   descoberta?: string | undefined;
-  promocao?: string;
   erroPromocao?: string;
 };
 
@@ -145,37 +143,24 @@ function matchesExternalSearch(result: ExternalPlaceReconciliation, search?: str
     .some((value) => normalizeSearchText(value).includes(needle));
 }
 
-function promotionMessage(value?: string): string | undefined {
-  switch (value) {
-    case "criada":
-      return "Candidato enviado para curadoria como draft. Ele só aparecerá no catálogo depois de uma publicação governada.";
-    case "existente":
-      return "Este candidato já havia sido enviado para curadoria. Nenhuma duplicata foi criada.";
-    case "salva":
-      return "Lugar salvo na viagem com a origem externa preservada. Nenhuma publicação editorial foi feita.";
-    default:
-      return undefined;
-  }
-}
-
-function promotionErrorMessage(value?: string): string | undefined {
+function placeActionErrorMessage(value?: string): string | undefined {
   switch (value) {
     case "candidato-invalido":
-      return "O candidato informado é inválido. Refaça a descoberta antes de tentar novamente.";
+      return "O Lugar informado é inválido. Atualize a busca antes de tentar novamente.";
     case "candidato-nao-encontrado":
-      return "O candidato não foi reencontrado na fonte atual. Refaça a descoberta antes de tentar novamente.";
+      return "O Lugar não foi reencontrado na Fonte atual. Atualize a busca antes de tentar novamente.";
     case "candidato-rejeitado":
-      return "O candidato não atende aos critérios atuais para promoção e não foi gravado.";
+      return "O Lugar não atende aos critérios atuais de identidade e não foi salvo.";
     case "possivel-duplicata":
-      return "O RouteBook encontrou uma possível duplicidade. A promoção foi bloqueada para evitar criar outro Lugar.";
+      return "O RouteBook encontrou uma possível duplicidade e bloqueou a gravação para evitar dois registros do mesmo Lugar.";
     case "fonte-indisponivel":
-      return "A fonte externa não pôde revalidar este candidato agora. Nenhuma alteração foi gravada.";
+      return "A Fonte não pôde revalidar este Lugar agora. Nenhuma alteração foi gravada.";
     case "destino-nao-suportado":
-      return "A promoção externa ainda não está disponível para este destino.";
+      return "Não foi possível resolver uma região segura para este Lugar agora.";
     case "consistencia":
-      return "O candidato possui um vínculo inconsistente e não foi promovido. Nenhuma alteração parcial foi mantida.";
+      return "O Lugar possui um vínculo de identidade inconsistente. Nenhuma alteração parcial foi mantida.";
     case "erro-tecnico":
-      return "Não foi possível enviar o candidato para curadoria agora. Nenhuma alteração parcial foi mantida.";
+      return "Não foi possível concluir a ação neste Lugar agora. Nenhuma alteração parcial foi mantida.";
     default:
       return undefined;
   }
@@ -265,9 +250,6 @@ function CanonicalDiscoveryCard({
       )}
       <div className={styles.cardIdentity}>
         <span>{categoryLabels[place.category]}</span>
-        <strong className={`${styles.sourceBadge} ${styles.publishedSource}`}>
-          {candidate ? "Curado + atualizado" : "Curado pelo RouteBook"}
-        </strong>
       </div>
       <strong>{place.name}</strong>
       <p>{place.summary}</p>
@@ -280,12 +262,9 @@ function CanonicalDiscoveryCard({
         {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
       </small>
       {candidate ? (
-        <small>
-          Conteúdo: RouteBook · contexto de localização: Overture · licença da origem:{" "}
-          {candidate.sourceLicense}
-        </small>
+        <small>Fonte de localização: Overture · licença: {candidate.sourceLicense}</small>
       ) : (
-        <small>Conteúdo e localização: catálogo publicado do RouteBook</small>
+        <small>Fonte: RouteBook</small>
       )}
       <div className={styles.cardActions}>
         <form action={isSaved ? removePublishedPlaceAction : savePublishedPlaceAction}>
@@ -405,18 +384,16 @@ function ExternalDiscoveryCard({
       />
       <div className={styles.cardIdentity}>
         <span>{categoryLabel}</span>
-        <strong className={`${styles.sourceBadge} ${styles.externalSource}`}>
-          Descoberta atual
-        </strong>
       </div>
       <strong>{candidate.name}</strong>
-      <p>{candidate.addressLabel ?? "Endereço não informado pela fonte"}</p>
-      <small>Categoria na origem: {providerCategoryLabel(candidate.providerCategory)}</small>
+      <p>{candidate.addressLabel ?? "Endereço não informado pela Fonte"}</p>
+      <small>
+        Categoria informada pela Fonte: {providerCategoryLabel(candidate.providerCategory)}
+      </small>
       <small>
         {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
       </small>
-      <small>Fonte: Overture · licença da origem: {candidate.sourceLicense}</small>
-      <small>Candidato externo — ainda não publicado no RouteBook · sem conteúdo curado</small>
+      <small>Fonte: Overture · licença: {candidate.sourceLicense}</small>
       <div className={styles.cardActions}>
         <a
           className="product-secondary-action"
@@ -461,38 +438,15 @@ function ExternalDiscoveryCard({
             </button>
           </form>
           <small>
-            O RouteBook revalida o candidato antes de salvar e preserva a fonte. Salvar não publica
-            o Lugar nem o adiciona automaticamente ao roteiro.
+            O RouteBook revalida o Lugar antes de salvar e preserva a Fonte. Salvar não o adiciona
+            automaticamente ao roteiro.
           </small>
         </>
       ) : (
         <small>
-          Este candidato pode ser consultado, mas ainda não tem categoria segura para ser salvo.
+          Este Lugar pode ser consultado, mas a Fonte ainda não informa uma categoria segura para
+          salvá-lo.
         </small>
-      )}
-      {destinationId ? (
-        <>
-          <form action={promoteExternalPlaceAction} className={styles.promotionForm}>
-            <input name="tripId" type="hidden" value={tripId} />
-            <input name="externalId" type="hidden" value={candidate.externalId} />
-            {search ? <input name="busca" type="hidden" value={search} /> : null}
-            {category ? <input name="categoria" type="hidden" value={category} /> : null}
-            {maximumDistanceMeters ? (
-              <input name="distancia" type="hidden" value={String(maximumDistanceMeters / 1_000)} />
-            ) : null}
-            {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
-            {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
-            <button className="product-secondary-action" type="submit">
-              Enviar para curadoria
-            </button>
-          </form>
-          <small>
-            A ação cria um draft para revisão; não publica, não salva na viagem e não adiciona ao
-            roteiro.
-          </small>
-        </>
-      ) : (
-        <small>A curadoria editorial permanece separada e não é necessária para planejar.</small>
       )}
     </li>
   );
@@ -518,8 +472,7 @@ export default async function PlacesPage({
   const discoverExternal = rawFilters.descoberta !== "ocultar";
   const showAllExternal = rawFilters.descoberta === "todas";
   const discoveryMode = !discoverExternal ? "ocultar" : showAllExternal ? "todas" : undefined;
-  const promotionStatusMessage = promotionMessage(rawFilters.promocao);
-  const promotionError = promotionErrorMessage(rawFilters.erroPromocao);
+  const placeActionError = placeActionErrorMessage(rawFilters.erroPromocao);
   const accommodationCoordinate = trip.accommodation?.coordinate;
   const requestedMaximumDistanceMeters = parseMaximumDistance(rawFilters.distancia);
   const regionResolution = resolvePlaceDiscoveryRegion({
@@ -643,7 +596,7 @@ export default async function PlacesPage({
       });
     } else if (discoveryResult.status === "failed") {
       externalDiscoveryError =
-        "A fonte externa não respondeu agora. O catálogo curado continua disponível normalmente.";
+        "A Fonte de lugares não respondeu agora. Os dados já disponíveis continuam acessíveis normalmente.";
     }
   }
 
@@ -704,7 +657,7 @@ export default async function PlacesPage({
       qualityMatches = [...qualityResult.value];
     } else if (qualityResult.status === "failed") {
       qualityProviderError =
-        "Os sinais de qualidade não responderam agora. A Discovery continua ordenada por proximidade.";
+        "Os sinais de qualidade não responderam agora. Os lugares continuam ordenados por proximidade.";
     } else {
       qualityProviderError =
         "O enriquecimento de qualidade está pausado neste ambiente. Os lugares continuam disponíveis por proximidade.";
@@ -733,8 +686,6 @@ export default async function PlacesPage({
     (item) => item.kind === "external",
   ).length;
   const visibleExternalCount = discoveryItems.filter((item) => item.kind === "external").length;
-  const enrichedCount = allDiscoveryItems.filter((item) => item.kind === "enriched").length;
-  const curatedCount = allDiscoveryItems.filter((item) => item.kind !== "external").length;
   const hasMoreExternalResults =
     hasExternalCoverage && availableExternalCount > visibleExternalCount;
   const hasExpandedExternalResults =
@@ -833,9 +784,9 @@ export default async function PlacesPage({
           <p className="product-eyebrow">Guia de viagem</p>
           <h1>Lugares em {trip.destination.name}</h1>
           <p>
-            Explore uma lista única de Lugares. O RouteBook combina conteúdo curado com descobertas
-            atuais da região sem mostrar o mesmo lugar duas vezes. Para distância por ruas, duração
-            e trânsito, use as ações de rota real.
+            Explore uma lista única de Lugares encontrados para esta viagem. O RouteBook reconcilia
+            as Fontes disponíveis para evitar duplicatas. Para distância por ruas, duração e
+            trânsito, use as ações de rota real.
           </p>
         </div>
       </header>
@@ -912,7 +863,7 @@ export default async function PlacesPage({
       {!region ? (
         <p className={styles.notice} role="status">
           Não há uma referência espacial confiável para esta viagem. O RouteBook não inventa centro,
-          distância ou cobertura de Discovery.
+          distância ou cobertura de lugares.
         </p>
       ) : region.source === "accommodation" ? (
         <p className={styles.notice}>
@@ -1037,58 +988,41 @@ export default async function PlacesPage({
           <h2>
             {hasExternalCoverage
               ? `${visibleOptionCount} de ${totalAvailableOptionCount} ${
-                  totalAvailableOptionCount === 1 ? "lugar único" : "lugares únicos"
+                  totalAvailableOptionCount === 1 ? "lugar" : "lugares"
                 } exibidos`
               : `${filteredPublishedPlaces.length} ${
-                  filteredPublishedPlaces.length === 1 ? "lugar curado" : "lugares curados"
+                  filteredPublishedPlaces.length === 1 ? "lugar" : "lugares"
                 }`}
           </h2>
           <p>
-            {hasExternalCoverage
-              ? `${curatedCount} com conteúdo curado do RouteBook · ${enrichedCount} também reconciliados com Overture · ${availableExternalCount} somente na descoberta atual.`
-              : "Lista e mapa exibem o mesmo conjunto curado e filtrado."}
+            Lista e mapa usam o mesmo conjunto de Lugares. As Fontes são reconciliadas para evitar
+            duplicatas e permanecem disponíveis como Provenance quando relevante.
           </p>
         </div>
-        <Link
-          className="product-secondary-action"
-          href={discoveryHref(tripId, {
-            ...canonicalParams,
-            ...(discoverExternal ? { descoberta: "ocultar" } : { descoberta: undefined }),
-          })}
-        >
-          {discoverExternal ? "Ocultar atualização externa" : "Mostrar atualização externa"}
-        </Link>
       </div>
 
       {discoverExternal ? (
-        <section aria-label="Cobertura da descoberta" className={styles.discoverySummary}>
-          <strong>Um catálogo, identidades únicas</strong>
+        <section aria-label="Cobertura de lugares" className={styles.discoverySummary}>
+          <strong>Lugares reconciliados, sem duplicatas</strong>
           <p>
-            O RouteBook reconcilia a cobertura do Overture com o catálogo curado antes de montar a
-            grade. Quando as duas fontes representam o mesmo Lugar, você vê um único card com
-            conteúdo curado e contexto atualizado. A origem continua indicada para rastreabilidade.
+            O RouteBook compara identidades vindas das Fontes disponíveis antes de montar a grade.
+            Quando duas referências representam o mesmo Lugar, você vê uma única opção.
           </p>
           <p>
-            {externalCandidateCount} candidatos externos foram avaliados. {enrichedCount} Lugares
-            visíveis receberam contexto externo e {externalPossibleMatchCount} correspondências
-            possíveis foram tratadas de forma conservadora para evitar duplicatas.{" "}
-            {externalLinkedCount} referências já possuem vínculo canônico e {externalRejectedCount}{" "}
-            candidatos foram rejeitados pela validação da Fonte/categoria.
+            {externalCandidateCount} referências da Fonte foram avaliadas. {externalLinkedCount}{" "}
+            foram associadas com segurança a Lugares já conhecidos e {externalPossibleMatchCount}{" "}
+            possíveis duplicidades foram retidas de forma conservadora. {externalRejectedCount}{" "}
+            resultados foram descartados pela validação da Fonte ou categoria.
           </p>
-          {promotionStatusMessage ? (
-            <p className={styles.notice} role="status">
-              {promotionStatusMessage}
-            </p>
-          ) : null}
-          {promotionError ? (
+          {placeActionError ? (
             <p className={styles.notice} role="alert">
-              {promotionError}
+              {placeActionError}
             </p>
           ) : null}
           {priceRange ? (
             <p className={styles.notice} role="status">
-              A fonte externa não fornece a faixa de preço canônica do RouteBook; esse filtro vale
-              para Lugares com conteúdo curado e não exclui descobertas externas sem preço.
+              Nem todas as Fontes informam faixa de preço. O filtro é aplicado quando esse dado está
+              disponível e não exclui Lugares sem preço confirmado.
             </p>
           ) : null}
           {externalDiscoveryError ? (
@@ -1100,14 +1034,14 @@ export default async function PlacesPage({
               className="product-primary-action"
               href={discoveryHref(tripId, { ...canonicalParams, descoberta: "todas" })}
             >
-              Mostrar todos os {availableExternalCount} lugares descobertos
+              Mostrar todos os {availableExternalCount} lugares encontrados
             </Link>
           ) : hasExpandedExternalResults ? (
             <Link
               className="product-secondary-action"
               href={discoveryHref(tripId, { ...canonicalParams, descoberta: undefined })}
             >
-              Mostrar primeiras {externalDiscoveryDisplayLimit} descobertas externas
+              Mostrar primeiros {externalDiscoveryDisplayLimit} lugares
             </Link>
           ) : null}
         </section>
@@ -1177,7 +1111,7 @@ export default async function PlacesPage({
       )}
 
       <TripMap
-        description={`Mesmo conjunto da grade: ${visibleOptionCount} identidades únicas, sendo ${discoveryItems.filter((item) => item.kind !== "external").length} com conteúdo curado e ${visibleExternalCount} somente externos. A Hospedagem aparece como referência adicional quando disponível.`}
+        description={`Mesmo conjunto da grade: ${visibleOptionCount} ${visibleOptionCount === 1 ? "Lugar único" : "Lugares únicos"}. A Hospedagem aparece como referência adicional quando disponível.`}
         emptyDescription="Não há lugar com coordenadas no conjunto filtrado. Limpe ou amplie os filtros para recuperar resultados."
         emptyTitle="Nenhum lugar para exibir no mapa"
         points={mapPoints}

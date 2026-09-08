@@ -49,7 +49,7 @@ test("mantém Discovery funcional sem coordenadas da hospedagem", async ({ page 
       name: /\d+ de \d+ (?:lugar|lugares) exibidos/,
     }),
   ).toBeVisible();
-  await expect(page.getByText("Lugares reconciliados, sem duplicatas")).toBeVisible();
+  await expect(page.getByText("A lista e o mapa mostram os mesmos lugares.")).toBeVisible();
   await expect(
     page
       .getByRole("list", { name: "Opções de lugares" })

@@ -51,7 +51,9 @@ export default async function AccommodationPage({
       <header className="app-page-heading">
         <p className="product-eyebrow">Planejamento da viagem</p>
         <h1>Hospedagem de {trip.name}</h1>
-        <p>Informe onde você vai ficar. Essa localização serve de referência para mapa e distâncias.</p>
+        <p>
+          Informe onde você vai ficar. Essa localização serve de referência para mapa e distâncias.
+        </p>
       </header>
 
       <AccommodationForm accommodation={trip.accommodation} tripId={tripId} />

@@ -8,10 +8,7 @@ export function EmptyTripsState() {
       <div className="empty-state-content">
         <p className="product-eyebrow">Primeiro acesso</p>
         <h2 id="empty-trips-title">Você ainda não criou nenhuma viagem</h2>
-        <p>
-          Comece informando destino, datas e hospedagem. O RouteBook usará esse contexto para
-          organizar as próximas decisões da sua viagem.
-        </p>
+        <p>Comece com o destino e as datas. Você pode informar a hospedagem agora ou depois.</p>
 
         <div className="empty-state-actions">
           <Link className="product-primary-action" href="/viagens/nova">

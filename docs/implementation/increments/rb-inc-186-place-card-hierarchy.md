@@ -165,6 +165,7 @@ apps/web/e2e/external-place-images.spec.ts
 apps/web/e2e/recommendations-experience.spec.ts
 apps/web/e2e/route-destination-reliability.spec.ts
 apps/web/e2e/trip-day-guide.spec.ts
+apps/web/e2e/multi-destination-validation.spec.ts
 docs/implementation/increments/rb-inc-186-place-card-hierarchy.md
 docs/implementation/context-packs/rb-inc-186-place-card-hierarchy.md
 docs/implementation/traceability-matrix.md
@@ -178,6 +179,8 @@ Arquivos adicionais exigem atualização deste incremento antes da alteração.
 `apps/web/e2e/route-destination-reliability.spec.ts` foi incluído em 2026-09-08 após a suíte responsiva revelar seletores anteriores à nova anatomia do card e uma leitura direta de `Calcular rota real`, agora corretamente protegido por `Mais informações`. A correção é limitada ao contrato E2E da hierarquia progressiva; não altera destino, roteamento, Google Maps ou dados persistidos.
 
 `apps/web/e2e/trip-day-guide.spec.ts` foi incluído em 2026-09-08 após a suíte responsiva revelar a legenda legada `Lugar publicado`. O componente de mapa unificado já apresenta `Lugar` para pontos materializados e provider-first, em linha com o RB-INC-185. A correção é limitada à asserção textual do E2E; não altera Guia, mapa, dados, roteamento ou persistência.
+
+`apps/web/e2e/multi-destination-validation.spec.ts` foi incluído em 2026-09-08 após a suíte responsiva revelar o rótulo legado `Salvar na viagem` em um card provider-first. A nova anatomia mantém a ação secundária visível com o rótulo canônico `Salvar lugar`; a correção é limitada ao contrato E2E e não altera Discovery, materialização, Salvos, Roteiro, mapa, Guia ou persistência.
 
 ## 10. Critérios de aceite
 

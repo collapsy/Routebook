@@ -268,10 +268,7 @@ function CanonicalDiscoveryCard({
       />
 
       <div className={styles.cardActions}>
-        <Link
-          className="product-primary-action"
-          href={`/viagens/${tripId}/lugares/${place.slug}`}
-        >
+        <Link className="product-primary-action" href={`/viagens/${tripId}/lugares/${place.slug}`}>
           Ver detalhes
         </Link>
         <form action={isSaved ? removePublishedPlaceAction : savePublishedPlaceAction}>
@@ -411,12 +408,7 @@ function ExternalDiscoveryCard({
       />
 
       <div className={styles.cardActions}>
-        <a
-          className="product-primary-action"
-          href={mapsSearchUrl}
-          rel="noreferrer"
-          target="_blank"
-        >
+        <a className="product-primary-action" href={mapsSearchUrl} rel="noreferrer" target="_blank">
           Ver mapa e fotos
         </a>
         {candidate.category ? (
@@ -447,7 +439,8 @@ function ExternalDiscoveryCard({
           <small>Fonte: Overture · licença: {candidate.sourceLicense}</small>
           {!candidate.category ? (
             <small>
-              Salvar fica disponível quando a Fonte informa uma categoria reconhecida pelo RouteBook.
+              Salvar fica disponível quando a Fonte informa uma categoria reconhecida pelo
+              RouteBook.
             </small>
           ) : null}
           <div className={styles.cardAuxiliaryActions}>

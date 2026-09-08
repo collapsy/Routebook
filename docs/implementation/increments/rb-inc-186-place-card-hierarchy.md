@@ -88,7 +88,7 @@ Visível sem interação adicional:
 
 Disponível por divulgação progressiva:
 
-- posição detalhada no ranking;
+- posição detalhada no ranking e ordenação ativa;
 - razões do Score;
 - popularidade relativa;
 - Provider de qualidade e data de coleta;
@@ -154,9 +154,13 @@ apps/web/app/viagens/[tripId]/lugares/place-discovery.module.css
 apps/web/components/place-ranking-meta.tsx
 apps/web/components/place-ranking-meta.module.css
 apps/web/components/place-ranking-meta.test.tsx
+apps/web/components/external-place-image-preview.tsx
+apps/web/components/external-place-image-preview.test.tsx
 apps/web/e2e/place-discovery-anywhere.spec.ts
 apps/web/e2e/place-discovery-filters.spec.ts
 apps/web/e2e/place-actions.spec.ts
+apps/web/e2e/accommodation-proximity.spec.ts
+apps/web/e2e/authenticated-trips.spec.ts
 docs/implementation/increments/rb-inc-186-place-card-hierarchy.md
 docs/implementation/context-packs/rb-inc-186-place-card-hierarchy.md
 docs/implementation/traceability-matrix.md
@@ -177,6 +181,7 @@ Arquivos adicionais exigem atualização deste incremento antes da alteração.
 - [ ] Desktop evita cards excessivamente estreitos; mobile usa leitura em uma coluna.
 - [ ] Testes de componente e E2E cobrem hierarquia e ações críticas.
 - [ ] Documentation e Engineering Validation passam no mesmo SHA final.
+- [ ] Vercel Preview valida visualmente a hierarquia dos cards em desktop e mobile antes da integração.
 - [ ] Production permanece intocada.
 
 ## 11. Testes

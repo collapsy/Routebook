@@ -92,25 +92,24 @@ export default async function SavedPlacesPage({
             Abrir roteiro
           </Link>
           <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
-            Explorar catálogo
+            Explorar lugares
           </Link>
         </div>
       </div>
 
       {salvo === "1" ? (
         <p className="success-banner" role="status">
-          Lugar salvo na viagem com a origem externa preservada. Agora você pode adicioná-lo ao
-          roteiro.
+          Lugar salvo. Agora você pode adicioná-lo ao roteiro.
         </p>
       ) : null}
       {removed === "1" ? (
         <p className="success-banner" role="status">
-          Lugar removido da sua seleção.
+          Lugar removido dos salvos.
         </p>
       ) : null}
       {adicionadoAoRoteiro === "1" ? (
         <p className="success-banner" role="status">
-          Lugar adicionado ao roteiro. Ele continua salvo na sua seleção.
+          Lugar adicionado ao roteiro.
         </p>
       ) : null}
       {erro ? (
@@ -124,8 +123,8 @@ export default async function SavedPlacesPage({
           <p className="product-eyebrow">Sua seleção</p>
           <h1>Lugares salvos</h1>
           <p>
-            Reúna os lugares que deseja considerar durante a viagem para {trip.destination.name} e
-            transforme uma intenção em Atividade quando decidir o Dia.
+            Salve opções para comparar durante a viagem para {trip.destination.name} e adicione ao
+            roteiro quando decidir o dia.
           </p>
           <p>
             As distâncias exibidas são estimativas em linha reta a partir da hospedagem e não
@@ -141,10 +140,7 @@ export default async function SavedPlacesPage({
         <section className="traveler-context-summary" aria-labelledby="saved-empty-title">
           <p className="product-eyebrow">Seleção vazia</p>
           <h2 id="saved-empty-title">Você ainda não salvou nenhum lugar</h2>
-          <p>
-            Explore o catálogo e salve praias, restaurantes, natureza ou vida noturna para
-            encontrá-los aqui.
-          </p>
+          <p>Explore lugares e salve as opções que quiser comparar depois.</p>
           <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
             Explorar lugares
           </Link>
@@ -175,7 +171,7 @@ export default async function SavedPlacesPage({
                   <strong>Distância da hospedagem: </strong>
                   {accommodationDistance
                     ? `${accommodationDistance.label} — ${accommodationDistance.description}`
-                    : "indisponível enquanto a hospedagem não possuir coordenadas."}
+                    : "informe a localização da hospedagem para calcular esta distância."}
                 </p>
 
                 <form

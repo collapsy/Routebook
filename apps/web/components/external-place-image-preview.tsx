@@ -211,7 +211,11 @@ export function ExternalPlaceImagePreview({
     return (
       <div data-external-place-image-state={state.status} ref={containerRef}>
         <CategoryIllustration
-          ariaLabel={isLoading ? `Carregando imagem para ${placeName}` : `Imagem ilustrativa para ${placeName}`}
+          ariaLabel={
+            isLoading
+              ? `Carregando imagem para ${placeName}`
+              : `Imagem ilustrativa para ${placeName}`
+          }
           disclosure="Imagem ilustrativa — não é foto do local."
           eyebrow="Imagem"
           kind={category ?? "place"}

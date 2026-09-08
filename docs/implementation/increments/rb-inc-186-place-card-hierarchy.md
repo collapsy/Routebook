@@ -7,7 +7,7 @@ owner: Traveler Experience
 status: Draft
 version: "0.1.0"
 created: "2026-09-07"
-last_updated: "2026-09-07"
+last_updated: "2026-09-08"
 authors: [RouteBook Team]
 tags: [implementation, places, discovery, ux, cards, progressive-disclosure, mobile]
 related_documents: [RB-CORE-0004, RB-UX-006, RB-DS-002, RB-DS-003, RB-INC-185, RB-CTX-186]
@@ -162,6 +162,7 @@ apps/web/e2e/place-actions.spec.ts
 apps/web/e2e/accommodation-proximity.spec.ts
 apps/web/e2e/authenticated-trips.spec.ts
 apps/web/e2e/external-place-images.spec.ts
+apps/web/e2e/recommendations-experience.spec.ts
 docs/implementation/increments/rb-inc-186-place-card-hierarchy.md
 docs/implementation/context-packs/rb-inc-186-place-card-hierarchy.md
 docs/implementation/traceability-matrix.md
@@ -169,6 +170,8 @@ docs/registry.md
 ```
 
 Arquivos adicionais exigem atualização deste incremento antes da alteração.
+
+`apps/web/e2e/recommendations-experience.spec.ts` foi incluído em 2026-09-08 após a suíte responsiva completa revelar uma asserção textual legada da taxonomia anterior ao RB-INC-185 (`Recomendações canônicas`/`Descobertas externas`). A correção é limitada à regressão de linguagem já autorizada pela experiência unificada de Lugar; não altera Recommendations, ranking, domínio ou persistência.
 
 ## 10. Critérios de aceite
 

@@ -208,11 +208,14 @@ function previewAltText(placeName: string, description: string): string {
   return `Fotografia de ${placeName}.`;
 }
 
-function normalizeCoordinate(page: CommonsPage): Readonly<{
-  latitude: number;
-  longitude: number;
-}> | undefined {
-  const coordinate = page.coordinates?.find(({ primary }) => primary === "") ?? page.coordinates?.[0];
+function normalizeCoordinate(page: CommonsPage):
+  | Readonly<{
+      latitude: number;
+      longitude: number;
+    }>
+  | undefined {
+  const coordinate =
+    page.coordinates?.find(({ primary }) => primary === "") ?? page.coordinates?.[0];
   if (
     !coordinate ||
     typeof coordinate.lat !== "number" ||
@@ -399,7 +402,9 @@ export class WikimediaCommonsPlaceImageAdapter implements PlaceImagePort {
       .filter(canPromoteExternalImageToControlledAsset);
   }
 
-  async findSecurePreview(place: PlaceImageLookup): Promise<WikimediaPlaceImagePreview | undefined> {
+  async findSecurePreview(
+    place: PlaceImageLookup,
+  ): Promise<WikimediaPlaceImagePreview | undefined> {
     const records = await this.searchRecords(place);
 
     for (const record of records) {

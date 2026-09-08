@@ -244,7 +244,7 @@ test("edita uma Proposed Activity da UI ao PostgreSQL, reidrata e preserva o Iti
   await page.reload();
   await expect(page.getByRole("heading", { name: editedActivity })).toBeVisible();
   await expect(page.getByText(proposedActivity, { exact: true })).toHaveCount(0);
-  await expect(page.getByText(/Roteiro atual permanece preservado/i)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Revise antes de aplicar" })).toBeVisible();
   await page.getByText(`Editar sugestão: ${editedActivity}`, { exact: true }).click();
   await expect(page.getByRole("combobox", { name: "Dia proposto" })).toHaveValue(
     fixture.secondDayId,

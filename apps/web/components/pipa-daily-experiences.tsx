@@ -73,8 +73,8 @@ export function PipaDailyExperiences({
           <p className="product-eyebrow">{isToday ? "Hoje em Pipa" : "Experiências do Dia"}</p>
           <h2 id="daily-experiences-title">O que vale encaixar em {formatDate(experience.date)}</h2>
           <p>
-            Sol e Lua são recomendações espaciais. Rolês só aparecem aqui quando existe programação
-            confirmada para a data e vínculo seguro com um Lugar do RouteBook.
+            Sol e Lua usam horário e direção para sugerir pontos de observação. Eventos só aparecem
+            quando há programação confirmada para a data.
           </p>
         </div>
         <span className={styles.dateBadge}>{isToday ? "Hoje" : formatDate(experience.date)}</span>
@@ -102,7 +102,7 @@ export function PipaDailyExperiences({
           <p className="product-eyebrow">Céu e horizonte</p>
           <h3>Onde ver o Sol e a Lua</h3>
         </div>
-        <small>Horários e azimutes específicos para Pipa</small>
+        <small>Horários e direções para Pipa</small>
       </div>
 
       {experience.hasAstronomyCoverage ? (
@@ -151,8 +151,8 @@ export function PipaDailyExperiences({
                       <strong>{recommendation.place.name}</strong>
                       <small>
                         {recommendation.confidence === "curated"
-                          ? "Ponto curado"
-                          : "Adequação inferida pela geografia"}
+                          ? "Ponto recomendado"
+                          : "Adequação estimada pela localização"}
                       </small>
                     </div>
                     <p>{recommendation.reason}</p>
@@ -191,18 +191,15 @@ export function PipaDailyExperiences({
           ))}
         </div>
       ) : (
-        <p className={styles.emptyState}>
-          Ainda não há horário astronômico governado para esta data. O RouteBook não inventa uma
-          janela de observação.
-        </p>
+        <p className={styles.emptyState}>Horário astronômico ainda não disponível para esta data.</p>
       )}
 
       <div className={styles.sectionHeading}>
         <div>
-          <p className="product-eyebrow">Agenda verificada</p>
+          <p className="product-eyebrow">Agenda confirmada</p>
           <h3>Rolês confirmados</h3>
         </div>
-        <small>Luau só entra aqui quando houver evento confirmado</small>
+        <small>Eventos aparecem quando há programação confirmada</small>
       </div>
 
       {experience.confirmedEvents.length > 0 ? (
@@ -212,7 +209,7 @@ export function PipaDailyExperiences({
               <CategoryIllustration
                 ariaLabel={`Ilustração genérica do evento ${event.title}`}
                 disclosure="Ilustração do rolê — não é foto do evento nem do local."
-                eyebrow="Agenda verificada"
+                eyebrow="Agenda confirmada"
                 kind="event"
                 label="Rolê confirmado"
               />
@@ -267,8 +264,8 @@ export function PipaDailyExperiences({
         </div>
       ) : (
         <p className={styles.emptyState}>
-          Nenhum rolê foi confirmado nas fontes governadas para esta data. Lugares abertos podem
-          continuar aparecendo em Vida noturna, mas não são apresentados aqui como evento.
+          Nenhum evento confirmado para esta data. Bares e casas noturnas ainda podem aparecer em
+          Vida noturna.
         </p>
       )}
 
@@ -283,8 +280,8 @@ export function PipaDailyExperiences({
       ) : null}
 
       <p className={styles.disclaimer} role="note">
-        Condição do céu, acesso ao horizonte e operação dos locais podem mudar. Este Preview ainda
-        não integra previsão de nuvens em tempo real; confirme as condições antes de sair.
+        Condição do céu, acesso ao horizonte e operação dos locais podem mudar. Confirme as
+        condições antes de sair.
       </p>
     </section>
   );

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { PlaceRankingMeta } from "./place-ranking-meta";
 
 describe("PlaceRankingMeta", () => {
-  it("não fabrica score ou Top quando não existem sinais", () => {
+  it("não fabrica score ou Top e mantém a posição no disclosure quando não existem sinais", () => {
     render(
       <PlaceRankingMeta
         categoryLabel="Praias"
@@ -14,12 +14,14 @@ describe("PlaceRankingMeta", () => {
       />,
     );
 
-    expect(screen.getByText("#1 · Mais próximos")).toBeInTheDocument();
-    expect(screen.queryByText(/Score RouteBook/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Score/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Top praias/i)).not.toBeInTheDocument();
+    expect(screen.getByText("Entender este ranking")).toBeInTheDocument();
+    expect(screen.getByText("#1 · Mais próximos")).toBeInTheDocument();
+    expect(screen.getByText(/reflete apenas a ordenação selecionada/i)).toBeInTheDocument();
   });
 
-  it("expõe score derivado, rating, volume, Provider e motivo quando há evidência", () => {
+  it("resume score e rating e mantém volume, Provider e motivo no disclosure", () => {
     render(
       <PlaceRankingMeta
         categoryLabel="Praias"
@@ -43,9 +45,11 @@ describe("PlaceRankingMeta", () => {
     );
 
     expect(screen.getByText("Top praias")).toBeInTheDocument();
-    expect(screen.getByText("Score RouteBook 9,1/10")).toBeInTheDocument();
+    expect(screen.getByText("Score 9,1/10")).toBeInTheDocument();
+    expect(screen.getByText("Nota 4,8/5")).toBeInTheDocument();
+    expect(screen.getByText("Entender este ranking")).toBeInTheDocument();
     expect(screen.getByText(/2\.340 avaliações/)).toBeInTheDocument();
-    expect(screen.getByText(/Fonte: Google Places/)).toBeInTheDocument();
+    expect(screen.getByText(/Fonte do ranking: Google Places/)).toBeInTheDocument();
     expect(screen.getByText(/Muito bem avaliado/)).toBeInTheDocument();
   });
 });

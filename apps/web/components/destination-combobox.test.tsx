@@ -189,7 +189,9 @@ describe("DestinationCombobox", () => {
 
     expect(input).toHaveValue("Recife");
     expect(
-      screen.getByText("As sugestões não estão disponíveis agora. Você pode continuar com o destino digitado."),
+      screen.getByText(
+        "As sugestões não estão disponíveis agora. Você pode continuar com o destino digitado.",
+      ),
     ).toBeInTheDocument();
   });
 

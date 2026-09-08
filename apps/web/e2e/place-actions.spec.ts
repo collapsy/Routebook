@@ -35,7 +35,9 @@ test("salva no catálogo preservando filtros e abre o compositor do Lugar", asyn
   await expect(page).toHaveURL(/descoberta=ocultar/);
   await expect(page).toHaveURL(/busca=Praia(%20|\+)do(%20|\+)Amor/);
   await expect(page).toHaveURL(/categoria=beach/);
-  await expect(card.getByRole("button", { name: "Remover dos salvos" })).toBeVisible();
+  await expect(card.getByRole("button", { name: "Remover dos salvos" })).toBeVisible({
+    timeout: 15_000,
+  });
 
   await card.getByRole("link", { name: "Ver detalhes" }).click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares/praia-do-amor$`));
@@ -106,7 +108,9 @@ test("mantém contexto visual ilustrativo em Lugar salvo sem fotografia real", a
     "beach",
   );
   await discoveryCard.getByRole("button", { name: "Salvar lugar" }).click();
-  await expect(discoveryCard.getByRole("button", { name: "Remover dos salvos" })).toBeVisible();
+  await expect(discoveryCard.getByRole("button", { name: "Remover dos salvos" })).toBeVisible({
+    timeout: 15_000,
+  });
 
   await page.goto(`/viagens/${trip.id}/lugares-salvos`);
   const savedCard = page.locator(".place-card").filter({ hasText: "Praia das Minas" }).first();

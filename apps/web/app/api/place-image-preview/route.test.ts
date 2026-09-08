@@ -160,11 +160,7 @@ describe("GET /api/place-image-preview", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () =>
-        commonsResponse(
-          "Praia do Amor no litoral brasileiro",
-          "File:Praia do Amor.jpg",
-          undefined,
-        ),
+        commonsResponse("Praia do Amor no litoral brasileiro", "File:Praia do Amor.jpg", undefined),
       ),
     );
 

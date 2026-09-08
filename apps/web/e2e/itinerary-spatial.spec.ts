@@ -77,7 +77,7 @@ test("abre uma rota externa entre etapas válidas sem ocultar lacunas", async ({
   await expect(page.getByText(/Total em linha reta/)).toHaveCount(0);
 
   const routeLinks = page.getByRole("link", { name: /Abrir rota de/ });
-  await expect(routeLinks).toHaveCount(1);
+  await expect(routeLinks).toHaveCount(2);
   const routeLink = page.getByRole("link", {
     name: `Abrir rota de ${firstPlaceName} para ${secondPlaceName}`,
   });

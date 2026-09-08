@@ -25,7 +25,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Detalhes do lugar — RouteBook",
-  description: "Consulte os detalhes básicos de um lugar publicado para a sua viagem.",
+  description: "Consulte informações e planeje um lugar da sua viagem.",
 };
 
 const categoryLabels: Record<PlaceCategory, string> = {
@@ -34,13 +34,6 @@ const categoryLabels: Record<PlaceCategory, string> = {
   nature: "Natureza",
   nightlife: "Vida noturna",
 };
-
-function formatCoordinate(value: number): string {
-  return new Intl.NumberFormat("pt-BR", {
-    minimumFractionDigits: 4,
-    maximumFractionDigits: 6,
-  }).format(value);
-}
 
 function formatDayLabel(value: string): string {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -116,13 +109,13 @@ export default async function PlaceDetailsPage({
 
       {saved === "1" ? (
         <p className="success-banner" role="status">
-          Lugar salvo na sua viagem.
+          Lugar salvo.
         </p>
       ) : null}
 
       {removed === "1" ? (
         <p className="success-banner" role="status">
-          Lugar removido da sua seleção. Atividades já planejadas continuam no Roteiro.
+          Lugar removido dos salvos. O que já estiver no roteiro continua lá.
         </p>
       ) : null}
 
@@ -171,8 +164,8 @@ export default async function PlaceDetailsPage({
             ))}
           </ul>
           <p>
-            Orientação editorial revisada em 16/08/2026. Não representa horário, preço,
-            disponibilidade, maré, clima ou condição de rota em tempo real.
+            Orientação revisada em 16/08/2026. Horários, preços, disponibilidade, maré, clima e
+            condições de rota podem mudar.
           </p>
           {practicalGuide.sources.length > 0 ? (
             <p>
@@ -187,19 +180,16 @@ export default async function PlaceDetailsPage({
               ))}
             </p>
           ) : (
-            <p>
-              Base editorial: catálogo publicado do RouteBook. Use “Ver mapa e fotos” para confirmar
-              dados operacionais atuais do estabelecimento.
-            </p>
+            <p>Use “Ver mapa e fotos” para confirmar informações atuais antes de sair.</p>
           )}
         </section>
       ) : (
         <section className="traveler-context-summary" aria-labelledby="place-guide-pending">
           <p className="product-eyebrow">Planejamento prático</p>
-          <h2 id="place-guide-pending">Orientação específica em revisão</h2>
+          <h2 id="place-guide-pending">Confira as informações atuais</h2>
           <p>
-            O resumo publicado continua disponível, mas este lugar ainda não possui um perfil
-            operacional revisado. Confirme acesso e dados atuais antes de sair.
+            Ainda não há orientação prática específica para este lugar. Confirme acesso, horários e
+            outras informações que possam mudar antes de sair.
           </p>
         </section>
       )}
@@ -211,11 +201,11 @@ export default async function PlaceDetailsPage({
       >
         <div className="section-heading-row">
           <div>
-            <p className="product-eyebrow">Planejar este Lugar</p>
+            <p className="product-eyebrow">Planejar este lugar</p>
             <h2 id="place-itinerary-title">Adicionar ao roteiro</h2>
             <p>
-              Escolha o Dia e, se quiser, defina horário e duração. Esta ação cria uma Atividade no
-              Roteiro; ela não salva o Lugar automaticamente na sua lista de interesse.
+              Escolha o dia e, se quiser, defina horário e duração. Adicionar ao roteiro não salva o
+              lugar automaticamente nos Salvos.
             </p>
           </div>
           {adicionadoAoRoteiro === "1" && selectedDay ? (
@@ -223,7 +213,7 @@ export default async function PlaceDetailsPage({
               className="product-primary-action"
               href={`/viagens/${tripId}/roteiro?dia=${selectedDay.date}#dia-em-foco`}
             >
-              Ver Dia no roteiro
+              Ver dia no roteiro
             </Link>
           ) : null}
         </div>
@@ -286,12 +276,11 @@ export default async function PlaceDetailsPage({
       <section className="traveler-context-summary" aria-labelledby="place-route-title">
         <div className="section-heading-row">
           <div>
-            <p className="product-eyebrow">Deslocamento e informação atual</p>
-            <h2 id="place-route-title">Confira antes de sair</h2>
+            <p className="product-eyebrow">Antes de sair</p>
+            <h2 id="place-route-title">Mapa, fotos e rota</h2>
             <p>
-              Abra o local no Google Maps para consultar fotos e dados atuais. Se a hospedagem
-              estiver geocodificada, calcule a rota real por ruas; o resultado externo pode incluir
-              duração e trânsito.
+              Abra o local no Google Maps para consultar fotos e informações atuais. Se a hospedagem
+              tiver localização, você também pode abrir a rota a pé ou de carro.
             </p>
           </div>
           <div className="section-heading-row">
@@ -316,7 +305,7 @@ export default async function PlaceDetailsPage({
                   rel="noreferrer"
                   target="_blank"
                 >
-                  Rota real a pé
+                  Rota a pé
                 </a>
                 <a
                   className="product-secondary-action"
@@ -329,7 +318,7 @@ export default async function PlaceDetailsPage({
                   rel="noreferrer"
                   target="_blank"
                 >
-                  Rota real de carro
+                  Rota de carro
                 </a>
               </>
             ) : null}
@@ -340,14 +329,12 @@ export default async function PlaceDetailsPage({
       <section className="traveler-context-summary" aria-labelledby="saved-place-title">
         <div className="section-heading-row">
           <div>
-            <p className="product-eyebrow">Sua seleção</p>
-            <h2 id="saved-place-title">
-              {savedPlace ? "Este lugar está salvo" : "Salvar como opção"}
-            </h2>
+            <p className="product-eyebrow">Salvos</p>
+            <h2 id="saved-place-title">{savedPlace ? "Este lugar está salvo" : "Salvar para depois"}</h2>
             <p>
               {savedPlace
-                ? "Ele faz parte da sua seleção pessoal. Remover dos Salvos não remove Atividades já planejadas."
-                : "Salvar mantém este Lugar como opção para decidir depois; isso não o adiciona ao Roteiro."}
+                ? "Remover dos salvos não remove o que já estiver no roteiro."
+                : "Salvar deixa este lugar disponível nos Salvos; não o adiciona ao roteiro."}
             </p>
           </div>
           <form action={savedPlace ? removePlaceAction : savePlaceAction}>
@@ -382,29 +369,11 @@ export default async function PlaceDetailsPage({
                 <span>{accommodationDistance.description}</span>
               </>
             ) : (
-              "Indisponível enquanto a hospedagem não possuir coordenadas."
+              "Informe a localização da hospedagem para calcular esta distância."
             )}
           </dd>
         </div>
-        <div>
-          <dt>Coordenadas</dt>
-          <dd>
-            {formatCoordinate(place.latitude)}, {formatCoordinate(place.longitude)}
-          </dd>
-        </div>
       </dl>
-
-      <section className="traveler-context-summary" aria-labelledby="place-data-note">
-        <p className="product-eyebrow">Informação rastreável</p>
-        <h2 id="place-data-note">Detalhes básicos do catálogo</h2>
-        <p>
-          Esta página apresenta somente informações persistidas e publicadas pelo RouteBook. A
-          distância é uma estimativa geodésica em linha reta e não representa rota por ruas,
-          trânsito ou tempo de deslocamento. As ações externas permitem consultar esses dados no
-          momento da decisão, sem persistir conteúdo do Google como informação canônica do
-          RouteBook.
-        </p>
-      </section>
     </section>
   );
 }

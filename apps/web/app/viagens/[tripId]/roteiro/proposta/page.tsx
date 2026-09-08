@@ -99,7 +99,9 @@ export default async function ItineraryProposalReviewPage({
               : "Revise as mudanças sugeridas, edite se necessário e escolha o que deseja aplicar ao Roteiro."}
           </p>
         </div>
-        <span>{proposal.status === "expired" ? "Proposta expirada" : "Aguardando sua decisão"}</span>
+        <span>
+          {proposal.status === "expired" ? "Proposta expirada" : "Aguardando sua decisão"}
+        </span>
       </header>
 
       <ItineraryProposalReview

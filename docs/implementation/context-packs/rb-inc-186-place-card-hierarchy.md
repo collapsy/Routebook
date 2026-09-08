@@ -69,11 +69,12 @@ Categoria / estado curto
 Nome
 Resumo curto opcional
 Distância + sinais principais disponíveis
-Ranking compacto
+Ranking compacto quando houver sinais reais
 [Ação principal] [Salvar/remover]
+Entender este ranking
+  posição / ordenação / evidências
 Mais informações
   endereço / Provenance
-  razões e evidência detalhada de ranking
   mapa / rota real quando aplicável
 ```
 
@@ -83,20 +84,20 @@ A ordem pode variar levemente por disponibilidade de dados, mas a hierarquia nã
 
 `PlaceRankingMeta` deve deixar de renderizar toda a evidência expandida por padrão.
 
-Visível:
+Visível somente quando houver dado real:
 
-- posição e ordenação;
 - Top de categoria quando houver evidência;
-- Score/rating resumido quando houver dado real.
+- Score/rating resumido quando houver sinais verificados.
 
-Divulgação progressiva:
+Divulgação progressiva em `Entender este ranking`:
 
+- posição e ordenação ativas;
 - volume de avaliações;
 - popularidade relativa;
 - Provider e timestamp;
 - razões do Score.
 
-Sem `quality/signals`, somente a posição/ordenação real deve aparecer.
+Sem `quality/signals`, não se fabrica Score, rating ou Top; a posição/ordenação real permanece consultável no disclosure sem dominar a leitura rápida.
 
 ## 8. Ações
 
@@ -124,7 +125,7 @@ Não explicar essa diferença com termos `externo`, `publicado`, `candidato` ou 
 
 ## 10. Caminhos permitidos
 
-Somente os caminhos declarados em RB-INC-186.
+Somente os caminhos declarados em RB-INC-186. O escopo inclui os testes de regressão e o fallback visual explicitamente registrados no incremento porque a nova linguagem de Lugar invalida contratos legados desses pontos.
 
 ## 11. Testes mínimos
 
@@ -133,7 +134,7 @@ Somente os caminhos declarados em RB-INC-186.
 - card provider-first não exibe CTA de curadoria nem excesso de ações primárias;
 - `Adicionar ao roteiro` não aparece na grade de Discovery;
 - Provenance continua acessível;
-- E2E zero-seed e regressão de filtros continuam operacionais;
+- E2E zero-seed, proximidade, mapa e regressão de filtros continuam operacionais;
 - mobile mantém uma coluna e os fluxos de salvar/detalhes funcionam.
 
 ## 12. Gates
@@ -148,4 +149,4 @@ pnpm build
 pnpm test:e2e
 ```
 
-Documentation e Engineering Validation devem ficar verdes no mesmo SHA final. Production permanece fora de escopo.
+Documentation e Engineering Validation devem ficar verdes no mesmo SHA final. O Vercel Preview deve validar visualmente a hierarquia em desktop e mobile antes da integração. Production permanece fora de escopo.

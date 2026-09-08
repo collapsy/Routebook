@@ -66,7 +66,7 @@ afterEach(() => {
 });
 
 describe("ExternalPlaceImagePreview", () => {
-  it("não consulta mídia antes de aproximar o card do viewport", () => {
+  it("não consulta mídia antes de aproximar o card do viewport e mantém fallback visual curto", () => {
     const fetcher = vi.fn();
     vi.stubGlobal("fetch", fetcher);
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
@@ -74,14 +74,15 @@ describe("ExternalPlaceImagePreview", () => {
     renderPreview();
 
     expect(fetcher).not.toHaveBeenCalled();
-    expect(screen.getByText("Imagem do lugar")).toBeInTheDocument();
-    expect(screen.getByText("Fotografia sob demanda")).toBeInTheDocument();
+    expect(screen.getByText("Imagem ilustrativa")).toBeInTheDocument();
+    expect(screen.queryByText("Imagem do lugar")).not.toBeInTheDocument();
+    expect(screen.queryByText("Fotografia sob demanda")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("status", { name: "Fotografia sob demanda para Praia do Amor" }),
+      screen.getByRole("status", { name: "Imagem ilustrativa para Praia do Amor" }),
     ).toHaveAttribute("data-category-illustration", "beach");
   });
 
-  it("usa fallback sem request quando Media está desabilitada", () => {
+  it("usa fallback compacto sem request quando Media está desabilitada", () => {
     const fetcher = vi.fn();
     vi.stubGlobal("fetch", fetcher);
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
@@ -100,12 +101,12 @@ describe("ExternalPlaceImagePreview", () => {
     expect(fetcher).not.toHaveBeenCalled();
     expect(
       screen.getByRole("img", {
-        name: "Ilustração de Praia para Praia do Amor — não é foto do local",
+        name: "Imagem ilustrativa de Praia para Praia do Amor",
       }),
-    ).toHaveAttribute("data-category-illustration", "beach");
+    ).toHaveAttribute("data-presentation", "compact");
   });
 
-  it("usa fallback sem request quando o Destination não possui Media governada", () => {
+  it("usa fallback compacto sem request quando o Destination não possui Media governada", () => {
     const fetcher = vi.fn();
     vi.stubGlobal("fetch", fetcher);
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
@@ -122,9 +123,9 @@ describe("ExternalPlaceImagePreview", () => {
     expect(fetcher).not.toHaveBeenCalled();
     expect(
       screen.getByRole("img", {
-        name: "Ilustração de Natureza para Lugar em Florianópolis — não é foto do local",
+        name: "Imagem ilustrativa de Natureza para Lugar em Florianópolis",
       }),
-    ).toBeInTheDocument();
+    ).toHaveAttribute("data-presentation", "compact");
   });
 
   it("renderiza foto licenciada e Provenance após match seguro", async () => {
@@ -167,9 +168,9 @@ describe("ExternalPlaceImagePreview", () => {
     await waitFor(() => {
       expect(
         screen.getByRole("img", {
-          name: "Ilustração de Praia para Praia do Amor — não é foto do local",
+          name: "Imagem ilustrativa de Praia para Praia do Amor",
         }),
-      ).toHaveAttribute("data-category-illustration", "beach");
+      ).toHaveAttribute("data-presentation", "compact");
     });
   });
 });

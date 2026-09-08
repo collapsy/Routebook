@@ -61,7 +61,9 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
       new URL(enrichedRouteHref!).searchParams.get("destination")?.toLocaleLowerCase("pt-BR"),
     ).toContain(enrichedName.toLocaleLowerCase("pt-BR"));
     await expect(enrichedCard.getByRole("link", { name: "Ver detalhes" })).toBeVisible();
-    await expect(enrichedCard.getByRole("button", { name: /Salvar lugar|Remover dos salvos/ })).toBeVisible();
+    await expect(
+      enrichedCard.getByRole("button", { name: /Salvar lugar|Remover dos salvos/ }),
+    ).toBeVisible();
     await expect(enrichedCard.getByRole("link", { name: "Adicionar ao roteiro" })).toHaveCount(0);
   }
 
@@ -104,9 +106,7 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     const expandedExternalTotal = await externalPlaces.count();
     expect(expandedExternalTotal).toBeGreaterThan(externalTotal);
     await expect(praiaDoAmorExternalCard).toHaveCount(0);
-    await expect(
-      page.getByRole("link", { name: "Mostrar primeiros 60 lugares" }),
-    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "Mostrar primeiros 60 lugares" })).toBeVisible();
   }
 
   await page.goto(`/viagens/${trip.id}/lugares`);

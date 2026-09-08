@@ -74,6 +74,7 @@ describe("ExternalPlaceImagePreview", () => {
     renderPreview();
 
     expect(fetcher).not.toHaveBeenCalled();
+    expect(screen.getByText("Imagem do lugar")).toBeInTheDocument();
     expect(screen.getByText("Fotografia sob demanda")).toBeInTheDocument();
     expect(
       screen.getByRole("status", { name: "Fotografia sob demanda para Praia do Amor" }),

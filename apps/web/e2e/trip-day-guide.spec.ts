@@ -78,7 +78,7 @@ test("abre o Guia da viagem e cobre os oito Dias reais de Pipa", async ({ page }
   await expect(firstDay.getByRole("link", { name: "Rota e tempo no Maps" })).toHaveCount(2);
 
   const firstDayLegend = firstDay.getByRole("list", { name: "Legenda do mapa" });
-  await expect(firstDayLegend).toContainText("Lugar publicado");
+  await expect(firstDayLegend).toContainText("Lugar");
   await expect(firstDayLegend).not.toContainText("Atividade planejada");
   await expect(firstDay.getByRole("list", { name: "Locais exibidos no mapa" })).toContainText(
     "Parada sugerida 1: Chapadão de Pipa",

@@ -43,7 +43,10 @@ test("configura e mantém o contexto progressivo da viagem", async ({ page }, te
   await createPipaTripThroughUi(page, tripName);
   await page.getByRole("link", { name: tripName }).click();
 
-  await page.getByRole("link", { name: "Informar preferências" }).click();
+  await page
+    .getByLabel("Preferências ainda não informadas")
+    .getByRole("link", { name: "Informar preferências" })
+    .click();
   await page.getByLabel("Quantidade de viajantes").fill("3");
   await page.getByLabel("Praias").check();
   await page.getByLabel("Gastronomia").check();
@@ -62,7 +65,10 @@ test("configura e mantém o contexto progressivo da viagem", async ({ page }, te
 
   await page.reload();
   await expect(page.getByText("Praias, Gastronomia, Vida noturna")).toBeVisible();
-  await page.getByRole("link", { name: "Editar preferências" }).click();
+  await page
+    .getByLabel("Preferências informadas")
+    .getByRole("link", { name: "Editar preferências" })
+    .click();
   await expect(page.getByLabel("Quantidade de viajantes")).toHaveValue("3");
   await expect(page.getByLabel("Praias")).toBeChecked();
 });

@@ -123,7 +123,10 @@ export function PlanningConflictReview({
         <span aria-hidden="true">✓</span>
         <div>
           <h2 id="planning-review-empty-title">Nenhum conflito encontrado</h2>
-          <p>O Roteiro não apresenta conflitos conhecidos agora. Condições externas ainda podem mudar.</p>
+          <p>
+            O Roteiro não apresenta conflitos conhecidos agora. Condições externas ainda podem
+            mudar.
+          </p>
         </div>
       </section>
     );

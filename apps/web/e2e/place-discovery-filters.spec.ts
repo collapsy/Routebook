@@ -53,7 +53,9 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   if (enrichedTotal > 0) {
     const enrichedCard = enrichedPlaces.first();
     const enrichedName = (await enrichedCard.locator("h3").innerText()).trim();
-    const enrichedMoreInfo = enrichedCard.locator("summary").filter({ hasText: "Mais informações" });
+    const enrichedMoreInfo = enrichedCard
+      .locator("summary")
+      .filter({ hasText: "Mais informações" });
     await expect(enrichedMoreInfo).toBeVisible();
     await enrichedMoreInfo.click();
     const enrichedRouteHref = await enrichedCard

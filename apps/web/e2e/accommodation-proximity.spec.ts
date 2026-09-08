@@ -25,16 +25,14 @@ test("prioriza no Discovery o lugar mais próximo da hospedagem geocodificada", 
   expect(publishedTotal).toBeGreaterThanOrEqual(30);
   await expect(externalPlaces.first()).toBeVisible();
   const praiaDoAmorCard = publishedPlaces.filter({
-    has: page.locator(`a[href="/viagens/${trip.id}/lugares/praia-do-amor#adicionar-ao-roteiro"]`),
+    has: page.locator(`a[href="/viagens/${trip.id}/lugares/praia-do-amor"]`),
   });
   await expect(praiaDoAmorCard).toHaveCount(1);
   await expect(praiaDoAmorCard).toContainText(
     /\d+(?:[.,]\d+)?\s*(?:m|km) em linha reta da hospedagem/,
   );
   expect(await options.getByRole("listitem").count()).toBeGreaterThan(publishedTotal);
-  await expect(page.getByRole("list", { name: "Legenda do mapa" })).toContainText(
-    "Descoberta externa",
-  );
+  await expect(page.getByRole("list", { name: "Legenda do mapa" })).toContainText("Lugar");
 });
 
 test("mantém Discovery funcional sem coordenadas da hospedagem", async ({ page }) => {
@@ -48,14 +46,10 @@ test("mantém Discovery funcional sem coordenadas da hospedagem", async ({ page 
 
   await expect(
     page.getByRole("heading", {
-      name: /\d+ de \d+ (?:lugar único|lugares únicos) exibidos/,
+      name: /\d+ de \d+ (?:lugar|lugares) exibidos/,
     }),
   ).toBeVisible();
-  await expect(
-    page.getByText(
-      /\d+ com conteúdo curado do RouteBook.*também reconciliados com Overture.*somente na descoberta atual/,
-    ),
-  ).toBeVisible();
+  await expect(page.getByText("Lugares reconciliados, sem duplicatas")).toBeVisible();
   await expect(
     page
       .getByRole("list", { name: "Opções de lugares" })

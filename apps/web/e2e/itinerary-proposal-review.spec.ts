@@ -256,9 +256,7 @@ test("aceita uma Proposal ready da UI ao PostgreSQL e preserva o resultado após
     /\/roteiro\?propostaAceita=applied$/,
   );
 
-  await expect(page.getByRole("status")).toHaveText(
-    "Proposta aceita. O Roteiro foi atualizado com as mudanças confirmadas.",
-  );
+  await expect(page.getByRole("status")).toHaveText("Proposta aplicada ao Roteiro.");
   await expect(page.getByText(proposedActivity, { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Gerar proposta" })).toHaveAttribute(
     "href",
@@ -343,7 +341,7 @@ test("aceita parcialmente da UI ao PostgreSQL e reproduz sem reaplicar efeitos",
       /\/roteiro\?propostaAceita=partial-applied$/,
     );
     await expect(page.getByRole("status")).toHaveText(
-      "Seleção aplicada. O Roteiro foi atualizado somente com as mudanças confirmadas.",
+      "Mudanças selecionadas aplicadas ao Roteiro.",
     );
     await expect(page.getByText(proposedActivity, { exact: true })).toBeVisible();
     await expect(page.getByText(remainingProposedActivity, { exact: true })).toHaveCount(0);
@@ -354,7 +352,7 @@ test("aceita parcialmente da UI ao PostgreSQL e reproduz sem reaplicar efeitos",
       /\/roteiro\?propostaAceita=partial-replay$/,
     );
     await expect(replayPage.getByRole("status")).toHaveText(
-      "Esta seleção já havia sido aplicada. O Roteiro atualizado foi carregado.",
+      "O Roteiro já está atualizado com esta seleção.",
     );
 
     const itinerary = await new DrizzleItineraryRepository().findByTripId(fixture.tripId);
@@ -442,7 +440,7 @@ test("reproduz o aceite concorrente e rejeita chave nova sem duplicar efeitos", 
     await expect(replayPage).toHaveURL(/\/roteiro\?propostaAceita=replay$/);
 
     await expect(replayPage.getByRole("status")).toHaveText(
-      "Esta proposta já havia sido aceita. O Roteiro atualizado foi carregado.",
+      "O Roteiro já está atualizado com esta proposta.",
     );
 
     await conflictingPage.locator('input[name="idempotencyKey"]').evaluate((input) => {
@@ -568,7 +566,7 @@ test("descarta uma Proposal ready e preserva integralmente o Roteiro", async ({
   );
 
   await expect(page.getByRole("status")).toHaveText(
-    "Proposta descartada. Seu Roteiro atual não foi alterado.",
+    "Proposta descartada. Nenhuma mudança foi aplicada ao Roteiro.",
   );
   await expect(page.getByText(confirmedActivity, { exact: true })).toBeVisible();
   await expect(page.getByText(proposedActivity, { exact: true })).toHaveCount(0);

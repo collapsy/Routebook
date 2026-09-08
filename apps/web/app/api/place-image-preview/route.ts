@@ -3,15 +3,9 @@ import { NextResponse } from "next/server";
 import { resolvePlaceBootstrapPolicy, runPlaceBootstrapStep } from "../../../lib/place-bootstrap";
 import { WikimediaCommonsPlaceImageAdapter } from "../../../lib/wikimedia-place-image";
 
-const SUPPORTED_DESTINATION_ID = "pipa-rn-br";
 const SUCCESS_CACHE_CONTROL = "public, s-maxage=86400, stale-while-revalidate=604800";
 const MISS_CACHE_CONTROL = "public, s-maxage=21600, stale-while-revalidate=86400";
-const PIPA_REGION_BOUNDS = Object.freeze({
-  minimumLatitude: -6.35,
-  maximumLatitude: -6.1,
-  minimumLongitude: -35.2,
-  maximumLongitude: -34.95,
-});
+const DESTINATION_CONTEXT_PATTERN = /^[\p{L}\p{N}\s._-]+$/u;
 
 function parseCoordinate(value: string | null): number | undefined {
   if (!value) return undefined;
@@ -19,13 +13,15 @@ function parseCoordinate(value: string | null): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-function isInsideSupportedRegion(latitude: number, longitude: number): boolean {
-  return (
-    latitude >= PIPA_REGION_BOUNDS.minimumLatitude &&
-    latitude <= PIPA_REGION_BOUNDS.maximumLatitude &&
-    longitude >= PIPA_REGION_BOUNDS.minimumLongitude &&
-    longitude <= PIPA_REGION_BOUNDS.maximumLongitude
-  );
+function isValidCoordinate(latitude: number, longitude: number): boolean {
+  return latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180;
+}
+
+function parseDestinationContext(value: string | null): string | undefined {
+  const normalized = value?.trim();
+  if (!normalized) return undefined;
+  if (normalized.length > 160 || !DESTINATION_CONTEXT_PATTERN.test(normalized)) return undefined;
+  return normalized;
 }
 
 export async function GET(request: Request) {
@@ -38,18 +34,19 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
-  const destinationId = url.searchParams.get("destinationId")?.trim();
+  const rawDestinationContext = url.searchParams.get("destinationId");
+  const destinationContext = parseDestinationContext(rawDestinationContext);
   const name = url.searchParams.get("name")?.trim() ?? "";
   const latitude = parseCoordinate(url.searchParams.get("latitude"));
   const longitude = parseCoordinate(url.searchParams.get("longitude"));
 
   if (
-    destinationId !== SUPPORTED_DESTINATION_ID ||
     name.length < 2 ||
     name.length > 180 ||
     latitude === undefined ||
     longitude === undefined ||
-    !isInsideSupportedRegion(latitude, longitude)
+    !isValidCoordinate(latitude, longitude) ||
+    (rawDestinationContext !== null && rawDestinationContext.trim() && !destinationContext)
   ) {
     return NextResponse.json(
       { error: "Parâmetros inválidos para a prévia de imagem externa." },
@@ -65,6 +62,7 @@ export async function GET(request: Request) {
         name,
         latitude,
         longitude,
+        ...(destinationContext ? { contextLabel: destinationContext } : {}),
       }),
   });
 

@@ -604,7 +604,7 @@ test("trata uma Proposal atualizada concorrentemente sem falso sucesso", async (
   await expect(page).toHaveURL(/\/roteiro\?erroProposta=estado-atualizado$/);
 
   await expect(page.locator(".itinerary-feedback")).toHaveText(
-    /foi atualizada e não pode mais ser descartada/i,
+    /Esta proposta mudou e não pode mais ser descartada\. Atualize a página\./i,
   );
   await expect(page.getByText(confirmedActivity, { exact: true })).toBeVisible();
   await expect(page.getByText("Proposta descartada", { exact: false })).toHaveCount(0);

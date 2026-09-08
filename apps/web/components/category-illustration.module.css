@@ -24,6 +24,10 @@
   z-index: -1;
 }
 
+.visual[data-presentation="compact"] .veil {
+  background: linear-gradient(180deg, rgb(15 23 42 / 0%) 55%, rgb(15 23 42 / 18%) 100%);
+}
+
 .copy {
   display: grid;
   gap: 0.22rem;

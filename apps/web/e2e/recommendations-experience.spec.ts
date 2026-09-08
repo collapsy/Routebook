@@ -93,10 +93,14 @@ async function openRecommendations(
       exact: true,
     }),
   ).toBeVisible();
-  await expect(page.getByText(/Compare opções sugeridas a partir do que você informou/i)).toBeVisible();
+  await expect(
+    page.getByText(/Compare opções sugeridas a partir do que você informou/i),
+  ).toBeVisible();
 
   if (view === "all") {
-    await expect(page.getByRole("heading", { name: "Todas as sugestões", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Todas as sugestões", exact: true }),
+    ).toBeVisible();
   }
 }
 
@@ -194,7 +198,9 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
   expect(showAllHref).toMatch(/\/recomendacoes\?view=all$/);
   await page.goto(showAllHref!);
   await expect(page).toHaveURL(/\/recomendacoes\?view=all$/);
-  await expect(page.getByRole("heading", { name: "Todas as sugestões", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Todas as sugestões", exact: true }),
+  ).toBeVisible();
   const fullList = page.getByRole("list", { name: "Sugestões de lugares" });
   const fullHeadings = fullList.getByRole("heading", { level: 2 });
   await expect(fullHeadings).toHaveCount(30);

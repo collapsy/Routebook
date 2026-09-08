@@ -25,6 +25,28 @@ describe("CategoryIllustration", () => {
     expect(screen.getByText("Ilustração de categoria — não é foto do local")).toBeInTheDocument();
   });
 
+  it("reduz o fallback de Lugar a um selo curto sem repetir categoria ou justificativa", () => {
+    render(
+      <CategoryIllustration
+        ariaLabel="Imagem ilustrativa de Gastronomia para Chateau Allemand"
+        kind="gastronomy"
+        placeFallback
+        presentation="compact"
+      />,
+    );
+
+    const illustration = screen.getByRole("img", {
+      name: "Imagem ilustrativa de Gastronomia para Chateau Allemand",
+    });
+    expect(illustration).toHaveAttribute("data-presentation", "compact");
+    expect(screen.getByText("Imagem ilustrativa")).toBeInTheDocument();
+    expect(screen.queryByText("Gastronomia")).not.toBeInTheDocument();
+    expect(screen.queryByText("Referência visual")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Ilustração de categoria — não é foto do local"),
+    ).not.toBeInTheDocument();
+  });
+
   it("suporta variantes temporais sem atribuir a imagem a um local", () => {
     render(
       <CategoryIllustration

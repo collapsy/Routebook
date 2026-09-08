@@ -195,7 +195,7 @@ export function ExternalPlaceImagePreview({
           </div>
           <figcaption className={styles.caption}>
             <span>
-              Foto externa: {preview.attribution} · {preview.license} · {preview.sourceName}.
+              Foto: {preview.attribution} · {preview.license} · {preview.sourceName}.
             </span>{" "}
             <a href={preview.sourceUrl} rel="noreferrer" target="_blank">
               Ver fonte
@@ -211,19 +211,11 @@ export function ExternalPlaceImagePreview({
     return (
       <div data-external-place-image-state={state.status} ref={containerRef}>
         <CategoryIllustration
-          ariaLabel={
-            compactFallback
-              ? isLoading
-                ? `Buscando foto para ${placeName}`
-                : `Imagem ilustrativa para ${placeName}`
-              : isLoading
-                ? `Buscando fotografia licenciada para ${placeName}`
-                : `Fotografia sob demanda para ${placeName}`
-          }
-          disclosure="Ilustração de categoria enquanto a foto real é verificada."
-          eyebrow="Imagem do lugar"
+          ariaLabel={isLoading ? `Carregando imagem para ${placeName}` : `Imagem ilustrativa para ${placeName}`}
+          disclosure="Imagem ilustrativa — não é foto do local."
+          eyebrow="Imagem"
           kind={category ?? "place"}
-          label={isLoading ? "Buscando fotografia…" : "Fotografia sob demanda"}
+          label={isLoading ? "Carregando foto…" : "Imagem ilustrativa"}
           live
           presentation={compactFallback ? "compact" : "descriptive"}
         />

@@ -54,7 +54,10 @@ async function createTripWithRecommendationContext(page: Page) {
 
   await Promise.all([
     page.waitForURL(/\/contexto$/),
-    page.getByRole("link", { name: "Informar preferências" }).click(),
+    page
+      .getByLabel("O que vale a pena considerar?")
+      .getByRole("link", { name: "Informar preferências" })
+      .click(),
   ]);
   await page.getByRole("checkbox", { name: "Praias" }).check();
   await page.getByRole("checkbox", { name: "Natureza" }).check();
@@ -126,7 +129,9 @@ test("permanece neutra quando o contexto é insuficiente", async ({ page }) => {
   ).toBeVisible();
   await expect(page.getByRole("list", { name: "Sugestões contextuais de lugares" })).toHaveCount(0);
   await expect(
-    page.getByRole("link", { name: "Informar preferências", exact: true }),
+    page
+      .getByLabel("O que vale a pena considerar?")
+      .getByRole("link", { name: "Informar preferências", exact: true }),
   ).toBeVisible();
   await expect(
     page

@@ -152,7 +152,9 @@ describe("contextual external suggestions", () => {
     expect(suggestions[0]?.limitations).toContain(
       "Preço, avaliação pública, horário e disponibilidade não foram confirmados por esta sugestão.",
     );
-    expect(suggestions[0]?.limitations.join(" ")).not.toMatch(/publicad|catálogo|descoberta externa/i);
+    expect(suggestions[0]?.limitations.join(" ")).not.toMatch(
+      /publicad|catálogo|descoberta externa/i,
+    );
     expect(() =>
       buildContextualExternalSuggestions({
         tripId: "trip-gramado",

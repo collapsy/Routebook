@@ -42,16 +42,14 @@ function IgnoredPlanningRiskHistory({ items }: { items: readonly IgnoredPlanning
     <section className={styles.history} aria-labelledby="planning-review-history-title">
       <header>
         <div>
-          <p className={styles.eyebrow}>Histórico auditável</p>
+          <p className={styles.eyebrow}>Histórico</p>
           <h2 id="planning-review-history-title">Riscos ignorados</h2>
         </div>
-        <p>
-          {items.length === 1 ? "1 decisão registrada" : `${items.length} decisões registradas`}
-        </p>
+        <p>{items.length === 1 ? "1 risco ignorado" : `${items.length} riscos ignorados`}</p>
       </header>
       <p className={styles.historyExplanation}>
-        Estes riscos foram aceitos conscientemente. As condições não foram resolvidas e continuam
-        preservadas para consulta.
+        Estes riscos foram ignorados anteriormente, mas as condições podem continuar afetando o
+        planejamento.
       </p>
       <ol aria-label="Riscos ignorados registrados" className={styles.historyList}>
         {items.map((item) => {
@@ -75,11 +73,11 @@ function IgnoredPlanningRiskHistory({ items }: { items: readonly IgnoredPlanning
                 </p>
                 <dl>
                   <div>
-                    <dt>Decisão registrada</dt>
+                    <dt>Ignorado em</dt>
                     <dd>{item.ignoredAtLabel}</dd>
                   </div>
                   <div>
-                    <dt>Autoria</dt>
+                    <dt>Por</dt>
                     <dd>{item.actorLabel ?? "Participante não disponível"}</dd>
                   </div>
                 </dl>
@@ -114,7 +112,7 @@ export function PlanningConflictReview({
     } catch {
       setPendingConflictId(null);
       setActionError(
-        "Não foi possível confirmar esta decisão agora. Verifique sua conexão e tente novamente.",
+        "Não foi possível ignorar este risco agora. Verifique sua conexão e tente novamente.",
       );
     }
   }
@@ -125,10 +123,7 @@ export function PlanningConflictReview({
         <span aria-hidden="true">✓</span>
         <div>
           <h2 id="planning-review-empty-title">Nenhum conflito encontrado</h2>
-          <p>
-            A análise determinística atual não encontrou inconsistências no Roteiro. Isso não
-            garante ausência de imprevistos ou mudanças externas.
-          </p>
+          <p>O Roteiro não apresenta conflitos conhecidos agora. Condições externas ainda podem mudar.</p>
         </div>
       </section>
     );
@@ -141,10 +136,7 @@ export function PlanningConflictReview({
           <span aria-hidden="true">✓</span>
           <div>
             <h2 id="planning-review-empty-title">Nenhum conflito aberto</h2>
-            <p>
-              A análise determinística atual não encontrou itens abertos. Os Riscos aceitos
-              conscientemente continuam registrados no histórico abaixo.
-            </p>
+            <p>Os riscos ignorados anteriormente continuam disponíveis no histórico abaixo.</p>
           </div>
         </section>
         <IgnoredPlanningRiskHistory items={review.ignoredRisks} />
@@ -161,12 +153,9 @@ export function PlanningConflictReview({
     <div className={styles.review}>
       <section className={styles.summary} aria-labelledby="planning-review-summary-title">
         <div>
-          <p className={styles.eyebrow}>Resultado da análise</p>
+          <p className={styles.eyebrow}>Resumo</p>
           <h2 id="planning-review-summary-title">{conflictLabel(review.total)} para revisar</h2>
-          <p>
-            Os itens abaixo são resultados da política determinística atual e não alteram o Roteiro
-            automaticamente.
-          </p>
+          <p>Confira os itens abaixo e decida quais precisam de ajuste antes da viagem.</p>
         </div>
         <dl aria-label="Conflitos por severidade">
           <div>
@@ -265,8 +254,8 @@ export function PlanningConflictReview({
                             <input name="tripId" type="hidden" value={tripId} />
                             <input name="planningConflictId" type="hidden" value={item.id} />
                             <p>
-                              A condição continuará existindo no planejamento. Esta ação registra
-                              uma decisão consciente; ela não corrige nem resolve o conflito.
+                              Ignorar não resolve a condição. O risco continuará no planejamento e
+                              ficará disponível no histórico.
                             </p>
                             <label>
                               <input
@@ -279,7 +268,7 @@ export function PlanningConflictReview({
                             </label>
                             <button disabled={pendingConflictId !== null} type="submit">
                               {pendingConflictId === item.id
-                                ? "Registrando decisão…"
+                                ? "Ignorando risco…"
                                 : "Confirmar e ignorar risco"}
                             </button>
                           </form>

@@ -101,6 +101,41 @@ describe("GooglePlacePhotoAdapter", () => {
     await expect(adapter.findPreview(input)).resolves.toBeUndefined();
   });
 
+  it("revalida alias de Place já reconciliado somente quando permanece praticamente no mesmo ponto", async () => {
+    const renamedInput = {
+      placeId: "ChIJPuntoRojo01",
+      name: "Punto Cero Guatemala",
+      category: "nightlife" as const,
+      latitude: 14.7443,
+      longitude: -91.1562,
+    };
+    const fetcher = vi.fn(async () =>
+      Response.json({
+        id: renamedInput.placeId,
+        displayName: { text: "PUNTO ROJO" },
+        location: { latitude: 14.74432, longitude: -91.15618 },
+        photos: [
+          {
+            name: `places/${renamedInput.placeId}/photos/current-photo`,
+            authorAttributions: [],
+          },
+        ],
+      }),
+    );
+    const adapter = new GooglePlacePhotoAdapter("secret-google", {
+      fetcher,
+      now: () => new Date("2026-09-09T20:00:00.000Z"),
+    });
+
+    const preview = await adapter.findPreview(renamedInput);
+
+    expect(preview).toMatchObject({
+      provider: "google-places",
+      sourceName: "Google Maps",
+    });
+    expect(JSON.stringify(preview)).not.toContain("current-photo");
+  });
+
   it("usa token efêmero e resolve photo name novamente antes da mídia", async () => {
     const fetcher = vi
       .fn<(value: string | URL | Request, init?: RequestInit) => Promise<Response>>()

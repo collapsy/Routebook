@@ -22,7 +22,7 @@ ai_context:
 
 ## 1. Missão
 
-Aumentar a taxa de resolução segura de Hospedagem informada somente por nome usando o Destination como contexto geográfico textual e estruturado, sem aceitar silenciosamente homônimos distantes ou ambíguos.
+Aumentar a taxa de resolução segura de Hospedagem informada somente por nome usando o Destination como contexto geográfico textual e estruturado, sem aceitar silenciosamente homônimos distantes ou ambíguos, tanto na criação da Viagem quanto na edição posterior da Hospedagem.
 
 ## 2. Unidade de trabalho
 
@@ -56,6 +56,8 @@ Aumentar a taxa de resolução segura de Hospedagem informada somente por nome u
 - Nominatim permanece consulta pontual por submit, nunca autocomplete;
 - Destination fornece contexto, não regra regional;
 - resultado inseguro equivale a ausência de coordenada, não a estimativa inventada;
+- falha do Geocoder não bloqueia a criação da Viagem;
+- criação e edição devem compartilhar a mesma política de resolução da Hospedagem;
 - endereço completo mantém o comportamento já validado no RB-INC-181;
 - fallback manual avançado permanece disponível;
 - nenhuma mudança em Production ou `main` é autorizada por este incremento.
@@ -67,6 +69,8 @@ apps/web/lib/geocoding.ts
 apps/web/lib/geocoding.test.ts
 apps/web/lib/accommodation-geocoding.ts
 apps/web/lib/accommodation-geocoding.test.ts
+apps/web/app/viagens/nova/actions.ts
+apps/web/app/viagens/nova/actions.test.ts
 apps/web/e2e/authenticated-trips.spec.ts
 docs/implementation/increments/rb-inc-189-accommodation-name-geocoding.md
 docs/implementation/context-packs/rb-inc-189-accommodation-name-geocoding.md
@@ -104,14 +108,27 @@ Para Hospedagem sem endereço:
 
 O caso live `Hotel Palacio Maya` em `Panajachel, Guatemala` deve resolver o registro local `Hotel El Palacio Maya` quando o Provider o devolver para a query contextual, sem aceitar homônimo de outra cidade.
 
-## 8. Contrato com endereço
+## 8. Contrato de criação da Viagem
+
+Depois que `/viagens/nova` confirmar o Destination e antes de persistir a Trip:
+
+1. normalizar nome/endereço da Hospedagem informados no formulário;
+2. se não houver nome de Hospedagem, não chamar o Geocoder;
+3. se houver nome, executar a mesma resolução destination-aware usada na edição;
+4. se houver resultado seguro, persistir endereço normalizado e coordenada junto com a Trip;
+5. em `not-found` ou `GeocodingProviderError`, persistir somente os dados textuais fornecidos e continuar a criação da Viagem;
+6. não criar estado novo de domínio nem coordenada estimada.
+
+O fluxo de criação não pode ter uma segunda política independente da tela `Editar hospedagem`.
+
+## 9. Contrato com endereço
 
 - query continua sendo `endereço + Destination`;
 - país pode ser usado como restrição adicional;
 - não aplicar o raio rígido de name-only para não regredir endereços completos em Destinations amplos;
 - o primeiro resultado válido do Provider continua sendo aceito quando não há conflito do contrato existente.
 
-## 9. Limites espaciais
+## 10. Limites espaciais
 
 Os limites existem apenas para impedir homônimos claramente fora do Destination no fluxo name-only. Permanecem configurados em código testável, sem nomes de cidades ou países.
 
@@ -121,7 +138,7 @@ Os demais tipos canônicos preservam os limites já estabelecidos nesta branch e
 
 A implementação deve preferir falhar fechado em caso de dúvida. Se o Destination não oferecer coordenada válida, aplicar somente os sinais seguros disponíveis, como país, sem inventar âncora.
 
-## 10. Testes mínimos
+## 11. Testes mínimos
 
 - compatibilidade de `Geocoder` sem contexto;
 - múltiplos candidatos e seleção do mais próximo;
@@ -135,9 +152,12 @@ A implementação deve preferir falhar fechado em caso de dúvida. Se o Destinat
 - regressão realista `Hotel Palacio Maya` + `Panajachel, Guatemala` pode aceitar `Hotel El Palacio Maya` local retornado pelo Provider;
 - endereço completo preserva query e comportamento do RB-INC-181;
 - Provider error/no-result continuam degradando sem coordenadas;
-- E2E determinístico prova save somente por nome e contexto espacial disponível.
+- action de `/viagens/nova` persiste coordenada quando a Hospedagem é resolvida;
+- action de `/viagens/nova` continua criando a Trip sem coordenada em no-result/Provider error;
+- action de `/viagens/nova` não chama Geocoder quando Hospedagem não foi informada;
+- E2E determinístico prova criação de Viagem com Hospedagem somente por nome e contexto espacial disponível.
 
-## 11. Gates
+## 12. Gates
 
 ```bash
 pnpm format:check
@@ -151,15 +171,15 @@ pnpm test:e2e
 
 Documentation e Engineering Validation do GitHub são as evidências técnicas canônicas.
 
-## 12. Gates humanos remanescentes
+## 13. Gates humanos remanescentes
 
 - Vercel Preview real do SHA final;
-- prova funcional com `Hotel Palacio Maya` em `Panajachel, Guatemala`;
+- prova funcional com `Hotel Palacio Maya` em `Panajachel, Guatemala` criado diretamente em `/viagens/nova`;
 - prova funcional em ao menos um segundo Destination não-Pipa;
 - qualquer mudança em Provider/comercialização;
 - qualquer mudança em Production;
 - integração na `main`.
 
-## 13. Handoff
+## 14. Handoff
 
-Relatar SHA, arquivos alterados, estratégia textual/espacial, testes reais, comportamento de ambiguidade/distância, estado do Preview e riscos/gates restantes.
+Relatar SHA, arquivos alterados, estratégia textual/espacial, testes reais, comportamento da criação e edição, estado do Preview e riscos/gates restantes.

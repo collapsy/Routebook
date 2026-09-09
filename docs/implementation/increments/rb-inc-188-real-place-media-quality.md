@@ -274,6 +274,7 @@ apps/web/e2e/external-place-images.spec.ts
 apps/web/e2e/place-discovery-anywhere.spec.ts
 apps/web/e2e/place-discovery-filters.spec.ts
 apps/web/e2e/place-actions.spec.ts
+apps/web/e2e/recommendations-experience.spec.ts
 apps/web/e2e/multi-destination-validation.spec.ts
 apps/web/e2e/accommodation-proximity.spec.ts
 apps/web/e2e/route-destination-reliability.spec.ts
@@ -284,6 +285,8 @@ docs/registry.md
 ```
 
 `apps/web/e2e/place-actions.spec.ts` foi incluído após a Engineering Validation do SHA `0231cbf0aef91eb2b1169e1ceaaae1cd6d269152` revelar uma asserção legada que ainda exigia a ilustração de categoria removida pelo fallback compacto deste incremento. A alteração autorizada é restrita a alinhar o contrato E2E ao estado neutro `Sem foto`, sem alterar Salvos, persistência ou a jornada coberta.
+
+`apps/web/e2e/recommendations-experience.spec.ts` foi incluído após a Engineering Validation do SHA `d1b32e6e2d13249aa04224b394fa6d5d53e2d17f` revelar que uma Recommendation reutilizando a mídia de Place ainda exigia a ilustração de categoria removida pelo fallback compacto. A alteração autorizada é restrita a alinhar essa expectativa ao estado neutro `Sem foto`, sem alterar decisões, efeitos colaterais ou semântica de Recommendation.
 
 Arquivo adicional indispensável deve ser registrado no incremento/Context Pack antes da alteração e justificado na PR.
 

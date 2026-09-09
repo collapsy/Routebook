@@ -50,17 +50,17 @@ describe("buildAccommodationGeocodingQuery", () => {
     ).toBe("Av. Borges de Medeiros, 3000, Gramado, RS, Brasil");
   });
 
-  it("usa somente o nome quando não existe endereço e deixa Destination para o contexto espacial", () => {
+  it("usa nome e Destination juntos quando não existe endereço", () => {
     expect(buildAccommodationGeocodingQuery("Hotel Teste", undefined, "Gramado, RS, Brasil")).toBe(
-      "Hotel Teste",
+      "Hotel Teste, Gramado, RS, Brasil",
     );
   });
 });
 
 describe("accommodationNameSearchRadiusKm", () => {
-  it("usa limites amplos por tipo canônico sem regra regional", () => {
+  it("usa limites por tipo canônico sem regra regional", () => {
     expect(accommodationNameSearchRadiusKm("district")).toBe(60);
-    expect(accommodationNameSearchRadiusKm("city")).toBe(120);
+    expect(accommodationNameSearchRadiusKm("city")).toBe(40);
     expect(accommodationNameSearchRadiusKm("island")).toBe(250);
     expect(accommodationNameSearchRadiusKm("park")).toBe(250);
     expect(accommodationNameSearchRadiusKm("region")).toBe(800);
@@ -97,7 +97,7 @@ describe("prepareAccommodationUpdate", () => {
     });
   });
 
-  it("resolve somente nome usando país, âncora e raio do Destination", async () => {
+  it("resolve somente nome usando Destination textual, país, âncora e raio", async () => {
     const provider = geocoder({
       normalizedAddress: "Hotel Teste, Gramado, RS, Brasil",
       latitude: -29.378,
@@ -110,10 +110,10 @@ describe("prepareAccommodationUpdate", () => {
       geocoder: provider,
     });
 
-    expect(provider.geocode).toHaveBeenCalledWith("Hotel Teste", {
+    expect(provider.geocode).toHaveBeenCalledWith("Hotel Teste, Gramado, RS, Brasil", {
       countryCode: "BR",
       anchor: { latitude: -29.3746, longitude: -50.8764 },
-      maxDistanceKm: 120,
+      maxDistanceKm: 40,
       rejectAmbiguous: true,
     });
     expect(result).toEqual({
@@ -123,6 +123,53 @@ describe("prepareAccommodationUpdate", () => {
         accommodationAddress: "Hotel Teste, Gramado, RS, Brasil",
         accommodationLatitude: -29.378,
         accommodationLongitude: -50.873,
+      },
+    });
+  });
+
+  it("cobre Hotel Palacio Maya em Panajachel quando o Provider retorna o nome local com artigo", async () => {
+    const provider = geocoder({
+      normalizedAddress: "Hotel El Palacio Maya, Calle Santander, Panajachel, Sololá, Guatemala",
+      latitude: 14.7440496,
+      longitude: -91.1561068,
+    });
+    const panajachelTrip = trip({
+      name: "Panajachel 2026",
+      destination: {
+        name: "Panajachel, Guatemala",
+        type: "city",
+        countryCode: "GT",
+        latitude: 14.7447393,
+        longitude: -91.153659,
+        timeZone: "America/Guatemala",
+      },
+      period: {
+        startDate: "2026-10-12",
+        endDate: "2026-10-22",
+        timeZone: "America/Guatemala",
+      },
+    });
+
+    const result = await prepareAccommodationUpdate({
+      trip: panajachelTrip,
+      accommodationName: "Hotel Palacio Maya",
+      geocoder: provider,
+    });
+
+    expect(provider.geocode).toHaveBeenCalledWith("Hotel Palacio Maya, Panajachel, Guatemala", {
+      countryCode: "GT",
+      anchor: { latitude: 14.7447393, longitude: -91.153659 },
+      maxDistanceKm: 40,
+      rejectAmbiguous: true,
+    });
+    expect(result).toEqual({
+      locationStatus: "resolved",
+      input: {
+        accommodationName: "Hotel Palacio Maya",
+        accommodationAddress:
+          "Hotel El Palacio Maya, Calle Santander, Panajachel, Sololá, Guatemala",
+        accommodationLatitude: 14.7440496,
+        accommodationLongitude: -91.1561068,
       },
     });
   });

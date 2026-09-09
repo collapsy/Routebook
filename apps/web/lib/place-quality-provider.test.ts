@@ -129,6 +129,57 @@ describe("GooglePlacesQualityAdapter", () => {
     expect(JSON.stringify(matches)).not.toContain("secret-google");
   });
 
+  it("usa o location bias real fora do Brasil sem fixar regionCode", async () => {
+    const antiguaTarget: PlaceQualityTarget = {
+      id: "external:lava-terrace",
+      name: "Lava Terrace",
+      category: "nightlife",
+      latitude: 14.5578,
+      longitude: -90.7337,
+    };
+    let requestBody: Record<string, unknown> | undefined;
+    const fetcher = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      return new Response(
+        JSON.stringify({
+          places: [
+            {
+              id: "google-lava-terrace",
+              displayName: { text: "Lava Terrace" },
+              location: { latitude: 14.55781, longitude: -90.73369 },
+              rating: 4.7,
+              userRatingCount: 840,
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    });
+
+    const adapter = new GooglePlacesQualityAdapter("secret-google", { fetcher });
+    const matches = await adapter.findSignals([antiguaTarget]);
+
+    expect(requestBody).toMatchObject({
+      textQuery: "bares e vida noturna",
+      locationBias: {
+        circle: {
+          center: { latitude: 14.5578, longitude: -90.7337 },
+        },
+      },
+    });
+    expect(requestBody).not.toHaveProperty("regionCode");
+    expect(matches).toEqual([
+      expect.objectContaining({
+        targetId: antiguaTarget.id,
+        signals: expect.objectContaining({
+          provider: "google-places",
+          externalId: "google-lava-terrace",
+          rating: { value: 4.7, scaleMax: 5, reviewCount: 840 },
+        }),
+      }),
+    ]);
+  });
+
   it("faz busca nominal limitada quando a busca ampla não contém o Place curado", async () => {
     const restaurant: PlaceQualityTarget = {
       id: "published:camarao-na-fazenda-pipa",

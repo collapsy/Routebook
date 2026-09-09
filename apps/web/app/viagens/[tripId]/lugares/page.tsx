@@ -506,7 +506,13 @@ export default async function PlacesPage({
       : [],
     listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
   ]);
-  const destinationId = resolveCuratedDestinationId(publishedPlaces);
+  const destinationId =
+    resolveCuratedDestinationId(publishedPlaces) ??
+    trip.destination.name
+      .normalize("NFKC")
+      .replace(/[^\p{L}\p{N}\s._-]+/gu, " ")
+      .replace(/\s+/g, " ")
+      .trim();
   const savedPlaceIds = new Set(savedPlaces.map((selection) => selection.placeId));
   const filteredPlaces = filterPlaces(
     publishedPlaces,

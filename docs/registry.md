@@ -15,7 +15,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-FND-001 | Visão do Produto | Foundation | Published | 0.1.0 | [product-vision.md](./foundation/product-vision.md) |
 | RB-FND-002 | Princípios do Produto | Foundation | Published | 0.1.0 | [product-principles.md](./foundation/product-principles.md) |
 | RB-FND-003 | Escopo do Produto | Foundation | Published | 0.1.0 | [product-scope.md](./foundation/product-scope.md) |
-| RB-FND-004 | Glossário do Produto | Foundation | Published | 0.1.0 | [product-glossary.md](./foundation/ubiquitous-language.md) |
+| RB-FND-004 | Glossário do Produto | Foundation | Published | 0.1.0 | [product-glossary.md](./foundation/product-glossary.md) |
 | RB-PRD-001 | Visão Geral do Produto | Product | Published | 0.1.0 | [product-overview.md](./product/product-overview.md) |
 | RB-PRD-002 | Definição do MVP | Product | Published | 0.1.0 | [mvp-definition.md](./product/mvp-definition.md) |
 | RB-PRD-003 | Personas | Product | Published | 0.1.0 | [personas.md](./product/personas.md) |
@@ -374,7 +374,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-159 | Ações diretas de Lugar no planejamento | Implementation | Draft | 0.1.0 | [rb-inc-159-place-actions-itinerary-entry.md](./implementation/increments/rb-inc-159-place-actions-itinerary-entry.md) |
 | RB-CTX-159 | Context Pack do RB-INC-159 — Ações diretas de Lugar no planejamento | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-159-place-actions-itinerary-entry.md](./implementation/context-packs/rb-inc-159-place-actions-itinerary-entry.md) |
 | RB-INC-160 | Guia diário completo da viagem de Pipa | Implementation | Draft | 0.1.0 | [rb-inc-160-pipa-trip-guide.md](./implementation/increments/rb-inc-160-pipa-trip-guide.md) |
-| RB-CTX-160 | Context Pack do RB-INC-160 — Guia diário completo de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-160-pipa-trip-guide.md](./implementation/context-packs/rb-inc-160-pipa-trip-guide.md) |
+| RB-CTX-160 | Context Pack do RB-INC-160 — Guia diário completo da viagem de Pipa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-160-pipa-trip-guide.md](./implementation/context-packs/rb-inc-160-pipa-trip-guide.md) |
 | RB-INC-161 | Experiência de viagem ativa e navegação mobile | Implementation | Draft | 0.1.0 | [rb-inc-161-active-trip-mobile-experience.md](./implementation/increments/rb-inc-161-active-trip-mobile-experience.md) |
 | RB-CTX-161 | Context Pack do RB-INC-161 — Experiência de viagem ativa e navegação mobile | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-161-active-trip-mobile-experience.md](./implementation/context-packs/rb-inc-161-active-trip-mobile-experience.md) |
 | RB-INC-162 | Imagens governadas para Places externos | Implementation | Draft | 0.1.0 | [rb-inc-162-external-place-images.md](./implementation/increments/rb-inc-162-external-place-images.md) |

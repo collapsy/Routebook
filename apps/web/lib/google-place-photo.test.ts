@@ -4,6 +4,10 @@ import {
   GooglePlacePhotoAdapter,
   resolveConfiguredGooglePlacePhotoProvider,
 } from "./google-place-photo";
+import {
+  GooglePlacesQualityAdapter,
+  isConservativeQualityIdentityMatch,
+} from "./place-quality-provider";
 
 const input = {
   placeId: "ChIJPraiaDoAmor01",
@@ -11,6 +15,23 @@ const input = {
   category: "beach" as const,
   latitude: -6.2366,
   longitude: -35.0465,
+};
+
+const puntoCero = {
+  id: "external:punto-cero-guatemala",
+  name: "Punto Cero Guatemala",
+  category: "nightlife" as const,
+  latitude: 14.7443,
+  longitude: -91.1562,
+  addressLabel: "Panajachel, GT",
+};
+
+const puntoRojo = {
+  externalId: "google-punto-rojo",
+  name: "PUNTO ROJO",
+  latitude: 14.74432,
+  longitude: -91.15618,
+  addressLabel: "PRPR+59R, Panajachel, Guatemala",
 };
 
 function detailsResponse(overrides: Record<string, unknown> = {}): Response {
@@ -53,6 +74,103 @@ describe("resolveConfiguredGooglePlacePhotoProvider", () => {
         VERCEL_ENV: "preview",
       }),
     ).toMatchObject({ status: "missing-secret", provider: "google" });
+  });
+});
+
+describe("Google Places alias reconciliation", () => {
+  it("mantém alias desativado no matching amplo e exige âncora espacial forte", () => {
+    expect(isConservativeQualityIdentityMatch(puntoCero, puntoRojo)).toBe(false);
+    expect(
+      isConservativeQualityIdentityMatch(puntoCero, puntoRojo, { allowSpatialAlias: true }),
+    ).toBe(true);
+    expect(
+      isConservativeQualityIdentityMatch(
+        puntoCero,
+        { ...puntoRojo, latitude: 14.746 },
+        { allowSpatialAlias: true },
+      ),
+    ).toBe(false);
+  });
+
+  it("reconcilia o renome somente quando é o primeiro resultado da busca nominal", async () => {
+    const fetcher = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify(
+            fetcher.mock.calls.length === 1
+              ? { places: [] }
+              : {
+                  places: [
+                    {
+                      id: puntoRojo.externalId,
+                      displayName: { text: puntoRojo.name },
+                      location: {
+                        latitude: puntoRojo.latitude,
+                        longitude: puntoRojo.longitude,
+                      },
+                      formattedAddress: puntoRojo.addressLabel,
+                      rating: 4.5,
+                      userRatingCount: 2,
+                    },
+                  ],
+                },
+          ),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+    );
+    const adapter = new GooglePlacesQualityAdapter("secret-google", { fetcher });
+
+    const matches = await adapter.findSignals([puntoCero]);
+
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(matches).toEqual([
+      expect.objectContaining({
+        targetId: puntoCero.id,
+        signals: expect.objectContaining({
+          provider: "google-places",
+          externalId: puntoRojo.externalId,
+        }),
+      }),
+    ]);
+  });
+
+  it("não usa um alias espacial que venha atrás de outro resultado nominal", async () => {
+    const fetcher = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify(
+            fetcher.mock.calls.length === 1
+              ? { places: [] }
+              : {
+                  places: [
+                    {
+                      id: "google-neighbor",
+                      displayName: { text: "Otro Bar" },
+                      location: { latitude: 14.74431, longitude: -91.15619 },
+                      formattedAddress: "Panajachel, Guatemala",
+                      rating: 4.7,
+                      userRatingCount: 90,
+                    },
+                    {
+                      id: puntoRojo.externalId,
+                      displayName: { text: puntoRojo.name },
+                      location: {
+                        latitude: puntoRojo.latitude,
+                        longitude: puntoRojo.longitude,
+                      },
+                      formattedAddress: puntoRojo.addressLabel,
+                      rating: 4.5,
+                      userRatingCount: 2,
+                    },
+                  ],
+                },
+          ),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+    );
+    const adapter = new GooglePlacesQualityAdapter("secret-google", { fetcher });
+
+    await expect(adapter.findSignals([puntoCero])).resolves.toEqual([]);
   });
 });
 
@@ -104,16 +222,16 @@ describe("GooglePlacePhotoAdapter", () => {
   it("revalida alias de Place já reconciliado somente quando permanece praticamente no mesmo ponto", async () => {
     const renamedInput = {
       placeId: "ChIJPuntoRojo01",
-      name: "Punto Cero Guatemala",
-      category: "nightlife" as const,
-      latitude: 14.7443,
-      longitude: -91.1562,
+      name: puntoCero.name,
+      category: puntoCero.category,
+      latitude: puntoCero.latitude,
+      longitude: puntoCero.longitude,
     };
     const fetcher = vi.fn(async () =>
       Response.json({
         id: renamedInput.placeId,
-        displayName: { text: "PUNTO ROJO" },
-        location: { latitude: 14.74432, longitude: -91.15618 },
+        displayName: { text: puntoRojo.name },
+        location: { latitude: puntoRojo.latitude, longitude: puntoRojo.longitude },
         photos: [
           {
             name: `places/${renamedInput.placeId}/photos/current-photo`,

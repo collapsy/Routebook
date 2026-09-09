@@ -158,8 +158,11 @@ Regras:
 - passar Google Place ID reconciliado do ranking para a superfície de mídia;
 - renderizar attribution obrigatória;
 - manter fallback compacto do RB-INC-188;
+- adicionar probe de aceitação estritamente Preview-only, com cenários fixos e resposta agregada sem secrets/resource names, para medir Quality + disponibilidade de foto real nos dois destinos exigidos pelo gate;
 - testes unitários, rota, componente e E2E;
 - documentação, Registry, rastreabilidade, CI e Preview.
+
+A probe de aceitação é indispensável porque a rota `api/internal/place-quality-probe` existente pertence ao RB-INC-172, restringe-se à branch histórica e contém diagnóstico regional legado. Ela não será reutilizada nem ampliada como contrato de produto.
 
 ## 12. Fora de escopo
 
@@ -185,6 +188,8 @@ apps/web/app/api/place-image-preview/route.ts
 apps/web/app/api/place-image-preview/route.test.ts
 apps/web/app/api/place-image-preview/google/route.ts
 apps/web/app/api/place-image-preview/google/route.test.ts
+apps/web/app/api/internal/place-media-probe/route.ts
+apps/web/app/api/internal/place-media-probe/route.test.ts
 apps/web/components/external-place-image-preview.tsx
 apps/web/components/external-place-image-preview.test.tsx
 apps/web/app/viagens/[tripId]/lugares/page.tsx
@@ -216,6 +221,7 @@ Arquivo adicional indispensável deve ser registrado no Increment/Context Pack a
 - [ ] foto não altera score/ranking;
 - [ ] pelo menos dois Destinations não-Pipa são validados, incluindo um fora do Brasil;
 - [ ] cobertura live de gastronomia/vida noturna melhora materialmente no Preview;
+- [ ] probe Preview-only não expõe API key, token de mídia completo ou photo resource name;
 - [ ] Documentation e Engineering Validation passam no mesmo SHA;
 - [ ] Vercel Preview fica READY no mesmo SHA;
 - [ ] Production permanece bloqueada.

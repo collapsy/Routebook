@@ -230,7 +230,7 @@ export async function prepareAccommodationUpdate({
   return resolveAccommodationLocation({
     destination: trip.destination,
     accommodationName,
-    accommodationAddress,
+    ...(accommodationAddress !== undefined ? { accommodationAddress } : {}),
     geocoder,
   });
 }

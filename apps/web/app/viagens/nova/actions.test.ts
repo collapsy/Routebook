@@ -10,6 +10,7 @@ const databaseMocks = vi.hoisted(() => ({ createTrip: vi.fn() }));
 const sessionMocks = vi.hoisted(() => ({ getSession: vi.fn() }));
 const resolverMocks = vi.hoisted(() => ({ resolveConfigured: vi.fn(), resolveText: vi.fn() }));
 const suggestionMocks = vi.hoisted(() => ({ resolveSelected: vi.fn() }));
+const geocoderMocks = vi.hoisted(() => ({ geocode: vi.fn(), resolve: vi.fn() }));
 
 vi.mock("next/cache", () => ({ revalidatePath: cacheMocks.revalidatePath }));
 vi.mock("next/navigation", () => ({ redirect: navigationMocks.redirect }));
@@ -23,6 +24,15 @@ vi.mock("@/lib/destination-resolver", () => ({
 vi.mock("@/lib/destination-suggestions", () => ({
   resolveSelectedDestination: suggestionMocks.resolveSelected,
 }));
+vi.mock("@/lib/geocoding", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/lib/geocoding")>();
+  return {
+    ...original,
+    resolveAccommodationGeocoder: geocoderMocks.resolve,
+  };
+});
+
+import { GeocodingProviderError } from "@/lib/geocoding";
 
 import { createTripAction } from "./actions";
 
@@ -43,6 +53,21 @@ const resolvedDestination = {
     collectedAt: new Date("2026-09-04T12:00:00.000Z"),
     method: "places-autocomplete-selection+place-details+local-timezone-estimate-v1",
     confidenceLevel: "confirmed" as const,
+  },
+};
+
+const panajachelDestination = {
+  destination: {
+    name: "Panajachel, Guatemala",
+    type: "city" as const,
+    countryCode: "GT",
+    latitude: 14.7447393,
+    longitude: -91.153659,
+    timeZone: "America/Guatemala",
+  },
+  provenance: {
+    ...resolvedDestination.provenance,
+    externalReference: "ChIJ-PANAJACHEL",
   },
 };
 
@@ -78,10 +103,16 @@ beforeEach(() => {
   });
   resolverMocks.resolveText.mockResolvedValue({ status: "resolved", value: resolvedDestination });
   databaseMocks.createTrip.mockResolvedValue({ id: "trip-1" });
+  geocoderMocks.resolve.mockReturnValue({ geocode: geocoderMocks.geocode });
+  geocoderMocks.geocode.mockResolvedValue({
+    normalizedAddress: "Avenida Paulista, São Paulo - SP, Brasil",
+    latitude: -23.5614,
+    longitude: -46.6559,
+  });
 });
 
 describe("createTripAction destination selection", () => {
-  it("revalida referência selecionada no servidor antes de criar a Trip", async () => {
+  it("revalida referência selecionada e geocodifica a hospedagem antes de criar a Trip", async () => {
     await expect(createTripAction({ fieldErrors: {} }, tripForm())).rejects.toThrow(
       "NEXT_REDIRECT:/viagens?created=1",
     );
@@ -92,6 +123,10 @@ describe("createTripAction destination selection", () => {
       sessionToken: "8b0201d2-4fee-42cf-a4aa-2a073aa445c0",
     });
     expect(resolverMocks.resolveConfigured).not.toHaveBeenCalled();
+    expect(geocoderMocks.geocode).toHaveBeenCalledWith(
+      "Avenida Paulista, São Paulo - SP, São Paulo, SP",
+      { countryCode: "BR" },
+    );
     expect(databaseMocks.createTrip).toHaveBeenCalledWith({
       userId: "user-1",
       destinationProvenance: resolvedDestination.provenance,
@@ -102,8 +137,103 @@ describe("createTripAction destination selection", () => {
         endDate: "2026-11-12",
         accommodationName: "Hotel Paulista",
         accommodationAddress: "Avenida Paulista, São Paulo - SP",
+        accommodationLatitude: -23.5614,
+        accommodationLongitude: -46.6559,
       },
     });
+  });
+
+  it("resolve Hotel Palacio Maya em Panajachel durante a criação name-only", async () => {
+    suggestionMocks.resolveSelected.mockResolvedValue({
+      status: "resolved",
+      value: panajachelDestination,
+    });
+    geocoderMocks.geocode.mockResolvedValue({
+      normalizedAddress:
+        "Hotel El Palacio Maya, Calle Santander, Barrio Jucanyá, Panajachel, Sololá, Guatemala",
+      latitude: 14.7440496,
+      longitude: -91.1561068,
+    });
+
+    const formData = tripForm({
+      destination: "Panajachel, Guatemala",
+      destinationSelectedLabel: "Panajachel, Guatemala",
+      destinationReference: "ChIJ-PANAJACHEL",
+      name: "Panajachel 2026",
+      accommodationName: "Hotel Palacio Maya",
+      accommodationAddress: "",
+    });
+
+    await expect(createTripAction({ fieldErrors: {} }, formData)).rejects.toThrow(
+      "NEXT_REDIRECT:/viagens?created=1",
+    );
+
+    expect(geocoderMocks.geocode).toHaveBeenCalledWith("Hotel Palacio Maya, Panajachel, Guatemala", {
+      countryCode: "GT",
+      anchor: { latitude: 14.7447393, longitude: -91.153659 },
+      maxDistanceKm: 40,
+      rejectAmbiguous: true,
+    });
+    expect(databaseMocks.createTrip).toHaveBeenCalledWith(
+      expect.objectContaining({
+        trip: expect.objectContaining({
+          accommodationName: "Hotel Palacio Maya",
+          accommodationAddress:
+            "Hotel El Palacio Maya, Calle Santander, Barrio Jucanyá, Panajachel, Sololá, Guatemala",
+          accommodationLatitude: 14.7440496,
+          accommodationLongitude: -91.1561068,
+        }),
+      }),
+    );
+  });
+
+  it("cria a Trip sem coordenada quando o hotel não produz candidato seguro", async () => {
+    geocoderMocks.geocode.mockResolvedValue(undefined);
+    const formData = tripForm({ accommodationAddress: "" });
+
+    await expect(createTripAction({ fieldErrors: {} }, formData)).rejects.toThrow(
+      "NEXT_REDIRECT:/viagens?created=1",
+    );
+
+    expect(databaseMocks.createTrip).toHaveBeenCalledWith(
+      expect.objectContaining({
+        trip: expect.objectContaining({
+          accommodationName: "Hotel Paulista",
+        }),
+      }),
+    );
+    const call = databaseMocks.createTrip.mock.calls[0]?.[0];
+    expect(call.trip.accommodationLatitude).toBeUndefined();
+    expect(call.trip.accommodationLongitude).toBeUndefined();
+  });
+
+  it("cria a Trip sem coordenada quando o Provider da hospedagem está indisponível", async () => {
+    geocoderMocks.geocode.mockRejectedValue(new GeocodingProviderError());
+    const formData = tripForm({ accommodationAddress: "" });
+
+    await expect(createTripAction({ fieldErrors: {} }, formData)).rejects.toThrow(
+      "NEXT_REDIRECT:/viagens?created=1",
+    );
+
+    const call = databaseMocks.createTrip.mock.calls[0]?.[0];
+    expect(call.trip.accommodationName).toBe("Hotel Paulista");
+    expect(call.trip.accommodationLatitude).toBeUndefined();
+    expect(call.trip.accommodationLongitude).toBeUndefined();
+  });
+
+  it("não chama o Geocoder quando nenhuma hospedagem foi informada", async () => {
+    const formData = tripForm({ accommodationName: "", accommodationAddress: "" });
+
+    await expect(createTripAction({ fieldErrors: {} }, formData)).rejects.toThrow(
+      "NEXT_REDIRECT:/viagens?created=1",
+    );
+
+    expect(geocoderMocks.geocode).not.toHaveBeenCalled();
+    expect(databaseMocks.createTrip).toHaveBeenCalledWith(
+      expect.objectContaining({
+        trip: expect.objectContaining({ accommodationName: "" }),
+      }),
+    );
   });
 
   it("rejeita identidade stale quando o texto mudou depois da seleção", async () => {

@@ -250,7 +250,11 @@ export class GooglePlacePhotoAdapter {
 
     if (
       externalId !== input.placeId ||
-      !isConservativeQualityIdentityMatch(target, { externalId, name, latitude, longitude })
+      !isConservativeQualityIdentityMatch(
+        target,
+        { externalId, name, latitude, longitude },
+        { allowSpatialAlias: true },
+      )
     ) {
       return undefined;
     }

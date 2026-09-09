@@ -105,6 +105,97 @@ describe("GET /api/place-image-preview", () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
 
+  it("rejeita Google Place ID inválido sem consultar Provider", async () => {
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(requestUrl({ googlePlaceId: "<script>", category: "nightlife" })),
+    );
+
+    expect(response.status).toBe(400);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("prioriza Google Photo com identidade revalidada e metadata no-store", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const fetcher = vi.fn(async () =>
+      Response.json({
+        id: "ChIJLavaTerrace01",
+        displayName: { text: "Lava Terrace" },
+        location: { latitude: 14.55781, longitude: -90.73369 },
+        photos: [
+          {
+            name: "places/ChIJLavaTerrace01/photos/resource-secret",
+            authorAttributions: [{ displayName: "Fotógrafo Google" }],
+            googleMapsUri: "https://www.google.com/maps/place/?q=place_id:lava",
+          },
+        ],
+      }),
+    );
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          destinationId: "Antigua Guatemala",
+          name: "Lava Terrace",
+          latitude: "14.5578",
+          longitude: "-90.7337",
+          googlePlaceId: "ChIJLavaTerrace01",
+          category: "nightlife",
+        }),
+      ),
+    );
+    const payload = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(payload).toMatchObject({
+      provider: "google-places",
+      sourceName: "Google Maps",
+      authorAttributions: [{ displayName: "Fotógrafo Google" }],
+    });
+    expect(String(payload.mediaUrl)).toMatch(/^\/api\/place-image-preview\/google\?token=/);
+    expect(JSON.stringify(payload)).not.toContain("resource-secret");
+    expect(JSON.stringify(payload)).not.toContain("secret-google");
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it("cai para Wikimedia segura quando Google não possui foto", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const fetcher = vi
+      .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(
+        Response.json({
+          id: "ChIJPraiaDoAmor01",
+          displayName: { text: "Praia do Amor" },
+          location: { latitude: -6.2366, longitude: -35.0465 },
+          photos: [],
+        }),
+      )
+      .mockResolvedValueOnce(commonsResponse());
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          googlePlaceId: "ChIJPraiaDoAmor01",
+          category: "beach",
+        }),
+      ),
+    );
+    const payload = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(payload.sourceName).toBe("Wikimedia Commons");
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+
   it("devolve preview seguro de Pipa com Provenance e cache CDN", async () => {
     vi.stubGlobal(
       "fetch",

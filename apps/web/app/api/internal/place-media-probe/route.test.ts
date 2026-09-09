@@ -30,11 +30,13 @@ const fixtures = [
 ] as const;
 
 function nearestFixture(latitude: number, longitude: number) {
-  return [...fixtures].sort((left, right) => {
+  const fixture = [...fixtures].sort((left, right) => {
     const leftDistance = Math.hypot(left.latitude - latitude, left.longitude - longitude);
     const rightDistance = Math.hypot(right.latitude - latitude, right.longitude - longitude);
     return leftDistance - rightDistance;
   })[0];
+  if (!fixture) throw new Error("Fixture de probe ausente.");
+  return fixture;
 }
 
 function googleFetcher() {

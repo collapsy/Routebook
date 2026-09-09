@@ -28,6 +28,7 @@ type AdapterDependencies = Readonly<{
 }>;
 
 type QualityProviderName = "google" | "foursquare";
+type AddressRelationship = "same" | "compatible" | "different" | "unknown";
 
 export type PlaceQualityProviderConfiguration =
   | Readonly<{ status: "not-configured" }>
@@ -99,6 +100,8 @@ const IDENTITY_STOPWORDS = new Set([
 
 const EXACT_NAME_MAX_DISTANCE_METERS = 300;
 const TOKEN_MATCH_MAX_DISTANCE_METERS = 700;
+const ADDRESS_COMPATIBILITY_MIN_COVERAGE = 0.8;
+const ADDRESS_DETAILED_MIN_TOKENS = 3;
 
 function cleanText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -124,6 +127,10 @@ function identityTokens(value: string): string[] {
     .filter((token) => token.length >= 3 && !IDENTITY_STOPWORDS.has(token));
 }
 
+function uniqueIdentityTokens(value: string): string[] {
+  return [...new Set(identityTokens(value))];
+}
+
 function candidateDistance(target: PlaceQualityTarget, candidate: ProviderCandidate): number {
   return placeDistanceMeters(target, candidate);
 }
@@ -131,11 +138,32 @@ function candidateDistance(target: PlaceQualityTarget, candidate: ProviderCandid
 function addressRelationship(
   target: PlaceQualityTarget,
   candidate: ProviderCandidate,
-): "same" | "different" | "unknown" {
+): AddressRelationship {
   if (!target.addressLabel || !candidate.addressLabel) return "unknown";
-  return normalizeIdentity(target.addressLabel) === normalizeIdentity(candidate.addressLabel)
-    ? "same"
-    : "different";
+
+  const targetAddress = normalizeIdentity(target.addressLabel);
+  const candidateAddress = normalizeIdentity(candidate.addressLabel);
+  if (targetAddress === candidateAddress) return "same";
+
+  const targetTokens = uniqueIdentityTokens(target.addressLabel);
+  const candidateTokens = uniqueIdentityTokens(candidate.addressLabel);
+  if (targetTokens.length === 0 || candidateTokens.length === 0) return "unknown";
+
+  const candidateSet = new Set(candidateTokens);
+  const shared = targetTokens.filter((token) => candidateSet.has(token));
+  if (shared.length === 0) return "different";
+
+  const minimumCoverage = shared.length / Math.min(targetTokens.length, candidateTokens.length);
+  if (minimumCoverage >= ADDRESS_COMPATIBILITY_MIN_COVERAGE) return "compatible";
+
+  if (
+    targetTokens.length >= ADDRESS_DETAILED_MIN_TOKENS &&
+    candidateTokens.length >= ADDRESS_DETAILED_MIN_TOKENS
+  ) {
+    return "different";
+  }
+
+  return "unknown";
 }
 
 export function isConservativeQualityIdentityMatch(
@@ -168,7 +196,7 @@ export function isConservativeQualityIdentityMatch(
   return (
     minimumCoverage >= 0.8 &&
     unionCoverage >= 0.5 &&
-    (address === "same" || distanceMeters <= TOKEN_MATCH_MAX_DISTANCE_METERS)
+    (address === "same" || address === "compatible" || distanceMeters <= TOKEN_MATCH_MAX_DISTANCE_METERS)
   );
 }
 

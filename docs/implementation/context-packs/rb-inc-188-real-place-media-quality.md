@@ -210,6 +210,8 @@ Somente os caminhos listados no RB-INC-188.
 
 Durante a Engineering Validation do SHA `0231cbf0aef91eb2b1169e1ceaaae1cd6d269152`, `apps/web/e2e/place-actions.spec.ts` tornou-se indispensável porque o cenário pré-existente ainda exigia a ilustração genérica removida por este incremento. A alteração autorizada nesse arquivo fica restrita a alinhar a expectativa E2E ao fallback compacto `Sem foto`, sem ampliar a jornada coberta.
 
+Durante a Engineering Validation do SHA `d1b32e6e2d13249aa04224b394fa6d5d53e2d17f`, `apps/web/e2e/recommendations-experience.spec.ts` tornou-se indispensável porque uma Recommendation que reutiliza a mídia de Place ainda exigia a ilustração genérica removida pelo fallback compacto. A alteração autorizada nesse arquivo fica restrita a alinhar a expectativa ao estado neutro `Sem foto`, sem ampliar decisões, efeitos colaterais ou a jornada de Recommendation.
+
 Qualquer outro arquivo adicional indispensável exige atualização prévia do Increment e deste Context Pack.
 
 ## 14. Testes mínimos

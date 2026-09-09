@@ -11,7 +11,8 @@ const MAX_RESULTS = 8;
 const MAX_SECURE_IMAGE_DISTANCE_METERS = 3_000;
 const USER_AGENT = "RouteBookPlaceImageBot/0.1 (https://github.com/collapsy/Routebook)";
 
-const REUSABLE_LICENSE_PATTERN = /^CC BY(?:-SA)? (?:2\.0|2\.5|3\.0|4\.0)$/i;
+const REUSABLE_LICENSE_PATTERN =
+  /^(?:CC BY(?:-SA)? (?:2\.0|2\.5|3\.0|4\.0)|CC0 1\.0|Public domain)$/i;
 const PLACE_NAME_STOPWORDS = new Set([
   "a",
   "as",
@@ -202,6 +203,19 @@ function isReusableLicense(value: string): boolean {
   return REUSABLE_LICENSE_PATTERN.test(value.trim());
 }
 
+function isAllowedLicenseUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      url.hostname === "creativecommons.org" &&
+      (url.pathname.startsWith("/licenses/") || url.pathname.startsWith("/publicdomain/"))
+    );
+  } catch {
+    return false;
+  }
+}
+
 function previewAltText(placeName: string, description: string): string {
   const cleanedDescription = description.trim().replace(/\s+/g, " ");
   if (cleanedDescription.length >= 12) return cleanedDescription.slice(0, 220);
@@ -251,8 +265,7 @@ export function normalizeWikimediaImageRecord(page: CommonsPage): WikimediaImage
   if (thumbnailUrl && !isAllowedMediaUrl(thumbnailUrl)) return undefined;
   if (!mime.startsWith("image/")) return undefined;
   if (!artist || !isReusableLicense(license)) return undefined;
-  if (licenseUrl && !licenseUrl.startsWith("https://creativecommons.org/licenses/"))
-    return undefined;
+  if (licenseUrl && !isAllowedLicenseUrl(licenseUrl)) return undefined;
 
   return {
     fileTitle,
@@ -338,9 +351,10 @@ function toCandidate(record: WikimediaImageRecord, collectedAt: Date): ExternalP
   };
 }
 
-function buildSearchText(placeName: string, contextLabel?: string): string {
+function buildSearchTexts(placeName: string, contextLabel?: string): readonly string[] {
+  const exactName = `\"${placeName}\"`;
   const context = destinationContextTokens(contextLabel).join(" ");
-  return `\"${placeName}\"${context ? ` ${context}` : ""}`;
+  return [...new Set([context ? `${exactName} ${context}` : exactName, exactName])];
 }
 
 export class WikimediaCommonsPlaceImageAdapter implements PlaceImagePort {
@@ -352,14 +366,17 @@ export class WikimediaCommonsPlaceImageAdapter implements PlaceImagePort {
     this.now = dependencies.now ?? (() => new Date());
   }
 
-  private async searchRecords(place: PlaceImageLookup): Promise<readonly WikimediaImageRecord[]> {
+  private async searchRecords(
+    place: PlaceImageLookup,
+    searchText = buildSearchTexts(place.name, place.contextLabel)[0] ?? `\"${place.name}\"`,
+  ): Promise<readonly WikimediaImageRecord[]> {
     const query = new URLSearchParams({
       action: "query",
       format: "json",
       formatversion: "2",
       maxlag: "1",
       generator: "search",
-      gsrsearch: buildSearchText(place.name, place.contextLabel),
+      gsrsearch: searchText,
       gsrnamespace: "6",
       gsrlimit: String(MAX_RESULTS),
       prop: "imageinfo|coordinates",
@@ -405,22 +422,24 @@ export class WikimediaCommonsPlaceImageAdapter implements PlaceImagePort {
   async findSecurePreview(
     place: PlaceImageLookup,
   ): Promise<WikimediaPlaceImagePreview | undefined> {
-    const records = await this.searchRecords(place);
+    for (const searchText of buildSearchTexts(place.name, place.contextLabel)) {
+      const records = await this.searchRecords(place, searchText);
 
-    for (const record of records) {
-      const match = classifyWikimediaImageMatch(place, record);
-      if (match.status !== "secure") continue;
+      for (const record of records) {
+        const match = classifyWikimediaImageMatch(place, record);
+        if (match.status !== "secure") continue;
 
-      return {
-        previewUrl: record.thumbnailUrl ?? record.mediaUrl,
-        sourceUrl: record.descriptionUrl,
-        sourceName: SOURCE_NAME,
-        license: record.license,
-        ...(record.licenseUrl ? { licenseUrl: record.licenseUrl } : {}),
-        attribution: record.artist,
-        altText: previewAltText(place.name, record.description),
-        matchEvidence: match.reason,
-      };
+        return {
+          previewUrl: record.thumbnailUrl ?? record.mediaUrl,
+          sourceUrl: record.descriptionUrl,
+          sourceName: SOURCE_NAME,
+          license: record.license,
+          ...(record.licenseUrl ? { licenseUrl: record.licenseUrl } : {}),
+          attribution: record.artist,
+          altText: previewAltText(place.name, record.description),
+          matchEvidence: match.reason,
+        };
+      }
     }
 
     return undefined;

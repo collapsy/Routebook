@@ -22,7 +22,7 @@ ai_context:
 
 ## 1. Missão
 
-Aumentar a taxa de resolução segura de Hospedagem informada somente por nome usando o Destination como contexto geográfico estruturado, sem aceitar silenciosamente homônimos distantes ou ambíguos.
+Aumentar a taxa de resolução segura de Hospedagem informada somente por nome usando o Destination como contexto geográfico textual e estruturado, sem aceitar silenciosamente homônimos distantes ou ambíguos.
 
 ## 2. Unidade de trabalho
 
@@ -30,7 +30,7 @@ Aumentar a taxa de resolução segura de Hospedagem informada somente por nome u
 - branch: `codex/rb-inc-189-accommodation-name-geocoding-rb181`;
 - base: PR #431 / RB-INC-181 @ `0d86b0ca3eabcc27ad12ae0013d0f12c70c49259`;
 - Provider: Nominatim existente;
-- Preview: gate posterior enquanto a quota Vercel estiver indisponível;
+- Preview: gate funcional;
 - merge: gate humano;
 - Production: fora de escopo.
 
@@ -91,15 +91,18 @@ Sem contexto, o comportamento permanece compatível com o contrato anterior.
 
 Para Hospedagem sem endereço:
 
-1. query = nome da Hospedagem normalizado por trim;
-2. contexto = país + coordenada do Destination quando disponíveis;
-3. raio máximo deriva do tipo canônico do Destination (`district`, `city`, `island`, `park`, `region`) e deve ser documentado/testado;
+1. query = `nome da Hospedagem + Destination`;
+2. contexto estruturado = país + coordenada do Destination quando disponíveis;
+3. o texto do Destination serve para recuperação do Provider, enquanto país/âncora/raio continuam sendo a autoridade para aceitar ou rejeitar o resultado;
 4. o adapter solicita no máximo uma pequena lista de candidatos em uma única chamada;
-5. candidatos inválidos ou de país divergente são descartados;
-6. candidatos além do raio são descartados;
-7. candidatos praticamente co-localizados são tratados como uma mesma localização para fins de ambiguidade;
-8. se dois candidatos distintos continuam competitivos, a resolução retorna `undefined`;
-9. caso contrário, o candidato seguro é retornado.
+5. quando existe âncora e raio válidos, usar `viewbox` restritivo (`bounded=1`);
+6. candidatos inválidos ou de país divergente são descartados;
+7. candidatos além do raio são descartados;
+8. candidatos praticamente co-localizados são tratados como uma mesma localização para fins de ambiguidade;
+9. se dois candidatos distintos continuam competitivos, a resolução retorna `undefined`;
+10. caso contrário, o candidato seguro é retornado.
+
+O caso live `Hotel Palacio Maya` em `Panajachel, Guatemala` deve resolver o registro local `Hotel El Palacio Maya` quando o Provider o devolver para a query contextual, sem aceitar homônimo de outra cidade.
 
 ## 8. Contrato com endereço
 
@@ -110,7 +113,11 @@ Para Hospedagem sem endereço:
 
 ## 9. Limites espaciais
 
-Os limites existem apenas para impedir homônimos claramente fora do Destination no fluxo name-only. Devem ser suficientemente amplos para respeitar tipos canônicos e permanecer configurados em código testável, sem nomes de cidades ou países.
+Os limites existem apenas para impedir homônimos claramente fora do Destination no fluxo name-only. Permanecem configurados em código testável, sem nomes de cidades ou países.
+
+Para `Destination.type = city`, o limite é 40 km a partir da coordenada canônica do Destination. Esse valor rejeita cidades vizinhas claramente distintas sem exigir precisão de bairro ou endereço.
+
+Os demais tipos canônicos preservam os limites já estabelecidos nesta branch enquanto não houver evidência live que justifique recalibração específica.
 
 A implementação deve preferir falhar fechado em caso de dúvida. Se o Destination não oferecer coordenada válida, aplicar somente os sinais seguros disponíveis, como país, sem inventar âncora.
 
@@ -119,10 +126,13 @@ A implementação deve preferir falhar fechado em caso de dúvida. Se o Destinat
 - compatibilidade de `Geocoder` sem contexto;
 - múltiplos candidatos e seleção do mais próximo;
 - `countryCode` aplicado e revalidado;
+- `viewbox` restritivo com `bounded=1` quando há âncora/raio;
 - candidato fora do raio rejeitado;
+- candidato a aproximadamente 50 km de um Destination `city` rejeitado pelo raio de 40 km;
 - dois candidatos distintos competitivos → `undefined`;
 - duplicatas co-localizadas não bloqueiam candidato seguro;
-- name-only passa contexto correto do Destination;
+- name-only envia `nome + Destination` e contexto estruturado;
+- regressão realista `Hotel Palacio Maya` + `Panajachel, Guatemala` pode aceitar `Hotel El Palacio Maya` local retornado pelo Provider;
 - endereço completo preserva query e comportamento do RB-INC-181;
 - Provider error/no-result continuam degradando sem coordenadas;
 - E2E determinístico prova save somente por nome e contexto espacial disponível.
@@ -139,16 +149,17 @@ pnpm build
 pnpm test:e2e
 ```
 
-Documentation e Engineering Validation do GitHub são as evidências técnicas canônicas enquanto o Preview estiver rate-limited.
+Documentation e Engineering Validation do GitHub são as evidências técnicas canônicas.
 
 ## 12. Gates humanos remanescentes
 
-- Vercel Preview real de um SHA final quando a quota voltar;
-- prova funcional com nome real de hospedagem em Destination não-Pipa;
+- Vercel Preview real do SHA final;
+- prova funcional com `Hotel Palacio Maya` em `Panajachel, Guatemala`;
+- prova funcional em ao menos um segundo Destination não-Pipa;
 - qualquer mudança em Provider/comercialização;
 - qualquer mudança em Production;
 - integração na `main`.
 
 ## 13. Handoff
 
-Relatar SHA, arquivos alterados, estratégia espacial, testes reais, comportamento de ambiguidade/distância, estado do Preview e riscos/gates restantes.
+Relatar SHA, arquivos alterados, estratégia textual/espacial, testes reais, comportamento de ambiguidade/distância, estado do Preview e riscos/gates restantes.

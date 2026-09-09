@@ -1,10 +1,6 @@
 import type { Trip, UpdateAccommodationInput } from "@routebook/trip-management";
 
-import {
-  GeocodingProviderError,
-  type Geocoder,
-  type GeocodingContext,
-} from "./geocoding";
+import { GeocodingProviderError, type Geocoder, type GeocodingContext } from "./geocoding";
 
 export type AccommodationLocationStatus =
   "removed" | "manual" | "preserved" | "resolved" | "not-found" | "unavailable";

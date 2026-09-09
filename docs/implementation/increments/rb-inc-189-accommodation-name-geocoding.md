@@ -28,10 +28,11 @@ ai_context:
 - O RB-INC-181 automatizou a geocodificação no submit, porém o adapter Nominatim ainda usa `limit=1` e aceita o primeiro resultado textual.
 - Em uso real foi observado que informar somente o nome do hotel/pousada pode não localizar a Hospedagem ou pode depender demais da ordenação textual global do Provider.
 - O Destination já possui país e, quando resolvido pelo fluxo atual, coordenadas suficientes para funcionar como âncora espacial sem introduzir um Provider novo.
+- No aceite live de 2026-09-09, `Hotel Palacio Maya` em `Panajachel, Guatemala` não foi resolvido apesar de existir localmente como `Hotel El Palacio Maya`; em tentativa anterior, a mesma expressão foi associada a uma hospedagem fora do Destination porque o raio de `city` era amplo demais. Essa evidência exige combinar recuperação textual contextual e validação espacial conservadora.
 
 ## 2. Resultado vertical
 
-Quando o usuário informa somente o nome da Hospedagem, o RouteBook usa o Destination da própria Trip como contexto estruturado para buscar e selecionar um candidato geograficamente coerente. O primeiro resultado global deixa de ser aceito automaticamente.
+Quando o usuário informa somente o nome da Hospedagem, o RouteBook usa o Destination da própria Trip como contexto textual e estruturado para buscar e selecionar um candidato geograficamente coerente. O primeiro resultado global deixa de ser aceito automaticamente.
 
 Quando não existe candidato seguro — por distância excessiva, país divergente ou ambiguidade relevante — nenhuma coordenada é inventada e o fallback avançado do RB-INC-181 permanece disponível.
 
@@ -41,16 +42,17 @@ Quando não existe candidato seguro — por distância excessiva, país divergen
 
 A porta `Geocoder` permanece a fronteira externa e o adapter continua sendo Nominatim. O incremento apenas adiciona contexto opcional de busca à porta, sem acoplar Trip Management a parâmetros específicos do Provider.
 
-### 3.2 Nome-only usa contexto espacial, não hardcode regional
+### 3.2 Nome-only combina contexto textual e espacial, sem hardcode regional
 
 Para Hospedagem sem endereço:
 
-- a query primária é o nome informado pelo usuário;
+- a query inclui o nome informado pelo usuário e o nome do Destination;
 - `countryCode`, latitude, longitude e tipo do Destination são derivados da Trip;
-- o adapter pode usar esses dados para restringir/priorizar candidatos;
-- nenhuma regra depende de Pipa, Brasil ou cidade específica.
+- o adapter usa esses dados para restringir/priorizar candidatos;
+- quando existe âncora e raio válidos, o `viewbox` do Nominatim é restritivo (`bounded=1`) e a distância radial continua sendo revalidada localmente;
+- nenhuma regra depende de Pipa, Brasil, Guatemala ou cidade específica.
 
-O texto do Destination deixa de ser a única forma de desambiguação para o caso name-only.
+O texto do Destination melhora a recuperação do Provider, mas não substitui a validação estruturada por país e proximidade.
 
 ### 3.3 Mais de um candidato, seleção conservadora
 
@@ -61,6 +63,8 @@ Quando existe contexto espacial, o Nominatim pode retornar uma pequena lista lim
 3. descarta candidato fora do raio coerente com o tipo do Destination;
 4. trata resultados praticamente co-localizados como a mesma localização para evitar falso conflito de objetos OSM duplicados;
 5. rejeita o resultado quando dois candidatos espacialmente distintos continuam competitivos, em vez de escolher arbitrariamente.
+
+Para `Destination.type = city`, o raio name-only é reduzido para 40 km. Isso impede que uma hospedagem de outra cidade próxima seja aceita apenas porque está no mesmo país, sem exigir que o usuário informe coordenadas manualmente.
 
 ### 3.4 Endereço completo preserva RB-INC-181
 
@@ -103,17 +107,20 @@ Mudança fora desses caminhos exige atualização deste incremento e do Context 
 - [ ] Hospedagem somente por nome pode ser resolvida quando existe candidato espacialmente coerente com o Destination;
 - [ ] país do Destination restringe a seleção quando disponível;
 - [ ] coordenada do Destination prioriza candidatos próximos sem regra regional fixa;
+- [ ] query name-only inclui contexto textual do Destination sem substituir as restrições estruturadas;
+- [ ] `viewbox` é restritivo quando existe âncora/raio válidos;
 - [ ] candidato distante do Destination é rejeitado no fluxo name-only;
+- [ ] `city` não aceita hospedagem em cidade vizinha distante apenas por compartilhar o país;
 - [ ] candidatos espacialmente distintos e competitivos são tratados como ambíguos e não geram coordenada arbitrária;
 - [ ] duplicatas praticamente co-localizadas não geram falso estado ambíguo;
 - [ ] endereço completo continua funcionando como no RB-INC-181;
 - [ ] no-result e erro do Provider continuam sem coordenada inventada;
 - [ ] fallback manual avançado permanece intacto;
 - [ ] teste unitário do adapter cobre país, proximidade, distância, ambiguidade e compatibilidade sem contexto;
-- [ ] teste de aplicação cobre name-only com contexto do Destination e regressão de endereço completo;
+- [ ] teste de aplicação cobre `Hotel Palacio Maya` + `Panajachel, Guatemala` resolvido para candidato local `Hotel El Palacio Maya` e regressão de endereço completo;
 - [ ] E2E determinístico cobre Hospedagem somente por nome → save → contexto espacial disponível;
 - [ ] Documentation Validation e Engineering Validation ficam verdes no mesmo SHA;
-- [ ] Vercel Preview real permanece gate de aceite funcional posterior quando a quota estiver disponível;
+- [ ] Vercel Preview real valida novamente o caso Panajachel e ao menos um segundo Destination não-Pipa;
 - [ ] Production permanece intocada;
 - [ ] merge permanece gate humano explícito.
 
@@ -122,6 +129,8 @@ Mudança fora desses caminhos exige atualização deste incremento e do Context 
 | Risco | Mitigação |
 | --- | --- |
 | homônimo próximo | detectar competição entre candidatos distintos e falhar fechado |
+| homônimo em cidade vizinha | raio de `city` mais conservador + `bounded=1` + validação radial |
+| variação pequena no nome cadastrado | combinar nome digitado com contexto textual do Destination sem abandonar país/âncora |
 | objetos OSM duplicados do mesmo hotel | agrupar candidatos praticamente co-localizados antes de avaliar ambiguidade |
 | Destination grande | raio varia por tipo canônico em vez de assumir cidade |
 | resultado em outro país | `countryCode` enviado e revalidado quando disponível |

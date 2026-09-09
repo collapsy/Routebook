@@ -168,12 +168,15 @@ describe("createTripAction destination selection", () => {
       "NEXT_REDIRECT:/viagens?created=1",
     );
 
-    expect(geocoderMocks.geocode).toHaveBeenCalledWith("Hotel Palacio Maya, Panajachel, Guatemala", {
-      countryCode: "GT",
-      anchor: { latitude: 14.7447393, longitude: -91.153659 },
-      maxDistanceKm: 40,
-      rejectAmbiguous: true,
-    });
+    expect(geocoderMocks.geocode).toHaveBeenCalledWith(
+      "Hotel Palacio Maya, Panajachel, Guatemala",
+      {
+        countryCode: "GT",
+        anchor: { latitude: 14.7447393, longitude: -91.153659 },
+        maxDistanceKm: 40,
+        rejectAmbiguous: true,
+      },
+    );
     expect(databaseMocks.createTrip).toHaveBeenCalledWith(
       expect.objectContaining({
         trip: expect.objectContaining({

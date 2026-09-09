@@ -71,6 +71,8 @@ Para `Destination.type = city`, o raio name-only é reduzido para 40 km. Isso im
 
 A action de `/viagens/nova` deve resolver a Hospedagem depois que o Destination estiver confirmado e antes da persistência da Trip. Ela reutiliza a mesma construção de query, contexto e política espacial usada em `Editar hospedagem`.
 
+Mapa, distâncias e qualquer Region derivada da Hospedagem somente podem usar esse ponto quando a coordenada segura tiver sido persistida; texto de Hospedagem sem coordenada não substitui contexto espacial confirmado.
+
 A criação da Viagem não deve falhar apenas porque a Hospedagem não pôde ser geocodificada. Em `not-found` ou indisponibilidade do Provider, a Trip é criada com os dados textuais fornecidos e sem coordenada inventada; o usuário pode revisar a Hospedagem depois.
 
 ### 3.5 Endereço completo preserva RB-INC-181
@@ -123,6 +125,7 @@ Mudança fora desses caminhos exige atualização deste incremento e do Context 
 - [ ] candidatos espacialmente distintos e competitivos são tratados como ambíguos e não geram coordenada arbitrária;
 - [ ] duplicatas praticamente co-localizadas não geram falso estado ambíguo;
 - [ ] criação de Viagem com Hospedagem usa o Destination já resolvido para tentar geocodificação antes da persistência;
+- [ ] mapa e distâncias usam a Hospedagem criada somente quando sua coordenada segura foi persistida;
 - [ ] `not-found` ou indisponibilidade do Geocoder não bloqueiam a criação da Viagem e não inventam coordenadas;
 - [ ] endereço completo continua funcionando como no RB-INC-181;
 - [ ] no-result e erro do Provider continuam sem coordenada inventada;

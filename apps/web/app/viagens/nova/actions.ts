@@ -65,13 +65,15 @@ function selectedDestinationError(
 async function accommodationForCreation(
   destination: CreateTripInput["destination"],
   formData: FormData,
-): Promise<Pick<
-  CreateTripInput,
-  | "accommodationName"
-  | "accommodationAddress"
-  | "accommodationLatitude"
-  | "accommodationLongitude"
->> {
+): Promise<
+  Pick<
+    CreateTripInput,
+    | "accommodationName"
+    | "accommodationAddress"
+    | "accommodationLatitude"
+    | "accommodationLongitude"
+  >
+> {
   const accommodationName = String(formData.get("accommodationName") ?? "").trim();
   const accommodationAddress = String(formData.get("accommodationAddress") ?? "").trim();
 

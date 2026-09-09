@@ -1,6 +1,10 @@
 import type { Trip, UpdateAccommodationInput } from "@routebook/trip-management";
 
-import { GeocodingProviderError, type Geocoder } from "./geocoding";
+import {
+  GeocodingProviderError,
+  type Geocoder,
+  type GeocodingContext,
+} from "./geocoding";
 
 export type AccommodationLocationStatus =
   "removed" | "manual" | "preserved" | "resolved" | "not-found" | "unavailable";
@@ -28,12 +32,66 @@ export function buildAccommodationGeocodingQuery(
   accommodationAddress: string | undefined,
   destinationName: string,
 ): string {
-  const location = accommodationAddress?.trim() || accommodationName.trim();
-  const destination = destinationName.trim();
+  const address = accommodationAddress?.trim();
+  if (!address) return accommodationName.trim();
 
-  if (!location) return "";
-  if (!destination || normalized(location).includes(normalized(destination))) return location;
-  return `${location}, ${destination}`;
+  const destination = destinationName.trim();
+  if (!destination || normalized(address).includes(normalized(destination))) return address;
+  return `${address}, ${destination}`;
+}
+
+export function accommodationNameSearchRadiusKm(type: Trip["destination"]["type"]): number {
+  switch (type) {
+    case "district":
+      return 60;
+    case "city":
+      return 120;
+    case "island":
+    case "park":
+      return 250;
+    case "region":
+      return 800;
+    default:
+      return 300;
+  }
+}
+
+function destinationCountryCode(trip: Trip): string | undefined {
+  const code = trip.destination.countryCode?.trim().toUpperCase();
+  return code && /^[A-Z]{2}$/.test(code) ? code : undefined;
+}
+
+function destinationAnchor(trip: Trip): GeocodingContext["anchor"] | undefined {
+  const latitude = trip.destination.latitude;
+  const longitude = trip.destination.longitude;
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return undefined;
+  }
+  return { latitude, longitude };
+}
+
+function geocodingContext(trip: Trip, nameOnly: boolean): GeocodingContext | undefined {
+  const countryCode = destinationCountryCode(trip);
+  if (!nameOnly) return countryCode ? { countryCode } : undefined;
+
+  const anchor = destinationAnchor(trip);
+  return {
+    ...(countryCode ? { countryCode } : {}),
+    ...(anchor
+      ? {
+          anchor,
+          maxDistanceKm: accommodationNameSearchRadiusKm(trip.destination.type),
+          rejectAmbiguous: true,
+        }
+      : {}),
+  };
 }
 
 function sameLocation(
@@ -107,6 +165,7 @@ export async function prepareAccommodationUpdate({
 
   if (!accommodationName.trim()) return { input: base, locationStatus: "not-found" };
 
+  const nameOnly = !accommodationAddress?.trim();
   const query = buildAccommodationGeocodingQuery(
     accommodationName,
     accommodationAddress,
@@ -114,7 +173,7 @@ export async function prepareAccommodationUpdate({
   );
 
   try {
-    const result = await geocoder.geocode(query);
+    const result = await geocoder.geocode(query, geocodingContext(trip, nameOnly));
     if (!result) return { input: base, locationStatus: "not-found" };
 
     return {

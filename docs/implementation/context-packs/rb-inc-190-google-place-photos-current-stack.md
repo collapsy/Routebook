@@ -140,6 +140,8 @@ apps/web/app/api/place-image-preview/route.ts
 apps/web/app/api/place-image-preview/route.test.ts
 apps/web/app/api/place-image-preview/google/route.ts
 apps/web/app/api/place-image-preview/google/route.test.ts
+apps/web/app/api/internal/place-media-probe/route.ts
+apps/web/app/api/internal/place-media-probe/route.test.ts
 apps/web/components/external-place-image-preview.tsx
 apps/web/components/external-place-image-preview.test.tsx
 apps/web/app/viagens/[tripId]/lugares/page.tsx
@@ -152,6 +154,17 @@ docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
 
+A probe `api/internal/place-media-probe` é um instrumento de aceitação do RB-INC-190, não contrato de produto. Ela deve:
+
+- responder apenas em Vercel Preview da branch do incremento;
+- usar cenários fixos de validação, incluindo Antigua Guatemala e um segundo Destination não-Pipa;
+- executar o mesmo Quality Provider configurado e a mesma revalidação Google Photo do runtime;
+- retornar somente contagens/estados e nomes dos fixtures, sem API key, token completo, Google Place ID ou photo resource name;
+- usar `private, no-store`;
+- permanecer indisponível em Production e em outras branches.
+
+Ela é indispensável porque a probe histórica do RB-INC-172 está hardcoded para a branch antiga e contém diagnóstico regional legado; alterá-la criaria mistura de responsabilidades.
+
 Arquivo adicional indispensável deve ser registrado aqui e no Increment antes da alteração.
 
 ## 11. Validação obrigatória
@@ -162,6 +175,7 @@ Arquivo adicional indispensável deve ser registrado aqui e no Increment antes d
 - testes do token efêmero;
 - testes da rota metadata Google-first + Wikimedia fallback;
 - testes da rota de bytes;
+- testes da probe live, incluindo bloqueio fora do Preview/branch e ausência de identificadores sensíveis na resposta;
 - testes do componente para Google attribution e fallback compacto;
 - E2E de mídia e multi-destino;
 - `pnpm format:check`;

@@ -15,6 +15,7 @@ type ProviderCandidate = Readonly<{
   longitude: number;
   addressLabel?: string;
   targetedForId?: string;
+  targetedRank?: number;
   rating?: number;
   ratingScaleMax?: number;
   reviewCount?: number;
@@ -29,6 +30,10 @@ type AdapterDependencies = Readonly<{
 
 type QualityProviderName = "google" | "foursquare";
 type AddressRelationship = "same" | "compatible" | "different" | "unknown";
+
+export type QualityIdentityMatchOptions = Readonly<{
+  allowSpatialAlias?: boolean;
+}>;
 
 export type PlaceQualityProviderConfiguration =
   | Readonly<{ status: "not-configured" }>
@@ -102,6 +107,9 @@ const EXACT_NAME_MAX_DISTANCE_METERS = 300;
 const TOKEN_MATCH_MAX_DISTANCE_METERS = 700;
 const ADDRESS_COMPATIBILITY_MIN_COVERAGE = 0.8;
 const ADDRESS_DETAILED_MIN_TOKENS = 3;
+const SPATIAL_ALIAS_MAX_DISTANCE_METERS = 75;
+const SPATIAL_ALIAS_WITHOUT_ADDRESS_MAX_DISTANCE_METERS = 25;
+const SPATIAL_ALIAS_MINIMUM_LEAD_TOKEN_LENGTH = 4;
 
 function cleanText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -166,9 +174,38 @@ function addressRelationship(
   return "unknown";
 }
 
+function isConservativeSpatialAliasMatch(
+  target: PlaceQualityTarget,
+  candidate: ProviderCandidate,
+  address: AddressRelationship,
+): boolean {
+  if (address === "different") return false;
+
+  const distanceMeters = candidateDistance(target, candidate);
+  const maximumDistanceMeters =
+    address === "same" || address === "compatible"
+      ? SPATIAL_ALIAS_MAX_DISTANCE_METERS
+      : SPATIAL_ALIAS_WITHOUT_ADDRESS_MAX_DISTANCE_METERS;
+  if (distanceMeters > maximumDistanceMeters) return false;
+
+  const targetTokens = identityTokens(target.name);
+  const candidateTokens = identityTokens(candidate.name);
+  if (targetTokens.length < 2 || candidateTokens.length < 2) return false;
+
+  const targetLead = targetTokens[0];
+  const candidateLead = candidateTokens[0];
+  return (
+    targetLead !== undefined &&
+    candidateLead !== undefined &&
+    targetLead.length >= SPATIAL_ALIAS_MINIMUM_LEAD_TOKEN_LENGTH &&
+    targetLead === candidateLead
+  );
+}
+
 export function isConservativeQualityIdentityMatch(
   target: PlaceQualityTarget,
   candidate: ProviderCandidate,
+  options: QualityIdentityMatchOptions = {},
 ): boolean {
   const distanceMeters = candidateDistance(target, candidate);
   const targetIdentity = normalizeIdentity(target.name);
@@ -178,6 +215,9 @@ export function isConservativeQualityIdentityMatch(
   if (address === "different") return false;
   if (targetIdentity === candidateIdentity) {
     return distanceMeters <= EXACT_NAME_MAX_DISTANCE_METERS;
+  }
+  if (options.allowSpatialAlias && isConservativeSpatialAliasMatch(target, candidate, address)) {
+    return true;
   }
   if (distanceMeters > TOKEN_MATCH_MAX_DISTANCE_METERS) return false;
 
@@ -235,6 +275,13 @@ function isTargetedQualityIdentityExpansionMatch(
     addressRelationship(target, candidate) === "different"
   ) {
     return false;
+  }
+
+  if (
+    candidate.targetedRank === 0 &&
+    isConservativeQualityIdentityMatch(target, candidate, { allowSpatialAlias: true })
+  ) {
+    return true;
   }
 
   const targetTokens = identityTokens(target.name);
@@ -447,7 +494,7 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
       }[];
     };
 
-    return (payload.places ?? []).flatMap((place) => {
+    return (payload.places ?? []).flatMap((place, index) => {
       const externalId = cleanText(place.id);
       const name = cleanText(place.displayName?.text);
       const latitude = finiteNumber(place.location?.latitude);
@@ -464,7 +511,7 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
           latitude,
           longitude,
           ...(addressLabel ? { addressLabel } : {}),
-          ...(targetedForId ? { targetedForId } : {}),
+          ...(targetedForId ? { targetedForId, targetedRank: index } : {}),
           ...(rating === undefined ? {} : { rating, ratingScaleMax: 5 }),
           ...(reviewCount === undefined ? {} : { reviewCount }),
         },

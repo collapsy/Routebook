@@ -6,11 +6,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createPostgresAuthenticatedTrip } from "@routebook/database";
-import { TripValidationError } from "@routebook/trip-management";
+import { TripValidationError, type CreateTripInput } from "@routebook/trip-management";
 
+import { resolveAccommodationLocation } from "@/lib/accommodation-geocoding";
 import { getRouteBookSession } from "@/lib/auth-session";
 import { resolveConfiguredDestinationResolver } from "@/lib/destination-resolver";
 import { resolveSelectedDestination } from "@/lib/destination-suggestions";
+import { resolveAccommodationGeocoder } from "@/lib/geocoding";
 
 import type { CreateTripActionState } from "./state";
 
@@ -57,6 +59,38 @@ function selectedDestinationError(
     formError: "Não foi possível confirmar o destino agora. Tente novamente em instantes.",
     destinationSelectionResetToken,
   };
+}
+
+async function accommodationForCreation(
+  destination: CreateTripInput["destination"],
+  formData: FormData,
+): Promise<
+  Pick<
+    CreateTripInput,
+    | "accommodationName"
+    | "accommodationAddress"
+    | "accommodationLatitude"
+    | "accommodationLongitude"
+  >
+> {
+  const accommodationName = String(formData.get("accommodationName") ?? "").trim();
+  const accommodationAddress = String(formData.get("accommodationAddress") ?? "").trim();
+
+  if (!accommodationName) {
+    return {
+      accommodationName,
+      ...(accommodationAddress ? { accommodationAddress } : {}),
+    };
+  }
+
+  const resolved = await resolveAccommodationLocation({
+    destination,
+    accommodationName,
+    ...(accommodationAddress ? { accommodationAddress } : {}),
+    geocoder: resolveAccommodationGeocoder(),
+  });
+
+  return resolved.input;
 }
 
 export async function createTripAction(
@@ -139,6 +173,8 @@ export async function createTripAction(
 
   try {
     const requestedName = String(formData.get("name") ?? "").trim();
+    const accommodation = await accommodationForCreation(resolution.value.destination, formData);
+
     await createPostgresAuthenticatedTrip({
       userId: session.user.id,
       destinationProvenance: resolution.value.provenance,
@@ -147,8 +183,7 @@ export async function createTripAction(
         destination: resolution.value.destination,
         startDate: String(formData.get("startDate") ?? ""),
         endDate: String(formData.get("endDate") ?? ""),
-        accommodationName: String(formData.get("accommodationName") ?? ""),
-        accommodationAddress: String(formData.get("accommodationAddress") ?? ""),
+        ...accommodation,
       },
     });
   } catch (error) {

@@ -31,7 +31,9 @@ test("cria, abre e mantém uma viagem persistida", async ({ page }, testInfo) =>
   await expect(page.getByRole("heading", { name: "8 dias de viagem" })).toBeVisible();
   await expect(page.getByText("Dia 1", { exact: true })).toBeVisible();
   await expect(page.getByText("Dia 8", { exact: true })).toBeVisible();
-  await expect(page.getByRole("definition").filter({ hasText: "Condomínio Solar Água" })).toBeVisible();
+  await expect(
+    page.getByRole("definition").filter({ hasText: "Condomínio Solar Água" }),
+  ).toBeVisible();
 
   await page.reload();
   await expect(page.getByRole("heading", { name: tripName })).toBeVisible();

@@ -28,10 +28,15 @@ export function buildAccommodationGeocodingQuery(
   accommodationAddress: string | undefined,
   destinationName: string,
 ): string {
-  const address = accommodationAddress?.trim();
-  if (!address) return accommodationName.trim();
-
   const destination = destinationName.trim();
+  const address = accommodationAddress?.trim();
+
+  if (!address) {
+    const name = accommodationName.trim();
+    if (!destination || normalized(name).includes(normalized(destination))) return name;
+    return `${name}, ${destination}`;
+  }
+
   if (!destination || normalized(address).includes(normalized(destination))) return address;
   return `${address}, ${destination}`;
 }
@@ -41,7 +46,7 @@ export function accommodationNameSearchRadiusKm(type: Trip["destination"]["type"
     case "district":
       return 60;
     case "city":
-      return 120;
+      return 40;
     case "island":
     case "park":
       return 250;

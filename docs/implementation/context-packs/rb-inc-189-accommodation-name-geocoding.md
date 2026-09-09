@@ -72,11 +72,14 @@ apps/web/lib/accommodation-geocoding.test.ts
 apps/web/app/viagens/nova/actions.ts
 apps/web/app/viagens/nova/actions.test.ts
 apps/web/e2e/authenticated-trips.spec.ts
+apps/web/e2e/product-shell.spec.ts
 docs/implementation/increments/rb-inc-189-accommodation-name-geocoding.md
 docs/implementation/context-packs/rb-inc-189-accommodation-name-geocoding.md
 docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
+
+`product-shell.spec.ts` está autorizado somente para estabilizar a asserção de persistência da Hospedagem diante da nova representação espacial válida: o mesmo nome pode aparecer no resumo, endereço, marcador e lista do mapa. A correção deve restringir o locator a uma representação semântica única, sem alterar runtime ou reduzir a cobertura funcional.
 
 Qualquer caminho adicional deve ser autorizado primeiro neste Context Pack e no Increment.
 
@@ -155,7 +158,8 @@ A implementação deve preferir falhar fechado em caso de dúvida. Se o Destinat
 - action de `/viagens/nova` persiste coordenada quando a Hospedagem é resolvida;
 - action de `/viagens/nova` continua criando a Trip sem coordenada em no-result/Provider error;
 - action de `/viagens/nova` não chama Geocoder quando Hospedagem não foi informada;
-- E2E determinístico prova criação de Viagem com Hospedagem somente por nome e contexto espacial disponível.
+- E2E determinístico prova criação de Viagem com Hospedagem somente por nome e contexto espacial disponível;
+- regressão de Product Shell usa locator semântico único para a Hospedagem mesmo quando o mapa repete seu nome em múltiplas representações.
 
 ## 12. Gates
 

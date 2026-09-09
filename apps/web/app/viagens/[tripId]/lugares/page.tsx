@@ -166,6 +166,10 @@ function providerCategoryLabel(value: string): string {
   return value.replaceAll("_", " ").replaceAll("-", " ");
 }
 
+function googlePlaceIdFromSignals(signals?: PlaceQualitySignals): string | undefined {
+  return signals?.provider === "google-places" ? signals.externalId : undefined;
+}
+
 type CanonicalDiscoveryItem = PublishedPlaceDiscoveryItem | EnrichedPlaceDiscoveryItem;
 
 function CanonicalDiscoveryCard({
@@ -230,6 +234,7 @@ function CanonicalDiscoveryCard({
           category={place.category}
           destinationId={destinationId}
           enabled={externalMediaEnabled}
+          googlePlaceId={googlePlaceIdFromSignals(qualitySignals)}
           latitude={candidate.latitude}
           longitude={candidate.longitude}
           placeName={place.name}
@@ -376,6 +381,7 @@ function ExternalDiscoveryCard({
         category={candidate.category}
         destinationId={destinationId}
         enabled={externalMediaEnabled}
+        googlePlaceId={googlePlaceIdFromSignals(qualitySignals)}
         latitude={candidate.latitude}
         longitude={candidate.longitude}
         placeName={candidate.name}

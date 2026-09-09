@@ -87,7 +87,9 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
   );
 });
 
-test("mantém rota do candidato externo sem hospedagem usando a localização atual", async ({ page }) => {
+test("mantém rota do candidato externo sem hospedagem usando a localização atual", async ({
+  page,
+}) => {
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Rota externa sem hospedagem ${test.info().project.name} ${Date.now()}`,
     startDate: "2026-08-22",
@@ -115,7 +117,9 @@ test("mantém rota do candidato externo sem hospedagem usando a localização at
   expect(routeUrl.searchParams.get("travelmode")).toBe("walking");
 });
 
-test("degrada candidato externo para estado compacto quando não há foto segura", async ({ page }) => {
+test("degrada candidato externo para estado compacto quando não há foto segura", async ({
+  page,
+}) => {
   await page.route("**/api/place-image-preview**", async (route) => {
     const requestUrl = new URL(route.request().url());
     if (requestUrl.pathname === "/api/place-image-preview") {

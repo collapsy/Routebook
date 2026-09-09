@@ -34,7 +34,7 @@ test("usa nome e endereço nos destinos individuais do catálogo, detalhe e Guia
   await expect(moreInfo).toBeVisible();
   await moreInfo.click();
   const cardRouteHref = await praiaDoAmorCard
-    .getByRole("link", { name: "Calcular rota real" })
+    .getByRole("link", { name: "Ver rota" })
     .getAttribute("href");
   expect(googleMapsDestination(cardRouteHref)).toBe("Praia do Amor, Pipa, Tibau do Sul — RN");
 

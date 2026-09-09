@@ -131,6 +131,51 @@ test("hospedagem é localizada ao salvar e habilita contexto espacial", async ({
   await expect(page.getByLabel("Resumo do mapa")).toContainText("1 ponto representado");
 });
 
+test("hospedagem somente por nome usa Destination e habilita contexto espacial", async ({
+  page,
+}, testInfo) => {
+  const suffix = `rb-inc-189-${testInfo.project.name}-${Date.now()}`;
+  const email = `${suffix}@example.com`;
+  const password = "routebook-e2e-password";
+  const tripName = `Floripa hotel por nome ${suffix}`;
+
+  await page.goto("/criar-conta?next=%2Fviagens");
+  await page.getByLabel("Nome").fill("Owner RB-INC-189");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Senha").fill(password);
+  await page.getByRole("button", { name: "Criar conta" }).click();
+  await expect(page).toHaveURL(/\/viagens$/);
+
+  await page.goto("/viagens/nova");
+  await page.getByLabel("Nome da viagem").fill(tripName);
+  await page.getByLabel("Para onde você vai?").fill("Florianópolis, SC");
+  await page.getByLabel("Quando começa?").fill("2026-12-05");
+  await page.getByLabel("Quando termina?").fill("2026-12-08");
+  await page.getByRole("button", { name: "Criar meu guia" }).click();
+  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+
+  const tripLink = page.getByRole("link", { name: tripName });
+  const tripHref = await tripLink.getAttribute("href");
+  expect(tripHref).toMatch(/^\/viagens\/[0-9a-f-]+$/);
+
+  await page.goto(`${tripHref}/hospedagem`);
+  await page.getByLabel("Nome da hospedagem").fill("Hotel RouteBook Nome");
+  await expect(page.getByLabel("Endereço")).toHaveValue("");
+  await page.getByRole("button", { name: "Salvar hospedagem" }).click();
+
+  await expect(page).toHaveURL(/\/hospedagem\?saved=1&located=1$/);
+  await expect(
+    page.getByText(
+      "Hospedagem salva e localização confirmada. Mapa e distâncias já podem usar esse ponto.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+
+  await page.goto(tripHref!);
+  await expect(page.getByText("Mapa ainda indisponível")).toHaveCount(0);
+  await expect(page.getByLabel("Resumo do mapa")).toContainText("1 ponto representado");
+});
+
 test("cria Trip para São Paulo selecionando sugestão de Destination", async ({
   page,
 }, testInfo) => {

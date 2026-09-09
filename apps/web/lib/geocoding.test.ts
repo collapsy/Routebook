@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import {
-  GeocodingProviderError,
-  NominatimGeocoder,
-  type GeocodingContext,
-} from "./geocoding";
+import { GeocodingProviderError, NominatimGeocoder, type GeocodingContext } from "./geocoding";
 
 type NominatimFixture = Readonly<{
   display_name: string;
@@ -216,12 +212,14 @@ describe("NominatimGeocoder", () => {
   it("rejeita coordenadas malformadas", async () => {
     const provider = new NominatimGeocoder(
       "https://example.test",
-      vi.fn().mockResolvedValue(
-        new Response(
-          JSON.stringify([{ display_name: "Resultado inválido", lat: "200", lon: "x" }]),
-          { status: 200 },
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(
+            JSON.stringify([{ display_name: "Resultado inválido", lat: "200", lon: "x" }]),
+            { status: 200 },
+          ),
         ),
-      ),
     );
 
     await expect(provider.geocode("Resultado inválido")).rejects.toThrow("localização inválida");

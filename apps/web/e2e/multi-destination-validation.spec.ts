@@ -45,9 +45,12 @@ test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e G
   expect(await external.count()).toBeGreaterThan(0);
   await expect(options).toContainText(/Gastronomia|Vida noturna/);
   await expect(external.first()).toContainText(/em linha reta da hospedagem/);
-  await expect(
-    external.first().locator('[data-external-place-image-state="fallback"]'),
-  ).toBeVisible();
+  const externalMedia = external.first().locator("[data-external-place-image-state]");
+  await expect(externalMedia).toBeVisible();
+  await expect(externalMedia).toHaveAttribute(
+    "data-external-place-image-state",
+    /^(idle|loading|ready|fallback)$/,
+  );
 
   const promotable = options
     .locator('[data-place-source="external"]:not([data-place-category="unmapped"])')

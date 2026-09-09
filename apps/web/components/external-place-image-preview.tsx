@@ -242,7 +242,16 @@ export function ExternalPlaceImagePreview({
       });
 
     return () => controller.abort();
-  }, [category, destinationId, enabled, googlePlaceId, latitude, longitude, placeName, state.status]);
+  }, [
+    category,
+    destinationId,
+    enabled,
+    googlePlaceId,
+    latitude,
+    longitude,
+    placeName,
+    state.status,
+  ]);
 
   if (!enabled) {
     return (

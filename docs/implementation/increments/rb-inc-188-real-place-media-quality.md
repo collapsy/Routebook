@@ -273,6 +273,7 @@ apps/web/app/viagens/[tripId]/lugares/place-discovery.module.css
 apps/web/e2e/external-place-images.spec.ts
 apps/web/e2e/place-discovery-anywhere.spec.ts
 apps/web/e2e/place-discovery-filters.spec.ts
+apps/web/e2e/place-actions.spec.ts
 apps/web/e2e/multi-destination-validation.spec.ts
 apps/web/e2e/accommodation-proximity.spec.ts
 apps/web/e2e/route-destination-reliability.spec.ts
@@ -281,6 +282,8 @@ docs/implementation/context-packs/rb-inc-188-real-place-media-quality.md
 docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
+
+`apps/web/e2e/place-actions.spec.ts` foi incluído após a Engineering Validation do SHA `0231cbf0aef91eb2b1169e1ceaaae1cd6d269152` revelar uma asserção legada que ainda exigia a ilustração de categoria removida pelo fallback compacto deste incremento. A alteração autorizada é restrita a alinhar o contrato E2E ao estado neutro `Sem foto`, sem alterar Salvos, persistência ou a jornada coberta.
 
 Arquivo adicional indispensável deve ser registrado no incremento/Context Pack antes da alteração e justificado na PR.
 

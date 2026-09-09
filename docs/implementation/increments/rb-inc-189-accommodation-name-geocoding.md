@@ -30,6 +30,7 @@ ai_context:
 - O Destination já possui país e, quando resolvido pelo fluxo atual, coordenadas suficientes para funcionar como âncora espacial sem introduzir um Provider novo.
 - No aceite live de 2026-09-09, `Hotel Palacio Maya` em `Panajachel, Guatemala` não foi resolvido apesar de existir localmente como `Hotel El Palacio Maya`; em tentativa anterior, a mesma expressão foi associada a uma hospedagem fora do Destination porque o raio de `city` era amplo demais. Essa evidência exige combinar recuperação textual contextual e validação espacial conservadora.
 - O segundo aceite live no SHA `30f42205d96ed12538a735435c972388346d2078` confirmou uma lacuna diferente: ao preencher a Hospedagem diretamente em `/viagens/nova`, a action de criação persistia somente nome/endereço e não invocava o Geocoder. O comportamento deste incremento deve, portanto, ser consistente tanto na criação da Viagem quanto em `Editar hospedagem`.
+- A validação Engineering no SHA `9ddc06fc5bb41b3ce659a3bb456e79f9340d4706` confirmou a nova geocodificação em unitários e build, mas expôs uma regressão E2E de locator no Product Shell: com contexto espacial disponível, `Condomínio Solar Água` aparece em múltiplas representações legítimas da mesma página e o locator textual antigo deixa de ser estrito.
 
 ## 2. Resultado vertical
 
@@ -83,6 +84,10 @@ Quando existe endereço, a query continua usando `endereço + Destination`. O no
 
 `undefined` continua significando ausência de resultado seguro. Erros do Provider continuam usando `GeocodingProviderError`. Nenhum estado novo é introduzido no domínio e `Accommodation.coordinate` continua opcional.
 
+### 3.7 Regressão de locator não reduz cobertura
+
+Quando uma Hospedagem com coordenada válida passa a aparecer simultaneamente no resumo e no mapa, o E2E não deve depender de `getByText` amplo. A regressão de Product Shell deve selecionar uma representação semântica única já existente na página, preservando a prova de persistência sem ocultar ou remover conteúdo do runtime.
+
 ## 4. Escopo
 
 ```text
@@ -93,11 +98,14 @@ apps/web/lib/accommodation-geocoding.test.ts
 apps/web/app/viagens/nova/actions.ts
 apps/web/app/viagens/nova/actions.test.ts
 apps/web/e2e/authenticated-trips.spec.ts
+apps/web/e2e/product-shell.spec.ts
 docs/implementation/increments/rb-inc-189-accommodation-name-geocoding.md
 docs/implementation/context-packs/rb-inc-189-accommodation-name-geocoding.md
 docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
+
+`apps/web/e2e/product-shell.spec.ts` só pode ser alterado para tornar determinística a asserção de Hospedagem já persistida diante das múltiplas representações legítimas introduzidas quando o mapa está disponível. Não é autorizado alterar a experiência, remover a verificação ou enfraquecer a persistência comprovada.
 
 Mudança fora desses caminhos exige atualização deste incremento e do Context Pack antes do commit correspondente.
 
@@ -134,6 +142,7 @@ Mudança fora desses caminhos exige atualização deste incremento e do Context 
 - [ ] teste de aplicação cobre `Hotel Palacio Maya` + `Panajachel, Guatemala` resolvido para candidato local `Hotel El Palacio Maya` e regressão de endereço completo;
 - [ ] teste da action de criação cobre Hospedagem name-only resolvida, no-result, Provider indisponível e ausência de Hospedagem;
 - [ ] E2E determinístico cobre criação de Viagem com Hospedagem somente por nome → contexto espacial disponível;
+- [ ] regressão do Product Shell continua comprovando a Hospedagem persistida com locator semântico único mesmo quando o mapa repete o nome;
 - [ ] Documentation Validation e Engineering Validation ficam verdes no mesmo SHA;
 - [ ] Vercel Preview real valida novamente o caso Panajachel e ao menos um segundo Destination não-Pipa;
 - [ ] Production permanece intocada;
@@ -153,7 +162,8 @@ Mudança fora desses caminhos exige atualização deste incremento e do Context 
 | resultado em outro país | `countryCode` enviado e revalidado quando disponível |
 | Provider público receber chamadas excessivas | uma única consulta por submit no caminho normal; sem autocomplete e lista pequena |
 | regressão de endereço completo | contexto espacial rígido aplicado somente ao fluxo name-only |
+| locator E2E ambíguo quando mapa está disponível | usar papel/estrutura semântica única em vez de texto global, sem alterar runtime |
 
 ## 8. Rollback
 
-Não há migration. Rollback remove a tentativa de geocodificação da action de criação e restaura o comportamento anterior da edição. Coordenadas já persistidas continuam válidas e o fallback manual permanece inalterado.
+Não há migration. Rollback remove a tentativa de geocodificação da action de criação e restaura o comportamento anterior da edição. Coordenadas já persistidas continuam válidas e o fallback manual permanece inalterado. A estabilização E2E pode ser revertida independentemente sem efeito no runtime.

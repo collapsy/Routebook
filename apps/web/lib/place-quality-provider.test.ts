@@ -79,6 +79,45 @@ describe("isConservativeQualityIdentityMatch", () => {
     ).toBe(true);
   });
 
+  it("só aceita alias espacial quando explicitamente autorizado e fortemente ancorado", () => {
+    const panajachelTarget: PlaceQualityTarget = {
+      id: "external:punto-cero-guatemala",
+      name: "Punto Cero Guatemala",
+      category: "nightlife",
+      latitude: 14.7443,
+      longitude: -91.1562,
+      addressLabel: "Panajachel, GT",
+    };
+    const renamedCandidate = {
+      externalId: "google-punto-rojo",
+      name: "PUNTO ROJO",
+      latitude: 14.74432,
+      longitude: -91.15618,
+      addressLabel: "PRPR+59R, Panajachel, Guatemala",
+    };
+
+    expect(isConservativeQualityIdentityMatch(panajachelTarget, renamedCandidate)).toBe(false);
+    expect(
+      isConservativeQualityIdentityMatch(panajachelTarget, renamedCandidate, {
+        allowSpatialAlias: true,
+      }),
+    ).toBe(true);
+    expect(
+      isConservativeQualityIdentityMatch(
+        panajachelTarget,
+        { ...renamedCandidate, latitude: 14.746, longitude: -91.15618 },
+        { allowSpatialAlias: true },
+      ),
+    ).toBe(false);
+    expect(
+      isConservativeQualityIdentityMatch(
+        panajachelTarget,
+        { ...renamedCandidate, name: "Rojo Bar" },
+        { allowSpatialAlias: true },
+      ),
+    ).toBe(false);
+  });
+
   it("rejeita filial homônima quando o endereço diverge", () => {
     const branchTarget: PlaceQualityTarget = {
       id: "published:cafe-cultura-centro",
@@ -242,6 +281,96 @@ describe("GooglePlacesQualityAdapter", () => {
         }),
       }),
     ]);
+  });
+
+  it("reconcilia renome somente no primeiro resultado da busca nominal fortemente ancorada", async () => {
+    const puntoCero: PlaceQualityTarget = {
+      id: "external:punto-cero-guatemala",
+      name: "Punto Cero Guatemala",
+      category: "nightlife",
+      latitude: 14.7443,
+      longitude: -91.1562,
+      addressLabel: "Panajachel, GT",
+    };
+    const fetcher = vi.fn(async () =>
+      new Response(
+        JSON.stringify(
+          fetcher.mock.calls.length === 1
+            ? { places: [] }
+            : {
+                places: [
+                  {
+                    id: "google-punto-rojo",
+                    displayName: { text: "PUNTO ROJO" },
+                    location: { latitude: 14.74432, longitude: -91.15618 },
+                    formattedAddress: "PRPR+59R, Panajachel, Guatemala",
+                    rating: 4.5,
+                    userRatingCount: 2,
+                  },
+                ],
+              },
+        ),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+
+    const adapter = new GooglePlacesQualityAdapter("secret-google", { fetcher });
+    const matches = await adapter.findSignals([puntoCero]);
+
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(matches).toEqual([
+      expect.objectContaining({
+        targetId: puntoCero.id,
+        signals: expect.objectContaining({
+          provider: "google-places",
+          externalId: "google-punto-rojo",
+          rating: { value: 4.5, scaleMax: 5, reviewCount: 2 },
+        }),
+      }),
+    ]);
+  });
+
+  it("não aceita alias espacial vindo como segundo resultado nominal", async () => {
+    const puntoCero: PlaceQualityTarget = {
+      id: "external:punto-cero-guatemala",
+      name: "Punto Cero Guatemala",
+      category: "nightlife",
+      latitude: 14.7443,
+      longitude: -91.1562,
+      addressLabel: "Panajachel, GT",
+    };
+    const fetcher = vi.fn(async () =>
+      new Response(
+        JSON.stringify(
+          fetcher.mock.calls.length === 1
+            ? { places: [] }
+            : {
+                places: [
+                  {
+                    id: "google-neighbor",
+                    displayName: { text: "Otro Bar" },
+                    location: { latitude: 14.74431, longitude: -91.15619 },
+                    formattedAddress: "Panajachel, Guatemala",
+                    rating: 4.7,
+                    userRatingCount: 90,
+                  },
+                  {
+                    id: "google-punto-rojo",
+                    displayName: { text: "PUNTO ROJO" },
+                    location: { latitude: 14.74432, longitude: -91.15618 },
+                    formattedAddress: "PRPR+59R, Panajachel, Guatemala",
+                    rating: 4.5,
+                    userRatingCount: 2,
+                  },
+                ],
+              },
+        ),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+
+    const adapter = new GooglePlacesQualityAdapter("secret-google", { fetcher });
+    await expect(adapter.findSignals([puntoCero])).resolves.toEqual([]);
   });
 
   it("faz busca nominal limitada quando a busca ampla não contém o Place curado", async () => {

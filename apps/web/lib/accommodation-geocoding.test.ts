@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { Trip } from "@routebook/trip-management";
 
 import {
+  accommodationNameSearchRadiusKm,
   buildAccommodationGeocodingQuery,
   prepareAccommodationUpdate,
 } from "./accommodation-geocoding";
@@ -39,7 +40,7 @@ function geocoder(result: Awaited<ReturnType<Geocoder["geocode"]>>): Geocoder {
 }
 
 describe("buildAccommodationGeocodingQuery", () => {
-  it("usa endereço e Destination como contexto", () => {
+  it("usa endereço e Destination como contexto textual", () => {
     expect(
       buildAccommodationGeocodingQuery(
         "Hotel Teste",
@@ -49,15 +50,25 @@ describe("buildAccommodationGeocodingQuery", () => {
     ).toBe("Av. Borges de Medeiros, 3000, Gramado, RS, Brasil");
   });
 
-  it("usa nome e Destination quando não existe endereço", () => {
+  it("usa somente o nome quando não existe endereço e deixa Destination para o contexto espacial", () => {
     expect(buildAccommodationGeocodingQuery("Hotel Teste", undefined, "Gramado, RS, Brasil")).toBe(
-      "Hotel Teste, Gramado, RS, Brasil",
+      "Hotel Teste",
     );
   });
 });
 
+describe("accommodationNameSearchRadiusKm", () => {
+  it("usa limites amplos por tipo canônico sem regra regional", () => {
+    expect(accommodationNameSearchRadiusKm("district")).toBe(60);
+    expect(accommodationNameSearchRadiusKm("city")).toBe(120);
+    expect(accommodationNameSearchRadiusKm("island")).toBe(250);
+    expect(accommodationNameSearchRadiusKm("park")).toBe(250);
+    expect(accommodationNameSearchRadiusKm("region")).toBe(800);
+  });
+});
+
 describe("prepareAccommodationUpdate", () => {
-  it("resolve automaticamente e persiste as coordenadas retornadas", async () => {
+  it("resolve endereço automaticamente e preserva a query contextual do RB-INC-181", async () => {
     const provider = geocoder({
       normalizedAddress: "Av. Borges de Medeiros, Gramado, RS, Brasil",
       latitude: -29.378,
@@ -73,12 +84,43 @@ describe("prepareAccommodationUpdate", () => {
 
     expect(provider.geocode).toHaveBeenCalledWith(
       "Av. Borges de Medeiros, 3000, Gramado, RS, Brasil",
+      { countryCode: "BR" },
     );
     expect(result).toEqual({
       locationStatus: "resolved",
       input: {
         accommodationName: "Hotel Teste",
         accommodationAddress: "Av. Borges de Medeiros, 3000",
+        accommodationLatitude: -29.378,
+        accommodationLongitude: -50.873,
+      },
+    });
+  });
+
+  it("resolve somente nome usando país, âncora e raio do Destination", async () => {
+    const provider = geocoder({
+      normalizedAddress: "Hotel Teste, Gramado, RS, Brasil",
+      latitude: -29.378,
+      longitude: -50.873,
+    });
+
+    const result = await prepareAccommodationUpdate({
+      trip: trip(),
+      accommodationName: "Hotel Teste",
+      geocoder: provider,
+    });
+
+    expect(provider.geocode).toHaveBeenCalledWith("Hotel Teste", {
+      countryCode: "BR",
+      anchor: { latitude: -29.3746, longitude: -50.8764 },
+      maxDistanceKm: 120,
+      rejectAmbiguous: true,
+    });
+    expect(result).toEqual({
+      locationStatus: "resolved",
+      input: {
+        accommodationName: "Hotel Teste",
+        accommodationAddress: "Hotel Teste, Gramado, RS, Brasil",
         accommodationLatitude: -29.378,
         accommodationLongitude: -50.873,
       },
@@ -130,6 +172,19 @@ describe("prepareAccommodationUpdate", () => {
       accommodationName: "Hotel",
       accommodationAddress: "Endereço novo",
     });
+  });
+
+  it("não inventa coordenada quando name-only não produz candidato seguro", async () => {
+    const provider = geocoder(undefined);
+
+    const result = await prepareAccommodationUpdate({
+      trip: trip(),
+      accommodationName: "Hotel Homônimo",
+      geocoder: provider,
+    });
+
+    expect(result.locationStatus).toBe("not-found");
+    expect(result.input).toEqual({ accommodationName: "Hotel Homônimo" });
   });
 
   it("degrada erro do Provider sem inventar coordenadas", async () => {

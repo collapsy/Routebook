@@ -222,7 +222,10 @@ export class NominatimGeocoder implements Geocoder {
 
     if (isValidAnchor(context?.anchor)) {
       const viewbox = buildViewbox(context.anchor, context.maxDistanceKm);
-      if (viewbox) url.searchParams.set("viewbox", viewbox);
+      if (viewbox) {
+        url.searchParams.set("viewbox", viewbox);
+        url.searchParams.set("bounded", "1");
+      }
     }
 
     let response: Response;

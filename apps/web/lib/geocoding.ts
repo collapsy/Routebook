@@ -99,12 +99,12 @@ function isValidAnchor(
 ): anchor is NonNullable<GeocodingContext["anchor"]> {
   return Boolean(
     anchor &&
-      Number.isFinite(anchor.latitude) &&
-      Number.isFinite(anchor.longitude) &&
-      anchor.latitude >= -90 &&
-      anchor.latitude <= 90 &&
-      anchor.longitude >= -180 &&
-      anchor.longitude <= 180,
+    Number.isFinite(anchor.latitude) &&
+    Number.isFinite(anchor.longitude) &&
+    anchor.latitude >= -90 &&
+    anchor.latitude <= 90 &&
+    anchor.longitude >= -180 &&
+    anchor.longitude <= 180,
   );
 }
 
@@ -189,8 +189,7 @@ function selectCandidate(
   if (context?.rejectAmbiguous) {
     const competitor = ranked.find(
       (candidate) =>
-        candidate !== nearest &&
-        distanceKm(candidate, nearest) > COLOCATED_THRESHOLD_KM,
+        candidate !== nearest && distanceKm(candidate, nearest) > COLOCATED_THRESHOLD_KM,
     );
     if (competitor) {
       const ambiguityMargin = Math.max(
@@ -211,10 +210,7 @@ export class NominatimGeocoder implements Geocoder {
     private readonly fetcher: FetchLike = fetch,
   ) {}
 
-  async geocode(
-    query: string,
-    context?: GeocodingContext,
-  ): Promise<GeocodingResult | undefined> {
+  async geocode(query: string, context?: GeocodingContext): Promise<GeocodingResult | undefined> {
     const url = new URL("/search", this.endpoint);
     url.searchParams.set("q", query);
     url.searchParams.set("format", "jsonv2");

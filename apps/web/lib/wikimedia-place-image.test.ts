@@ -49,6 +49,27 @@ describe("normalizeWikimediaImageRecord", () => {
     });
   });
 
+  it("aceita CC0 como licença reutilizável auditável", () => {
+    const page = commonsPage();
+    const info = page.imageinfo[0]!;
+    const record = normalizeWikimediaImageRecord({
+      ...page,
+      imageinfo: [
+        {
+          ...info,
+          extmetadata: {
+            ...info.extmetadata,
+            LicenseShortName: { value: "CC0 1.0" },
+            LicenseUrl: { value: "https://creativecommons.org/publicdomain/zero/1.0/" },
+          },
+        },
+      ],
+    });
+
+    expect(record?.license).toBe("CC0 1.0");
+    expect(record?.licenseUrl).toBe("https://creativecommons.org/publicdomain/zero/1.0/");
+  });
+
   it("rejeita mídia fora dos hosts oficiais", () => {
     const page = commonsPage();
     const info = page.imageinfo[0]!;
@@ -287,6 +308,47 @@ describe("WikimediaCommonsPlaceImageAdapter", () => {
     const calledUrl = new URL(String(fetcher.mock.calls[0]?.[0]));
     expect(calledUrl.searchParams.get("gsrsearch")).toContain("florianopolis");
     expect(calledUrl.searchParams.get("gsrsearch")).not.toContain("Pipa Tibau do Sul");
+  });
+
+  it("tenta o nome exato quando a busca contextual não encontra imagem segura", async () => {
+    const bridgePage = commonsPage({
+      title: "File:Ponte Hercilio Luz Florianopolis.jpg",
+      coordinates: [{ lat: -27.594, lon: -48.566, primary: "" }],
+      imageinfo: [
+        {
+          descriptionurl:
+            "https://commons.wikimedia.org/wiki/File:Ponte_Hercilio_Luz_Florianopolis.jpg",
+          url: "https://upload.wikimedia.org/example/ponte.jpg",
+          thumburl: "https://upload.wikimedia.org/example/1280px-ponte.jpg",
+          mime: "image/jpeg",
+          extmetadata: {
+            Artist: { value: "Autor" },
+            LicenseShortName: { value: "CC BY-SA 3.0" },
+            LicenseUrl: { value: "https://creativecommons.org/licenses/by-sa/3.0/" },
+            ImageDescription: { value: "Ponte Hercílio Luz em Florianópolis" },
+          },
+        },
+      ],
+    });
+    const fetcher = vi
+      .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ query: { pages: [] } }))
+      .mockResolvedValueOnce(Response.json({ query: { pages: [bridgePage] } }));
+    const adapter = new WikimediaCommonsPlaceImageAdapter({ fetcher });
+
+    const result = await adapter.findSecurePreview({
+      name: "Ponte Hercílio Luz",
+      latitude: -27.5935,
+      longitude: -48.5652,
+      contextLabel: "florianopolis-sc-br",
+    });
+
+    expect(result?.sourceName).toBe("Wikimedia Commons");
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    const firstSearch = new URL(String(fetcher.mock.calls[0]?.[0])).searchParams.get("gsrsearch");
+    const secondSearch = new URL(String(fetcher.mock.calls[1]?.[0])).searchParams.get("gsrsearch");
+    expect(firstSearch).toContain("florianopolis");
+    expect(secondSearch).toBe('"Ponte Hercílio Luz"');
   });
 
   it("propaga indisponibilidade da fonte sem produzir fallback falso", async () => {

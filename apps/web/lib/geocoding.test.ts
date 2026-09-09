@@ -67,9 +67,10 @@ describe("NominatimGeocoder", () => {
     expect(requestedUrl.searchParams.get("limit")).toBe("1");
     expect(requestedUrl.searchParams.has("countrycodes")).toBe(false);
     expect(requestedUrl.searchParams.has("viewbox")).toBe(false);
+    expect(requestedUrl.searchParams.has("bounded")).toBe(false);
   });
 
-  it("usa país e viewbox e seleciona o candidato mais próximo da âncora", async () => {
+  it("usa país e viewbox restritivo e seleciona o candidato mais próximo da âncora", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       payload([
         {
@@ -96,6 +97,7 @@ describe("NominatimGeocoder", () => {
     expect(requestedUrl.searchParams.get("viewbox")).toMatch(
       /^-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+$/,
     );
+    expect(requestedUrl.searchParams.get("bounded")).toBe("1");
     expect(result?.normalizedAddress).toBe("Hotel A Gramado, Brasil");
   });
 
@@ -133,6 +135,31 @@ describe("NominatimGeocoder", () => {
     );
 
     await expect(provider.geocode("Hotel A", context())).resolves.toBeUndefined();
+  });
+
+  it("rejeita hotel de cidade vizinha quando Destination city usa raio de 40 km", async () => {
+    const provider = new NominatimGeocoder(
+      "https://example.test",
+      vi.fn().mockResolvedValue(
+        payload([
+          {
+            display_name: "Hotel em Antígua, Guatemala",
+            lat: "14.5572969",
+            lon: "-90.7332233",
+            countryCode: "gt",
+          },
+        ]),
+      ),
+    );
+
+    await expect(
+      provider.geocode("Hotel Palacio Maya, Panajachel, Guatemala", {
+        countryCode: "GT",
+        anchor: { latitude: 14.7447393, longitude: -91.153659 },
+        maxDistanceKm: 40,
+        rejectAmbiguous: true,
+      }),
+    ).resolves.toBeUndefined();
   });
 
   it("falha fechado quando dois candidatos distintos continuam competitivos", async () => {

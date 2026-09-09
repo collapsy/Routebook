@@ -210,22 +210,23 @@ describe("GooglePlacesQualityAdapter", () => {
       longitude: -91.15612,
       addressLabel: "Panajachel, GT",
     };
-    const fetcher = vi.fn(async () =>
-      new Response(
-        JSON.stringify({
-          places: [
-            {
-              id: "google-el-roof",
-              displayName: { text: "El Roof" },
-              location: { latitude: 14.74431, longitude: -91.15608 },
-              formattedAddress: "Calle Santander, Panajachel, Sololá, Guatemala",
-              rating: 4.6,
-              userRatingCount: 219,
-            },
-          ],
-        }),
-        { status: 200, headers: { "Content-Type": "application/json" } },
-      ),
+    const fetcher = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            places: [
+              {
+                id: "google-el-roof",
+                displayName: { text: "El Roof" },
+                location: { latitude: 14.74431, longitude: -91.15608 },
+                formattedAddress: "Calle Santander, Panajachel, Sololá, Guatemala",
+                rating: 4.6,
+                userRatingCount: 219,
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
     );
 
     const adapter = new GooglePlacesQualityAdapter("secret-google", { fetcher });

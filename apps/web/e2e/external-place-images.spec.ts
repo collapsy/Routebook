@@ -78,7 +78,7 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
 
   const name = (await externalCard.getByRole("heading", { level: 3 }).innerText()).trim();
   await externalCard.getByText("Mais informações", { exact: true }).click();
-  const routeLink = externalCard.getByRole("link", { name: "Calcular rota real" });
+  const routeLink = externalCard.getByRole("link", { name: "Ver rota" });
   await expect(routeLink).toBeVisible();
   const routeHref = await routeLink.getAttribute("href");
   expect(routeHref).toBeTruthy();
@@ -87,7 +87,7 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
   );
 });
 
-test("mantém rota real do candidato externo sem hospedagem usando a localização atual", async ({
+test("mantém rota do candidato externo sem hospedagem usando a localização atual", async ({
   page,
 }) => {
   const { trip } = await createAuthenticatedE2ETrip({
@@ -102,7 +102,7 @@ test("mantém rota real do candidato externo sem hospedagem usando a localizaç�
   await expect(externalCard).toBeVisible({ timeout: 20_000 });
   const name = (await externalCard.getByRole("heading", { level: 3 }).innerText()).trim();
   await externalCard.getByText("Mais informações", { exact: true }).click();
-  const routeLink = externalCard.getByRole("link", { name: "Calcular rota real" });
+  const routeLink = externalCard.getByRole("link", { name: "Ver rota" });
   await expect(routeLink).toBeVisible();
 
   const routeHref = await routeLink.getAttribute("href");
@@ -117,7 +117,7 @@ test("mantém rota real do candidato externo sem hospedagem usando a localizaç�
   expect(routeUrl.searchParams.get("travelmode")).toBe("walking");
 });
 
-test("degrada candidato externo para ilustração de categoria quando não há foto segura", async ({
+test("degrada candidato externo para estado compacto quando não há foto segura", async ({
   page,
 }) => {
   await page.route("**/api/place-image-preview**", async (route) => {
@@ -154,10 +154,7 @@ test("degrada candidato externo para ilustração de categoria quando não há f
 
   const fallback = externalCard.locator('[data-place-image-fallback="true"]');
   await expect(fallback).toBeVisible();
-  await expect(fallback).toContainText("Imagem ilustrativa");
+  await expect(fallback).toContainText("Sem foto");
   await expect(fallback).toHaveAttribute("data-presentation", "compact");
-  await expect(fallback).toHaveAttribute(
-    "data-category-illustration",
-    /beach|gastronomy|nature|nightlife|place/,
-  );
+  await expect(fallback).not.toHaveAttribute("data-category-illustration", /.+/);
 });

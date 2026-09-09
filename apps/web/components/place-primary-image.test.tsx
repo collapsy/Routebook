@@ -21,19 +21,19 @@ describe("PlacePrimaryImage", () => {
     render(<PlacePrimaryImage placeName="Praia do Amor" primaryImage={primaryImage} />);
 
     expect(screen.getByRole("img", { name: primaryImage.altText })).toBeInTheDocument();
-    expect(screen.queryByText("Imagem ilustrativa")).not.toBeInTheDocument();
+    expect(screen.queryByText("Sem foto")).not.toBeInTheDocument();
   });
 
-  it("usa fallback compacto e acessível quando o Place não possui imagem", () => {
+  it("usa estado neutro e compacto quando o Place não possui imagem", () => {
     render(<PlacePrimaryImage category="beach" placeName="Praia do Amor" />);
 
     const fallback = screen.getByRole("img", {
-      name: "Imagem ilustrativa de Praia para Praia do Amor",
+      name: "Foto não disponível para Praia do Amor",
     });
     expect(fallback).toHaveAttribute("data-place-image-fallback", "true");
-    expect(fallback).toHaveAttribute("data-category-illustration", "beach");
     expect(fallback).toHaveAttribute("data-presentation", "compact");
-    expect(screen.getByText("Imagem ilustrativa")).toBeInTheDocument();
+    expect(screen.getByText("Sem foto")).toBeInTheDocument();
+    expect(screen.queryByText("Imagem ilustrativa")).not.toBeInTheDocument();
     expect(screen.queryByText("Referência visual")).not.toBeInTheDocument();
   });
 
@@ -46,18 +46,21 @@ describe("PlacePrimaryImage", () => {
 
     expect(
       screen.getByRole("img", {
-        name: "Imagem ilustrativa de Praia para Praia do Amor",
+        name: "Foto não disponível para Praia do Amor",
       }),
     ).toHaveAttribute("data-presentation", "compact");
   });
 
-  it("permite apresentação descritiva quando um contexto explicitamente precisar dela", () => {
+  it("permite fallback neutro descritivo quando um contexto precisar de mais área", () => {
     render(
       <PlacePrimaryImage category="beach" compactFallback={false} placeName="Praia do Amor" />,
     );
 
-    expect(screen.getByText("Referência visual")).toBeInTheDocument();
-    expect(screen.getByText("Ilustração de categoria — não é foto do local")).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "Foto não disponível para Praia do Amor" }),
+    ).toHaveAttribute("data-presentation", "descriptive");
+    expect(screen.getByText("Foto não disponível")).toBeInTheDocument();
+    expect(screen.queryByText(/ilustra/i)).not.toBeInTheDocument();
   });
 
   it("exibe Provenance textual sem usar sourceUrl como mídia", () => {

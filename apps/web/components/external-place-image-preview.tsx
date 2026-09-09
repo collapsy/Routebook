@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 
 import type { PlaceCategory } from "@routebook/place-catalog";
 
-import { CategoryIllustration } from "./category-illustration";
 import { PlacePrimaryImage } from "./place-primary-image";
 import styles from "./place-primary-image.module.css";
 
@@ -68,18 +67,18 @@ function isPreviewData(value: unknown): value is ExternalPlaceImagePreviewData {
 
 function buildPreviewEndpoint(
   input: Readonly<{
-    destinationId: string;
+    destinationId?: string;
     name: string;
     latitude: number;
     longitude: number;
   }>,
 ): string {
   const query = new URLSearchParams({
-    destinationId: input.destinationId,
     name: input.name,
     latitude: String(input.latitude),
     longitude: String(input.longitude),
   });
+  if (input.destinationId) query.set("destinationId", input.destinationId);
   return `/api/place-image-preview?${query}`;
 }
 
@@ -110,7 +109,7 @@ export function ExternalPlaceImagePreview({
 
   useEffect(() => {
     const target = containerRef.current;
-    if (!target || state.status !== "idle" || !destinationId || !enabled) return;
+    if (!target || state.status !== "idle" || !enabled) return;
 
     if (typeof IntersectionObserver === "undefined") {
       const timer = setTimeout(() => setState({ status: "loading" }), 0);
@@ -128,16 +127,16 @@ export function ExternalPlaceImagePreview({
     );
     observer.observe(target);
     return () => observer.disconnect();
-  }, [destinationId, enabled, state.status]);
+  }, [enabled, state.status]);
 
   useEffect(() => {
-    if (state.status !== "loading" || !destinationId || !enabled) return;
+    if (state.status !== "loading" || !enabled) return;
 
     const controller = new AbortController();
 
     void fetch(
       buildPreviewEndpoint({
-        destinationId,
+        ...(destinationId ? { destinationId } : {}),
         name: placeName,
         latitude,
         longitude,
@@ -164,7 +163,7 @@ export function ExternalPlaceImagePreview({
     return () => controller.abort();
   }, [destinationId, enabled, latitude, longitude, placeName, state.status]);
 
-  if (!enabled || !destinationId) {
+  if (!enabled) {
     return (
       <div ref={containerRef} data-external-place-image-state="fallback">
         <PlacePrimaryImage
@@ -206,29 +205,26 @@ export function ExternalPlaceImagePreview({
     );
   }
 
-  if (state.status === "idle" || state.status === "loading") {
-    const isLoading = state.status === "loading";
+  if (state.status === "loading") {
     return (
-      <div data-external-place-image-state={state.status} ref={containerRef}>
-        <CategoryIllustration
-          ariaLabel={
-            isLoading
-              ? `Carregando imagem para ${placeName}`
-              : `Imagem ilustrativa para ${placeName}`
-          }
-          disclosure="Imagem ilustrativa — não é foto do local."
-          eyebrow="Imagem"
-          kind={category ?? "place"}
-          label={isLoading ? "Carregando foto…" : "Imagem ilustrativa"}
-          live
-          presentation={compactFallback ? "compact" : "descriptive"}
-        />
+      <div data-external-place-image-state="loading" ref={containerRef}>
+        <div
+          aria-label={`Carregando foto para ${placeName}`}
+          className={styles.noPhoto}
+          data-presentation="compact"
+          role="img"
+        >
+          <span>Carregando foto…</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} data-external-place-image-state="fallback">
+    <div
+      ref={containerRef}
+      data-external-place-image-state={state.status === "idle" ? "idle" : "fallback"}
+    >
       <PlacePrimaryImage
         category={category}
         compactFallback={compactFallback}

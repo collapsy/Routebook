@@ -305,7 +305,7 @@ function CanonicalDiscoveryCard({
               rel="noreferrer"
               target="_blank"
             >
-              Calcular rota real
+              Ver rota
             </a>
           </div>
         </div>
@@ -445,7 +445,7 @@ function ExternalDiscoveryCard({
               rel="noreferrer"
               target="_blank"
             >
-              Calcular rota real
+              Ver rota
             </a>
           </div>
         </div>
@@ -506,7 +506,13 @@ export default async function PlacesPage({
       : [],
     listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
   ]);
-  const destinationId = resolveCuratedDestinationId(publishedPlaces);
+  const destinationId =
+    resolveCuratedDestinationId(publishedPlaces) ??
+    trip.destination.name
+      .normalize("NFKC")
+      .replace(/[^\p{L}\p{N}\s._-]+/gu, " ")
+      .replace(/\s+/g, " ")
+      .trim();
   const savedPlaceIds = new Set(savedPlaces.map((selection) => selection.placeId));
   const filteredPlaces = filterPlaces(
     publishedPlaces,

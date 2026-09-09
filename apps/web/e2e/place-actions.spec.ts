@@ -84,7 +84,7 @@ test("adiciona Place publicado ao Roteiro sem salvar automaticamente", async ({ 
   await expect(chapadaoActivity.locator("small")).toContainText("1 h");
 });
 
-test("mantém contexto visual ilustrativo em Lugar salvo sem fotografia real", async ({ page }) => {
+test("mantém fallback compacto em Lugar salvo sem fotografia real", async ({ page }) => {
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Salvos com fallback visual ${test.info().project.name} ${Date.now()}`,
     startDate: "2026-08-22",
@@ -103,10 +103,9 @@ test("mantém contexto visual ilustrativo em Lugar salvo sem fotografia real", a
     .locator('[data-place-source="published"]')
     .filter({ hasText: "Praia das Minas" })
     .first();
-  await expect(discoveryCard.locator('[data-place-image-fallback="true"]')).toHaveAttribute(
-    "data-category-illustration",
-    "beach",
-  );
+  const discoveryFallback = discoveryCard.locator('[data-place-image-fallback="true"]');
+  await expect(discoveryFallback).toHaveAttribute("data-presentation", "compact");
+  await expect(discoveryFallback).toHaveText("Sem foto");
   await discoveryCard.getByRole("button", { name: "Salvar lugar" }).click();
   await expect(discoveryCard.getByRole("button", { name: "Remover dos salvos" })).toBeVisible({
     timeout: 15_000,
@@ -116,7 +115,6 @@ test("mantém contexto visual ilustrativo em Lugar salvo sem fotografia real", a
   const savedCard = page.locator(".place-card").filter({ hasText: "Praia das Minas" }).first();
   const fallback = savedCard.locator('[data-place-image-fallback="true"]');
   await expect(fallback).toBeVisible();
-  await expect(fallback).toHaveAttribute("data-category-illustration", "beach");
   await expect(fallback).toHaveAttribute("data-presentation", "compact");
-  await expect(fallback).toContainText("Imagem ilustrativa");
+  await expect(fallback).toHaveText("Sem foto");
 });

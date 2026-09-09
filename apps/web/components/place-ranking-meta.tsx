@@ -42,6 +42,8 @@ export function PlaceRankingMeta({
   categoryLabel: string;
   timeZone: string;
 }>) {
+  if (!quality && !signals) return null;
+
   const popularityPercent =
     signals?.popularity &&
     Math.round((signals.popularity.value / signals.popularity.scaleMax) * 100);
@@ -72,7 +74,7 @@ export function PlaceRankingMeta({
       ) : null}
 
       <details className={styles.details}>
-        <summary>Entender este ranking</summary>
+        <summary>Por que aparece assim?</summary>
         <div className={styles.evidence}>
           <span>
             #{position} · {orderLabel}
@@ -92,21 +94,13 @@ export function PlaceRankingMeta({
           ) : null}
           {signals ? (
             <span>
-              Fonte do ranking: {providerLabel(signals.provider)} · coletado em{" "}
+              Fonte: {providerLabel(signals.provider)} · atualizado em{" "}
               {formatCollectedAt(signals.collectedAt, timeZone)}
             </span>
           ) : null}
-          {quality ? (
-            quality.reasons.length > 0 ? (
-              <span className={styles.reason}>{quality.reasons.join(" · ")}</span>
-            ) : (
-              <span className={styles.reason}>Score derivado somente dos sinais disponíveis.</span>
-            )
-          ) : (
-            <span className={styles.reason}>
-              A posição reflete apenas a ordenação selecionada nesta lista.
-            </span>
-          )}
+          {quality && quality.reasons.length > 0 ? (
+            <span className={styles.reason}>{quality.reasons.join(" · ")}</span>
+          ) : null}
         </div>
       </details>
     </section>

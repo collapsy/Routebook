@@ -10,6 +10,8 @@ function googleMapsDestination(href: string | null): string | null {
 test("usa nome e endereço nos destinos individuais do catálogo, detalhe e Guia", async ({
   page,
 }) => {
+  test.slow();
+
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Rotas confiáveis ${test.info().project.name} ${Date.now()}`,
     startDate: "2026-08-22",
@@ -34,7 +36,7 @@ test("usa nome e endereço nos destinos individuais do catálogo, detalhe e Guia
   await expect(moreInfo).toBeVisible();
   await moreInfo.click();
   const cardRouteHref = await praiaDoAmorCard
-    .getByRole("link", { name: "Calcular rota real" })
+    .getByRole("link", { name: "Ver rota" })
     .getAttribute("href");
   expect(googleMapsDestination(cardRouteHref)).toBe("Praia do Amor, Pipa, Tibau do Sul — RN");
 

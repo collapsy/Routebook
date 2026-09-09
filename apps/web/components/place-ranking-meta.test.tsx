@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { PlaceRankingMeta } from "./place-ranking-meta";
 
 describe("PlaceRankingMeta", () => {
-  it("não fabrica score ou Top e mantém a posição no disclosure quando não existem sinais", () => {
+  it("não fabrica score, Top ou explicação de ranking quando não existem sinais", () => {
     const { container } = render(
       <PlaceRankingMeta
         categoryLabel="Praias"
@@ -15,14 +15,14 @@ describe("PlaceRankingMeta", () => {
     );
     const view = within(container);
 
+    expect(view.queryByLabelText("Evidência do ranking")).not.toBeInTheDocument();
     expect(view.queryByText(/Score/)).not.toBeInTheDocument();
     expect(view.queryByText(/Top praias/i)).not.toBeInTheDocument();
-    expect(view.getByText("Entender este ranking")).toBeInTheDocument();
-    expect(view.getByText("#1 · Mais próximos")).toBeInTheDocument();
-    expect(view.getByText(/reflete apenas a ordenação selecionada/i)).toBeInTheDocument();
+    expect(view.queryByText(/Mais próximos/)).not.toBeInTheDocument();
+    expect(view.queryByText(/ordenação selecionada/i)).not.toBeInTheDocument();
   });
 
-  it("resume score e rating e mantém volume, Provider e motivo no disclosure", () => {
+  it("resume score e rating e mantém volume, fonte e motivo no disclosure", () => {
     const { container } = render(
       <PlaceRankingMeta
         categoryLabel="Praias"
@@ -49,9 +49,10 @@ describe("PlaceRankingMeta", () => {
     expect(view.getByText("Top praias")).toBeInTheDocument();
     expect(view.getByText("Score 9,1/10")).toBeInTheDocument();
     expect(view.getByText("Nota 4,8/5")).toBeInTheDocument();
-    expect(view.getByText("Entender este ranking")).toBeInTheDocument();
+    expect(view.getByText("Por que aparece assim?")).toBeInTheDocument();
     expect(view.getByText(/2\.340 avaliações/)).toBeInTheDocument();
-    expect(view.getByText(/Fonte do ranking: Google Places/)).toBeInTheDocument();
+    expect(view.getByText(/Fonte: Google Places/)).toBeInTheDocument();
+    expect(view.queryByText(/Provider/i)).not.toBeInTheDocument();
     expect(view.getByText(/Muito bem avaliado/)).toBeInTheDocument();
   });
 });

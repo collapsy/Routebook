@@ -5,6 +5,10 @@ import { GET } from "./route";
 function commonsResponse(
   description = "Praia do Amor em Pipa, Tibau do Sul, Rio Grande do Norte",
   title = "File:Praia do Amor Pipa.jpg",
+  coordinate: Readonly<{ latitude: number; longitude: number }> | null = {
+    latitude: -6.2366,
+    longitude: -35.0465,
+  },
 ) {
   return new Response(
     JSON.stringify({
@@ -13,6 +17,13 @@ function commonsResponse(
           {
             pageid: 123,
             title,
+            ...(coordinate
+              ? {
+                  coordinates: [
+                    { lat: coordinate.latitude, lon: coordinate.longitude, primary: "" },
+                  ],
+                }
+              : {}),
             imageinfo: [
               {
                 descriptionurl: "https://commons.wikimedia.org/wiki/File:Praia_do_Amor_Pipa.jpg",
@@ -37,13 +48,17 @@ function commonsResponse(
   );
 }
 
-function requestUrl(overrides: Record<string, string> = {}): string {
-  const params = new URLSearchParams({
+function requestUrl(overrides: Record<string, string | undefined> = {}): string {
+  const values: Record<string, string | undefined> = {
     destinationId: "pipa-rn-br",
     name: "Praia do Amor",
     latitude: "-6.2366",
     longitude: "-35.0465",
     ...overrides,
+  };
+  const params = new URLSearchParams();
+  Object.entries(values).forEach(([key, value]) => {
+    if (value !== undefined) params.set(key, value);
   });
   return `http://localhost/api/place-image-preview?${params}`;
 }
@@ -67,18 +82,30 @@ describe("GET /api/place-image-preview", () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
 
-  it("rejeita recorte geográfico ou Destination inválido sem consultar a Fonte", async () => {
+  it("rejeita coordenadas inválidas sem consultar a Fonte", async () => {
     const fetcher = vi.fn();
     vi.stubGlobal("fetch", fetcher);
 
-    const response = await GET(new Request(requestUrl({ destinationId: "outro-destino" })));
+    const response = await GET(new Request(requestUrl({ latitude: "91" })));
 
     expect(response.status).toBe(400);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
     expect(fetcher).not.toHaveBeenCalled();
   });
 
-  it("devolve somente preview seguro com Provenance e cache CDN", async () => {
+  it("rejeita contexto de Destination inválido sem consultar a Fonte", async () => {
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(requestUrl({ destinationId: "<script>alert(1)</script>" })),
+    );
+
+    expect(response.status).toBe(400);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("devolve preview seguro de Pipa com Provenance e cache CDN", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => commonsResponse()),
@@ -100,18 +127,44 @@ describe("GET /api/place-image-preview", () => {
       licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
       attribution: "Fotógrafo RouteBook",
     });
-    expect(String(payload.matchEvidence)).toContain("contexto local de Pipa/Tibau do Sul");
+    expect(String(payload.matchEvidence)).toMatch(/identifica o Lugar/i);
+  });
+
+  it("aceita Destination zero-seed sem destinationId quando a fotografia é geograficamente coerente", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        commonsResponse(
+          "Ponte Hercílio Luz em Florianópolis, Santa Catarina",
+          "File:Ponte Hercílio Luz Florianópolis.jpg",
+          { latitude: -27.594, longitude: -48.566 },
+        ),
+      ),
+    );
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          destinationId: undefined,
+          name: "Ponte Hercílio Luz",
+          latitude: "-27.5935",
+          longitude: "-48.5652",
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(200);
   });
 
   it("mantém fallback quando a identidade é ambígua", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () =>
-        commonsResponse("Praia do Amor no litoral brasileiro", "File:Praia do Amor.jpg"),
+        commonsResponse("Praia do Amor no litoral brasileiro", "File:Praia do Amor.jpg", null),
       ),
     );
 
-    const response = await GET(new Request(requestUrl()));
+    const response = await GET(new Request(requestUrl({ destinationId: undefined })));
 
     expect(response.status).toBe(404);
     expect(response.headers.get("Cache-Control")).toBe(

@@ -304,9 +304,8 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
   await expect(newRecommendation).toBeVisible();
   const newRecommendationFallback = newRecommendation.locator('[data-place-image-fallback="true"]');
   await expect(newRecommendationFallback).toBeVisible();
-  await expect(newRecommendationFallback).toHaveAttribute("data-category-illustration", "beach");
   await expect(newRecommendationFallback).toHaveAttribute("data-presentation", "compact");
-  await expect(newRecommendationFallback).toContainText("Imagem ilustrativa");
+  await expect(newRecommendationFallback).toHaveText("Sem foto");
   await expect(
     newRecommendation.getByText(/categoria do Lugar corresponde a um interesse/i),
   ).toBeVisible();

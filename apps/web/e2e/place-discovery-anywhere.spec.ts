@@ -34,9 +34,7 @@ test("descobre lugares em Florianópolis com zero seed sem expor lifecycle edito
   await expect(published).toHaveCount(0);
   await expect(external.first()).toBeVisible({ timeout: 30_000 });
   expect(await external.count()).toBeGreaterThan(0);
-  await expect(
-    external.first().locator('[data-external-place-image-state="fallback"]'),
-  ).toBeVisible();
+  await expect(external.first().locator("[data-external-place-image-state]")).toBeVisible();
   await expect(external.first()).toContainText(/em linha reta do destino/);
   await expect(external.first()).toContainText(/Fonte: Overture/);
   await expect(page.getByLabel("Distância máxima")).toBeEnabled();

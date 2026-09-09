@@ -442,6 +442,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-187 | Microcopy de confiança e remoção de justificativas técnicas | Implementation | Draft | 0.1.0 | [rb-inc-187-trustworthy-microcopy.md](./implementation/increments/rb-inc-187-trustworthy-microcopy.md) |
 | RB-CTX-187 | Context Pack do RB-INC-187 — Microcopy de confiança e remoção de justificativas técnicas | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-187-trustworthy-microcopy.md](./implementation/context-packs/rb-inc-187-trustworthy-microcopy.md) |
 
+| RB-INC-188 | Fotos reais dos lugares, fallback compacto e qualidade do catálogo | Implementation | Draft | 0.1.0 | [rb-inc-188-real-place-media-quality.md](./implementation/increments/rb-inc-188-real-place-media-quality.md) |
+| RB-CTX-188 | Context Pack do RB-INC-188 — Fotos reais e qualidade do catálogo | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-188-real-place-media-quality.md](./implementation/context-packs/rb-inc-188-real-place-media-quality.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

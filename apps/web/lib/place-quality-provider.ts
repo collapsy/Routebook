@@ -196,7 +196,9 @@ export function isConservativeQualityIdentityMatch(
   return (
     minimumCoverage >= 0.8 &&
     unionCoverage >= 0.5 &&
-    (address === "same" || address === "compatible" || distanceMeters <= TOKEN_MATCH_MAX_DISTANCE_METERS)
+    (address === "same" ||
+      address === "compatible" ||
+      distanceMeters <= TOKEN_MATCH_MAX_DISTANCE_METERS)
   );
 }
 

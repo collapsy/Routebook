@@ -392,7 +392,6 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
       body: JSON.stringify({
         textQuery,
         languageCode: "pt-BR",
-        regionCode: "BR",
         pageSize,
         locationBias: {
           circle: {

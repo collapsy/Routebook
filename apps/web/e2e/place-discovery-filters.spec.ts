@@ -55,7 +55,7 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     await expect(enrichedMoreInfo).toBeVisible();
     await enrichedMoreInfo.click();
     const enrichedRouteHref = await enrichedCard
-      .getByRole("link", { name: "Calcular rota real" })
+      .getByRole("link", { name: "Ver rota" })
       .getAttribute("href");
     expect(enrichedRouteHref).toBeTruthy();
     expect(
@@ -98,7 +98,7 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     "href",
     /google\.com\/maps\/search/,
   );
-  await expect(praiaDoAmorCard.getByRole("link", { name: "Calcular rota real" })).toHaveAttribute(
+  await expect(praiaDoAmorCard.getByRole("link", { name: "Ver rota" })).toHaveAttribute(
     "href",
     /google\.com\/maps\/dir/,
   );
@@ -127,9 +127,8 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     .filter({ hasText: "Praia das Minas" })
     .first();
   const praiaDasMinasFallback = praiaDasMinasCard.locator('[data-place-image-fallback="true"]');
-  await expect(praiaDasMinasFallback).toHaveAttribute("data-category-illustration", "beach");
   await expect(praiaDasMinasFallback).toHaveAttribute("data-presentation", "compact");
-  await expect(praiaDasMinasFallback).toContainText("Imagem ilustrativa");
+  await expect(praiaDasMinasFallback).toHaveText("Sem foto");
 
   await page.goto(`/viagens/${trip.id}/lugares`);
   await page.getByLabel("Nome ou termo").fill("gastronomico");

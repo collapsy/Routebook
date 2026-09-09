@@ -425,6 +425,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-181 | Geocodificação automática da Hospedagem ao salvar | Implementation | Draft | 0.1.0 | [rb-inc-181-accommodation-auto-geocoding.md](./implementation/increments/rb-inc-181-accommodation-auto-geocoding.md) |
 | RB-CTX-181 | Context Pack do RB-INC-181 — geocodificação automática da Hospedagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-181-accommodation-auto-geocoding.md](./implementation/context-packs/rb-inc-181-accommodation-auto-geocoding.md) |
 
+| RB-INC-189 | Geocodificação robusta de Hospedagem por nome e contexto do Destination | Implementation | Draft | 0.1.0 | [rb-inc-189-accommodation-name-geocoding.md](./implementation/increments/rb-inc-189-accommodation-name-geocoding.md) |
+| RB-CTX-189 | Context Pack do RB-INC-189 — geocodificação robusta de Hospedagem por nome | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-189-accommodation-name-geocoding.md](./implementation/context-packs/rb-inc-189-accommodation-name-geocoding.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;
@@ -433,14 +436,3 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 - `Published`: documento oficialmente publicado e disponível como referência;
 - `Deprecated`: documento substituído ou descontinuado;
 - `Archived`: documento mantido apenas para histórico.
-
-O status do frontmatter representa o ciclo de publicação do arquivo. Em ADRs, o status interno da decisão é uma dimensão distinta e deve ser governado conforme `RB-GOV-002`.
-
-## Regras de manutenção
-
-- Cada documento deve possuir um identificador único.
-- O ID registrado deve ser igual ao informado no frontmatter do arquivo.
-- O caminho deve apontar para o arquivo atual.
-- O status e a versão devem permanecer sincronizados com o frontmatter.
-- Documentos removidos não devem desaparecer sem histórico; devem ser marcados como `Deprecated` ou `Archived` quando necessário.
-- Alterações no registro devem passar por `node scripts/validate-docs.mjs`.

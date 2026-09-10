@@ -57,9 +57,9 @@ A auditoria confirmou três causas iniciais:
 
 No Preview de Antigua Guatemala, a Discovery retornou `candidateCount: 200`, mas `qualityMatchCount: 0`. A remoção do viés regional e o refinamento conservador de identidade elevaram a cobertura.
 
-A validação posterior em Panajachel expôs um segundo gargalo: `candidateCount: 127`, `qualityMatchCount: 12` e `mediaPreviewEligibleCount: 12`. Fotos Google funcionaram para cards reconciliados, mas cards fora da cobertura inicial continuaram em Wikimedia/`Sem foto`, inclusive estabelecimentos que possuem fotografia no Google Maps. O caso `Punto Cero Guatemala`/`PUNTO ROJO` também comprovou a necessidade de aliases espaciais conservadores.
+A validação posterior em Panajachel expôs um segundo gargalo: `candidateCount: 127`, `qualityMatchCount: 12` e `mediaPreviewEligibleCount: 12`. Fotos Google funcionaram para cards reconciliados, mas cards sem Google Place ID inicial continuaram em Wikimedia/`Sem foto`, inclusive estabelecimentos que possuem fotografia no Google Maps. O caso `Punto Cero Guatemala`/`PUNTO ROJO` também comprovou a necessidade de aliases espaciais conservadores.
 
-O `previewBudget` não pode condenar permanentemente cards posteriores ao fallback. Ele continua sendo proteção do bootstrap inicial, enquanto a interação/viewport pode solicitar enriquecimento individual autenticado.
+O budget de Preview deve controlar fan-out, não transformar ausência de match no batch em ausência permanente de fotografia.
 
 ## 4. Quality Provider global
 
@@ -80,7 +80,7 @@ Regras:
 Google Places Photos pode ser tentado por dois caminhos equivalentes de identidade governada:
 
 1. o item já possui `PlaceQualitySignals` com `provider = google-places` e `externalId` reconciliado pelo bootstrap; ou
-2. um card renderizado para uma Trip autenticada entra próximo ao viewport, ainda não possui Google Place ID e solicita **uma reconciliação individual** usando nome, categoria, coordenadas e endereço disponível. Essa reconciliação usa o mesmo Google Quality Provider e a mesma política conservadora; somente um `PlaceQualitySignals(provider=google-places, externalId)` resultante pode seguir para foto.
+2. um card de uma sessão autenticada entra próximo ao viewport, ainda não possui Google Place ID e solicita **uma reconciliação individual** usando nome, categoria e coordenadas. Essa reconciliação usa o mesmo Google Quality Provider e a mesma política conservadora; somente um `PlaceQualitySignals(provider=google-places, externalId)` resultante pode seguir para foto.
 
 Não é permitido liberar foto por texto sozinho, proximidade frouxa ou resultado Google não reconciliado. O lookup individual não altera Place canônico, ranking, Saved Place ou Recommendation.
 
@@ -98,9 +98,9 @@ Mismatch resulta em ausência de foto Google.
 Para cada card elegível:
 
 1. browser aguarda o card se aproximar do viewport;
-2. browser solicita metadata ao endpoint RouteBook, enviando contexto mínimo do Place e `tripId` quando o card precisar de reconciliação sob demanda;
+2. browser solicita metadata ao endpoint RouteBook com nome, categoria e coordenadas do Place;
 3. se já houver `googlePlaceId` governado, o endpoint segue direto para a revalidação de mídia;
-4. se não houver `googlePlaceId`, o endpoint só pode executar Quality individual quando a categoria for válida e `tripId` estiver autorizado para a sessão atual;
+4. se não houver `googlePlaceId`, o endpoint só pode executar Quality individual quando houver sessão RouteBook autenticada e categoria válida;
 5. um match individual válido produz um Google Place ID efêmero apenas para esta resposta; ele não é persistido no domínio;
 6. servidor chama Place Details com FieldMask mínimo `id,displayName,location,photos`;
 7. identidade é revalidada novamente;
@@ -137,9 +137,9 @@ Google miss/failure/mismatch deve degradar para Wikimedia segura usando o Destin
 
 Durante `idle/loading`, não reintroduzir hero ilustrativo genérico que recrie o problema visual rejeitado no RB-INC-188. O estado temporário continua compacto.
 
-A mídia continua lazy e uma foto por card é suficiente. O `previewBudget` limita o conjunto priorizado pelo bootstrap inicial; ele não bloqueia para sempre cards posteriores. Cards adicionais podem solicitar Quality + Media individualmente somente ao se aproximarem do viewport, com autenticação da Trip e sem fan-out eager de todos os candidatos.
+A mídia continua lazy e uma foto por card é suficiente. Em Preview, o budget de mídia pode cobrir até os 60 cards já exibidos pelo Discovery; fora de Preview, o default histórico de 12 permanece. Mesmo no Preview, o `IntersectionObserver` impede fan-out eager: chamadas só ocorrem quando o card se aproxima do viewport.
 
-O limite de exibição do Discovery continua limitando quantos cards podem ser materializados em uma página. A mudança não autoriza background crawl, prefetch de todos os candidatos nem persistência de IDs/fotos Google.
+Dentro desse conjunto, cards sem ID Google inicial podem solicitar Quality + Media individualmente. A mudança não autoriza background crawl, prefetch de todos os 200 candidatos de Discovery nem persistência de IDs/fotos Google.
 
 ## 10. Production e configuração
 
@@ -155,6 +155,7 @@ Regras:
 - ausência da variável = nenhuma chamada Google Photos;
 - `VERCEL_ENV=production` bloqueia o adapter nesta fase;
 - nenhuma variável Production é alterada por este incremento;
+- o aumento do budget é restrito ao ambiente Preview; Production mantém o default histórico;
 - não criar nova chave, billing ou ampliar quota do Provider;
 - logs não podem conter chave, token completo ou resource name de foto.
 
@@ -165,8 +166,8 @@ Regras:
 - adicionar rota interna de bytes Google;
 - integrar Google-first ao endpoint atual sem remover Wikimedia destination-agnostic;
 - passar Google Place ID reconciliado do ranking para a superfície de mídia;
-- permitir reconciliação Quality individual, autenticada e lazy para cards sem ID inicial que entram próximo ao viewport;
-- passar `tripId` e endereço disponível à superfície de mídia sem persistir novo dado Google;
+- permitir reconciliação Quality individual, autenticada e lazy para cards sem ID inicial;
+- ampliar o budget de mídia somente em Preview até o limite de 60 cards exibidos, preservando 12 fora de Preview e respeitando override menor explícito;
 - preservar alias espacial conservador para renomes confirmados por proximidade forte;
 - renderizar attribution obrigatória;
 - manter fallback compacto do RB-INC-188;
@@ -194,6 +195,8 @@ A probe de aceitação é indispensável porque a rota `api/internal/place-quali
 ## 13. Caminhos autorizados
 
 ```text
+apps/web/lib/place-bootstrap.ts
+apps/web/lib/place-bootstrap.test.ts
 apps/web/lib/place-quality-provider.ts
 apps/web/lib/place-quality-provider.test.ts
 apps/web/lib/google-place-photo.ts
@@ -216,7 +219,7 @@ docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
 
-`apps/web/lib/trip-route-access.ts` pode ser importado como fronteira existente de autorização, mas não deve ser alterado neste incremento.
+`apps/web/lib/auth-session.ts` pode ser importado como fronteira existente de autenticação, mas não deve ser alterado neste incremento.
 
 Arquivo adicional indispensável deve ser registrado no Increment/Context Pack antes da alteração e justificado na PR.
 
@@ -226,8 +229,9 @@ Arquivo adicional indispensável deve ser registrado no Increment/Context Pack a
 - [ ] destino não-Brasil recebe busca Google usando as coordenadas reais como location bias;
 - [ ] `Place.primaryImage` continua prioridade absoluta;
 - [ ] Google Photo só é tentada com Google Place ID reconciliado pelo bootstrap ou por Quality individual autenticada usando a mesma política conservadora;
-- [ ] card fora do `previewBudget` inicial pode obter foto ao entrar próximo ao viewport sem fan-out eager dos demais cards;
-- [ ] Quality individual sem `tripId` autorizado não chama Google;
+- [ ] card sem ID Google inicial pode obter foto ao entrar próximo ao viewport;
+- [ ] Preview pode habilitar até 60 cards exibidos para mídia lazy sem alterar o default de 12 fora de Preview;
+- [ ] Quality individual sem sessão autenticada não chama Google;
 - [ ] Place Details revalida ID, nome/alias autorizado e proximidade;
 - [ ] API key e photo resource name não chegam ao browser;
 - [ ] metadata e mídia Google usam `private, no-store`;

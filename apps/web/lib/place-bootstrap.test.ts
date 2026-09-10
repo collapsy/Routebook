@@ -18,8 +18,12 @@ describe("resolvePlaceBootstrapPolicy", () => {
   });
 
   it("amplia somente o budget de mídia no Vercel Preview", () => {
-    expect(resolvePlaceBootstrapPolicy({ VERCEL_ENV: "preview" }).media.previewBudget).toBe(60);
-    expect(resolvePlaceBootstrapPolicy({ VERCEL_ENV: "production" }).media.previewBudget).toBe(12);
+    expect(
+      resolvePlaceBootstrapPolicy({ VERCEL_ENV: "preview" }).media.previewBudget,
+    ).toBe(60);
+    expect(
+      resolvePlaceBootstrapPolicy({ VERCEL_ENV: "production" }).media.previewBudget,
+    ).toBe(12);
   });
 
   it("respeita override menor no Preview e não amplia Production", () => {

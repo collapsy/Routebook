@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 
 import { PLACE_CATEGORIES, type PlaceCategory } from "@routebook/place-catalog";
 
+import { getRouteBookSession } from "../../../lib/auth-session";
 import { resolveConfiguredGooglePlacePhotoProvider } from "../../../lib/google-place-photo";
 import { resolvePlaceBootstrapPolicy, runPlaceBootstrapStep } from "../../../lib/place-bootstrap";
+import { resolveConfiguredPlaceQualityProvider } from "../../../lib/place-quality-provider";
 import { WikimediaCommonsPlaceImageAdapter } from "../../../lib/wikimedia-place-image";
 
 const SUCCESS_CACHE_CONTROL = "public, s-maxage=86400, stale-while-revalidate=604800";
@@ -11,6 +13,7 @@ const MISS_CACHE_CONTROL = "public, s-maxage=21600, stale-while-revalidate=86400
 const GOOGLE_CACHE_CONTROL = "private, no-store";
 const DESTINATION_CONTEXT_PATTERN = /^[\p{L}\p{N}\s._-]+$/u;
 const GOOGLE_PLACE_ID_PATTERN = /^[A-Za-z0-9_-]{5,256}$/;
+const ON_DEMAND_QUALITY_TARGET_ID = "place-media-on-demand";
 
 function parseCoordinate(value: string | null): number | undefined {
   if (!value) return undefined;
@@ -75,52 +78,93 @@ export async function GET(request: Request) {
     );
   }
 
+  const google = resolveConfiguredGooglePlacePhotoProvider();
+  const onDemandGoogleEligible = !googlePlaceId && Boolean(category) && google.status === "configured";
+  let effectiveGooglePlaceId = googlePlaceId;
   let googleFailed = false;
 
-  if (googlePlaceId && category) {
-    const google = resolveConfiguredGooglePlacePhotoProvider();
-    if (google.status === "configured") {
-      const googleResult = await runPlaceBootstrapStep({
-        enabled: policy.media.enabled,
-        maxAttempts: policy.media.maxAttempts,
-        operation: () =>
-          google.adapter.findPreview({
-            placeId: googlePlaceId,
-            name,
-            category,
-            latitude,
-            longitude,
-          }),
-      });
-
-      if (googleResult.status === "success" && googleResult.value) {
-        const { mediaToken, ...publicPreview } = googleResult.value;
-        console.info("[place-bootstrap] media preview completed", {
-          provider: "google-places",
-          status: googleResult.status,
-          attempts: googleResult.attempts,
-          durationMs: googleResult.durationMs,
-          matched: true,
+  if (onDemandGoogleEligible && category) {
+    const session = await getRouteBookSession(request.headers);
+    if (session) {
+      const qualityProvider = resolveConfiguredPlaceQualityProvider();
+      if (qualityProvider.status === "configured" && qualityProvider.provider === "google") {
+        const qualityResult = await runPlaceBootstrapStep({
+          enabled: policy.quality.enabled,
+          maxAttempts: policy.quality.maxAttempts,
+          operation: () =>
+            qualityProvider.port.findSignals([
+              {
+                id: ON_DEMAND_QUALITY_TARGET_ID,
+                name,
+                category,
+                latitude,
+                longitude,
+              },
+            ]),
         });
-        return NextResponse.json(
-          {
-            ...publicPreview,
-            mediaUrl: `/api/place-image-preview/google?token=${encodeURIComponent(mediaToken)}`,
-          },
-          { headers: { "Cache-Control": GOOGLE_CACHE_CONTROL } },
-        );
+        const match =
+          qualityResult.status === "success"
+            ? qualityResult.value.find(
+                (entry) =>
+                  entry.targetId === ON_DEMAND_QUALITY_TARGET_ID &&
+                  entry.signals.provider === "google-places",
+              )
+            : undefined;
+        effectiveGooglePlaceId = match?.signals.externalId;
+        googleFailed = qualityResult.status === "failed";
+        console.info("[place-bootstrap] on-demand quality completed", {
+          provider: "google-places",
+          status: qualityResult.status,
+          attempts: qualityResult.attempts,
+          durationMs: qualityResult.durationMs,
+          matched: Boolean(effectiveGooglePlaceId),
+          ...(qualityResult.status === "failed" ? { retryable: qualityResult.retryable } : {}),
+        });
       }
+    }
+  }
 
-      googleFailed = googleResult.status === "failed";
+  if (effectiveGooglePlaceId && category && google.status === "configured") {
+    const googleResult = await runPlaceBootstrapStep({
+      enabled: policy.media.enabled,
+      maxAttempts: policy.media.maxAttempts,
+      operation: () =>
+        google.adapter.findPreview({
+          placeId: effectiveGooglePlaceId,
+          name,
+          category,
+          latitude,
+          longitude,
+        }),
+    });
+
+    if (googleResult.status === "success" && googleResult.value) {
+      const { mediaToken, ...publicPreview } = googleResult.value;
       console.info("[place-bootstrap] media preview completed", {
         provider: "google-places",
         status: googleResult.status,
         attempts: googleResult.attempts,
         durationMs: googleResult.durationMs,
-        matched: false,
-        ...(googleResult.status === "failed" ? { retryable: googleResult.retryable } : {}),
+        matched: true,
       });
+      return NextResponse.json(
+        {
+          ...publicPreview,
+          mediaUrl: `/api/place-image-preview/google?token=${encodeURIComponent(mediaToken)}`,
+        },
+        { headers: { "Cache-Control": GOOGLE_CACHE_CONTROL } },
+      );
     }
+
+    googleFailed = googleFailed || googleResult.status === "failed";
+    console.info("[place-bootstrap] media preview completed", {
+      provider: "google-places",
+      status: googleResult.status,
+      attempts: googleResult.attempts,
+      durationMs: googleResult.durationMs,
+      matched: false,
+      ...(googleResult.status === "failed" ? { retryable: googleResult.retryable } : {}),
+    });
   }
 
   const result = await runPlaceBootstrapStep({
@@ -165,7 +209,10 @@ export async function GET(request: Request) {
       },
       {
         status: googleFailed ? 503 : 404,
-        headers: { "Cache-Control": googleFailed ? "no-store" : MISS_CACHE_CONTROL },
+        headers: {
+          "Cache-Control":
+            googleFailed || onDemandGoogleEligible ? "no-store" : MISS_CACHE_CONTROL,
+        },
       },
     );
   }
@@ -178,6 +225,8 @@ export async function GET(request: Request) {
     matched: true,
   });
   return NextResponse.json(result.value, {
-    headers: { "Cache-Control": SUCCESS_CACHE_CONTROL },
+    headers: {
+      "Cache-Control": onDemandGoogleEligible ? GOOGLE_CACHE_CONTROL : SUCCESS_CACHE_CONTROL,
+    },
   });
 }

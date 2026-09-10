@@ -79,7 +79,8 @@ export async function GET(request: Request) {
   }
 
   const google = resolveConfiguredGooglePlacePhotoProvider();
-  const onDemandGoogleEligible = !googlePlaceId && Boolean(category) && google.status === "configured";
+  const onDemandGoogleEligible =
+    !googlePlaceId && Boolean(category) && google.status === "configured";
   let effectiveGooglePlaceId = googlePlaceId;
   let googleFailed = false;
 
@@ -87,7 +88,10 @@ export async function GET(request: Request) {
     const session = await getRouteBookSession(request.headers);
     if (session) {
       const qualityProvider = resolveConfiguredPlaceQualityProvider();
-      if (qualityProvider.status === "configured" && qualityProvider.provider === "google") {
+      if (
+        qualityProvider.status === "configured" &&
+        qualityProvider.provider === "google"
+      ) {
         const qualityResult = await runPlaceBootstrapStep({
           enabled: policy.quality.enabled,
           maxAttempts: policy.quality.maxAttempts,

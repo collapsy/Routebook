@@ -9,36 +9,12 @@ import {
 } from "./place-bootstrap";
 
 describe("resolvePlaceBootstrapPolicy", () => {
-  it("usa defaults governados fora de Preview", () => {
+  it("usa defaults governados sem ampliar contratos", () => {
     expect(resolvePlaceBootstrapPolicy({})).toEqual({
       discovery: { enabled: true, maxAttempts: 2, candidateLimit: 200 },
       quality: { enabled: true, maxAttempts: 2, targetLimit: 60 },
       media: { enabled: true, maxAttempts: 2, previewBudget: 12 },
     });
-  });
-
-  it("amplia somente o budget de mídia no Vercel Preview", () => {
-    expect(
-      resolvePlaceBootstrapPolicy({ VERCEL_ENV: "preview" }).media.previewBudget,
-    ).toBe(60);
-    expect(
-      resolvePlaceBootstrapPolicy({ VERCEL_ENV: "production" }).media.previewBudget,
-    ).toBe(12);
-  });
-
-  it("respeita override menor no Preview e não amplia Production", () => {
-    expect(
-      resolvePlaceBootstrapPolicy({
-        VERCEL_ENV: "preview",
-        ROUTEBOOK_PLACE_MEDIA_PREVIEW_BUDGET: "8",
-      }).media.previewBudget,
-    ).toBe(8);
-    expect(
-      resolvePlaceBootstrapPolicy({
-        VERCEL_ENV: "production",
-        ROUTEBOOK_PLACE_MEDIA_PREVIEW_BUDGET: "60",
-      }).media.previewBudget,
-    ).toBe(12);
   });
 
   it("aplica kill switches e clamps de retry/budget", () => {

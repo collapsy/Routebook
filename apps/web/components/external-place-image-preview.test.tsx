@@ -46,6 +46,21 @@ const preview = {
   matchEvidence: "Identidade e contexto local confirmados.",
 } as const;
 
+const googlePreview = {
+  provider: "google-places",
+  mediaUrl: "/api/place-image-preview/google?token=token-assinado",
+  sourceUrl: "https://www.google.com/maps/place/?q=place_id:lava",
+  sourceName: "Google Maps",
+  authorAttributions: [
+    {
+      displayName: "Fotógrafo Google",
+      uri: "https://maps.google.com/maps/contrib/123",
+    },
+  ],
+  altText: "Fotografia de Lava Terrace fornecida pelo Google Maps.",
+  matchEvidence: "Google Place ID revalidado por identidade e proximidade antes da mídia.",
+} as const;
+
 function renderPreview() {
   return render(
     <ExternalPlaceImagePreview
@@ -129,6 +144,43 @@ describe("ExternalPlaceImagePreview", () => {
         name: "Foto não disponível para Lugar em Florianópolis",
       }),
     ).toHaveAttribute("data-presentation", "compact");
+  });
+
+  it("renderiza Google Photo governada e attribution quando existe Google Place ID", async () => {
+    const fetcher = vi.fn<(input: string | URL | Request) => Promise<Response>>().mockResolvedValue(
+      Response.json(googlePreview, {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetcher);
+    vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
+
+    render(
+      <ExternalPlaceImagePreview
+        category="nightlife"
+        destinationId="Antigua Guatemala"
+        googlePlaceId="ChIJLavaTerrace01"
+        latitude={14.5578}
+        longitude={-90.7337}
+        placeName="Lava Terrace"
+      />,
+    );
+    enterViewport();
+
+    const image = await screen.findByRole("img", { name: googlePreview.altText });
+    expect(image).toHaveAttribute("src", googlePreview.mediaUrl);
+    expect(screen.getByText("Google Maps")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Fotógrafo Google" })).toHaveAttribute(
+      "href",
+      "https://maps.google.com/maps/contrib/123",
+    );
+    expect(screen.getByRole("link", { name: "Ver no Google Maps" })).toHaveAttribute(
+      "href",
+      googlePreview.sourceUrl,
+    );
+    expect(String(fetcher.mock.calls[0]?.[0])).toContain("googlePlaceId=ChIJLavaTerrace01");
+    expect(String(fetcher.mock.calls[0]?.[0])).toContain("category=nightlife");
   });
 
   it("renderiza foto licenciada e Provenance após match seguro", async () => {

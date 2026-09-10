@@ -1,5 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+const { getRouteBookSessionMock } = vi.hoisted(() => ({
+  getRouteBookSessionMock: vi.fn(),
+}));
+
+vi.mock("../../../lib/auth-session", () => ({
+  getRouteBookSession: getRouteBookSessionMock,
+}));
+
 import { GET } from "./route";
 
 function commonsResponse(
@@ -64,6 +72,7 @@ function requestUrl(overrides: Record<string, string | undefined> = {}): string 
 }
 
 afterEach(() => {
+  getRouteBookSessionMock.mockReset();
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
@@ -103,6 +112,197 @@ describe("GET /api/place-image-preview", () => {
 
     expect(response.status).toBe(400);
     expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("rejeita Google Place ID inválido sem consultar Provider", async () => {
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(requestUrl({ googlePlaceId: "<script>", category: "nightlife" })),
+    );
+
+    expect(response.status).toBe(400);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("prioriza Google Photo com identidade revalidada e metadata no-store", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const fetcher = vi.fn(async () =>
+      Response.json({
+        id: "ChIJLavaTerrace01",
+        displayName: { text: "Lava Terrace" },
+        location: { latitude: 14.55781, longitude: -90.73369 },
+        photos: [
+          {
+            name: "places/ChIJLavaTerrace01/photos/resource-secret",
+            authorAttributions: [{ displayName: "Fotógrafo Google" }],
+            googleMapsUri: "https://www.google.com/maps/place/?q=place_id:lava",
+          },
+        ],
+      }),
+    );
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          destinationId: "Antigua Guatemala",
+          name: "Lava Terrace",
+          latitude: "14.5578",
+          longitude: "-90.7337",
+          googlePlaceId: "ChIJLavaTerrace01",
+          category: "nightlife",
+        }),
+      ),
+    );
+    const payload = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(payload).toMatchObject({
+      provider: "google-places",
+      sourceName: "Google Maps",
+      authorAttributions: [{ displayName: "Fotógrafo Google" }],
+    });
+    expect(String(payload.mediaUrl)).toMatch(/^\/api\/place-image-preview\/google\?token=/);
+    expect(JSON.stringify(payload)).not.toContain("resource-secret");
+    expect(JSON.stringify(payload)).not.toContain("secret-google");
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(getRouteBookSessionMock).not.toHaveBeenCalled();
+  });
+
+  it("reconcilia Quality sob demanda para sessão autenticada antes da foto", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("ROUTEBOOK_PLACE_QUALITY_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    getRouteBookSessionMock.mockResolvedValue({
+      user: { id: "user-1" },
+      session: { id: "session-1" },
+    });
+
+    const fetcher = vi
+      .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ places: [] }))
+      .mockResolvedValueOnce(
+        Response.json({
+          places: [
+            {
+              id: "ChIJPuntoRojo01",
+              displayName: { text: "PUNTO ROJO" },
+              location: { latitude: 14.7406, longitude: -91.1585 },
+              formattedAddress: "Calle del Lago, Panajachel, Guatemala",
+              rating: 4.5,
+              userRatingCount: 2,
+            },
+          ],
+        }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({
+          id: "ChIJPuntoRojo01",
+          displayName: { text: "PUNTO ROJO" },
+          location: { latitude: 14.7406, longitude: -91.1585 },
+          photos: [
+            {
+              name: "places/ChIJPuntoRojo01/photos/resource-secret",
+              authorAttributions: [{ displayName: "Cliente Google" }],
+              googleMapsUri: "https://www.google.com/maps/place/?q=place_id:punto-rojo",
+            },
+          ],
+        }),
+      );
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          destinationId: "Panajachel Guatemala",
+          name: "Punto Cero Guatemala",
+          latitude: "14.7406",
+          longitude: "-91.1585",
+          category: "nightlife",
+        }),
+      ),
+    );
+    const payload = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(payload).toMatchObject({
+      provider: "google-places",
+      sourceName: "Google Maps",
+    });
+    expect(String(payload.mediaUrl)).toMatch(/^\/api\/place-image-preview\/google\?token=/);
+    expect(JSON.stringify(payload)).not.toContain("ChIJPuntoRojo01");
+    expect(JSON.stringify(payload)).not.toContain("resource-secret");
+    expect(fetcher).toHaveBeenCalledTimes(3);
+    expect(getRouteBookSessionMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("não dispara Quality Google sob demanda sem sessão autenticada", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("ROUTEBOOK_PLACE_QUALITY_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    getRouteBookSessionMock.mockResolvedValue(null);
+    const fetcher = vi.fn(async (input: string | URL | Request) => {
+      expect(String(input)).toContain("commons.wikimedia.org");
+      return Response.json({ query: { pages: [] } });
+    });
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          destinationId: "Panajachel Guatemala",
+          name: "Punto Cero Guatemala",
+          latitude: "14.7406",
+          longitude: "-91.1585",
+          category: "nightlife",
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(getRouteBookSessionMock).toHaveBeenCalledTimes(1);
+    expect(fetcher).toHaveBeenCalled();
+  });
+
+  it("cai para Wikimedia segura quando Google não possui foto", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const fetcher = vi
+      .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(
+        Response.json({
+          id: "ChIJPraiaDoAmor01",
+          displayName: { text: "Praia do Amor" },
+          location: { latitude: -6.2366, longitude: -35.0465 },
+          photos: [],
+        }),
+      )
+      .mockResolvedValueOnce(commonsResponse());
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          googlePlaceId: "ChIJPraiaDoAmor01",
+          category: "beach",
+        }),
+      ),
+    );
+    const payload = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(payload.sourceName).toBe("Wikimedia Commons");
+    expect(fetcher).toHaveBeenCalledTimes(2);
   });
 
   it("devolve preview seguro de Pipa com Provenance e cache CDN", async () => {

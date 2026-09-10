@@ -97,8 +97,8 @@ Caminho lazy quando o card não recebeu ID no bootstrap:
 
 ```text
 card entra próximo ao viewport
-  -> /api/place-image-preview com tripId + nome + categoria + coordenadas + endereço disponível
-  -> autorização da Trip para a sessão atual
+  -> /api/place-image-preview com nome + categoria + coordenadas
+  -> sessão RouteBook autenticada
   -> Quality Provider com um único target
   -> matching conservador / alias espacial restrito
   -> PlaceQualitySignals(provider=google-places, externalId)
@@ -117,8 +117,8 @@ O lookup lazy não pode promover Place, salvar Google Place ID, alterar score ou
 
 ## 7. Segurança e cache
 
-- lookup Quality lazy exige `tripId` autorizado quando não existe Google Place ID pré-reconciliado;
-- requisição sem autorização não pode disparar Google Quality;
+- lookup Quality lazy exige sessão RouteBook autenticada quando não existe Google Place ID pré-reconciliado;
+- requisição anônima não pode disparar Google Quality;
 - metadata Google: `private, no-store`;
 - mídia Google: `private, no-store`;
 - token HMAC com TTL curto;
@@ -144,9 +144,11 @@ Quando o Provider devolver attribution:
 
 - resolução inicia somente próxima ao viewport;
 - uma foto por card;
-- `previewBudget` existente continua limitando o conjunto priorizado no bootstrap inicial;
-- cards posteriores não ficam permanentemente desabilitados: podem pedir Quality + Media individual quando entram próximo ao viewport;
-- não existe fan-out eager para todos os candidatos do Discovery;
+- fora de Preview, `previewBudget` mantém o default histórico de 12;
+- em Preview, o fallback governado do budget pode chegar a 60, igual ao limite de cards externos exibidos, respeitando override explícito menor;
+- ampliar o budget não significa fan-out eager: cada componente continua protegido por `IntersectionObserver`;
+- card sem Google Place ID no batch pode pedir Quality + Media individualmente quando entra próximo ao viewport;
+- nenhum dos 200 candidatos brutos do Discovery é percorrido em background;
 - `idle/loading` continua compacto, sem restaurar hero ilustrativo genérico;
 - erro de imagem volta ao fallback sem quebrar layout;
 - Discovery, mapa, salvar e roteiro independem da foto.
@@ -154,6 +156,8 @@ Quando o Provider devolver attribution:
 ## 10. Caminhos permitidos
 
 ```text
+apps/web/lib/place-bootstrap.ts
+apps/web/lib/place-bootstrap.test.ts
 apps/web/lib/place-quality-provider.ts
 apps/web/lib/place-quality-provider.test.ts
 apps/web/lib/google-place-photo.ts
@@ -176,7 +180,7 @@ docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
 
-`apps/web/lib/trip-route-access.ts` é fronteira existente e pode ser importada para autorização do lookup lazy, sem alteração do arquivo.
+`apps/web/lib/auth-session.ts` é fronteira existente e pode ser importada para autenticação do lookup lazy, sem alteração do arquivo.
 
 A probe `api/internal/place-media-probe` é um instrumento de aceitação do RB-INC-190, não contrato de produto. Ela deve:
 
@@ -199,11 +203,12 @@ Arquivo adicional indispensável deve ser registrado aqui e no Increment antes d
 - testes do token efêmero;
 - testes da rota metadata Google-first + Wikimedia fallback;
 - teste da rota comprovando lookup Quality individual quando não há `googlePlaceId`;
-- teste da rota comprovando que ausência/falha de autorização não dispara Google Quality;
+- teste da rota comprovando que ausência de sessão não dispara Google Quality;
+- teste de policy comprovando budget 60 somente em Preview e default 12 fora dele;
 - testes da rota de bytes;
 - testes da probe live, incluindo bloqueio fora do Preview/branch e ausência de identificadores sensíveis na resposta;
-- testes do componente para `tripId`, endereço opcional, lazy viewport, Google attribution e fallback compacto;
-- E2E de mídia com card fora do conjunto inicialmente reconciliado;
+- testes do componente para lazy viewport, Google attribution e fallback compacto;
+- E2E de mídia cobrindo card além do lote histórico de 12;
 - E2E multi-destino;
 - `pnpm format:check`;
 - `pnpm docs:validate`;
@@ -244,6 +249,7 @@ Relatar:
 - `qualityMatchCount` em pelo menos um destino fora do Brasil;
 - quantidade/amostra de cards Google com match seguro no bootstrap e no caminho lazy;
 - fallbacks observados;
-- evidência de que card fora do lote inicial pode obter foto no viewport;
+- evidência de que card sem match no batch pode obter foto no viewport;
+- budget efetivo observado em Preview;
 - risco de compliance ainda aberto para Production;
 - decisão humana exigida para aceite visual e merge.

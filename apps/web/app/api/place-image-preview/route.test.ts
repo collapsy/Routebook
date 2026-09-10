@@ -179,7 +179,10 @@ describe("GET /api/place-image-preview", () => {
     vi.stubEnv("ROUTEBOOK_PLACE_QUALITY_PROVIDER", "google");
     vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
     vi.stubEnv("VERCEL_ENV", "preview");
-    getRouteBookSessionMock.mockResolvedValue({ user: { id: "user-1" }, session: { id: "session-1" } });
+    getRouteBookSessionMock.mockResolvedValue({
+      user: { id: "user-1" },
+      session: { id: "session-1" },
+    });
 
     const fetcher = vi
       .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()

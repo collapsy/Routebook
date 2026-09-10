@@ -42,6 +42,7 @@ const DEFAULT_POLICY: PlaceBootstrapPolicy = Object.freeze({
   quality: Object.freeze({ enabled: true, maxAttempts: 2, targetLimit: 60 }),
   media: Object.freeze({ enabled: true, maxAttempts: 2, previewBudget: 12 }),
 });
+const PREVIEW_MEDIA_BUDGET = 60;
 
 function parseEnabled(value: string | undefined, fallback: boolean): boolean {
   if (value === undefined || !value.trim()) return fallback;
@@ -66,6 +67,14 @@ function boundedInteger(
 export function resolvePlaceBootstrapPolicy(
   environment: Readonly<Record<string, string | undefined>> = process.env,
 ): PlaceBootstrapPolicy {
+  const isPreview = environment.VERCEL_ENV?.trim().toLowerCase() === "preview";
+  const mediaPreviewBudgetFallback = isPreview
+    ? PREVIEW_MEDIA_BUDGET
+    : DEFAULT_POLICY.media.previewBudget;
+  const mediaPreviewBudgetMaximum = isPreview
+    ? PREVIEW_MEDIA_BUDGET
+    : DEFAULT_POLICY.media.previewBudget;
+
   return {
     discovery: {
       enabled: parseEnabled(
@@ -111,9 +120,9 @@ export function resolvePlaceBootstrapPolicy(
       ),
       previewBudget: boundedInteger(
         environment.ROUTEBOOK_PLACE_MEDIA_PREVIEW_BUDGET,
-        DEFAULT_POLICY.media.previewBudget,
+        mediaPreviewBudgetFallback,
         0,
-        DEFAULT_POLICY.media.previewBudget,
+        mediaPreviewBudgetMaximum,
       ),
     },
   };

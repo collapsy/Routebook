@@ -96,6 +96,8 @@ modules/proposal-management/src/deterministic-itinerary-proposal-generator.ts
 modules/proposal-management/src/deterministic-itinerary-proposal-generator.test.ts
 modules/proposal-management/src/itinerary-proposal-generation-input-assembler.ts
 modules/proposal-management/src/itinerary-proposal-generation-input-assembler.test.ts
+modules/proposal-management/src/authoritative-itinerary-proposal-generation.ts
+modules/proposal-management/src/authoritative-itinerary-proposal-generation.test.ts
 packages/database/src/authoritative-itinerary-proposal-generation-context.ts
 packages/database/src/authoritative-itinerary-proposal-generation-context-postgres.test.ts
 apps/web/lib/itinerary-proposal-discovery-candidates.ts

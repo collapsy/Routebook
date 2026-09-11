@@ -370,14 +370,15 @@ describe("GET /api/place-image-preview", () => {
     vi.stubEnv("ROUTEBOOK_PLACE_QUALITY_PROVIDER", "google");
     vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
     vi.stubEnv("VERCEL_ENV", "preview");
+    const ambiguousCommons = () =>
+      commonsResponse("Praia do Amor no litoral brasileiro", "File:Praia do Amor.jpg", null);
     const fetcher = vi
       .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
       .mockResolvedValueOnce(Response.json({ places: [] }))
       .mockResolvedValueOnce(Response.json({ places: [] }))
       .mockResolvedValueOnce(Response.json({ places: [] }))
-      .mockResolvedValueOnce(
-        commonsResponse("Praia do Amor no litoral brasileiro", "File:Praia do Amor.jpg", null),
-      );
+      .mockResolvedValueOnce(ambiguousCommons())
+      .mockResolvedValueOnce(ambiguousCommons());
     vi.stubGlobal("fetch", fetcher);
 
     const response = await GET(
@@ -391,7 +392,7 @@ describe("GET /api/place-image-preview", () => {
 
     expect(response.status).toBe(404);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(fetcher).toHaveBeenCalledTimes(4);
+    expect(fetcher).toHaveBeenCalledTimes(5);
   });
 
   it("cai para Wikimedia segura quando Google não possui foto", async () => {

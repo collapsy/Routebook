@@ -70,6 +70,8 @@ O primeiro padrão é compatível com Places que possuem identidade Google recup
 
 A inspeção de `apps/web/app/viagens/[tripId]/lugares/page.tsx` mostrou ainda que `externalMediaItemIds` aplicava `.slice(0, bootstrapPolicy.media.previewBudget)`. Como o default é 12, o card de posição 13 em diante recebia `enabled=false` e renderizava `Sem foto` sem consulta alguma. Esse corte é incompatível com a estratégia lazy já presente no componente: o `IntersectionObserver` é quem deve impedir requests de cards que o usuário ainda não alcançou.
 
+Com esse corte removido, o aceite mobile seguinte confirmou melhora material: vários cards posteriores aos 12 iniciais passaram a mostrar Google Photo. Os `Sem foto` restantes já correspondem a requests reais. Em alguns, a reconciliação lazy termina `matched: false`; em outros, existe identidade Google mas o adapter de foto não libera mídia. A recuperação identity-only também tinha uma limitação de cobertura: solicitava até cinco resultados da Text Search, porém descartava toda a resposta quando o primeiro resultado era incompatível, mesmo que um candidato posterior passasse o mesmo matching conservador.
+
 ## 5. Contratos preservados
 
 - Overture continua Discovery;
@@ -103,12 +105,12 @@ Cobertura complementar autorizada quando `findSignals` retorna sem Google Place 
 
 1. ainda dentro do mesmo request lazy e somente com Google Quality + Google Photo configurados, pode ocorrer **uma busca nominal de identidade** adicional;
 2. a consulta usa `nome + Destination` quando disponível, `locationBias` nas coordenadas do card, raio de 2,5 km, até cinco resultados e FieldMask somente de identidade (`id`, `displayName`, `location`, `formattedAddress`);
-3. somente o primeiro resultado do Google pode ser considerado;
-4. esse resultado deve passar por `isConservativeQualityIdentityMatch(..., { allowSpatialAlias: true })` usando nome, coordenadas e contexto de Destination;
+3. os resultados são avaliados na ordem retornada pelo Google e somente o primeiro candidato que passe `isConservativeQualityIdentityMatch(..., { allowSpatialAlias: true })` pode ser considerado;
+4. candidatos anteriores que falham nesse mesmo gate são ignorados, sem alteração dos thresholds de matching;
 5. rating e popularity não são necessários nesse fallback porque ele não produz score, ranking ou Provenance de qualidade; ele recupera apenas o Google Place ID efêmero para mídia;
 6. o adapter Google Photo continua fazendo a segunda revalidação por Place Details antes de liberar a fotografia.
 
-Isso não autoriza lookup de foto por texto puro: texto e rank de busca apenas recuperam um candidato; nome, proximidade e coerência contextual continuam gates obrigatórios. O ID não é persistido e não retroalimenta ranking.
+Isso não autoriza lookup de foto por texto puro: texto e rank de busca apenas recuperam candidatos; nome, proximidade e coerência contextual continuam gates obrigatórios. O ID não é persistido e não retroalimenta ranking.
 
 ## 7. Fluxo autorizado
 
@@ -121,8 +123,9 @@ qualquer card elegível aproxima-se do viewport
        não -> Google Quality just-in-time (1 target + Destination opcional)
                -> match google-places? -> Google Photo adapter
                -> sem signal -> busca nominal identity-only governada
-                    -> primeiro candidato passa matching conservador? -> Google Photo adapter
-                    -> miss -> Wikimedia
+                    -> avalia até cinco resultados na ordem
+                    -> primeiro candidato seguro passa matching conservador? -> Google Photo adapter
+                    -> nenhum candidato seguro -> Wikimedia
   -> Google Photo miss/failure -> Wikimedia
   -> Wikimedia miss -> Sem foto
 ```
@@ -134,7 +137,7 @@ Cards que ainda não entraram na margem do viewport não executam esse fluxo. Ca
 - falha de Quality lazy não quebra o card;
 - Quality miss pode tentar uma única recuperação identity-only antes de Wikimedia;
 - a recuperação identity-only ocorre somente no request lazy do card e somente depois de `findSignals` não fornecer Google Place ID;
-- uma tentativa identity-only faz no máximo uma Text Search adicional e nunca pagina;
+- uma tentativa identity-only faz no máximo uma Text Search adicional e nunca pagina; no máximo cinco candidatos da mesma resposta são avaliados;
 - o bootstrap inicial de Quality continua limitado e não ganha batch adicional;
 - `ROUTEBOOK_PLACE_MEDIA_PREVIEW_BUDGET` não é usado na Discovery como corte permanente de elegibilidade; o controle efetivo dessa superfície é o viewport lazy;
 - não existe prefetch global de toda a lista: rolar a página é o que torna novos cards elegíveis a executar mídia;
@@ -144,7 +147,7 @@ Cards que ainda não entraram na margem do viewport não executam esse fluxo. Ca
 - resposta Wikimedia obtida após tentativa Google lazy também usa cache privado `no-store`;
 - miss final após tentativa Google lazy usa `no-store` e não pode congelar um `Sem foto` por horas;
 - caminho Wikimedia puro preserva o cache público atual;
-- logs podem registrar status/attempts/duration, contagem de cards lazy elegíveis e `matched`, mas nunca key, token completo, coordenada precisa adicional ou photo resource name.
+- logs podem registrar status/attempts/duration, contagem de cards lazy elegíveis, quantidade de candidatos identity-only, posição do candidato seguro e `matched`, mas nunca key, token completo, nome do usuário, coordenada precisa adicional ou photo resource name.
 
 ## 9. Caminhos permitidos
 
@@ -168,7 +171,8 @@ Não alterar `place-discovery-ranking.ts` para elevar o limite. Alterar `place-q
 
 - route: sem Google ID + category válida + busca ampla miss + targeted fallback destination-aware seguro -> Google Photo;
 - route: Place Google seguro sem rating/popularity ainda pode recuperar identidade para mídia sem criar score;
-- route: primeiro candidato identity-only incompatível não libera foto;
+- route: primeiro candidato identity-only incompatível é ignorado e candidato posterior seguro da mesma resposta pode liberar Google Photo;
+- route: nenhum candidato identity-only seguro não libera foto;
 - route: targeted fallback recebe `nome + Destination` sem afrouxar matching;
 - route: Quality Google miss -> Wikimedia com cache privado quando o caminho lazy estava elegível;
 - route: miss final após Quality lazy -> `no-store`;
@@ -191,7 +195,7 @@ Não alterar `place-discovery-ranking.ts` para elevar o limite. Alterar `place-q
 - não persistir Google ID/foto;
 - não alterar ranking;
 - não tratar texto sozinho como identidade suficiente para foto;
-- não aceitar candidato identity-only que não seja o primeiro resultado seguro;
+- não aceitar candidato identity-only que não passe o matching conservador;
 - não hardcodar alias `Punto Cero`/`PUNTO ROJO` ou qualquer estabelecimento específico;
 - não relaxar thresholds apenas para obter fotografia;
 - não criar Provider novo;
@@ -200,4 +204,4 @@ Não alterar `place-discovery-ranking.ts` para elevar o limite. Alterar `place-q
 
 ## 12. Handoff
 
-Relatar branch/SHA, arquivos, testes, CI, Preview same-SHA, proporção de metadata Google `200`/miss na amostra lazy, confirmação de request em card além da posição 12, fallback observado e gate visual restante.
+Relatar branch/SHA, arquivos, testes, CI, Preview same-SHA, proporção de metadata Google `200`/miss na amostra lazy, confirmação de request em card além da posição 12, distribuição de `candidateCount/matchedRank` identity-only, fallback observado e gate visual restante.

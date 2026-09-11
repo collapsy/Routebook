@@ -35,8 +35,6 @@ describe("mergeItineraryProposalGenerationCandidates", () => {
   it("mantém o comportamento legado quando não há candidatos adicionais", () => {
     const recommendation = candidate("recommendation-1", "place-1", "Lugar recomendado");
 
-    expect(mergeItineraryProposalGenerationCandidates([recommendation])).toEqual([
-      recommendation,
-    ]);
+    expect(mergeItineraryProposalGenerationCandidates([recommendation])).toEqual([recommendation]);
   });
 });

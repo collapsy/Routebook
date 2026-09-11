@@ -4,7 +4,10 @@ import { PlacePromotionServiceError } from "@routebook/database";
 import type { ExternalPlaceCandidate, Place } from "@routebook/place-catalog";
 import { addActivity, createItinerary, createTrip } from "@routebook/trip-management";
 
-import { loadItineraryProposalDiscoveryCandidates } from "./itinerary-proposal-discovery-candidates";
+import {
+  loadItineraryProposalDiscoveryCandidates,
+  type ItineraryProposalDiscoveryCandidateDependencies,
+} from "./itinerary-proposal-discovery-candidates";
 import type { RecommendationDiscoverySuggestions } from "./recommendation-discovery-suggestions";
 
 const now = new Date("2026-09-11T15:00:00.000Z");
@@ -68,14 +71,18 @@ function discovery(
   };
 }
 
+type PromoteCandidate = NonNullable<
+  ItineraryProposalDiscoveryCandidateDependencies["promoteCandidate"]
+>;
+
 function dependencies(input: {
   candidates: readonly ExternalPlaceCandidate[];
   places: readonly Place[];
-  promote?: ReturnType<typeof vi.fn>;
+  promote?: PromoteCandidate;
 }) {
-  const promote =
+  const promote: PromoteCandidate =
     input.promote ??
-    vi.fn(async ({ candidate }: { candidate: ExternalPlaceCandidate }) => ({
+    vi.fn(async ({ candidate }) => ({
       status: "created" as const,
       placeId: `internal-${candidate.externalId}`,
       slug: `place-${candidate.externalId}`,
@@ -146,7 +153,7 @@ describe("loadItineraryProposalDiscoveryCandidates", () => {
 
   it("retém candidato rejeitado ou ambíguo sem transformar a falha em atividade", async () => {
     const ambiguous = externalCandidate("ambiguous", "Lugar ambíguo");
-    const promote = vi.fn(async () => {
+    const promote: PromoteCandidate = vi.fn(async () => {
       throw new PlacePromotionServiceError(
         "possível duplicata",
         "possible-match",
@@ -164,7 +171,7 @@ describe("loadItineraryProposalDiscoveryCandidates", () => {
 
   it("propaga falha técnica inesperada em vez de produzir Proposal vazia silenciosamente", async () => {
     const cafe = externalCandidate("cafe", "Café seguro");
-    const promote = vi.fn(async () => {
+    const promote: PromoteCandidate = vi.fn(async () => {
       throw new Error("database unavailable");
     });
     const deps = dependencies({ candidates: [cafe], places: [], promote });

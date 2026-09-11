@@ -135,6 +135,47 @@ test("hospedagem é localizada ao salvar e habilita contexto espacial", async ({
   ).toBeVisible();
 });
 
+test("hospedagem somente por nome na criação alimenta mapa e lugares próximos", async ({
+  page,
+}, testInfo) => {
+  const suffix = `rb-inc-189-${testInfo.project.name}-${Date.now()}`;
+  const email = `${suffix}@example.com`;
+  const password = "routebook-e2e-password";
+  const tripName = `Floripa hotel por nome ${suffix}`;
+
+  await page.goto("/criar-conta?next=%2Fviagens");
+  await page.getByLabel("Nome").fill("Owner RB-INC-189");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Senha").fill(password);
+  await page.getByRole("button", { name: "Criar conta" }).click();
+  await expect(page).toHaveURL(/\/viagens$/);
+
+  await page.goto("/viagens/nova");
+  await page.getByLabel("Nome da viagem").fill(tripName);
+  await page.getByLabel("Para onde você vai?").fill("Florianópolis, SC");
+  await page.getByLabel("Quando começa?").fill("2026-12-05");
+  await page.getByLabel("Quando termina?").fill("2026-12-08");
+  await page.getByLabel("Onde vai ficar?").fill("Hotel RouteBook Nome");
+  await expect(page.getByLabel("Endereço da hospedagem")).toHaveValue("");
+  await page.getByRole("button", { name: "Criar meu guia" }).click();
+  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+
+  const tripLink = page.getByRole("link", { name: tripName });
+  const tripHref = await tripLink.getAttribute("href");
+  expect(tripHref).toMatch(/^\/viagens\/[0-9a-f-]+$/);
+
+  await page.goto(tripHref!);
+  await expect(page.getByText("Mapa ainda indisponível")).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: /Mapa do entorno de Florianópolis/ }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Resumo do mapa")).toContainText("4 pontos representados");
+  await expect(page.getByLabel("Legenda do mapa")).toContainText("Lugar");
+  await expect(
+    page.getByLabel("Locais exibidos no mapa").getByText("Café próximo", { exact: true }),
+  ).toBeVisible();
+});
+
 test("cria Trip para São Paulo selecionando sugestão de Destination", async ({
   page,
 }, testInfo) => {

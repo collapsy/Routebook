@@ -445,6 +445,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-188 | Fotos reais dos lugares, fallback compacto e qualidade do catálogo | Implementation | Draft | 0.1.0 | [rb-inc-188-real-place-media-quality.md](./implementation/increments/rb-inc-188-real-place-media-quality.md) |
 | RB-CTX-188 | Context Pack do RB-INC-188 — Fotos reais e qualidade do catálogo | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-188-real-place-media-quality.md](./implementation/context-packs/rb-inc-188-real-place-media-quality.md) |
 
+| RB-INC-189 | Geocodificação robusta de Hospedagem por nome na stack atual | Implementation | Draft | 0.1.0 | [rb-inc-189-accommodation-name-geocoding.md](./implementation/increments/rb-inc-189-accommodation-name-geocoding.md) |
+| RB-CTX-189 | Context Pack do RB-INC-189 — geocodificação robusta de Hospedagem na stack atual | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-189-accommodation-name-geocoding.md](./implementation/context-packs/rb-inc-189-accommodation-name-geocoding.md) |
+
 | RB-INC-190 | Google Places Photos destination-agnostic na stack atual | Implementation | Draft | 0.1.0 | [rb-inc-190-google-place-photos-current-stack.md](./implementation/increments/rb-inc-190-google-place-photos-current-stack.md) |
 | RB-CTX-190 | Context Pack do RB-INC-190 — Google Places Photos destination-agnostic | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-190-google-place-photos-current-stack.md](./implementation/context-packs/rb-inc-190-google-place-photos-current-stack.md) |
 

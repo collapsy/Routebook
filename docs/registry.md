@@ -453,6 +453,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-192 | Cobertura lazy de Google Photos para Places externos | Implementation | Draft | 0.1.0 | [rb-inc-192-lazy-google-photo-coverage.md](./implementation/increments/rb-inc-192-lazy-google-photo-coverage.md) |
 | RB-CTX-192 | Context Pack do RB-INC-192 — Cobertura lazy de Google Photos | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-192-lazy-google-photo-coverage.md](./implementation/context-packs/rb-inc-192-lazy-google-photo-coverage.md) |
+| RB-INC-193 | Pontos turísticos e mirantes como categorias de Place | Implementation | Draft | 0.1.0 | [rb-inc-193-place-category-expansion.md](./implementation/increments/rb-inc-193-place-category-expansion.md) |
+| RB-CTX-193 | Context Pack do RB-INC-193 — Expansão de categorias de Place | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-193-place-category-expansion.md](./implementation/context-packs/rb-inc-193-place-category-expansion.md) |
 
 ## Status possíveis
 

@@ -106,15 +106,7 @@ describe("listAvailablePlaceCategories", () => {
         "attraction",
         "nature",
       ]),
-    ).toEqual([
-      "gastronomy",
-      "nature",
-      "nightlife",
-      "attraction",
-      "viewpoint",
-      "tour",
-      "shopping",
-    ]);
+    ).toEqual(["gastronomy", "nature", "nightlife", "attraction", "viewpoint", "tour", "shopping"]);
   });
 
   it("não oferece praia quando a cobertura da viagem não possui beach", () => {

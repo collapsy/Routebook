@@ -26,6 +26,8 @@ Ao solicitar explicitamente uma nova Proposta de Roteiro em uma Trip RouteBook A
 
 A geração deve continuar sem alterar o Roteiro antes do aceite. Uma Proposal `ready` sem mudanças continua válida pelo domínio quando nenhuma alteração adequada existir, mas a interface não pode apresentá-la como uma proposta acionável “aguardando sua decisão”.
 
+A seleção de candidatos da Proposal também não pode ser artificialmente limitada pelo recorte visual de Sugestões: quando a viagem possui capacidade para várias Activities por Dia, o pipeline deve fornecer candidatos suficientes para o gerador exercer sua política de densidade.
+
 ## 2. Issue, branch e execução paralela
 
 - Issue: `#455`.
@@ -37,15 +39,17 @@ A geração deve continuar sem alterar o Roteiro antes do aceite. Uma Proposal `
 
 ## 3. Evidência do problema
 
-A falha foi reproduzida no Preview em Panajachel, Guatemala, em 11/09/2026:
+A falha inicial foi reproduzida no Preview em Panajachel, Guatemala, em 11/09/2026:
 
-- Discovery Anywhere exibe diversos Lugares reais;
+- Discovery Anywhere exibia diversos Lugares reais;
 - a Trip não possuía Recommendations persistidas capazes de alimentar o contexto autoritativo de Proposal;
 - a geração recebeu zero candidatos;
 - uma Proposal foi persistida como `ready` com zero `ProposedActivity`;
 - a revisão exibiu “Proposta aguardando sua decisão” e `0` mudanças propostas.
 
-O problema é uma lacuna de composição: Discovery e Proposal usam contratos válidos isoladamente, mas a ação explícita de gerar uma Proposal não reutiliza a coleção segura já disponível na experiência provider-first.
+Após conectar Discovery ao pipeline, o aceite funcional revelou uma segunda limitação: a seleção reutilizada mantinha o limite visual fixo de seis candidatos. Como o generator balanceia candidatos entre os Dias e aceita até três Activities por Dia, uma viagem mais longa recebia aproximadamente uma sugestão por Dia mesmo quando a Discovery possuía muito mais opções seguras.
+
+A correção preserva o mesmo ranking contextual e torna apenas o tamanho da seleção da Proposal sensível à capacidade do Itinerary.
 
 ## 4. Decisões preservadas
 
@@ -58,6 +62,7 @@ Este incremento não altera o domínio canônico.
 - Materialização operacional de um Lugar seguro continua distinta de publicação editorial, conforme RB-INC-178.
 - Gerar Proposal não cria Saved Place, Activity, Decision ou Recommendation.
 - Aplicação integral ou parcial continua exigindo decisão explícita do usuário.
+- Descartar uma Proposal é uma rejeição explícita do usuário; não é remoção física do histórico.
 
 ## 5. Fronteira escolhida
 
@@ -85,6 +90,8 @@ A aplicação deve reutilizar a cadeia já aprovada pelo RB-INC-184:
 
 Somente itens `external` seguros que sobreviveram à reconciliação podem participar desta ponte. `possible_match` ambíguo e `rejected` permanecem retidos.
 
+O limite visual padrão de `Lugares para considerar` continua sendo 6. Na mutação explícita de gerar Proposal, porém, a mesma seleção contextual pode receber um limite maior calculado a partir da capacidade do Itinerary. Isso amplia volume sem criar outro ranking.
+
 ## 7. Identidade persistível para a Proposed Activity
 
 Como uma Proposed Activity pode ser aceita posteriormente e virar Activity, o candidato escolhido precisa de identidade interna reproduzível.
@@ -100,7 +107,7 @@ Na ação explícita de gerar Proposal:
 
 A leitura normal de Lugares ou Sugestões continua sem materializar nada. A mutação só ocorre após a ação explícita `Gerar proposta de roteiro`.
 
-## 8. Composição dos candidatos
+## 8. Composição e orçamento de candidatos
 
 Ordem do input do gerador:
 
@@ -118,6 +125,8 @@ Regras:
 - não inventar preço, duração, horário, rating, disponibilidade ou rota;
 - a justificativa pode registrar apenas que o Lugar foi selecionado entre opções seguras da área da Viagem.
 
+Para evitar Proposal subdimensionada, o limite solicitado à Discovery pela geração é a soma da capacidade disponível dos Dias segundo a mesma meta já usada pelo generator: até 3 Activities por Dia. Activities existentes e Free Periods `protected` consomem capacidade; Dia vazio protegido sem espaço flexível permanece intencionalmente vazio. O cálculo apenas dimensiona o conjunto de entrada. A decisão final de onde e quantos candidatos propor continua exclusiva do generator existente.
+
 ## 9. Proposal vazia
 
 Uma Proposal `ready` com zero mudanças não é erro de domínio. Entretanto ela não representa uma decisão aplicável.
@@ -126,10 +135,11 @@ A experiência deve:
 
 - rotular o estado como `Sem mudanças sugeridas` ou equivalente;
 - explicar que nenhuma mudança adequada foi encontrada;
-- não exibir aceite integral, parcial, edição ou descarte como ação decisória da Proposal vazia;
+- não exibir aceite integral, parcial ou edição para a Proposal vazia;
 - manter critérios, justificativas e limitações visíveis;
+- permitir a usuário autorizado descartar/rejeitar a Proposal para gerar outra posteriormente;
 - permitir ao usuário voltar ao Roteiro ou explorar Lugares;
-- preservar a Proposal para auditoria/histórico.
+- preservar a Proposal rejeitada para auditoria/histórico.
 
 ## 10. Escopo e caminhos autorizados
 
@@ -159,7 +169,7 @@ Arquivos adicionais indispensáveis devem ser adicionados ao Increment e ao Cont
 
 - alterar `RecommendationTarget` ou permitir Recommendation persistida para Place não publicado;
 - criar novo lifecycle/estado de Proposal;
-- alterar algoritmo de densidade diária;
+- alterar o algoritmo de distribuição/densidade diária do generator;
 - preencher horários automaticamente;
 - persistir Saved Place por gerar Proposal;
 - aplicar Proposal automaticamente;
@@ -172,6 +182,8 @@ Arquivos adicionais indispensáveis devem ser adicionados ao Increment e ao Cont
 
 - [ ] Trip zero-seed com Discovery segura gera Proposal com ao menos um Lugar elegível sem exigir Recommendation persistida prévia.
 - [ ] A ponte reutiliza a Discovery/reconciliação existente; não existe segundo algoritmo de descoberta ou identidade.
+- [ ] A apresentação contextual continua limitada por padrão a 6 itens, enquanto a geração de Proposal pode solicitar a mesma seleção até a capacidade disponível do Itinerary.
+- [ ] Uma viagem longa não fica artificialmente limitada a seis candidatos quando há mais Lugares seguros e capacidade diária disponível.
 - [ ] Candidato selecionado é revalidado server-side e materializado como Place operacional `draft` antes de virar referência de Proposed Activity.
 - [ ] Nenhuma Recommendation artificial é criada para Place `draft`.
 - [ ] Gerar Proposal não cria Saved Place, Activity ou Decision.
@@ -179,7 +191,7 @@ Arquivos adicionais indispensáveis devem ser adicionados ao Increment e ao Cont
 - [ ] Place já presente no Roteiro não é proposto novamente.
 - [ ] `possible_match` ambíguo e candidato rejeitado não entram na Proposal.
 - [ ] Densidade diária e Free Periods continuam governados pelo generator existente.
-- [ ] Proposal `ready` com zero mudanças continua auditável, mas não aparece como “aguardando sua decisão” nem oferece ações de aceite/edição/descarte.
+- [ ] Proposal `ready` com zero mudanças continua auditável e não oferece aceite/edição, mas pode ser explicitamente descartada para permitir nova geração.
 - [ ] Pipa/cenários canônicos com Recommendations persistidas continuam funcionando.
 - [ ] Nenhum arquivo da stack de mídia é alterado neste incremento.
 - [ ] Documentation e Engineering Validation passam no mesmo SHA final.
@@ -191,15 +203,17 @@ Arquivos adicionais indispensáveis devem ser adicionados ao Increment e ao Cont
 ### Unitários
 
 - seleção contextual expõe exatamente os candidatos usados pela apresentação;
+- limite visual padrão permanece 6;
+- seleção usada pela Proposal pode crescer até a capacidade calculada da viagem sem mudar o ranking;
 - materialização produz candidatos adicionais com `placeId` interno;
-- candidato já planejado é omitido;
+- candidato já planejado é omitido e reduz a capacidade disponível;
 - falha conhecida de reconciliação/materialização é fail-closed;
 - Recommendation e Discovery do mesmo `placeId` não duplicam input;
 - comando sem candidatos adicionais mantém comportamento legado.
 
 ### Interface
 
-- Proposal vazia é apresentada como não acionável;
+- Proposal vazia é apresentada como não aplicável, sem aceite/edição, mas permite descarte explícito quando autorizado;
 - Proposal com mudanças mantém ações de decisão existentes;
 - Proposal expirada permanece histórica e não aplicável.
 
@@ -208,7 +222,7 @@ Arquivos adicionais indispensáveis devem ser adicionados ao Increment e ao Cont
 - Trip zero-seed + Discovery E2E → gerar Proposal → Proposed Activity visível e persistida;
 - Itinerary permanece idêntico antes do aceite;
 - nenhuma Recommendation precisa ser inserida para o cenário zero-seed;
-- regressão de Recommendation persistida e deduplicação de Place planejado continuam verdes.
+- regressão de Recommendation persistida, densidade diária e deduplicação de Place planejado continuam verdes.
 
 ## 14. Validação
 

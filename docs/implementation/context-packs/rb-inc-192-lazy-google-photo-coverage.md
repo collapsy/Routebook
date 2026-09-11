@@ -7,7 +7,7 @@ owner: Place Catalog and Traveler Experience
 status: Draft
 version: "0.1.0"
 created: "2026-09-09"
-last_updated: "2026-09-09"
+last_updated: "2026-09-11"
 authors: [RouteBook Team]
 tags: [implementation, context-pack, places, google-places, photos, quality, lazy, preview]
 related_documents: [RB-INC-192, RB-CORE-0004, RB-ARC-003, RB-ADR-012, RB-INC-168, RB-INC-172, RB-INC-177, RB-INC-188, RB-INC-189, RB-INC-190]
@@ -60,7 +60,9 @@ mediaPreviewBudget: 12
 mediaPreviewEligibleCount: 12
 ```
 
-No mesmo deployment existem respostas Google metadata/media `200`, portanto Provider, chave, token e proxy de bytes estão operacionais. O problema é que cards fora dos 12 targets de Quality não possuem Google Place ID governado.
+No mesmo deployment existem respostas Google metadata/media `200`, portanto Provider, chave, token e proxy de bytes estão operacionais. O problema inicial era que cards fora dos 12 targets de Quality não possuíam Google Place ID governado.
+
+A validação do primeiro Preview RB-INC-192 em 2026-09-11 confirmou um segundo detalhe: a Quality lazy era executada, porém targets sem match na busca ampla entravam no targeted fallback sem o contexto textual do Destination. O fluxo deve reutilizar o Destination já validado como `addressLabel` do target para tornar a busca nominal mais específica, sem alterar a política conservadora de identidade.
 
 ## 5. Contratos preservados
 
@@ -73,7 +75,8 @@ No mesmo deployment existem respostas Google metadata/media `200`, portanto Prov
 - `Place.primaryImage` curada continua prioridade;
 - Wikimedia continua fallback destination-agnostic;
 - `Sem foto` compacto continua fallback final;
-- foto não altera ranking nem persistência.
+- foto não altera ranking nem persistência;
+- nenhum threshold de matching é relaxado para aumentar cobertura visual.
 
 ## 6. Extensão explícita ao RB-INC-190
 
@@ -83,10 +86,11 @@ O RB-INC-190 exigia Google Place ID previamente reconciliado antes do pedido de 
 - `category`, nome e coordenadas sejam válidos;
 - o Quality Provider configurado seja Google;
 - `findSignals` seja chamado para um único target;
+- quando houver Destination textual validado, ele seja repassado como `addressLabel` do target para o targeted fallback nominal existente;
 - o resultado seja `provider=google-places`;
 - o adapter Google Photo faça a revalidação já existente antes de retornar metadata.
 
-Isso não autoriza lookup direto de Google Photo por nome. A busca textual continua exclusivamente dentro do Quality Provider e sujeita à identidade conservadora.
+Isso não autoriza lookup direto de Google Photo por nome. A busca textual continua exclusivamente dentro do Quality Provider e sujeita à identidade conservadora. `addressLabel` melhora a consulta; não transforma texto em prova de identidade.
 
 ## 7. Fluxo autorizado
 
@@ -95,7 +99,7 @@ card entra na margem do viewport
   -> ExternalPlaceImagePreview solicita /api/place-image-preview
   -> existe googlePlaceId inicial?
        sim -> Google Photo adapter
-       não -> Google Quality just-in-time (1 target)
+       não -> Google Quality just-in-time (1 target + Destination como contexto opcional)
                -> match google-places? -> Google Photo adapter
                -> miss/failure -> Wikimedia
   -> Google Photo miss/failure -> Wikimedia
@@ -108,8 +112,10 @@ card entra na margem do viewport
 - Quality miss segue para Wikimedia;
 - falha transitória Google deve degradar conforme política existente;
 - resposta Google Photo continua `private, no-store`;
-- Wikimedia preserva cache atual;
-- logs podem registrar status/attempts/duration e `lazyQualityMatched`, mas nunca key, token completo ou photo resource name.
+- resposta Wikimedia obtida após tentativa Google lazy também usa cache privado `no-store`, porque a ausência/presença do match Google é dinâmica;
+- miss final após tentativa Google lazy usa `no-store` e não pode congelar um `Sem foto` em cache público por horas;
+- caminho Wikimedia puro, sem elegibilidade Google lazy, preserva o cache público atual;
+- logs podem registrar status/attempts/duration e `matched`, mas nunca key, token completo, coordenada precisa adicional ou photo resource name.
 
 ## 9. Caminhos permitidos
 
@@ -130,15 +136,17 @@ Não alterar `place-discovery-ranking.ts` para elevar o limite. Não alterar `pl
 
 ## 10. Testes obrigatórios
 
-- route: sem Google ID + category válida + Quality Google seguro -> Google Photo;
-- route: Quality Google miss -> Wikimedia;
+- route: sem Google ID + category válida + busca ampla miss + targeted fallback destination-aware seguro -> Google Photo;
+- route: targeted fallback recebe `nome + Destination` sem afrouxar matching;
+- route: Quality Google miss -> Wikimedia com cache privado quando o caminho lazy estava elegível;
+- route: miss final após Quality lazy -> `no-store`;
 - route: Quality Provider não configurado/Foursquare -> Wikimedia;
 - route: Quality failure -> fallback sem vazar segredo;
 - route: Google ID inicial continua tomando o caminho RB-INC-190 sem Quality lazy;
 - componente: não faz request antes de entrar no viewport;
 - componente: Google attribution/fallback permanecem;
 - E2E: card externo fora do bootstrap consegue foto quando há identidade segura;
-- `Punto Cero Guatemala` live no Preview;
+- `Punto Cero Guatemala` live no Preview, aceitando `Sem foto` somente se a identidade real continuar ambígua após a busca destination-aware;
 - segundo Destination não-Pipa;
 - Documentation e Engineering completos;
 - Preview same-SHA.
@@ -150,6 +158,8 @@ Não alterar `place-discovery-ranking.ts` para elevar o limite. Não alterar `pl
 - não persistir Google ID/foto;
 - não alterar ranking;
 - não usar texto como identidade suficiente para foto;
+- não hardcodar alias `Punto Cero`/`PUNTO ROJO` ou qualquer estabelecimento específico;
+- não relaxar thresholds apenas para obter fotografia;
 - não criar Provider novo;
 - não ativar Production;
 - não misturar RB-INC-191 de Roteiro nesta branch.

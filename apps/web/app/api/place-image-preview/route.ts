@@ -40,15 +40,17 @@ function parseGooglePlaceId(value: string | null): string | undefined {
   return GOOGLE_PLACE_ID_PATTERN.test(normalized) ? normalized : undefined;
 }
 
-async function resolveLazyGooglePlaceId(input: Readonly<{
-  category: PlaceCategory;
-  name: string;
-  latitude: number;
-  longitude: number;
-  addressLabel?: string;
-  enabled: boolean;
-  maxAttempts: number;
-}>): Promise<Readonly<{ placeId?: string; failed: boolean }>> {
+async function resolveLazyGooglePlaceId(
+  input: Readonly<{
+    category: PlaceCategory;
+    name: string;
+    latitude: number;
+    longitude: number;
+    addressLabel?: string;
+    enabled: boolean;
+    maxAttempts: number;
+  }>,
+): Promise<Readonly<{ placeId?: string; failed: boolean }>> {
   const quality = resolveConfiguredPlaceQualityProvider();
   if (quality.status !== "configured" || quality.provider !== "google") {
     return { failed: false };
@@ -129,7 +131,8 @@ export async function GET(request: Request) {
   }
 
   const google = resolveConfiguredGooglePlacePhotoProvider();
-  const onDemandGoogleEligible = !googlePlaceId && Boolean(category) && google.status === "configured";
+  const onDemandGoogleEligible =
+    !googlePlaceId && Boolean(category) && google.status === "configured";
   let effectiveGooglePlaceId = googlePlaceId;
   let googleFailed = false;
 

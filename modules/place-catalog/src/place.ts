@@ -1,6 +1,13 @@
 import { randomUUID } from "node:crypto";
 
-export const PLACE_CATEGORIES = ["beach", "gastronomy", "nature", "nightlife"] as const;
+export const PLACE_CATEGORIES = [
+  "beach",
+  "gastronomy",
+  "nature",
+  "nightlife",
+  "attraction",
+  "viewpoint",
+] as const;
 export type PlaceCategory = (typeof PLACE_CATEGORIES)[number];
 export const PLACE_PRICE_RANGES = ["free", "budget", "moderate", "premium"] as const;
 export type PlacePriceRange = (typeof PLACE_PRICE_RANGES)[number];

@@ -50,6 +50,8 @@ const categoryLabels = {
   gastronomy: "Gastronomia",
   nature: "Natureza",
   nightlife: "Vida noturna",
+  attraction: "Ponto turístico",
+  viewpoint: "Mirante",
 } as const;
 
 const proposalErrorMessages: Readonly<Record<string, string>> = {

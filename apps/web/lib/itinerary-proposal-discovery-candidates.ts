@@ -16,12 +16,15 @@ import {
   type RecommendationDiscoverySuggestions,
 } from "./recommendation-discovery-suggestions";
 
+const ITINERARY_PROPOSAL_DESIRED_ACTIVITY_COUNT_PER_DAY = 3;
+
 export type ItineraryProposalDiscoveryCandidateDependencies = Readonly<{
   travelerProfileRepository?: Pick<DrizzleTravelerProfileRepository, "findByTripId">;
   placeRepository?: Pick<DrizzlePlaceRepository, "listByIds">;
   loadDiscovery?: (
     trip: Trip,
     interests: readonly TravelerInterest[],
+    selectionLimit: number,
   ) => Promise<RecommendationDiscoverySuggestions>;
   promoteCandidate?: (
     input: PromoteExternalPlaceCandidateInput,
@@ -34,6 +37,30 @@ function plannedPlaceIds(itinerary: Itinerary): ReadonlySet<string> {
       day.activities.flatMap((activity) => (activity.placeId ? [activity.placeId] : [])),
     ),
   );
+}
+
+function discoveryCandidateLimit(itinerary: Itinerary): number {
+  return itinerary.days.reduce((total, day) => {
+    const protectedFreePeriodCount = day.freePeriods.filter(
+      (freePeriod) => freePeriod.mode === "protected",
+    ).length;
+    const flexibleFreePeriodCount = day.freePeriods.filter(
+      (freePeriod) => freePeriod.mode === "flexible",
+    ).length;
+    const intentionallyEmpty =
+      day.activities.length === 0 &&
+      protectedFreePeriodCount > 0 &&
+      flexibleFreePeriodCount === 0;
+    if (intentionallyEmpty) return total;
+
+    const availableSlots = Math.max(
+      0,
+      ITINERARY_PROPOSAL_DESIRED_ACTIVITY_COUNT_PER_DAY -
+        day.activities.length -
+        protectedFreePeriodCount,
+    );
+    return total + availableSlots;
+  }, 0);
 }
 
 function placeById(places: readonly Place[]): ReadonlyMap<string, Place> {
@@ -60,15 +87,21 @@ export async function loadItineraryProposalDiscoveryCandidates(
     throw new Error("O Roteiro informado não pertence à Viagem da geração de Proposal.");
   }
 
+  const selectionLimit = discoveryCandidateLimit(itinerary);
+  if (selectionLimit === 0) return Object.freeze([]);
+
   const travelerProfileRepository =
     dependencies.travelerProfileRepository ?? new DrizzleTravelerProfileRepository();
   const placeRepository = dependencies.placeRepository ?? new DrizzlePlaceRepository();
-  const loadDiscovery = dependencies.loadDiscovery ?? loadRecommendationDiscoverySuggestions;
+  const loadDiscovery =
+    dependencies.loadDiscovery ??
+    ((currentTrip, interests, limit) =>
+      loadRecommendationDiscoverySuggestions(currentTrip, interests, { selectionLimit: limit }));
   const promoteCandidate = dependencies.promoteCandidate ?? promoteExternalPlaceCandidate;
 
   const profile = await travelerProfileRepository.findByTripId(trip.id);
   const interests = (profile?.interests ?? []) as readonly TravelerInterest[];
-  const discovery = await loadDiscovery(trip, interests);
+  const discovery = await loadDiscovery(trip, interests, selectionLimit);
   if (discovery.candidates.length === 0) return Object.freeze([]);
 
   const plannedIds = plannedPlaceIds(itinerary);

@@ -61,6 +61,8 @@ const CATEGORY_QUERY: Readonly<Record<PlaceCategory, string>> = Object.freeze({
   gastronomy: "restaurantes",
   nightlife: "bares e vida noturna",
   nature: "atrações e natureza",
+  attraction: "pontos turísticos",
+  viewpoint: "mirantes",
 });
 
 const IDENTITY_STOPWORDS = new Set([

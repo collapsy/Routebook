@@ -3,6 +3,8 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   DrizzleItineraryProposalRepository,
   DrizzleItineraryRepository,
+  DrizzlePlaceRepository,
+  DrizzleRecommendationRepository,
   getDatabase,
   places,
   recommendations,
@@ -178,6 +180,55 @@ async function createDensityFixture(tripName: string, candidateCount: number): P
   return trip.id;
 }
 
+async function createZeroSeedDiscoveryFixture(tripName: string): Promise<string> {
+  const now = new Date();
+  const { trip } = await createAuthenticatedE2ETrip(
+    {
+      name: tripName,
+      destination: {
+        name: "Florianópolis, SC",
+        type: "city",
+        countryCode: "BR",
+        latitude: -27.5949,
+        longitude: -48.5482,
+        timeZone: "America/Sao_Paulo",
+      },
+      startDate: "2026-11-10",
+      endDate: "2026-11-12",
+    },
+    now,
+  );
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }, now),
+  );
+  return trip.id;
+}
+
+async function createFullDensityEmptyFixture(tripName: string): Promise<string> {
+  const now = new Date();
+  const { trip } = await createAuthenticatedE2ETrip(
+    {
+      name: tripName,
+      startDate: "2026-08-22",
+      endDate: "2026-08-22",
+    },
+    now,
+  );
+  let itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);
+  for (let index = 0; index < 3; index += 1) {
+    itinerary = addActivity(
+      itinerary,
+      {
+        dayDate: "2026-08-22",
+        title: `Atividade existente ${index + 1}`,
+      },
+      new Date(now.getTime() + index + 1),
+    );
+  }
+  await new DrizzleItineraryRepository().save(itinerary);
+  return trip.id;
+}
+
 async function generateProposalFromEmptyState(
   page: Page,
   tripId: string,
@@ -223,7 +274,7 @@ test("gera uma Proposal ready da UI ao PostgreSQL sem alterar o Itinerary", asyn
   const proposalId = await generateProposalFromEmptyState(page, fixture.tripId);
 
   await expect(page.getByRole("heading", { level: 1, name: "Proposta de Roteiro" })).toBeVisible();
-  await expect(page.getByText("Proposta aguardando sua decisão")).toBeVisible();
+  await expect(page.getByText("Proposta aguardando sua decisão").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: fixture.placeTitle! })).toBeVisible();
   await expect(page.getByText("Boa opção para compor o roteiro gerado.")).toBeVisible();
 
@@ -237,14 +288,16 @@ test("gera uma Proposal ready da UI ao PostgreSQL sem alterar o Itinerary", asyn
     status: "ready",
     generationMethod: "deterministic-candidate-balancing",
     generationVersion: "2",
-    proposedActivities: [
+  });
+  expect(proposal?.proposedActivities).toEqual(
+    expect.arrayContaining([
       expect.objectContaining({
         placeId: fixture.placeId,
         title: fixture.placeTitle,
         operationType: "add",
       }),
-    ],
-  });
+    ]),
+  );
   expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
 
   await page.reload();
@@ -253,6 +306,38 @@ test("gera uma Proposal ready da UI ao PostgreSQL sem alterar o Itinerary", asyn
     await new DrizzleItineraryProposalRepository().findById(fixture.tripId, proposalId),
   ).toEqual(proposal);
   expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
+});
+
+test("destino zero-seed transforma Discovery segura em Proposal sem criar Recommendation", async ({
+  page,
+}, testInfo) => {
+  const tripId = await createZeroSeedDiscoveryFixture(
+    `Proposal Anywhere ${testInfo.project.name} ${Date.now()}`,
+  );
+  const itineraryRepository = new DrizzleItineraryRepository();
+  const recommendationRepository = new DrizzleRecommendationRepository();
+  const itineraryBefore = await itineraryRepository.findByTripId(tripId);
+  expect(itineraryBefore).not.toBeNull();
+  expect(await recommendationRepository.listByTripId(tripId)).toEqual([]);
+
+  const proposalId = await generateProposalFromEmptyState(page, tripId);
+
+  await expect(page.getByRole("heading", { name: "Café descoberto próximo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Parque descoberto próximo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Bar descoberto próximo" })).toBeVisible();
+
+  const proposal = await new DrizzleItineraryProposalRepository().findById(tripId, proposalId);
+  expect(proposal).toMatchObject({ status: "ready", generationVersion: "2" });
+  expect(proposal?.proposedActivities).toHaveLength(3);
+
+  const proposedPlaceIds =
+    proposal?.proposedActivities.flatMap((activity) => (activity.placeId ? [activity.placeId] : [])) ??
+    [];
+  const proposalPlaces = await new DrizzlePlaceRepository().listByIds(proposedPlaceIds);
+  expect(proposalPlaces).toHaveLength(3);
+  expect(proposalPlaces.every((place) => place.publicationStatus === "draft")).toBe(true);
+  expect(await recommendationRepository.listByTripId(tripId)).toEqual([]);
+  expect(await itineraryRepository.findByTripId(tripId)).toEqual(itineraryBefore);
 });
 
 test("limita a densidade diária sem alterar o Itinerary antes do aceite", async ({
@@ -275,46 +360,44 @@ test("limita a densidade diária sem alterar o Itinerary antes do aceite", async
   });
   expect(proposal?.proposedActivities).toHaveLength(3);
   expect(proposal?.limitations).toContain(
-    "2 candidato(s) elegível(is) não foram propostos porque os Dias disponíveis atingiram a densidade desejada ou foram preservados como vazios intencionais.",
+    "5 candidato(s) elegível(is) não foram propostos porque os Dias disponíveis atingiram a densidade desejada ou foram preservados como vazios intencionais.",
   );
   await expect(
     page.getByText(
-      "2 candidato(s) elegível(is) não foram propostos porque os Dias disponíveis atingiram a densidade desejada ou foram preservados como vazios intencionais.",
+      "5 candidato(s) elegível(is) não foram propostos porque os Dias disponíveis atingiram a densidade desejada ou foram preservados como vazios intencionais.",
     ),
   ).toBeVisible();
   expect(await itineraryRepository.findByTripId(tripId)).toEqual(itineraryBefore);
 });
 
-test("gera Proposal ready sem mudanças quando não há Recommendation elegível", async ({
+test("Proposal ready vazia continua auditável sem parecer uma decisão aplicável", async ({
   page,
 }, testInfo) => {
-  const fixture = await createGenerationFixture(
-    `Geração sem candidatos ${testInfo.project.name} ${Date.now()}`,
-    false,
+  const tripId = await createFullDensityEmptyFixture(
+    `Geração sem espaço ${testInfo.project.name} ${Date.now()}`,
   );
   const itineraryRepository = new DrizzleItineraryRepository();
-  const itineraryBefore = await itineraryRepository.findByTripId(fixture.tripId);
+  const itineraryBefore = await itineraryRepository.findByTripId(tripId);
   expect(itineraryBefore).not.toBeNull();
 
-  const proposalId = await generateProposalFromEmptyState(page, fixture.tripId);
+  const proposalId = await generateProposalFromEmptyState(page, tripId);
 
+  await expect(page.getByText("Sem mudanças sugeridas").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Nenhuma mudança para aplicar" })).toBeVisible();
   await expect(page.getByText("Nenhuma mudança adequada foi proposta")).toBeVisible();
-  await expect(
-    page.getByText(
-      "Nenhum candidato elegível foi recebido; a proposta não contém mudanças e o Roteiro atual permanece preservado.",
-    ),
-  ).toBeVisible();
+  await expect(page.getByText("Aceitar proposta")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Descartar proposta" })).toHaveCount(0);
 
-  const proposal = await new DrizzleItineraryProposalRepository().findById(
-    fixture.tripId,
-    proposalId,
-  );
+  const proposal = await new DrizzleItineraryProposalRepository().findById(tripId, proposalId);
   expect(proposal).toMatchObject({ status: "ready", proposedActivities: [] });
-  expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
+  expect(proposal?.limitations).toContain(
+    "3 candidato(s) elegível(is) não foram propostos porque os Dias disponíveis atingiram a densidade desejada ou foram preservados como vazios intencionais.",
+  );
+  expect(await itineraryRepository.findByTripId(tripId)).toEqual(itineraryBefore);
 
   await page.reload();
-  await expect(page.getByText("Nenhuma mudança adequada foi proposta")).toBeVisible();
-  expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
+  await expect(page.getByText("Sem mudanças sugeridas").first()).toBeVisible();
+  expect(await itineraryRepository.findByTripId(tripId)).toEqual(itineraryBefore);
 });
 
 test("não propõe novamente Place que já está no Roteiro", async ({ page }, testInfo) => {
@@ -329,10 +412,14 @@ test("não propõe novamente Place que já está no Roteiro", async ({ page }, t
 
   const proposalId = await generateProposalFromEmptyState(page, fixture.tripId);
 
-  await expect(page.getByText("Nenhuma mudança adequada foi proposta")).toBeVisible();
   await expect(page.getByRole("heading", { name: fixture.placeTitle! })).toHaveCount(0);
+  const proposal = await new DrizzleItineraryProposalRepository().findById(
+    fixture.tripId,
+    proposalId,
+  );
+  expect(proposal).toMatchObject({ status: "ready" });
   expect(
-    await new DrizzleItineraryProposalRepository().findById(fixture.tripId, proposalId),
-  ).toMatchObject({ status: "ready", proposedActivities: [] });
+    proposal?.proposedActivities.some((activity) => activity.placeId === fixture.placeId),
+  ).toBe(false);
   expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
 });

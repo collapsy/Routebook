@@ -210,9 +210,10 @@ function e2eCandidate(
     category: PlaceCategory;
   }>,
 ): ExternalPlaceCandidate {
+  const spatialIdentity = `${center.latitude.toFixed(4)}:${center.longitude.toFixed(4)}`;
   return {
     provider: "routebook-e2e",
-    externalId: input.id,
+    externalId: `${input.id}:${spatialIdentity}`,
     name: input.name,
     latitude: center.latitude + input.latitudeOffset,
     longitude: center.longitude + input.longitudeOffset,

@@ -165,6 +165,31 @@ describe("contextual external suggestions", () => {
     ).toThrow(RangeError);
   });
 
+  it("permite ampliar o mesmo ranking contextual para a capacidade da Proposal", () => {
+    const candidates = Array.from({ length: 9 }, (_, index) =>
+      candidate(`candidate-${index + 1}`, `Lugar ${index + 1}`, "gastronomy"),
+    );
+    const result = buildRecommendationDiscoverySuggestions({
+      trip,
+      publishedPlaces: [],
+      externalReconciliations: candidates.map((item) => ({
+        candidate: item,
+        status: "new" as const,
+        reason: "novo",
+      })),
+      reference: { latitude: -29.3788, longitude: -50.872 },
+      interests: ["gastronomy"],
+      discoveryStatus: "success",
+      selectionLimit: 8,
+    });
+
+    expect(result.candidates).toHaveLength(8);
+    expect(result.suggestions).toHaveLength(8);
+    expect(result.candidates.map((item) => item.externalId)).toEqual(
+      result.suggestions.map((suggestion) => suggestion.externalId),
+    );
+  });
+
   it("retém possible_match ambíguo e rejected usando o feed reconciliado", () => {
     const safe = candidate("safe", "Descoberta segura", "nature");
     const possible = candidate("possible", "Possível duplicidade", "nature");

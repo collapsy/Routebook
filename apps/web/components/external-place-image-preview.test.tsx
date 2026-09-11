@@ -96,8 +96,8 @@ describe("ExternalPlaceImagePreview", () => {
     ).toHaveAttribute("data-presentation", "compact");
   });
 
-  it("usa fallback compacto sem request quando Media está desabilitada", () => {
-    const fetcher = vi.fn();
+  it("não deixa o budget server-side desabilitar permanentemente um card que chega ao viewport", async () => {
+    const fetcher = vi.fn(async () => Response.json({ error: "miss" }, { status: 404 }));
     vi.stubGlobal("fetch", fetcher);
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
 
@@ -113,8 +113,11 @@ describe("ExternalPlaceImagePreview", () => {
     );
 
     expect(fetcher).not.toHaveBeenCalled();
+    enterViewport();
+
+    await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(1));
     expect(
-      screen.getByRole("img", {
+      await screen.findByRole("img", {
         name: "Foto não disponível para Praia do Amor",
       }),
     ).toHaveAttribute("data-presentation", "compact");

@@ -93,14 +93,18 @@ describe("mapOverturePlaceCategory", () => {
         "tour_operator",
       ]),
     ).toBe("tour");
-    expect(
-      mapOverturePlaceCategory("shopping_center", ["shopping", "shopping_mall"]),
-    ).toBe("shopping");
+    expect(mapOverturePlaceCategory("shopping_center", ["shopping", "shopping_mall"])).toBe(
+      "shopping",
+    );
   });
 
   it("não transforma ancestrais genéricos de Travel ou Shopping em categoria canônica", () => {
-    expect(mapOverturePlaceCategory("travel_agency", ["travel_and_transportation", "travel"])).toBeUndefined();
-    expect(mapOverturePlaceCategory("antique_store", ["shopping", "specialty_store"])).toBeUndefined();
+    expect(
+      mapOverturePlaceCategory("travel_agency", ["travel_and_transportation", "travel"]),
+    ).toBeUndefined();
+    expect(
+      mapOverturePlaceCategory("antique_store", ["shopping", "specialty_store"]),
+    ).toBeUndefined();
   });
 
   it("não transforma POI relacionado em praia somente por ancestral da taxonomia", () => {

@@ -331,8 +331,9 @@ test("destino zero-seed transforma Discovery segura em Proposal sem criar Recomm
   expect(proposal?.proposedActivities).toHaveLength(3);
 
   const proposedPlaceIds =
-    proposal?.proposedActivities.flatMap((activity) => (activity.placeId ? [activity.placeId] : [])) ??
-    [];
+    proposal?.proposedActivities.flatMap((activity) =>
+      activity.placeId ? [activity.placeId] : [],
+    ) ?? [];
   const proposalPlaces = await new DrizzlePlaceRepository().listByIds(proposedPlaceIds);
   expect(proposalPlaces).toHaveLength(3);
   expect(proposalPlaces.every((place) => place.publicationStatus === "draft")).toBe(true);

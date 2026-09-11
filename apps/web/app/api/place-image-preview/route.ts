@@ -45,6 +45,7 @@ async function resolveLazyGooglePlaceId(input: Readonly<{
   name: string;
   latitude: number;
   longitude: number;
+  addressLabel?: string;
   enabled: boolean;
   maxAttempts: number;
 }>): Promise<Readonly<{ placeId?: string; failed: boolean }>> {
@@ -64,6 +65,7 @@ async function resolveLazyGooglePlaceId(input: Readonly<{
           category: input.category,
           latitude: input.latitude,
           longitude: input.longitude,
+          ...(input.addressLabel ? { addressLabel: input.addressLabel } : {}),
         },
       ]);
       return matches.find(
@@ -127,15 +129,17 @@ export async function GET(request: Request) {
   }
 
   const google = resolveConfiguredGooglePlacePhotoProvider();
+  const onDemandGoogleEligible = !googlePlaceId && Boolean(category) && google.status === "configured";
   let effectiveGooglePlaceId = googlePlaceId;
   let googleFailed = false;
 
-  if (!effectiveGooglePlaceId && category && google.status === "configured") {
+  if (onDemandGoogleEligible && category) {
     const lazyQuality = await resolveLazyGooglePlaceId({
       category,
       name,
       latitude,
       longitude,
+      ...(destinationContext ? { addressLabel: destinationContext } : {}),
       enabled: policy.quality.enabled,
       maxAttempts: policy.quality.maxAttempts,
     });
@@ -228,7 +232,9 @@ export async function GET(request: Request) {
       },
       {
         status: googleFailed ? 503 : 404,
-        headers: { "Cache-Control": googleFailed ? "no-store" : MISS_CACHE_CONTROL },
+        headers: {
+          "Cache-Control": googleFailed || onDemandGoogleEligible ? "no-store" : MISS_CACHE_CONTROL,
+        },
       },
     );
   }
@@ -241,6 +247,8 @@ export async function GET(request: Request) {
     matched: true,
   });
   return NextResponse.json(result.value, {
-    headers: { "Cache-Control": SUCCESS_CACHE_CONTROL },
+    headers: {
+      "Cache-Control": onDemandGoogleEligible ? GOOGLE_CACHE_CONTROL : SUCCESS_CACHE_CONTROL,
+    },
   });
 }

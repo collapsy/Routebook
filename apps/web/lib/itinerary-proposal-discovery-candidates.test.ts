@@ -57,7 +57,9 @@ function place(id: string, name: string): Place {
   };
 }
 
-function discovery(candidates: readonly ExternalPlaceCandidate[]): RecommendationDiscoverySuggestions {
+function discovery(
+  candidates: readonly ExternalPlaceCandidate[],
+): RecommendationDiscoverySuggestions {
   return {
     suggestions: [],
     candidates,
@@ -145,7 +147,11 @@ describe("loadItineraryProposalDiscoveryCandidates", () => {
   it("retém candidato rejeitado ou ambíguo sem transformar a falha em atividade", async () => {
     const ambiguous = externalCandidate("ambiguous", "Lugar ambíguo");
     const promote = vi.fn(async () => {
-      throw new PlacePromotionServiceError("possível duplicata", "possible-match", "place-existing");
+      throw new PlacePromotionServiceError(
+        "possível duplicata",
+        "possible-match",
+        "place-existing",
+      );
     });
     const deps = dependencies({ candidates: [ambiguous], places: [], promote });
     const itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);

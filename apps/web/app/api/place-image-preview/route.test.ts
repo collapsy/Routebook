@@ -252,6 +252,67 @@ describe("GET /api/place-image-preview", () => {
     expect(JSON.stringify(payload)).not.toContain("secret-google");
   });
 
+  it("recupera identidade Google segura sem rating apenas para mídia", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("ROUTEBOOK_PLACE_QUALITY_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const identityCandidate = {
+      id: "ChIJPuntoCeroNoRating",
+      displayName: { text: "Punto Cero Guatemala" },
+      location: { latitude: 14.74191, longitude: -91.15621 },
+      formattedAddress: "Panajachel, Guatemala",
+    };
+    const fetcher = vi
+      .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ places: [] }))
+      .mockResolvedValueOnce(Response.json({ places: [identityCandidate] }))
+      .mockResolvedValueOnce(Response.json({ places: [identityCandidate] }))
+      .mockResolvedValueOnce(
+        Response.json({
+          id: identityCandidate.id,
+          displayName: identityCandidate.displayName,
+          location: identityCandidate.location,
+          photos: [
+            {
+              name: `places/${identityCandidate.id}/photos/photo-current`,
+              authorAttributions: [{ displayName: "Cliente Google" }],
+            },
+          ],
+        }),
+      );
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          destinationId: "Panajachel Guatemala",
+          name: "Punto Cero Guatemala",
+          latitude: "14.74191",
+          longitude: "-91.15621",
+          category: "nightlife",
+          googlePlaceId: undefined,
+        }),
+      ),
+    );
+    const payload = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(payload).toMatchObject({ provider: "google-places", sourceName: "Google Maps" });
+    expect(fetcher).toHaveBeenCalledTimes(4);
+    const [identityInput, identityInit] = fetcher.mock.calls[2] ?? [];
+    expect(String(identityInput)).toBe("https://places.googleapis.com/v1/places:searchText");
+    expect((identityInit?.headers as Record<string, string>)["X-Goog-FieldMask"]).toBe(
+      "places.id,places.displayName,places.location,places.formattedAddress",
+    );
+    expect(JSON.parse(String(identityInit?.body))).toMatchObject({
+      textQuery: "Punto Cero Guatemala, Panajachel Guatemala",
+      pageSize: 5,
+    });
+    expect(JSON.stringify(payload)).not.toContain("secret-google");
+    expect(JSON.stringify(payload)).not.toContain("photo-current");
+  });
+
   it("não executa Quality lazy quando o Quality Provider Google não está configurado", async () => {
     vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
     vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
@@ -284,6 +345,7 @@ describe("GET /api/place-image-preview", () => {
       .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
       .mockResolvedValueOnce(Response.json({ places: [] }))
       .mockResolvedValueOnce(Response.json({ places: [] }))
+      .mockResolvedValueOnce(Response.json({ places: [] }))
       .mockResolvedValueOnce(commonsResponse());
     vi.stubGlobal("fetch", fetcher);
 
@@ -300,7 +362,7 @@ describe("GET /api/place-image-preview", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("Cache-Control")).toBe("private, no-store");
     expect(payload.sourceName).toBe("Wikimedia Commons");
-    expect(fetcher).toHaveBeenCalledTimes(3);
+    expect(fetcher).toHaveBeenCalledTimes(4);
   });
 
   it("não cacheia publicamente miss após tentativa de Quality lazy", async () => {
@@ -310,6 +372,7 @@ describe("GET /api/place-image-preview", () => {
     vi.stubEnv("VERCEL_ENV", "preview");
     const fetcher = vi
       .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ places: [] }))
       .mockResolvedValueOnce(Response.json({ places: [] }))
       .mockResolvedValueOnce(Response.json({ places: [] }))
       .mockResolvedValueOnce(
@@ -328,7 +391,7 @@ describe("GET /api/place-image-preview", () => {
 
     expect(response.status).toBe(404);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(fetcher).toHaveBeenCalledTimes(3);
+    expect(fetcher).toHaveBeenCalledTimes(4);
   });
 
   it("cai para Wikimedia segura quando Google não possui foto", async () => {

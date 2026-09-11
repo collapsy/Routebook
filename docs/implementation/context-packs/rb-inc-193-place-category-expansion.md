@@ -57,7 +57,7 @@ Distinguir `attraction` e `viewpoint` das categorias genéricas atuais da Discov
 - a tela de Lugares deriva filtros disponíveis das categorias efetivamente presentes;
 - `CategoryIllustration` é fallback visual, nunca fotografia nem dado persistido;
 - fotografia governada continua tendo precedência;
-- `CATEGORY_WEIGHTS` é um consumidor exaustivo de `PlaceCategory`, então toda nova categoria precisa de pesos definidos para manter o typecheck e o comportamento determinístico.
+- `CATEGORY_WEIGHTS` e mapas `Record<PlaceCategory, ...>`/objetos indexados por categoria são consumidores exaustivos: toda nova categoria precisa de tratamento explícito para preservar typecheck e comportamento determinístico.
 
 ## 5. Decisão de classificação
 
@@ -99,8 +99,8 @@ A hierarquia usa `taxonomy.hierarchy`. Este incremento não muda parsing de PMTi
 - foto/mídia não altera categoria;
 - não há recalibração de ranking neste incremento; as novas categorias apenas recebem pesos de compatibilidade equivalentes aos de `nature`;
 - `Place.category` permanece singular na implementação;
-- Recommendation e Proposal permanecem intocados;
-- nenhum Provider, secret, billing ou migration novo.
+- regras de Recommendation, Saved Place, Activity e Proposal permanecem inalteradas; consumidores de apresentação/consulta podem receber rótulos ou queries explícitas apenas para suportar os novos valores de `PlaceCategory`;
+- nenhum novo Provider, secret, billing ou migration.
 
 ## 8. Caminhos permitidos
 
@@ -111,10 +111,18 @@ modules/place-catalog/src/external-place.ts
 modules/place-catalog/src/external-place.test.ts
 modules/place-catalog/src/place-quality.ts
 modules/place-catalog/src/place-quality.test.ts
+apps/web/app/api/internal/place-quality-probe/route.ts
 apps/web/app/viagens/[tripId]/lugares/filters.ts
 apps/web/app/viagens/[tripId]/lugares/filters.test.ts
+apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx
+apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx
+apps/web/app/viagens/[tripId]/roteiro/page.tsx
 apps/web/components/category-illustration.tsx
 apps/web/components/category-illustration.test.tsx
+apps/web/components/contextual-recommendation-strip.tsx
+apps/web/components/recommendation-card.tsx
+apps/web/lib/place-quality-provider.ts
+apps/web/lib/recommendation-discovery-suggestions.ts
 apps/web/public/category-illustrations/attraction.svg
 apps/web/public/category-illustrations/viewpoint.svg
 apps/web/e2e/place-discovery-filters.spec.ts
@@ -125,6 +133,8 @@ docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
 
+Os oito caminhos web adicionais acima foram autorizados depois que o Engineering Validation revelou consumidores exaustivos da união `PlaceCategory`. Neles, a mudança permitida limita-se a rótulos/queries de categoria e compatibilidade de apresentação; nenhuma regra de decisão ou persistência é alterada.
+
 ## 9. Testes esperados
 
 - aceitação de `attraction` e `viewpoint` no domínio;
@@ -134,6 +144,7 @@ docs/registry.md
 - filtro não aparece quando não há cobertura;
 - fallback ilustrativo para as duas novas categorias;
 - cálculo de qualidade das novas categorias com pesos idênticos a `nature`;
+- typecheck dos consumidores exaustivos de `PlaceCategory` na web;
 - docs validation;
 - lint, typecheck, unit/integration, build e E2E aplicáveis.
 
@@ -144,12 +155,12 @@ docs/registry.md
 - não ampliar para shopping/cultural-site/tour sem novo recorte explícito;
 - não converter `Place.category` para array neste incremento;
 - não recalibrar ranking ou criar pesos específicos para attraction/viewpoint;
-- não tocar Proposal ou Recommendation;
-- não alterar arquivos da PR #458;
+- não alterar lógica de Recommendation, Saved Place, Activity ou Proposal; compatibilidade exaustiva de rótulo/query é permitida;
+- não alterar arquivos funcionais da PR #458;
 - não introduzir migration;
 - não ativar Production;
 - não integrar na `main` sem decisão humana.
 
 ## 11. Handoff
 
-Relatar issue, branch, SHA, arquivos alterados, mappings efetivos, pesos de compatibilidade, testes executados, resultados do CI, conflitos com a stack paralela e qualquer gate restante.
+Relatar issue, branch, SHA, arquivos alterados, mappings efetivos, pesos de compatibilidade, consumidores exaustivos reconciliados, testes executados, resultados do CI, conflitos com a stack paralela e qualquer gate restante.

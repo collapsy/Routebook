@@ -388,11 +388,12 @@ test("Proposal ready vazia continua auditável sem parecer uma decisão aplicáv
   await expect(page.getByText("Nenhuma mudança adequada foi proposta")).toBeVisible();
   await expect(page.getByText("Aceitar proposta")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Descartar proposta" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Descartar e gerar outra" })).toBeVisible();
 
   const proposal = await new DrizzleItineraryProposalRepository().findById(tripId, proposalId);
   expect(proposal).toMatchObject({ status: "ready", proposedActivities: [] });
   expect(proposal?.limitations).toContain(
-    "3 candidato(s) elegível(is) não foram propostos porque os Dias disponíveis atingiram a densidade desejada ou foram preservados como vazios intencionais.",
+    "Nenhum candidato elegível foi recebido; a proposta não contém mudanças e o Roteiro atual permanece preservado.",
   );
   expect(await itineraryRepository.findByTripId(tripId)).toEqual(itineraryBefore);
 

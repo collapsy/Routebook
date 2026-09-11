@@ -46,6 +46,7 @@ export type ContextualExternalSuggestionViewModel = Readonly<{
 
 export type RecommendationDiscoverySuggestions = Readonly<{
   suggestions: readonly ContextualExternalSuggestionViewModel[];
+  candidates: readonly ExternalPlaceCandidate[];
   discoveryStatus: RecommendationDiscoveryStatus;
   availableCount: number;
 }>;
@@ -55,6 +56,10 @@ type ExternalReferenceRepositoryPort = Pick<
   DrizzlePlaceExternalReferenceRepository,
   "listByPlaceIds"
 >;
+
+type ContextualExternalDiscoveryItem = Extract<PlaceDiscoveryItem, { kind: "external" }> & {
+  candidate: ExternalPlaceCandidate & { category: PlaceCategory };
+};
 
 export type RecommendationDiscoverySuggestionDependencies = Readonly<{
   placeRepository?: PlaceRepositoryPort;
@@ -95,22 +100,13 @@ function supportedInterestCategories(
   );
 }
 
-function isExternalWithCategory(item: PlaceDiscoveryItem): item is Extract<
-  PlaceDiscoveryItem,
-  { kind: "external" }
-> & {
-  candidate: ExternalPlaceCandidate & { category: PlaceCategory };
-} {
+function isExternalWithCategory(item: PlaceDiscoveryItem): item is ContextualExternalDiscoveryItem {
   return item.kind === "external" && item.candidate.category !== undefined;
 }
 
 function compareExternalSuggestions(
-  left: Extract<PlaceDiscoveryItem, { kind: "external" }> & {
-    candidate: ExternalPlaceCandidate & { category: PlaceCategory };
-  },
-  right: Extract<PlaceDiscoveryItem, { kind: "external" }> & {
-    candidate: ExternalPlaceCandidate & { category: PlaceCategory };
-  },
+  left: ContextualExternalDiscoveryItem,
+  right: ContextualExternalDiscoveryItem,
   preferredCategories: ReadonlySet<PlaceCategory>,
 ): number {
   const leftMatches = preferredCategories.has(left.candidate.category);
@@ -127,27 +123,37 @@ function compareExternalSuggestions(
   );
 }
 
-export function buildContextualExternalSuggestions(
+export function selectContextualExternalDiscoveryItems(
   input: Readonly<{
-    tripId: string;
     items: readonly PlaceDiscoveryItem[];
     interests: readonly TravelerInterest[];
     limit?: number;
   }>,
-): readonly ContextualExternalSuggestionViewModel[] {
+): readonly ContextualExternalDiscoveryItem[] {
   const limit = input.limit ?? CONTEXTUAL_EXTERNAL_SUGGESTION_LIMIT;
   if (!Number.isInteger(limit) || limit <= 0) {
     throw new RangeError("external suggestion limit must be a positive integer");
   }
 
   const preferredCategories = supportedInterestCategories(input.interests);
-  const hasInterests = input.interests.length > 0;
+  return Object.freeze(
+    input.items
+      .filter(isExternalWithCategory)
+      .sort((left, right) => compareExternalSuggestions(left, right, preferredCategories))
+      .slice(0, limit),
+  );
+}
 
-  const suggestions = input.items
-    .filter(isExternalWithCategory)
-    .sort((left, right) => compareExternalSuggestions(left, right, preferredCategories))
-    .slice(0, limit)
-    .map<ContextualExternalSuggestionViewModel>((item) => {
+function buildContextualExternalSuggestionViewModels(
+  tripId: string,
+  selectedItems: readonly ContextualExternalDiscoveryItem[],
+  interests: readonly TravelerInterest[],
+): readonly ContextualExternalSuggestionViewModel[] {
+  const preferredCategories = supportedInterestCategories(interests);
+  const hasInterests = interests.length > 0;
+
+  return Object.freeze(
+    selectedItems.map<ContextualExternalSuggestionViewModel>((item) => {
       const matchesInterest = preferredCategories.has(item.candidate.category);
       const reasons = [
         ...(matchesInterest
@@ -175,11 +181,22 @@ export function buildContextualExternalSuggestions(
         reasons: Object.freeze(reasons),
         limitations: Object.freeze(limitations),
         sourceLabel: sourceLabel(item.candidate.provider),
-        discoveryHref: `/viagens/${input.tripId}/lugares`,
+        discoveryHref: `/viagens/${tripId}/lugares`,
       });
-    });
+    }),
+  );
+}
 
-  return Object.freeze(suggestions);
+export function buildContextualExternalSuggestions(
+  input: Readonly<{
+    tripId: string;
+    items: readonly PlaceDiscoveryItem[];
+    interests: readonly TravelerInterest[];
+    limit?: number;
+  }>,
+): readonly ContextualExternalSuggestionViewModel[] {
+  const selectedItems = selectContextualExternalDiscoveryItems(input);
+  return buildContextualExternalSuggestionViewModels(input.tripId, selectedItems, input.interests);
 }
 
 function e2eCandidate(
@@ -264,13 +281,18 @@ export function buildRecommendationDiscoverySuggestions(
     reference: input.reference,
   });
   const externalItems = items.filter((item) => item.kind === "external");
+  const selectedItems = selectContextualExternalDiscoveryItems({
+    items,
+    interests: input.interests,
+  });
 
   return Object.freeze({
-    suggestions: buildContextualExternalSuggestions({
-      tripId: input.trip.id,
-      items,
-      interests: input.interests,
-    }),
+    suggestions: buildContextualExternalSuggestionViewModels(
+      input.trip.id,
+      selectedItems,
+      input.interests,
+    ),
+    candidates: Object.freeze(selectedItems.map((item) => item.candidate)),
     discoveryStatus: input.discoveryStatus,
     availableCount: externalItems.length,
   });
@@ -289,6 +311,7 @@ export async function loadRecommendationDiscoverySuggestions(
   if (regionResolution.status !== "resolved") {
     return Object.freeze({
       suggestions: Object.freeze([]),
+      candidates: Object.freeze([]),
       discoveryStatus: "unavailable",
       availableCount: 0,
     });

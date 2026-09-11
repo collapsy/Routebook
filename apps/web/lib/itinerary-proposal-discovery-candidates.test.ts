@@ -140,10 +140,7 @@ describe("loadItineraryProposalDiscoveryCandidates", () => {
       },
       now,
     );
-    const itinerary = createItinerary(
-      { tripId: longerTrip.id, period: longerTrip.period },
-      now,
-    );
+    const itinerary = createItinerary({ tripId: longerTrip.id, period: longerTrip.period }, now);
     const deps = dependencies({ candidates: [], places: [] });
 
     await expect(

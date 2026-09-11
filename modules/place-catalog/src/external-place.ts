@@ -99,6 +99,10 @@ const OVERTURE_CATEGORY_MAP: Readonly<Record<string, PlaceCategory>> = Object.fr
   tourist_attraction: "attraction",
   scenic_viewpoint: "viewpoint",
   viewpoint: "viewpoint",
+  tour_operator: "tour",
+  shopping_mall: "shopping",
+  market: "shopping",
+  farmers_market: "shopping",
 });
 
 const IDENTITY_STOP_WORDS = new Set([

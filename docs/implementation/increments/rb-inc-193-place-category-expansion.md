@@ -93,6 +93,7 @@ Categorias externas sem ACL explícito continuam sem categoria canônica e falha
 - pesquisa textual encontra os novos rótulos de categoria;
 - cards preservam fotografia real governada quando disponível;
 - quando não houver fotografia, cada nova categoria possui fallback visual local e explicitamente ilustrativo;
+- consumidores de apresentação que exibem `PlaceCategory` recebem rótulos explícitos para as duas novas categorias, sem alterar decisão, salvamento, atividade ou proposta;
 - nenhuma categoria vazia é exibida apenas por existir no domínio;
 - nenhuma mudança de navegação, ranking ou densidade visual é introduzida.
 
@@ -104,6 +105,7 @@ Categorias externas sem ACL explícito continuam sem categoria canônica e falha
 - atualizar fallback visual por categoria;
 - cobrir novas categorias com testes unitários e de interface;
 - preservar compatibilidade do ranking existente atribuindo às novas categorias os mesmos pesos neutros já usados por `nature`, sem recalibrar a fórmula ou alterar sua semântica;
+- reconciliar consumidores exaustivos de `PlaceCategory` em qualidade e apresentação, incluindo queries de Provider e rótulos de cards/páginas, sem alterar regras de Recommendation, Saved Place, Activity ou Proposal;
 - registrar a aderência no glossário de domínio sem criar conceito novo;
 - documentação, Registry e rastreabilidade do incremento.
 
@@ -112,9 +114,10 @@ Categorias externas sem ACL explícito continuam sem categoria canônica e falha
 - categoria genérica `interesting` / `Pontos interessantes`;
 - adicionar Cultura, Compras, Serviços, Tours ou Transporte neste incremento;
 - transformar `Place.category` em coleção multivalorada;
-- recalibrar ranking, pesos ou fórmula de qualidade; Recommendation, Proposal, Saved Place ou Activity também permanecem inalterados;
+- recalibrar ranking, pesos ou fórmula de qualidade;
+- alterar lógica de Recommendation, Saved Place, Activity ou Proposal; ajustes de compatibilidade de rótulo/consulta exigidos pela expansão exaustiva de `PlaceCategory` são permitidos;
 - publicar automaticamente candidatos externos;
-- alterar Provider, billing, secrets ou Provenance;
+- alterar Provider, billing, secrets ou Provenance — apenas ampliar as queries existentes por categoria nos adapters já configurados;
 - migration de banco — `places.category` já é `varchar`;
 - Production;
 - merge na `main` sem gate humano.
@@ -128,10 +131,18 @@ modules/place-catalog/src/external-place.ts
 modules/place-catalog/src/external-place.test.ts
 modules/place-catalog/src/place-quality.ts
 modules/place-catalog/src/place-quality.test.ts
+apps/web/app/api/internal/place-quality-probe/route.ts
 apps/web/app/viagens/[tripId]/lugares/filters.ts
 apps/web/app/viagens/[tripId]/lugares/filters.test.ts
+apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx
+apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx
+apps/web/app/viagens/[tripId]/roteiro/page.tsx
 apps/web/components/category-illustration.tsx
 apps/web/components/category-illustration.test.tsx
+apps/web/components/contextual-recommendation-strip.tsx
+apps/web/components/recommendation-card.tsx
+apps/web/lib/place-quality-provider.ts
+apps/web/lib/recommendation-discovery-suggestions.ts
 apps/web/public/category-illustrations/attraction.svg
 apps/web/public/category-illustrations/viewpoint.svg
 apps/web/e2e/place-discovery-filters.spec.ts
@@ -143,6 +154,8 @@ docs/registry.md
 ```
 
 `place-quality.ts` e seu teste foram incluídos após o primeiro Engineering Validation revelar um consumidor exaustivo de `PlaceCategory`. A correção é estritamente de compatibilidade: `attraction` e `viewpoint` herdam os pesos atuais de `nature`; não há nova decisão de ranking.
+
+O Engineering Validation seguinte revelou oito consumidores exaustivos adicionais na camada web. Eles foram incluídos somente para completar queries/rótulos de categoria e permitir que `attraction`/`viewpoint` atravessem as superfícies existentes. Nenhuma regra de decisão, estado de Saved Place, Activity ou Proposal foi alterada.
 
 Arquivo adicional indispensável exige registro prévio neste incremento e justificativa na PR.
 
@@ -158,8 +171,8 @@ Arquivo adicional indispensável exige registro prévio neste incremento e justi
 - [ ] fallback visual das novas categorias é distinto, local e explicitamente ilustrativo;
 - [ ] fotografia governada continua prevalecendo sobre fallback;
 - [ ] novas categorias recebem pesos de compatibilidade iguais aos de `nature`, sem recalibração de ranking;
-- [ ] Proposal e Recommendation não mudam;
-- [ ] nenhuma migration, Provider, secret ou billing é adicionado;
+- [ ] consumidores exaustivos da web exibem/consultam as novas categorias sem alterar regras de Recommendation, Saved Place, Activity ou Proposal;
+- [ ] nenhuma migration, novo Provider, secret ou billing é adicionado;
 - [ ] testes de domínio/ACL/UI passam;
 - [ ] Documentation e Engineering Validation passam no mesmo SHA;
 - [ ] PR permanece Draft até reconciliação com a stack corrente e aceite.
@@ -171,6 +184,7 @@ Arquivo adicional indispensável exige registro prévio neste incremento e justi
 - filtros: ordem canônica, disponibilidade real, busca por rótulo e filtragem das novas categorias;
 - ilustração: `attraction` e `viewpoint` expõem categoria/fallback sem simular fotografia;
 - qualidade: novas categorias são calculáveis com os pesos de compatibilidade de `nature`, sem alterar pesos existentes;
+- typecheck de todos os consumidores exaustivos de `PlaceCategory` na web;
 - E2E: filtros continuam responsivos e categorias vazias não aparecem;
 - regressão das quatro categorias anteriores;
 - `pnpm docs:validate`;
@@ -180,7 +194,7 @@ Arquivo adicional indispensável exige registro prévio neste incremento e justi
 
 **Taxonomia externa ampla:** somente três mappings novos são autorizados; nenhum ancestral genérico vira categoria canônica automaticamente.
 
-**Quebra de consumidores exaustivos:** `Record<PlaceCategory, ...>` e switches devem falhar em typecheck até receberem tratamento explícito. O primeiro pipeline encontrou `CATEGORY_WEIGHTS` em `place-quality.ts`, tratado com herança explícita dos pesos de `nature` para evitar recalibração funcional.
+**Quebra de consumidores exaustivos:** `Record<PlaceCategory, ...>` e switches devem falhar em typecheck até receberem tratamento explícito. O primeiro pipeline encontrou `CATEGORY_WEIGHTS` em `place-quality.ts`; o pipeline seguinte revelou oito consumidores web de query/rótulo. Todos são tratados de forma explícita para evitar fallback silencioso.
 
 **Conflito com trabalho paralelo:** a branch parte de RB-INC-192 e não modifica arquivos do RB-INC-191. `docs/registry.md` pode exigir reconciliação textual posterior.
 
@@ -188,4 +202,4 @@ Arquivo adicional indispensável exige registro prévio neste incremento e justi
 
 ## 12. Rollback
 
-Reverter os novos valores, ACL, rótulos, assets, pesos de compatibilidade e documentação. Nenhum dado ou schema é alterado por migration. Places materializados como `attraction`/`viewpoint` durante um Preview devem permanecer governados pela mesma política de rascunho e não serão removidos automaticamente.
+Reverter os novos valores, ACL, rótulos, assets, pesos de compatibilidade, queries e documentação. Nenhum dado ou schema é alterado por migration. Places materializados como `attraction`/`viewpoint` durante um Preview devem permanecer governados pela mesma política de rascunho e não serão removidos automaticamente.

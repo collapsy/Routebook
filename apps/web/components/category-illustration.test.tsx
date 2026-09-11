@@ -28,6 +28,8 @@ describe("CategoryIllustration", () => {
   it.each([
     ["attraction", "Ponto turístico"],
     ["viewpoint", "Mirante"],
+    ["tour", "Passeio"],
+    ["shopping", "Compras"],
   ] as const)("expõe fallback próprio para %s", (kind, label) => {
     render(
       <CategoryIllustration

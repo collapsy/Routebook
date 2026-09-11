@@ -3,8 +3,14 @@ import { randomUUID } from "node:crypto";
 import type {
   GenerateAuthoritativeItineraryProposalCommand,
   ItineraryProposal,
+  ItineraryProposalGenerationCandidate,
 } from "@routebook/proposal-management";
-import type { ItineraryRepository, TripRepository } from "@routebook/trip-management";
+import type {
+  Itinerary,
+  ItineraryRepository,
+  Trip,
+  TripRepository,
+} from "@routebook/trip-management";
 
 import type { TripRouteAccessResult } from "./trip-route-access";
 
@@ -53,11 +59,17 @@ type GenerationService = Readonly<{
   generate(command: GenerateAuthoritativeItineraryProposalCommand): Promise<ItineraryProposal>;
 }>;
 
+type AdditionalCandidateLoader = (
+  trip: Trip,
+  itinerary: Itinerary,
+) => Promise<readonly ItineraryProposalGenerationCandidate[]>;
+
 export type GenerateItineraryProposalActionDependencies = Readonly<{
   resolveAccess: TripAccessResolver;
   tripRepository: Pick<TripRepository, "findById">;
   itineraryRepository: Pick<ItineraryRepository, "findByTripId">;
   generationService: GenerationService;
+  loadAdditionalCandidates?: AdditionalCandidateLoader;
   now?: () => Date;
   createItineraryProposalId?: () => string;
   createProposedActivityId?: GenerateAuthoritativeItineraryProposalCommand["createProposedActivityId"];
@@ -126,6 +138,9 @@ export async function executeGenerateItineraryProposalAction(
   }
 
   const createProposedActivityId = dependencies.createProposedActivityId ?? (() => randomUUID());
+  const additionalCandidates = dependencies.loadAdditionalCandidates
+    ? await dependencies.loadAdditionalCandidates(trip, itinerary)
+    : undefined;
 
   const proposal = await dependencies.generationService.generate({
     request: {
@@ -142,6 +157,7 @@ export async function executeGenerateItineraryProposalAction(
     asOf: cloneInstant(now),
     generatedAt: cloneInstant(now),
     createProposedActivityId,
+    ...(additionalCandidates ? { additionalCandidates } : {}),
   });
 
   if (proposal.status === "failed") {

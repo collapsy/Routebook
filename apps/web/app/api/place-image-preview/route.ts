@@ -122,7 +122,7 @@ async function resolveIdentityOnlyGooglePlaceId(
     }[];
   };
 
-  const firstCandidate = (payload.places ?? []).flatMap((place): GoogleIdentityCandidate[] => {
+  const candidates = (payload.places ?? []).flatMap((place): GoogleIdentityCandidate[] => {
     const externalId = cleanText(place.id);
     const name = cleanText(place.displayName?.text);
     const latitude = finiteNumber(place.location?.latitude);
@@ -138,8 +138,7 @@ async function resolveIdentityOnlyGooglePlaceId(
         ...(addressLabel ? { addressLabel } : {}),
       },
     ];
-  })[0];
-  if (!firstCandidate) return undefined;
+  });
 
   const target: PlaceQualityTarget = {
     id: LAZY_QUALITY_TARGET_ID,
@@ -150,9 +149,19 @@ async function resolveIdentityOnlyGooglePlaceId(
     ...(input.addressLabel ? { addressLabel: input.addressLabel } : {}),
   };
 
-  return isConservativeQualityIdentityMatch(target, firstCandidate, { allowSpatialAlias: true })
-    ? firstCandidate.externalId
-    : undefined;
+  const matchedRank = candidates.findIndex((candidate) =>
+    isConservativeQualityIdentityMatch(target, candidate, { allowSpatialAlias: true }),
+  );
+  const matchedCandidate = matchedRank >= 0 ? candidates[matchedRank] : undefined;
+
+  console.info("[place-bootstrap] lazy media identity completed", {
+    provider: "google-places",
+    candidateCount: candidates.length,
+    matched: Boolean(matchedCandidate),
+    ...(matchedCandidate ? { matchedRank: matchedRank + 1 } : {}),
+  });
+
+  return matchedCandidate?.externalId;
 }
 
 async function resolveLazyGooglePlaceId(

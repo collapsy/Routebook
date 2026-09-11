@@ -127,7 +127,14 @@ describe("listAvailablePlaceCategories", () => {
 
   it("inclui as categorias novas somente quando a cobertura real as contém", () => {
     expect(
-      listAvailablePlaceCategories([undefined, "beach", "attraction", "viewpoint", "tour", "shopping"]),
+      listAvailablePlaceCategories([
+        undefined,
+        "beach",
+        "attraction",
+        "viewpoint",
+        "tour",
+        "shopping",
+      ]),
     ).toEqual(["beach", "attraction", "viewpoint", "tour", "shopping"]);
   });
 });

@@ -263,11 +263,19 @@ describe("GET /api/place-image-preview", () => {
       location: { latitude: 14.74191, longitude: -91.15621 },
       formattedAddress: "Panajachel, Guatemala",
     };
+    const incompatibleIdentityCandidate = {
+      id: "ChIJOutroBar01",
+      displayName: { text: "Outro Bar" },
+      location: { latitude: 14.7419, longitude: -91.1562 },
+      formattedAddress: "Panajachel, Guatemala",
+    };
     const fetcher = vi
       .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
       .mockResolvedValueOnce(Response.json({ places: [] }))
       .mockResolvedValueOnce(Response.json({ places: [identityCandidate] }))
-      .mockResolvedValueOnce(Response.json({ places: [identityCandidate] }))
+      .mockResolvedValueOnce(
+        Response.json({ places: [incompatibleIdentityCandidate, identityCandidate] }),
+      )
       .mockResolvedValueOnce(
         Response.json({
           id: identityCandidate.id,

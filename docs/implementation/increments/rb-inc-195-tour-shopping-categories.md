@@ -98,7 +98,7 @@ Categorias externas sem ACL explícito continuam sem categoria canônica e falha
 - atualizar rótulos e filtros da Discovery;
 - atualizar fallback visual por categoria;
 - cobrir novas categorias com testes unitários e de interface;
-- preservar compatibilidade do ranking existente com pesos explícitos conservadores, sem recalibrar a fórmula;
+- preservar compatibilidade do ranking existente: `tour` e `shopping` usam exatamente os pesos atuais de `nature` (`reputation 0.55`, `popularity 0.25`, `distance 0.20`, `opening 0`), sem recalibrar a fórmula;
 - reconciliar consumidores exaustivos de `PlaceCategory` em qualidade e apresentação;
 - criar Increment, Context Pack e registro documental.
 
@@ -155,7 +155,7 @@ Arquivo adicional indispensável exige registro prévio neste incremento e justi
 - [ ] busca textual encontra os novos rótulos;
 - [ ] fallback visual das novas categorias é distinto, local e explicitamente ilustrativo;
 - [ ] fotografia governada continua prevalecendo sobre fallback;
-- [ ] ranking permanece determinístico com pesos de compatibilidade explícitos;
+- [ ] ranking permanece determinístico com `tour` e `shopping` usando exatamente os pesos de compatibilidade de `nature`;
 - [ ] consumidores exaustivos da web exibem/consultam as novas categorias sem alterar regras de Recommendation, Saved Place, Activity ou Proposal;
 - [ ] nenhuma migration, novo Provider, secret ou billing é adicionado;
 - [ ] testes de domínio/ACL/UI passam;
@@ -168,7 +168,7 @@ Arquivo adicional indispensável exige registro prévio neste incremento e justi
 - ACL: mappings autorizados e categoria desconhecida;
 - filtros: ordem canônica, disponibilidade real, busca por rótulo e filtragem das novas categorias;
 - ilustração: `tour` e `shopping` expõem fallback sem simular fotografia;
-- qualidade: novas categorias são calculáveis sem alterar pesos existentes;
+- qualidade: novas categorias são calculáveis e retornam o mesmo score de `nature` sob sinais idênticos;
 - typecheck dos consumidores exaustivos de `PlaceCategory` na web;
 - E2E: filtros continuam responsivos e categorias vazias não aparecem;
 - regressão das seis categorias anteriores;

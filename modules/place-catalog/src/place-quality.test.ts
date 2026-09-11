@@ -85,6 +85,22 @@ describe("PlaceQualitySignals", () => {
     );
   });
 
+  it.each(["attraction", "viewpoint"] as const)(
+    "calcula qualidade para a nova categoria %s",
+    (category) => {
+      const result = calculatePlaceQualityScore({
+        category,
+        distanceMeters: 900,
+        signals: signals(),
+      });
+
+      expect(result?.score).toBeGreaterThan(0);
+      expect(result?.reasons).toEqual(
+        expect.arrayContaining(["Muito bem avaliado", "Muitas avaliações", "Popular na região"]),
+      );
+    },
+  );
+
   it("usa abertura como sinal contextual para vida noturna somente quando solicitado", () => {
     const openSignals = signals({ openNow: true });
     const closedSignals = signals({ openNow: false });

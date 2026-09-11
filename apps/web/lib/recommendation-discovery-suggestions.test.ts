@@ -194,8 +194,16 @@ describe("contextual external suggestions", () => {
       trip,
       publishedPlaces: [],
       externalReconciliations: [
-        { candidate: candidate("near-cafe", "Café perto", "gastronomy"), status: "new", reason: "novo" },
-        { candidate: candidate("nature", "Parque preferido", "nature"), status: "new", reason: "novo" },
+        {
+          candidate: candidate("near-cafe", "Café perto", "gastronomy"),
+          status: "new",
+          reason: "novo",
+        },
+        {
+          candidate: candidate("nature", "Parque preferido", "nature"),
+          status: "new",
+          reason: "novo",
+        },
         { candidate: candidate("bar", "Bar", "nightlife"), status: "new", reason: "novo" },
       ],
       reference: { latitude: -29.3788, longitude: -50.872 },

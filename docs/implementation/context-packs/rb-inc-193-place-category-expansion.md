@@ -56,7 +56,8 @@ Distinguir `attraction` e `viewpoint` das categorias genéricas atuais da Discov
 - `places.category` é `varchar`, portanto a expansão não exige migration;
 - a tela de Lugares deriva filtros disponíveis das categorias efetivamente presentes;
 - `CategoryIllustration` é fallback visual, nunca fotografia nem dado persistido;
-- fotografia governada continua tendo precedência.
+- fotografia governada continua tendo precedência;
+- `CATEGORY_WEIGHTS` é um consumidor exaustivo de `PlaceCategory`, então toda nova categoria precisa de pesos definidos para manter o typecheck e o comportamento determinístico.
 
 ## 5. Decisão de classificação
 
@@ -77,6 +78,8 @@ viewpoint  -> Mirantes
 
 Não mapear por inferência ampla ancestrais de taxonomia. Categoria externa desconhecida continua `undefined`.
 
+Para ranking, este incremento **não recalibra** a fórmula. `attraction` e `viewpoint` recebem exatamente os pesos já usados por `nature` como compatibilidade conservadora até um incremento específico de ranking justificar pesos próprios.
+
 ## 6. Compatibilidade Overture
 
 A stack atual já normaliza categoria primária usando, em ordem:
@@ -94,7 +97,7 @@ A hierarquia usa `taxonomy.hierarchy`. Este incremento não muda parsing de PMTi
 - categoria não altera identidade por si só;
 - Discovery oferece apenas filtros com cobertura real;
 - foto/mídia não altera categoria;
-- categoria não altera ranking neste incremento;
+- não há recalibração de ranking neste incremento; as novas categorias apenas recebem pesos de compatibilidade equivalentes aos de `nature`;
 - `Place.category` permanece singular na implementação;
 - Recommendation e Proposal permanecem intocados;
 - nenhum Provider, secret, billing ou migration novo.
@@ -106,6 +109,8 @@ modules/place-catalog/src/place.ts
 modules/place-catalog/src/place.test.ts
 modules/place-catalog/src/external-place.ts
 modules/place-catalog/src/external-place.test.ts
+modules/place-catalog/src/place-quality.ts
+modules/place-catalog/src/place-quality.test.ts
 apps/web/app/viagens/[tripId]/lugares/filters.ts
 apps/web/app/viagens/[tripId]/lugares/filters.test.ts
 apps/web/components/category-illustration.tsx
@@ -128,6 +133,7 @@ docs/registry.md
 - filtro e pesquisa pelos novos rótulos;
 - filtro não aparece quando não há cobertura;
 - fallback ilustrativo para as duas novas categorias;
+- cálculo de qualidade das novas categorias com pesos idênticos a `nature`;
 - docs validation;
 - lint, typecheck, unit/integration, build e E2E aplicáveis.
 
@@ -137,7 +143,8 @@ docs/registry.md
 - não mapear toda atração/cultura/comércio por ancestral genérico;
 - não ampliar para shopping/cultural-site/tour sem novo recorte explícito;
 - não converter `Place.category` para array neste incremento;
-- não tocar Proposal, Recommendation ou ranking;
+- não recalibrar ranking ou criar pesos específicos para attraction/viewpoint;
+- não tocar Proposal ou Recommendation;
 - não alterar arquivos da PR #458;
 - não introduzir migration;
 - não ativar Production;
@@ -145,4 +152,4 @@ docs/registry.md
 
 ## 11. Handoff
 
-Relatar issue, branch, SHA, arquivos alterados, mappings efetivos, testes executados, resultados do CI, conflitos com a stack paralela e qualquer gate restante.
+Relatar issue, branch, SHA, arquivos alterados, mappings efetivos, pesos de compatibilidade, testes executados, resultados do CI, conflitos com a stack paralela e qualquer gate restante.

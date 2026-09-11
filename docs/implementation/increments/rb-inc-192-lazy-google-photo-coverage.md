@@ -22,7 +22,7 @@ ai_context:
 
 ## 1. Resultado vertical
 
-A tela **Explorar Lugares** deve manter o bootstrap inicial de Quality limitado, mas um Place externo fora desse lote não pode ficar permanentemente impedido de usar Google Places Photos apenas porque apareceu depois dos primeiros 12 alvos ou porque sua identidade Google segura não possui rating/popularity suficiente para produzir score.
+A tela **Explorar Lugares** deve manter o bootstrap inicial de Quality limitado, mas um Place externo fora desse lote não pode ficar permanentemente impedido de usar Google Places Photos apenas porque apareceu depois dos primeiros 12 alvos, ficou depois dos primeiros 12 cards da lista ou porque sua identidade Google segura não possui rating/popularity suficiente para produzir score.
 
 Quando o card entra na janela lazy já governada por `IntersectionObserver`, o endpoint de mídia pode executar reconciliação Google just-in-time para **aquele único Place**, caso ainda não exista Google Place ID previamente reconciliado. Somente após um match conservador o Google Place ID efêmero pode alimentar o adapter Google Place Photo existente.
 
@@ -64,6 +64,8 @@ No aceite seguinte, a tela ainda mostrou vários cards `Sem foto`. Os logs do Pr
 
 A análise do contrato mostrou uma diferença importante entre ranking e mídia: `PlaceQualitySignals` admite `externalId` sem rating/popularity, mas o fluxo histórico de Quality foi otimizado para produzir sinais quantitativos de ranking. Um estabelecimento pode, portanto, ser identificável com segurança no Google e ainda não gerar signal útil de ranking. Ausência de reputação não deve ser confundida com ausência de identidade quando a finalidade exclusiva é buscar uma foto real.
 
+A inspeção da projeção da própria página revelou ainda uma lacuna independente: `externalMediaItemIds` aplicava `.slice(0, bootstrapPolicy.media.previewBudget)`. Com o budget padrão 12, todo card externo a partir da posição 13 recebia `enabled=false` e era renderizado imediatamente como `Sem foto`, **sem sequer entrar no fluxo lazy**. Isso contradiz o objetivo deste incremento: o budget de bootstrap não pode virar uma lista permanente de únicos cards autorizados a tentar mídia. Na Discovery, o controle de custo passa a ser principalmente por demanda visual: somente cards que entram na margem do `IntersectionObserver` iniciam o request.
+
 ## 4. Reconciliação just-in-time autorizada
 
 Quando `/api/place-image-preview` recebe um Place válido com `category`, mas **sem** `googlePlaceId`:
@@ -84,16 +86,22 @@ A recuperação identity-only é efêmera e exclusiva da mídia. Não é persist
 ## 5. Budget, performance e cache
 
 - `PLACE_DISCOVERY_QUALITY_LIMIT = 12` não é aumentado por este incremento;
-- o bootstrap server-side inicial continua limitado;
-- reconciliação extra ocorre apenas para cards que entram na margem lazy do viewport;
+- o bootstrap server-side inicial de Quality continua limitado;
+- `ROUTEBOOK_PLACE_MEDIA_PREVIEW_BUDGET` deixa de ser usado na Discovery como corte permanente dos únicos cards elegíveis a mídia;
+- o valor continua disponível como referência de budget das superfícies que fazem preview antecipado/eager, mas a lista de Discovery usa **viewport lazy** como gate efetivo de execução;
+- todos os cards externos/enriquecidos sem `primaryImage` podem ser elegíveis, porém **nenhum request é disparado antes de o card entrar na margem de 320 px do viewport**;
+- rolar a lista pode produzir novos requests conforme novos cards entram nessa margem; não existe batch global dos 60/127 resultados;
+- reconciliação extra ocorre apenas para cards efetivamente alcançados pelo usuário;
 - uma requisição de card reconcilia no máximo um target;
 - a busca identity-only ocorre somente quando `findSignals` não produziu Google Place ID;
 - cada tentativa identity-only faz no máximo uma Text Search adicional, sem paginação;
 - chamadas repetidas do mesmo ciclo de renderização continuam evitadas pelo estado do componente;
 - timeouts/retries reutilizam `runPlaceBootstrapStep` e a política existente;
-- nenhum prefetch global de todos os 127 candidatos é permitido;
+- nenhum prefetch global de todos os candidatos é permitido;
 - respostas que passaram pelo caminho Google lazy não podem transformar um miss temporário em `404` público de longa duração;
 - Wikimedia obtida depois de uma tentativa Google lazy usa cache privado `no-store`, enquanto o caminho Wikimedia puro preserva o cache público existente.
+
+Essa mudança de semântica é restrita à superfície Discovery no Preview e responde diretamente ao aceite visual: preservar um limite server-side como desabilitação permanente fazia dezenas de cards parecerem sem foto sem consulta real ao Provider.
 
 ## 6. Segurança e identidade
 
@@ -125,11 +133,12 @@ São operações efêmeras de cobertura de mídia.
 
 ## 8. UX e fallback
 
-- o card continua iniciando resolução próximo ao viewport;
+- todo card elegível inicia resolução somente ao se aproximar do viewport;
 - estado temporário continua compacto (`Carregando foto…`), sem hero genérico;
 - match Google seguro mostra foto + attribution;
 - miss Google tenta Wikimedia destination-agnostic;
 - ausência segura termina em `Sem foto`;
+- `Sem foto` não pode ser produzido apenas porque o card ficou depois da posição 12;
 - a aplicação não promete foto para todos os Places;
 - um Place ambíguo continua corretamente sem foto se nenhum Provider produzir identidade segura.
 
@@ -138,6 +147,7 @@ São operações efêmeras de cobertura de mídia.
 ```text
 apps/web/app/api/place-image-preview/route.ts
 apps/web/app/api/place-image-preview/route.test.ts
+apps/web/app/viagens/[tripId]/lugares/page.tsx
 apps/web/components/external-place-image-preview.tsx
 apps/web/components/external-place-image-preview.test.tsx
 apps/web/e2e/external-place-images.spec.ts
@@ -159,19 +169,23 @@ Alteração em outro arquivo exige primeiro atualização deste Increment e do C
 - [ ] Place Google seguro sem rating/popularity pode recuperar apenas sua identidade para mídia sem criar score;
 - [ ] recuperação identity-only consulta no máximo uma página curta e aceita somente o primeiro candidato que passe matching conservador;
 - [ ] Google Photo continua revalidando identidade via Place Details;
+- [ ] card externo posterior ao antigo budget de 12 continua podendo solicitar mídia ao entrar no viewport;
+- [ ] cards fora do viewport não fazem request antecipado;
 - [ ] mismatch/Provider ausente/falha degrada para Wikimedia/`Sem foto`;
 - [ ] miss do caminho Google lazy não recebe cache público de longa duração;
 - [ ] ranking e persistência não mudam;
 - [ ] `Punto Cero Guatemala` é validado live no Preview, sem hardcode específico;
 - [ ] ao menos um segundo destino não-Pipa é validado;
 - [ ] testes provam que o componente não chama mídia antes do IntersectionObserver;
+- [ ] E2E prova que um card além da posição 12 ainda resolve foto quando rolado ao viewport;
 - [ ] Documentation e Engineering Validation passam no mesmo SHA;
 - [ ] Vercel Preview fica READY no mesmo SHA;
 - [ ] Production permanece bloqueada.
 
 ## 11. Fora de escopo
 
-- aumentar o bootstrap para todos os candidatos;
+- aumentar o bootstrap de Quality para todos os candidatos;
+- prefetch de mídia de todos os resultados sem ação visual do usuário;
 - persistir Quality lazy ou identidade de mídia;
 - alterar ranking;
 - alterar Discovery;

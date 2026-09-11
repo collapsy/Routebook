@@ -17,6 +17,8 @@ const categoryQueries = Object.freeze({
   nature: "atrações e natureza",
   attraction: "pontos turísticos",
   viewpoint: "mirantes",
+  tour: "passeios e tours",
+  shopping: "shopping, mercados e compras",
 });
 
 const targets: readonly PlaceQualityTarget[] = Object.freeze([

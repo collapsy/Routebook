@@ -66,6 +66,8 @@ A análise do contrato mostrou uma diferença importante entre ranking e mídia:
 
 A inspeção da projeção da própria página revelou ainda uma lacuna independente: `externalMediaItemIds` aplicava `.slice(0, bootstrapPolicy.media.previewBudget)`. Com o budget padrão 12, todo card externo a partir da posição 13 recebia `enabled=false` e era renderizado imediatamente como `Sem foto`, **sem sequer entrar no fluxo lazy**. Isso contradiz o objetivo deste incremento: o budget de bootstrap não pode virar uma lista permanente de únicos cards autorizados a tentar mídia. Na Discovery, o controle de custo passa a ser principalmente por demanda visual: somente cards que entram na margem do `IntersectionObserver` iniciam o request.
 
+Após remover esse corte, o aceite mobile mostrou melhora material de cobertura: muitos cards posteriores ao antigo budget passaram a carregar Google Photo. Restaram misses reais em alguns estabelecimentos. Os logs mostraram duas classes: Quality/identity sem match seguro e identidade Google encontrada cujo adapter de foto não liberou mídia. A inspeção do fallback identity-only revelou outra perda de cobertura independente dos thresholds: a Text Search pedia até cinco resultados, mas o código considerava apenas o primeiro, mesmo quando ele falhava no matching e um candidato posterior poderia passar exatamente o mesmo gate conservador.
+
 ## 4. Reconciliação just-in-time autorizada
 
 Quando `/api/place-image-preview` recebe um Place válido com `category`, mas **sem** `googlePlaceId`:
@@ -76,7 +78,7 @@ Quando `/api/place-image-preview` recebe um Place válido com `category`, mas **
 4. quando o request possui contexto de Destination validado, esse contexto é reutilizado como `addressLabel` do target, permitindo que o targeted fallback existente consulte `nome + Destination`;
 5. um `PlaceQualitySignals(provider=google-places, externalId)` resultante libera o Google Place Photo;
 6. se `findSignals` não produzir Google Place ID, pode ocorrer **uma única recuperação identity-only** no mesmo request lazy: Text Search nominal com `nome + Destination` quando disponível, location bias de 2,5 km, até cinco resultados e FieldMask somente de identidade;
-7. somente o primeiro resultado dessa busca pode ser usado, e apenas se passar por `isConservativeQualityIdentityMatch(..., { allowSpatialAlias: true })` com nome, coordenadas e contexto local;
+7. os candidatos retornados podem ser avaliados na ordem do Google e somente o **primeiro candidato que passar** por `isConservativeQualityIdentityMatch(..., { allowSpatialAlias: true })` com nome, coordenadas e contexto local pode ser usado; candidatos anteriores que falham nesse mesmo gate são ignorados;
 8. rating/popularity não são exigidos nessa recuperação, porque ela não produz score e não entra no ranking;
 9. o adapter de foto continua revalidando ID, nome e proximidade via Place Details;
 10. miss/mismatch/failure segue para Wikimedia e depois `Sem foto`.
@@ -94,7 +96,7 @@ A recuperação identity-only é efêmera e exclusiva da mídia. Não é persist
 - reconciliação extra ocorre apenas para cards efetivamente alcançados pelo usuário;
 - uma requisição de card reconcilia no máximo um target;
 - a busca identity-only ocorre somente quando `findSignals` não produziu Google Place ID;
-- cada tentativa identity-only faz no máximo uma Text Search adicional, sem paginação;
+- cada tentativa identity-only faz no máximo uma Text Search adicional, sem paginação, avaliando no máximo cinco candidatos já retornados nessa única resposta;
 - chamadas repetidas do mesmo ciclo de renderização continuam evitadas pelo estado do componente;
 - timeouts/retries reutilizam `runPlaceBootstrapStep` e a política existente;
 - nenhum prefetch global de todos os candidatos é permitido;
@@ -106,9 +108,9 @@ Essa mudança de semântica é restrita à superfície Discovery no Preview e re
 ## 6. Segurança e identidade
 
 - nenhum Google Place ID é aceito sem matching de identidade;
-- `isConservativeQualityIdentityMatch` continua gate obrigatório;
+- `isConservativeQualityIdentityMatch` continua gate obrigatório e seus thresholds não são relaxados;
 - o contexto de Destination apenas torna a consulta nominal mais específica;
-- a recuperação identity-only considera apenas o primeiro resultado do Text Search e ainda exige matching conservador;
+- a recuperação identity-only pode inspecionar até cinco resultados da única Text Search, mas aceita no máximo um: o primeiro que passar o mesmo matching conservador; quantidade/posição de candidatos podem ser registradas sem nome, coordenada, chave ou resource name;
 - ausência de rating/popularity não é tratada como evidência positiva nem negativa de identidade;
 - o Google Photo adapter executa a segunda revalidação por Place Details;
 - API key, token completo e photo resource name permanecem server-side;
@@ -167,7 +169,8 @@ Alteração em outro arquivo exige primeiro atualização deste Increment e do C
 - [ ] reconciliação just-in-time processa um único target;
 - [ ] Destination validado é repassado como contexto do target lazy para o targeted fallback nominal;
 - [ ] Place Google seguro sem rating/popularity pode recuperar apenas sua identidade para mídia sem criar score;
-- [ ] recuperação identity-only consulta no máximo uma página curta e aceita somente o primeiro candidato que passe matching conservador;
+- [ ] recuperação identity-only consulta no máximo uma página curta, avalia até cinco resultados e aceita somente o primeiro candidato que passe o matching conservador, sem relaxar thresholds;
+- [ ] candidato textual anterior que falha no matching não bloqueia um candidato posterior seguro da mesma resposta;
 - [ ] Google Photo continua revalidando identidade via Place Details;
 - [ ] card externo posterior ao antigo budget de 12 continua podendo solicitar mídia ao entrar no viewport;
 - [ ] cards fora do viewport não fazem request antecipado;

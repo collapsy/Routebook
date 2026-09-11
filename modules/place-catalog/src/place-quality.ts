@@ -75,6 +75,8 @@ const CATEGORY_WEIGHTS: Readonly<
   gastronomy: { reputation: 0.55, popularity: 0.15, distance: 0.15, opening: 0.15 },
   nightlife: { reputation: 0.4, popularity: 0.3, distance: 0.1, opening: 0.2 },
   nature: { reputation: 0.55, popularity: 0.25, distance: 0.2, opening: 0 },
+  attraction: { reputation: 0.55, popularity: 0.25, distance: 0.2, opening: 0 },
+  viewpoint: { reputation: 0.55, popularity: 0.25, distance: 0.2, opening: 0 },
 });
 
 function isFiniteNonNegative(value: number): boolean {

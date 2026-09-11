@@ -87,7 +87,7 @@ Este incremento não muda parsing de PMTiles, protocolo de acesso nem Provider. 
 
 ## 7. Ranking
 
-Não recalibrar a fórmula. `tour` e `shopping` recebem pesos de compatibilidade conservadores já existentes, escolhidos explicitamente no código para manter comportamento determinístico até existir incremento específico de ranking por categoria.
+Não recalibrar a fórmula. `tour` e `shopping` usam exatamente o perfil de compatibilidade atual de `nature`: `reputation 0.55`, `popularity 0.25`, `distance 0.20` e `opening 0`. A equivalência é explícita e temporária até um incremento específico justificar pesos próprios por categoria.
 
 ## 8. Contratos preservados
 
@@ -136,7 +136,7 @@ docs/registry.md
 - filtros e busca pelos novos rótulos;
 - filtros ausentes sem cobertura;
 - fallbacks ilustrativos para as duas categorias;
-- cálculo de qualidade determinístico;
+- cálculo de qualidade determinístico e equivalente a `nature` sob sinais idênticos;
 - typecheck dos consumidores exaustivos;
 - docs validation;
 - lint, typecheck, unit/integration, build e E2E aplicáveis.

@@ -164,13 +164,14 @@ describe("GET /api/place-image-preview", () => {
     expect(fetcher).toHaveBeenCalledTimes(1);
   });
 
-  it("reconcilia Google Quality sob demanda para card fora do bootstrap e então libera Google Photo", async () => {
+  it("usa o Destination no fallback nominal de Quality lazy e então libera Google Photo", async () => {
     vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
     vi.stubEnv("ROUTEBOOK_PLACE_QUALITY_PROVIDER", "google");
     vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
     vi.stubEnv("VERCEL_ENV", "preview");
     const fetcher = vi
       .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ places: [] }))
       .mockResolvedValueOnce(
         Response.json({
           places: [
@@ -223,7 +224,7 @@ describe("GET /api/place-image-preview", () => {
       authorAttributions: [{ displayName: "Cliente Google" }],
     });
     expect(String(payload.mediaUrl)).toMatch(/^\/api\/place-image-preview\/google\?token=/);
-    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(fetcher).toHaveBeenCalledTimes(3);
 
     const [qualityInput, qualityInit] = fetcher.mock.calls[0] ?? [];
     expect(String(qualityInput)).toBe("https://places.googleapis.com/v1/places:searchText");
@@ -235,7 +236,18 @@ describe("GET /api/place-image-preview", () => {
         },
       },
     });
-    expect(JSON.parse(String(qualityInit?.body))).not.toHaveProperty("regionCode");
+
+    const [targetedInput, targetedInit] = fetcher.mock.calls[1] ?? [];
+    expect(String(targetedInput)).toBe("https://places.googleapis.com/v1/places:searchText");
+    expect(JSON.parse(String(targetedInit?.body))).toMatchObject({
+      textQuery: "Punto Cero Guatemala, Panajachel Guatemala",
+      locationBias: {
+        circle: {
+          center: { latitude: 14.74191, longitude: -91.15621 },
+        },
+      },
+    });
+    expect(JSON.parse(String(targetedInit?.body))).not.toHaveProperty("regionCode");
     expect(JSON.stringify(payload)).not.toContain("resource-secret");
     expect(JSON.stringify(payload)).not.toContain("secret-google");
   });
@@ -258,11 +270,12 @@ describe("GET /api/place-image-preview", () => {
     const payload = (await response.json()) as Record<string, unknown>;
 
     expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
     expect(payload.sourceName).toBe("Wikimedia Commons");
     expect(fetcher).toHaveBeenCalledTimes(1);
   });
 
-  it("cai para Wikimedia quando Quality lazy não encontra identidade Google segura", async () => {
+  it("cai para Wikimedia sem cache público quando Quality lazy não encontra identidade Google segura", async () => {
     vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
     vi.stubEnv("ROUTEBOOK_PLACE_QUALITY_PROVIDER", "google");
     vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
@@ -285,7 +298,36 @@ describe("GET /api/place-image-preview", () => {
     const payload = (await response.json()) as Record<string, unknown>;
 
     expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
     expect(payload.sourceName).toBe("Wikimedia Commons");
+    expect(fetcher).toHaveBeenCalledTimes(3);
+  });
+
+  it("não cacheia publicamente miss após tentativa de Quality lazy", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("ROUTEBOOK_PLACE_QUALITY_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const fetcher = vi
+      .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ places: [] }))
+      .mockResolvedValueOnce(Response.json({ places: [] }))
+      .mockResolvedValueOnce(
+        commonsResponse("Praia do Amor no litoral brasileiro", "File:Praia do Amor.jpg", null),
+      );
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          category: "beach",
+          googlePlaceId: undefined,
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
     expect(fetcher).toHaveBeenCalledTimes(3);
   });
 

@@ -35,13 +35,48 @@ const places: Place[] = [
     createdAt: now,
     updatedAt: now,
   },
+  {
+    id: "attraction",
+    destinationId: "florianopolis-sc-br",
+    slug: "projeto-tamar",
+    name: "Projeto Tamar",
+    summary: "Ponto turístico voltado à conservação marinha e à visitação educativa.",
+    category: "attraction",
+    latitude: -27.5747,
+    longitude: -48.4242,
+    priceRange: "moderate",
+    publicationStatus: "published",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "viewpoint",
+    destinationId: "florianopolis-sc-br",
+    slug: "mirante-da-lagoa",
+    name: "Mirante da Lagoa",
+    summary: "Mirante com vista panorâmica usado como parada rápida durante a viagem.",
+    category: "viewpoint",
+    latitude: -27.601,
+    longitude: -48.468,
+    priceRange: "free",
+    publicationStatus: "published",
+    createdAt: now,
+    updatedAt: now,
+  },
 ];
 
 describe("listAvailablePlaceCategories", () => {
   it("retorna somente categorias presentes, sem duplicar e na ordem canônica", () => {
     expect(
-      listAvailablePlaceCategories(["nightlife", "gastronomy", "gastronomy", "nature"]),
-    ).toEqual(["gastronomy", "nature", "nightlife"]);
+      listAvailablePlaceCategories([
+        "viewpoint",
+        "nightlife",
+        "gastronomy",
+        "gastronomy",
+        "attraction",
+        "nature",
+      ]),
+    ).toEqual(["gastronomy", "nature", "nightlife", "attraction", "viewpoint"]);
   });
 
   it("não oferece praia quando a cobertura da viagem não possui beach", () => {
@@ -52,10 +87,11 @@ describe("listAvailablePlaceCategories", () => {
     ]);
   });
 
-  it("inclui praia quando a cobertura real contém beach e ignora categorias ausentes", () => {
-    expect(listAvailablePlaceCategories([undefined, "beach", "gastronomy"])).toEqual([
+  it("inclui as categorias novas somente quando a cobertura real as contém", () => {
+    expect(listAvailablePlaceCategories([undefined, "beach", "attraction", "viewpoint"])).toEqual([
       "beach",
-      "gastronomy",
+      "attraction",
+      "viewpoint",
     ]);
   });
 });
@@ -69,6 +105,24 @@ describe("filterPlaces", () => {
     ).toEqual(["food"]);
   });
 
+  it("encontra Pontos turísticos e Mirantes pelos rótulos das categorias", () => {
+    expect(
+      filterPlaces(places, { search: "pontos turisticos" }).map(({ place }) => place.id),
+    ).toEqual(["attraction"]);
+    expect(filterPlaces(places, { search: "mirantes" }).map(({ place }) => place.id)).toEqual([
+      "viewpoint",
+    ]);
+  });
+
+  it("filtra diretamente as novas categorias", () => {
+    expect(filterPlaces(places, { category: "attraction" }).map(({ place }) => place.id)).toEqual([
+      "attraction",
+    ]);
+    expect(filterPlaces(places, { category: "viewpoint" }).map(({ place }) => place.id)).toEqual([
+      "viewpoint",
+    ]);
+  });
+
   it("combina categoria, Price Range e distância geodésica", () => {
     expect(
       filterPlaces(
@@ -80,7 +134,14 @@ describe("filterPlaces", () => {
   });
 
   it("prefere lugares mais próximos quando a hospedagem possui coordenadas", () => {
-    const results = filterPlaces(places, {}, { latitude: -6.2297, longitude: -35.0536 });
+    const results = filterPlaces(
+      places.slice(0, 2),
+      {},
+      {
+        latitude: -6.2297,
+        longitude: -35.0536,
+      },
+    );
 
     expect(results.map(({ place }) => place.id)).toEqual(["food", "beach"]);
     expect(results[0]?.distanceMeters).toBe(0);
@@ -88,7 +149,12 @@ describe("filterPlaces", () => {
   });
 
   it("preserva a ordem original quando não há coordenadas da hospedagem", () => {
-    expect(filterPlaces(places, {}).map(({ place }) => place.id)).toEqual(["beach", "food"]);
+    expect(filterPlaces(places, {}).map(({ place }) => place.id)).toEqual([
+      "beach",
+      "food",
+      "attraction",
+      "viewpoint",
+    ]);
   });
 
   it("não aplica distância sem coordenada da hospedagem", () => {

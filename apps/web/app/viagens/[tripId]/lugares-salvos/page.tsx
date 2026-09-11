@@ -29,6 +29,8 @@ const categoryLabels: Record<PlaceCategory, string> = {
   gastronomy: "Gastronomia",
   nature: "Natureza",
   nightlife: "Vida noturna",
+  attraction: "Ponto turístico",
+  viewpoint: "Mirante",
 };
 
 function formatDate(value: string): string {

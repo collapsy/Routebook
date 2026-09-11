@@ -12,6 +12,8 @@ export const categoryLabels: Record<PlaceCategory, string> = {
   gastronomy: "Gastronomia",
   nature: "Natureza",
   nightlife: "Vida noturna",
+  attraction: "Pontos turísticos",
+  viewpoint: "Mirantes",
 };
 
 export const priceRangeLabels: Record<PlacePriceRange, string> = {

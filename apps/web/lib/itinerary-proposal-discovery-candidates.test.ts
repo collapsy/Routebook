@@ -125,7 +125,31 @@ describe("loadItineraryProposalDiscoveryCandidates", () => {
         reason: "Lugar selecionado entre opções seguras da área desta Viagem.",
       },
     ]);
+    expect(deps.loadDiscovery).toHaveBeenCalledWith(trip, [], 6);
     expect(deps.promoteCandidate).toHaveBeenCalledTimes(2);
+  });
+
+  it("dimensiona a seleção Discovery pela capacidade da viagem em vez do limite fixo de seis", async () => {
+    const longerTrip = createTrip(
+      {
+        name: "Panajachel Proposal longa",
+        destination: trip.destination,
+        startDate: "2026-10-10",
+        endDate: "2026-10-13",
+        ownerName: "RouteBook QA",
+      },
+      now,
+    );
+    const itinerary = createItinerary(
+      { tripId: longerTrip.id, period: longerTrip.period },
+      now,
+    );
+    const deps = dependencies({ candidates: [], places: [] });
+
+    await expect(
+      loadItineraryProposalDiscoveryCandidates(longerTrip, itinerary, deps),
+    ).resolves.toEqual([]);
+    expect(deps.loadDiscovery).toHaveBeenCalledWith(longerTrip, [], 12);
   });
 
   it("omite Place já planejado depois de materializar a identidade", async () => {
@@ -148,6 +172,7 @@ describe("loadItineraryProposalDiscoveryCandidates", () => {
     await expect(loadItineraryProposalDiscoveryCandidates(trip, itinerary, deps)).resolves.toEqual(
       [],
     );
+    expect(deps.loadDiscovery).toHaveBeenCalledWith(trip, [], 5);
     expect(deps.placeRepository.listByIds).not.toHaveBeenCalled();
   });
 

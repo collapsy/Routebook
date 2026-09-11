@@ -69,7 +69,10 @@ describe("mapOverturePlaceCategory", () => {
     ["coffee_shop", "gastronomy"],
     ["bar", "nightlife"],
     ["night_club", "nightlife"],
-    ["scenic_viewpoint", "nature"],
+    ["park", "nature"],
+    ["tourist_attraction", "attraction"],
+    ["viewpoint", "viewpoint"],
+    ["scenic_viewpoint", "viewpoint"],
   ] as const)("mapeia %s para %s", (externalCategory, canonicalCategory) => {
     expect(mapOverturePlaceCategory(externalCategory)).toBe(canonicalCategory);
   });
@@ -141,7 +144,7 @@ describe("isStrongExternalPlaceIdentityMatch", () => {
       destinationId: "florianopolis-sc-br",
       slug: "projeto-tamar",
       name: "Projeto Tamar",
-      category: "nature",
+      category: "attraction",
       latitude: -27.5747,
       longitude: -48.4242,
     });
@@ -149,7 +152,7 @@ describe("isStrongExternalPlaceIdentityMatch", () => {
       externalId: "tamar-floripa",
       name: "Projeto Tamar Florianópolis",
       providerCategory: "tourist_attraction",
-      category: "nature",
+      category: "attraction",
       latitude: -27.5748,
       longitude: -48.4241,
     });
@@ -469,7 +472,7 @@ describe("reconcileExternalPlaceCandidate", () => {
       destinationId: "florianopolis-sc-br",
       name: "Projeto Tamar",
       slug: "projeto-tamar",
-      category: "nature",
+      category: "attraction",
       latitude: -27.5747,
       longitude: -48.4242,
     });
@@ -478,7 +481,7 @@ describe("reconcileExternalPlaceCandidate", () => {
         externalId: "tamar-floripa",
         name: "Projeto Tamar Florianópolis",
         providerCategory: "tourist_attraction",
-        category: "nature",
+        category: "attraction",
         latitude: -27.5748,
         longitude: -48.4241,
       }),
@@ -501,7 +504,7 @@ describe("reconcileExternalPlaceCandidate", () => {
         externalId: "new-place",
         name: "Mirante Novo",
         providerCategory: "scenic_viewpoint",
-        category: "nature",
+        category: "viewpoint",
         latitude: -6.2101,
         longitude: -35.0712,
       }),

@@ -89,7 +89,7 @@ function dependencies(input: {
     loadDiscovery: vi.fn(async () => discovery(input.candidates)),
     promoteCandidate: promote,
     placeRepository: {
-      listByIds: vi.fn(async () => input.places),
+      listByIds: vi.fn(async () => [...input.places]),
     },
   };
 }

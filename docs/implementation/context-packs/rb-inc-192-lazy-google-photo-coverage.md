@@ -22,7 +22,7 @@ ai_context:
 
 ## 1. Missão
 
-Remover a lacuna entre o bootstrap inicial limitado de Quality e a cobertura visual dos demais Places externos, sem transformar o catálogo em um batch caro nem afrouxar identidade.
+Remover a lacuna entre o bootstrap inicial limitado de Quality e a cobertura visual dos demais Places externos, sem transformar o catálogo em um batch caro nem afrouxar identidade. Um limite de bootstrap não pode se transformar em desabilitação permanente de mídia para cards posteriores na lista.
 
 ## 2. Unidade de trabalho
 
@@ -64,16 +64,18 @@ No mesmo deployment existem respostas Google metadata/media `200`, portanto Prov
 
 A validação do primeiro Preview RB-INC-192 em 2026-09-11 confirmou que a Quality lazy era executada, porém targets sem match na busca ampla entravam no targeted fallback sem o contexto textual do Destination. Esse ponto foi corrigido passando o Destination validado como `addressLabel` do target.
 
-A validação humana seguinte ainda mostrou vários cards `Sem foto`. Os logs do mesmo Preview provaram um terceiro detalhe operacional: em uma amostra lazy de 12 cards houve 9 respostas de metadata Google com foto e 3 misses finais. Em dois desses três misses, `findSignals` terminou `matched: false`; em um, a Quality reconciliou um Google Place ID mas o adapter de foto não encontrou mídia/identidade final segura.
+A validação humana seguinte ainda mostrou vários cards `Sem foto`. Os logs do mesmo Preview provaram outro detalhe: em uma amostra lazy de 12 cards houve 9 respostas Google com foto e 3 misses finais. Em dois desses três misses, `findSignals` terminou `matched: false`; em um, a Quality reconciliou Google Place ID mas o adapter de foto não liberou mídia segura.
 
-O primeiro padrão é compatível com Places reais que possuem identidade Google recuperável, porém não retornam `rating` nem `popularity`. O contrato `PlaceQualitySignals` permite `externalId` sem score, mas o caminho de Quality foi desenhado originalmente para ranking e pode não produzir sinal quando não existe evidência quantitativa. Para mídia, ausência de rating não deve apagar uma identidade Google que ainda passa pelo mesmo matching conservador.
+O primeiro padrão é compatível com Places que possuem identidade Google recuperável, porém sem `rating` nem `popularity`. Para mídia, ausência desses sinais não deve apagar uma identidade segura. Por isso existe fallback identity-only governado, exclusivo da mídia.
+
+A inspeção de `apps/web/app/viagens/[tripId]/lugares/page.tsx` mostrou ainda que `externalMediaItemIds` aplicava `.slice(0, bootstrapPolicy.media.previewBudget)`. Como o default é 12, o card de posição 13 em diante recebia `enabled=false` e renderizava `Sem foto` sem consulta alguma. Esse corte é incompatível com a estratégia lazy já presente no componente: o `IntersectionObserver` é quem deve impedir requests de cards que o usuário ainda não alcançou.
 
 ## 5. Contratos preservados
 
 - Overture continua Discovery;
 - Place Catalog continua autoridade canônica;
 - Quality continua enriquecimento temporário;
-- `PLACE_DISCOVERY_QUALITY_LIMIT = 12` continua protegendo bootstrap;
+- `PLACE_DISCOVERY_QUALITY_LIMIT = 12` continua protegendo bootstrap de Quality;
 - Google Place Photo só recebe Google Place ID depois de reconciliação de identidade;
 - Google Photo adapter continua revalidando identidade;
 - `Place.primaryImage` curada continua prioridade;
@@ -81,7 +83,8 @@ O primeiro padrão é compatível com Places reais que possuem identidade Google
 - `Sem foto` compacto continua fallback final;
 - foto não altera ranking nem persistência;
 - ausência de rating/popularity continua ausência de score;
-- nenhum threshold de matching é relaxado para aumentar cobertura visual.
+- nenhum threshold de matching é relaxado para aumentar cobertura visual;
+- cards fora do viewport continuam sem request de mídia.
 
 ## 6. Extensão explícita ao RB-INC-190
 
@@ -110,7 +113,8 @@ Isso não autoriza lookup de foto por texto puro: texto e rank de busca apenas r
 ## 7. Fluxo autorizado
 
 ```text
-card entra na margem do viewport
+qualquer card elegível aproxima-se do viewport
+  -> IntersectionObserver libera o request daquele card
   -> ExternalPlaceImagePreview solicita /api/place-image-preview
   -> existe googlePlaceId inicial?
        sim -> Google Photo adapter
@@ -123,25 +127,31 @@ card entra na margem do viewport
   -> Wikimedia miss -> Sem foto
 ```
 
+Cards que ainda não entraram na margem do viewport não executam esse fluxo. Cards que ficaram depois da posição 12 não são mais desabilitados apenas por posição.
+
 ## 8. Falhas, budget e cache
 
 - falha de Quality lazy não quebra o card;
 - Quality miss pode tentar uma única recuperação identity-only antes de Wikimedia;
 - a recuperação identity-only ocorre somente no request lazy do card e somente depois de `findSignals` não fornecer Google Place ID;
 - uma tentativa identity-only faz no máximo uma Text Search adicional e nunca pagina;
-- o bootstrap inicial continua limitado e não ganha batch adicional;
+- o bootstrap inicial de Quality continua limitado e não ganha batch adicional;
+- `ROUTEBOOK_PLACE_MEDIA_PREVIEW_BUDGET` não é usado na Discovery como corte permanente de elegibilidade; o controle efetivo dessa superfície é o viewport lazy;
+- não existe prefetch global de toda a lista: rolar a página é o que torna novos cards elegíveis a executar mídia;
+- o valor de preview budget permanece disponível para outras superfícies/eager paths que o utilizem e continua exposto como referência operacional, não como autorização exclusiva dos primeiros N cards da Discovery;
 - falha transitória Google deve degradar conforme política existente;
 - resposta Google Photo continua `private, no-store`;
 - resposta Wikimedia obtida após tentativa Google lazy também usa cache privado `no-store`;
 - miss final após tentativa Google lazy usa `no-store` e não pode congelar um `Sem foto` por horas;
 - caminho Wikimedia puro preserva o cache público atual;
-- logs podem registrar status/attempts/duration e `matched`, mas nunca key, token completo, coordenada precisa adicional ou photo resource name.
+- logs podem registrar status/attempts/duration, contagem de cards lazy elegíveis e `matched`, mas nunca key, token completo, coordenada precisa adicional ou photo resource name.
 
 ## 9. Caminhos permitidos
 
 ```text
 apps/web/app/api/place-image-preview/route.ts
 apps/web/app/api/place-image-preview/route.test.ts
+apps/web/app/viagens/[tripId]/lugares/page.tsx
 apps/web/components/external-place-image-preview.tsx
 apps/web/components/external-place-image-preview.test.tsx
 apps/web/e2e/external-place-images.spec.ts
@@ -168,6 +178,7 @@ Não alterar `place-discovery-ranking.ts` para elevar o limite. Alterar `place-q
 - componente: não faz request antes de entrar no viewport;
 - componente: Google attribution/fallback permanecem;
 - E2E: card externo fora do bootstrap consegue foto quando há identidade segura;
+- E2E: card posterior à antiga posição 12 faz request e resolve foto quando rolado ao viewport;
 - `Punto Cero Guatemala` live no Preview;
 - segundo Destination não-Pipa;
 - Documentation e Engineering completos;
@@ -176,7 +187,7 @@ Não alterar `place-discovery-ranking.ts` para elevar o limite. Alterar `place-q
 ## 11. Proibições
 
 - não aumentar indiscriminadamente Quality bootstrap;
-- não rodar reconciliação lazy para todos os candidatos no servidor;
+- não prefetchar mídia de todos os candidatos no servidor ou no browser;
 - não persistir Google ID/foto;
 - não alterar ranking;
 - não tratar texto sozinho como identidade suficiente para foto;
@@ -189,4 +200,4 @@ Não alterar `place-discovery-ranking.ts` para elevar o limite. Alterar `place-q
 
 ## 12. Handoff
 
-Relatar branch/SHA, arquivos, testes, CI, Preview same-SHA, proporção de metadata Google `200`/miss na amostra lazy, fallback observado e gate visual restante.
+Relatar branch/SHA, arquivos, testes, CI, Preview same-SHA, proporção de metadata Google `200`/miss na amostra lazy, confirmação de request em card além da posição 12, fallback observado e gate visual restante.

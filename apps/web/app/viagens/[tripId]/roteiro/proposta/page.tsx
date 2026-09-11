@@ -76,9 +76,11 @@ export default async function ItineraryProposalReviewPage({
   const review = buildItineraryProposalReview({ itinerary, proposal });
   const discardAction = discardItineraryProposalAction.bind(null, trip.id);
   const canDecide = acceptanceAccess.status === "authorized";
+  const isEmptyReady = review.status === "ready" && review.proposedChangeCount === 0;
   const canEdit =
     editAccess.status === "authorized" &&
     review.status === "ready" &&
+    !isEmptyReady &&
     review.isBasedOnCurrentItinerary;
   const idempotencyKey = `accept-itinerary-proposal:${proposal.id}:${proposal.baseItineraryVersion}`;
   const itineraryHref = `/viagens/${trip.id}/roteiro`;
@@ -96,17 +98,29 @@ export default async function ItineraryProposalReviewPage({
           <p>
             {proposal.status === "expired"
               ? "Esta proposta expirou. Consulte as sugestões como referência para planejar o Roteiro atual."
-              : "Revise as mudanças sugeridas, edite se necessário e escolha o que deseja aplicar ao Roteiro."}
+              : isEmptyReady
+                ? "Nenhuma mudança adequada foi encontrada. Revise os critérios ou explore outros Lugares antes de gerar uma nova proposta."
+                : "Revise as mudanças sugeridas, edite se necessário e escolha o que deseja aplicar ao Roteiro."}
           </p>
         </div>
         <span>
-          {proposal.status === "expired" ? "Proposta expirada" : "Aguardando sua decisão"}
+          {proposal.status === "expired"
+            ? "Proposta expirada"
+            : isEmptyReady
+              ? "Sem mudanças sugeridas"
+              : "Aguardando sua decisão"}
         </span>
       </header>
 
+      {isEmptyReady ? (
+        <Link className="product-secondary-action" href={`/viagens/${trip.id}/lugares`}>
+          Explorar lugares
+        </Link>
+      ) : null}
+
       <ItineraryProposalReview
-        canAccept={canDecide}
-        canDecide={canDecide}
+        canAccept={canDecide && !isEmptyReady}
+        canDecide={canDecide && !isEmptyReady}
         canEdit={canEdit}
         discardAction={discardAction}
         expectedItineraryVersion={proposal.baseItineraryVersion}

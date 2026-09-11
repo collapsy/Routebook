@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 
-import { PLACE_CATEGORIES, type PlaceCategory } from "@routebook/place-catalog";
+import {
+  PLACE_CATEGORIES,
+  type PlaceCategory,
+  type PlaceQualityTarget,
+} from "@routebook/place-catalog";
 
 import { resolveConfiguredGooglePlacePhotoProvider } from "../../../lib/google-place-photo";
 import { resolvePlaceBootstrapPolicy, runPlaceBootstrapStep } from "../../../lib/place-bootstrap";
-import { resolveConfiguredPlaceQualityProvider } from "../../../lib/place-quality-provider";
+import {
+  isConservativeQualityIdentityMatch,
+  resolveConfiguredPlaceQualityProvider,
+} from "../../../lib/place-quality-provider";
 import { WikimediaCommonsPlaceImageAdapter } from "../../../lib/wikimedia-place-image";
 
 const SUCCESS_CACHE_CONTROL = "public, s-maxage=86400, stale-while-revalidate=604800";
@@ -13,6 +20,20 @@ const GOOGLE_CACHE_CONTROL = "private, no-store";
 const DESTINATION_CONTEXT_PATTERN = /^[\p{L}\p{N}\s._-]+$/u;
 const GOOGLE_PLACE_ID_PATTERN = /^[A-Za-z0-9_-]{5,256}$/;
 const LAZY_QUALITY_TARGET_ID = "lazy-media-preview";
+const GOOGLE_PLACES_SEARCH_ENDPOINT = "https://places.googleapis.com/v1/places:searchText";
+const GOOGLE_IDENTITY_FIELD_MASK =
+  "places.id,places.displayName,places.location,places.formattedAddress";
+const GOOGLE_IDENTITY_RADIUS_METERS = 2_500;
+const GOOGLE_IDENTITY_PAGE_SIZE = 5;
+const GOOGLE_IDENTITY_TIMEOUT_MS = 5_000;
+
+type GoogleIdentityCandidate = Readonly<{
+  externalId: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  addressLabel?: string;
+}>;
 
 function parseCoordinate(value: string | null): number | undefined {
   if (!value) return undefined;
@@ -40,6 +61,100 @@ function parseGooglePlaceId(value: string | null): string | undefined {
   return GOOGLE_PLACE_ID_PATTERN.test(normalized) ? normalized : undefined;
 }
 
+function cleanText(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function finiteNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+async function resolveIdentityOnlyGooglePlaceId(
+  input: Readonly<{
+    category: PlaceCategory;
+    name: string;
+    latitude: number;
+    longitude: number;
+    addressLabel?: string;
+  }>,
+): Promise<string | undefined> {
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY?.trim();
+  if (!apiKey) return undefined;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), GOOGLE_IDENTITY_TIMEOUT_MS);
+  let response: Response;
+  try {
+    response = await fetch(GOOGLE_PLACES_SEARCH_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": apiKey,
+        "X-Goog-FieldMask": GOOGLE_IDENTITY_FIELD_MASK,
+      },
+      body: JSON.stringify({
+        textQuery: input.addressLabel ? `${input.name}, ${input.addressLabel}` : input.name,
+        languageCode: "pt-BR",
+        pageSize: GOOGLE_IDENTITY_PAGE_SIZE,
+        locationBias: {
+          circle: {
+            center: { latitude: input.latitude, longitude: input.longitude },
+            radius: GOOGLE_IDENTITY_RADIUS_METERS,
+          },
+        },
+      }),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+
+  if (!response.ok) {
+    throw new Error(`Google Places respondeu HTTP ${response.status} no fallback de identidade.`);
+  }
+
+  const payload = (await response.json()) as {
+    places?: readonly {
+      id?: string;
+      displayName?: Readonly<{ text?: string }>;
+      location?: Readonly<{ latitude?: number; longitude?: number }>;
+      formattedAddress?: string;
+    }[];
+  };
+
+  const firstCandidate = (payload.places ?? []).flatMap((place): GoogleIdentityCandidate[] => {
+    const externalId = cleanText(place.id);
+    const name = cleanText(place.displayName?.text);
+    const latitude = finiteNumber(place.location?.latitude);
+    const longitude = finiteNumber(place.location?.longitude);
+    if (!externalId || !name || latitude === undefined || longitude === undefined) return [];
+    const addressLabel = cleanText(place.formattedAddress);
+    return [
+      {
+        externalId,
+        name,
+        latitude,
+        longitude,
+        ...(addressLabel ? { addressLabel } : {}),
+      },
+    ];
+  })[0];
+  if (!firstCandidate) return undefined;
+
+  const target: PlaceQualityTarget = {
+    id: LAZY_QUALITY_TARGET_ID,
+    name: input.name,
+    category: input.category,
+    latitude: input.latitude,
+    longitude: input.longitude,
+    ...(input.addressLabel ? { addressLabel: input.addressLabel } : {}),
+  };
+
+  return isConservativeQualityIdentityMatch(target, firstCandidate, { allowSpatialAlias: true })
+    ? firstCandidate.externalId
+    : undefined;
+}
+
 async function resolveLazyGooglePlaceId(
   input: Readonly<{
     category: PlaceCategory;
@@ -60,20 +175,22 @@ async function resolveLazyGooglePlaceId(
     enabled: input.enabled,
     maxAttempts: input.maxAttempts,
     operation: async () => {
-      const matches = await quality.port.findSignals([
-        {
-          id: LAZY_QUALITY_TARGET_ID,
-          name: input.name,
-          category: input.category,
-          latitude: input.latitude,
-          longitude: input.longitude,
-          ...(input.addressLabel ? { addressLabel: input.addressLabel } : {}),
-        },
-      ]);
-      return matches.find(
+      const target: PlaceQualityTarget = {
+        id: LAZY_QUALITY_TARGET_ID,
+        name: input.name,
+        category: input.category,
+        latitude: input.latitude,
+        longitude: input.longitude,
+        ...(input.addressLabel ? { addressLabel: input.addressLabel } : {}),
+      };
+      const matches = await quality.port.findSignals([target]);
+      const signalPlaceId = matches.find(
         (match) =>
           match.targetId === LAZY_QUALITY_TARGET_ID && match.signals.provider === "google-places",
       )?.signals.externalId;
+      if (signalPlaceId) return signalPlaceId;
+
+      return resolveIdentityOnlyGooglePlaceId(input);
     },
   });
 

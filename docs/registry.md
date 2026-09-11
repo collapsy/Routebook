@@ -236,7 +236,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-093 | Integração E2E do Aceite Integral de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-093-itinerary-proposal-acceptance-e2e.md](./implementation/increments/rb-inc-093-itinerary-proposal-acceptance-e2e.md) |
 | RB-CTX-093 | Context Pack do RB-INC-093 — Integração E2E do Aceite Integral de Itinerary Proposal | Implementation Context | Draft | 0.1.0 | [rb-inc-093-itinerary-proposal-acceptance-e2e.md](./implementation/context-packs/rb-inc-093-itinerary-proposal-acceptance-e2e.md) |
 | RB-INC-094 | Adapter Determinístico de Geração de Itinerary Proposal Ready | Implementation | Draft | 0.1.0 | [rb-inc-094-deterministic-itinerary-proposal-generator.md](./implementation/increments/rb-inc-094-deterministic-itinerary-proposal-generator.md) |
-| RB-CTX-094 | Context Pack do RB-INC-094 | Implementation Context | Draft | 0.1.0 | [rb-inc-094-deterministic-itinerary-proposal-generator.md](./implementation/context-packs/rb-inc-094-deterministic-itinerary-proposal-generator.md) |
+| RB-CTX-094 | Context Pack do RB-INC-094 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-094-deterministic-itinerary-proposal-generator.md](./implementation/context-packs/rb-inc-094-deterministic-itinerary-proposal-generator.md) |
 | RB-INC-095 | Orquestração do Lifecycle de Geração de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-095-itinerary-proposal-generation-orchestration.md](./implementation/increments/rb-inc-095-itinerary-proposal-generation-orchestration.md) |
 | RB-CTX-095 | Context Pack do RB-INC-095 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-095-itinerary-proposal-generation-orchestration.md](./implementation/context-packs/rb-inc-095-itinerary-proposal-generation-orchestration.md) |
 
@@ -302,7 +302,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-124 | Bootstrap Isolado de Production | Implementation | Draft | 0.1.0 | [rb-inc-124-production-bootstrap.md](./implementation/increments/rb-inc-124-production-bootstrap.md) |
 | RB-CTX-124 | Context Pack do RB-INC-124 — Bootstrap Isolado de Production | Implementation Context | Draft | 0.1.0 | [rb-inc-124-production-bootstrap.md](./implementation/context-packs/rb-inc-124-production-bootstrap.md) |
 | RB-INC-125 | Remoção Mobile Determinística no E2E | Implementation | Draft | 0.1.0 | [rb-inc-125-deterministic-mobile-removal.md](./implementation/increments/rb-inc-125-deterministic-mobile-removal.md) |
-| RB-CTX-125 | Context Pack do RB-INC-125 — Remoção Mobile Determinística no E2E | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-125-deterministic-mobile-removal.md](./implementation/context-packs/rb-inc-125-deterministic-mobile-removal.md) |
+| RB-CTX-125 | Context Pack do RB-INC-125 — Remoção Mobile Determinística | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-125-deterministic-mobile-removal.md](./implementation/context-packs/rb-inc-125-deterministic-mobile-removal.md) |
 | RB-INC-126 | Navegação Determinística do Conflito para o Roteiro | Implementation | Draft | 0.1.0 | [rb-inc-126-deterministic-conflict-navigation.md](./implementation/increments/rb-inc-126-deterministic-conflict-navigation.md) |
 | RB-CTX-126 | Context Pack do RB-INC-126 — Navegação Determinística do Conflito | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-126-deterministic-conflict-navigation.md](./implementation/context-packs/rb-inc-126-deterministic-conflict-navigation.md) |
 | RB-INC-127 | Retorno Determinístico da Revisão de Proposal | Implementation | Draft | 0.1.0 | [rb-inc-127-deterministic-proposal-return.md](./implementation/increments/rb-inc-127-deterministic-proposal-return.md) |
@@ -450,6 +450,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-190 | Google Places Photos destination-agnostic na stack atual | Implementation | Draft | 0.1.0 | [rb-inc-190-google-place-photos-current-stack.md](./implementation/increments/rb-inc-190-google-place-photos-current-stack.md) |
 | RB-CTX-190 | Context Pack do RB-INC-190 — Google Places Photos destination-agnostic | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-190-google-place-photos-current-stack.md](./implementation/context-packs/rb-inc-190-google-place-photos-current-stack.md) |
+
+| RB-INC-192 | Cobertura lazy de Google Photos para Places externos | Implementation | Draft | 0.1.0 | [rb-inc-192-lazy-google-photo-coverage.md](./implementation/increments/rb-inc-192-lazy-google-photo-coverage.md) |
+| RB-CTX-192 | Context Pack do RB-INC-192 — Cobertura lazy de Google Photos | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-192-lazy-google-photo-coverage.md](./implementation/context-packs/rb-inc-192-lazy-google-photo-coverage.md) |
 
 ## Status possíveis
 

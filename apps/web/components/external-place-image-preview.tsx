@@ -171,7 +171,6 @@ export function ExternalPlaceImagePreview({
   longitude,
   category,
   googlePlaceId,
-  enabled = true,
   compactFallback = true,
 }: Readonly<{
   destinationId?: string | undefined;
@@ -180,6 +179,8 @@ export function ExternalPlaceImagePreview({
   longitude: number;
   category?: PlaceCategory | undefined;
   googlePlaceId?: string | undefined;
+  // Compatibilidade com o budget server-side legado. O endpoint continua sendo a autoridade do kill switch;
+  // na Discovery, a execução é governada pelo viewport, não por uma posição fixa na lista.
   enabled?: boolean | undefined;
   compactFallback?: boolean | undefined;
 }>) {
@@ -188,7 +189,7 @@ export function ExternalPlaceImagePreview({
 
   useEffect(() => {
     const target = containerRef.current;
-    if (!target || state.status !== "idle" || !enabled) return;
+    if (!target || state.status !== "idle") return;
 
     if (typeof IntersectionObserver === "undefined") {
       const timer = setTimeout(() => setState({ status: "loading" }), 0);
@@ -206,10 +207,10 @@ export function ExternalPlaceImagePreview({
     );
     observer.observe(target);
     return () => observer.disconnect();
-  }, [enabled, state.status]);
+  }, [state.status]);
 
   useEffect(() => {
-    if (state.status !== "loading" || !enabled) return;
+    if (state.status !== "loading") return;
 
     const controller = new AbortController();
 
@@ -242,28 +243,7 @@ export function ExternalPlaceImagePreview({
       });
 
     return () => controller.abort();
-  }, [
-    category,
-    destinationId,
-    enabled,
-    googlePlaceId,
-    latitude,
-    longitude,
-    placeName,
-    state.status,
-  ]);
-
-  if (!enabled) {
-    return (
-      <div ref={containerRef} data-external-place-image-state="fallback">
-        <PlacePrimaryImage
-          category={category}
-          compactFallback={compactFallback}
-          placeName={placeName}
-        />
-      </div>
-    );
-  }
+  }, [category, destinationId, googlePlaceId, latitude, longitude, placeName, state.status]);
 
   if (state.status === "ready") {
     const { preview } = state;

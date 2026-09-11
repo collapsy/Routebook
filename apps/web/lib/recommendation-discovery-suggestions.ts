@@ -66,6 +66,7 @@ export type RecommendationDiscoverySuggestionDependencies = Readonly<{
   externalReferenceRepository?: ExternalReferenceRepositoryPort;
   placeSearchPort?: PlaceSearchPort;
   bootstrapPolicy?: PlaceBootstrapPolicy;
+  selectionLimit?: number;
 }>;
 
 const categoryLabels: Readonly<Record<PlaceCategory, string>> = {
@@ -274,6 +275,7 @@ export function buildRecommendationDiscoverySuggestions(
     reference: Readonly<{ latitude: number; longitude: number }>;
     interests: readonly TravelerInterest[];
     discoveryStatus: Exclude<RecommendationDiscoveryStatus, "unavailable">;
+    selectionLimit?: number;
   }>,
 ): RecommendationDiscoverySuggestions {
   const items = buildPlaceDiscoveryFeed({
@@ -285,6 +287,7 @@ export function buildRecommendationDiscoverySuggestions(
   const selectedItems = selectContextualExternalDiscoveryItems({
     items,
     interests: input.interests,
+    ...(input.selectionLimit !== undefined ? { limit: input.selectionLimit } : {}),
   });
 
   return Object.freeze({
@@ -355,5 +358,8 @@ export async function loadRecommendationDiscoverySuggestions(
     reference: region.center,
     interests,
     discoveryStatus: discoveryResult.status,
+    ...(dependencies.selectionLimit !== undefined
+      ? { selectionLimit: dependencies.selectionLimit }
+      : {}),
   });
 }

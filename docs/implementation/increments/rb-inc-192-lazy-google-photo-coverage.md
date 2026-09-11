@@ -22,9 +22,9 @@ ai_context:
 
 ## 1. Resultado vertical
 
-A tela **Explorar Lugares** deve manter o bootstrap inicial de Quality limitado, mas um Place externo fora desse lote não pode ficar permanentemente impedido de usar Google Places Photos apenas porque apareceu depois dos primeiros 12 alvos.
+A tela **Explorar Lugares** deve manter o bootstrap inicial de Quality limitado, mas um Place externo fora desse lote não pode ficar permanentemente impedido de usar Google Places Photos apenas porque apareceu depois dos primeiros 12 alvos ou porque sua identidade Google segura não possui rating/popularity suficiente para produzir score.
 
-Quando o card entra na janela lazy já governada por `IntersectionObserver`, o endpoint de mídia pode executar uma reconciliação Google Quality just-in-time para **aquele único Place**, caso ainda não exista Google Place ID previamente reconciliado. Somente após um match conservador o Google Place ID efêmero pode alimentar o adapter Google Place Photo existente.
+Quando o card entra na janela lazy já governada por `IntersectionObserver`, o endpoint de mídia pode executar reconciliação Google just-in-time para **aquele único Place**, caso ainda não exista Google Place ID previamente reconciliado. Somente após um match conservador o Google Place ID efêmero pode alimentar o adapter Google Place Photo existente.
 
 A ordem permanece:
 
@@ -35,7 +35,7 @@ Place.primaryImage curada
 → fallback compacto “Sem foto”
 ```
 
-A diferença para o RB-INC-190 é apenas o momento da reconciliação: o ID pode vir do bootstrap inicial ou de Quality just-in-time no pedido lazy do card. Não existe lookup de foto por texto sem Quality.
+A diferença para o RB-INC-190 é o momento e a finalidade da reconciliação: o ID pode vir do bootstrap inicial, de Quality just-in-time ou de uma recuperação identity-only estritamente governada para mídia. Nenhum desses caminhos persiste o ID ou fabrica score.
 
 ## 2. Issue, branch e base
 
@@ -58,9 +58,11 @@ mediaPreviewEligibleCount: 12
 
 O Google Photos respondeu `200` para cards com Google Place ID governado, confirmando configuração e credencial funcionais. O card `Punto Cero Guatemala`, fora do lote enriquecido, caiu em `SEM FOTO`.
 
-A primeira implementação lazy foi validada novamente em 2026-09-11. Os logs confirmaram que a reconciliação just-in-time era realmente executada, porém parte dos cards ainda terminava em `matched: false` porque o target lazy não recebia o contexto textual do Destination usado pelo targeted fallback do Quality Provider. Assim, o lookup nominal perdia precisão justamente nos casos fora da busca ampla por categoria.
+A primeira implementação lazy foi validada novamente em 2026-09-11. Os logs confirmaram que a reconciliação just-in-time era realmente executada, porém parte dos cards ainda terminava em `matched: false` porque o target lazy não recebia o contexto textual do Destination usado pelo targeted fallback do Quality Provider. Esse ponto foi corrigido passando o Destination validado como `addressLabel`.
 
-A causa permanece de cobertura/recuperação de identidade, não de configuração: `PLACE_DISCOVERY_QUALITY_LIMIT = 12` protege custo/latência do bootstrap e deve ser preservado. O matching conservador também não deve ser afrouxado apenas para obter uma fotografia.
+No aceite seguinte, a tela ainda mostrou vários cards `Sem foto`. Os logs do Preview do mesmo SHA registraram 12 pedidos lazy de metadata no recorte observado: 9 produziram Google Photo com resposta `200` e 3 terminaram em `404`. Em dois dos três misses, a etapa lazy de Quality concluiu com sucesso técnico porém `matched: false`; no terceiro, Quality encontrou uma identidade Google mas o adapter de foto não liberou mídia segura.
+
+A análise do contrato mostrou uma diferença importante entre ranking e mídia: `PlaceQualitySignals` admite `externalId` sem rating/popularity, mas o fluxo histórico de Quality foi otimizado para produzir sinais quantitativos de ranking. Um estabelecimento pode, portanto, ser identificável com segurança no Google e ainda não gerar signal útil de ranking. Ausência de reputação não deve ser confundida com ausência de identidade quando a finalidade exclusiva é buscar uma foto real.
 
 ## 4. Reconciliação just-in-time autorizada
 
@@ -69,13 +71,15 @@ Quando `/api/place-image-preview` recebe um Place válido com `category`, mas **
 1. o request já deve ter sido disparado pelo comportamento lazy do card;
 2. o servidor resolve o Quality Provider configurado;
 3. somente se o Provider for Google, executa `findSignals` para um único `PlaceQualityTarget` derivado de nome, categoria e coordenadas do card;
-4. quando o request possui contexto de Destination validado, esse contexto é reutilizado como `addressLabel` do target, permitindo que o targeted fallback existente consulte `nome + Destination` sem criar nova heurística de identidade;
-5. o adapter existente aplica Text Search com location bias e matching conservador, incluindo targeted fallback já governado;
-6. somente um `PlaceQualitySignals(provider=google-places, externalId)` resultante pode liberar o Google Place Photo;
-7. o adapter de foto continua revalidando ID, nome e proximidade via Place Details;
-8. miss/mismatch/failure segue para Wikimedia e depois `Sem foto`.
+4. quando o request possui contexto de Destination validado, esse contexto é reutilizado como `addressLabel` do target, permitindo que o targeted fallback existente consulte `nome + Destination`;
+5. um `PlaceQualitySignals(provider=google-places, externalId)` resultante libera o Google Place Photo;
+6. se `findSignals` não produzir Google Place ID, pode ocorrer **uma única recuperação identity-only** no mesmo request lazy: Text Search nominal com `nome + Destination` quando disponível, location bias de 2,5 km, até cinco resultados e FieldMask somente de identidade;
+7. somente o primeiro resultado dessa busca pode ser usado, e apenas se passar por `isConservativeQualityIdentityMatch(..., { allowSpatialAlias: true })` com nome, coordenadas e contexto local;
+8. rating/popularity não são exigidos nessa recuperação, porque ela não produz score e não entra no ranking;
+9. o adapter de foto continua revalidando ID, nome e proximidade via Place Details;
+10. miss/mismatch/failure segue para Wikimedia e depois `Sem foto`.
 
-O match just-in-time é efêmero e exclusivo da mídia. Não é persistido nem retroalimentado no ranking. O Destination melhora a recuperação textual, mas nunca substitui a prova de identidade nem autoriza associação por similaridade fraca.
+A recuperação identity-only é efêmera e exclusiva da mídia. Não é persistida, não cria `PlaceQualitySignals` canônicos e não retroalimenta o ranking. Texto melhora a recuperação do candidato, mas nunca substitui a validação de identidade.
 
 ## 5. Budget, performance e cache
 
@@ -83,6 +87,8 @@ O match just-in-time é efêmero e exclusivo da mídia. Não é persistido nem r
 - o bootstrap server-side inicial continua limitado;
 - reconciliação extra ocorre apenas para cards que entram na margem lazy do viewport;
 - uma requisição de card reconcilia no máximo um target;
+- a busca identity-only ocorre somente quando `findSignals` não produziu Google Place ID;
+- cada tentativa identity-only faz no máximo uma Text Search adicional, sem paginação;
 - chamadas repetidas do mesmo ciclo de renderização continuam evitadas pelo estado do componente;
 - timeouts/retries reutilizam `runPlaceBootstrapStep` e a política existente;
 - nenhum prefetch global de todos os 127 candidatos é permitido;
@@ -91,9 +97,11 @@ O match just-in-time é efêmero e exclusivo da mídia. Não é persistido nem r
 
 ## 6. Segurança e identidade
 
-- nenhum Google Place ID é aceito a partir de texto sem o Quality Provider;
-- `isConservativeQualityIdentityMatch` e o targeted fallback existente continuam gate de identidade;
-- o contexto de Destination apenas torna a consulta nominal mais específica; os thresholds de identidade não são relaxados;
+- nenhum Google Place ID é aceito sem matching de identidade;
+- `isConservativeQualityIdentityMatch` continua gate obrigatório;
+- o contexto de Destination apenas torna a consulta nominal mais específica;
+- a recuperação identity-only considera apenas o primeiro resultado do Text Search e ainda exige matching conservador;
+- ausência de rating/popularity não é tratada como evidência positiva nem negativa de identidade;
 - o Google Photo adapter executa a segunda revalidação por Place Details;
 - API key, token completo e photo resource name permanecem server-side;
 - metadata Google e bytes continuam `private, no-store`;
@@ -101,18 +109,19 @@ O match just-in-time é efêmero e exclusivo da mídia. Não é persistido nem r
 
 ## 7. Ranking e domínio
 
-A reconciliação lazy:
+A reconciliação lazy e a recuperação identity-only:
 
-- não altera score;
-- não altera ordem dos cards;
-- não altera `PlaceQualitySignals` usados pelo ranking já calculado;
-- não publica Place canônico;
-- não cria Saved Place;
-- não cria Recommendation;
-- não cria Activity;
-- não interfere no RB-INC-191 de propostas de Roteiro.
+- não alteram score;
+- não alteram ordem dos cards;
+- não acrescentam rating/popularity inexistentes;
+- não alteram `PlaceQualitySignals` usados pelo ranking já calculado;
+- não publicam Place canônico;
+- não criam Saved Place;
+- não criam Recommendation;
+- não criam Activity;
+- não interferem no RB-INC-191 de propostas de Roteiro.
 
-É uma operação efêmera de cobertura de mídia.
+São operações efêmeras de cobertura de mídia.
 
 ## 8. UX e fallback
 
@@ -147,12 +156,13 @@ Alteração em outro arquivo exige primeiro atualização deste Increment e do C
 - [ ] card sem Google Place ID pré-calculado pode tentar Google Quality somente após o request lazy de mídia;
 - [ ] reconciliação just-in-time processa um único target;
 - [ ] Destination validado é repassado como contexto do target lazy para o targeted fallback nominal;
-- [ ] somente match `google-places` seguro alimenta Google Place Photo;
+- [ ] Place Google seguro sem rating/popularity pode recuperar apenas sua identidade para mídia sem criar score;
+- [ ] recuperação identity-only consulta no máximo uma página curta e aceita somente o primeiro candidato que passe matching conservador;
 - [ ] Google Photo continua revalidando identidade via Place Details;
 - [ ] mismatch/Provider ausente/falha degrada para Wikimedia/`Sem foto`;
 - [ ] miss do caminho Google lazy não recebe cache público de longa duração;
 - [ ] ranking e persistência não mudam;
-- [ ] `Punto Cero Guatemala` é validado live no Preview, sem forçar associação se a identidade real permanecer ambígua;
+- [ ] `Punto Cero Guatemala` é validado live no Preview, sem hardcode específico;
 - [ ] ao menos um segundo destino não-Pipa é validado;
 - [ ] testes provam que o componente não chama mídia antes do IntersectionObserver;
 - [ ] Documentation e Engineering Validation passam no mesmo SHA;
@@ -162,10 +172,11 @@ Alteração em outro arquivo exige primeiro atualização deste Increment e do C
 ## 11. Fora de escopo
 
 - aumentar o bootstrap para todos os candidatos;
-- persistir Quality lazy;
+- persistir Quality lazy ou identidade de mídia;
 - alterar ranking;
 - alterar Discovery;
 - relaxar matching conservador para forçar fotografia;
+- aceitar um resultado textual sem validação espacial/contextual;
 - hardcode de alias específico de estabelecimento;
 - modificar proposta de Roteiro;
 - scraping;

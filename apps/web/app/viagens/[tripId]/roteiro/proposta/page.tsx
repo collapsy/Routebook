@@ -99,7 +99,7 @@ export default async function ItineraryProposalReviewPage({
             {proposal.status === "expired"
               ? "Esta proposta expirou. Consulte as sugestões como referência para planejar o Roteiro atual."
               : isEmptyReady
-                ? "Nenhuma mudança adequada foi encontrada. Revise os critérios ou explore outros Lugares antes de gerar uma nova proposta."
+                ? "Nenhuma mudança adequada foi encontrada. Você pode descartar esta proposta e gerar outra usando os Lugares disponíveis agora."
                 : "Revise as mudanças sugeridas, edite se necessário e escolha o que deseja aplicar ao Roteiro."}
           </p>
         </div>
@@ -113,9 +113,19 @@ export default async function ItineraryProposalReviewPage({
       </header>
 
       {isEmptyReady ? (
-        <Link className="product-secondary-action" href={`/viagens/${trip.id}/lugares`}>
-          Explorar lugares
-        </Link>
+        <div>
+          {canDecide ? (
+            <form action={discardAction}>
+              <input name="itineraryProposalId" type="hidden" value={proposal.id} />
+              <button className="product-secondary-action" type="submit">
+                Descartar e gerar outra
+              </button>
+            </form>
+          ) : null}
+          <Link className="product-secondary-action" href={`/viagens/${trip.id}/lugares`}>
+            Explorar lugares
+          </Link>
+        </div>
       ) : null}
 
       <ItineraryProposalReview

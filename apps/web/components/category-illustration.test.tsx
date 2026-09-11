@@ -25,6 +25,27 @@ describe("CategoryIllustration", () => {
     expect(screen.getByText("Ilustração de categoria — não é foto do local")).toBeInTheDocument();
   });
 
+  it.each([
+    ["attraction", "Ponto turístico"],
+    ["viewpoint", "Mirante"],
+  ] as const)("expõe fallback próprio para %s", (kind, label) => {
+    render(
+      <CategoryIllustration
+        ariaLabel={`Ilustração de ${label} — não é foto do local`}
+        kind={kind}
+        placeFallback
+      />,
+    );
+
+    const illustration = screen.getByRole("img", {
+      name: `Ilustração de ${label} — não é foto do local`,
+    });
+    expect(illustration).toHaveAttribute("data-category-illustration", kind);
+    expect(illustration).toHaveAttribute("data-place-category", kind);
+    expect(screen.getByText(label)).toBeInTheDocument();
+    cleanup();
+  });
+
   it("reduz o fallback de Lugar a um selo curto sem repetir categoria ou justificativa", () => {
     render(
       <CategoryIllustration

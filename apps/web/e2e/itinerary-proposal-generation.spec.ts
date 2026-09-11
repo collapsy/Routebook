@@ -328,12 +328,12 @@ test("destino zero-seed transforma Discovery segura em Proposal sem criar Recomm
 
   const proposal = await new DrizzleItineraryProposalRepository().findById(tripId, proposalId);
   expect(proposal).toMatchObject({ status: "ready", generationVersion: "2" });
-  expect(proposal?.proposedActivities).toHaveLength(3);
+  const proposedActivities = proposal?.proposedActivities ?? [];
+  expect(proposedActivities).toHaveLength(3);
 
-  const proposedPlaceIds =
-    proposal?.proposedActivities.flatMap((activity) =>
-      activity.placeId ? [activity.placeId] : [],
-    ) ?? [];
+  const proposedPlaceIds = proposedActivities.flatMap((activity) =>
+    activity.placeId ? [activity.placeId] : [],
+  );
   const proposalPlaces = await new DrizzlePlaceRepository().listByIds(proposedPlaceIds);
   expect(proposalPlaces).toHaveLength(3);
   expect(proposalPlaces.every((place) => place.publicationStatus === "draft")).toBe(true);
@@ -419,8 +419,7 @@ test("não propõe novamente Place que já está no Roteiro", async ({ page }, t
     proposalId,
   );
   expect(proposal).toMatchObject({ status: "ready" });
-  expect(
-    proposal?.proposedActivities.some((activity) => activity.placeId === fixture.placeId),
-  ).toBe(false);
+  const proposedActivities = proposal?.proposedActivities ?? [];
+  expect(proposedActivities.some((activity) => activity.placeId === fixture.placeId)).toBe(false);
   expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
 });

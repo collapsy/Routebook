@@ -30,8 +30,7 @@ export function ItineraryProposalReview({
 }) {
   const isExpired = review.status === "expired";
   const isEmptyReady = !isExpired && review.proposedChangeCount === 0;
-  const editingEnabled =
-    canEdit && !isExpired && !isEmptyReady && review.isBasedOnCurrentItinerary;
+  const editingEnabled = canEdit && !isExpired && !isEmptyReady && review.isBasedOnCurrentItinerary;
 
   return (
     <div className={styles.review}>

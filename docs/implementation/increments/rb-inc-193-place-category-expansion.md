@@ -103,6 +103,7 @@ Categorias externas sem ACL explícito continuam sem categoria canônica e falha
 - atualizar rótulos e filtros da Discovery;
 - atualizar fallback visual por categoria;
 - cobrir novas categorias com testes unitários e de interface;
+- preservar compatibilidade do ranking existente atribuindo às novas categorias os mesmos pesos neutros já usados por `nature`, sem recalibrar a fórmula ou alterar sua semântica;
 - registrar a aderência no glossário de domínio sem criar conceito novo;
 - documentação, Registry e rastreabilidade do incremento.
 
@@ -111,7 +112,7 @@ Categorias externas sem ACL explícito continuam sem categoria canônica e falha
 - categoria genérica `interesting` / `Pontos interessantes`;
 - adicionar Cultura, Compras, Serviços, Tours ou Transporte neste incremento;
 - transformar `Place.category` em coleção multivalorada;
-- alterar ranking, Recommendation, Proposal, Saved Place ou Activity;
+- recalibrar ranking, pesos ou fórmula de qualidade; Recommendation, Proposal, Saved Place ou Activity também permanecem inalterados;
 - publicar automaticamente candidatos externos;
 - alterar Provider, billing, secrets ou Provenance;
 - migration de banco — `places.category` já é `varchar`;
@@ -125,6 +126,8 @@ modules/place-catalog/src/place.ts
 modules/place-catalog/src/place.test.ts
 modules/place-catalog/src/external-place.ts
 modules/place-catalog/src/external-place.test.ts
+modules/place-catalog/src/place-quality.ts
+modules/place-catalog/src/place-quality.test.ts
 apps/web/app/viagens/[tripId]/lugares/filters.ts
 apps/web/app/viagens/[tripId]/lugares/filters.test.ts
 apps/web/components/category-illustration.tsx
@@ -139,6 +142,8 @@ docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
 
+`place-quality.ts` e seu teste foram incluídos após o primeiro Engineering Validation revelar um consumidor exaustivo de `PlaceCategory`. A correção é estritamente de compatibilidade: `attraction` e `viewpoint` herdam os pesos atuais de `nature`; não há nova decisão de ranking.
+
 Arquivo adicional indispensável exige registro prévio neste incremento e justificativa na PR.
 
 ## 9. Critérios de aceite
@@ -152,7 +157,8 @@ Arquivo adicional indispensável exige registro prévio neste incremento e justi
 - [ ] busca textual encontra os novos rótulos;
 - [ ] fallback visual das novas categorias é distinto, local e explicitamente ilustrativo;
 - [ ] fotografia governada continua prevalecendo sobre fallback;
-- [ ] Proposal, Recommendation e ranking não mudam;
+- [ ] novas categorias recebem pesos de compatibilidade iguais aos de `nature`, sem recalibração de ranking;
+- [ ] Proposal e Recommendation não mudam;
 - [ ] nenhuma migration, Provider, secret ou billing é adicionado;
 - [ ] testes de domínio/ACL/UI passam;
 - [ ] Documentation e Engineering Validation passam no mesmo SHA;
@@ -164,6 +170,7 @@ Arquivo adicional indispensável exige registro prévio neste incremento e justi
 - ACL: attraction, viewpoint, scenic viewpoint e categoria desconhecida;
 - filtros: ordem canônica, disponibilidade real, busca por rótulo e filtragem das novas categorias;
 - ilustração: `attraction` e `viewpoint` expõem categoria/fallback sem simular fotografia;
+- qualidade: novas categorias são calculáveis com os pesos de compatibilidade de `nature`, sem alterar pesos existentes;
 - E2E: filtros continuam responsivos e categorias vazias não aparecem;
 - regressão das quatro categorias anteriores;
 - `pnpm docs:validate`;
@@ -173,7 +180,7 @@ Arquivo adicional indispensável exige registro prévio neste incremento e justi
 
 **Taxonomia externa ampla:** somente três mappings novos são autorizados; nenhum ancestral genérico vira categoria canônica automaticamente.
 
-**Quebra de consumidores exaustivos:** `Record<PlaceCategory, ...>` e switches devem falhar em typecheck até receberem tratamento explícito.
+**Quebra de consumidores exaustivos:** `Record<PlaceCategory, ...>` e switches devem falhar em typecheck até receberem tratamento explícito. O primeiro pipeline encontrou `CATEGORY_WEIGHTS` em `place-quality.ts`, tratado com herança explícita dos pesos de `nature` para evitar recalibração funcional.
 
 **Conflito com trabalho paralelo:** a branch parte de RB-INC-192 e não modifica arquivos do RB-INC-191. `docs/registry.md` pode exigir reconciliação textual posterior.
 
@@ -181,4 +188,4 @@ Arquivo adicional indispensável exige registro prévio neste incremento e justi
 
 ## 12. Rollback
 
-Reverter os novos valores, ACL, rótulos, assets e documentação. Nenhum dado ou schema é alterado por migration. Places materializados como `attraction`/`viewpoint` durante um Preview devem permanecer governados pela mesma política de rascunho e não serão removidos automaticamente.
+Reverter os novos valores, ACL, rótulos, assets, pesos de compatibilidade e documentação. Nenhum dado ou schema é alterado por migration. Places materializados como `attraction`/`viewpoint` durante um Preview devem permanecer governados pela mesma política de rascunho e não serão removidos automaticamente.

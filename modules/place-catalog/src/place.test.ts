@@ -35,6 +35,12 @@ describe("createPlace", () => {
     expect(place.priceRange).toBe("free");
   });
 
+  it.each(["attraction", "viewpoint"] as const)("aceita a categoria canônica %s", (category) => {
+    const place = createPlace({ ...validInput, category, slug: `lugar-${category}` });
+
+    expect(place.category).toBe(category);
+  });
+
   it("mantém endereço ausente como propriedade omitida", () => {
     const { addressLabel, ...withoutAddress } = validInput;
     expect(addressLabel).toBeTruthy();

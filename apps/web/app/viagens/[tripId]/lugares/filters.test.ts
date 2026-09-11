@@ -88,9 +88,11 @@ describe("listAvailablePlaceCategories", () => {
   });
 
   it("inclui as categorias novas somente quando a cobertura real as contém", () => {
-    expect(
-      listAvailablePlaceCategories([undefined, "beach", "attraction", "viewpoint"]),
-    ).toEqual(["beach", "attraction", "viewpoint"]);
+    expect(listAvailablePlaceCategories([undefined, "beach", "attraction", "viewpoint"])).toEqual([
+      "beach",
+      "attraction",
+      "viewpoint",
+    ]);
   });
 });
 
@@ -104,9 +106,9 @@ describe("filterPlaces", () => {
   });
 
   it("encontra Pontos turísticos e Mirantes pelos rótulos das categorias", () => {
-    expect(filterPlaces(places, { search: "pontos turisticos" }).map(({ place }) => place.id)).toEqual([
-      "attraction",
-    ]);
+    expect(
+      filterPlaces(places, { search: "pontos turisticos" }).map(({ place }) => place.id),
+    ).toEqual(["attraction"]);
     expect(filterPlaces(places, { search: "mirantes" }).map(({ place }) => place.id)).toEqual([
       "viewpoint",
     ]);
@@ -132,10 +134,14 @@ describe("filterPlaces", () => {
   });
 
   it("prefere lugares mais próximos quando a hospedagem possui coordenadas", () => {
-    const results = filterPlaces(places.slice(0, 2), {}, {
-      latitude: -6.2297,
-      longitude: -35.0536,
-    });
+    const results = filterPlaces(
+      places.slice(0, 2),
+      {},
+      {
+        latitude: -6.2297,
+        longitude: -35.0536,
+      },
+    );
 
     expect(results.map(({ place }) => place.id)).toEqual(["food", "beach"]);
     expect(results[0]?.distanceMeters).toBe(0);

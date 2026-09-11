@@ -48,9 +48,7 @@ function discoveryCandidateLimit(itinerary: Itinerary): number {
       (freePeriod) => freePeriod.mode === "flexible",
     ).length;
     const intentionallyEmpty =
-      day.activities.length === 0 &&
-      protectedFreePeriodCount > 0 &&
-      flexibleFreePeriodCount === 0;
+      day.activities.length === 0 && protectedFreePeriodCount > 0 && flexibleFreePeriodCount === 0;
     if (intentionallyEmpty) return total;
 
     const availableSlots = Math.max(

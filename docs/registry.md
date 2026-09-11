@@ -451,6 +451,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-190 | Google Places Photos destination-agnostic na stack atual | Implementation | Draft | 0.1.0 | [rb-inc-190-google-place-photos-current-stack.md](./implementation/increments/rb-inc-190-google-place-photos-current-stack.md) |
 | RB-CTX-190 | Context Pack do RB-INC-190 — Google Places Photos destination-agnostic | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-190-google-place-photos-current-stack.md](./implementation/context-packs/rb-inc-190-google-place-photos-current-stack.md) |
 
+| RB-INC-191 | Discovery Anywhere no pipeline autoritativo de Proposta de Roteiro | Implementation | Draft | 0.1.0 | [rb-inc-191-discovery-itinerary-proposal.md](./implementation/increments/rb-inc-191-discovery-itinerary-proposal.md) |
+| RB-CTX-191 | Context Pack do RB-INC-191 — Discovery Anywhere na Proposta de Roteiro | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-191-discovery-itinerary-proposal.md](./implementation/context-packs/rb-inc-191-discovery-itinerary-proposal.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

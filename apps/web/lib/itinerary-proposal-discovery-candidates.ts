@@ -138,6 +138,9 @@ export async function loadItineraryProposalDiscoveryCandidates(
           candidateId: candidateId(source),
           placeId,
           title: place.name,
+          category: place.category,
+          latitude: place.latitude,
+          longitude: place.longitude,
           reason: "Lugar selecionado entre opções seguras da área desta Viagem.",
         }),
       ];

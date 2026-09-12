@@ -468,7 +468,7 @@ function contextualCandidateScore(
   usedAnchor: boolean;
 }> {
   const candidate = indexed.candidate;
-  let score = -indexed.originalIndex;
+  let score = -indexed.originalIndex * 4;
   let usedSpatialSignal = false;
   let usedCategorySignal = false;
   let usedAnchor = false;
@@ -477,7 +477,7 @@ function contextualCandidateScore(
   const referenceCoordinate = state.lastCoordinate ?? anchorCoordinate;
   if (coordinate && referenceCoordinate) {
     const proximityKm = distanceKm(referenceCoordinate, coordinate);
-    score += Math.max(-30, 18 - proximityKm * 2.5);
+    score += Math.max(-10, 6 - proximityKm * 0.5);
     usedSpatialSignal = true;
     usedAnchor = state.lastCoordinate === undefined && anchorCoordinate !== undefined;
   }
@@ -527,7 +527,8 @@ function selectContextualCandidate(
       (score.score === selectedScore.score &&
         (candidate.originalIndex < selected.originalIndex ||
           (candidate.originalIndex === selected.originalIndex &&
-            compareCanonicalText(candidate.candidate.candidateId, selected.candidate.candidateId) < 0)))
+            compareCanonicalText(candidate.candidate.candidateId, selected.candidate.candidateId) <
+              0)))
     ) {
       selected = candidate;
       selectedScore = score;
@@ -718,11 +719,7 @@ export class DeterministicItineraryProposalGenerator implements ItineraryProposa
         );
         remaining.splice(selectedIndex, 1);
 
-        appendCandidate(
-          selection.indexed.candidate,
-          selection.indexed.originalIndex,
-          day,
-        );
+        appendCandidate(selection.indexed.candidate, selection.indexed.originalIndex, day);
         if (selection.indexed.candidate.category) {
           state.categories.push(selection.indexed.candidate.category);
         }
@@ -751,13 +748,19 @@ export class DeterministicItineraryProposalGenerator implements ItineraryProposa
     const contextualCriteria = [
       "Candidatos preservam a relevância recebida como sinal inicial.",
       ...(usedSpatialSignal
-        ? ["A composição favoreceu continuidade por proximidade geodésica entre Lugares do mesmo Dia."]
+        ? [
+            "A composição favoreceu continuidade por proximidade geodésica entre Lugares do mesmo Dia.",
+          ]
         : []),
       ...(usedCategorySignal
-        ? ["A composição considerou diversidade e complementaridade de categorias dentro de cada Dia."]
+        ? [
+            "A composição considerou diversidade e complementaridade de categorias dentro de cada Dia.",
+          ]
         : []),
       ...(usedAccommodationAnchor
-        ? ["A Hospedagem foi usada como referência espacial quando o Dia ainda não possuía outro Lugar proposto."]
+        ? [
+            "A Hospedagem foi usada como referência espacial quando o Dia ainda não possuía outro Lugar proposto.",
+          ]
         : []),
     ];
 

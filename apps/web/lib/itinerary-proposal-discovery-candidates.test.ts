@@ -102,7 +102,7 @@ function dependencies(input: {
 }
 
 describe("loadItineraryProposalDiscoveryCandidates", () => {
-  it("materializa a seleção segura e produz candidatos com PlaceId interno", async () => {
+  it("materializa a seleção segura e produz candidatos com PlaceId interno e contexto do Place", async () => {
     const cafe = externalCandidate("cafe", "Café seguro");
     const park = externalCandidate("park", "Parque seguro");
     const deps = dependencies({
@@ -116,12 +116,18 @@ describe("loadItineraryProposalDiscoveryCandidates", () => {
         candidateId: "discovery:overture:cafe",
         placeId: "internal-cafe",
         title: "Café seguro",
+        category: "gastronomy",
+        latitude: 14.741,
+        longitude: -91.156,
         reason: "Lugar selecionado entre opções seguras da área desta Viagem.",
       },
       {
         candidateId: "discovery:overture:park",
         placeId: "internal-park",
         title: "Parque seguro",
+        category: "gastronomy",
+        latitude: 14.741,
+        longitude: -91.156,
         reason: "Lugar selecionado entre opções seguras da área desta Viagem.",
       },
     ]);

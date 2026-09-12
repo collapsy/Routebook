@@ -194,7 +194,7 @@ async function createZeroSeedDiscoveryFixture(tripName: string): Promise<string>
         timeZone: "America/Sao_Paulo",
       },
       startDate: "2026-11-10",
-      endDate: "2026-11-12",
+      endDate: "2026-11-11",
     },
     now,
   );
@@ -286,8 +286,8 @@ test("gera uma Proposal ready da UI ao PostgreSQL sem alterar o Itinerary", asyn
     id: proposalId,
     tripId: fixture.tripId,
     status: "ready",
-    generationMethod: "deterministic-candidate-balancing",
-    generationVersion: "2",
+    generationMethod: "deterministic-contextual-composition",
+    generationVersion: "3",
   });
   expect(proposal?.proposedActivities).toEqual(
     expect.arrayContaining([
@@ -308,7 +308,7 @@ test("gera uma Proposal ready da UI ao PostgreSQL sem alterar o Itinerary", asyn
   expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
 });
 
-test("destino zero-seed transforma Discovery segura em Proposal sem criar Recommendation", async ({
+test("destino zero-seed transforma Discovery segura em Proposal contextual sem criar Recommendation", async ({
   page,
 }, testInfo) => {
   const tripId = await createZeroSeedDiscoveryFixture(
@@ -327,9 +327,17 @@ test("destino zero-seed transforma Discovery segura em Proposal sem criar Recomm
   await expect(page.getByRole("heading", { name: "Bar descoberto próximo" })).toBeVisible();
 
   const proposal = await new DrizzleItineraryProposalRepository().findById(tripId, proposalId);
-  expect(proposal).toMatchObject({ status: "ready", generationVersion: "2" });
+  expect(proposal).toMatchObject({ status: "ready", generationVersion: "3" });
   const proposedActivities = proposal?.proposedActivities ?? [];
   expect(proposedActivities).toHaveLength(3);
+  const proposedCountByDay = new Map<string, number>();
+  for (const activity of proposedActivities) {
+    proposedCountByDay.set(
+      activity.targetTripDayId,
+      (proposedCountByDay.get(activity.targetTripDayId) ?? 0) + 1,
+    );
+  }
+  expect(Math.max(...proposedCountByDay.values())).toBeGreaterThan(1);
 
   const proposedPlaceIds = proposedActivities.flatMap((activity) =>
     activity.placeId ? [activity.placeId] : [],
@@ -357,7 +365,7 @@ test("limita a densidade diária sem alterar o Itinerary antes do aceite", async
 
   expect(proposal).toMatchObject({
     status: "ready",
-    generationVersion: "2",
+    generationVersion: "3",
   });
   expect(proposal?.proposedActivities).toHaveLength(3);
   expect(proposal?.limitations).toContain(

@@ -134,8 +134,8 @@ describe("createPostgresAuthoritativeItineraryProposalGenerationService", () => 
       tripId,
       itineraryId,
       status: "ready",
-      generationMethod: "deterministic-candidate-balancing",
-      generationVersion: "2",
+      generationMethod: "deterministic-contextual-composition",
+      generationVersion: "3",
       proposedActivities: [
         expect.objectContaining({
           proposedActivityId,

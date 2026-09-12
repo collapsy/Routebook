@@ -41,6 +41,7 @@ export type GenerateAuthoritativeItineraryProposalCommand = Readonly<{
   generatedAt: Date;
   createProposedActivityId: GenerateItineraryProposalInput["createProposedActivityId"];
   additionalCandidates?: readonly ItineraryProposalGenerationCandidate[];
+  anchorCoordinate?: GenerateItineraryProposalInput["anchorCoordinate"];
 }>;
 
 export type AuthoritativeItineraryProposalGenerationErrorCode =
@@ -119,6 +120,7 @@ export async function generateAuthoritativeItineraryProposal(
       candidates,
       generatedAt: command.generatedAt,
       createProposedActivityId: command.createProposedActivityId,
+      ...(command.anchorCoordinate ? { anchorCoordinate: command.anchorCoordinate } : {}),
     },
   });
 }

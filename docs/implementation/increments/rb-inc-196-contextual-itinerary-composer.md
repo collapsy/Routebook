@@ -101,6 +101,7 @@ modules/proposal-management/src/authoritative-itinerary-proposal-generation.ts
 modules/proposal-management/src/authoritative-itinerary-proposal-generation.test.ts
 packages/database/src/authoritative-itinerary-proposal-generation-context.ts
 packages/database/src/authoritative-itinerary-proposal-generation-context-postgres.test.ts
+packages/database/src/authoritative-itinerary-proposal-generation-service-postgres.test.ts
 apps/web/lib/itinerary-proposal-discovery-candidates.ts
 apps/web/lib/itinerary-proposal-discovery-candidates.test.ts
 apps/web/lib/itinerary-proposal-generation.ts

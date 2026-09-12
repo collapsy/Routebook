@@ -73,6 +73,10 @@ describe("mapOverturePlaceCategory", () => {
     ["tourist_attraction", "attraction"],
     ["viewpoint", "viewpoint"],
     ["scenic_viewpoint", "viewpoint"],
+    ["tour_operator", "tour"],
+    ["shopping_mall", "shopping"],
+    ["market", "shopping"],
+    ["farmers_market", "shopping"],
   ] as const)("mapeia %s para %s", (externalCategory, canonicalCategory) => {
     expect(mapOverturePlaceCategory(externalCategory)).toBe(canonicalCategory);
   });
@@ -81,6 +85,26 @@ describe("mapOverturePlaceCategory", () => {
     expect(
       mapOverturePlaceCategory("sushi_restaurant", ["dining_and_drinking", "restaurant"]),
     ).toBe("gastronomy");
+    expect(
+      mapOverturePlaceCategory("architectural_tour", [
+        "travel_and_transportation",
+        "travel",
+        "tour",
+        "tour_operator",
+      ]),
+    ).toBe("tour");
+    expect(mapOverturePlaceCategory("shopping_center", ["shopping", "shopping_mall"])).toBe(
+      "shopping",
+    );
+  });
+
+  it("não transforma ancestrais genéricos de Travel ou Shopping em categoria canônica", () => {
+    expect(
+      mapOverturePlaceCategory("travel_agency", ["travel_and_transportation", "travel"]),
+    ).toBeUndefined();
+    expect(
+      mapOverturePlaceCategory("antique_store", ["shopping", "specialty_store"]),
+    ).toBeUndefined();
   });
 
   it("não transforma POI relacionado em praia somente por ancestral da taxonomia", () => {

@@ -7,6 +7,8 @@ export const PLACE_CATEGORIES = [
   "nightlife",
   "attraction",
   "viewpoint",
+  "tour",
+  "shopping",
 ] as const;
 export type PlaceCategory = (typeof PLACE_CATEGORIES)[number];
 export const PLACE_PRICE_RANGES = ["free", "budget", "moderate", "premium"] as const;

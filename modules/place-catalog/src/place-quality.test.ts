@@ -85,8 +85,8 @@ describe("PlaceQualitySignals", () => {
     );
   });
 
-  it.each(["attraction", "viewpoint"] as const)(
-    "calcula qualidade para a nova categoria %s",
+  it.each(["attraction", "viewpoint", "tour", "shopping"] as const)(
+    "calcula qualidade para a categoria expandida %s",
     (category) => {
       const result = calculatePlaceQualityScore({
         category,
@@ -100,6 +100,27 @@ describe("PlaceQualitySignals", () => {
       );
     },
   );
+
+  it("mantém tour e shopping com o mesmo perfil neutro de compatibilidade de nature", () => {
+    const nature = calculatePlaceQualityScore({
+      category: "nature",
+      distanceMeters: 900,
+      signals: signals(),
+    });
+    const tour = calculatePlaceQualityScore({
+      category: "tour",
+      distanceMeters: 900,
+      signals: signals(),
+    });
+    const shopping = calculatePlaceQualityScore({
+      category: "shopping",
+      distanceMeters: 900,
+      signals: signals(),
+    });
+
+    expect(tour?.score).toBe(nature?.score);
+    expect(shopping?.score).toBe(nature?.score);
+  });
 
   it("usa abertura como sinal contextual para vida noturna somente quando solicitado", () => {
     const openSignals = signals({ openNow: true });

@@ -10,6 +10,8 @@ const categoryLabels = {
   nightlife: "Vida noturna",
   attraction: "Ponto turístico",
   viewpoint: "Mirante",
+  tour: "Passeio",
+  shopping: "Compras",
 } as const;
 
 const priceRangeLabels = {

@@ -63,20 +63,50 @@ const places: Place[] = [
     createdAt: now,
     updatedAt: now,
   },
+  {
+    id: "tour",
+    destinationId: "florianopolis-sc-br",
+    slug: "passeio-de-barco",
+    name: "Passeio de barco pela costa",
+    summary: "Operador local com passeios guiados de barco para conhecer a costa da região.",
+    category: "tour",
+    latitude: -27.596,
+    longitude: -48.552,
+    priceRange: "premium",
+    publicationStatus: "published",
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "shopping",
+    destinationId: "florianopolis-sc-br",
+    slug: "mercado-local",
+    name: "Mercado local",
+    summary: "Mercado com produtos regionais, artesanato e opções de compras durante a viagem.",
+    category: "shopping",
+    latitude: -27.594,
+    longitude: -48.548,
+    priceRange: "budget",
+    publicationStatus: "published",
+    createdAt: now,
+    updatedAt: now,
+  },
 ];
 
 describe("listAvailablePlaceCategories", () => {
   it("retorna somente categorias presentes, sem duplicar e na ordem canônica", () => {
     expect(
       listAvailablePlaceCategories([
+        "shopping",
         "viewpoint",
         "nightlife",
         "gastronomy",
         "gastronomy",
+        "tour",
         "attraction",
         "nature",
       ]),
-    ).toEqual(["gastronomy", "nature", "nightlife", "attraction", "viewpoint"]);
+    ).toEqual(["gastronomy", "nature", "nightlife", "attraction", "viewpoint", "tour", "shopping"]);
   });
 
   it("não oferece praia quando a cobertura da viagem não possui beach", () => {
@@ -88,11 +118,16 @@ describe("listAvailablePlaceCategories", () => {
   });
 
   it("inclui as categorias novas somente quando a cobertura real as contém", () => {
-    expect(listAvailablePlaceCategories([undefined, "beach", "attraction", "viewpoint"])).toEqual([
-      "beach",
-      "attraction",
-      "viewpoint",
-    ]);
+    expect(
+      listAvailablePlaceCategories([
+        undefined,
+        "beach",
+        "attraction",
+        "viewpoint",
+        "tour",
+        "shopping",
+      ]),
+    ).toEqual(["beach", "attraction", "viewpoint", "tour", "shopping"]);
   });
 });
 
@@ -105,21 +140,33 @@ describe("filterPlaces", () => {
     ).toEqual(["food"]);
   });
 
-  it("encontra Pontos turísticos e Mirantes pelos rótulos das categorias", () => {
+  it("encontra categorias pelos rótulos de apresentação", () => {
     expect(
       filterPlaces(places, { search: "pontos turisticos" }).map(({ place }) => place.id),
     ).toEqual(["attraction"]);
     expect(filterPlaces(places, { search: "mirantes" }).map(({ place }) => place.id)).toEqual([
       "viewpoint",
     ]);
+    expect(filterPlaces(places, { search: "passeios" }).map(({ place }) => place.id)).toEqual([
+      "tour",
+    ]);
+    expect(filterPlaces(places, { search: "compras" }).map(({ place }) => place.id)).toEqual([
+      "shopping",
+    ]);
   });
 
-  it("filtra diretamente as novas categorias", () => {
+  it("filtra diretamente as categorias expandidas", () => {
     expect(filterPlaces(places, { category: "attraction" }).map(({ place }) => place.id)).toEqual([
       "attraction",
     ]);
     expect(filterPlaces(places, { category: "viewpoint" }).map(({ place }) => place.id)).toEqual([
       "viewpoint",
+    ]);
+    expect(filterPlaces(places, { category: "tour" }).map(({ place }) => place.id)).toEqual([
+      "tour",
+    ]);
+    expect(filterPlaces(places, { category: "shopping" }).map(({ place }) => place.id)).toEqual([
+      "shopping",
     ]);
   });
 
@@ -154,6 +201,8 @@ describe("filterPlaces", () => {
       "food",
       "attraction",
       "viewpoint",
+      "tour",
+      "shopping",
     ]);
   });
 

@@ -43,6 +43,9 @@ export type ItineraryProposalSourcePlace = Readonly<{
   durationMinutes?: number;
   estimatedCostAmount?: number;
   estimatedCostCurrency?: string;
+  category?: string;
+  latitude?: number;
+  longitude?: number;
 }>;
 
 export type AssembleItineraryProposalGenerationInput = Readonly<{
@@ -263,6 +266,11 @@ function normalizePlaces(
       "invalid-place",
       "Informe uma descrição válida para o Place.",
     );
+    const category = optionalText(
+      source.category,
+      "invalid-place",
+      "Informe uma categoria válida para o Place.",
+    );
     if (
       source.durationMinutes !== undefined &&
       (!Number.isInteger(source.durationMinutes) || source.durationMinutes < 1)
@@ -292,6 +300,29 @@ function normalizePlaces(
         "invalid-place",
       );
     }
+    const hasLatitude = source.latitude !== undefined;
+    const hasLongitude = source.longitude !== undefined;
+    if (hasLatitude !== hasLongitude) {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Latitude e longitude do Place devem ser informadas juntas.",
+        "invalid-place",
+      );
+    }
+    if (
+      hasLatitude &&
+      hasLongitude &&
+      (!Number.isFinite(source.latitude) ||
+        source.latitude! < -90 ||
+        source.latitude! > 90 ||
+        !Number.isFinite(source.longitude) ||
+        source.longitude! < -180 ||
+        source.longitude! > 180)
+    ) {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Informe coordenadas válidas para o Place.",
+        "invalid-place",
+      );
+    }
     if (byId.has(placeId)) {
       throw new ItineraryProposalGenerationInputAssemblyError(
         "Cada Place deve possuir um PlaceId único.",
@@ -311,6 +342,10 @@ function normalizePlaces(
           ? { estimatedCostAmount: source.estimatedCostAmount }
           : {}),
         ...(estimatedCostCurrency ? { estimatedCostCurrency } : {}),
+        ...(category ? { category } : {}),
+        ...(hasLatitude && hasLongitude
+          ? { latitude: source.latitude!, longitude: source.longitude! }
+          : {}),
       }),
     );
   }
@@ -451,6 +486,10 @@ function normalizeCandidates(
           : {}),
         ...(place.estimatedCostCurrency
           ? { estimatedCostCurrency: place.estimatedCostCurrency }
+          : {}),
+        ...(place.category ? { category: place.category } : {}),
+        ...(place.latitude !== undefined && place.longitude !== undefined
+          ? { latitude: place.latitude, longitude: place.longitude }
           : {}),
       });
     }),

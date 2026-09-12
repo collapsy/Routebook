@@ -55,6 +55,9 @@ function input(
         durationMinutes: 120,
         estimatedCostAmount: 0,
         estimatedCostCurrency: "brl",
+        category: "beach",
+        latitude: -6.235,
+        longitude: -35.045,
       },
       { placeId: "place-2", title: "Baía dos Golfinhos" },
     ],
@@ -124,7 +127,7 @@ describe("assembleItineraryProposalGenerationInput", () => {
     ]);
   });
 
-  it("preserva metadados opcionais do Place e a justificativa", () => {
+  it("preserva metadados opcionais e contextuais do Place e a justificativa", () => {
     const result = assembleItineraryProposalGenerationInput(input());
 
     expect(result.candidates).toEqual([
@@ -136,6 +139,9 @@ describe("assembleItineraryProposalGenerationInput", () => {
         durationMinutes: 120,
         estimatedCostAmount: 0,
         estimatedCostCurrency: "BRL",
+        category: "beach",
+        latitude: -6.235,
+        longitude: -35.045,
       },
       {
         candidateId: "recommendation-2",
@@ -144,6 +150,30 @@ describe("assembleItineraryProposalGenerationInput", () => {
         reason: "Boa opção para o grupo.",
       },
     ]);
+  });
+
+  it("rejeita coordenada parcial ou fora do intervalo no Place", () => {
+    const source = input();
+    expectCode(
+      () =>
+        assembleItineraryProposalGenerationInput(
+          input({
+            places: [{ ...source.places[0]!, longitude: undefined }],
+            recommendations: [source.recommendations[1]!],
+          }),
+        ),
+      "invalid-place",
+    );
+    expectCode(
+      () =>
+        assembleItineraryProposalGenerationInput(
+          input({
+            places: [{ ...source.places[0]!, latitude: 91 }],
+            recommendations: [source.recommendations[1]!],
+          }),
+        ),
+      "invalid-place",
+    );
   });
 
   it("exclui Recommendations inelegíveis, futuras e expiradas", () => {

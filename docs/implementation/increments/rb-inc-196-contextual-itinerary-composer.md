@@ -94,6 +94,7 @@ A UX não deve afirmar rota real, tempo de deslocamento ou horário de funcionam
 ```text
 modules/proposal-management/src/deterministic-itinerary-proposal-generator.ts
 modules/proposal-management/src/deterministic-itinerary-proposal-generator.test.ts
+modules/proposal-management/src/deterministic-itinerary-proposal-contextual.test.ts
 modules/proposal-management/src/itinerary-proposal-generation-input-assembler.ts
 modules/proposal-management/src/itinerary-proposal-generation-input-assembler.test.ts
 modules/proposal-management/src/authoritative-itinerary-proposal-generation.ts

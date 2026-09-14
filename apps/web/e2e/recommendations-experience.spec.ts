@@ -54,7 +54,10 @@ async function createTripWithRecommendationContext(page: Page) {
 
   await Promise.all([
     page.waitForURL(/\/contexto$/),
-    page.getByRole("link", { name: "Configurar contexto" }).click(),
+    page
+      .getByLabel("O que vale a pena considerar?")
+      .getByRole("link", { name: "Informar preferências" })
+      .click(),
   ]);
   await page.getByRole("checkbox", { name: "Praias" }).check();
   await page.getByRole("checkbox", { name: "Natureza" }).check();
@@ -93,18 +96,20 @@ async function openRecommendations(
       exact: true,
     }),
   ).toBeVisible();
-  await expect(page.getByText(/cada mudança exige uma ação explícita/i)).toBeVisible();
+  await expect(
+    page.getByText(/Compare opções sugeridas a partir do que você informou/i),
+  ).toBeVisible();
 
   if (view === "all") {
     await expect(
-      page.getByRole("heading", { name: "Lista completa e explicável", exact: true }),
+      page.getByRole("heading", { name: "Todas as sugestões", exact: true }),
     ).toBeVisible();
   }
 }
 
 function consideredRecommendationItem(page: Page, placeName: string) {
   return page
-    .getByRole("list", { name: "Recommendations já consideradas" })
+    .getByRole("list", { name: "Sugestões já consideradas" })
     .getByRole("listitem")
     .filter({ hasText: placeName });
 }
@@ -118,13 +123,15 @@ test("permanece neutra quando o contexto é insuficiente", async ({ page }) => {
   ).toBeVisible();
   await expect(
     page.getByRole("heading", {
-      name: "Ainda não há contexto suficiente para uma seleção confiável",
+      name: "Precisamos de mais informações para personalizar as sugestões",
       exact: true,
     }),
   ).toBeVisible();
   await expect(page.getByRole("list", { name: "Sugestões contextuais de lugares" })).toHaveCount(0);
   await expect(
-    page.getByRole("link", { name: "Configurar dados para recomendações", exact: true }),
+    page
+      .getByLabel("O que vale a pena considerar?")
+      .getByRole("link", { name: "Informar preferências", exact: true }),
   ).toBeVisible();
   await expect(
     page
@@ -147,10 +154,8 @@ test("mostra decisão contextual sem aplicar uma escolha", async ({ page }) => {
   await expect(contextualList).toBeVisible();
   await expect(contextualList.getByRole("listitem")).toHaveCount(3);
   await expect(contextualList.getByRole("img").first()).toBeVisible();
-  await expect(
-    contextualList.getByText(/Faixa de preço do catálogo|Faixa de preço: indisponível/).first(),
-  ).toBeVisible();
-  await expect(page.getByText(/não mede custo real, risco ou impacto de esperar/i)).toBeVisible();
+  await expect(contextualList.getByText(/Faixa de preço:/).first()).toBeVisible();
+  await expect(contextualList).not.toContainText("Faixa de preço do catálogo");
   await expect(page.getByRole("link", { name: "Ver todas as sugestões" })).toBeVisible();
   await expect(
     contextualList.getByRole("link", { name: /Comparar detalhes/ }).first(),
@@ -180,11 +185,9 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
   await expect(
     page.getByRole("heading", { name: "Sugestões para decidir agora", exact: true }),
   ).toBeVisible();
-  await expect(
-    page.getByText(/Exibindo 6 de 30 Recommendations como seleção inicial/i),
-  ).toBeVisible();
+  await expect(page.getByText(/Mostrando 6 de 30 sugestões para começar/i)).toBeVisible();
 
-  const focusedList = page.getByRole("list", { name: "Recommendations de Lugares" });
+  const focusedList = page.getByRole("list", { name: "Sugestões de lugares" });
   const focusedHeadings = focusedList.getByRole("heading", { level: 2 });
   await expect(focusedHeadings).toHaveCount(6);
   const focusedNames = await focusedHeadings.allTextContents();
@@ -201,9 +204,9 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
   await page.goto(showAllHref!);
   await expect(page).toHaveURL(/\/recomendacoes\?view=all$/);
   await expect(
-    page.getByRole("heading", { name: "Lista completa e explicável", exact: true }),
+    page.getByRole("heading", { name: "Todas as sugestões", exact: true }),
   ).toBeVisible();
-  const fullList = page.getByRole("list", { name: "Recommendations de Lugares" });
+  const fullList = page.getByRole("list", { name: "Sugestões de lugares" });
   const fullHeadings = fullList.getByRole("heading", { level: 2 });
   await expect(fullHeadings).toHaveCount(30);
   expect((await fullHeadings.allTextContents()).slice(0, 6)).toEqual(focusedNames);
@@ -220,9 +223,7 @@ test("foca a lista inicial e preserva a ordem na divulgação completa", async (
   await page.goto(focusHref!);
   await expect(page).toHaveURL(/\/recomendacoes$/);
   await expect(
-    page
-      .getByRole("list", { name: "Recommendations de Lugares" })
-      .getByRole("heading", { level: 2 }),
+    page.getByRole("list", { name: "Sugestões de lugares" }).getByRole("heading", { level: 2 }),
   ).toHaveCount(6);
 });
 
@@ -292,7 +293,7 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
   const { tripName, tripUrl } = await createTripWithRecommendationContext(page);
   await openRecommendations(page, tripUrl, tripName, "all");
 
-  const list = page.getByRole("list", { name: "Recommendations de Lugares" });
+  const list = page.getByRole("list", { name: "Sugestões de lugares" });
   await expect(list.getByRole("heading", { level: 2 })).toHaveCount(30);
   await expect(list.locator('[data-place-image-fallback="true"]')).toHaveCount(21);
 
@@ -303,10 +304,8 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
   await expect(newRecommendation).toBeVisible();
   const newRecommendationFallback = newRecommendation.locator('[data-place-image-fallback="true"]');
   await expect(newRecommendationFallback).toBeVisible();
-  await expect(newRecommendationFallback).toHaveAttribute("data-category-illustration", "beach");
-  await expect(newRecommendationFallback).toContainText(
-    "Ilustração de categoria — não é foto do local",
-  );
+  await expect(newRecommendationFallback).toHaveAttribute("data-presentation", "compact");
+  await expect(newRecommendationFallback).toHaveText("Sem foto");
   await expect(
     newRecommendation.getByText(/categoria do Lugar corresponde a um interesse/i),
   ).toBeVisible();
@@ -340,7 +339,7 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
         .click(),
     /ignorada=1/,
   );
-  await expect(page.getByRole("status").first()).toContainText("Recommendation ignorada");
+  await expect(page.getByRole("status").first()).toContainText("Sugestão ignorada");
 
   await page.reload();
   const ignoredRecommendation = consideredRecommendationItem(page, "Praia do Amor");

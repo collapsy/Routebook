@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   isPlausibleOvertureBeachName,
+  isUsefulOverturePlaceName,
   OverturePmtilesPlaceSearchAdapter,
   parseLatestOvertureTileRelease,
   resolveOvertureTileSourceLicense,
@@ -25,6 +26,22 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
     expect(resolveOvertureTileSourceLicense({ license: "CC-BY-4.0" })).toBe("CC-BY-4.0");
     expect(resolveOvertureTileSourceLicense({ dataset: "fsq" })).toBe("Apache-2.0");
     expect(resolveOvertureTileSourceLicense({ dataset: "unknown-dataset" })).toBeUndefined();
+  });
+
+  it("rejeita nomes que são apenas categoria ou produto e preserva identidades distintivas", () => {
+    for (const name of ["Sobremesa", "Dessert", "Restaurante", "Bar", "Café", "Praia"]) {
+      expect(isUsefulOverturePlaceName(name), name).toBe(false);
+    }
+    for (const name of [
+      "Café Central",
+      "Bar do Zé",
+      "Sobremesa La Casa",
+      "Praia do Amor",
+      "Parque Central",
+      "Ponte Hercílio Luz",
+    ]) {
+      expect(isUsefulOverturePlaceName(name), name).toBe(true);
+    }
   });
 
   it("aceita nomes plausíveis de praia e rejeita falsos positivos observados em Pipa", () => {

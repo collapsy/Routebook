@@ -46,6 +46,21 @@ const preview = {
   matchEvidence: "Identidade e contexto local confirmados.",
 } as const;
 
+const googlePreview = {
+  provider: "google-places",
+  mediaUrl: "/api/place-image-preview/google?token=token-assinado",
+  sourceUrl: "https://www.google.com/maps/place/?q=place_id:lava",
+  sourceName: "Google Maps",
+  authorAttributions: [
+    {
+      displayName: "Fotógrafo Google",
+      uri: "https://maps.google.com/maps/contrib/123",
+    },
+  ],
+  altText: "Fotografia de Lava Terrace fornecida pelo Google Maps.",
+  matchEvidence: "Google Place ID revalidado por identidade e proximidade antes da mídia.",
+} as const;
+
 function renderPreview() {
   return render(
     <ExternalPlaceImagePreview
@@ -66,7 +81,7 @@ afterEach(() => {
 });
 
 describe("ExternalPlaceImagePreview", () => {
-  it("não consulta mídia antes de aproximar o card do viewport", () => {
+  it("não consulta mídia antes de aproximar o card do viewport e usa estado compacto", () => {
     const fetcher = vi.fn();
     vi.stubGlobal("fetch", fetcher);
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
@@ -74,14 +89,15 @@ describe("ExternalPlaceImagePreview", () => {
     renderPreview();
 
     expect(fetcher).not.toHaveBeenCalled();
-    expect(screen.getByText("Fotografia sob demanda")).toBeInTheDocument();
+    expect(screen.getByText("Sem foto")).toBeInTheDocument();
+    expect(screen.queryByText("Imagem ilustrativa")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("status", { name: "Fotografia sob demanda para Praia do Amor" }),
-    ).toHaveAttribute("data-category-illustration", "beach");
+      screen.getByRole("img", { name: "Foto não disponível para Praia do Amor" }),
+    ).toHaveAttribute("data-presentation", "compact");
   });
 
-  it("usa fallback sem request quando Media está desabilitada", () => {
-    const fetcher = vi.fn();
+  it("não deixa o budget server-side desabilitar permanentemente um card que chega ao viewport", async () => {
+    const fetcher = vi.fn(async () => Response.json({ error: "miss" }, { status: 404 }));
     vi.stubGlobal("fetch", fetcher);
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
 
@@ -97,15 +113,20 @@ describe("ExternalPlaceImagePreview", () => {
     );
 
     expect(fetcher).not.toHaveBeenCalled();
+    enterViewport();
+
+    await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(1));
     expect(
-      screen.getByRole("img", {
-        name: "Ilustração de Praia para Praia do Amor — não é foto do local",
+      await screen.findByRole("img", {
+        name: "Foto não disponível para Praia do Amor",
       }),
-    ).toHaveAttribute("data-category-illustration", "beach");
+    ).toHaveAttribute("data-presentation", "compact");
   });
 
-  it("usa fallback sem request quando o Destination não possui Media governada", () => {
-    const fetcher = vi.fn();
+  it("consulta Media também quando o Destination não possui id curado", async () => {
+    const fetcher = vi.fn<(input: string | URL | Request) => Promise<Response>>(async () =>
+      Response.json({ error: "miss" }, { status: 404 }),
+    );
     vi.stubGlobal("fetch", fetcher);
     vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
 
@@ -117,13 +138,52 @@ describe("ExternalPlaceImagePreview", () => {
         placeName="Lugar em Florianópolis"
       />,
     );
+    enterViewport();
 
-    expect(fetcher).not.toHaveBeenCalled();
+    await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(1));
+    expect(String(fetcher.mock.calls[0]?.[0])).not.toContain("destinationId=");
     expect(
-      screen.getByRole("img", {
-        name: "Ilustração de Natureza para Lugar em Florianópolis — não é foto do local",
+      await screen.findByRole("img", {
+        name: "Foto não disponível para Lugar em Florianópolis",
       }),
-    ).toBeInTheDocument();
+    ).toHaveAttribute("data-presentation", "compact");
+  });
+
+  it("renderiza Google Photo governada e attribution quando existe Google Place ID", async () => {
+    const fetcher = vi.fn<(input: string | URL | Request) => Promise<Response>>().mockResolvedValue(
+      Response.json(googlePreview, {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetcher);
+    vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
+
+    render(
+      <ExternalPlaceImagePreview
+        category="nightlife"
+        destinationId="Antigua Guatemala"
+        googlePlaceId="ChIJLavaTerrace01"
+        latitude={14.5578}
+        longitude={-90.7337}
+        placeName="Lava Terrace"
+      />,
+    );
+    enterViewport();
+
+    const image = await screen.findByRole("img", { name: googlePreview.altText });
+    expect(image).toHaveAttribute("src", googlePreview.mediaUrl);
+    expect(screen.getByText("Google Maps")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Fotógrafo Google" })).toHaveAttribute(
+      "href",
+      "https://maps.google.com/maps/contrib/123",
+    );
+    expect(screen.getByRole("link", { name: "Ver no Google Maps" })).toHaveAttribute(
+      "href",
+      googlePreview.sourceUrl,
+    );
+    expect(String(fetcher.mock.calls[0]?.[0])).toContain("googlePlaceId=ChIJLavaTerrace01");
+    expect(String(fetcher.mock.calls[0]?.[0])).toContain("category=nightlife");
   });
 
   it("renderiza foto licenciada e Provenance após match seguro", async () => {
@@ -166,9 +226,9 @@ describe("ExternalPlaceImagePreview", () => {
     await waitFor(() => {
       expect(
         screen.getByRole("img", {
-          name: "Ilustração de Praia para Praia do Amor — não é foto do local",
+          name: "Foto não disponível para Praia do Amor",
         }),
-      ).toHaveAttribute("data-category-illustration", "beach");
+      ).toHaveAttribute("data-presentation", "compact");
     });
   });
 });

@@ -24,8 +24,8 @@ type SpatialDay = {
 
 const unavailableLabels = {
   "manual-activity": "Atividade manual sem Lugar associado.",
-  "place-not-found": "O Lugar vinculado não está disponível no catálogo publicado.",
-  "coordinates-unavailable": "O Lugar vinculado não possui coordenadas válidas.",
+  "place-not-found": "O lugar desta atividade não está disponível.",
+  "coordinates-unavailable": "Não há localização disponível para este lugar.",
 } as const;
 
 function buildMapPoints(tripId: string, context: ItineraryDaySpatialContext): TripMapPoint[] {
@@ -66,7 +66,7 @@ function LegList({ selectedDay }: { selectedDay: SpatialDay }) {
   if (legSummary.legs.length === 0) {
     return (
       <p className={styles.emptyDay}>
-        Ainda não há dois pontos consecutivos disponíveis para formar uma etapa.
+        Ainda não há locais suficientes no mapa para comparar deslocamentos.
       </p>
     );
   }
@@ -87,13 +87,13 @@ function LegList({ selectedDay }: { selectedDay: SpatialDay }) {
               aria-label={`Deslocamento de ${originLabel} para ${destinationLabel}`}
               data-route={` — de ${originLabel} para ${destinationLabel}`}
             >
-              Etapa geográfica {index + 1}
+              Trecho {index + 1}
             </strong>
             {leg.status === "available" ? (
               <div className={styles.legActions}>
                 <span>{formatGeodesicDistance(leg.distanceMeters)}</span>
                 <a
-                  aria-label={`Abrir rota externa de ${originLabel} para ${destinationLabel}`}
+                  aria-label={`Abrir rota de ${originLabel} para ${destinationLabel}`}
                   href={buildExternalDirectionsUrl({
                     origin: leg.origin.coordinate,
                     destination: leg.destination.coordinate,
@@ -101,14 +101,11 @@ function LegList({ selectedDay }: { selectedDay: SpatialDay }) {
                   rel="noopener noreferrer"
                   target="_blank"
                 >
-                  Abrir rota externa
+                  Abrir rota
                 </a>
               </div>
             ) : (
-              <span>
-                Distância indisponível porque existe uma lacuna geográfica entre os pontos
-                consecutivos.
-              </span>
+              <span>Distância indisponível entre estes pontos.</span>
             )}
           </li>
         );
@@ -155,8 +152,8 @@ export function ItinerarySpatialPanel({
         </header>
 
         <TripMap
-          description="Os números do mapa acompanham a ordem das Atividades na timeline. A linha entre pontos não representa uma rota calculada."
-          emptyDescription="Este Dia ainda não possui Hospedagem ou Atividades com coordenadas válidas. A timeline continua disponível."
+          description="Os números seguem a ordem das atividades. A linha entre os pontos não representa uma rota calculada."
+          emptyDescription="Não há locais suficientes para mostrar este Dia no mapa."
           emptyTitle="Mapa do Dia indisponível"
           points={points}
           title={`Mapa do Dia ${selectedDay.position}`}
@@ -191,12 +188,9 @@ export function ItinerarySpatialPanel({
       id="contexto-geografico"
     >
       <header className={styles.header}>
-        <p className={styles.eyebrow}>Visualização geográfica do Dia</p>
-        <h2 id="itinerary-spatial-title">Onde estão as decisões do Roteiro</h2>
-        <p>
-          O mapa acompanha o Dia em foco e relaciona a sequência das Atividades com a Hospedagem.
-          Nenhuma localização ausente é inferida.
-        </p>
+        <p className={styles.eyebrow}>Mapa do Dia</p>
+        <h2 id="itinerary-spatial-title">Onde ficam as atividades</h2>
+        <p>Veja a sequência do Dia a partir da hospedagem.</p>
       </header>
 
       {showDaySelector ? (
@@ -216,8 +210,8 @@ export function ItinerarySpatialPanel({
       ) : null}
 
       <TripMap
-        description="A Hospedagem possui símbolo próprio. As Atividades são numeradas conforme a ordem canônica do Dia."
-        emptyDescription="Este Dia não possui Hospedagem ou Atividades com coordenadas válidas. O Roteiro textual permanece disponível."
+        description="A hospedagem tem um marcador próprio. As atividades seguem a ordem do Dia."
+        emptyDescription="Não há locais suficientes para mostrar este Dia no mapa."
         emptyTitle="Mapa do Dia indisponível"
         points={points}
         title={`Mapa do Dia ${selectedDay.position}`}
@@ -226,13 +220,13 @@ export function ItinerarySpatialPanel({
       <section aria-labelledby="spatial-list-title" className={styles.textualContext}>
         <div className={styles.contextHeading}>
           <div>
-            <p className={styles.eyebrow}>Alternativa textual ao mapa</p>
-            <h3 id="spatial-list-title">Sequência do Dia {selectedDay.position}</h3>
+            <p className={styles.eyebrow}>Sequência do Dia</p>
+            <h3 id="spatial-list-title">Atividades do Dia {selectedDay.position}</h3>
           </div>
           <p>
             {context.accommodation.status === "available"
               ? "Hospedagem localizada."
-              : "Hospedagem sem coordenadas disponíveis."}
+              : "Hospedagem sem localização disponível."}
           </p>
         </div>
 
@@ -265,9 +259,7 @@ export function ItinerarySpatialPanel({
                     Etapa {step.order}
                   </strong>
                   <span>
-                    {step.status === "available"
-                      ? "Localização disponível no mapa."
-                      : unavailableLabels[step.reason]}
+                    {step.status === "available" ? "No mapa." : unavailableLabels[step.reason]}
                   </span>
                 </div>
               </li>
@@ -284,14 +276,14 @@ export function ItinerarySpatialPanel({
           </div>
           {legSummary.totalMeters !== undefined ? (
             <p>
-              Total geodésico: <strong>{formatGeodesicDistance(legSummary.totalMeters)}</strong>
+              Total em linha reta: <strong>{formatGeodesicDistance(legSummary.totalMeters)}</strong>
             </p>
           ) : null}
         </div>
 
         <p className={styles.estimateNotice}>
-          Distâncias geodésicas em linha reta. Não representam trajeto por ruas, trânsito ou duração
-          de deslocamento. Nenhum Meio de transporte é inferido.
+          Distâncias em linha reta. Não representam trajeto por ruas, trânsito ou duração de
+          deslocamento.
         </p>
 
         <LegList selectedDay={selectedDay} />

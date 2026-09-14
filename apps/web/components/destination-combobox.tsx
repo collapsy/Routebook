@@ -175,9 +175,9 @@ export function DestinationCombobox({
       : state === "empty"
         ? "Nenhum destino encontrado. Tente incluir cidade, estado ou país."
         : state === "disabled"
-          ? "As sugestões automáticas não estão disponíveis neste ambiente. Seu texto fica preservado para a busca textual disponível."
+          ? "As sugestões não estão disponíveis agora. Você pode continuar com o destino digitado."
           : state === "error"
-            ? "Não foi possível carregar sugestões agora. Seu texto foi preservado."
+            ? "Não foi possível carregar sugestões agora. Tente novamente."
             : selected
               ? `Destino selecionado: ${selected.label}`
               : "Digite pelo menos 3 caracteres para ver sugestões.";

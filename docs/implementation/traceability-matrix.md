@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: "2026-09-07"
+last_updated: "2026-09-08"
 authors:
   - RouteBook Team
 tags:
@@ -1009,3 +1009,61 @@ Ao concluir um incremento:
 | validação | SHA `9c7762953d462c9e5b96aa895ff33ac58859a049`; Documentation run `34143889461` e Engineering run `34143889453` verdes; 148 Playwright passaram e 1 flaky legado do Roteiro recuperou no retry |
 | Preview | `dpl_FPkN7yijEnrmLTMUTdNer4WarHL8` READY no mesmo SHA; sem warning/error/fatal na janela consultada |
 | governança | nenhum Provider, secret, billing, migration, ADR ou Production alterados pelo RB-INC-182 |
+
+## Evidências previstas do RB-INC-183
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-183-nearby-discovery-map.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-183-nearby-discovery-map.md` |
+| issue/PR | #435; PR #436; branch `codex/rb-inc-183-nearby-discovery-map` |
+| base empilhada | RB-INC-182 / `44985623b17bdb78be350c8d458e4c2ad6dc2b12` |
+| mapa | visão geral projeta Hospedagem, Places canônicos e descobertas externas reconciliadas; external-only limitado a 20 e read-only |
+| identidade | Region accommodation-first + reconciliação/`buildPlaceDiscoveryFeed`; nenhum read materializa, salva ou cria Activity/Decision |
+| validação | SHA `0a829f8a2d6f05f5776e6daba3cfe6e1b28f6bfe`; Documentation run `34159390624` e Engineering run `34159390743` verdes; 148 Playwright + 1 flaky legado rastreado em #437 |
+| Preview | `dpl_HKVQh13dTp6hwgFnzxycg9s1QRoY` READY no mesmo SHA; prova live autenticada em Gramado permanecia gate funcional explícito na PR |
+| governança | sem publicação automática, Provider novo/pago, billing, migration ou Production |
+
+## Evidências previstas do RB-INC-184
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-184-contextual-external-suggestions.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-184-contextual-external-suggestions.md` |
+| issue/PR | #438; PR #439; branch `codex/rb-inc-184-contextual-external-suggestions` |
+| base empilhada | RB-INC-183 / `0a829f8a2d6f05f5776e6daba3cfe6e1b28f6bfe` |
+| projeção | `ContextualExternalSuggestion` read-only e efêmera; não recebe RecommendationId, lifecycle ou Decision |
+| ordenação | interesse conhecido → distância → identidade estável; nenhum score, rating, preço ou disponibilidade é inventado |
+| validação | SHA `dd996a4dcb99fc2068a63bc0c74b54ca1c282632`; Documentation run `34167592461` e Engineering run `34167592414` verdes no mesmo SHA |
+| Preview | `dpl_EbMpXwyDYHHZugxhd9LZ6h1qF3UL` READY no mesmo SHA, `target=null`; validação live de Gramado continuava gate funcional descrito na PR |
+| governança | Recommendation persistida continua exigindo Place publicado; sem migration, Provider novo, billing, secret ou Production |
+
+## Evidências previstas do RB-INC-185
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-185-unified-place-experience.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-185-unified-place-experience.md` |
+| issue/PR | #440; PR #441; branch `codex/rb-inc-185-unified-place-experience` |
+| base empilhada | RB-INC-184 / `dd996a4dcb99fc2068a63bc0c74b54ca1c282632` |
+| linguagem | superfícies principais apresentam somente `Lugar`; Fonte/Provenance permanece metadado, não taxonomia editorial |
+| continuidade | Provider → reconciliação → Lugar → ação explícita → materialização interna quando necessária, sem CTA de publicação/curadoria |
+| validação própria | SHA `af12a9de42604487cc0a140acd45af776580fafb`; Documentation run `34173679667` verde; Engineering run `34173679637` vermelho no próprio head por regressões E2E legadas posteriormente saneadas no RB-INC-186 |
+| Preview | `dpl_yMj3FaHiJiUUoRdjnd6XKqq71JxQ` READY no mesmo SHA, `target=null` |
+| validação acumulada | a cadeia incluindo RB-INC-185 foi validada no RB-INC-186 SHA `42638e98fe159f720ad3bb1ccd4f9a0931aee4ed`: Documentation `34233429696` e Engineering `34233429804` verdes, com 151/151 Playwright aprovados |
+| governança | nenhuma mudança de domínio persistido, Provider, billing, migration ou Production |
+
+## Evidências previstas do RB-INC-186
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-186-place-card-hierarchy.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-186-place-card-hierarchy.md` |
+| issue/PR | #442; PR #443; branch `codex/rb-inc-186-place-card-hierarchy` |
+| base empilhada | RB-INC-185 / `af12a9de42604487cc0a140acd45af776580fafb` |
+| hierarquia | imagem/categoria/nome/distância e próxima ação dominam o card; ranking detalhado, Provenance e rota ficam em divulgação progressiva |
+| ações | materializado usa `Ver detalhes`; provider-first usa `Ver mapa e fotos` + `Salvar lugar`; `Adicionar ao roteiro` deixa de competir na Discovery e permanece em Detalhes |
+| regressões | contratos E2E antigos de linguagem/hierarquia foram alinhados de forma escopada em Recommendations, route reliability, Guia e validação multi-destination |
+| validação técnica | SHA `42638e98fe159f720ad3bb1ccd4f9a0931aee4ed`; Documentation run `34233429696` e Engineering run `34233429804` verdes; 151/151 Playwright, 401 testes web e 198 testes database aprovados |
+| Preview | `dpl_7qqQQF33GLatVT45FvwZEfRGprmM` READY no mesmo SHA, `target=null`, raiz HTTP 200 e `x-robots-tag: noindex`; inspeção visual desktop/mobile não foi marcada como concluída porque o navegador automatizado do ambiente foi bloqueado pelo sandbox de rede |
+| governança | PR permanece Draft; `main` e Production intocados; merge e aceite visual continuam gates humanos explícitos |

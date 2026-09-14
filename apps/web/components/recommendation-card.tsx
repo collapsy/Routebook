@@ -33,6 +33,10 @@ async function submitAndNavigate(action: RecommendationAction, formData: FormDat
   window.location.assign(result.redirectTo);
 }
 
+function travelerFacingConfidenceBasis(basis: string): string {
+  return basis.replace("distância geodésica", "distância em linha reta");
+}
+
 export function RecommendationCard({
   card,
   tripId,
@@ -52,6 +56,7 @@ export function RecommendationCard({
   const isRejected = card.status === "rejected";
   const isAccepted = card.status === "accepted";
   const canDecide = card.status === "presented";
+  const confidenceBasis = card.confidenceBasis.map(travelerFacingConfidenceBasis);
 
   return (
     <article
@@ -81,7 +86,7 @@ export function RecommendationCard({
       {card.geodesicDistanceLabel ? (
         <p className={styles.distance}>
           <strong>Distância da hospedagem: </strong>
-          {card.geodesicDistanceLabel}. Não representa rota, trânsito ou tempo de deslocamento.
+          {card.geodesicDistanceLabel}.
         </p>
       ) : null}
 
@@ -97,8 +102,7 @@ export function RecommendationCard({
       <section className={styles.confidence} aria-labelledby={`${titleId}-confidence`}>
         <h3 id={`${titleId}-confidence`}>Confiança {confidenceLabels[card.confidenceLevel]}</h3>
         <p className={styles.confidenceBasis}>
-          Essa leitura considera {card.confidenceBasis.join(" e ")}. Não é garantia de qualidade ou
-          de disponibilidade.
+          Baseada em {confidenceBasis.join(" e ")}. Não garante qualidade ou disponibilidade.
         </p>
       </section>
 
@@ -118,14 +122,13 @@ export function RecommendationCard({
 
       {isRejected ? (
         <p className={styles.stateText} role="status">
-          Você ignorou esta Recommendation. O Lugar continua disponível no catálogo e nenhuma
-          Preferência ou Atividade foi alterada.
+          Você ignorou esta sugestão.
         </p>
       ) : null}
 
       {isAccepted ? (
         <p className={styles.stateText} role="status">
-          Esta Recommendation já foi transformada em uma escolha explícita e persistida.
+          Esta sugestão já foi confirmada.
         </p>
       ) : null}
 

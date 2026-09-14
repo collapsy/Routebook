@@ -126,11 +126,9 @@ export function ItineraryProposalDecisionActions({
     return (
       <section className={styles.decisionActions} aria-labelledby="proposal-decision-title">
         <div className={styles.decisionCopy}>
-          <p className={styles.eyebrow}>Revisão somente leitura</p>
+          <p className={styles.eyebrow}>Somente leitura</p>
           <h2 id="proposal-decision-title">Você pode consultar esta proposta</h2>
-          <p>
-            Somente participantes com permissão de decisão podem aceitar ou descartar a proposta.
-          </p>
+          <p>Você não tem permissão para aceitar ou descartar esta proposta.</p>
         </div>
       </section>
     );
@@ -139,14 +137,14 @@ export function ItineraryProposalDecisionActions({
   return (
     <section className={styles.decisionActions} aria-labelledby="proposal-decision-title">
       <div className={styles.decisionCopy}>
-        <p className={styles.eyebrow}>Decisão sobre esta sugestão</p>
+        <p className={styles.eyebrow}>Sua decisão</p>
         <h2 id="proposal-decision-title">
           {canAccept ? "Quer aplicar esta proposta?" : "Não quer usar esta proposta?"}
         </h2>
         <p>
           {canAccept
-            ? "Revise a confirmação antes de substituir o estado atual do Roteiro pelas mudanças propostas."
-            : "Esta proposta não pode mais ser aplicada ao estado atual. Ao descartar, o Roteiro não será alterado."}
+            ? "Você pode aplicar tudo, escolher apenas algumas mudanças ou descartar a proposta."
+            : "O Roteiro mudou desde que esta proposta foi criada. Você ainda pode descartá-la."}
         </p>
       </div>
 
@@ -162,10 +160,7 @@ export function ItineraryProposalDecisionActions({
                 value={expectedItineraryVersion}
               />
               <input name="idempotencyKey" type="hidden" value={idempotencyKey} />
-              <p>
-                As mudanças serão aplicadas ao Roteiro em uma única decisão. Em caso de repetição, o
-                RouteBook reutilizará o resultado já persistido.
-              </p>
+              <p>Todas as mudanças desta proposta serão aplicadas ao Roteiro.</p>
               <label>
                 <input
                   disabled={decisionDisabled}
@@ -200,7 +195,7 @@ export function ItineraryProposalDecisionActions({
               />
               <fieldset disabled={decisionDisabled}>
                 <legend>Escolha as mudanças que deseja aplicar</legend>
-                <p>Itens não selecionados permanecerão fora do Roteiro.</p>
+                <p>Itens não selecionados ficarão fora do Roteiro.</p>
                 <ul className={styles.partialSelectionList}>
                   {partialAcceptanceItems.map((item) => (
                     <li key={item.id}>
@@ -250,22 +245,22 @@ export function ItineraryProposalDecisionActions({
       </div>
 
       <div aria-live="polite" className={styles.actionFeedback}>
-        {acceptPending ? <p>Aplicando a proposta e atualizando o Roteiro…</p> : null}
-        {partialAcceptPending ? <p>Aplicando a seleção e atualizando o Roteiro…</p> : null}
+        {acceptPending ? <p>Aplicando proposta ao Roteiro…</p> : null}
+        {partialAcceptPending ? <p>Aplicando seleção ao Roteiro…</p> : null}
         {state.status === "error" ? <p role="alert">{state.message}</p> : null}
         {partialState.status === "error" ? <p role="alert">{partialState.message}</p> : null}
         {state.status === "success" ? (
           <p role="status">
             {state.kind === "replay"
-              ? "Esta proposta já havia sido aceita. Abrindo o Roteiro atualizado…"
-              : "Proposta aceita. Abrindo o Roteiro atualizado…"}
+              ? "Esta proposta já foi aplicada. Abrindo o Roteiro…"
+              : "Proposta aplicada. Abrindo o Roteiro…"}
           </p>
         ) : null}
         {partialState.status === "success" ? (
           <p role="status">
             {partialState.kind === "replay"
-              ? "Esta seleção já havia sido aplicada. Abrindo o Roteiro atualizado…"
-              : "Seleção aplicada. Abrindo o Roteiro atualizado…"}
+              ? "Esta seleção já foi aplicada. Abrindo o Roteiro…"
+              : "Seleção aplicada. Abrindo o Roteiro…"}
           </p>
         ) : null}
       </div>

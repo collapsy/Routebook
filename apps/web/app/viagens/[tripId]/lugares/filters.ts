@@ -45,6 +45,15 @@ export function parsePlaceCategory(value?: string): PlaceCategory | undefined {
   return PLACE_CATEGORIES.find((category) => category === value);
 }
 
+export function listAvailablePlaceCategories(
+  categories: readonly (PlaceCategory | undefined)[],
+): PlaceCategory[] {
+  const available = new Set(
+    categories.filter((category): category is PlaceCategory => category !== undefined),
+  );
+  return PLACE_CATEGORIES.filter((category) => available.has(category));
+}
+
 export function parsePlacePriceRange(value?: string): PlacePriceRange | undefined {
   return PLACE_PRICE_RANGES.find((priceRange) => priceRange === value);
 }

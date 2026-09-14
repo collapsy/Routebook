@@ -32,10 +32,7 @@ export default async function TripsPage({
         <div>
           <p className="product-eyebrow">Seu espaço de planejamento</p>
           <h1>Minhas viagens</h1>
-          <p>
-            Cada viagem reúne o contexto estrutural que orientará lugares, distâncias, roteiro e
-            recomendações futuras.
-          </p>
+          <p>Abra uma viagem para continuar planejando lugares, roteiro e próximos passos.</p>
         </div>
         {trips.length > 0 ? (
           <Link className="product-primary-action" href="/viagens/nova">
@@ -46,13 +43,13 @@ export default async function TripsPage({
 
       {created === "1" ? (
         <p className="success-banner" role="status">
-          Viagem criada e salva com sucesso.
+          Viagem criada.
         </p>
       ) : null}
 
       {deleted === "1" ? (
         <p className="success-banner" role="status">
-          Viagem excluída com sucesso.
+          Viagem excluída.
         </p>
       ) : null}
 

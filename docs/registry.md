@@ -49,7 +49,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-SEC-001 | Arquitetura de Segurança e Privacidade | Security | Published | 0.1.0 | [security-and-privacy-architecture.md](./security/security-and-privacy-architecture.md) |
 | RB-OBS-001 | Observabilidade e Operação | Observability | Published | 0.1.0 | [observability-and-operations.md](./observability/observability-and-operations.md) |
 | RB-QA-001 | Estratégia de Qualidade e Testes | Quality | Published | 0.1.0 | [quality-and-testing-strategy.md](./quality/quality-and-testing-strategy.md) |
-| RB-OPS-001 | Runbooks e Procedimentos Operacionais | Operations | Published | 0.1.0 | [runbooks-and-operational-procedures.md](./operations/runbooks-and-operational-procedures.md) |
+| RB-OPS-001 | Runbooks e Procedimentos Operacionais | Operations Runbook | Published | 0.1.0 | [runbooks-and-operational-procedures.md](./operations/runbooks-and-operational-procedures.md) |
 | RB-SRE-001 | Estratégia de Confiabilidade e Continuidade | Reliability | Published | 0.1.0 | [reliability-and-continuity-strategy.md](./reliability/reliability-and-continuity-strategy.md) |
 | RB-AI-001 | Governança de Inteligência Artificial | AI Governance | Published | 0.1.0 | [ai-governance.md](./ai/ai-governance.md) |
 | RB-AI-002 | Estratégia de Avaliação de Inteligência Artificial | AI Evaluation | Published | 0.1.0 | [ai-evaluation-strategy.md](./ai/ai-evaluation-strategy.md) |
@@ -232,13 +232,13 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-091 | Server Action Autorizada para Aceitar Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-091-authorized-proposal-acceptance-action.md](./implementation/increments/rb-inc-091-authorized-proposal-acceptance-action.md) |
 | RB-CTX-091 | Context Pack do RB-INC-091 | Implementation Context | Draft | 0.1.0 | [rb-inc-091-authorized-proposal-acceptance-action.md](./implementation/context-packs/rb-inc-091-authorized-proposal-acceptance-action.md) |
 | RB-INC-092 | Experiência de Aceite da Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-092-itinerary-proposal-acceptance-experience.md](./implementation/increments/rb-inc-092-itinerary-proposal-acceptance-experience.md) |
-| RB-CTX-092 | Context Pack do RB-INC-092 | Implementation Context | Draft | 0.1.0 | [rb-inc-092-itinerary-proposal-acceptance-experience.md](./implementation/context-packs/rb-inc-092-itinerary-proposal-acceptance-experience.md) |
+| RB-CTX-092 | Context Pack do RB-INC-092 — Experiência de Aceite da Itinerary Proposal | Implementation Context | Draft | 0.1.0 | [rb-inc-092-itinerary-proposal-acceptance-experience.md](./implementation/context-packs/rb-inc-092-itinerary-proposal-acceptance-experience.md) |
 | RB-INC-093 | Integração E2E do Aceite Integral de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-093-itinerary-proposal-acceptance-e2e.md](./implementation/increments/rb-inc-093-itinerary-proposal-acceptance-e2e.md) |
-| RB-CTX-093 | Context Pack do RB-INC-093 | Implementation Context | Draft | 0.1.0 | [rb-inc-093-itinerary-proposal-acceptance-e2e.md](./implementation/context-packs/rb-inc-093-itinerary-proposal-acceptance-e2e.md) |
+| RB-CTX-093 | Context Pack do RB-INC-093 — Integração E2E do Aceite Integral de Itinerary Proposal | Implementation Context | Draft | 0.1.0 | [rb-inc-093-itinerary-proposal-acceptance-e2e.md](./implementation/context-packs/rb-inc-093-itinerary-proposal-acceptance-e2e.md) |
 | RB-INC-094 | Adapter Determinístico de Geração de Itinerary Proposal Ready | Implementation | Draft | 0.1.0 | [rb-inc-094-deterministic-itinerary-proposal-generator.md](./implementation/increments/rb-inc-094-deterministic-itinerary-proposal-generator.md) |
-| RB-CTX-094 | Context Pack do RB-INC-094 | Implementation Context | Draft | 0.1.0 | [rb-inc-094-deterministic-itinerary-proposal-generator.md](./implementation/context-packs/rb-inc-094-deterministic-itinerary-proposal-generator.md) |
+| RB-CTX-094 | Context Pack do RB-INC-094 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-094-deterministic-itinerary-proposal-generator.md](./implementation/context-packs/rb-inc-094-deterministic-itinerary-proposal-generator.md) |
 | RB-INC-095 | Orquestração do Lifecycle de Geração de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-095-itinerary-proposal-generation-orchestration.md](./implementation/increments/rb-inc-095-itinerary-proposal-generation-orchestration.md) |
-| RB-CTX-095 | Context Pack do RB-INC-095 | Implementation Context | Draft | 0.1.0 | [rb-inc-095-itinerary-proposal-generation-orchestration.md](./implementation/context-packs/rb-inc-095-itinerary-proposal-generation-orchestration.md) |
+| RB-CTX-095 | Context Pack do RB-INC-095 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-095-itinerary-proposal-generation-orchestration.md](./implementation/context-packs/rb-inc-095-itinerary-proposal-generation-orchestration.md) |
 
 | RB-INC-096 | Assembler Determinístico de Entrada para Geração de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-096-itinerary-proposal-generation-input-assembler.md](./implementation/increments/rb-inc-096-itinerary-proposal-generation-input-assembler.md) |
 | RB-CTX-096 | Context Pack do RB-INC-096 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-096-itinerary-proposal-generation-input-assembler.md](./implementation/context-packs/rb-inc-096-itinerary-proposal-generation-input-assembler.md) |
@@ -254,45 +254,45 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-101 | Context Pack do RB-INC-101 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-101-authorized-itinerary-proposal-generation-experience.md](./implementation/context-packs/rb-inc-101-authorized-itinerary-proposal-generation-experience.md) |
 | RB-INC-102 | Integração E2E da Geração Autorizada de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-102-authorized-itinerary-proposal-generation-e2e.md](./implementation/increments/rb-inc-102-authorized-itinerary-proposal-generation-e2e.md) |
 | RB-CTX-102 | Context Pack do RB-INC-102 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-102-authorized-itinerary-proposal-generation-e2e.md](./implementation/context-packs/rb-inc-102-authorized-itinerary-proposal-generation-e2e.md) |
-| RB-INC-103 | Núcleo de Edição de Proposed Activity em Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-103-edit-itinerary-proposal-activity.md](./implementation/increments/rb-inc-103-edit-itinerary-proposal-activity.md) |
+| RB-INC-103 | Núcleo de Edição de Proposed Activity em Itinerary Proposal | Implementation Increment | Draft | 0.1.0 | [rb-inc-103-edit-itinerary-proposal-activity.md](./implementation/increments/rb-inc-103-edit-itinerary-proposal-activity.md) |
 | RB-CTX-103 | Context Pack do RB-INC-103 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-103-edit-itinerary-proposal-activity.md](./implementation/context-packs/rb-inc-103-edit-itinerary-proposal-activity.md) |
-| RB-INC-104 | Serviço de Aplicação para Edição Persistida de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-104-persisted-itinerary-proposal-edit.md](./implementation/increments/rb-inc-104-persisted-itinerary-proposal-edit.md) |
+| RB-INC-104 | Serviço de Aplicação para Edição Persistida de Itinerary Proposal | Implementation Increment | Draft | 0.1.0 | [rb-inc-104-persisted-itinerary-proposal-edit.md](./implementation/increments/rb-inc-104-persisted-itinerary-proposal-edit.md) |
 | RB-CTX-104 | Context Pack do RB-INC-104 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-104-persisted-itinerary-proposal-edit.md](./implementation/context-packs/rb-inc-104-persisted-itinerary-proposal-edit.md) |
 
-| RB-INC-105 | Server Action Autorizada para Edição de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-105-authorized-itinerary-proposal-edit-action.md](./implementation/increments/rb-inc-105-authorized-itinerary-proposal-edit-action.md) |
+| RB-INC-105 | Server Action Autorizada para Edição de Itinerary Proposal | Implementation Increment | Draft | 0.1.0 | [rb-inc-105-authorized-itinerary-proposal-edit-action.md](./implementation/increments/rb-inc-105-authorized-itinerary-proposal-edit-action.md) |
 | RB-CTX-105 | Context Pack do RB-INC-105 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-105-authorized-itinerary-proposal-edit-action.md](./implementation/context-packs/rb-inc-105-authorized-itinerary-proposal-edit-action.md) |
 
-| RB-INC-106 | Experiência de Edição de Proposed Activity na Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-106-itinerary-proposal-edit-experience.md](./implementation/increments/rb-inc-106-itinerary-proposal-edit-experience.md) |
-| RB-CTX-106 | Context Pack do RB-INC-106 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-106-itinerary-proposal-edit-experience.md](./implementation/context-packs/rb-inc-106-itinerary-proposal-edit-experience.md) |
+| RB-INC-106 | Experiência de Edição de Proposed Activity na Itinerary Proposal | Implementation Increment | Draft | 0.1.0 | [rb-inc-106-itinerary-proposal-edit-experience.md](./implementation/increments/rb-inc-106-itinerary-proposal-edit-experience.md) |
+| RB-CTX-106 | Context Pack do RB-INC-106 — Experiência de Edição de Proposed Activity na Itinerary Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-106-itinerary-proposal-edit-experience.md](./implementation/context-packs/rb-inc-106-itinerary-proposal-edit-experience.md) |
 
-| RB-INC-107 | E2E Integral da Edição de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/increments/rb-inc-107-itinerary-proposal-edit-e2e.md) |
-| RB-CTX-107 | Context Pack do RB-INC-107 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/context-packs/rb-inc-107-itinerary-proposal-edit-e2e.md) |
-| RB-INC-108 | Núcleo de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/increments/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
+| RB-INC-107 | E2E Integral da Edição de Itinerary Proposal | Implementation Increment | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/increments/rb-inc-107-itinerary-proposal-edit-e2e.md) |
+| RB-CTX-107 | Context Pack do RB-INC-107 — E2E Integral da Edição de Itinerary Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-107-itinerary-proposal-edit-e2e.md](./implementation/context-packs/rb-inc-107-itinerary-proposal-edit-e2e.md) |
+| RB-INC-108 | Núcleo de Aceite Parcial de Itinerary Proposal | Implementation Increment | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/increments/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
 | RB-CTX-108 | Context Pack do RB-INC-108 | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-108-partial-itinerary-proposal-acceptance-core.md](./implementation/context-packs/rb-inc-108-partial-itinerary-proposal-acceptance-core.md) |
-| RB-INC-109 | Transação PostgreSQL de Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md](./implementation/increments/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md) |
+| RB-INC-109 | Transação PostgreSQL de Aceite Parcial de Itinerary Proposal | Implementation Increment | Draft | 0.1.0 | [rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md](./implementation/increments/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md) |
 | RB-CTX-109 | Context Pack do RB-INC-109 | Implementation Context | Draft | 0.1.0 | [rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md](./implementation/context-packs/rb-inc-109-postgres-partial-itinerary-proposal-acceptance.md) |
-| RB-INC-110 | Server Action Autorizada para Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-110-authorized-partial-itinerary-proposal-action.md](./implementation/increments/rb-inc-110-authorized-partial-itinerary-proposal-action.md) |
+| RB-INC-110 | Server Action Autorizada para Aceite Parcial de Itinerary Proposal | Implementation Increment | Draft | 0.1.0 | [rb-inc-110-authorized-partial-itinerary-proposal-action.md](./implementation/increments/rb-inc-110-authorized-partial-itinerary-proposal-action.md) |
 | RB-CTX-110 | Context Pack do RB-INC-110 | Implementation Context | Draft | 0.1.0 | [rb-inc-110-authorized-partial-itinerary-proposal-action.md](./implementation/context-packs/rb-inc-110-authorized-partial-itinerary-proposal-action.md) |
-| RB-INC-111 | Experiência de Seleção e Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-111-partial-itinerary-proposal-acceptance-experience.md](./implementation/increments/rb-inc-111-partial-itinerary-proposal-acceptance-experience.md) |
+| RB-INC-111 | Experiência de Seleção e Aceite Parcial de Itinerary Proposal | Implementation Increment | Draft | 0.1.0 | [rb-inc-111-partial-itinerary-proposal-acceptance-experience.md](./implementation/increments/rb-inc-111-partial-itinerary-proposal-acceptance-experience.md) |
 | RB-CTX-111 | Context Pack do RB-INC-111 | Implementation Context | Draft | 0.1.0 | [rb-inc-111-partial-itinerary-proposal-acceptance-experience.md](./implementation/context-packs/rb-inc-111-partial-itinerary-proposal-acceptance-experience.md) |
-| RB-INC-112 | E2E do Aceite Parcial de Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-112-partial-itinerary-proposal-acceptance-e2e.md](./implementation/increments/rb-inc-112-partial-itinerary-proposal-acceptance-e2e.md) |
+| RB-INC-112 | E2E do Aceite Parcial de Itinerary Proposal | Implementation Increment | Draft | 0.1.0 | [rb-inc-112-partial-itinerary-proposal-acceptance-e2e.md](./implementation/increments/rb-inc-112-partial-itinerary-proposal-acceptance-e2e.md) |
 | RB-CTX-112 | Context Pack do RB-INC-112 — E2E do Aceite Parcial de Itinerary Proposal | Implementation Context | Draft | 0.1.0 | [rb-inc-112-partial-itinerary-proposal-acceptance-e2e.md](./implementation/context-packs/rb-inc-112-partial-itinerary-proposal-acceptance-e2e.md) |
-| RB-INC-113 | Liveness e Readiness Operacionais da Aplicação Web | Implementation | Draft | 0.1.0 | [rb-inc-113-operational-health-checks.md](./implementation/increments/rb-inc-113-operational-health-checks.md) |
+| RB-INC-113 | Liveness e Readiness Operacionais da Aplicação Web | Implementation Increment | Draft | 0.1.0 | [rb-inc-113-operational-health-checks.md](./implementation/increments/rb-inc-113-operational-health-checks.md) |
 | RB-CTX-113 | Context Pack do RB-INC-113 — Liveness e Readiness Operacionais | Implementation Context | Draft | 0.1.0 | [rb-inc-113-operational-health-checks.md](./implementation/context-packs/rb-inc-113-operational-health-checks.md) |
-| RB-INC-114 | Smoke Operacional Pós-deployment | Implementation | Draft | 0.1.0 | [rb-inc-114-operational-smoke.md](./implementation/increments/rb-inc-114-operational-smoke.md) |
+| RB-INC-114 | Smoke Operacional Pós-deployment | Implementation Increment | Draft | 0.1.0 | [rb-inc-114-operational-smoke.md](./implementation/increments/rb-inc-114-operational-smoke.md) |
 | RB-CTX-114 | Context Pack do RB-INC-114 — Smoke Operacional Pós-deployment | Implementation Context | Draft | 0.1.0 | [rb-inc-114-operational-smoke.md](./implementation/context-packs/rb-inc-114-operational-smoke.md) |
 | RB-INC-115 | Aprovação Formal do RB-ADR-017 | Implementation | Draft | 0.1.0 | [rb-inc-115-approve-adr-017.md](./implementation/increments/rb-inc-115-approve-adr-017.md) |
 | RB-CTX-115 | Context Pack do RB-INC-115 — Aprovação Formal do RB-ADR-017 | Implementation Context | Draft | 0.1.0 | [rb-inc-115-approve-adr-017.md](./implementation/context-packs/rb-inc-115-approve-adr-017.md) |
 | RB-INC-116 | Aprovação Formal do RB-ADR-018 | Implementation | Draft | 0.1.0 | [rb-inc-116-approve-adr-018.md](./implementation/increments/rb-inc-116-approve-adr-018.md) |
 | RB-CTX-116 | Context Pack do RB-INC-116 — Aprovação Formal do RB-ADR-018 | Implementation Context | Draft | 0.1.0 | [rb-inc-116-approve-adr-018.md](./implementation/context-packs/rb-inc-116-approve-adr-018.md) |
 | RB-INC-117 | Bootstrap Vercel e Neon para Preview | Implementation | Draft | 0.1.0 | [rb-inc-117-vercel-neon-preview-bootstrap.md](./implementation/increments/rb-inc-117-vercel-neon-preview-bootstrap.md) |
-| RB-CTX-117 | Context Pack do RB-INC-117 — Bootstrap Vercel e Neon para Preview | Implementation Context | Draft | 0.1.0 | [rb-inc-117-vercel-neon-preview-bootstrap.md](./implementation/context-packs/rb-inc-117-vercel-neon-preview-bootstrap.md) |
+| RB-CTX-117 | Context Pack do RB-INC-117 — Bootstrap Vercel e Neon para Preview | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-117-vercel-neon-preview-bootstrap.md](./implementation/context-packs/rb-inc-117-vercel-neon-preview-bootstrap.md) |
 | RB-INC-118 | Sincronização Determinística Pós-Server Action no E2E | Implementation | Draft | 0.1.0 | [rb-inc-118-deterministic-server-action-e2e.md](./implementation/increments/rb-inc-118-deterministic-server-action-e2e.md) |
-| RB-CTX-118 | Context Pack do RB-INC-118 — Sincronização Determinística Pós-Server Action no E2E | Implementation Context | Draft | 0.1.0 | [rb-inc-118-deterministic-server-action-e2e.md](./implementation/context-packs/rb-inc-118-deterministic-server-action-e2e.md) |
+| RB-CTX-118 | Context Pack do RB-INC-118 — Sincronização Determinística Pós-Server Action no E2E | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-118-deterministic-server-action-e2e.md](./implementation/context-packs/rb-inc-118-deterministic-server-action-e2e.md) |
 | RB-INC-119 | Navegação Determinística da Landing para Viagens | Implementation | Draft | 0.1.0 | [rb-inc-119-deterministic-landing-navigation.md](./implementation/increments/rb-inc-119-deterministic-landing-navigation.md) |
-| RB-CTX-119 | Context Pack do RB-INC-119 — Navegação Determinística da Landing para Viagens | Implementation Context | Draft | 0.1.0 | [rb-inc-119-deterministic-landing-navigation.md](./implementation/context-packs/rb-inc-119-deterministic-landing-navigation.md) |
+| RB-CTX-119 | Context Pack do RB-INC-119 — Navegação Determinística da Landing para Viagens | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-119-deterministic-landing-navigation.md](./implementation/context-packs/rb-inc-119-deterministic-landing-navigation.md) |
 | RB-INC-120 | Geração de Proposal E2E Sincronizada | Implementation | Draft | 0.1.0 | [rb-inc-120-deterministic-proposal-generation.md](./implementation/increments/rb-inc-120-deterministic-proposal-generation.md) |
-| RB-CTX-120 | Context Pack do RB-INC-120 — Geração de Proposal E2E Sincronizada | Implementation Context | Draft | 0.1.0 | [rb-inc-120-deterministic-proposal-generation.md](./implementation/context-packs/rb-inc-120-deterministic-proposal-generation.md) |
+| RB-CTX-120 | Context Pack do RB-INC-120 — Geração de Proposal E2E Sincronizada | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-120-deterministic-proposal-generation.md](./implementation/context-packs/rb-inc-120-deterministic-proposal-generation.md) |
 | RB-INC-121 | Mutações do Roteiro E2E Sincronizadas pelo Resultado Renderizado | Implementation | Draft | 0.1.0 | [rb-inc-121-deterministic-itinerary-mutations.md](./implementation/increments/rb-inc-121-deterministic-itinerary-mutations.md) |
 | RB-CTX-121 | Context Pack do RB-INC-121 — Mutações do Roteiro E2E Sincronizadas | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-121-deterministic-itinerary-mutations.md](./implementation/context-packs/rb-inc-121-deterministic-itinerary-mutations.md) |
 | RB-INC-122 | Contrato de Redirect das Server Actions E2E | Implementation | Draft | 0.1.0 | [rb-inc-122-rsc-response-completion.md](./implementation/increments/rb-inc-122-rsc-response-completion.md) |
@@ -302,7 +302,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-124 | Bootstrap Isolado de Production | Implementation | Draft | 0.1.0 | [rb-inc-124-production-bootstrap.md](./implementation/increments/rb-inc-124-production-bootstrap.md) |
 | RB-CTX-124 | Context Pack do RB-INC-124 — Bootstrap Isolado de Production | Implementation Context | Draft | 0.1.0 | [rb-inc-124-production-bootstrap.md](./implementation/context-packs/rb-inc-124-production-bootstrap.md) |
 | RB-INC-125 | Remoção Mobile Determinística no E2E | Implementation | Draft | 0.1.0 | [rb-inc-125-deterministic-mobile-removal.md](./implementation/increments/rb-inc-125-deterministic-mobile-removal.md) |
-| RB-CTX-125 | Context Pack do RB-INC-125 — Remoção Mobile Determinística no E2E | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-125-deterministic-mobile-removal.md](./implementation/context-packs/rb-inc-125-deterministic-mobile-removal.md) |
+| RB-CTX-125 | Context Pack do RB-INC-125 — Remoção Mobile Determinística | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-125-deterministic-mobile-removal.md](./implementation/context-packs/rb-inc-125-deterministic-mobile-removal.md) |
 | RB-INC-126 | Navegação Determinística do Conflito para o Roteiro | Implementation | Draft | 0.1.0 | [rb-inc-126-deterministic-conflict-navigation.md](./implementation/increments/rb-inc-126-deterministic-conflict-navigation.md) |
 | RB-CTX-126 | Context Pack do RB-INC-126 — Navegação Determinística do Conflito | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-126-deterministic-conflict-navigation.md](./implementation/context-packs/rb-inc-126-deterministic-conflict-navigation.md) |
 | RB-INC-127 | Retorno Determinístico da Revisão de Proposal | Implementation | Draft | 0.1.0 | [rb-inc-127-deterministic-proposal-return.md](./implementation/increments/rb-inc-127-deterministic-proposal-return.md) |
@@ -397,7 +397,6 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-171 | Context Pack do RB-INC-171 — Navegação mobile e separação Hoje / Guia por dia | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-171-mobile-navigation-focus.md](./implementation/context-packs/rb-inc-171-mobile-navigation-focus.md) |
 | RB-INC-172 | Experiência completa de ranking de Places | Implementation | Draft | 0.2.0 | [rb-inc-172-place-ranking-experience.md](./implementation/increments/rb-inc-172-place-ranking-experience.md) |
 | RB-CTX-172 | Context Pack do RB-INC-172 — Experiência completa de ranking de Places | Implementation Context Pack | Draft | 0.2.0 | [rb-inc-172-place-ranking-experience.md](./implementation/context-packs/rb-inc-172-place-ranking-experience.md) |
-
 | RB-INC-173 | Destination Foundation destination-agnostic | Implementation | Draft | 0.1.0 | [rb-inc-173-destination-foundation.md](./implementation/increments/rb-inc-173-destination-foundation.md) |
 | RB-CTX-173 | Context Pack do RB-INC-173 — Destination Foundation | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-173-destination-foundation.md](./implementation/context-packs/rb-inc-173-destination-foundation.md) |
 
@@ -424,6 +423,36 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-181 | Geocodificação automática da Hospedagem ao salvar | Implementation | Draft | 0.1.0 | [rb-inc-181-accommodation-auto-geocoding.md](./implementation/increments/rb-inc-181-accommodation-auto-geocoding.md) |
 | RB-CTX-181 | Context Pack do RB-INC-181 — geocodificação automática da Hospedagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-181-accommodation-auto-geocoding.md](./implementation/context-packs/rb-inc-181-accommodation-auto-geocoding.md) |
+
+| RB-INC-182 | Categorias contextuais na Discovery por viagem | Implementation | Draft | 0.1.0 | [rb-inc-182-contextual-place-categories.md](./implementation/increments/rb-inc-182-contextual-place-categories.md) |
+| RB-CTX-182 | Context Pack do RB-INC-182 — categorias contextuais na Discovery | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-182-contextual-place-categories.md](./implementation/context-packs/rb-inc-182-contextual-place-categories.md) |
+
+| RB-INC-183 | Descobertas externas próximas no mapa da visão geral | Implementation | Draft | 0.1.0 | [rb-inc-183-nearby-discovery-map.md](./implementation/increments/rb-inc-183-nearby-discovery-map.md) |
+| RB-CTX-183 | Context Pack do RB-INC-183 — descobertas externas próximas no mapa da visão geral | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-183-nearby-discovery-map.md](./implementation/context-packs/rb-inc-183-nearby-discovery-map.md) |
+
+| RB-INC-184 | Sugestões contextuais para Destinations sem catálogo publicado | Implementation | Draft | 0.1.0 | [rb-inc-184-contextual-external-suggestions.md](./implementation/increments/rb-inc-184-contextual-external-suggestions.md) |
+| RB-CTX-184 | Context Pack do RB-INC-184 — sugestões contextuais externas | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-184-contextual-external-suggestions.md](./implementation/context-packs/rb-inc-184-contextual-external-suggestions.md) |
+
+| RB-INC-185 | Experiência unificada de Lugar provider-first | Implementation | Draft | 0.1.0 | [rb-inc-185-unified-place-experience.md](./implementation/increments/rb-inc-185-unified-place-experience.md) |
+| RB-CTX-185 | Context Pack do RB-INC-185 — experiência unificada de Lugar provider-first | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-185-unified-place-experience.md](./implementation/context-packs/rb-inc-185-unified-place-experience.md) |
+
+| RB-INC-186 | Cards de Lugar com hierarquia visual progressiva | Implementation | Draft | 0.1.0 | [rb-inc-186-place-card-hierarchy.md](./implementation/increments/rb-inc-186-place-card-hierarchy.md) |
+| RB-CTX-186 | Context Pack do RB-INC-186 — Cards de Lugar com hierarquia visual progressiva | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-186-place-card-hierarchy.md](./implementation/context-packs/rb-inc-186-place-card-hierarchy.md) |
+
+| RB-INC-187 | Microcopy de confiança e remoção de justificativas técnicas | Implementation | Draft | 0.1.0 | [rb-inc-187-trustworthy-microcopy.md](./implementation/increments/rb-inc-187-trustworthy-microcopy.md) |
+| RB-CTX-187 | Context Pack do RB-INC-187 — Microcopy de confiança e remoção de justificativas técnicas | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-187-trustworthy-microcopy.md](./implementation/context-packs/rb-inc-187-trustworthy-microcopy.md) |
+
+| RB-INC-188 | Fotos reais dos lugares, fallback compacto e qualidade do catálogo | Implementation | Draft | 0.1.0 | [rb-inc-188-real-place-media-quality.md](./implementation/increments/rb-inc-188-real-place-media-quality.md) |
+| RB-CTX-188 | Context Pack do RB-INC-188 — Fotos reais e qualidade do catálogo | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-188-real-place-media-quality.md](./implementation/context-packs/rb-inc-188-real-place-media-quality.md) |
+
+| RB-INC-189 | Geocodificação robusta de Hospedagem por nome na stack atual | Implementation | Draft | 0.1.0 | [rb-inc-189-accommodation-name-geocoding.md](./implementation/increments/rb-inc-189-accommodation-name-geocoding.md) |
+| RB-CTX-189 | Context Pack do RB-INC-189 — geocodificação robusta de Hospedagem na stack atual | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-189-accommodation-name-geocoding.md](./implementation/context-packs/rb-inc-189-accommodation-name-geocoding.md) |
+
+| RB-INC-190 | Google Places Photos destination-agnostic na stack atual | Implementation | Draft | 0.1.0 | [rb-inc-190-google-place-photos-current-stack.md](./implementation/increments/rb-inc-190-google-place-photos-current-stack.md) |
+| RB-CTX-190 | Context Pack do RB-INC-190 — Google Places Photos destination-agnostic | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-190-google-place-photos-current-stack.md](./implementation/context-packs/rb-inc-190-google-place-photos-current-stack.md) |
+
+| RB-INC-192 | Cobertura lazy de Google Photos para Places externos | Implementation | Draft | 0.1.0 | [rb-inc-192-lazy-google-photo-coverage.md](./implementation/increments/rb-inc-192-lazy-google-photo-coverage.md) |
+| RB-CTX-192 | Context Pack do RB-INC-192 — Cobertura lazy de Google Photos | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-192-lazy-google-photo-coverage.md](./implementation/context-packs/rb-inc-192-lazy-google-photo-coverage.md) |
 
 ## Status possíveis
 

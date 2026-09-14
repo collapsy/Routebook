@@ -27,7 +27,7 @@ async function openManualComposer(page: Page) {
     await expect(page).toHaveURL(/dia=2026-08-22/);
   }
   await page.getByText("Adicionar atividade manual", { exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Adicione uma decisão manual" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Adicionar uma atividade" })).toBeVisible();
 }
 
 test("prioriza a timeline do dia vazio antes das ações secundárias", async ({ page }, testInfo) => {
@@ -298,10 +298,10 @@ test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ 
     page,
     () => page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
     /adicionadoAoRoteiro=1$/,
-    "continua salvo",
+    "Lugar adicionado ao roteiro.",
   );
 
-  await expect(page.getByRole("status")).toContainText("continua salvo");
+  await expect(page.getByRole("status")).toContainText("Lugar adicionado ao roteiro.");
   await expect(page.getByRole("heading", { name: placeName })).toBeVisible();
 
   await page.getByRole("link", { name: "Abrir roteiro" }).click();

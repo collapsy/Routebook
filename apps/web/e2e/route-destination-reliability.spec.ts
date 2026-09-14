@@ -10,6 +10,8 @@ function googleMapsDestination(href: string | null): string | null {
 test("usa nome e endereço nos destinos individuais do catálogo, detalhe e Guia", async ({
   page,
 }) => {
+  test.slow();
+
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Rotas confiáveis ${test.info().project.name} ${Date.now()}`,
     startDate: "2026-08-22",
@@ -26,20 +28,21 @@ test("usa nome e endereço nos destinos individuais do catálogo, detalhe e Guia
     .getByRole("list", { name: "Opções de lugares" })
     .locator('[data-place-source="published"]');
   const praiaDoAmorCard = publishedPlaces.filter({
-    has: page.locator("strong").filter({ hasText: /^Praia do Amor$/ }),
+    has: page.locator("h3").filter({ hasText: /^Praia do Amor$/ }),
   });
   await expect(praiaDoAmorCard).toHaveCount(1);
 
+  const moreInfo = praiaDoAmorCard.locator("summary").filter({ hasText: "Mais informações" });
+  await expect(moreInfo).toBeVisible();
+  await moreInfo.click();
   const cardRouteHref = await praiaDoAmorCard
-    .getByRole("link", { name: "Calcular rota real" })
+    .getByRole("link", { name: "Ver rota" })
     .getAttribute("href");
   expect(googleMapsDestination(cardRouteHref)).toBe("Praia do Amor, Pipa, Tibau do Sul — RN");
 
   await page.goto(`/viagens/${trip.id}/lugares/praia-do-amor`);
-  const walkingHref = await page.getByRole("link", { name: "Rota real a pé" }).getAttribute("href");
-  const drivingHref = await page
-    .getByRole("link", { name: "Rota real de carro" })
-    .getAttribute("href");
+  const walkingHref = await page.getByRole("link", { name: "Rota a pé" }).getAttribute("href");
+  const drivingHref = await page.getByRole("link", { name: "Rota de carro" }).getAttribute("href");
   expect(googleMapsDestination(walkingHref)).toBe("Praia do Amor, Pipa, Tibau do Sul — RN");
   expect(googleMapsDestination(drivingHref)).toBe("Praia do Amor, Pipa, Tibau do Sul — RN");
 

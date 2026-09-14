@@ -8,40 +8,35 @@ import type {
   PlacePrimaryImage as PlacePrimaryImageContract,
 } from "@routebook/place-catalog";
 
-import { CategoryIllustration } from "./category-illustration";
 import styles from "./place-primary-image.module.css";
-
-const categoryLabels: Record<PlaceCategory, string> = {
-  beach: "Praia",
-  gastronomy: "Gastronomia",
-  nature: "Natureza",
-  nightlife: "Vida noturna",
-};
 
 export function PlacePrimaryImage({
   placeName,
   primaryImage,
-  category,
   showProvenance = false,
   priority = false,
+  compactFallback = true,
 }: {
   placeName: string;
   primaryImage?: PlacePrimaryImageContract | undefined;
   category?: PlaceCategory | undefined;
   showProvenance?: boolean;
   priority?: boolean;
+  compactFallback?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
 
   if (!primaryImage || failed) {
-    const fallbackLabel = category ? categoryLabels[category] : "Lugar";
     return (
-      <CategoryIllustration
-        ariaLabel={`Ilustração de ${fallbackLabel} para ${placeName} — não é foto do local`}
-        eyebrow={fallbackLabel}
-        kind={category ?? "place"}
-        placeFallback
-      />
+      <div
+        aria-label={`Foto não disponível para ${placeName}`}
+        className={styles.noPhoto}
+        data-place-image-fallback="true"
+        data-presentation={compactFallback ? "compact" : "descriptive"}
+        role="img"
+      >
+        <span>{compactFallback ? "Sem foto" : "Foto não disponível"}</span>
+      </div>
     );
   }
 

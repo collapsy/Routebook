@@ -57,6 +57,58 @@ const BEACH_BUSINESS_TOKENS = new Set([
   "suite",
   "suites",
 ]);
+const GENERIC_PLACE_NAME_TOKENS = new Set([
+  "atracao",
+  "attraction",
+  "bar",
+  "bars",
+  "beach",
+  "beaches",
+  "cafe",
+  "cafeteria",
+  "club",
+  "clube",
+  "dessert",
+  "desserts",
+  "food",
+  "gastronomia",
+  "mirante",
+  "nightlife",
+  "park",
+  "parque",
+  "playa",
+  "praia",
+  "postre",
+  "pub",
+  "restaurant",
+  "restaurants",
+  "restaurante",
+  "restaurantes",
+  "sobremesa",
+  "turismo",
+  "viewpoint",
+]);
+const PLACE_NAME_STOPWORDS = new Set([
+  "a",
+  "and",
+  "as",
+  "da",
+  "das",
+  "de",
+  "do",
+  "dos",
+  "e",
+  "el",
+  "en",
+  "la",
+  "las",
+  "le",
+  "les",
+  "o",
+  "of",
+  "os",
+  "the",
+]);
 
 type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 
@@ -138,6 +190,16 @@ function normalizedNameTokens(value: string): string[] {
     .trim()
     .split(/\s+/)
     .filter(Boolean);
+}
+
+export function isUsefulOverturePlaceName(name: string): boolean {
+  const identityTokens = normalizedNameTokens(name).filter(
+    (token) => !PLACE_NAME_STOPWORDS.has(token),
+  );
+  return (
+    identityTokens.length > 0 &&
+    identityTokens.some((token) => !GENERIC_PLACE_NAME_TOKENS.has(token))
+  );
 }
 
 export function isPlausibleOvertureBeachName(name: string): boolean {
@@ -306,7 +368,14 @@ function normalizeTileFeature(
   const source = primarySource(feature.properties);
   const sourceLicense = resolveOvertureTileSourceLicense(source);
 
-  if (!externalId || name.length < 2 || !providerCategory || !category || !sourceLicense) {
+  if (
+    !externalId ||
+    name.length < 2 ||
+    !isUsefulOverturePlaceName(name) ||
+    !providerCategory ||
+    !category ||
+    !sourceLicense
+  ) {
     return undefined;
   }
   if (category === "beach" && !isPlausibleOvertureBeachName(name)) return undefined;

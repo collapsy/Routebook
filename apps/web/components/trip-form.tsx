@@ -43,7 +43,7 @@ export function TripForm({
         </div>
         {destinationAttribution ? (
           <p className="field-hint">
-            Busca textual alternativa:{" "}
+            Dados de destino:{" "}
             <a href={destinationAttribution.href} rel="noreferrer" target="_blank">
               {destinationAttribution.label}
             </a>
@@ -117,10 +117,7 @@ export function TripForm({
         <button className="product-button" disabled={pending} type="submit">
           {pending ? "Criando seu guia…" : "Criar meu guia"}
         </button>
-        <p>
-          Você poderá ajustar hospedagem, preferências, lugares e roteiro depois. Nada é planejado
-          automaticamente sem sua ação.
-        </p>
+        <p>Você poderá ajustar hospedagem, preferências, lugares e roteiro depois.</p>
       </div>
     </form>
   );

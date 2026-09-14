@@ -58,10 +58,6 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
 
   await page.goto(`/viagens/${trip.id}/lugares`);
 
-  const bootstrapStatus = page.getByLabel("Status do guia");
-  await expect(bootstrapStatus).toHaveAttribute("data-place-bootstrap-stage", "enriching");
-  await expect(bootstrapStatus).toContainText("Enriquecendo seu guia");
-
   const externalCard = page.locator('[data-place-source="external"]').first();
   await expect(externalCard).toBeVisible({ timeout: 20_000 });
   await externalCard.scrollIntoViewIfNeeded();
@@ -71,7 +67,7 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
   });
   await expect(externalCard.getByRole("img", { name: preview.altText })).toBeVisible();
   await expect(externalCard).toContainText("Fonte: Overture");
-  await expect(externalCard).toContainText("Candidato externo — ainda não publicado");
+  await expect(externalCard).not.toContainText("Candidato externo — ainda não publicado");
   await expect(externalCard).toContainText("Teste RouteBook");
   await expect(externalCard).toContainText("CC BY-SA 4.0");
   await expect(externalCard).toContainText("Wikimedia Commons");
@@ -80,17 +76,18 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
     preview.sourceUrl,
   );
 
-  const name = (await externalCard.locator(":scope > strong").innerText()).trim();
-  const routeHref = await externalCard
-    .getByRole("link", { name: "Calcular rota real" })
-    .getAttribute("href");
+  const name = (await externalCard.getByRole("heading", { level: 3 }).innerText()).trim();
+  await externalCard.getByText("Mais informações", { exact: true }).click();
+  const routeLink = externalCard.getByRole("link", { name: "Ver rota" });
+  await expect(routeLink).toBeVisible();
+  const routeHref = await routeLink.getAttribute("href");
   expect(routeHref).toBeTruthy();
   expect(new URL(routeHref!).searchParams.get("destination")?.toLocaleLowerCase("pt-BR")).toContain(
     name.toLocaleLowerCase("pt-BR"),
   );
 });
 
-test("mantém rota real do candidato externo sem hospedagem usando a localização atual", async ({
+test("mantém rota do candidato externo sem hospedagem usando a localização atual", async ({
   page,
 }) => {
   const { trip } = await createAuthenticatedE2ETrip({
@@ -102,10 +99,12 @@ test("mantém rota real do candidato externo sem hospedagem usando a localizaç�
   await page.goto(`/viagens/${trip.id}/lugares`);
 
   const externalCard = page.locator('[data-place-source="external"]').first();
-  const routeLink = externalCard.getByRole("link", { name: "Calcular rota real" });
-  await expect(routeLink).toBeVisible({ timeout: 20_000 });
+  await expect(externalCard).toBeVisible({ timeout: 20_000 });
+  const name = (await externalCard.getByRole("heading", { level: 3 }).innerText()).trim();
+  await externalCard.getByText("Mais informações", { exact: true }).click();
+  const routeLink = externalCard.getByRole("link", { name: "Ver rota" });
+  await expect(routeLink).toBeVisible();
 
-  const name = (await externalCard.locator(":scope > strong").innerText()).trim();
   const routeHref = await routeLink.getAttribute("href");
   expect(routeHref).toBeTruthy();
 
@@ -118,7 +117,7 @@ test("mantém rota real do candidato externo sem hospedagem usando a localizaç�
   expect(routeUrl.searchParams.get("travelmode")).toBe("walking");
 });
 
-test("degrada candidato externo para ilustração de categoria quando não há foto segura", async ({
+test("degrada candidato externo para estado compacto quando não há foto segura", async ({
   page,
 }) => {
   await page.route("**/api/place-image-preview**", async (route) => {
@@ -155,9 +154,7 @@ test("degrada candidato externo para ilustração de categoria quando não há f
 
   const fallback = externalCard.locator('[data-place-image-fallback="true"]');
   await expect(fallback).toBeVisible();
-  await expect(fallback).toContainText("Ilustração de categoria — não é foto do local");
-  await expect(fallback).toHaveAttribute(
-    "data-category-illustration",
-    /beach|gastronomy|nature|nightlife|place/,
-  );
+  await expect(fallback).toContainText("Sem foto");
+  await expect(fallback).toHaveAttribute("data-presentation", "compact");
+  await expect(fallback).not.toHaveAttribute("data-category-illustration", /.+/);
 });

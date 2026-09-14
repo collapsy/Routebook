@@ -6,11 +6,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createPostgresAuthenticatedTrip } from "@routebook/database";
-import { TripValidationError } from "@routebook/trip-management";
+import { TripValidationError, type CreateTripInput } from "@routebook/trip-management";
 
+import { resolveAccommodationLocation } from "@/lib/accommodation-geocoding";
 import { getRouteBookSession } from "@/lib/auth-session";
 import { resolveConfiguredDestinationResolver } from "@/lib/destination-resolver";
 import { resolveSelectedDestination } from "@/lib/destination-suggestions";
+import { resolveAccommodationGeocoder } from "@/lib/geocoding";
 
 import type { CreateTripActionState } from "./state";
 
@@ -18,10 +20,10 @@ function resolverUnavailableMessage(
   reason: "disabled" | "blocked" | "invalid-configuration",
 ): string {
   if (reason === "disabled")
-    return "Selecione um destino sugerido ou tente novamente quando a busca de destinos estiver disponível.";
+    return "Não foi possível localizar esse destino agora. Tente novamente mais tarde.";
   if (reason === "blocked")
-    return "A busca textual de destinos está bloqueada neste ambiente por segurança. Selecione uma sugestão da lista.";
-  return "A busca de destinos está com uma configuração inválida. Selecione uma sugestão da lista ou tente novamente mais tarde.";
+    return "Não foi possível localizar esse destino pelo texto digitado. Selecione uma sugestão da lista.";
+  return "Não foi possível localizar esse destino agora. Selecione uma sugestão da lista ou tente novamente mais tarde.";
 }
 
 function createDestinationSelectionResetToken(): string {
@@ -48,8 +50,7 @@ function selectedDestinationError(
   if (result.reason === "blocked" || result.reason === "misconfigured") {
     return {
       fieldErrors: {},
-      formError:
-        "A seleção de destinos não está disponível neste ambiente. Seu texto foi preservado; tente novamente mais tarde.",
+      formError: "Não foi possível confirmar o destino agora. Tente novamente mais tarde.",
       destinationSelectionResetToken,
     };
   }
@@ -58,6 +59,38 @@ function selectedDestinationError(
     formError: "Não foi possível confirmar o destino agora. Tente novamente em instantes.",
     destinationSelectionResetToken,
   };
+}
+
+async function accommodationForCreation(
+  destination: CreateTripInput["destination"],
+  formData: FormData,
+): Promise<
+  Pick<
+    CreateTripInput,
+    | "accommodationName"
+    | "accommodationAddress"
+    | "accommodationLatitude"
+    | "accommodationLongitude"
+  >
+> {
+  const accommodationName = String(formData.get("accommodationName") ?? "").trim();
+  const accommodationAddress = String(formData.get("accommodationAddress") ?? "").trim();
+
+  if (!accommodationName) {
+    return {
+      accommodationName,
+      ...(accommodationAddress ? { accommodationAddress } : {}),
+    };
+  }
+
+  const resolved = await resolveAccommodationLocation({
+    destination,
+    accommodationName,
+    ...(accommodationAddress ? { accommodationAddress } : {}),
+    geocoder: resolveAccommodationGeocoder(),
+  });
+
+  return resolved.input;
 }
 
 export async function createTripAction(
@@ -140,6 +173,8 @@ export async function createTripAction(
 
   try {
     const requestedName = String(formData.get("name") ?? "").trim();
+    const accommodation = await accommodationForCreation(resolution.value.destination, formData);
+
     await createPostgresAuthenticatedTrip({
       userId: session.user.id,
       destinationProvenance: resolution.value.provenance,
@@ -148,8 +183,7 @@ export async function createTripAction(
         destination: resolution.value.destination,
         startDate: String(formData.get("startDate") ?? ""),
         endDate: String(formData.get("endDate") ?? ""),
-        accommodationName: String(formData.get("accommodationName") ?? ""),
-        accommodationAddress: String(formData.get("accommodationAddress") ?? ""),
+        ...accommodation,
       },
     });
   } catch (error) {
@@ -167,7 +201,7 @@ export async function createTripAction(
     console.error("Falha ao criar viagem autenticada", error);
     return {
       fieldErrors: {},
-      formError: "Não foi possível salvar a viagem agora. Revise a conexão e tente novamente.",
+      formError: "Não foi possível criar a viagem agora. Tente novamente.",
       ...(destinationSelectionResetToken ? { destinationSelectionResetToken } : {}),
     };
   }

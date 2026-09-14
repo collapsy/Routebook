@@ -7,7 +7,7 @@ export default function TripsLoading() {
       role="status"
     >
       <div className="product-state-card loading-card">
-        <p className="product-eyebrow">Organizando seu espaço</p>
+        <p className="product-eyebrow">Carregando viagens</p>
         <div className="loading-line loading-line-short" />
         <div className="loading-line" />
         <div className="loading-block" />

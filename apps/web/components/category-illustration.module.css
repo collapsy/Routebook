@@ -24,11 +24,28 @@
   z-index: -1;
 }
 
+.visual[data-presentation="compact"] .veil {
+  background: linear-gradient(180deg, rgb(15 23 42 / 0%) 55%, rgb(15 23 42 / 18%) 100%);
+}
+
 .copy {
   display: grid;
   gap: 0.22rem;
   max-width: 28rem;
   text-shadow: 0 1px 8px rgb(0 0 0 / 35%);
+}
+
+.badge {
+  background: rgb(15 23 42 / 78%);
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 750;
+  line-height: 1;
+  padding: 0.48rem 0.68rem;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 40%);
 }
 
 .eyebrow {

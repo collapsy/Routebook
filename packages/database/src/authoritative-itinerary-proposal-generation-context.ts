@@ -190,6 +190,9 @@ async function loadContext(
             id: places.id,
             name: places.name,
             summary: places.summary,
+            category: places.category,
+            latitude: places.latitude,
+            longitude: places.longitude,
           })
           .from(places)
           .where(inArray(places.id, placeIds))
@@ -223,6 +226,9 @@ async function loadContext(
         placeId: row.id,
         title: row.name,
         ...(row.summary.trim() ? { description: row.summary } : {}),
+        category: row.category,
+        latitude: row.latitude,
+        longitude: row.longitude,
       }),
     ),
   );

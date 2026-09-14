@@ -137,6 +137,37 @@ describe("executeGenerateItineraryProposalAction", () => {
     );
   });
 
+  it("usa a coordenada da Hospedagem como âncora espacial quando disponível", async () => {
+    const dependencies = deps();
+    const tripWithAccommodation: Trip = {
+      ...trip,
+      accommodation: {
+        name: "Condomínio Solar Água",
+        address: "Pipa, Tibau do Sul - RN",
+        coordinate: {
+          latitude: -6.2301,
+          longitude: -35.049,
+        },
+      },
+    };
+    dependencies.tripRepository.findById.mockResolvedValue(tripWithAccommodation);
+
+    await executeGenerateItineraryProposalAction({ tripId }, dependencies);
+
+    expect(dependencies.loadAdditionalCandidates).toHaveBeenCalledWith(
+      tripWithAccommodation,
+      itinerary,
+    );
+    expect(dependencies.generationService.generate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        anchorCoordinate: {
+          latitude: -6.2301,
+          longitude: -35.049,
+        },
+      }),
+    );
+  });
+
   it("encaminha candidatos adicionais da Discovery sem alterar o estado autoritativo lido", async () => {
     const dependencies = deps();
     const additionalCandidates = [

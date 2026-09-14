@@ -461,6 +461,9 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-195 | Passeios e compras como categorias de Place | Implementation | Draft | 0.1.0 | [rb-inc-195-tour-shopping-categories.md](./implementation/increments/rb-inc-195-tour-shopping-categories.md) |
 | RB-CTX-195 | Context Pack do RB-INC-195 — Passeios e compras | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-195-tour-shopping-categories.md](./implementation/context-packs/rb-inc-195-tour-shopping-categories.md) |
 
+| RB-INC-196 | Compositor contextual inteligente de Proposta de Roteiro | Implementation | Draft | 0.1.0 | [rb-inc-196-contextual-itinerary-composer.md](./implementation/increments/rb-inc-196-contextual-itinerary-composer.md) |
+| RB-CTX-196 | Context Pack do RB-INC-196 — Compositor contextual inteligente de Proposta de Roteiro | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-196-contextual-itinerary-composer.md](./implementation/context-packs/rb-inc-196-contextual-itinerary-composer.md) |
+
 ## Status possíveis
 
 - `Planned`: documento previsto, mas ainda não iniciado;

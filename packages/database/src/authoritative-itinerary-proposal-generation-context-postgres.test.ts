@@ -223,7 +223,7 @@ afterAll(async () => {
 });
 
 describe("PostgresAuthoritativeItineraryProposalGenerationContextPort", () => {
-  it("carrega Activities e Free Periods em snapshot autoritativo e determinístico", async () => {
+  it("carrega Activities, Free Periods e contexto espacial dos Places de modo determinístico", async () => {
     const port = createPostgresAuthoritativeItineraryProposalGenerationContextPort(database);
 
     const context = await port.load({ tripId, asOf: now });
@@ -264,6 +264,9 @@ describe("PostgresAuthoritativeItineraryProposalGenerationContextPort", () => {
           placeId: secondPlaceId,
           title: "Praia do Amor",
           description: "Praia com falésias e ondas.",
+          category: "beach",
+          latitude: -6.235,
+          longitude: -35.045,
         },
       ]),
     );

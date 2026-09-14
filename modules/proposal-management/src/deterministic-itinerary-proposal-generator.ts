@@ -4,11 +4,16 @@ import type {
 } from "./itinerary-proposal";
 
 export const DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_METHOD =
-  "deterministic-candidate-balancing";
-export const DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_VERSION = "2";
+  "deterministic-contextual-composition";
+export const DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_VERSION = "3";
 export const DETERMINISTIC_ITINERARY_PROPOSAL_VALIDITY_HOURS = 24;
 export const DEFAULT_DETERMINISTIC_ACTIVITY_DURATION_MINUTES = 90;
 export const DETERMINISTIC_DESIRED_ACTIVITY_COUNT_PER_DAY = 3;
+
+export type ItineraryProposalGenerationCoordinate = Readonly<{
+  latitude: number;
+  longitude: number;
+}>;
 
 export type ItineraryProposalGenerationDay = Readonly<{
   tripDayId: string;
@@ -27,12 +32,16 @@ export type ItineraryProposalGenerationCandidate = Readonly<{
   reason?: string;
   estimatedCostAmount?: number;
   estimatedCostCurrency?: string;
+  category?: string;
+  latitude?: number;
+  longitude?: number;
 }>;
 
 export type GenerateItineraryProposalInput = Readonly<{
   days: readonly ItineraryProposalGenerationDay[];
   candidates: readonly ItineraryProposalGenerationCandidate[];
   generatedAt: Date;
+  anchorCoordinate?: ItineraryProposalGenerationCoordinate;
   createProposedActivityId: (
     candidate: ItineraryProposalGenerationCandidate,
     index: number,
@@ -51,6 +60,7 @@ export type DeterministicItineraryProposalGenerationErrorCode =
   | "invalid-day"
   | "duplicate-candidate"
   | "invalid-candidate"
+  | "invalid-anchor-coordinate"
   | "invalid-generated-at"
   | "invalid-validity"
   | "invalid-proposed-activity-id"
@@ -93,6 +103,26 @@ function isValidIsoDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const parsed = new Date(`${value}T00:00:00.000Z`);
   return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+function validCoordinate(
+  coordinate: ItineraryProposalGenerationCoordinate,
+  code: DeterministicItineraryProposalGenerationErrorCode,
+  message: string,
+): ItineraryProposalGenerationCoordinate {
+  if (
+    !coordinate ||
+    typeof coordinate !== "object" ||
+    !Number.isFinite(coordinate.latitude) ||
+    coordinate.latitude < -90 ||
+    coordinate.latitude > 90 ||
+    !Number.isFinite(coordinate.longitude) ||
+    coordinate.longitude < -180 ||
+    coordinate.longitude > 180
+  ) {
+    throw new DeterministicItineraryProposalGenerationError(message, code);
+  }
+  return Object.freeze({ latitude: coordinate.latitude, longitude: coordinate.longitude });
 }
 
 function hasFreePeriodContext(day: ItineraryProposalGenerationDay): boolean {
@@ -193,6 +223,11 @@ function normalizeCandidate(
     "invalid-candidate",
     "Informe uma justificativa válida.",
   );
+  const category = normalizedOptionalText(
+    candidate.category,
+    "invalid-candidate",
+    "Informe uma categoria válida.",
+  );
   const estimatedCostCurrency = normalizedOptionalText(
     candidate.estimatedCostCurrency,
     "invalid-candidate",
@@ -226,6 +261,22 @@ function normalizeCandidate(
     );
   }
 
+  const hasLatitude = candidate.latitude !== undefined;
+  const hasLongitude = candidate.longitude !== undefined;
+  if (hasLatitude !== hasLongitude) {
+    throw new DeterministicItineraryProposalGenerationError(
+      "Latitude e longitude do candidato devem ser informadas juntas.",
+      "invalid-candidate",
+    );
+  }
+  if (hasLatitude && hasLongitude) {
+    validCoordinate(
+      { latitude: candidate.latitude!, longitude: candidate.longitude! },
+      "invalid-candidate",
+      "Informe coordenadas válidas para o candidato.",
+    );
+  }
+
   return Object.freeze({
     candidateId,
     title,
@@ -239,6 +290,10 @@ function normalizeCandidate(
       ? { estimatedCostAmount: candidate.estimatedCostAmount }
       : {}),
     ...(estimatedCostCurrency ? { estimatedCostCurrency } : {}),
+    ...(category ? { category } : {}),
+    ...(hasLatitude && hasLongitude
+      ? { latitude: candidate.latitude!, longitude: candidate.longitude! }
+      : {}),
   });
 }
 
@@ -355,6 +410,134 @@ function nextDensityAwareDay(
   );
 }
 
+function candidateCoordinate(
+  candidate: ItineraryProposalGenerationCandidate,
+): ItineraryProposalGenerationCoordinate | undefined {
+  return candidate.latitude !== undefined && candidate.longitude !== undefined
+    ? { latitude: candidate.latitude, longitude: candidate.longitude }
+    : undefined;
+}
+
+function distanceKm(
+  left: ItineraryProposalGenerationCoordinate,
+  right: ItineraryProposalGenerationCoordinate,
+): number {
+  const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
+  const earthRadiusKm = 6371.0088;
+  const deltaLatitude = toRadians(right.latitude - left.latitude);
+  const deltaLongitude = toRadians(right.longitude - left.longitude);
+  const leftLatitude = toRadians(left.latitude);
+  const rightLatitude = toRadians(right.latitude);
+  const haversine =
+    Math.sin(deltaLatitude / 2) ** 2 +
+    Math.cos(leftLatitude) * Math.cos(rightLatitude) * Math.sin(deltaLongitude / 2) ** 2;
+  return 2 * earthRadiusKm * Math.asin(Math.min(1, Math.sqrt(haversine)));
+}
+
+const COMPLEMENTARY_CATEGORIES = new Set(["gastronomy", "nightlife"]);
+
+function isPrimaryExperienceCategory(category: string | undefined): boolean {
+  return category !== undefined && !COMPLEMENTARY_CATEGORIES.has(category);
+}
+
+type DayCompositionState = {
+  categories: string[];
+  lastCoordinate?: ItineraryProposalGenerationCoordinate;
+};
+
+type IndexedCandidate = Readonly<{
+  candidate: ItineraryProposalGenerationCandidate;
+  originalIndex: number;
+}>;
+
+type CandidateSelection = Readonly<{
+  indexed: IndexedCandidate;
+  usedSpatialSignal: boolean;
+  usedCategorySignal: boolean;
+  usedAnchor: boolean;
+}>;
+
+function contextualCandidateScore(
+  indexed: IndexedCandidate,
+  state: DayCompositionState,
+  anchorCoordinate: ItineraryProposalGenerationCoordinate | undefined,
+): Readonly<{
+  score: number;
+  usedSpatialSignal: boolean;
+  usedCategorySignal: boolean;
+  usedAnchor: boolean;
+}> {
+  const candidate = indexed.candidate;
+  let score = -indexed.originalIndex * 4;
+  let usedSpatialSignal = false;
+  let usedCategorySignal = false;
+  let usedAnchor = false;
+
+  const coordinate = candidateCoordinate(candidate);
+  const referenceCoordinate = state.lastCoordinate ?? anchorCoordinate;
+  if (coordinate && referenceCoordinate) {
+    const proximityKm = distanceKm(referenceCoordinate, coordinate);
+    score += Math.max(-10, 6 - proximityKm * 0.5);
+    usedSpatialSignal = true;
+    usedAnchor = state.lastCoordinate === undefined && anchorCoordinate !== undefined;
+  }
+
+  const category = candidate.category;
+  if (category) {
+    usedCategorySignal = true;
+    const categoryCount = state.categories.filter((value) => value === category).length;
+    const hasPrimary = state.categories.some(isPrimaryExperienceCategory);
+    const hasGastronomy = state.categories.includes("gastronomy");
+    const hasNightlife = state.categories.includes("nightlife");
+
+    if (categoryCount > 0) score -= 18 * categoryCount;
+
+    if (state.categories.length === 0) {
+      if (isPrimaryExperienceCategory(category)) score += 12;
+      else if (category === "nightlife") score -= 8;
+      else score -= 3;
+    } else if (category === "gastronomy") {
+      if (hasPrimary && !hasGastronomy) score += 12;
+      if (hasGastronomy) score -= 10;
+    } else if (category === "nightlife") {
+      if (hasPrimary && !hasNightlife) score += 8;
+      if (hasNightlife) score -= 12;
+    } else if (!hasPrimary) {
+      score += 8;
+    } else {
+      score += 2;
+    }
+  }
+
+  return Object.freeze({ score, usedSpatialSignal, usedCategorySignal, usedAnchor });
+}
+
+function selectContextualCandidate(
+  remaining: readonly IndexedCandidate[],
+  state: DayCompositionState,
+  anchorCoordinate: ItineraryProposalGenerationCoordinate | undefined,
+): CandidateSelection {
+  let selected = remaining[0]!;
+  let selectedScore = contextualCandidateScore(selected, state, anchorCoordinate);
+
+  for (const candidate of remaining.slice(1)) {
+    const score = contextualCandidateScore(candidate, state, anchorCoordinate);
+    if (
+      score.score > selectedScore.score ||
+      (score.score === selectedScore.score &&
+        (candidate.originalIndex < selected.originalIndex ||
+          (candidate.originalIndex === selected.originalIndex &&
+            compareCanonicalText(candidate.candidate.candidateId, selected.candidate.candidateId) <
+              0)))
+    ) {
+      selected = candidate;
+      selectedScore = score;
+    }
+  }
+
+  return Object.freeze({ indexed: selected, ...selectedScore });
+}
+
 function limitationsFor(
   candidates: readonly ItineraryProposalGenerationCandidate[],
   freePeriodContextKnown: boolean,
@@ -396,6 +579,32 @@ function limitationsFor(
   return Object.freeze(limitations);
 }
 
+function proposedActivity(
+  candidate: ItineraryProposalGenerationCandidate,
+  proposedActivityId: string,
+  day: ItineraryProposalGenerationDay,
+  proposedOrder: number,
+): ProposedActivityInput {
+  return Object.freeze({
+    proposedActivityId,
+    targetTripDayId: day.tripDayId,
+    ...(candidate.placeId ? { placeId: candidate.placeId } : {}),
+    title: candidate.title,
+    ...(candidate.description ? { description: candidate.description } : {}),
+    durationMinutes: candidate.durationMinutes ?? DEFAULT_DETERMINISTIC_ACTIVITY_DURATION_MINUTES,
+    proposedOrder,
+    operationType: "add",
+    flexibility: "flexible",
+    ...(candidate.estimatedCostAmount !== undefined
+      ? { estimatedCostAmount: candidate.estimatedCostAmount }
+      : {}),
+    ...(candidate.estimatedCostCurrency
+      ? { estimatedCostCurrency: candidate.estimatedCostCurrency }
+      : {}),
+    ...(candidate.reason ? { reason: candidate.reason } : {}),
+  });
+}
+
 export class DeterministicItineraryProposalGenerator implements ItineraryProposalGenerationPort {
   async generate(
     input: GenerateItineraryProposalInput,
@@ -416,26 +625,39 @@ export class DeterministicItineraryProposalGenerator implements ItineraryProposa
 
     const days = normalizedDays(input.days);
     const candidates = normalizedCandidates(input.candidates);
+    const anchorCoordinate = input.anchorCoordinate
+      ? validCoordinate(
+          input.anchorCoordinate,
+          "invalid-anchor-coordinate",
+          "Informe uma coordenada de referência válida para a geração.",
+        )
+      : undefined;
     const freePeriodContextKnown = days.every(hasFreePeriodContext);
     const activityCounts = new Map(
       days.map((day) => [day.tripDayId, day.existingActivityCount] as const),
     );
     const proposedActivityIds = new Set<string>();
     const proposedActivities: ProposedActivityInput[] = [];
+    const hasContextualSignals =
+      anchorCoordinate !== undefined ||
+      candidates.some(
+        (candidate) =>
+          candidate.category !== undefined ||
+          (candidate.latitude !== undefined && candidate.longitude !== undefined),
+      );
     let skippedCandidateCount = 0;
+    let usedSpatialSignal = false;
+    let usedCategorySignal = false;
+    let usedAccommodationAnchor = false;
 
-    candidates.forEach((candidate, index) => {
-      const day = freePeriodContextKnown
-        ? nextDensityAwareDay(days, activityCounts)
-        : nextLegacyDay(days, activityCounts);
-      if (!day) {
-        skippedCandidateCount += 1;
-        return;
-      }
-
+    const appendCandidate = (
+      candidate: ItineraryProposalGenerationCandidate,
+      candidateIndex: number,
+      day: ItineraryProposalGenerationDay,
+    ) => {
       const proposedOrder = activityCounts.get(day.tripDayId) ?? day.existingActivityCount;
       const proposedActivityId = requiredText(
-        input.createProposedActivityId(candidate, index),
+        input.createProposedActivityId(candidate, candidateIndex),
         "invalid-proposed-activity-id",
         "A factory deve produzir um ProposedActivityId válido.",
       );
@@ -447,30 +669,69 @@ export class DeterministicItineraryProposalGenerator implements ItineraryProposa
         );
       }
       proposedActivityIds.add(proposedActivityId);
-
-      proposedActivities.push(
-        Object.freeze({
-          proposedActivityId,
-          targetTripDayId: day.tripDayId,
-          ...(candidate.placeId ? { placeId: candidate.placeId } : {}),
-          title: candidate.title,
-          ...(candidate.description ? { description: candidate.description } : {}),
-          durationMinutes:
-            candidate.durationMinutes ?? DEFAULT_DETERMINISTIC_ACTIVITY_DURATION_MINUTES,
-          proposedOrder,
-          operationType: "add",
-          flexibility: "flexible",
-          ...(candidate.estimatedCostAmount !== undefined
-            ? { estimatedCostAmount: candidate.estimatedCostAmount }
-            : {}),
-          ...(candidate.estimatedCostCurrency
-            ? { estimatedCostCurrency: candidate.estimatedCostCurrency }
-            : {}),
-          ...(candidate.reason ? { reason: candidate.reason } : {}),
-        }),
-      );
+      proposedActivities.push(proposedActivity(candidate, proposedActivityId, day, proposedOrder));
       activityCounts.set(day.tripDayId, proposedOrder + 1);
-    });
+    };
+
+    if (!hasContextualSignals) {
+      candidates.forEach((candidate, index) => {
+        const day = freePeriodContextKnown
+          ? nextDensityAwareDay(days, activityCounts)
+          : nextLegacyDay(days, activityCounts);
+        if (!day || (freePeriodContextKnown && isIntentionallyEmpty(day))) {
+          skippedCandidateCount += 1;
+          return;
+        }
+        if (
+          freePeriodContextKnown &&
+          effectiveDensity(day, activityCounts) >= DETERMINISTIC_DESIRED_ACTIVITY_COUNT_PER_DAY
+        ) {
+          skippedCandidateCount += 1;
+          return;
+        }
+        appendCandidate(candidate, index, day);
+      });
+    } else {
+      const remaining: IndexedCandidate[] = candidates.map((candidate, originalIndex) =>
+        Object.freeze({ candidate, originalIndex }),
+      );
+      const states = new Map<string, DayCompositionState>(
+        days.map((day) => [day.tripDayId, { categories: [] }] as const),
+      );
+
+      while (remaining.length > 0) {
+        const day = freePeriodContextKnown
+          ? nextDensityAwareDay(days, activityCounts)
+          : nextLegacyDay(days, activityCounts);
+        if (!day) break;
+        if (
+          freePeriodContextKnown &&
+          (isIntentionallyEmpty(day) ||
+            effectiveDensity(day, activityCounts) >= DETERMINISTIC_DESIRED_ACTIVITY_COUNT_PER_DAY)
+        ) {
+          break;
+        }
+
+        const state = states.get(day.tripDayId)!;
+        const selection = selectContextualCandidate(remaining, state, anchorCoordinate);
+        const selectedIndex = remaining.findIndex(
+          (value) => value.originalIndex === selection.indexed.originalIndex,
+        );
+        remaining.splice(selectedIndex, 1);
+
+        appendCandidate(selection.indexed.candidate, selection.indexed.originalIndex, day);
+        if (selection.indexed.candidate.category) {
+          state.categories.push(selection.indexed.candidate.category);
+        }
+        const selectedCoordinate = candidateCoordinate(selection.indexed.candidate);
+        if (selectedCoordinate) state.lastCoordinate = selectedCoordinate;
+        usedSpatialSignal ||= selection.usedSpatialSignal;
+        usedCategorySignal ||= selection.usedCategorySignal;
+        usedAccommodationAnchor ||= selection.usedAnchor;
+      }
+
+      skippedCandidateCount = remaining.length;
+    }
 
     const generatedAt = new Date(input.generatedAt.getTime());
     const validUntil = new Date(
@@ -484,6 +745,25 @@ export class DeterministicItineraryProposalGenerator implements ItineraryProposa
       );
     }
 
+    const contextualCriteria = [
+      "Candidatos preservam a relevância recebida como sinal inicial.",
+      ...(usedSpatialSignal
+        ? [
+            "A composição favoreceu continuidade por proximidade geodésica entre Lugares do mesmo Dia.",
+          ]
+        : []),
+      ...(usedCategorySignal
+        ? [
+            "A composição considerou diversidade e complementaridade de categorias dentro de cada Dia.",
+          ]
+        : []),
+      ...(usedAccommodationAnchor
+        ? [
+            "A Hospedagem foi usada como referência espacial quando o Dia ainda não possuía outro Lugar proposto.",
+          ]
+        : []),
+    ];
+
     return Object.freeze({
       generationMethod: DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_METHOD,
       generationVersion: DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_VERSION,
@@ -491,22 +771,28 @@ export class DeterministicItineraryProposalGenerator implements ItineraryProposa
       criteria: Object.freeze(
         freePeriodContextKnown
           ? [
-              "Candidatos preservados na ordem recebida.",
+              ...(hasContextualSignals
+                ? contextualCriteria
+                : ["Candidatos preservados na ordem recebida."]),
               `Dias elegíveis recebem sugestões até a densidade conservadora de ${DETERMINISTIC_DESIRED_ACTIVITY_COUNT_PER_DAY} Activities, descontando Free Periods protected da capacidade.`,
               "Dias vazios protegidos permanecem sem Proposed Activities e Free Periods flexible continuam elegíveis para sugestão.",
               "Novas Activities são anexadas após o conteúdo existente sem horário inventado.",
             ]
           : [
-              "Candidatos preservados na ordem recebida.",
+              ...(hasContextualSignals
+                ? contextualCriteria
+                : ["Candidatos preservados na ordem recebida."]),
               "Distribuição balanceada pela quantidade de Atividades de cada Dia.",
               "Novas Atividades anexadas após o conteúdo existente.",
             ],
       ),
       justifications: Object.freeze([
         candidates.length > 0
-          ? freePeriodContextKnown
-            ? "A política determinística prioriza Dias subpreenchidos, preserva espaço protegido e limita a densidade para evitar sobreplanejamento."
-            : "A política determinística mantém a ordem dos candidatos e distribui a carga entre os Dias disponíveis no modo legado."
+          ? hasContextualSignals
+            ? "A proposta combina relevância, densidade e sinais contextuais disponíveis para formar Dias mais coerentes sem inventar horários ou rotas."
+            : freePeriodContextKnown
+              ? "A política determinística prioriza Dias subpreenchidos, preserva espaço protegido e limita a densidade para evitar sobreplanejamento."
+              : "A política determinística mantém a ordem dos candidatos e distribui a carga entre os Dias disponíveis no modo legado."
           : "Nenhum candidato elegível foi recebido; nenhuma mudança foi proposta.",
       ]),
       limitations: limitationsFor(candidates, freePeriodContextKnown, skippedCandidateCount),

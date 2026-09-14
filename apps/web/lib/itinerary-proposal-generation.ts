@@ -141,6 +141,7 @@ export async function executeGenerateItineraryProposalAction(
   const additionalCandidates = dependencies.loadAdditionalCandidates
     ? await dependencies.loadAdditionalCandidates(trip, itinerary)
     : undefined;
+  const accommodationCoordinate = trip.accommodation?.coordinate;
 
   const proposal = await dependencies.generationService.generate({
     request: {
@@ -158,6 +159,14 @@ export async function executeGenerateItineraryProposalAction(
     generatedAt: cloneInstant(now),
     createProposedActivityId,
     ...(additionalCandidates ? { additionalCandidates } : {}),
+    ...(accommodationCoordinate
+      ? {
+          anchorCoordinate: {
+            latitude: accommodationCoordinate.latitude,
+            longitude: accommodationCoordinate.longitude,
+          },
+        }
+      : {}),
   });
 
   if (proposal.status === "failed") {

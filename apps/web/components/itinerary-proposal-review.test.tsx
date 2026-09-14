@@ -228,7 +228,7 @@ describe("ItineraryProposalReview", () => {
     expect(screen.queryByRole("button", { name: /Editar sugestão:/ })).not.toBeInTheDocument();
   });
 
-  it("keeps justifications visible when no activity change was proposed", () => {
+  it("mantém Proposal vazia auditável sem apresentá-la como decisão aplicável", () => {
     render(
       <ItineraryProposalReview
         {...decisionProps}
@@ -236,9 +236,15 @@ describe("ItineraryProposalReview", () => {
       />,
     );
 
+    expect(screen.getByText("Sem mudanças sugeridas")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Nenhuma mudança para aplicar" })).toBeVisible();
     expect(screen.getByRole("status")).toHaveTextContent("Nenhuma mudança adequada foi proposta");
     expect(screen.getByRole("heading", { name: "Justificativas" })).toBeInTheDocument();
     expect(screen.getByText("Reduz deslocamentos no fim da tarde.")).toBeInTheDocument();
     expect(screen.getByText("Nenhuma limitação foi informada para esta proposta.")).toBeVisible();
+    expect(screen.queryByText("Proposta aguardando sua decisão")).not.toBeInTheDocument();
+    expect(screen.queryByText("Aceitar proposta")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Descartar proposta" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Editar sugestão:/ })).not.toBeInTheDocument();
   });
 });

@@ -165,6 +165,31 @@ describe("contextual external suggestions", () => {
     ).toThrow(RangeError);
   });
 
+  it("permite ampliar o mesmo ranking contextual para a capacidade da Proposal", () => {
+    const candidates = Array.from({ length: 9 }, (_, index) =>
+      candidate(`candidate-${index + 1}`, `Lugar ${index + 1}`, "gastronomy"),
+    );
+    const result = buildRecommendationDiscoverySuggestions({
+      trip,
+      publishedPlaces: [],
+      externalReconciliations: candidates.map((item) => ({
+        candidate: item,
+        status: "new" as const,
+        reason: "novo",
+      })),
+      reference: { latitude: -29.3788, longitude: -50.872 },
+      interests: ["gastronomy"],
+      discoveryStatus: "success",
+      selectionLimit: 8,
+    });
+
+    expect(result.candidates).toHaveLength(8);
+    expect(result.suggestions).toHaveLength(8);
+    expect(result.candidates.map((item) => item.externalId)).toEqual(
+      result.suggestions.map((suggestion) => suggestion.externalId),
+    );
+  });
+
   it("retém possible_match ambíguo e rejected usando o feed reconciliado", () => {
     const safe = candidate("safe", "Descoberta segura", "nature");
     const possible = candidate("possible", "Possível duplicidade", "nature");
@@ -185,6 +210,35 @@ describe("contextual external suggestions", () => {
 
     expect(result.availableCount).toBe(1);
     expect(result.suggestions.map((suggestion) => suggestion.name)).toEqual(["Descoberta segura"]);
+    expect(result.candidates.map((item) => item.externalId)).toEqual(["safe"]);
+    expect(result.candidates[0]).toBe(safe);
+  });
+
+  it("mantém a mesma seleção contextual para apresentação e geração de Proposal", () => {
+    const result = buildRecommendationDiscoverySuggestions({
+      trip,
+      publishedPlaces: [],
+      externalReconciliations: [
+        {
+          candidate: candidate("near-cafe", "Café perto", "gastronomy"),
+          status: "new",
+          reason: "novo",
+        },
+        {
+          candidate: candidate("nature", "Parque preferido", "nature"),
+          status: "new",
+          reason: "novo",
+        },
+        { candidate: candidate("bar", "Bar", "nightlife"), status: "new", reason: "novo" },
+      ],
+      reference: { latitude: -29.3788, longitude: -50.872 },
+      interests: ["nature"],
+      discoveryStatus: "success",
+    });
+
+    expect(result.candidates.map((item) => item.externalId)).toEqual(
+      result.suggestions.map((suggestion) => suggestion.externalId),
+    );
   });
 
   it("degrada falha do Provider para coleção vazia sem erro fatal", async () => {
@@ -209,6 +263,7 @@ describe("contextual external suggestions", () => {
     expect(search).toHaveBeenCalledTimes(1);
     expect(result.discoveryStatus).toBe("failed");
     expect(result.suggestions).toEqual([]);
+    expect(result.candidates).toEqual([]);
     expect(result.availableCount).toBe(0);
   });
 });

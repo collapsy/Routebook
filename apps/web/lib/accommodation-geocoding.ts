@@ -1,6 +1,6 @@
-import type { Trip, UpdateAccommodationInput } from "@routebook/trip-management";
+import type { Destination, Trip, UpdateAccommodationInput } from "@routebook/trip-management";
 
-import { GeocodingProviderError, type Geocoder } from "./geocoding";
+import { GeocodingProviderError, type Geocoder, type GeocodingContext } from "./geocoding";
 
 export type AccommodationLocationStatus =
   "removed" | "manual" | "preserved" | "resolved" | "not-found" | "unavailable";
@@ -14,9 +14,21 @@ type PrepareAccommodationInput = Readonly<{
   geocoder: Geocoder;
 }>;
 
+type ResolveAccommodationInput = Readonly<{
+  destination: Destination;
+  accommodationName: string;
+  accommodationAddress?: string;
+  geocoder: Geocoder;
+}>;
+
 export type PreparedAccommodationUpdate = Readonly<{
   input: UpdateAccommodationInput;
   locationStatus: AccommodationLocationStatus;
+}>;
+
+export type ResolvedAccommodationLocation = Readonly<{
+  input: UpdateAccommodationInput;
+  locationStatus: "resolved" | "not-found" | "unavailable";
 }>;
 
 function normalized(value: string | undefined): string {
@@ -28,12 +40,74 @@ export function buildAccommodationGeocodingQuery(
   accommodationAddress: string | undefined,
   destinationName: string,
 ): string {
-  const location = accommodationAddress?.trim() || accommodationName.trim();
   const destination = destinationName.trim();
+  const address = accommodationAddress?.trim();
 
-  if (!location) return "";
-  if (!destination || normalized(location).includes(normalized(destination))) return location;
-  return `${location}, ${destination}`;
+  if (!address) {
+    const name = accommodationName.trim();
+    if (!destination || normalized(name).includes(normalized(destination))) return name;
+    return `${name}, ${destination}`;
+  }
+
+  if (!destination || normalized(address).includes(normalized(destination))) return address;
+  return `${address}, ${destination}`;
+}
+
+export function accommodationNameSearchRadiusKm(type: Destination["type"]): number {
+  switch (type) {
+    case "district":
+      return 60;
+    case "city":
+      return 40;
+    case "island":
+    case "park":
+      return 250;
+    case "region":
+      return 800;
+    default:
+      return 300;
+  }
+}
+
+function destinationCountryCode(destination: Destination): string | undefined {
+  const code = destination.countryCode?.trim().toUpperCase();
+  return code && /^[A-Z]{2}$/.test(code) ? code : undefined;
+}
+
+function destinationAnchor(destination: Destination): GeocodingContext["anchor"] | undefined {
+  const latitude = destination.latitude;
+  const longitude = destination.longitude;
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return undefined;
+  }
+  return { latitude, longitude };
+}
+
+function geocodingContext(
+  destination: Destination,
+  nameOnly: boolean,
+): GeocodingContext | undefined {
+  const countryCode = destinationCountryCode(destination);
+  if (!nameOnly) return countryCode ? { countryCode } : undefined;
+
+  const anchor = destinationAnchor(destination);
+  return {
+    ...(countryCode ? { countryCode } : {}),
+    ...(anchor
+      ? {
+          anchor,
+          maxDistanceKm: accommodationNameSearchRadiusKm(destination.type),
+          rejectAmbiguous: true,
+        }
+      : {}),
+  };
 }
 
 function sameLocation(
@@ -55,10 +129,49 @@ function rawInput(
   accommodationName: string,
   accommodationAddress: string | undefined,
 ): UpdateAccommodationInput {
+  const name = accommodationName.trim();
+  const address = accommodationAddress?.trim();
   return {
-    accommodationName,
-    ...(accommodationAddress ? { accommodationAddress } : {}),
+    accommodationName: name,
+    ...(address ? { accommodationAddress: address } : {}),
   };
+}
+
+export async function resolveAccommodationLocation({
+  destination,
+  accommodationName,
+  accommodationAddress,
+  geocoder,
+}: ResolveAccommodationInput): Promise<ResolvedAccommodationLocation> {
+  const base = rawInput(accommodationName, accommodationAddress);
+  if (!base.accommodationName) return { input: base, locationStatus: "not-found" };
+
+  const nameOnly = !base.accommodationAddress;
+  const query = buildAccommodationGeocodingQuery(
+    base.accommodationName,
+    base.accommodationAddress,
+    destination.name,
+  );
+
+  try {
+    const result = await geocoder.geocode(query, geocodingContext(destination, nameOnly));
+    if (!result) return { input: base, locationStatus: "not-found" };
+
+    return {
+      input: {
+        accommodationName: base.accommodationName,
+        accommodationAddress: base.accommodationAddress ?? result.normalizedAddress,
+        accommodationLatitude: result.latitude,
+        accommodationLongitude: result.longitude,
+      },
+      locationStatus: "resolved",
+    };
+  } catch (error) {
+    if (error instanceof GeocodingProviderError) {
+      return { input: base, locationStatus: "unavailable" };
+    }
+    throw error;
+  }
 }
 
 export async function prepareAccommodationUpdate({
@@ -105,31 +218,10 @@ export async function prepareAccommodationUpdate({
     };
   }
 
-  if (!accommodationName.trim()) return { input: base, locationStatus: "not-found" };
-
-  const query = buildAccommodationGeocodingQuery(
+  return resolveAccommodationLocation({
+    destination: trip.destination,
     accommodationName,
-    accommodationAddress,
-    trip.destination.name,
-  );
-
-  try {
-    const result = await geocoder.geocode(query);
-    if (!result) return { input: base, locationStatus: "not-found" };
-
-    return {
-      input: {
-        accommodationName,
-        accommodationAddress: accommodationAddress?.trim() || result.normalizedAddress,
-        accommodationLatitude: result.latitude,
-        accommodationLongitude: result.longitude,
-      },
-      locationStatus: "resolved",
-    };
-  } catch (error) {
-    if (error instanceof GeocodingProviderError) {
-      return { input: base, locationStatus: "unavailable" };
-    }
-    throw error;
-  }
+    ...(accommodationAddress !== undefined ? { accommodationAddress } : {}),
+    geocoder,
+  });
 }

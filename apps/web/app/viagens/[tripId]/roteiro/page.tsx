@@ -53,12 +53,9 @@ const categoryLabels = {
 } as const;
 
 const proposalErrorMessages: Readonly<Record<string, string>> = {
-  "referencia-invalida":
-    "A referência da proposta é inválida. O Roteiro atual permanece preservado.",
-  "proposta-nao-encontrada":
-    "A proposta não está mais disponível nesta Viagem. O Roteiro atual permanece preservado.",
-  "estado-atualizado":
-    "A proposta foi atualizada e não pode mais ser descartada. O Roteiro atual permanece preservado.",
+  "referencia-invalida": "Não foi possível identificar esta proposta. Abra a proposta novamente.",
+  "proposta-nao-encontrada": "Esta proposta não está mais disponível.",
+  "estado-atualizado": "Esta proposta mudou e não pode mais ser descartada. Atualize a página.",
 };
 
 function formatDate(value: string): string {
@@ -314,20 +311,20 @@ export default async function ItineraryPage({
       {propostaAceita === "applied" || propostaAceita === "replay" ? (
         <p className="success-banner" role="status">
           {propostaAceita === "replay"
-            ? "Esta proposta já havia sido aceita. O Roteiro atualizado foi carregado."
-            : "Proposta aceita. O Roteiro foi atualizado com as mudanças confirmadas."}
+            ? "O Roteiro já está atualizado com esta proposta."
+            : "Proposta aplicada ao Roteiro."}
         </p>
       ) : null}
       {propostaAceita === "partial-applied" || propostaAceita === "partial-replay" ? (
         <p className="success-banner" role="status">
           {propostaAceita === "partial-replay"
-            ? "Esta seleção já havia sido aplicada. O Roteiro atualizado foi carregado."
-            : "Seleção aplicada. O Roteiro foi atualizado somente com as mudanças confirmadas."}
+            ? "O Roteiro já está atualizado com esta seleção."
+            : "Mudanças selecionadas aplicadas ao Roteiro."}
         </p>
       ) : null}
       {propostaDescartada === "1" ? (
         <p className="success-banner" role="status">
-          Proposta descartada. Seu Roteiro atual não foi alterado.
+          Proposta descartada. Nenhuma mudança foi aplicada ao Roteiro.
         </p>
       ) : null}
       {erroProposta && proposalErrorMessages[erroProposta] ? (
@@ -409,10 +406,7 @@ export default async function ItineraryPage({
                 <section className={journeyStyles.emptyGuide} aria-labelledby="empty-day-title">
                   <p className="product-eyebrow">Dia aberto</p>
                   <h3 id="empty-day-title">Escolha um Lugar para começar este Dia</h3>
-                  <p>
-                    Você pode montar o Dia aos poucos ou mantê-lo livre. Nada será adicionado ao
-                    Roteiro sem uma ação explícita sua.
-                  </p>
+                  <p>Você pode montar o Dia aos poucos ou mantê-lo livre.</p>
                   <div className={journeyStyles.emptyActions}>
                     <Link className="product-primary-action" href={`/viagens/${tripId}/lugares`}>
                       Explorar Lugares
@@ -659,7 +653,7 @@ export default async function ItineraryPage({
               <div className={journeyStyles.secondaryHeading}>
                 <div>
                   <p className="product-eyebrow">Planejar este Dia</p>
-                  <h2>Adicionar sem sair do contexto</h2>
+                  <h2>Adicionar ao Dia</h2>
                 </div>
                 <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
                   Encontrar um Lugar
@@ -674,10 +668,10 @@ export default async function ItineraryPage({
                 <summary>Adicionar atividade manual</summary>
                 <section className="itinerary-composer" aria-labelledby="new-activity-title">
                   <div>
-                    <h2 id="new-activity-title">Adicione uma decisão manual</h2>
+                    <h2 id="new-activity-title">Adicionar uma atividade</h2>
                     <p>
-                      Use quando a atividade não vier de um Lugar. Ela será adicionada ao Dia em
-                      foco; horário e duração continuam opcionais.
+                      Use para incluir algo que não esteja na lista de Lugares. Horário e duração
+                      são opcionais.
                     </p>
                   </div>
 

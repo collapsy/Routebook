@@ -42,6 +42,8 @@ export function PlaceRankingMeta({
   categoryLabel: string;
   timeZone: string;
 }>) {
+  if (!quality && !signals) return null;
+
   const popularityPercent =
     signals?.popularity &&
     Math.round((signals.popularity.value / signals.popularity.scaleMax) * 100);
@@ -53,46 +55,54 @@ export function PlaceRankingMeta({
       data-place-ranking-position={position}
       data-place-ranking-quality={quality ? "true" : "false"}
     >
-      <div className={styles.badges}>
-        <strong className={styles.position}>
-          #{position} · {orderLabel}
-        </strong>
-        {quality && categoryRank === 1 ? (
-          <strong className={styles.topBadge}>
-            Top {categoryLabel.toLocaleLowerCase("pt-BR")}
-          </strong>
-        ) : categoryRank ? (
-          <span className={styles.categoryRank}>
-            #{categoryRank} em {categoryLabel}
-          </span>
-        ) : null}
-      </div>
+      {quality || signals?.rating ? (
+        <div className={styles.summary}>
+          {quality ? (
+            <strong className={styles.score}>Score {formatDecimal(quality.score)}/10</strong>
+          ) : null}
+          {signals?.rating ? (
+            <span className={styles.rating}>
+              Nota {formatDecimal(signals.rating.value)}/{formatDecimal(signals.rating.scaleMax, 0)}
+            </span>
+          ) : null}
+          {quality && categoryRank === 1 ? (
+            <strong className={styles.topBadge}>
+              Top {categoryLabel.toLocaleLowerCase("pt-BR")}
+            </strong>
+          ) : null}
+        </div>
+      ) : null}
 
-      {quality && signals ? (
+      <details className={styles.details}>
+        <summary>Por que aparece assim?</summary>
         <div className={styles.evidence}>
-          <strong>Score RouteBook {formatDecimal(quality.score)}/10</strong>
-          {signals.rating ? (
+          <span>
+            #{position} · {orderLabel}
+          </span>
+          {categoryRank && categoryRank > 1 ? (
             <span>
-              {formatDecimal(signals.rating.value)}/{formatDecimal(signals.rating.scaleMax, 0)}
-              {signals.rating.reviewCount !== undefined
-                ? ` · ${new Intl.NumberFormat("pt-BR").format(signals.rating.reviewCount)} avaliações`
-                : ""}
+              #{categoryRank} em {categoryLabel}
+            </span>
+          ) : null}
+          {signals?.rating?.reviewCount !== undefined ? (
+            <span>
+              {new Intl.NumberFormat("pt-BR").format(signals.rating.reviewCount)} avaliações
             </span>
           ) : null}
           {popularityPercent !== undefined ? (
             <span>{popularityPercent}% de popularidade relativa</span>
           ) : null}
-          <span>
-            Fonte: {providerLabel(signals.provider)} · coletado em{" "}
-            {formatCollectedAt(signals.collectedAt, timeZone)}
-          </span>
-          {quality.reasons.length > 0 ? (
+          {signals ? (
+            <span>
+              Fonte: {providerLabel(signals.provider)} · atualizado em{" "}
+              {formatCollectedAt(signals.collectedAt, timeZone)}
+            </span>
+          ) : null}
+          {quality && quality.reasons.length > 0 ? (
             <span className={styles.reason}>{quality.reasons.join(" · ")}</span>
-          ) : (
-            <span className={styles.reason}>Score derivado somente dos sinais disponíveis.</span>
-          )}
+          ) : null}
         </div>
-      ) : null}
+      </details>
     </section>
   );
 }

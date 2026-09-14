@@ -58,6 +58,27 @@ describe("isConservativeQualityIdentityMatch", () => {
     ).toBe(true);
   });
 
+  it("aceita localidade resumida do Overture contra endereço completo do Google", () => {
+    const panajachelTarget: PlaceQualityTarget = {
+      id: "external:el-roof",
+      name: "El Roof",
+      category: "gastronomy",
+      latitude: 14.74428,
+      longitude: -91.15612,
+      addressLabel: "Panajachel, GT",
+    };
+
+    expect(
+      isConservativeQualityIdentityMatch(panajachelTarget, {
+        externalId: "google-el-roof",
+        name: "El Roof",
+        latitude: 14.74431,
+        longitude: -91.15608,
+        addressLabel: "Calle Santander, Panajachel, Sololá, Guatemala",
+      }),
+    ).toBe(true);
+  });
+
   it("rejeita filial homônima quando o endereço diverge", () => {
     const branchTarget: PlaceQualityTarget = {
       id: "published:cafe-cultura-centro",
@@ -127,6 +148,100 @@ describe("GooglePlacesQualityAdapter", () => {
       "places.id,places.displayName,places.location,places.formattedAddress,places.rating,places.userRatingCount",
     );
     expect(JSON.stringify(matches)).not.toContain("secret-google");
+  });
+
+  it("usa o location bias real fora do Brasil sem fixar regionCode", async () => {
+    const antiguaTarget: PlaceQualityTarget = {
+      id: "external:lava-terrace",
+      name: "Lava Terrace",
+      category: "nightlife",
+      latitude: 14.5578,
+      longitude: -90.7337,
+    };
+    let requestBody: Record<string, unknown> | undefined;
+    const fetcher = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      return new Response(
+        JSON.stringify({
+          places: [
+            {
+              id: "google-lava-terrace",
+              displayName: { text: "Lava Terrace" },
+              location: { latitude: 14.55781, longitude: -90.73369 },
+              rating: 4.7,
+              userRatingCount: 840,
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    });
+
+    const adapter = new GooglePlacesQualityAdapter("secret-google", { fetcher });
+    const matches = await adapter.findSignals([antiguaTarget]);
+
+    expect(requestBody).toMatchObject({
+      textQuery: "bares e vida noturna",
+      locationBias: {
+        circle: {
+          center: { latitude: 14.5578, longitude: -90.7337 },
+        },
+      },
+    });
+    expect(requestBody).not.toHaveProperty("regionCode");
+    expect(matches).toEqual([
+      expect.objectContaining({
+        targetId: antiguaTarget.id,
+        signals: expect.objectContaining({
+          provider: "google-places",
+          externalId: "google-lava-terrace",
+          rating: { value: 4.7, scaleMax: 5, reviewCount: 840 },
+        }),
+      }),
+    ]);
+  });
+
+  it("reconcilia Place comercial internacional com endereço resumido do Overture", async () => {
+    const elRoof: PlaceQualityTarget = {
+      id: "external:el-roof",
+      name: "El Roof",
+      category: "gastronomy",
+      latitude: 14.74428,
+      longitude: -91.15612,
+      addressLabel: "Panajachel, GT",
+    };
+    const fetcher = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            places: [
+              {
+                id: "google-el-roof",
+                displayName: { text: "El Roof" },
+                location: { latitude: 14.74431, longitude: -91.15608 },
+                formattedAddress: "Calle Santander, Panajachel, Sololá, Guatemala",
+                rating: 4.6,
+                userRatingCount: 219,
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+    );
+
+    const adapter = new GooglePlacesQualityAdapter("secret-google", { fetcher });
+    const matches = await adapter.findSignals([elRoof]);
+
+    expect(matches).toEqual([
+      expect.objectContaining({
+        targetId: elRoof.id,
+        signals: expect.objectContaining({
+          provider: "google-places",
+          externalId: "google-el-roof",
+          rating: { value: 4.6, scaleMax: 5, reviewCount: 219 },
+        }),
+      }),
+    ]);
   });
 
   it("faz busca nominal limitada quando a busca ampla não contém o Place curado", async () => {

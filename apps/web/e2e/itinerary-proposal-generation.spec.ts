@@ -223,7 +223,7 @@ test("gera uma Proposal ready da UI ao PostgreSQL sem alterar o Itinerary", asyn
   const proposalId = await generateProposalFromEmptyState(page, fixture.tripId);
 
   await expect(page.getByRole("heading", { level: 1, name: "Proposta de Roteiro" })).toBeVisible();
-  await expect(page.getByText("Sugestão — ainda não aplicada")).toBeVisible();
+  await expect(page.getByText("Proposta aguardando sua decisão")).toBeVisible();
   await expect(page.getByRole("heading", { name: fixture.placeTitle! })).toBeVisible();
   await expect(page.getByText("Boa opção para compor o roteiro gerado.")).toBeVisible();
 

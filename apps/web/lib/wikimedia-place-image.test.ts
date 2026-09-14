@@ -10,6 +10,7 @@ function commonsPage(overrides: Record<string, unknown> = {}) {
   return {
     pageid: 123,
     title: "File:Praia do Amor, Pipa, Brazil.jpg",
+    coordinates: [{ lat: -6.2366, lon: -35.0465, primary: "" }],
     imageinfo: [
       {
         descriptionurl: "https://commons.wikimedia.org/wiki/File:Praia_do_Amor,_Pipa,_Brazil.jpg",
@@ -32,7 +33,7 @@ function commonsPage(overrides: Record<string, unknown> = {}) {
 }
 
 describe("normalizeWikimediaImageRecord", () => {
-  it("normaliza metadata licenciada e remove HTML da atribuição", () => {
+  it("normaliza metadata licenciada, coordenada e remove HTML da atribuição", () => {
     expect(normalizeWikimediaImageRecord(commonsPage())).toEqual({
       fileTitle: "File:Praia do Amor, Pipa, Brazil.jpg",
       descriptionUrl: "https://commons.wikimedia.org/wiki/File:Praia_do_Amor,_Pipa,_Brazil.jpg",
@@ -44,7 +45,29 @@ describe("normalizeWikimediaImageRecord", () => {
       license: "CC BY-SA 4.0",
       licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
       description: "View of Praia do Amor, Pipa Beach, Brazil",
+      coordinate: { latitude: -6.2366, longitude: -35.0465 },
     });
+  });
+
+  it("aceita CC0 como licença reutilizável auditável", () => {
+    const page = commonsPage();
+    const info = page.imageinfo[0]!;
+    const record = normalizeWikimediaImageRecord({
+      ...page,
+      imageinfo: [
+        {
+          ...info,
+          extmetadata: {
+            ...info.extmetadata,
+            LicenseShortName: { value: "CC0 1.0" },
+            LicenseUrl: { value: "https://creativecommons.org/publicdomain/zero/1.0/" },
+          },
+        },
+      ],
+    });
+
+    expect(record?.license).toBe("CC0 1.0");
+    expect(record?.licenseUrl).toBe("https://creativecommons.org/publicdomain/zero/1.0/");
   });
 
   it("rejeita mídia fora dos hosts oficiais", () => {
@@ -98,27 +121,44 @@ describe("normalizeWikimediaImageRecord", () => {
 });
 
 describe("classifyWikimediaImageMatch", () => {
-  it("marca como secure quando identidade distintiva e contexto local aparecem", () => {
+  it("marca como secure quando identidade distintiva e contexto dinâmico aparecem", () => {
     expect(
       classifyWikimediaImageMatch(
-        { name: "Lagoa de Guaraíras" },
+        { name: "Lagoa de Guaraíras", contextLabel: "pipa-rn-br" },
         {
           fileTitle: "File:Lagoa Guaraíras.jpg",
           description:
-            "Pôr do sol na Lagoa Guaraíras, vista a partir do município de Tibau do Sul/RN.",
+            "Pôr do sol na Lagoa Guaraíras, vista a partir do município de Tibau do Sul, Pipa.",
         },
       ).status,
     ).toBe("secure");
   });
 
-  it("reconhece equivalência bilíngue de centro quando a metadata identifica Pipa", () => {
+  it("reconhece equivalência bilíngue de centro com contexto dinâmico", () => {
     expect(
       classifyWikimediaImageMatch(
-        { name: "Praia do Centro" },
+        { name: "Praia do Centro", contextLabel: "pipa-rn-br" },
         {
           fileTitle: "File:PipaBeachView.JPG",
           description:
             "A view of the centre of Pipa Beach/Praia da Pipa, as seen from the hill above Praia do Amor.",
+        },
+      ).status,
+    ).toBe("secure");
+  });
+
+  it("usa coordenada da fotografia como contexto seguro em Destination sem id curado", () => {
+    expect(
+      classifyWikimediaImageMatch(
+        {
+          name: "Ponte Hercílio Luz",
+          latitude: -27.5935,
+          longitude: -48.5652,
+        },
+        {
+          fileTitle: "File:Ponte Hercilio Luz Florianopolis.jpg",
+          description: "Ponte Hercílio Luz vista do centro de Florianópolis.",
+          coordinate: { latitude: -27.594, longitude: -48.566 },
         },
       ).status,
     ).toBe("secure");
@@ -136,10 +176,10 @@ describe("classifyWikimediaImageMatch", () => {
     ).toBe("ambiguous");
   });
 
-  it("mantém homônimo ambíguo quando não existe contexto de Pipa", () => {
+  it("mantém homônimo ambíguo quando o contexto informado não aparece", () => {
     expect(
       classifyWikimediaImageMatch(
-        { name: "Baía dos Golfinhos" },
+        { name: "Baía dos Golfinhos", contextLabel: "pipa-rn-br" },
         {
           fileTitle: "File:Baía dos Golfinhos.jpg",
           description: "Baía dos Golfinhos - Fernando de Noronha - PE",
@@ -148,10 +188,23 @@ describe("classifyWikimediaImageMatch", () => {
     ).toBe("ambiguous");
   });
 
+  it("não transforma nome genérico em identidade segura apenas pela proximidade", () => {
+    expect(
+      classifyWikimediaImageMatch(
+        { name: "Sobremesa", latitude: 13.693, longitude: -89.2182 },
+        {
+          fileTitle: "File:Sobremesa.jpg",
+          description: "Sobremesa servida no centro.",
+          coordinate: { latitude: 13.6931, longitude: -89.2181 },
+        },
+      ).status,
+    ).toBe("ambiguous");
+  });
+
   it("rejeita mídia sem sinais do Place ou do destino", () => {
     expect(
       classifyWikimediaImageMatch(
-        { name: "Praia do Amor" },
+        { name: "Praia do Amor", contextLabel: "pipa-rn-br" },
         {
           fileTitle: "File:Praia qualquer.jpg",
           description: "Praia no litoral brasileiro.",
@@ -205,11 +258,97 @@ describe("WikimediaCommonsPlaceImageAdapter", () => {
     expect(calledUrl.hostname).toBe("commons.wikimedia.org");
     expect(calledUrl.searchParams.get("gsrnamespace")).toBe("6");
     expect(calledUrl.searchParams.get("iiurlwidth")).toBe("1280");
+    expect(calledUrl.searchParams.get("prop")).toBe("imageinfo|coordinates");
     expect(calledUrl.searchParams.get("maxlag")).toBe("1");
     expect(init?.headers).toMatchObject({
       "User-Agent": expect.stringContaining("https://github.com/collapsy/Routebook"),
       "Api-User-Agent": expect.stringContaining("https://github.com/collapsy/Routebook"),
     });
+  });
+
+  it("usa contexto de Destination sem acoplar a busca a Pipa", async () => {
+    const fetcher = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>(
+      async () =>
+        Response.json({
+          query: {
+            pages: [
+              commonsPage({
+                title: "File:Ponte Hercilio Luz Florianopolis.jpg",
+                coordinates: [{ lat: -27.594, lon: -48.566, primary: "" }],
+                imageinfo: [
+                  {
+                    descriptionurl:
+                      "https://commons.wikimedia.org/wiki/File:Ponte_Hercilio_Luz_Florianopolis.jpg",
+                    url: "https://upload.wikimedia.org/example/ponte.jpg",
+                    thumburl: "https://upload.wikimedia.org/example/1280px-ponte.jpg",
+                    mime: "image/jpeg",
+                    extmetadata: {
+                      Artist: { value: "Autor" },
+                      LicenseShortName: { value: "CC BY 4.0" },
+                      LicenseUrl: { value: "https://creativecommons.org/licenses/by/4.0/" },
+                      ImageDescription: { value: "Ponte Hercílio Luz em Florianópolis" },
+                    },
+                  },
+                ],
+              }),
+            ],
+          },
+        }),
+    );
+    const adapter = new WikimediaCommonsPlaceImageAdapter({ fetcher });
+
+    const result = await adapter.findSecurePreview({
+      name: "Ponte Hercílio Luz",
+      latitude: -27.5935,
+      longitude: -48.5652,
+      contextLabel: "florianopolis-sc-br",
+    });
+
+    expect(result?.sourceName).toBe("Wikimedia Commons");
+    const calledUrl = new URL(String(fetcher.mock.calls[0]?.[0]));
+    expect(calledUrl.searchParams.get("gsrsearch")).toContain("florianopolis");
+    expect(calledUrl.searchParams.get("gsrsearch")).not.toContain("Pipa Tibau do Sul");
+  });
+
+  it("tenta o nome exato quando a busca contextual não encontra imagem segura", async () => {
+    const bridgePage = commonsPage({
+      title: "File:Ponte Hercilio Luz Florianopolis.jpg",
+      coordinates: [{ lat: -27.594, lon: -48.566, primary: "" }],
+      imageinfo: [
+        {
+          descriptionurl:
+            "https://commons.wikimedia.org/wiki/File:Ponte_Hercilio_Luz_Florianopolis.jpg",
+          url: "https://upload.wikimedia.org/example/ponte.jpg",
+          thumburl: "https://upload.wikimedia.org/example/1280px-ponte.jpg",
+          mime: "image/jpeg",
+          extmetadata: {
+            Artist: { value: "Autor" },
+            LicenseShortName: { value: "CC BY-SA 3.0" },
+            LicenseUrl: { value: "https://creativecommons.org/licenses/by-sa/3.0/" },
+            ImageDescription: { value: "Ponte Hercílio Luz em Florianópolis" },
+          },
+        },
+      ],
+    });
+    const fetcher = vi
+      .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ query: { pages: [] } }))
+      .mockResolvedValueOnce(Response.json({ query: { pages: [bridgePage] } }));
+    const adapter = new WikimediaCommonsPlaceImageAdapter({ fetcher });
+
+    const result = await adapter.findSecurePreview({
+      name: "Ponte Hercílio Luz",
+      latitude: -27.5935,
+      longitude: -48.5652,
+      contextLabel: "florianopolis-sc-br",
+    });
+
+    expect(result?.sourceName).toBe("Wikimedia Commons");
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    const firstSearch = new URL(String(fetcher.mock.calls[0]?.[0])).searchParams.get("gsrsearch");
+    const secondSearch = new URL(String(fetcher.mock.calls[1]?.[0])).searchParams.get("gsrsearch");
+    expect(firstSearch).toContain("florianopolis");
+    expect(secondSearch).toBe('"Ponte Hercílio Luz"');
   });
 
   it("propaga indisponibilidade da fonte sem produzir fallback falso", async () => {

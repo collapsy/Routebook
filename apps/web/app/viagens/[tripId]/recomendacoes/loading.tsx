@@ -4,9 +4,8 @@ export default function RecommendationsLoading() {
   return (
     <main aria-busy="true" className={styles.page}>
       <header className={styles.heading}>
-        <p className={styles.eyebrow}>Decision Intelligence determinística</p>
-        <h1>Carregando sugestões da viagem</h1>
-        <p>Estamos avaliando somente o Contexto conhecido e os Places publicados.</p>
+        <p className={styles.eyebrow}>Sugestões para a viagem</p>
+        <h1>Carregando sugestões</h1>
       </header>
       <div aria-hidden="true" className={styles.loadingCard} />
       <div aria-hidden="true" className={styles.loadingCard} />

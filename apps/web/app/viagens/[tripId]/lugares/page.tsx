@@ -46,7 +46,6 @@ import {
 } from "../../../../lib/place-discovery-ranking";
 import {
   derivePlaceBootstrapStage,
-  placeBootstrapStageCopy,
   resolvePlaceBootstrapPolicy,
   runPlaceBootstrapStep,
 } from "../../../../lib/place-bootstrap";
@@ -55,7 +54,6 @@ import type { TripMapPoint } from "../../../../lib/trip-map";
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
 import { resolvePlaceDiscoveryRegion } from "../../../../lib/place-discovery-region";
 import {
-  promoteExternalPlaceAction,
   removePublishedPlaceAction,
   saveExternalPlaceAction,
   savePublishedPlaceAction,
@@ -63,6 +61,7 @@ import {
 import {
   categoryLabels,
   filterPlaces,
+  listAvailablePlaceCategories,
   parseMaximumDistance,
   parsePlaceCategory,
   parsePlacePriceRange,
@@ -75,7 +74,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Lugares da viagem — RouteBook",
-  description: "Explore lugares únicos e contextualizados do destino da sua viagem.",
+  description: "Explore lugares para visitar durante a sua viagem.",
 };
 
 type DiscoverySearchParams = {
@@ -85,7 +84,6 @@ type DiscoverySearchParams = {
   preco?: string;
   ordem?: string;
   descoberta?: string | undefined;
-  promocao?: string;
   erroPromocao?: string;
 };
 
@@ -144,37 +142,21 @@ function matchesExternalSearch(result: ExternalPlaceReconciliation, search?: str
     .some((value) => normalizeSearchText(value).includes(needle));
 }
 
-function promotionMessage(value?: string): string | undefined {
-  switch (value) {
-    case "criada":
-      return "Candidato enviado para curadoria como draft. Ele só aparecerá no catálogo depois de uma publicação governada.";
-    case "existente":
-      return "Este candidato já havia sido enviado para curadoria. Nenhuma duplicata foi criada.";
-    case "salva":
-      return "Lugar salvo na viagem com a origem externa preservada. Nenhuma publicação editorial foi feita.";
-    default:
-      return undefined;
-  }
-}
-
-function promotionErrorMessage(value?: string): string | undefined {
+function placeActionErrorMessage(value?: string): string | undefined {
   switch (value) {
     case "candidato-invalido":
-      return "O candidato informado é inválido. Refaça a descoberta antes de tentar novamente.";
+      return "Não foi possível usar este lugar. Atualize a busca e tente novamente.";
     case "candidato-nao-encontrado":
-      return "O candidato não foi reencontrado na fonte atual. Refaça a descoberta antes de tentar novamente.";
+      return "Este lugar não está mais disponível na busca atual. Atualize a busca e tente novamente.";
     case "candidato-rejeitado":
-      return "O candidato não atende aos critérios atuais para promoção e não foi gravado.";
+      return "Não foi possível salvar este lugar. Atualize a busca ou escolha outra opção.";
     case "possivel-duplicata":
-      return "O RouteBook encontrou uma possível duplicidade. A promoção foi bloqueada para evitar criar outro Lugar.";
+      return "Este lugar pode já estar disponível na viagem. Atualize a busca antes de tentar novamente.";
     case "fonte-indisponivel":
-      return "A fonte externa não pôde revalidar este candidato agora. Nenhuma alteração foi gravada.";
     case "destino-nao-suportado":
-      return "A promoção externa ainda não está disponível para este destino.";
     case "consistencia":
-      return "O candidato possui um vínculo inconsistente e não foi promovido. Nenhuma alteração parcial foi mantida.";
     case "erro-tecnico":
-      return "Não foi possível enviar o candidato para curadoria agora. Nenhuma alteração parcial foi mantida.";
+      return "Não foi possível salvar este lugar agora. Tente novamente.";
     default:
       return undefined;
   }
@@ -182,6 +164,10 @@ function promotionErrorMessage(value?: string): string | undefined {
 
 function providerCategoryLabel(value: string): string {
   return value.replaceAll("_", " ").replaceAll("-", " ");
+}
+
+function googlePlaceIdFromSignals(signals?: PlaceQualitySignals): string | undefined {
+  return signals?.provider === "google-places" ? signals.externalId : undefined;
 }
 
 type CanonicalDiscoveryItem = PublishedPlaceDiscoveryItem | EnrichedPlaceDiscoveryItem;
@@ -237,15 +223,6 @@ function CanonicalDiscoveryCard({
       data-place-source="published"
       data-place-state={candidate ? "enriched" : "published"}
     >
-      <PlaceRankingMeta
-        categoryLabel={categoryLabels[place.category]}
-        orderLabel={rankingOrderLabel}
-        position={rankingPosition}
-        timeZone={timeZone}
-        {...(quality ? { quality } : {})}
-        {...(qualitySignals ? { signals: qualitySignals } : {})}
-        {...(categoryRank ? { categoryRank } : {})}
-      />
       {place.primaryImage || !candidate ? (
         <PlacePrimaryImage
           category={place.category}
@@ -257,36 +234,44 @@ function CanonicalDiscoveryCard({
           category={place.category}
           destinationId={destinationId}
           enabled={externalMediaEnabled}
+          googlePlaceId={googlePlaceIdFromSignals(qualitySignals)}
           latitude={candidate.latitude}
           longitude={candidate.longitude}
           placeName={place.name}
         />
       )}
+
       <div className={styles.cardIdentity}>
         <span>{categoryLabels[place.category]}</span>
-        <strong className={`${styles.sourceBadge} ${styles.publishedSource}`}>
-          {candidate ? "Curado + atualizado" : "Curado pelo RouteBook"}
-        </strong>
+        {isSaved ? <span>Salvo</span> : null}
       </div>
-      <strong>{place.name}</strong>
-      <p>{place.summary}</p>
-      <small>{addressLabel ?? "Endereço ainda não informado"}</small>
-      <small>
-        Faixa de preço aproximada:{" "}
-        {place.priceRange ? priceRangeLabels[place.priceRange] : "indisponível"}
-      </small>
-      <small>
-        {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
-      </small>
-      {candidate ? (
-        <small>
-          Conteúdo: RouteBook · contexto de localização: Overture · licença da origem:{" "}
-          {candidate.sourceLicense}
-        </small>
-      ) : (
-        <small>Conteúdo e localização: catálogo publicado do RouteBook</small>
-      )}
+
+      <h3 className={styles.cardTitle}>{place.name}</h3>
+      {place.summary ? <p className={styles.cardSummary}>{place.summary}</p> : null}
+
+      <div className={styles.cardFacts}>
+        <span className={styles.cardFact}>
+          {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
+        </span>
+        {place.priceRange ? (
+          <span className={styles.cardPrice}>{priceRangeLabels[place.priceRange]}</span>
+        ) : null}
+      </div>
+
+      <PlaceRankingMeta
+        categoryLabel={categoryLabels[place.category]}
+        orderLabel={rankingOrderLabel}
+        position={rankingPosition}
+        timeZone={timeZone}
+        {...(quality ? { quality } : {})}
+        {...(qualitySignals ? { signals: qualitySignals } : {})}
+        {...(categoryRank ? { categoryRank } : {})}
+      />
+
       <div className={styles.cardActions}>
+        <Link className="product-primary-action" href={`/viagens/${tripId}/lugares/${place.slug}`}>
+          Ver detalhes
+        </Link>
         <form action={isSaved ? removePublishedPlaceAction : savePublishedPlaceAction}>
           <input name="tripId" type="hidden" value={tripId} />
           <input name="placeSlug" type="hidden" value={place.slug} />
@@ -294,40 +279,42 @@ function CanonicalDiscoveryCard({
             {isSaved ? "Remover dos salvos" : "Salvar lugar"}
           </button>
         </form>
-        <Link
-          className="product-primary-action"
-          href={`/viagens/${tripId}/lugares/${place.slug}#adicionar-ao-roteiro`}
-        >
-          Adicionar ao roteiro
-        </Link>
-        <Link
-          className="product-secondary-action"
-          href={`/viagens/${tripId}/lugares/${place.slug}`}
-        >
-          Ver detalhes
-        </Link>
-        <a
-          className="product-secondary-action"
-          href={mapsSearchUrl}
-          rel="noreferrer"
-          target="_blank"
-        >
-          Ver mapa e fotos
-        </a>
-        <a
-          className="product-secondary-action"
-          href={buildGoogleMapsDirectionsUrl({
-            ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
-            destination: coordinate,
-            destinationLabel,
-            travelMode: "walking",
-          })}
-          rel="noreferrer"
-          target="_blank"
-        >
-          Calcular rota real
-        </a>
       </div>
+
+      <details className={styles.cardDetails}>
+        <summary>Mais informações</summary>
+        <div className={styles.cardDetailsBody}>
+          <p>{addressLabel ?? "Endereço ainda não informado"}</p>
+          {candidate ? (
+            <small>Fonte de localização: Overture · licença: {candidate.sourceLicense}</small>
+          ) : (
+            <small>Fonte: RouteBook</small>
+          )}
+          <div className={styles.cardAuxiliaryActions}>
+            <a
+              className="product-secondary-action"
+              href={mapsSearchUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
+              Ver mapa e fotos
+            </a>
+            <a
+              className="product-secondary-action"
+              href={buildGoogleMapsDirectionsUrl({
+                ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
+                destination: coordinate,
+                destinationLabel,
+                travelMode: "walking",
+              })}
+              rel="noreferrer"
+              target="_blank"
+            >
+              Ver rota
+            </a>
+          </div>
+        </div>
+      </details>
     </li>
   );
 }
@@ -378,6 +365,11 @@ function ExternalDiscoveryCard({
     name: candidate.name,
     addressLabel: candidate.addressLabel,
   });
+  const mapsSearchUrl = buildGoogleMapsSearchUrl({
+    name: candidate.name,
+    addressLabel: candidate.addressLabel,
+    coordinate,
+  });
 
   return (
     <li
@@ -385,6 +377,28 @@ function ExternalDiscoveryCard({
       data-place-source="external"
       data-place-state="external"
     >
+      <ExternalPlaceImagePreview
+        category={candidate.category}
+        destinationId={destinationId}
+        enabled={externalMediaEnabled}
+        googlePlaceId={googlePlaceIdFromSignals(qualitySignals)}
+        latitude={candidate.latitude}
+        longitude={candidate.longitude}
+        placeName={candidate.name}
+      />
+
+      <div className={styles.cardIdentity}>
+        <span>{categoryLabel}</span>
+      </div>
+
+      <h3 className={styles.cardTitle}>{candidate.name}</h3>
+
+      <div className={styles.cardFacts}>
+        <span className={styles.cardFact}>
+          {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
+        </span>
+      </div>
+
       <PlaceRankingMeta
         categoryLabel={categoryLabel}
         orderLabel={rankingOrderLabel}
@@ -394,57 +408,12 @@ function ExternalDiscoveryCard({
         {...(qualitySignals ? { signals: qualitySignals } : {})}
         {...(categoryRank ? { categoryRank } : {})}
       />
-      <ExternalPlaceImagePreview
-        category={candidate.category}
-        destinationId={destinationId}
-        enabled={externalMediaEnabled}
-        latitude={candidate.latitude}
-        longitude={candidate.longitude}
-        placeName={candidate.name}
-      />
-      <div className={styles.cardIdentity}>
-        <span>{categoryLabel}</span>
-        <strong className={`${styles.sourceBadge} ${styles.externalSource}`}>
-          Descoberta atual
-        </strong>
-      </div>
-      <strong>{candidate.name}</strong>
-      <p>{candidate.addressLabel ?? "Endereço não informado pela fonte"}</p>
-      <small>Categoria na origem: {providerCategoryLabel(candidate.providerCategory)}</small>
-      <small>
-        {formatDistance(distanceMeters)} em linha reta {distanceReferenceLabel}
-      </small>
-      <small>Fonte: Overture · licença da origem: {candidate.sourceLicense}</small>
-      <small>Candidato externo — ainda não publicado no RouteBook · sem conteúdo curado</small>
+
       <div className={styles.cardActions}>
-        <a
-          className="product-secondary-action"
-          href={buildGoogleMapsSearchUrl({
-            name: candidate.name,
-            addressLabel: candidate.addressLabel,
-            coordinate,
-          })}
-          rel="noreferrer"
-          target="_blank"
-        >
+        <a className="product-primary-action" href={mapsSearchUrl} rel="noreferrer" target="_blank">
           Ver mapa e fotos
         </a>
-        <a
-          className="product-secondary-action"
-          href={buildGoogleMapsDirectionsUrl({
-            ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
-            destination: coordinate,
-            destinationLabel,
-            travelMode: "walking",
-          })}
-          rel="noreferrer"
-          target="_blank"
-        >
-          Calcular rota real
-        </a>
-      </div>
-      {candidate.category ? (
-        <>
+        {candidate.category ? (
           <form action={saveExternalPlaceAction} className={styles.promotionForm}>
             <input name="tripId" type="hidden" value={tripId} />
             <input name="externalId" type="hidden" value={candidate.externalId} />
@@ -455,44 +424,38 @@ function ExternalDiscoveryCard({
             ) : null}
             {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
             {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
-            <button className="product-button" type="submit">
-              Salvar na viagem
-            </button>
-          </form>
-          <small>
-            O RouteBook revalida o candidato antes de salvar e preserva a fonte. Salvar não publica
-            o Lugar nem o adiciona automaticamente ao roteiro.
-          </small>
-        </>
-      ) : (
-        <small>
-          Este candidato pode ser consultado, mas ainda não tem categoria segura para ser salvo.
-        </small>
-      )}
-      {destinationId ? (
-        <>
-          <form action={promoteExternalPlaceAction} className={styles.promotionForm}>
-            <input name="tripId" type="hidden" value={tripId} />
-            <input name="externalId" type="hidden" value={candidate.externalId} />
-            {search ? <input name="busca" type="hidden" value={search} /> : null}
-            {category ? <input name="categoria" type="hidden" value={category} /> : null}
-            {maximumDistanceMeters ? (
-              <input name="distancia" type="hidden" value={String(maximumDistanceMeters / 1_000)} />
-            ) : null}
-            {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
-            {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
             <button className="product-secondary-action" type="submit">
-              Enviar para curadoria
+              Salvar lugar
             </button>
           </form>
-          <small>
-            A ação cria um draft para revisão; não publica, não salva na viagem e não adiciona ao
-            roteiro.
-          </small>
-        </>
-      ) : (
-        <small>A curadoria editorial permanece separada e não é necessária para planejar.</small>
-      )}
+        ) : null}
+      </div>
+
+      <details className={styles.cardDetails}>
+        <summary>Mais informações</summary>
+        <div className={styles.cardDetailsBody}>
+          <p>{candidate.addressLabel ?? "Endereço não informado"}</p>
+          <small>Fonte: Overture · licença: {candidate.sourceLicense}</small>
+          {!candidate.category ? (
+            <small>Salvar ainda não está disponível para este lugar.</small>
+          ) : null}
+          <div className={styles.cardAuxiliaryActions}>
+            <a
+              className="product-secondary-action"
+              href={buildGoogleMapsDirectionsUrl({
+                ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
+                destination: coordinate,
+                destinationLabel,
+                travelMode: "walking",
+              })}
+              rel="noreferrer"
+              target="_blank"
+            >
+              Ver rota
+            </a>
+          </div>
+        </div>
+      </details>
     </li>
   );
 }
@@ -517,8 +480,7 @@ export default async function PlacesPage({
   const discoverExternal = rawFilters.descoberta !== "ocultar";
   const showAllExternal = rawFilters.descoberta === "todas";
   const discoveryMode = !discoverExternal ? "ocultar" : showAllExternal ? "todas" : undefined;
-  const promotionStatusMessage = promotionMessage(rawFilters.promocao);
-  const promotionError = promotionErrorMessage(rawFilters.erroPromocao);
+  const placeActionError = placeActionErrorMessage(rawFilters.erroPromocao);
   const accommodationCoordinate = trip.accommodation?.coordinate;
   const requestedMaximumDistanceMeters = parseMaximumDistance(rawFilters.distancia);
   const regionResolution = resolvePlaceDiscoveryRegion({
@@ -550,7 +512,13 @@ export default async function PlacesPage({
       : [],
     listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
   ]);
-  const destinationId = resolveCuratedDestinationId(publishedPlaces);
+  const destinationId =
+    resolveCuratedDestinationId(publishedPlaces) ??
+    trip.destination.name
+      .normalize("NFKC")
+      .replace(/[^\p{L}\p{N}\s._-]+/gu, " ")
+      .replace(/\s+/g, " ")
+      .trim();
   const savedPlaceIds = new Set(savedPlaces.map((selection) => selection.placeId));
   const filteredPlaces = filterPlaces(
     publishedPlaces,
@@ -593,6 +561,7 @@ export default async function PlacesPage({
       ? [{ key: "preco" as const, label: `Preço: ${priceRangeLabels[priceRange]}` }]
       : []),
   ];
+  let allExternalReconciliations: ExternalPlaceReconciliation[] = [];
   let externalReconciliations: ExternalPlaceReconciliation[] = [];
   let externalCandidateCount = 0;
   let externalPossibleMatchCount = 0;
@@ -614,7 +583,6 @@ export default async function PlacesPage({
         new OverturePmtilesPlaceSearchAdapter().search({
           center: region.center,
           radiusMeters: region.externalRadiusMeters,
-          ...(category ? { categories: [category] } : {}),
           limit: bootstrapPolicy.discovery.candidateLimit,
         }),
     });
@@ -627,6 +595,7 @@ export default async function PlacesPage({
       const reconciliations = candidates.map((candidate) =>
         reconcileExternalPlaceCandidate(candidate, publishedPlaces, references),
       );
+      allExternalReconciliations = reconciliations;
       externalCandidateCount = candidates.length;
       externalPossibleMatchCount = reconciliations.filter(
         (result) => result.status === "possible_match",
@@ -635,16 +604,29 @@ export default async function PlacesPage({
       externalRejectedCount = reconciliations.filter(
         (result) => result.status === "rejected",
       ).length;
-      externalReconciliations = reconciliations.filter(
-        (result) => result.status !== "new" || matchesExternalSearch(result, search),
-      );
+      externalReconciliations = reconciliations.filter((result) => {
+        if (category && result.candidate.category !== category) return false;
+        return result.status !== "new" || matchesExternalSearch(result, search);
+      });
     } else if (discoveryResult.status === "failed") {
       externalDiscoveryError =
-        "A fonte externa não respondeu agora. O catálogo curado continua disponível normalmente.";
+        "Não foi possível atualizar os lugares encontrados agora. Os lugares já disponíveis continuam na lista.";
     }
   }
 
   const hasExternalCoverage = discoverExternal && Boolean(region) && discoveryStatus === "success";
+  const facetDiscoveryItems = region
+    ? buildPlaceDiscoveryFeed({
+        publishedPlaces,
+        externalReconciliations: hasExternalCoverage ? allExternalReconciliations : [],
+        reference: region.center,
+      })
+    : [];
+  const availableCategories = listAvailablePlaceCategories(
+    facetDiscoveryItems.map((item) =>
+      item.kind === "external" ? item.candidate.category : item.place.category,
+    ),
+  );
   const filteredPublishedPlaces = filteredPlaces.map(({ place }) => place);
   const allDiscoveryItems = region
     ? buildPlaceDiscoveryFeed({
@@ -687,12 +669,9 @@ export default async function PlacesPage({
 
     if (qualityResult.status === "success") {
       qualityMatches = [...qualityResult.value];
-    } else if (qualityResult.status === "failed") {
-      qualityProviderError =
-        "Os sinais de qualidade não responderam agora. A Discovery continua ordenada por proximidade.";
     } else {
       qualityProviderError =
-        "O enriquecimento de qualidade está pausado neste ambiente. Os lugares continuam disponíveis por proximidade.";
+        "Avaliação e popularidade não estão disponíveis agora. Use Mais próximos para ordenar.";
     }
   }
 
@@ -718,8 +697,6 @@ export default async function PlacesPage({
     (item) => item.kind === "external",
   ).length;
   const visibleExternalCount = discoveryItems.filter((item) => item.kind === "external").length;
-  const enrichedCount = allDiscoveryItems.filter((item) => item.kind === "enriched").length;
-  const curatedCount = allDiscoveryItems.filter((item) => item.kind !== "external").length;
   const hasMoreExternalResults =
     hasExternalCoverage && availableExternalCount > visibleExternalCount;
   const hasExpandedExternalResults =
@@ -743,7 +720,6 @@ export default async function PlacesPage({
     discoveryStatus,
     mediaExpected: externalMediaItemIds.size > 0,
   });
-  const bootstrapCopy = placeBootstrapStageCopy(bootstrapStage);
   const mapPoints: TripMapPoint[] = ranking.items.map(({ item }) => {
     if (item.kind !== "external") {
       const coordinate =
@@ -818,22 +794,11 @@ export default async function PlacesPage({
           <p className="product-eyebrow">Guia de viagem</p>
           <h1>Lugares em {trip.destination.name}</h1>
           <p>
-            Explore uma lista única de Lugares. O RouteBook combina conteúdo curado com descobertas
-            atuais da região sem mostrar o mesmo lugar duas vezes. Para distância por ruas, duração
-            e trânsito, use as ações de rota real.
+            Compare lugares para decidir o que vale visitar. As distâncias da lista são em linha
+            reta; use as ações de rota para trajetos e tempo de deslocamento.
           </p>
         </div>
       </header>
-
-      <section
-        aria-label="Status do guia"
-        className={styles.notice}
-        data-place-bootstrap-stage={bootstrapStage}
-        role="status"
-      >
-        <strong>{bootstrapCopy.label}</strong>
-        <p>{bootstrapCopy.description}</p>
-      </section>
 
       <form action={`/viagens/${tripId}/lugares`} className={styles.filters} method="get">
         {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
@@ -855,7 +820,7 @@ export default async function PlacesPage({
           <label htmlFor="place-category">Categoria</label>
           <select defaultValue={category ?? ""} id="place-category" name="categoria">
             <option value="">Todas</option>
-            {PLACE_CATEGORIES.map((value) => (
+            {availableCategories.map((value) => (
               <option key={value} value={value}>
                 {categoryLabels[value]}
               </option>
@@ -896,8 +861,7 @@ export default async function PlacesPage({
 
       {!region ? (
         <p className={styles.notice} role="status">
-          Não há uma referência espacial confiável para esta viagem. O RouteBook não inventa centro,
-          distância ou cobertura de Discovery.
+          Não foi possível calcular distâncias nem buscar lugares próximos agora.
         </p>
       ) : region.source === "accommodation" ? (
         <p className={styles.notice}>
@@ -906,8 +870,8 @@ export default async function PlacesPage({
         </p>
       ) : (
         <p className={styles.notice} role="status">
-          Sem hospedagem geocodificada, as distâncias usam a referência aproximada do destino. Elas
-          são estimativas em linha reta e não representam rota ou tempo de deslocamento.
+          Sem a localização da hospedagem, as distâncias usam uma referência aproximada do destino.
+          São estimativas em linha reta e não representam rota ou tempo de deslocamento.
         </p>
       )}
 
@@ -943,7 +907,7 @@ export default async function PlacesPage({
       <section aria-labelledby="place-ranking-title" className={styles.rankingPanel}>
         <div className={styles.rankingHeader}>
           <div>
-            <p className="product-eyebrow">Ranking RouteBook</p>
+            <p className="product-eyebrow">Ordenação</p>
             <h2 id="place-ranking-title">Como você quer ordenar?</h2>
           </div>
           <nav aria-label="Ordenação dos lugares" className={styles.rankingControls}>
@@ -976,9 +940,8 @@ export default async function PlacesPage({
         {ranking.hasQualityCoverage ? (
           <>
             <p className={styles.rankingNotice}>
-              Score RouteBook é derivado de sinais externos verificados e contexto da viagem; não é
-              uma nota criada pelo usuário. Rating, popularidade e Provider continuam identificados
-              em cada card.
+              O Score RouteBook combina sinais disponíveis e o contexto da viagem. Veja os detalhes
+              do ranking em cada lugar.
             </p>
             {topLists.length > 0 ? (
               <details className={styles.topLists}>
@@ -1006,13 +969,7 @@ export default async function PlacesPage({
         ) : (
           <p className={styles.rankingNotice} role="status">
             {qualityProviderError ??
-              (qualityProvider.status === "configured"
-                ? `${qualityProvider.providerLabel} está configurado, mas nenhum sinal foi associado com segurança a esta seleção. O RouteBook não inventa um Top.`
-                : qualityProvider.status === "missing-secret"
-                  ? `${qualityProvider.providerLabel} foi selecionado, mas a credencial ainda não está provisionada. Até lá, somente Mais próximos é real.`
-                  : qualityProvider.status === "invalid-provider"
-                    ? "A configuração do Provider de qualidade é inválida. O ranking permanece por proximidade."
-                    : "Ranking por avaliação e popularidade aguarda um Provider de qualidade explicitamente configurado. Até lá, somente Mais próximos é exibido como ordenação real.")}
+              "Avaliação e popularidade não estão disponíveis para esta seleção. Use Mais próximos para ordenar."}
           </p>
         )}
       </section>
@@ -1022,58 +979,32 @@ export default async function PlacesPage({
           <h2>
             {hasExternalCoverage
               ? `${visibleOptionCount} de ${totalAvailableOptionCount} ${
-                  totalAvailableOptionCount === 1 ? "lugar único" : "lugares únicos"
+                  totalAvailableOptionCount === 1 ? "lugar" : "lugares"
                 } exibidos`
               : `${filteredPublishedPlaces.length} ${
-                  filteredPublishedPlaces.length === 1 ? "lugar curado" : "lugares curados"
+                  filteredPublishedPlaces.length === 1 ? "lugar" : "lugares"
                 }`}
           </h2>
-          <p>
-            {hasExternalCoverage
-              ? `${curatedCount} com conteúdo curado do RouteBook · ${enrichedCount} também reconciliados com Overture · ${availableExternalCount} somente na descoberta atual.`
-              : "Lista e mapa exibem o mesmo conjunto curado e filtrado."}
-          </p>
+          <p>A lista e o mapa mostram os mesmos lugares.</p>
         </div>
-        <Link
-          className="product-secondary-action"
-          href={discoveryHref(tripId, {
-            ...canonicalParams,
-            ...(discoverExternal ? { descoberta: "ocultar" } : { descoberta: undefined }),
-          })}
-        >
-          {discoverExternal ? "Ocultar atualização externa" : "Mostrar atualização externa"}
-        </Link>
       </div>
 
-      {discoverExternal ? (
-        <section aria-label="Cobertura da descoberta" className={styles.discoverySummary}>
-          <strong>Um catálogo, identidades únicas</strong>
-          <p>
-            O RouteBook reconcilia a cobertura do Overture com o catálogo curado antes de montar a
-            grade. Quando as duas fontes representam o mesmo Lugar, você vê um único card com
-            conteúdo curado e contexto atualizado. A origem continua indicada para rastreabilidade.
-          </p>
-          <p>
-            {externalCandidateCount} candidatos externos foram avaliados. {enrichedCount} Lugares
-            visíveis receberam contexto externo e {externalPossibleMatchCount} correspondências
-            possíveis foram tratadas de forma conservadora para evitar duplicatas.{" "}
-            {externalLinkedCount} referências já possuem vínculo canônico e {externalRejectedCount}{" "}
-            candidatos foram rejeitados pela validação da Fonte/categoria.
-          </p>
-          {promotionStatusMessage ? (
-            <p className={styles.notice} role="status">
-              {promotionStatusMessage}
-            </p>
-          ) : null}
-          {promotionError ? (
+      {discoverExternal &&
+      (placeActionError ||
+        priceRange ||
+        externalDiscoveryError ||
+        hasMoreExternalResults ||
+        hasExpandedExternalResults) ? (
+        <section aria-label="Mais lugares" className={styles.discoverySummary}>
+          {placeActionError ? (
             <p className={styles.notice} role="alert">
-              {promotionError}
+              {placeActionError}
             </p>
           ) : null}
           {priceRange ? (
             <p className={styles.notice} role="status">
-              A fonte externa não fornece a faixa de preço canônica do RouteBook; esse filtro vale
-              para Lugares com conteúdo curado e não exclui descobertas externas sem preço.
+              Alguns lugares não têm faixa de preço informada e podem continuar aparecendo nos
+              resultados.
             </p>
           ) : null}
           {externalDiscoveryError ? (
@@ -1085,14 +1016,14 @@ export default async function PlacesPage({
               className="product-primary-action"
               href={discoveryHref(tripId, { ...canonicalParams, descoberta: "todas" })}
             >
-              Mostrar todos os {availableExternalCount} lugares descobertos
+              Mostrar todos os {availableExternalCount} lugares encontrados
             </Link>
           ) : hasExpandedExternalResults ? (
             <Link
               className="product-secondary-action"
               href={discoveryHref(tripId, { ...canonicalParams, descoberta: undefined })}
             >
-              Mostrar primeiras {externalDiscoveryDisplayLimit} descobertas externas
+              Mostrar primeiros {externalDiscoveryDisplayLimit} lugares
             </Link>
           ) : null}
         </section>
@@ -1162,7 +1093,7 @@ export default async function PlacesPage({
       )}
 
       <TripMap
-        description={`Mesmo conjunto da grade: ${visibleOptionCount} identidades únicas, sendo ${discoveryItems.filter((item) => item.kind !== "external").length} com conteúdo curado e ${visibleExternalCount} somente externos. A Hospedagem aparece como referência adicional quando disponível.`}
+        description={`A lista e o mapa mostram os mesmos ${visibleOptionCount} ${visibleOptionCount === 1 ? "lugar" : "lugares"}. A hospedagem aparece como referência adicional quando disponível.`}
         emptyDescription="Não há lugar com coordenadas no conjunto filtrado. Limpe ou amplie os filtros para recuperar resultados."
         emptyTitle="Nenhum lugar para exibir no mapa"
         points={mapPoints}

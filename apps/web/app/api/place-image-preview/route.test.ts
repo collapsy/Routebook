@@ -5,6 +5,10 @@ import { GET } from "./route";
 function commonsResponse(
   description = "Praia do Amor em Pipa, Tibau do Sul, Rio Grande do Norte",
   title = "File:Praia do Amor Pipa.jpg",
+  coordinate: Readonly<{ latitude: number; longitude: number }> | null = {
+    latitude: -6.2366,
+    longitude: -35.0465,
+  },
 ) {
   return new Response(
     JSON.stringify({
@@ -13,6 +17,13 @@ function commonsResponse(
           {
             pageid: 123,
             title,
+            ...(coordinate
+              ? {
+                  coordinates: [
+                    { lat: coordinate.latitude, lon: coordinate.longitude, primary: "" },
+                  ],
+                }
+              : {}),
             imageinfo: [
               {
                 descriptionurl: "https://commons.wikimedia.org/wiki/File:Praia_do_Amor_Pipa.jpg",
@@ -37,13 +48,17 @@ function commonsResponse(
   );
 }
 
-function requestUrl(overrides: Record<string, string> = {}): string {
-  const params = new URLSearchParams({
+function requestUrl(overrides: Record<string, string | undefined> = {}): string {
+  const values: Record<string, string | undefined> = {
     destinationId: "pipa-rn-br",
     name: "Praia do Amor",
     latitude: "-6.2366",
     longitude: "-35.0465",
     ...overrides,
+  };
+  const params = new URLSearchParams();
+  Object.entries(values).forEach(([key, value]) => {
+    if (value !== undefined) params.set(key, value);
   });
   return `http://localhost/api/place-image-preview?${params}`;
 }
@@ -67,18 +82,360 @@ describe("GET /api/place-image-preview", () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
 
-  it("rejeita recorte geográfico ou Destination inválido sem consultar a Fonte", async () => {
+  it("rejeita coordenadas inválidas sem consultar a Fonte", async () => {
     const fetcher = vi.fn();
     vi.stubGlobal("fetch", fetcher);
 
-    const response = await GET(new Request(requestUrl({ destinationId: "outro-destino" })));
+    const response = await GET(new Request(requestUrl({ latitude: "91" })));
 
     expect(response.status).toBe(400);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
     expect(fetcher).not.toHaveBeenCalled();
   });
 
-  it("devolve somente preview seguro com Provenance e cache CDN", async () => {
+  it("rejeita contexto de Destination inválido sem consultar a Fonte", async () => {
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(requestUrl({ destinationId: "<script>alert(1)</script>" })),
+    );
+
+    expect(response.status).toBe(400);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("rejeita Google Place ID inválido sem consultar Provider", async () => {
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(requestUrl({ googlePlaceId: "<script>", category: "nightlife" })),
+    );
+
+    expect(response.status).toBe(400);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("prioriza Google Photo com identidade revalidada e metadata no-store", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const fetcher = vi.fn(async () =>
+      Response.json({
+        id: "ChIJLavaTerrace01",
+        displayName: { text: "Lava Terrace" },
+        location: { latitude: 14.55781, longitude: -90.73369 },
+        photos: [
+          {
+            name: "places/ChIJLavaTerrace01/photos/resource-secret",
+            authorAttributions: [{ displayName: "Fotógrafo Google" }],
+            googleMapsUri: "https://www.google.com/maps/place/?q=place_id:lava",
+          },
+        ],
+      }),
+    );
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          destinationId: "Antigua Guatemala",
+          name: "Lava Terrace",
+          latitude: "14.5578",
+          longitude: "-90.7337",
+          googlePlaceId: "ChIJLavaTerrace01",
+          category: "nightlife",
+        }),
+      ),
+    );
+    const payload = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(payload).toMatchObject({
+      provider: "google-places",
+      sourceName: "Google Maps",
+      authorAttributions: [{ displayName: "Fotógrafo Google" }],
+    });
+    expect(String(payload.mediaUrl)).toMatch(/^\/api\/place-image-preview\/google\?token=/);
+    expect(JSON.stringify(payload)).not.toContain("resource-secret");
+    expect(JSON.stringify(payload)).not.toContain("secret-google");
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it("usa o Destination no fallback nominal de Quality lazy e então libera Google Photo", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("ROUTEBOOK_PLACE_QUALITY_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const fetcher = vi
+      .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ places: [] }))
+      .mockResolvedValueOnce(
+        Response.json({
+          places: [
+            {
+              id: "ChIJPuntoCeroGt01",
+              displayName: { text: "Punto Cero Guatemala" },
+              location: { latitude: 14.74191, longitude: -91.15621 },
+              formattedAddress: "Panajachel, Guatemala",
+              rating: 4.6,
+              userRatingCount: 127,
+            },
+          ],
+        }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({
+          id: "ChIJPuntoCeroGt01",
+          displayName: { text: "Punto Cero Guatemala" },
+          location: { latitude: 14.74191, longitude: -91.15621 },
+          photos: [
+            {
+              name: "places/ChIJPuntoCeroGt01/photos/resource-secret",
+              authorAttributions: [{ displayName: "Cliente Google" }],
+              googleMapsUri: "https://www.google.com/maps/place/?q=place_id:punto-cero",
+            },
+          ],
+        }),
+      );
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          destinationId: "Panajachel Guatemala",
+          name: "Punto Cero Guatemala",
+          latitude: "14.74191",
+          longitude: "-91.15621",
+          category: "nightlife",
+          googlePlaceId: undefined,
+        }),
+      ),
+    );
+    const payload = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(payload).toMatchObject({
+      provider: "google-places",
+      sourceName: "Google Maps",
+      authorAttributions: [{ displayName: "Cliente Google" }],
+    });
+    expect(String(payload.mediaUrl)).toMatch(/^\/api\/place-image-preview\/google\?token=/);
+    expect(fetcher).toHaveBeenCalledTimes(3);
+
+    const [qualityInput, qualityInit] = fetcher.mock.calls[0] ?? [];
+    expect(String(qualityInput)).toBe("https://places.googleapis.com/v1/places:searchText");
+    expect(JSON.parse(String(qualityInit?.body))).toMatchObject({
+      textQuery: "bares e vida noturna",
+      locationBias: {
+        circle: {
+          center: { latitude: 14.74191, longitude: -91.15621 },
+        },
+      },
+    });
+
+    const [targetedInput, targetedInit] = fetcher.mock.calls[1] ?? [];
+    expect(String(targetedInput)).toBe("https://places.googleapis.com/v1/places:searchText");
+    expect(JSON.parse(String(targetedInit?.body))).toMatchObject({
+      textQuery: "Punto Cero Guatemala, Panajachel Guatemala",
+      locationBias: {
+        circle: {
+          center: { latitude: 14.74191, longitude: -91.15621 },
+        },
+      },
+    });
+    expect(JSON.parse(String(targetedInit?.body))).not.toHaveProperty("regionCode");
+    expect(JSON.stringify(payload)).not.toContain("resource-secret");
+    expect(JSON.stringify(payload)).not.toContain("secret-google");
+  });
+
+  it("recupera identidade Google segura sem rating apenas para mídia", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("ROUTEBOOK_PLACE_QUALITY_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const identityCandidate = {
+      id: "ChIJPuntoCeroNoRating",
+      displayName: { text: "Punto Cero Guatemala" },
+      location: { latitude: 14.74191, longitude: -91.15621 },
+      formattedAddress: "Panajachel, Guatemala",
+    };
+    const incompatibleIdentityCandidate = {
+      id: "ChIJOutroBar01",
+      displayName: { text: "Outro Bar" },
+      location: { latitude: 14.7419, longitude: -91.1562 },
+      formattedAddress: "Panajachel, Guatemala",
+    };
+    const fetcher = vi
+      .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ places: [] }))
+      .mockResolvedValueOnce(Response.json({ places: [identityCandidate] }))
+      .mockResolvedValueOnce(
+        Response.json({ places: [incompatibleIdentityCandidate, identityCandidate] }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({
+          id: identityCandidate.id,
+          displayName: identityCandidate.displayName,
+          location: identityCandidate.location,
+          photos: [
+            {
+              name: `places/${identityCandidate.id}/photos/photo-current`,
+              authorAttributions: [{ displayName: "Cliente Google" }],
+            },
+          ],
+        }),
+      );
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          destinationId: "Panajachel Guatemala",
+          name: "Punto Cero Guatemala",
+          latitude: "14.74191",
+          longitude: "-91.15621",
+          category: "nightlife",
+          googlePlaceId: undefined,
+        }),
+      ),
+    );
+    const payload = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(payload).toMatchObject({ provider: "google-places", sourceName: "Google Maps" });
+    expect(fetcher).toHaveBeenCalledTimes(4);
+    const [identityInput, identityInit] = fetcher.mock.calls[2] ?? [];
+    expect(String(identityInput)).toBe("https://places.googleapis.com/v1/places:searchText");
+    expect((identityInit?.headers as Record<string, string>)["X-Goog-FieldMask"]).toBe(
+      "places.id,places.displayName,places.location,places.formattedAddress",
+    );
+    expect(JSON.parse(String(identityInit?.body))).toMatchObject({
+      textQuery: "Punto Cero Guatemala, Panajachel Guatemala",
+      pageSize: 5,
+    });
+    expect(JSON.stringify(payload)).not.toContain("secret-google");
+    expect(JSON.stringify(payload)).not.toContain("photo-current");
+  });
+
+  it("não executa Quality lazy quando o Quality Provider Google não está configurado", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const fetcher = vi.fn(async () => commonsResponse());
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          category: "beach",
+          googlePlaceId: undefined,
+        }),
+      ),
+    );
+    const payload = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(payload.sourceName).toBe("Wikimedia Commons");
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it("cai para Wikimedia sem cache público quando Quality lazy não encontra identidade Google segura", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("ROUTEBOOK_PLACE_QUALITY_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const fetcher = vi
+      .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ places: [] }))
+      .mockResolvedValueOnce(Response.json({ places: [] }))
+      .mockResolvedValueOnce(Response.json({ places: [] }))
+      .mockResolvedValueOnce(commonsResponse());
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          category: "beach",
+          googlePlaceId: undefined,
+        }),
+      ),
+    );
+    const payload = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(payload.sourceName).toBe("Wikimedia Commons");
+    expect(fetcher).toHaveBeenCalledTimes(4);
+  });
+
+  it("não cacheia publicamente miss após tentativa de Quality lazy", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("ROUTEBOOK_PLACE_QUALITY_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const ambiguousCommons = () =>
+      commonsResponse("Praia do Amor no litoral brasileiro", "File:Praia do Amor.jpg", null);
+    const fetcher = vi
+      .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ places: [] }))
+      .mockResolvedValueOnce(Response.json({ places: [] }))
+      .mockResolvedValueOnce(Response.json({ places: [] }))
+      .mockResolvedValueOnce(ambiguousCommons())
+      .mockResolvedValueOnce(ambiguousCommons());
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          category: "beach",
+          googlePlaceId: undefined,
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(fetcher).toHaveBeenCalledTimes(5);
+  });
+
+  it("cai para Wikimedia segura quando Google não possui foto", async () => {
+    vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "secret-google");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const fetcher = vi
+      .fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(
+        Response.json({
+          id: "ChIJPraiaDoAmor01",
+          displayName: { text: "Praia do Amor" },
+          location: { latitude: -6.2366, longitude: -35.0465 },
+          photos: [],
+        }),
+      )
+      .mockResolvedValueOnce(commonsResponse());
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          googlePlaceId: "ChIJPraiaDoAmor01",
+          category: "beach",
+        }),
+      ),
+    );
+    const payload = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(payload.sourceName).toBe("Wikimedia Commons");
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+
+  it("devolve preview seguro de Pipa com Provenance e cache CDN", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => commonsResponse()),
@@ -100,18 +457,44 @@ describe("GET /api/place-image-preview", () => {
       licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
       attribution: "Fotógrafo RouteBook",
     });
-    expect(String(payload.matchEvidence)).toContain("contexto local de Pipa/Tibau do Sul");
+    expect(String(payload.matchEvidence)).toMatch(/identifica o Lugar/i);
+  });
+
+  it("aceita Destination zero-seed sem destinationId quando a fotografia é geograficamente coerente", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        commonsResponse(
+          "Ponte Hercílio Luz em Florianópolis, Santa Catarina",
+          "File:Ponte Hercílio Luz Florianópolis.jpg",
+          { latitude: -27.594, longitude: -48.566 },
+        ),
+      ),
+    );
+
+    const response = await GET(
+      new Request(
+        requestUrl({
+          destinationId: undefined,
+          name: "Ponte Hercílio Luz",
+          latitude: "-27.5935",
+          longitude: "-48.5652",
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(200);
   });
 
   it("mantém fallback quando a identidade é ambígua", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () =>
-        commonsResponse("Praia do Amor no litoral brasileiro", "File:Praia do Amor.jpg"),
+        commonsResponse("Praia do Amor no litoral brasileiro", "File:Praia do Amor.jpg", null),
       ),
     );
 
-    const response = await GET(new Request(requestUrl()));
+    const response = await GET(new Request(requestUrl({ destinationId: undefined })));
 
     expect(response.status).toBe(404);
     expect(response.headers.get("Cache-Control")).toBe(

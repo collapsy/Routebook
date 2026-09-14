@@ -22,7 +22,6 @@ export function TripCard({ trip }: { trip: Trip }) {
             </Link>
           </h2>
         </div>
-        <span className="trip-context-version">Contexto v{trip.contextVersion}</span>
       </div>
 
       <dl className="trip-card-details">
@@ -42,12 +41,11 @@ export function TripCard({ trip }: { trip: Trip }) {
         </div>
         <div>
           <dt>Responsável</dt>
-          <dd>{owner?.displayName ?? "Owner não identificado"}</dd>
+          <dd>{owner?.displayName ?? "Responsável não informado"}</dd>
         </div>
       </dl>
 
       <div className="trip-card-footer">
-        <p className="trip-card-id">TripId: {trip.id}</p>
         <Link className="product-secondary-action" href={`/viagens/${trip.id}`}>
           Abrir viagem
         </Link>

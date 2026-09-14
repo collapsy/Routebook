@@ -130,7 +130,7 @@ function GuideDay({
 
           <aside className={styles.mapColumn}>
             <TripMap
-              description="Os números do mapa seguem exatamente a ordem dos cards deste Dia. A linha entre pontos não representa uma rota calculada."
+              description="Os números seguem a ordem das paradas. A linha entre os pontos não representa uma rota calculada."
               points={mapPoints}
               title={`Mapa do Dia ${day.index} — ${formatDate(day.date)}`}
             />
@@ -178,12 +178,9 @@ export function TripDayGuide({
     <section className={styles.guide} aria-labelledby="trip-guide-title">
       <header className={styles.hero}>
         <div>
-          <p className="product-eyebrow">Guia da viagem · sugestão editorial</p>
+          <p className="product-eyebrow">Sugestão de roteiro</p>
           <h1 id="trip-guide-title">Guia da viagem em Pipa</h1>
-          <p>
-            Use estes Dias como ponto de partida para decidir o que faz sentido para o grupo. Nada
-            aqui altera o Roteiro até você escolher explicitamente uma ação de planejamento.
-          </p>
+          <p>Use estes Dias como ponto de partida e ajuste as paradas ao ritmo do grupo.</p>
         </div>
         <div className={styles.heroMeta} aria-label="Resumo do guia">
           <span>{guide.days.length} Dias cobertos</span>
@@ -193,16 +190,15 @@ export function TripDayGuide({
       </header>
 
       <div className={styles.disclosure} role="note">
-        <strong>Editorial, não aplicado:</strong> ordem, horários e duração são orientação.
-        Distâncias nos cards são apenas em linha reta; Google Maps calcula rota e tempo atuais
-        quando você abre um link. Confirme maré, clima, funcionamento, preços e programação antes de
-        sair.
+        <strong>Referências para planejar:</strong> horários e durações são sugestões. Distâncias
+        nos cards são em linha reta; abra o Google Maps para rota e tempo atuais. Confirme maré,
+        clima, funcionamento, preços e programação antes de sair.
       </div>
 
       {guide.coverageLimited ? (
         <p className={styles.coverageNote} role="note">
-          Este piloto cobre os primeiros 8 Dias da Viagem. Os demais Dias continuam disponíveis no
-          Roteiro sem sugestão editorial automática.
+          Este guia cobre os primeiros 8 Dias da viagem. Os demais Dias continuam disponíveis no
+          Roteiro para você planejar.
         </p>
       ) : null}
 

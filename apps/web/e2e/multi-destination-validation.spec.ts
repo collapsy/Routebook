@@ -45,20 +45,23 @@ test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e G
   expect(await external.count()).toBeGreaterThan(0);
   await expect(options).toContainText(/Gastronomia|Vida noturna/);
   await expect(external.first()).toContainText(/em linha reta da hospedagem/);
-  await expect(
-    external.first().locator('[data-external-place-image-state="fallback"]'),
-  ).toBeVisible();
+  const externalMedia = external.first().locator("[data-external-place-image-state]");
+  await expect(externalMedia).toBeVisible();
+  await expect(externalMedia).toHaveAttribute(
+    "data-external-place-image-state",
+    /^(idle|loading|ready|fallback)$/,
+  );
 
   const promotable = options
     .locator('[data-place-source="external"]:not([data-place-category="unmapped"])')
     .first();
   await expect(promotable).toBeVisible();
-  await promotable.getByRole("button", { name: "Salvar na viagem" }).click();
+  await promotable.getByRole("button", { name: "Salvar lugar" }).click();
   await expect(page).toHaveURL(new RegExp("/viagens/" + trip.id + "/lugares-salvos\\?salvo=1"), {
     timeout: 45_000,
   });
   await expect(
-    page.getByText(/Lugar salvo na viagem com a origem externa preservada/),
+    page.getByText("Lugar salvo. Agora você pode adicioná-lo ao roteiro."),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Lugares salvos", exact: true })).toBeVisible();
   const savedCard = page.locator(".place-card").first();

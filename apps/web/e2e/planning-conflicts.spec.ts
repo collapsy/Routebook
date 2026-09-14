@@ -76,7 +76,7 @@ test("revisa um conflito de horários e retorna ao dia afetado", async ({ page }
   await expect(page.getByRole("heading", { level: 1, name: "Revisão de Conflitos" })).toBeVisible();
 });
 
-test("ignora um risco e preserva seu histórico auditável", async ({ page }, testInfo) => {
+test("ignora um risco e mantém seu histórico disponível", async ({ page }, testInfo) => {
   const tripId = await createConflictFixture(
     `Risco ignorado ${testInfo.project.name} ${Date.now()}`,
   );
@@ -92,7 +92,9 @@ test("ignora um risco e preserva seu histórico auditável", async ({ page }, te
     page.getByRole("button", { name: "Confirmar e ignorar risco" }).click(),
   ]);
 
-  await expect(page.getByText(/Risco ignorado e Decision registrada/)).toBeVisible();
+  await expect(page.getByRole("status").first()).toContainText(
+    "Risco ignorado. A condição continua no Roteiro.",
+  );
   await expect(page.getByRole("heading", { name: "Nenhum conflito aberto" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Riscos ignorados" })).toBeVisible();
   const ignoredHistory = page.getByRole("list", { name: "Riscos ignorados registrados" });

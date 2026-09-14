@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
-const uniqueOptionsHeading = /\d+ de \d+ lugar(?: único|es únicos) exibidos/;
+const uniqueOptionsHeading = /\d+ de \d+ lugares? exibidos/;
 
 test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sincronizados", async ({
   page,
@@ -18,16 +18,18 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   });
 
   await page.goto(`/viagens/${trip.id}`);
-  const catalogLink = page.getByRole("link", { name: "Explorar catálogo ampliado" }).first();
+  const catalogLink = page.getByRole("link", { name: "Explorar lugares" }).first();
   await expect(catalogLink).toHaveAttribute("href", `/viagens/${trip.id}/lugares`);
   await page.goto((await catalogLink.getAttribute("href"))!);
   await expect(page.getByRole("heading", { name: /Lugares em Pipa/ })).toBeVisible({
     timeout: 20_000,
   });
 
-  const bootstrapStatus = page.getByLabel("Status do guia");
-  await expect(bootstrapStatus).toHaveAttribute("data-place-bootstrap-stage", /enriching|ready/);
-  await expect(bootstrapStatus).toContainText(/Enriquecendo seu guia|Guia pronto/);
+  const categoryFilter = page.getByLabel("Categoria");
+  await expect(categoryFilter.locator('option[value="beach"]')).toHaveText("Praias");
+  await expect(categoryFilter.locator('option[value="gastronomy"]')).toHaveText("Gastronomia");
+  await expect(categoryFilter.locator('option[value="nature"]')).toHaveText("Natureza");
+  await expect(categoryFilter.locator('option[value="nightlife"]')).toHaveText("Vida noturna");
 
   const options = page.getByRole("list", { name: "Opções de lugares" });
   const canonicalPlaces = options.locator('[data-place-source="published"]');
@@ -43,16 +45,28 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   expect(enrichedTotal).toBeLessThanOrEqual(canonicalTotal);
 
   await expect(page.getByRole("heading", { name: uniqueOptionsHeading })).toBeVisible();
-  await expect(page.getByText("Um catálogo, identidades únicas")).toBeVisible();
+  await expect(page.getByText("A lista e o mapa mostram os mesmos lugares.")).toBeVisible();
   if (enrichedTotal > 0) {
-    await expect(enrichedPlaces.first()).toContainText("Curado + atualizado");
-    await expect(enrichedPlaces.first()).toContainText("RouteBook");
-    await expect(enrichedPlaces.first()).toContainText("Overture");
+    const enrichedCard = enrichedPlaces.first();
+    const enrichedName = (await enrichedCard.locator("h3").innerText()).trim();
+    const enrichedMoreInfo = enrichedCard
+      .locator("summary")
+      .filter({ hasText: "Mais informações" });
+    await expect(enrichedMoreInfo).toBeVisible();
+    await enrichedMoreInfo.click();
+    const enrichedRouteHref = await enrichedCard
+      .getByRole("link", { name: "Ver rota" })
+      .getAttribute("href");
+    expect(enrichedRouteHref).toBeTruthy();
+    expect(
+      new URL(enrichedRouteHref!).searchParams.get("destination")?.toLocaleLowerCase("pt-BR"),
+    ).toContain(enrichedName.toLocaleLowerCase("pt-BR"));
+    await expect(enrichedCard.getByRole("link", { name: "Ver detalhes" })).toBeVisible();
+    await expect(
+      enrichedCard.getByRole("button", { name: /Salvar lugar|Remover dos salvos/ }),
+    ).toBeVisible();
+    await expect(enrichedCard.getByRole("link", { name: "Adicionar ao roteiro" })).toHaveCount(0);
   }
-  await expect(page.getByRole("link", { name: "Ocultar atualização externa" })).toHaveAttribute(
-    "href",
-    `/viagens/${trip.id}/lugares?descoberta=ocultar`,
-  );
 
   const visibleOptionTotal = await options.getByRole("listitem").count();
   const mapLocations = page.getByRole("list", { name: "Locais exibidos no mapa" });
@@ -65,41 +79,32 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(discoveryMap).toHaveAttribute("data-map-published-count", String(canonicalTotal));
   await expect(discoveryMap).toHaveAttribute("data-map-external-count", String(externalTotal));
 
-  if (enrichedTotal > 0) {
-    const enrichedCard = enrichedPlaces.first();
-    const enrichedName = (
-      await enrichedCard.locator(":scope > strong:not([class])").innerText()
-    ).trim();
-    const enrichedRouteHref = await enrichedCard
-      .getByRole("link", { name: "Calcular rota real" })
-      .getAttribute("href");
-    expect(enrichedRouteHref).toBeTruthy();
-    expect(
-      new URL(enrichedRouteHref!).searchParams.get("destination")?.toLocaleLowerCase("pt-BR"),
-    ).toContain(enrichedName.toLocaleLowerCase("pt-BR"));
-    await expect(enrichedCard.getByRole("link", { name: "Ver detalhes" })).toBeVisible();
-    await expect(enrichedCard.getByRole("link", { name: "Adicionar ao roteiro" })).toBeVisible();
-  }
-
   const praiaDoAmorCard = canonicalPlaces.filter({
-    has: page.locator("strong").filter({ hasText: /^Praia do Amor$/ }),
+    has: page.locator("h3").filter({ hasText: /^Praia do Amor$/ }),
   });
   const praiaDoAmorExternalCard = externalPlaces.filter({
-    has: page.locator("strong:not([class])").filter({ hasText: /^Praia do Amor$/ }),
+    has: page.locator("h3").filter({ hasText: /^Praia do Amor$/ }),
   });
   await expect(praiaDoAmorCard).toHaveCount(1);
   await expect(praiaDoAmorExternalCard).toHaveCount(0);
+  await expect(praiaDoAmorCard.getByRole("link", { name: "Ver detalhes" })).toBeVisible();
+  await expect(praiaDoAmorCard.getByRole("link", { name: "Adicionar ao roteiro" })).toHaveCount(0);
+  const praiaDoAmorMoreInfo = praiaDoAmorCard
+    .locator("summary")
+    .filter({ hasText: "Mais informações" });
+  await expect(praiaDoAmorMoreInfo).toBeVisible();
+  await praiaDoAmorMoreInfo.click();
   await expect(praiaDoAmorCard.getByRole("link", { name: "Ver mapa e fotos" })).toHaveAttribute(
     "href",
     /google\.com\/maps\/search/,
   );
-  await expect(praiaDoAmorCard.getByRole("link", { name: "Calcular rota real" })).toHaveAttribute(
+  await expect(praiaDoAmorCard.getByRole("link", { name: "Ver rota" })).toHaveAttribute(
     "href",
     /google\.com\/maps\/dir/,
   );
 
   const expandDiscoveryLink = page.getByRole("link", {
-    name: /Mostrar todos os \d+ lugares descobertos/,
+    name: /Mostrar todos os \d+ lugares encontrados/,
   });
   if ((await expandDiscoveryLink.count()) > 0) {
     await expect(expandDiscoveryLink).toHaveAttribute("href", /descoberta=todas/);
@@ -107,9 +112,7 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     const expandedExternalTotal = await externalPlaces.count();
     expect(expandedExternalTotal).toBeGreaterThan(externalTotal);
     await expect(praiaDoAmorExternalCard).toHaveCount(0);
-    await expect(
-      page.getByRole("link", { name: "Mostrar primeiras 60 descobertas externas" }),
-    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "Mostrar primeiros 60 lugares" })).toBeVisible();
   }
 
   await page.goto(`/viagens/${trip.id}/lugares`);
@@ -124,10 +127,8 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     .filter({ hasText: "Praia das Minas" })
     .first();
   const praiaDasMinasFallback = praiaDasMinasCard.locator('[data-place-image-fallback="true"]');
-  await expect(praiaDasMinasFallback).toHaveAttribute("data-category-illustration", "beach");
-  await expect(praiaDasMinasFallback).toContainText(
-    "Ilustração de categoria — não é foto do local",
-  );
+  await expect(praiaDasMinasFallback).toHaveAttribute("data-presentation", "compact");
+  await expect(praiaDasMinasFallback).toHaveText("Sem foto");
 
   await page.goto(`/viagens/${trip.id}/lugares`);
   await page.getByLabel("Nome ou termo").fill("gastronomico");
@@ -147,6 +148,10 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(options).toContainText("Praia do Amor");
   await expect(mapLocations).toContainText("Praia do Amor");
   await expect(page.getByText(/em linha reta da hospedagem/).first()).toBeVisible();
+  await expect(page.getByLabel("Categoria")).toHaveValue("beach");
+  await expect(page.getByLabel("Categoria").locator('option[value="gastronomy"]')).toHaveCount(1);
+  await expect(page.getByLabel("Categoria").locator('option[value="nature"]')).toHaveCount(1);
+  await expect(page.getByLabel("Categoria").locator('option[value="nightlife"]')).toHaveCount(1);
 
   await page.goto(`/viagens/${trip.id}/lugares?descoberta=ocultar`);
   const rankingNav = page.getByRole("navigation", { name: "Ordenação dos lugares" });
@@ -164,13 +169,47 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(page.locator('[data-place-ranking-order="distance"]')).toBeVisible();
 
   await page.goto(`/viagens/${trip.id}/lugares?descoberta=ocultar`);
-  await expect(page.getByRole("heading", { name: /\d+ lugares curados/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: `${canonicalTotal} lugares`, exact: true }),
+  ).toBeVisible();
   const hiddenPublishedTotal = await options.locator('[data-place-source="published"]').count();
   expect(hiddenPublishedTotal).toBe(canonicalTotal);
   await expect(options.locator('[data-place-source="external"]')).toHaveCount(0);
-  await expect(
-    page.getByText("Lista e mapa exibem o mesmo conjunto curado e filtrado."),
-  ).toBeVisible();
+  await expect(page.getByText("A lista e o mapa mostram os mesmos lugares.")).toBeVisible();
+});
+
+test("deriva categorias da cobertura de Gramado sem oferecer praia inexistente", async ({
+  page,
+}) => {
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: `Categorias Gramado ${test.info().project.name} ${Date.now()}`,
+    destination: {
+      name: "Gramado, RS",
+      type: "city",
+      countryCode: "BR",
+      latitude: -29.378,
+      longitude: -50.873,
+      timeZone: "America/Sao_Paulo",
+    },
+    startDate: "2026-09-20",
+    endDate: "2026-09-23",
+  });
+
+  await page.goto(`/viagens/${trip.id}/lugares`);
+  await expect(page.getByRole("heading", { name: /Lugares em Gramado/ })).toBeVisible({
+    timeout: 20_000,
+  });
+
+  const categoryFilter = page.getByLabel("Categoria");
+  await expect(categoryFilter).toBeVisible();
+  const optionValues = await categoryFilter
+    .locator("option")
+    .evaluateAll((options) => options.map((option) => (option as HTMLOptionElement).value));
+
+  expect(optionValues[0]).toBe("");
+  expect(optionValues).not.toContain("beach");
+  expect(optionValues.length).toBeGreaterThan(1);
+  await expect(categoryFilter.locator('option[value="beach"]')).toHaveCount(0);
 });
 
 test("mantém marcadores ancorados ao viewport durante pan e zoom", async ({ page }) => {
@@ -192,7 +231,7 @@ test("mantém marcadores ancorados ao viewport durante pan e zoom", async ({ pag
   await expect(map.getByRole("button", { name: "Afastar mapa" })).toBeVisible();
 
   const marker = map.getByRole("link", {
-    name: "Lugar publicado: Praia do Amor. Abrir detalhes.",
+    name: "Lugar: Praia do Amor. Abrir detalhes.",
   });
   await expect(marker).toBeVisible();
 
@@ -223,7 +262,7 @@ test("mantém marcadores ancorados ao viewport durante pan e zoom", async ({ pag
     .toBe(zoomBefore + 1);
 
   const markerAfterZoom = await marker.boundingBox();
-  if (!markerAfterZoom) throw new Error("Marker desapareceu após aplicar zoom.");
+  if (!markerAfterZoom) throw new Error("Marker desapareceu após aplicar zoom no mapa.");
   expect(
     Math.hypot(markerAfterZoom.x - markerBeforeZoom.x, markerAfterZoom.y - markerBeforeZoom.y),
   ).toBeGreaterThan(5);

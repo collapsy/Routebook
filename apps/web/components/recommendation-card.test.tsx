@@ -74,6 +74,8 @@ describe("RecommendationCard", () => {
     expect(screen.getByText("Lugar salvo")).toBeInTheDocument();
     expect(screen.getByText("Já está no roteiro")).toBeInTheDocument();
     expect(screen.getByText(/1,8 km em linha reta/)).toBeInTheDocument();
+    expect(screen.getByText(/distância em linha reta disponível/)).toBeInTheDocument();
+    expect(screen.queryByText(/distância geodésica disponível/)).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Ignorar recomendação de Praia do Amor" }),
     ).toBeInTheDocument();
@@ -98,9 +100,8 @@ describe("RecommendationCard", () => {
     renderCard({ ...presentedCard, status: "rejected", canIgnore: false });
 
     expect(screen.getByText("Recomendação ignorada")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "nenhuma Preferência ou Atividade foi alterada",
-    );
+    expect(screen.getByRole("status")).toHaveTextContent("Você ignorou esta sugestão.");
+    expect(screen.queryByText(/Preferência|Atividade/)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Ignorar recomendação/ })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Salvar lugar" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Adicionar ao roteiro" })).not.toBeInTheDocument();

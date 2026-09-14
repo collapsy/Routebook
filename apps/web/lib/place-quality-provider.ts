@@ -15,6 +15,7 @@ type ProviderCandidate = Readonly<{
   longitude: number;
   addressLabel?: string;
   targetedForId?: string;
+  targetedRank?: number;
   rating?: number;
   ratingScaleMax?: number;
   reviewCount?: number;
@@ -28,6 +29,11 @@ type AdapterDependencies = Readonly<{
 }>;
 
 type QualityProviderName = "google" | "foursquare";
+type AddressRelationship = "same" | "compatible" | "different" | "unknown";
+
+export type QualityIdentityMatchOptions = Readonly<{
+  allowSpatialAlias?: boolean;
+}>;
 
 export type PlaceQualityProviderConfiguration =
   | Readonly<{ status: "not-configured" }>
@@ -99,6 +105,11 @@ const IDENTITY_STOPWORDS = new Set([
 
 const EXACT_NAME_MAX_DISTANCE_METERS = 300;
 const TOKEN_MATCH_MAX_DISTANCE_METERS = 700;
+const ADDRESS_COMPATIBILITY_MIN_COVERAGE = 0.8;
+const ADDRESS_DETAILED_MIN_TOKENS = 3;
+const SPATIAL_ALIAS_MAX_DISTANCE_METERS = 75;
+const SPATIAL_ALIAS_WITHOUT_ADDRESS_MAX_DISTANCE_METERS = 25;
+const SPATIAL_ALIAS_MINIMUM_LEAD_TOKEN_LENGTH = 4;
 
 function cleanText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -124,6 +135,10 @@ function identityTokens(value: string): string[] {
     .filter((token) => token.length >= 3 && !IDENTITY_STOPWORDS.has(token));
 }
 
+function uniqueIdentityTokens(value: string): string[] {
+  return [...new Set(identityTokens(value))];
+}
+
 function candidateDistance(target: PlaceQualityTarget, candidate: ProviderCandidate): number {
   return placeDistanceMeters(target, candidate);
 }
@@ -131,16 +146,66 @@ function candidateDistance(target: PlaceQualityTarget, candidate: ProviderCandid
 function addressRelationship(
   target: PlaceQualityTarget,
   candidate: ProviderCandidate,
-): "same" | "different" | "unknown" {
+): AddressRelationship {
   if (!target.addressLabel || !candidate.addressLabel) return "unknown";
-  return normalizeIdentity(target.addressLabel) === normalizeIdentity(candidate.addressLabel)
-    ? "same"
-    : "different";
+
+  const targetAddress = normalizeIdentity(target.addressLabel);
+  const candidateAddress = normalizeIdentity(candidate.addressLabel);
+  if (targetAddress === candidateAddress) return "same";
+
+  const targetTokens = uniqueIdentityTokens(target.addressLabel);
+  const candidateTokens = uniqueIdentityTokens(candidate.addressLabel);
+  if (targetTokens.length === 0 || candidateTokens.length === 0) return "unknown";
+
+  const candidateSet = new Set(candidateTokens);
+  const shared = targetTokens.filter((token) => candidateSet.has(token));
+  if (shared.length === 0) return "different";
+
+  const minimumCoverage = shared.length / Math.min(targetTokens.length, candidateTokens.length);
+  if (minimumCoverage >= ADDRESS_COMPATIBILITY_MIN_COVERAGE) return "compatible";
+
+  if (
+    targetTokens.length >= ADDRESS_DETAILED_MIN_TOKENS &&
+    candidateTokens.length >= ADDRESS_DETAILED_MIN_TOKENS
+  ) {
+    return "different";
+  }
+
+  return "unknown";
+}
+
+function isConservativeSpatialAliasMatch(
+  target: PlaceQualityTarget,
+  candidate: ProviderCandidate,
+  address: AddressRelationship,
+): boolean {
+  if (address === "different") return false;
+
+  const distanceMeters = candidateDistance(target, candidate);
+  const maximumDistanceMeters =
+    address === "same" || address === "compatible"
+      ? SPATIAL_ALIAS_MAX_DISTANCE_METERS
+      : SPATIAL_ALIAS_WITHOUT_ADDRESS_MAX_DISTANCE_METERS;
+  if (distanceMeters > maximumDistanceMeters) return false;
+
+  const targetTokens = identityTokens(target.name);
+  const candidateTokens = identityTokens(candidate.name);
+  if (targetTokens.length < 2 || candidateTokens.length < 2) return false;
+
+  const targetLead = targetTokens[0];
+  const candidateLead = candidateTokens[0];
+  return (
+    targetLead !== undefined &&
+    candidateLead !== undefined &&
+    targetLead.length >= SPATIAL_ALIAS_MINIMUM_LEAD_TOKEN_LENGTH &&
+    targetLead === candidateLead
+  );
 }
 
 export function isConservativeQualityIdentityMatch(
   target: PlaceQualityTarget,
   candidate: ProviderCandidate,
+  options: QualityIdentityMatchOptions = {},
 ): boolean {
   const distanceMeters = candidateDistance(target, candidate);
   const targetIdentity = normalizeIdentity(target.name);
@@ -150,6 +215,9 @@ export function isConservativeQualityIdentityMatch(
   if (address === "different") return false;
   if (targetIdentity === candidateIdentity) {
     return distanceMeters <= EXACT_NAME_MAX_DISTANCE_METERS;
+  }
+  if (options.allowSpatialAlias && isConservativeSpatialAliasMatch(target, candidate, address)) {
+    return true;
   }
   if (distanceMeters > TOKEN_MATCH_MAX_DISTANCE_METERS) return false;
 
@@ -168,7 +236,9 @@ export function isConservativeQualityIdentityMatch(
   return (
     minimumCoverage >= 0.8 &&
     unionCoverage >= 0.5 &&
-    (address === "same" || distanceMeters <= TOKEN_MATCH_MAX_DISTANCE_METERS)
+    (address === "same" ||
+      address === "compatible" ||
+      distanceMeters <= TOKEN_MATCH_MAX_DISTANCE_METERS)
   );
 }
 
@@ -205,6 +275,13 @@ function isTargetedQualityIdentityExpansionMatch(
     addressRelationship(target, candidate) === "different"
   ) {
     return false;
+  }
+
+  if (
+    candidate.targetedRank === 0 &&
+    isConservativeQualityIdentityMatch(target, candidate, { allowSpatialAlias: true })
+  ) {
+    return true;
   }
 
   const targetTokens = identityTokens(target.name);
@@ -392,7 +469,6 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
       body: JSON.stringify({
         textQuery,
         languageCode: "pt-BR",
-        regionCode: "BR",
         pageSize,
         locationBias: {
           circle: {
@@ -418,7 +494,7 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
       }[];
     };
 
-    return (payload.places ?? []).flatMap((place) => {
+    return (payload.places ?? []).flatMap((place, index) => {
       const externalId = cleanText(place.id);
       const name = cleanText(place.displayName?.text);
       const latitude = finiteNumber(place.location?.latitude);
@@ -435,7 +511,7 @@ export class GooglePlacesQualityAdapter extends GroupedPlaceQualityAdapter {
           latitude,
           longitude,
           ...(addressLabel ? { addressLabel } : {}),
-          ...(targetedForId ? { targetedForId } : {}),
+          ...(targetedForId ? { targetedForId, targetedRank: index } : {}),
           ...(rating === undefined ? {} : { rating, ratingScaleMax: 5 }),
           ...(reviewCount === undefined ? {} : { reviewCount }),
         },

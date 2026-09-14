@@ -4,7 +4,9 @@ import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
 test.setTimeout(120_000);
 
-test("descobre candidatos em Florianópolis com zero seed regional", async ({ page }) => {
+test("descobre lugares em Florianópolis com zero seed sem expor lifecycle editorial", async ({
+  page,
+}) => {
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Anywhere Florianópolis ${test.info().project.name} ${Date.now()}`,
     destination: {
@@ -24,9 +26,6 @@ test("descobre candidatos em Florianópolis com zero seed regional", async ({ pa
   await expect(page.getByRole("heading", { name: /Lugares em Florianópolis/ })).toBeVisible({
     timeout: 20_000,
   });
-  const bootstrapStatus = page.getByLabel("Status do guia");
-  await expect(bootstrapStatus).toHaveAttribute("data-place-bootstrap-stage", "ready");
-  await expect(bootstrapStatus).toContainText("Guia pronto");
 
   const options = page.getByRole("list", { name: "Opções de lugares" });
   const published = options.locator('[data-place-source="published"]');
@@ -35,19 +34,21 @@ test("descobre candidatos em Florianópolis com zero seed regional", async ({ pa
   await expect(published).toHaveCount(0);
   await expect(external.first()).toBeVisible({ timeout: 30_000 });
   expect(await external.count()).toBeGreaterThan(0);
-  await expect(
-    external.first().locator('[data-external-place-image-state="fallback"]'),
-  ).toBeVisible();
+  await expect(external.first().locator("[data-external-place-image-state]")).toBeVisible();
   await expect(external.first()).toContainText(/em linha reta do destino/);
+  await expect(external.first()).toContainText(/Fonte: Overture/);
   await expect(page.getByLabel("Distância máxima")).toBeEnabled();
   await expect(page.getByText(/referência aproximada do destino/)).toBeVisible();
-  await expect(page.getByRole("button", { name: "Salvar na viagem" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ver mapa e fotos" }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Salvar lugar" }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Enviar para curadoria" })).toHaveCount(0);
-  await expect(
-    page
-      .getByText(/curadoria editorial permanece separada e não é necessária para planejar/)
-      .first(),
-  ).toBeVisible();
+  await expect(page.getByText(/Descoberta atual/i)).toHaveCount(0);
+  await expect(page.getByText(/Candidato externo/i)).toHaveCount(0);
+  await expect(page.getByText(/Curado pelo RouteBook/i)).toHaveCount(0);
+
+  const legend = page.getByRole("list", { name: "Legenda do mapa" });
+  await expect(legend).toContainText("Lugar");
+  await expect(legend.getByText("Descoberta externa", { exact: true })).toHaveCount(0);
 
   const map = page.locator('[data-routebook-map="true"]');
   await expect(map).toHaveAttribute("data-map-published-count", "0");

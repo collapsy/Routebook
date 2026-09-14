@@ -20,6 +20,7 @@ import {
 } from "./itinerary-proposal-experience";
 
 const requestedAt = new Date("2026-08-01T12:00:00.000Z");
+const activeReviewAsOf = new Date("2026-08-01T13:00:00.000Z");
 
 function createReviewItinerary() {
   let itinerary = createItinerary(
@@ -111,11 +112,11 @@ describe("itinerary proposal review experience", () => {
       requestedAt,
     });
 
-    expect(hasReadyItineraryProposal([requested, older, tiedA])).toBe(true);
-    expect(findLatestReadyItineraryProposal([tiedA, requested, older, tiedB])?.id).toBe(
-      "proposal-b",
-    );
-    expect(findLatestReadyItineraryProposal([requested])).toBeNull();
+    expect(hasReadyItineraryProposal([requested, older, tiedA], activeReviewAsOf)).toBe(true);
+    expect(
+      findLatestReadyItineraryProposal([tiedA, requested, older, tiedB], activeReviewAsOf)?.id,
+    ).toBe("proposal-b");
+    expect(findLatestReadyItineraryProposal([requested], activeReviewAsOf)).toBeNull();
   });
 
   it("rejects an incomplete ready snapshot instead of inventing review content", () => {
@@ -124,7 +125,7 @@ describe("itinerary proposal review experience", () => {
       generatedAt: undefined,
     } as unknown as ItineraryProposal;
 
-    expect(() => findLatestReadyItineraryProposal([malformed])).toThrowError(
+    expect(() => findLatestReadyItineraryProposal([malformed], activeReviewAsOf)).toThrowError(
       ItineraryProposalReviewIntegrityError,
     );
   });
@@ -142,8 +143,10 @@ describe("itinerary proposal review experience", () => {
       itinerary,
     });
 
-    expect(getItineraryProposalReviewStatus([expired, ready])).toBe("ready");
-    expect(findLatestReviewableItineraryProposal([expired, ready])?.id).toBe(ready.id);
+    expect(getItineraryProposalReviewStatus([expired, ready], activeReviewAsOf)).toBe("ready");
+    expect(findLatestReviewableItineraryProposal([expired, ready], activeReviewAsOf)?.id).toBe(
+      ready.id,
+    );
   });
 
   it("selects the latest expired Proposal with a stable identity tie-break", () => {
@@ -165,8 +168,8 @@ describe("itinerary proposal review experience", () => {
       itinerary,
     });
 
-    expect(getItineraryProposalReviewStatus([older, tiedA])).toBe("expired");
-    expect(findLatestReviewableItineraryProposal([tiedA, older, tiedB])?.id).toBe(
+    expect(getItineraryProposalReviewStatus([older, tiedA], activeReviewAsOf)).toBe("expired");
+    expect(findLatestReviewableItineraryProposal([tiedA, older, tiedB], activeReviewAsOf)?.id).toBe(
       "proposal-expired-b",
     );
   });
@@ -177,9 +180,25 @@ describe("itinerary proposal review experience", () => {
       expiredAt: undefined,
     } as unknown as ItineraryProposal;
 
-    expect(() => findLatestReviewableItineraryProposal([malformed])).toThrowError(
+    expect(() => findLatestReviewableItineraryProposal([malformed], activeReviewAsOf)).toThrowError(
       ItineraryProposalReviewIntegrityError,
     );
+  });
+
+  it("projects a ready Proposal past validUntil as expired without mutating it", () => {
+    const itinerary = createReviewItinerary();
+    const proposal = createReadyProposal({ itinerary });
+    const asOf = new Date(proposal.validUntil!.getTime());
+
+    expect(hasReadyItineraryProposal([proposal], asOf)).toBe(false);
+    expect(getItineraryProposalReviewStatus([proposal], asOf)).toBe("expired");
+    expect(findLatestReadyItineraryProposal([proposal], asOf)).toBeNull();
+    expect(findLatestReviewableItineraryProposal([proposal], asOf)?.id).toBe(proposal.id);
+    expect(buildItineraryProposalReview({ asOf, itinerary, proposal })).toMatchObject({
+      status: "expired",
+      expiredAtLabel: "2 de ago. de 2026, 09:02",
+    });
+    expect(proposal.status).toBe("ready");
   });
 
   it("groups changes by known days and exposes raw editable values without parsing labels", () => {
@@ -220,7 +239,11 @@ describe("itinerary proposal review experience", () => {
       ],
     });
 
-    const review = buildItineraryProposalReview({ itinerary, proposal });
+    const review = buildItineraryProposalReview({
+      asOf: activeReviewAsOf,
+      itinerary,
+      proposal,
+    });
 
     expect(review.proposedChangeCount).toBe(3);
     expect(review.knownConflictCount).toBe(1);
@@ -278,9 +301,13 @@ describe("itinerary proposal review experience", () => {
       baseItineraryVersion: itinerary.version - 1,
     } as ItineraryProposal;
 
-    expect(buildItineraryProposalReview({ itinerary, proposal }).isBasedOnCurrentItinerary).toBe(
-      false,
-    );
+    expect(
+      buildItineraryProposalReview({
+        asOf: activeReviewAsOf,
+        itinerary,
+        proposal,
+      }).isBasedOnCurrentItinerary,
+    ).toBe(false);
   });
 
   it("formats the expiration instant for an expired historical review", () => {
@@ -290,7 +317,9 @@ describe("itinerary proposal review experience", () => {
       itinerary,
     });
 
-    expect(buildItineraryProposalReview({ itinerary, proposal })).toMatchObject({
+    expect(
+      buildItineraryProposalReview({ asOf: activeReviewAsOf, itinerary, proposal }),
+    ).toMatchObject({
       status: "expired",
       expiredAtLabel: "2 de ago. de 2026, 12:30",
     });

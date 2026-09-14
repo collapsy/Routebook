@@ -89,6 +89,15 @@ function isValidDate(value: Date | undefined): value is Date {
   return value instanceof Date && !Number.isNaN(value.getTime());
 }
 
+function requireValidAsOf(asOf: Date): Date {
+  if (!isValidDate(asOf)) {
+    throw new ItineraryProposalReviewIntegrityError(
+      "A referência temporal da revisão da Proposta é inválida.",
+    );
+  }
+  return asOf;
+}
+
 function requireReviewableContent(proposal: ItineraryProposal) {
   if (
     (proposal.status !== "ready" && proposal.status !== "expired") ||
@@ -184,21 +193,48 @@ function editValues(activity: ProposedActivity): ItineraryProposalReviewActivity
   };
 }
 
-export function hasReadyItineraryProposal(proposals: readonly ItineraryProposal[]): boolean {
-  return proposals.some((proposal) => proposal.status === "ready");
+function isReadyAt(proposal: ItineraryProposal, asOf: Date): boolean {
+  const content = requireReviewableContent(proposal);
+  return content.status === "ready" && asOf.getTime() < content.validUntil.getTime();
+}
+
+function effectiveExpiredAt(proposal: ItineraryProposal, asOf: Date): Date | null {
+  const content = requireReviewableContent(proposal);
+  if (content.status === "expired") return content.expiredAt;
+  return asOf.getTime() >= content.validUntil.getTime() ? content.validUntil : null;
+}
+
+export function hasReadyItineraryProposal(
+  proposals: readonly ItineraryProposal[],
+  asOf: Date,
+): boolean {
+  requireValidAsOf(asOf);
+  return proposals
+    .filter((proposal) => proposal.status === "ready")
+    .some((proposal) => isReadyAt(proposal, asOf));
 }
 
 export function getItineraryProposalReviewStatus(
   proposals: readonly ItineraryProposal[],
+  asOf: Date,
 ): "ready" | "expired" | null {
-  if (hasReadyItineraryProposal(proposals)) return "ready";
-  return proposals.some((proposal) => proposal.status === "expired") ? "expired" : null;
+  requireValidAsOf(asOf);
+  if (hasReadyItineraryProposal(proposals, asOf)) return "ready";
+  return proposals
+    .filter((proposal) => proposal.status === "ready" || proposal.status === "expired")
+    .some((proposal) => effectiveExpiredAt(proposal, asOf) !== null)
+    ? "expired"
+    : null;
 }
 
 export function findLatestReadyItineraryProposal(
   proposals: readonly ItineraryProposal[],
+  asOf: Date,
 ): ItineraryProposal | null {
-  const ready = proposals.filter((proposal) => proposal.status === "ready");
+  requireValidAsOf(asOf);
+  const ready = proposals
+    .filter((proposal) => proposal.status === "ready")
+    .filter((proposal) => isReadyAt(proposal, asOf));
   for (const proposal of ready) requireReviewableContent(proposal);
 
   return (
@@ -211,28 +247,38 @@ export function findLatestReadyItineraryProposal(
 
 export function findLatestReviewableItineraryProposal(
   proposals: readonly ItineraryProposal[],
+  asOf: Date,
 ): ItineraryProposal | null {
-  const latestReady = findLatestReadyItineraryProposal(proposals);
+  requireValidAsOf(asOf);
+  const latestReady = findLatestReadyItineraryProposal(proposals, asOf);
   if (latestReady) return latestReady;
 
-  const expired = proposals.filter((proposal) => proposal.status === "expired");
+  const expired = proposals.filter(
+    (proposal) =>
+      (proposal.status === "ready" || proposal.status === "expired") &&
+      effectiveExpiredAt(proposal, asOf) !== null,
+  );
   for (const proposal of expired) requireReviewableContent(proposal);
 
   return (
     [...expired].sort((left, right) => {
-      const timeDifference = right.expiredAt!.getTime() - left.expiredAt!.getTime();
+      const timeDifference =
+        effectiveExpiredAt(right, asOf)!.getTime() - effectiveExpiredAt(left, asOf)!.getTime();
       return timeDifference || right.id.localeCompare(left.id);
     })[0] ?? null
   );
 }
 
 export function buildItineraryProposalReview({
+  asOf,
   itinerary,
   proposal,
 }: {
+  asOf: Date;
   itinerary: Itinerary;
   proposal: ItineraryProposal;
 }): ItineraryProposalReview {
+  requireValidAsOf(asOf);
   if (proposal.tripId !== itinerary.tripId || proposal.itineraryId !== itinerary.id) {
     throw new ItineraryProposalReviewIntegrityError(
       "A Proposta não pertence ao Roteiro informado.",
@@ -240,6 +286,7 @@ export function buildItineraryProposalReview({
   }
 
   const content = requireReviewableContent(proposal);
+  const expiredAt = effectiveExpiredAt(proposal, asOf);
   const daysById = new Map(itinerary.days.map((day) => [day.id, day]));
   const sourceActivities = new Map(
     itinerary.days.flatMap((day) =>
@@ -322,11 +369,11 @@ export function buildItineraryProposalReview({
     days,
   };
 
-  return content.status === "expired"
+  return expiredAt
     ? {
         ...review,
         status: "expired",
-        expiredAtLabel: formatInstant(content.expiredAt, itinerary.period.timeZone),
+        expiredAtLabel: formatInstant(expiredAt, itinerary.period.timeZone),
       }
     : { ...review, status: "ready" };
 }

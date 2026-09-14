@@ -47,10 +47,12 @@ function resultRows(result: unknown): readonly Record<string, unknown>[] {
 
 async function createProposalFixture(
   tripName: string,
-  status: "ready" | "expired" = "ready",
+  status: "ready" | "expired" | "ready-past-validity" = "ready",
   proposedActivityCount: 1 | 2 = 1,
 ): Promise<ProposalFixture> {
-  const requestedAt = new Date(Date.now() - 10_000);
+  const requestedAt = new Date(
+    Date.now() - (status === "ready-past-validity" ? 2 * 86_400_000 : 10_000),
+  );
   const { trip } = await createAuthenticatedE2ETrip(
     {
       name: tripName,
@@ -661,4 +663,30 @@ test("consulta uma Proposal expired somente como referência histórica", async 
   await expect(
     page.getByRole("button", { name: /aceitar|aplicar|descartar|gerar novamente/i }),
   ).toHaveCount(0);
+});
+
+test("projeta uma Proposal ready vencida como referência histórica", async ({ page }, testInfo) => {
+  const fixture = await createProposalFixture(
+    `Proposta ready vencida ${testInfo.project.name} ${Date.now()}`,
+    "ready-past-validity",
+  );
+  await page.goto(`/viagens/${fixture.tripId}/roteiro`);
+
+  await followValidatedLink(
+    page,
+    page.getByRole("link", { name: "Ver proposta expirada" }),
+    /\/roteiro\/proposta$/,
+  );
+
+  await expect(
+    page.getByRole("heading", { name: "Consulte esta proposta como referência" }),
+  ).toBeVisible();
+  await expect(page.getByText("Proposta expirada", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Expirada em")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /aceitar|aplicar|descartar|gerar novamente/i }),
+  ).toHaveCount(0);
+  expect(
+    await new DrizzleItineraryProposalRepository().findById(fixture.tripId, fixture.proposalId),
+  ).toMatchObject({ status: "ready" });
 });

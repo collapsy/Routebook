@@ -43,7 +43,8 @@ export default async function ItineraryProposalReviewPage({
     resolveTripRouteAccess({ tripId: trip.id, action: "trip:accept-proposal" }),
     resolveTripRouteAccess({ tripId: trip.id, action: "trip:edit" }),
   ]);
-  const proposal = findLatestReviewableItineraryProposal(proposals);
+  const asOf = new Date();
+  const proposal = findLatestReviewableItineraryProposal(proposals, asOf);
 
   if (!proposal) {
     const canGenerate = editAccess.status === "authorized";
@@ -73,7 +74,7 @@ export default async function ItineraryProposalReviewPage({
     );
   }
 
-  const review = buildItineraryProposalReview({ itinerary, proposal });
+  const review = buildItineraryProposalReview({ asOf, itinerary, proposal });
   const discardAction = discardItineraryProposalAction.bind(null, trip.id);
   const canDecide = acceptanceAccess.status === "authorized";
   const isEmptyReady = review.status === "ready" && review.proposedChangeCount === 0;
@@ -96,7 +97,7 @@ export default async function ItineraryProposalReviewPage({
           <p className="product-eyebrow">{trip.name}</p>
           <h1>Proposta de Roteiro</h1>
           <p>
-            {proposal.status === "expired"
+            {review.status === "expired"
               ? "Esta proposta expirou. Consulte as sugestões como referência para planejar o Roteiro atual."
               : isEmptyReady
                 ? "Nenhuma mudança adequada foi encontrada. Você pode descartar esta proposta e gerar outra usando os Lugares disponíveis agora."
@@ -104,7 +105,7 @@ export default async function ItineraryProposalReviewPage({
           </p>
         </div>
         <span>
-          {proposal.status === "expired"
+          {review.status === "expired"
             ? "Proposta expirada"
             : isEmptyReady
               ? "Sem mudanças sugeridas"

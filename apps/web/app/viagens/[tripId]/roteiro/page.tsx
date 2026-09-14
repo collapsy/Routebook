@@ -191,7 +191,7 @@ export default async function ItineraryPage({
     loadOrCreateItinerary(trip),
     new DrizzleItineraryProposalRepository().listByTripId(trip.id),
   ]);
-  const proposalReviewStatus = getItineraryProposalReviewStatus(proposals);
+  const proposalReviewStatus = getItineraryProposalReviewStatus(proposals, new Date());
   const {
     dia,
     novaAtividade,

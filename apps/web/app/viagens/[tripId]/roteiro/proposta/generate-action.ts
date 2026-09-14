@@ -9,6 +9,7 @@ import {
   DrizzleTripRepository,
 } from "@routebook/database";
 
+import { loadItineraryProposalDiscoveryCandidates } from "@/lib/itinerary-proposal-discovery-candidates";
 import {
   executeGenerateItineraryProposalAction,
   generateItineraryProposalActionError,
@@ -33,6 +34,7 @@ export async function generateItineraryProposalAction(
         tripRepository: new DrizzleTripRepository(),
         itineraryRepository: new DrizzleItineraryRepository(),
         generationService: createPostgresAuthoritativeItineraryProposalGenerationService(),
+        loadAdditionalCandidates: loadItineraryProposalDiscoveryCandidates,
       },
     );
   } catch (error) {

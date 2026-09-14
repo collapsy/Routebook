@@ -29,7 +29,8 @@ export function ItineraryProposalReview({
   tripId: string;
 }) {
   const isExpired = review.status === "expired";
-  const editingEnabled = canEdit && !isExpired && review.isBasedOnCurrentItinerary;
+  const isEmptyReady = !isExpired && review.proposedChangeCount === 0;
+  const editingEnabled = canEdit && !isExpired && !isEmptyReady && review.isBasedOnCurrentItinerary;
 
   return (
     <div className={styles.review}>
@@ -40,16 +41,26 @@ export function ItineraryProposalReview({
       >
         <div>
           <span className={styles.status}>
-            {isExpired ? "Proposta expirada" : "Proposta aguardando sua decisão"}
+            {isExpired
+              ? "Proposta expirada"
+              : isEmptyReady
+                ? "Sem mudanças sugeridas"
+                : "Proposta aguardando sua decisão"}
           </span>
           <h2 id="proposal-review-summary-title">
-            {isExpired ? "Consulte esta proposta como referência" : "Revise antes de aplicar"}
+            {isExpired
+              ? "Consulte esta proposta como referência"
+              : isEmptyReady
+                ? "Nenhuma mudança para aplicar"
+                : "Revise antes de aplicar"}
           </h2>
           {isExpired ? (
             <p>
               A validade terminou em {review.expiredAtLabel}. Esta proposta não pode mais ser
               aplicada.
             </p>
+          ) : isEmptyReady ? (
+            <p>Nenhuma mudança adequada foi encontrada para o Roteiro atual.</p>
           ) : (
             <p>Compare as mudanças sugeridas e escolha se deseja aplicá-las ao Roteiro.</p>
           )}
@@ -227,7 +238,7 @@ export function ItineraryProposalReview({
         </p>
       ) : null}
 
-      {!isExpired ? (
+      {!isExpired && !isEmptyReady ? (
         <ItineraryProposalDecisionActions
           canAccept={canAccept && review.isBasedOnCurrentItinerary}
           canDecide={canDecide}

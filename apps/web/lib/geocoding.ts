@@ -81,3 +81,21 @@ export class NominatimGeocoder implements Geocoder {
     return { normalizedAddress, latitude, longitude };
   }
 }
+
+class E2EAccommodationGeocoder implements Geocoder {
+  async geocode(query: string): Promise<GeocodingResult | undefined> {
+    if (!query.trim()) return undefined;
+    return {
+      normalizedAddress: query,
+      latitude: -29.378,
+      longitude: -50.873,
+    };
+  }
+}
+
+export function resolveAccommodationGeocoder(environment = process.env): Geocoder {
+  if (environment.ROUTEBOOK_E2E_DESTINATION_RESOLVER === "1" && !environment.VERCEL_ENV) {
+    return new E2EAccommodationGeocoder();
+  }
+  return new NominatimGeocoder();
+}

@@ -191,7 +191,7 @@ export function TripMap({
   title,
   description = "Use os marcadores para localizar a hospedagem e abrir os detalhes dos lugares.",
   emptyTitle = "Mapa ainda indisponível",
-  emptyDescription = "Informe as coordenadas da hospedagem ou aguarde a publicação de lugares com localização para visualizar o mapa. As demais áreas da viagem continuam disponíveis normalmente.",
+  emptyDescription = "Adicione ou revise o nome e o endereço da hospedagem para o RouteBook tentar localizá-la automaticamente, ou aguarde a publicação de lugares com localização. As demais áreas da viagem continuam disponíveis normalmente.",
 }: TripMapProps) {
   const mapElementRef = useRef<HTMLDivElement>(null);
   const titleId = useId();

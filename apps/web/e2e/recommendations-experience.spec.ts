@@ -66,10 +66,11 @@ async function createTripWithRecommendationContext(page: Page) {
   await page.goto(`${tripUrl}/hospedagem`);
   await page.getByLabel("Nome da hospedagem").fill("Condomínio Solar Água");
   await page.getByLabel("Endereço", { exact: true }).fill("Pipa, Tibau do Sul — RN");
+  await page.getByText("Opções avançadas de localização", { exact: true }).click();
   await page.getByLabel("Latitude", { exact: true }).fill("-6,2302");
   await page.getByLabel("Longitude", { exact: true }).fill("-35,0503");
   await Promise.all([
-    page.waitForURL(/\/hospedagem\?saved=1$/),
+    page.waitForURL(/\/hospedagem\?saved=1&located=1$/),
     page.getByRole("button", { name: "Salvar hospedagem" }).click(),
   ]);
 

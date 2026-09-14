@@ -92,13 +92,17 @@ const OVERTURE_CATEGORY_MAP: Readonly<Record<string, PlaceCategory>> = Object.fr
   music_venue: "nightlife",
   park: "nature",
   nature_reserve: "nature",
-  scenic_viewpoint: "nature",
-  viewpoint: "nature",
-  tourist_attraction: "nature",
   lagoon: "nature",
   waterfall: "nature",
   botanical_garden: "nature",
   hiking_area: "nature",
+  tourist_attraction: "attraction",
+  scenic_viewpoint: "viewpoint",
+  viewpoint: "viewpoint",
+  tour_operator: "tour",
+  shopping_mall: "shopping",
+  market: "shopping",
+  farmers_market: "shopping",
 });
 
 const IDENTITY_STOP_WORDS = new Set([

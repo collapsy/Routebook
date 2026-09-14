@@ -33,6 +33,10 @@ const categoryLabels: Record<PlaceCategory, string> = {
   gastronomy: "Gastronomia",
   nature: "Natureza",
   nightlife: "Vida noturna",
+  attraction: "Ponto turístico",
+  viewpoint: "Mirante",
+  tour: "Passeio",
+  shopping: "Compras",
 };
 
 function formatDayLabel(value: string): string {

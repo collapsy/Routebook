@@ -68,6 +68,10 @@ const categoryLabels: Readonly<Record<PlaceCategory, string>> = {
   gastronomy: "Gastronomia",
   nature: "Natureza",
   nightlife: "Vida noturna",
+  attraction: "Pontos turísticos",
+  viewpoint: "Mirantes",
+  tour: "Passeios",
+  shopping: "Compras",
 };
 
 function formatGeodesicDistance(distanceMeters: number): string {

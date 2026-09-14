@@ -40,7 +40,10 @@ test("usa nome e endereço nos destinos individuais do catálogo, detalhe e Guia
     .getAttribute("href");
   expect(googleMapsDestination(cardRouteHref)).toBe("Praia do Amor, Pipa, Tibau do Sul — RN");
 
-  await page.goto(`/viagens/${trip.id}/lugares/praia-do-amor`);
+  await page.goto(`/viagens/${trip.id}/lugares/praia-do-amor`, {
+    waitUntil: "domcontentloaded",
+  });
+  await expect(page.getByRole("heading", { level: 1, name: "Praia do Amor" })).toBeVisible();
   const walkingHref = await page.getByRole("link", { name: "Rota a pé" }).getAttribute("href");
   const drivingHref = await page.getByRole("link", { name: "Rota de carro" }).getAttribute("href");
   expect(googleMapsDestination(walkingHref)).toBe("Praia do Amor, Pipa, Tibau do Sul — RN");

@@ -37,6 +37,29 @@
   padding: 0.55rem 0.8rem;
 }
 
+.expiredNextStep {
+  align-items: start;
+  background: color-mix(in oklab, var(--primary) 7%, var(--surface));
+  border: 1px solid color-mix(in oklab, var(--primary) 24%, var(--border));
+  border-radius: var(--radius-large);
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+.expiredNextStep h2 {
+  font-size: clamp(1.35rem, 4vw, 1.8rem);
+  letter-spacing: -0.035em;
+  margin: 0.35rem 0 0.65rem;
+}
+
+.expiredNextStep p:last-child {
+  color: var(--foreground-muted);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 42rem;
+}
+
 .emptyState,
 .errorState {
   background: var(--surface);
@@ -90,6 +113,11 @@
 
 @media (min-width: 760px) {
   .hero {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .expiredNextStep {
+    align-items: center;
     grid-template-columns: minmax(0, 1fr) auto;
   }
 }

@@ -1,11 +1,16 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 import {
+  accountMemberships,
+  accounts,
   DrizzleDecisionRepository,
   DrizzleItineraryProposalRepository,
   DrizzleItineraryRepository,
   getDatabase,
+  places,
+  recommendations,
+  trips,
 } from "@routebook/database";
 import {
   completeItineraryProposalGeneration,
@@ -17,7 +22,7 @@ import {
 } from "@routebook/proposal-management";
 import { addActivity, createItinerary } from "@routebook/trip-management";
 
-import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
+import { createAuthenticatedE2ETrip, getE2EWorkspaceIdentity } from "./support/authenticated-trip";
 
 test.setTimeout(120_000);
 
@@ -168,6 +173,62 @@ async function createItineraryWithoutProposal(tripName: string): Promise<string>
   const itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);
   await new DrizzleItineraryRepository().save(itinerary);
   return trip.id;
+}
+
+async function createProposalRecoveryCandidate(tripId: string): Promise<string> {
+  const now = new Date();
+  const placeId = crypto.randomUUID();
+  const recommendationId = crypto.randomUUID();
+  const placeTitle = `Praia para nova proposta ${placeId.slice(0, 8)}`;
+  const database = getDatabase();
+
+  await database.insert(places).values({
+    id: placeId,
+    destinationId: "pipa-rn",
+    slug: `proposal-recovery-${placeId}`,
+    name: placeTitle,
+    summary: "Lugar elegível para validar a recuperação de uma Proposal expirada.",
+    category: "beach",
+    latitude: 1,
+    longitude: 1,
+    addressLabel: "Pipa, Tibau do Sul - RN",
+    publicationStatus: "published",
+    createdAt: now,
+    updatedAt: now,
+  });
+  await database.insert(recommendations).values({
+    id: recommendationId,
+    tripId,
+    placeId,
+    status: "presented",
+    contextSnapshot: { schemaVersion: 1, tripId },
+    contextFingerprint: recommendationId.replaceAll("-", "").padEnd(64, "0").slice(0, 64),
+    reasons: [
+      {
+        code: "proposal-recovery-e2e",
+        message: "Boa opção para compor a nova proposta.",
+        evidence: {},
+      },
+    ],
+    limitations: [],
+    score: 0.9,
+    confidenceLevel: "high",
+    confidenceBasis: ["published-place"],
+    validFrom: new Date(now.getTime() - 60_000),
+    expiresAt: new Date(now.getTime() + 86_400_000),
+    generator: "deterministic",
+    policyVersion: "rb-inc-191-recovery-e2e",
+    generatedAt: new Date(now.getTime() - 120_000),
+    presentedAt: new Date(now.getTime() - 60_000),
+    resolvedAt: null,
+    linkedDecisionId: null,
+    statusReason: null,
+    supersededByRecommendationId: null,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return placeTitle;
 }
 
 async function openAcceptance(page: Page, tripId: string): Promise<void> {
@@ -636,14 +697,22 @@ test("alcança o estado vazio de Proposal pelo Roteiro quando não existe Propos
   );
 });
 
-test("consulta uma Proposal expired somente como referência histórica", async ({
+test("recupera uma Proposal expired sem alterar o histórico ou o Roteiro", async ({
   page,
 }, testInfo) => {
-  const { tripId } = await createProposalFixture(
+  const fixture = await createProposalFixture(
     `Proposta expirada ${testInfo.project.name} ${Date.now()}`,
     "expired",
   );
-  await page.goto(`/viagens/${tripId}/roteiro`);
+  const placeTitle = await createProposalRecoveryCandidate(fixture.tripId);
+  const itineraryRepository = new DrizzleItineraryRepository();
+  const proposalRepository = new DrizzleItineraryProposalRepository();
+  const itineraryBefore = await itineraryRepository.findByTripId(fixture.tripId);
+  const expiredProposalBefore = await proposalRepository.findById(
+    fixture.tripId,
+    fixture.proposalId,
+  );
+  await page.goto(`/viagens/${fixture.tripId}/roteiro`);
 
   await expect(page.getByText(confirmedActivity, { exact: true })).toBeVisible();
   await expect(page.getByText(proposedActivity, { exact: true })).toHaveCount(0);
@@ -660,9 +729,67 @@ test("consulta uma Proposal expired somente como referência histórica", async 
   await expect(page.getByText("Expirada em")).toBeVisible();
   await expect(page.getByRole("heading", { name: proposedActivity })).toBeVisible();
   await expect(page.getByRole("note")).toHaveText(/expirou e não pode mais ser aplicada/i);
-  await expect(
-    page.getByRole("button", { name: /aceitar|aplicar|descartar|gerar novamente/i }),
-  ).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Continue com uma nova proposta" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Gerar proposta de roteiro" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /aceitar|aplicar|descartar/i })).toHaveCount(0);
+
+  const generatedUrl = /\/roteiro\/proposta\?propostaGerada=[0-9a-f-]+$/i;
+  await submitAndWaitForActionNavigation(
+    page,
+    () => page.getByRole("button", { name: "Gerar proposta de roteiro" }).click(),
+    generatedUrl,
+  );
+  await expect(page.getByText("Proposta aguardando sua decisão").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: placeTitle })).toBeVisible();
+
+  const generatedProposalId = new URL(page.url()).searchParams.get("propostaGerada");
+  expect(generatedProposalId).toMatch(/^[0-9a-f-]{36}$/i);
+  expect(
+    await proposalRepository.findById(fixture.tripId, generatedProposalId as ItineraryProposalId),
+  ).toMatchObject({ status: "ready" });
+  expect(await proposalRepository.findById(fixture.tripId, fixture.proposalId)).toEqual(
+    expiredProposalBefore,
+  );
+  expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
+});
+
+test("não oferece nova geração a participante sem permissão de edição", async ({
+  page,
+}, testInfo) => {
+  const fixture = await createProposalFixture(
+    `Proposta expirada somente leitura ${testInfo.project.name} ${Date.now()}`,
+    "expired",
+  );
+  const identity = await getE2EWorkspaceIdentity();
+  const accountId = crypto.randomUUID();
+  const now = new Date();
+  const database = getDatabase();
+  await database.insert(accounts).values({
+    id: accountId,
+    name: `Conta somente leitura ${accountId.slice(0, 8)}`,
+    status: "active",
+    createdAt: now,
+    updatedAt: now,
+  });
+  await database.insert(accountMemberships).values({
+    id: crypto.randomUUID(),
+    accountId,
+    userId: identity.id,
+    role: "viewer",
+    status: "active",
+    createdAt: now,
+    updatedAt: now,
+  });
+  await database.update(trips).set({ accountId }).where(eq(trips.id, fixture.tripId));
+
+  await page.goto(`/viagens/${fixture.tripId}/roteiro/proposta`);
+
+  await expect(page.getByText("Proposta expirada", { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: proposedActivity })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Continue com uma nova proposta" })).toHaveCount(
+    0,
+  );
+  await expect(page.getByRole("button", { name: "Gerar proposta de roteiro" })).toHaveCount(0);
 });
 
 test("projeta uma Proposal ready vencida como referência histórica", async ({ page }, testInfo) => {
@@ -683,9 +810,9 @@ test("projeta uma Proposal ready vencida como referência histórica", async ({ 
   ).toBeVisible();
   await expect(page.getByText("Proposta expirada", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Expirada em")).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: /aceitar|aplicar|descartar|gerar novamente/i }),
-  ).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Continue com uma nova proposta" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Gerar proposta de roteiro" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /aceitar|aplicar|descartar/i })).toHaveCount(0);
   expect(
     await new DrizzleItineraryProposalRepository().findById(fixture.tripId, fixture.proposalId),
   ).toMatchObject({ status: "ready" });

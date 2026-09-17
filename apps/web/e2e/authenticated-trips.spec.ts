@@ -42,6 +42,9 @@ test("cria Trip autenticada e impede leitura por outro User", async ({ page }, t
     page.locator("#conteudo-principal").getByText("Owner RB-INC-090", { exact: true }),
   ).toBeVisible();
 
+  if (testInfo.project.name.startsWith("mobile")) {
+    await page.getByRole("button", { name: "Conta" }).click();
+  }
   await page.getByRole("button", { name: "Sair" }).click();
   await expect(page).toHaveURL(/\/$/);
 

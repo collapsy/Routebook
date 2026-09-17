@@ -131,6 +131,7 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
   await expect(praiaDasMinasFallback).toHaveAttribute("data-place-initial", "P");
   await expect(praiaDasMinasFallback).toHaveAttribute("data-presentation", "compact");
   await expect(praiaDasMinasFallback).toHaveText("Sem foto");
+  await expect(praiaDasMinasFallback).toContainText("Referência visual · não é foto do local");
   const compactCardLayout = await praiaDasMinasCard.evaluate((card) => {
     const primaryAction = Array.from(card.querySelectorAll("a")).find(
       (link) => link.textContent?.trim() === "Ver detalhes",

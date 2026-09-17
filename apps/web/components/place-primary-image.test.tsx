@@ -35,6 +35,7 @@ describe("PlacePrimaryImage", () => {
     expect(fallback).toHaveAttribute("data-place-initial", "P");
     expect(fallback).toHaveAttribute("data-presentation", "compact");
     expect(screen.getByText("Sem foto")).toBeInTheDocument();
+    expect(screen.getByText("Referência visual · não é foto do local")).toBeInTheDocument();
     expect(screen.queryByText("Imagem ilustrativa")).not.toBeInTheDocument();
     expect(screen.queryByText("Referência visual")).not.toBeInTheDocument();
   });

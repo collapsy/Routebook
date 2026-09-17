@@ -39,7 +39,10 @@ export function PlacePrimaryImage({
         data-presentation={compactFallback ? "compact" : "descriptive"}
         role="img"
       >
-        <span>{compactFallback ? "Sem foto" : "Foto não disponível"}</span>
+        <span className={styles.noPhotoCopy}>
+          <strong>{compactFallback ? "Sem foto" : "Foto não disponível"}</strong>
+          <small>Referência visual · não é foto do local</small>
+        </span>
       </div>
     );
   }

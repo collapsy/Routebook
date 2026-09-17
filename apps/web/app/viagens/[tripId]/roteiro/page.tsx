@@ -227,6 +227,19 @@ export default async function ItineraryPage({
 
   const activityCount = itinerary.days.reduce((total, day) => total + day.activities.length, 0);
   const freePeriodCount = itinerary.days.reduce((total, day) => total + day.freePeriods.length, 0);
+  const plannedDayCount = itinerary.days.filter(
+    (day) => day.activities.length > 0 || day.freePeriods.length > 0,
+  ).length;
+  const nextOpenDay = itinerary.days.find(
+    (day) => day.activities.length === 0 && day.freePeriods.length === 0,
+  );
+  const nextStep = nextOpenDay
+    ? {
+        href: `/viagens/${tripId}/roteiro?dia=${nextOpenDay.date}#dia-em-foco`,
+        label: `Planejar Dia ${nextOpenDay.position}`,
+      }
+    : { href: `/viagens/${tripId}/roteiro/revisao`, label: "Revisar roteiro" };
+  const hasStartedPlanning = plannedDayCount > 0;
   const targetDays = itinerary.days.filter((day) => day.id !== selectedDay.id);
   const selectedItemCount = selectedDay.activities.length + selectedDay.freePeriods.length;
   const selectedDaySummary = formatDaySummary(
@@ -355,6 +368,40 @@ export default async function ItineraryPage({
           </p>
         </div>
       </header>
+
+      <section aria-labelledby="itinerary-progress-title" className={journeyStyles.journeyGuide}>
+        <div className={journeyStyles.journeyGuideHeader}>
+          <div>
+            <p className="product-eyebrow">Seu progresso</p>
+            <h2 id="itinerary-progress-title">
+              {plannedDayCount} de {itinerary.days.length} dias planejados
+            </h2>
+          </div>
+          <Link className="product-secondary-action" href={nextStep.href}>
+            {nextStep.label}
+          </Link>
+        </div>
+        <ol aria-label="Etapas da viagem" className={journeyStyles.journeySteps}>
+          <li
+            className={
+              hasStartedPlanning ? journeyStyles.journeyStepDone : journeyStyles.journeyStep
+            }
+          >
+            <span aria-hidden="true">{hasStartedPlanning ? "✓" : "1"}</span> Explorar
+          </li>
+          <li aria-current="step" className={journeyStyles.journeyStepCurrent}>
+            <span aria-hidden="true">2</span> Montar roteiro
+          </li>
+          <li className={journeyStyles.journeyStep}>
+            <span aria-hidden="true">3</span> Revisar
+          </li>
+        </ol>
+        <p className={journeyStyles.journeyGuideHint}>
+          {nextOpenDay
+            ? "Você pode continuar montando os dias na ordem que preferir."
+            : "Todos os dias têm planejamento. Revise os conflitos antes de finalizar."}
+        </p>
+      </section>
 
       <nav aria-label="Selecionar Dia do roteiro" className={journeyStyles.daySelector}>
         {itinerary.days.map((day) => {

@@ -45,11 +45,10 @@ export default async function ItineraryProposalReviewPage({
   ]);
   const asOf = new Date();
   const proposal = findLatestReviewableItineraryProposal(proposals, asOf);
+  const canGenerate = editAccess.status === "authorized";
+  const generateAction = generateItineraryProposalAction.bind(null, trip.id);
 
   if (!proposal) {
-    const canGenerate = editAccess.status === "authorized";
-    const generateAction = generateItineraryProposalAction.bind(null, trip.id);
-
     return (
       <section className={`app-page ${styles.page}`}>
         <Link className="back-link" href={`/viagens/${trip.id}/roteiro`}>
@@ -112,6 +111,20 @@ export default async function ItineraryProposalReviewPage({
               : "Aguardando sua decisão"}
         </span>
       </header>
+
+      {review.status === "expired" && canGenerate ? (
+        <section className={styles.expiredNextStep} aria-labelledby="expired-proposal-next-step">
+          <div>
+            <p className="product-eyebrow">Próximo passo</p>
+            <h2 id="expired-proposal-next-step">Continue com uma nova proposta</h2>
+            <p>
+              A proposta abaixo permanece como referência. Gere outra usando o Roteiro e os Lugares
+              disponíveis agora.
+            </p>
+          </div>
+          <ItineraryProposalGenerationControl action={generateAction} />
+        </section>
+      ) : null}
 
       {isEmptyReady ? (
         <div>

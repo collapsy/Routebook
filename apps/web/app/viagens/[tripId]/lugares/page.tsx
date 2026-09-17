@@ -258,16 +258,6 @@ function CanonicalDiscoveryCard({
         ) : null}
       </div>
 
-      <PlaceRankingMeta
-        categoryLabel={categoryLabels[place.category]}
-        orderLabel={rankingOrderLabel}
-        position={rankingPosition}
-        timeZone={timeZone}
-        {...(quality ? { quality } : {})}
-        {...(qualitySignals ? { signals: qualitySignals } : {})}
-        {...(categoryRank ? { categoryRank } : {})}
-      />
-
       <div className={styles.cardActions}>
         <Link className="product-primary-action" href={`/viagens/${tripId}/lugares/${place.slug}`}>
           Ver detalhes
@@ -290,6 +280,16 @@ function CanonicalDiscoveryCard({
           ) : (
             <small>Fonte: RouteBook</small>
           )}
+          <PlaceRankingMeta
+            categoryLabel={categoryLabels[place.category]}
+            detailsOnly
+            orderLabel={rankingOrderLabel}
+            position={rankingPosition}
+            timeZone={timeZone}
+            {...(quality ? { quality } : {})}
+            {...(qualitySignals ? { signals: qualitySignals } : {})}
+            {...(categoryRank ? { categoryRank } : {})}
+          />
           <div className={styles.cardAuxiliaryActions}>
             <a
               className="product-secondary-action"
@@ -399,16 +399,6 @@ function ExternalDiscoveryCard({
         </span>
       </div>
 
-      <PlaceRankingMeta
-        categoryLabel={categoryLabel}
-        orderLabel={rankingOrderLabel}
-        position={rankingPosition}
-        timeZone={timeZone}
-        {...(quality ? { quality } : {})}
-        {...(qualitySignals ? { signals: qualitySignals } : {})}
-        {...(categoryRank ? { categoryRank } : {})}
-      />
-
       <div className={styles.cardActions}>
         <a className="product-primary-action" href={mapsSearchUrl} rel="noreferrer" target="_blank">
           Ver mapa e fotos
@@ -439,6 +429,16 @@ function ExternalDiscoveryCard({
           {!candidate.category ? (
             <small>Salvar ainda não está disponível para este lugar.</small>
           ) : null}
+          <PlaceRankingMeta
+            categoryLabel={categoryLabel}
+            detailsOnly
+            orderLabel={rankingOrderLabel}
+            position={rankingPosition}
+            timeZone={timeZone}
+            {...(quality ? { quality } : {})}
+            {...(qualitySignals ? { signals: qualitySignals } : {})}
+            {...(categoryRank ? { categoryRank } : {})}
+          />
           <div className={styles.cardAuxiliaryActions}>
             <a
               className="product-secondary-action"

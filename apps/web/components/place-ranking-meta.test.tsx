@@ -55,4 +55,27 @@ describe("PlaceRankingMeta", () => {
     expect(view.queryByText(/Provider/i)).not.toBeInTheDocument();
     expect(view.getByText(/Muito bem avaliado/)).toBeInTheDocument();
   });
+
+  it("pode renderizar a evidência dentro do disclosure do card", () => {
+    const { container } = render(
+      <PlaceRankingMeta
+        categoryLabel="Gastronomia"
+        detailsOnly
+        orderLabel="Recomendados"
+        position={2}
+        timeZone="America/Sao_Paulo"
+        quality={{
+          score: 8.2,
+          reputationScore: 0.82,
+          distanceScore: 0.7,
+          reasons: ["Muito bem avaliado"],
+        }}
+      />,
+    );
+    const view = within(container);
+
+    expect(view.queryByText("Por que aparece assim?")).not.toBeInTheDocument();
+    expect(view.getByText("Score 8,2/10")).toBeInTheDocument();
+    expect(view.getByText("#2 · Recomendados")).toBeInTheDocument();
+  });
 });

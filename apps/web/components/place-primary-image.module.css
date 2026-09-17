@@ -152,3 +152,7 @@
   color: var(--primary-strong);
   font-weight: 700;
 }
+
+.captionPlaceholder {
+  visibility: hidden;
+}

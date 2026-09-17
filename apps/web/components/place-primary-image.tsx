@@ -30,20 +30,25 @@ export function PlacePrimaryImage({
 
   if (!primaryImage || failed) {
     return (
-      <div
-        aria-label={`Foto não disponível para ${placeName}`}
-        className={styles.noPhoto}
-        data-place-category={category}
-        data-place-image-fallback="true"
-        data-place-initial={placeInitial}
-        data-presentation={compactFallback ? "compact" : "descriptive"}
-        role="img"
-      >
-        <span className={styles.noPhotoCopy}>
-          <strong>{compactFallback ? "Sem foto" : "Foto não disponível"}</strong>
-          <small>Referência visual · não é foto do local</small>
-        </span>
-      </div>
+      <figure className={styles.figure}>
+        <div
+          aria-label={`Foto não disponível para ${placeName}`}
+          className={styles.noPhoto}
+          data-place-category={category}
+          data-place-image-fallback="true"
+          data-place-initial={placeInitial}
+          data-presentation={compactFallback ? "compact" : "descriptive"}
+          role="img"
+        >
+          <span className={styles.noPhotoCopy}>
+            <strong>{compactFallback ? "Sem foto" : "Foto não disponível"}</strong>
+            <small>Referência visual · não é foto do local</small>
+          </span>
+        </div>
+        <figcaption aria-hidden="true" className={styles.caption}>
+          <span className={styles.captionPlaceholder}>Foto indisponível</span>
+        </figcaption>
+      </figure>
     );
   }
 

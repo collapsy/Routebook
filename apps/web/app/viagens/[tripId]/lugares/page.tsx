@@ -78,6 +78,7 @@ export const metadata: Metadata = {
 };
 
 type DiscoverySearchParams = {
+  dia?: string;
   busca?: string;
   categoria?: string;
   distancia?: string;
@@ -186,6 +187,7 @@ function CanonicalDiscoveryCard({
   categoryRank,
   externalMediaEnabled,
   timeZone,
+  selectedDayDate,
 }: Readonly<{
   item: CanonicalDiscoveryItem;
   tripId: string;
@@ -200,6 +202,7 @@ function CanonicalDiscoveryCard({
   categoryRank?: number;
   externalMediaEnabled: boolean;
   timeZone: string;
+  selectedDayDate?: string;
 }>) {
   const { place, distanceMeters } = item;
   const candidate = item.kind === "enriched" ? item.candidate : undefined;
@@ -259,7 +262,10 @@ function CanonicalDiscoveryCard({
       </div>
 
       <div className={styles.cardActions}>
-        <Link className="product-primary-action" href={`/viagens/${tripId}/lugares/${place.slug}`}>
+        <Link
+          className="product-primary-action"
+          href={`/viagens/${tripId}/lugares/${place.slug}${selectedDayDate ? `?dia=${selectedDayDate}` : ""}`}
+        >
           Ver detalhes
         </Link>
         <form action={isSaved ? removePublishedPlaceAction : savePublishedPlaceAction}>
@@ -754,7 +760,7 @@ export default async function PlacesPage({
         kind: savedPlaceIds.has(item.place.id) ? "saved-place" : "published-place",
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
-        href: `/viagens/${tripId}/lugares/${item.place.slug}`,
+        href: `/viagens/${tripId}/lugares/${item.place.slug}${rawFilters.dia ? `?dia=${rawFilters.dia}` : ""}`,
       };
     }
 
@@ -1099,6 +1105,7 @@ export default async function PlacesPage({
                 tripId={tripId}
                 {...(destinationId ? { destinationId } : {})}
                 {...(accommodationCoordinate ? { accommodationCoordinate } : {})}
+                {...(rawFilters.dia ? { selectedDayDate: rawFilters.dia } : {})}
               />
             ),
           )}

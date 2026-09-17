@@ -44,12 +44,10 @@ test("prioriza a timeline do dia vazio antes das ações secundárias", async ({
   await expect(page.getByRole("navigation", { name: "Jornada de planejamento" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Revisar" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /Dia 1 —/ })).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Escolha um Lugar para começar este Dia" }),
-  ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Explorar Lugares" })).toHaveAttribute(
+  await expect(page.getByRole("heading", { name: "Comece adicionando um lugar" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Adicionar um lugar" })).toHaveAttribute(
     "href",
-    `/viagens/${trip.id}/lugares`,
+    `/viagens/${trip.id}/lugares?dia=2026-08-22`,
   );
   await expect(page.getByRole("link", { name: "Ver Lugares salvos" })).toHaveAttribute(
     "href",
@@ -119,9 +117,7 @@ test("remove uma atividade e mantém o mesmo Dia em foco", async ({ page }, test
   );
 
   await expect(page.getByText(activityTitle, { exact: true })).toHaveCount(0);
-  await expect(
-    page.getByRole("heading", { name: "Escolha um Lugar para começar este Dia" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Comece adicionando um lugar" })).toBeVisible();
 
   await page.reload();
   await expect(page.getByText(activityTitle, { exact: true })).toHaveCount(0);

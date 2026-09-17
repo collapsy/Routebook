@@ -233,15 +233,21 @@ export default async function ItineraryPage({
   const nextOpenDay = itinerary.days.find(
     (day) => day.activities.length === 0 && day.freePeriods.length === 0,
   );
-  const nextStep = nextOpenDay
-    ? {
-        href: `/viagens/${tripId}/roteiro?dia=${nextOpenDay.date}#dia-em-foco`,
-        label: `Planejar Dia ${nextOpenDay.position}`,
-      }
-    : { href: `/viagens/${tripId}/roteiro/revisao`, label: "Revisar roteiro" };
-  const hasStartedPlanning = plannedDayCount > 0;
   const targetDays = itinerary.days.filter((day) => day.id !== selectedDay.id);
   const selectedItemCount = selectedDay.activities.length + selectedDay.freePeriods.length;
+  const nextStep =
+    selectedItemCount === 0
+      ? {
+          href: `/viagens/${tripId}/lugares?dia=${selectedDay.date}`,
+          label: `Adicionar lugar ao Dia ${selectedDay.position}`,
+        }
+      : nextOpenDay
+        ? {
+            href: `/viagens/${tripId}/roteiro?dia=${nextOpenDay.date}#dia-em-foco`,
+            label: `Planejar Dia ${nextOpenDay.position}`,
+          }
+        : { href: `/viagens/${tripId}/roteiro/revisao`, label: "Revisar roteiro" };
+  const hasStartedPlanning = plannedDayCount > 0;
   const selectedDaySummary = formatDaySummary(
     selectedDay.activities.length,
     selectedDay.freePeriods.length,
@@ -456,11 +462,17 @@ export default async function ItineraryPage({
               {selectedDay.activities.length === 0 && selectedDay.freePeriods.length === 0 ? (
                 <section className={journeyStyles.emptyGuide} aria-labelledby="empty-day-title">
                   <p className="product-eyebrow">Dia aberto</p>
-                  <h3 id="empty-day-title">Escolha um Lugar para começar este Dia</h3>
-                  <p>Você pode montar o Dia aos poucos ou mantê-lo livre.</p>
+                  <h3 id="empty-day-title">Comece adicionando um lugar</h3>
+                  <p>
+                    Explore opções próximas, abra um lugar e escolha{" "}
+                    <strong>Adicionar ao roteiro</strong>.
+                  </p>
                   <div className={journeyStyles.emptyActions}>
-                    <Link className="product-primary-action" href={`/viagens/${tripId}/lugares`}>
-                      Explorar Lugares
+                    <Link
+                      className="product-primary-action"
+                      href={`/viagens/${tripId}/lugares?dia=${selectedDay.date}`}
+                    >
+                      Adicionar um lugar
                     </Link>
                     <Link
                       className="product-secondary-action"

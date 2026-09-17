@@ -274,44 +274,55 @@ function CanonicalDiscoveryCard({
       <details className={styles.cardDetails}>
         <summary>Mais informações</summary>
         <div className={styles.cardDetailsBody}>
-          <p>{addressLabel ?? "Endereço ainda não informado"}</p>
-          {candidate ? (
-            <small>Fonte de localização: Overture · licença: {candidate.sourceLicense}</small>
-          ) : (
-            <small>Fonte: RouteBook</small>
-          )}
-          <PlaceRankingMeta
-            categoryLabel={categoryLabels[place.category]}
-            detailsOnly
-            orderLabel={rankingOrderLabel}
-            position={rankingPosition}
-            timeZone={timeZone}
-            {...(quality ? { quality } : {})}
-            {...(qualitySignals ? { signals: qualitySignals } : {})}
-            {...(categoryRank ? { categoryRank } : {})}
-          />
-          <div className={styles.cardAuxiliaryActions}>
-            <a
-              className="product-secondary-action"
-              href={mapsSearchUrl}
-              rel="noreferrer"
-              target="_blank"
-            >
-              Ver mapa e fotos
-            </a>
-            <a
-              className="product-secondary-action"
-              href={buildGoogleMapsDirectionsUrl({
-                ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
-                destination: coordinate,
-                destinationLabel,
-                travelMode: "walking",
-              })}
-              rel="noreferrer"
-              target="_blank"
-            >
-              Ver rota
-            </a>
+          <div className={styles.cardDetailsSection}>
+            <span className={styles.cardDetailsLabel}>Localização</span>
+            <p>{addressLabel ?? "Endereço ainda não informado"}</p>
+            <small>
+              {candidate
+                ? `Dados de localização: Overture · licença: ${candidate.sourceLicense}`
+                : "Dados de localização: RouteBook"}
+            </small>
+          </div>
+          {quality || qualitySignals ? (
+            <div className={styles.cardDetailsSection}>
+              <span className={styles.cardDetailsLabel}>Por que este lugar aparece</span>
+              <PlaceRankingMeta
+                categoryLabel={categoryLabels[place.category]}
+                detailsOnly
+                orderLabel={rankingOrderLabel}
+                position={rankingPosition}
+                timeZone={timeZone}
+                {...(quality ? { quality } : {})}
+                {...(qualitySignals ? { signals: qualitySignals } : {})}
+                {...(categoryRank ? { categoryRank } : {})}
+              />
+            </div>
+          ) : null}
+          <div className={styles.cardDetailsSection}>
+            <span className={styles.cardDetailsLabel}>Planeje a chegada</span>
+            <div className={styles.cardAuxiliaryActions}>
+              <a
+                className="product-secondary-action"
+                href={mapsSearchUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Ver mapa e fotos
+              </a>
+              <a
+                className="product-secondary-action"
+                href={buildGoogleMapsDirectionsUrl({
+                  ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
+                  destination: coordinate,
+                  destinationLabel,
+                  travelMode: "walking",
+                })}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Ver rota
+              </a>
+            </div>
           </div>
         </div>
       </details>
@@ -424,35 +435,46 @@ function ExternalDiscoveryCard({
       <details className={styles.cardDetails}>
         <summary>Mais informações</summary>
         <div className={styles.cardDetailsBody}>
-          <p>{candidate.addressLabel ?? "Endereço não informado"}</p>
-          <small>Fonte: Overture · licença: {candidate.sourceLicense}</small>
-          {!candidate.category ? (
-            <small>Salvar ainda não está disponível para este lugar.</small>
+          <div className={styles.cardDetailsSection}>
+            <span className={styles.cardDetailsLabel}>Localização</span>
+            <p>{candidate.addressLabel ?? "Endereço não informado"}</p>
+            <small>Dados de localização: Overture · licença: {candidate.sourceLicense}</small>
+            {!candidate.category ? (
+              <small>Salvar ainda não está disponível para este lugar.</small>
+            ) : null}
+          </div>
+          {quality || qualitySignals ? (
+            <div className={styles.cardDetailsSection}>
+              <span className={styles.cardDetailsLabel}>Por que este lugar aparece</span>
+              <PlaceRankingMeta
+                categoryLabel={categoryLabel}
+                detailsOnly
+                orderLabel={rankingOrderLabel}
+                position={rankingPosition}
+                timeZone={timeZone}
+                {...(quality ? { quality } : {})}
+                {...(qualitySignals ? { signals: qualitySignals } : {})}
+                {...(categoryRank ? { categoryRank } : {})}
+              />
+            </div>
           ) : null}
-          <PlaceRankingMeta
-            categoryLabel={categoryLabel}
-            detailsOnly
-            orderLabel={rankingOrderLabel}
-            position={rankingPosition}
-            timeZone={timeZone}
-            {...(quality ? { quality } : {})}
-            {...(qualitySignals ? { signals: qualitySignals } : {})}
-            {...(categoryRank ? { categoryRank } : {})}
-          />
-          <div className={styles.cardAuxiliaryActions}>
-            <a
-              className="product-secondary-action"
-              href={buildGoogleMapsDirectionsUrl({
-                ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
-                destination: coordinate,
-                destinationLabel,
-                travelMode: "walking",
-              })}
-              rel="noreferrer"
-              target="_blank"
-            >
-              Ver rota
-            </a>
+          <div className={styles.cardDetailsSection}>
+            <span className={styles.cardDetailsLabel}>Planeje a chegada</span>
+            <div className={styles.cardAuxiliaryActions}>
+              <a
+                className="product-secondary-action"
+                href={buildGoogleMapsDirectionsUrl({
+                  ...(accommodationCoordinate ? { origin: accommodationCoordinate } : {}),
+                  destination: coordinate,
+                  destinationLabel,
+                  travelMode: "walking",
+                })}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Ver rota
+              </a>
+            </div>
           </div>
         </div>
       </details>

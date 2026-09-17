@@ -62,7 +62,9 @@ export async function AppShell({ children }: AppShellProps) {
             </Link>
             {session ? (
               <details className="app-account-menu">
-                <summary className="app-account-trigger">Conta</summary>
+                <summary aria-label="Abrir menu da conta" className="app-account-trigger">
+                  Conta
+                </summary>
                 <div className="app-account-popover">
                   <p className="app-account-user" title={session.user.name}>
                     {session.user.name}

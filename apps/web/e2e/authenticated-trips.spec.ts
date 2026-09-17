@@ -43,7 +43,7 @@ test("cria Trip autenticada e impede leitura por outro User", async ({ page }, t
   ).toBeVisible();
 
   if (testInfo.project.name.startsWith("mobile")) {
-    await page.getByRole("button", { name: "Conta" }).click();
+    await page.getByLabel("Abrir menu da conta").click();
   }
   await page.getByRole("button", { name: "Sair" }).click();
   await expect(page).toHaveURL(/\/$/);

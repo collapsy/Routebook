@@ -28,7 +28,7 @@ test("mantém a navegação global completa no desktop", async ({ page }) => {
   await expect(navigation.getByRole("link", { name: "Minhas viagens" })).toBeVisible();
   await expect(navigation.getByRole("link", { name: "Sobre o projeto" })).toBeVisible();
   await expect(navigation.getByRole("button", { name: "Sair" })).toBeVisible();
-  await expect(header.getByRole("button", { name: "Conta" })).toBeHidden();
+  await expect(header.getByLabel("Abrir menu da conta")).toBeHidden();
 });
 
 test("prioriza viagens e conta em uma única linha no mobile", async ({ page }) => {
@@ -37,7 +37,7 @@ test("prioriza viagens e conta em uma única linha no mobile", async ({ page }) 
 
   const header = page.getByRole("banner");
   const navigation = header.getByRole("navigation", { name: "Navegação global" });
-  const accountTrigger = navigation.getByRole("button", { name: "Conta" });
+  const accountTrigger = navigation.getByLabel("Abrir menu da conta");
 
   await expect(navigation.getByRole("link", { name: "Minhas viagens" })).toBeVisible();
   await expect(accountTrigger).toBeVisible();

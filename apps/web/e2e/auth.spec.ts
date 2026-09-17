@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 async function revealSignOut(page: import("@playwright/test").Page, projectName: string) {
   if (projectName.startsWith("mobile")) {
-    await page.getByRole("button", { name: "Conta" }).click();
+    await page.getByLabel("Abrir menu da conta").click();
   }
 }
 

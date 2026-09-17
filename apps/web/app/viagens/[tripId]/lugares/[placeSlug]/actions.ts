@@ -69,7 +69,9 @@ function resolveRequestedDayDate(
   if (!trip) return undefined;
   const requested = optionalText(value);
   if (!requested) return undefined;
-  return deriveTripDays(trip.period).some((day) => day.date === requested) ? requested : undefined;
+  return deriveTripDays(trip.period).some((day) => day.date === requested)
+    ? requested
+    : undefined;
 }
 
 function placeDetailsPath(tripId: string, placeSlug: string, dayDate?: string): string {

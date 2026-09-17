@@ -92,4 +92,4 @@ test("Detalhes preserva o Dia de origem e mantém Salvar separado do Roteiro", a
   await expect(page).toHaveURL(/dia=2026-08-24/);
   await expect(page.getByText(/Lugar salvo\. Ele continua fora do Roteiro/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Adicionar ao Dia 3" })).toBeVisible();
-}
+});

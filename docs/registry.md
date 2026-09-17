@@ -280,7 +280,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-113 | Liveness e Readiness Operacionais da Aplicação Web | Implementation Increment | Draft | 0.1.0 | [rb-inc-113-operational-health-checks.md](./implementation/increments/rb-inc-113-operational-health-checks.md) |
 | RB-CTX-113 | Context Pack do RB-INC-113 — Liveness e Readiness Operacionais | Implementation Context | Draft | 0.1.0 | [rb-inc-113-operational-health-checks.md](./implementation/context-packs/rb-inc-113-operational-health-checks.md) |
 | RB-INC-114 | Smoke Operacional Pós-deployment | Implementation Increment | Draft | 0.1.0 | [rb-inc-114-operational-smoke.md](./implementation/increments/rb-inc-114-operational-smoke.md) |
-| RB-CTX-114 | Context Pack do RB-INC-114 — Smoke Operacional Pós-deployment | Implementation Context | Draft | 0.1.0 | [rb-inc-114-operational-smoke.md](./implementation/context-packs/rb-inc-114-operational-smoke.md) |
+| RB-CTX-114 | Context Pack do RB-INC-114 — Smoke Operacional Pós-deployment | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-114-operational-smoke.md](./implementation/context-packs/rb-inc-114-operational-smoke.md) |
 | RB-INC-115 | Aprovação Formal do RB-ADR-017 | Implementation | Draft | 0.1.0 | [rb-inc-115-approve-adr-017.md](./implementation/increments/rb-inc-115-approve-adr-017.md) |
 | RB-CTX-115 | Context Pack do RB-INC-115 — Aprovação Formal do RB-ADR-017 | Implementation Context | Draft | 0.1.0 | [rb-inc-115-approve-adr-017.md](./implementation/context-packs/rb-inc-115-approve-adr-017.md) |
 | RB-INC-116 | Aprovação Formal do RB-ADR-018 | Implementation | Draft | 0.1.0 | [rb-inc-116-approve-adr-018.md](./implementation/increments/rb-inc-116-approve-adr-018.md) |
@@ -463,6 +463,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-196 | Compositor contextual inteligente de Proposta de Roteiro | Implementation | Draft | 0.1.0 | [rb-inc-196-contextual-itinerary-composer.md](./implementation/increments/rb-inc-196-contextual-itinerary-composer.md) |
 | RB-CTX-196 | Context Pack do RB-INC-196 — Compositor contextual inteligente de Proposta de Roteiro | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-196-contextual-itinerary-composer.md](./implementation/context-packs/rb-inc-196-contextual-itinerary-composer.md) |
+| RB-INC-198 | Contexto de Dia na jornada Roteiro → Lugar → Roteiro | Implementation Increment | Draft | 0.1.0 | [rb-inc-198-itinerary-day-place-flow.md](./implementation/increments/rb-inc-198-itinerary-day-place-flow.md) |
+| RB-CTX-198 | Context Pack do RB-INC-198 — Contexto de Dia na jornada Roteiro → Lugar → Roteiro | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-198-itinerary-day-place-flow.md](./implementation/context-packs/rb-inc-198-itinerary-day-place-flow.md) |
 
 ## Status possíveis
 

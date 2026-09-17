@@ -26,7 +26,7 @@ export async function AppShell({ children }: AppShellProps) {
             <span>RouteBook</span>
           </Link>
 
-          <nav aria-label="Navegação global" className="app-navigation">
+          <nav aria-label="Navegação global" className="app-navigation app-navigation-desktop">
             <Link aria-current="page" className="app-nav-link app-nav-link-active" href="/viagens">
               Minhas viagens
             </Link>
@@ -44,6 +44,39 @@ export async function AppShell({ children }: AppShellProps) {
                   </button>
                 </form>
               </div>
+            ) : (
+              <Link className="app-nav-link" href="/entrar?next=%2Fviagens">
+                Entrar
+              </Link>
+            )}
+          </nav>
+
+          <nav aria-label="Navegação global" className="app-navigation app-navigation-mobile">
+            <Link
+              aria-current="page"
+              aria-label="Minhas viagens"
+              className="app-nav-link app-nav-link-active"
+              href="/viagens"
+            >
+              Viagens
+            </Link>
+            {session ? (
+              <details className="app-account-menu">
+                <summary className="app-account-trigger">Conta</summary>
+                <div className="app-account-popover">
+                  <p className="app-account-user" title={session.user.name}>
+                    {session.user.name}
+                  </p>
+                  <Link className="app-account-action" href="/#proposito">
+                    Sobre o projeto
+                  </Link>
+                  <form action={signOutAction}>
+                    <button className="app-account-action app-account-sign-out" type="submit">
+                      Sair
+                    </button>
+                  </form>
+                </div>
+              </details>
             ) : (
               <Link className="app-nav-link" href="/entrar?next=%2Fviagens">
                 Entrar

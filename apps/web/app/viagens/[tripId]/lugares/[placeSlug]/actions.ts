@@ -69,9 +69,7 @@ function resolveRequestedDayDate(
   if (!trip) return undefined;
   const requested = optionalText(value);
   if (!requested) return undefined;
-  return deriveTripDays(trip.period).some((day) => day.date === requested)
-    ? requested
-    : undefined;
+  return deriveTripDays(trip.period).some((day) => day.date === requested) ? requested : undefined;
 }
 
 function placeDetailsPath(tripId: string, placeSlug: string, dayDate?: string): string {
@@ -136,9 +134,7 @@ export async function addPlaceToItineraryAction(formData: FormData): Promise<nev
         erroRoteiro: message,
         ...(dayDate ? { dia: dayDate } : {}),
       });
-      redirect(
-        `/viagens/${tripId}/lugares/${placeSlug}?${query.toString()}#adicionar-ao-roteiro`,
-      );
+      redirect(`/viagens/${tripId}/lugares/${placeSlug}?${query.toString()}#adicionar-ao-roteiro`);
     }
 
     throw error;

@@ -45,7 +45,7 @@ test("adiciona um Lugar ao Dia selecionado e retorna ao mesmo Dia", async ({ pag
   await card.getByRole("button", { name: "Adicionar ao Dia 2" }).click();
 
   await expect(page).toHaveURL(
-    new RegExp(`/viagens/${trip.id}/roteiro\\\\?atividadeCriada=1&dia=2026-08-23#dia-em-foco$`),
+    new RegExp(`/viagens/${trip.id}/roteiro\\?atividadeCriada=1&dia=2026-08-23#dia-em-foco$`),
   );
   await expect(page.getByRole("status")).toContainText("Atividade adicionada ao Dia 2");
   await expect(

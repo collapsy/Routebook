@@ -13,6 +13,7 @@ import styles from "./place-primary-image.module.css";
 export function PlacePrimaryImage({
   placeName,
   primaryImage,
+  category,
   showProvenance = false,
   priority = false,
   compactFallback = true,
@@ -25,13 +26,16 @@ export function PlacePrimaryImage({
   compactFallback?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
+  const placeInitial = placeName.trim().charAt(0).toLocaleUpperCase("pt-BR") || "?";
 
   if (!primaryImage || failed) {
     return (
       <div
         aria-label={`Foto não disponível para ${placeName}`}
         className={styles.noPhoto}
+        data-place-category={category}
         data-place-image-fallback="true"
+        data-place-initial={placeInitial}
         data-presentation={compactFallback ? "compact" : "descriptive"}
         role="img"
       >

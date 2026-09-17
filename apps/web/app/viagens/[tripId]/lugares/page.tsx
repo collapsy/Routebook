@@ -559,6 +559,7 @@ export default async function PlacesPage({
     region?.center,
   );
   const baseParams: DiscoverySearchParams = {
+    ...(rawFilters.dia ? { dia: rawFilters.dia } : {}),
     ...(search ? { busca: search } : {}),
     ...(category ? { categoria: category } : {}),
     ...(maximumDistanceMeters ? { distancia: String(maximumDistanceMeters / 1_000) } : {}),

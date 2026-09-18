@@ -150,12 +150,13 @@ apps/web/app/viagens/[tripId]/lugares/[placeSlug]/actions.ts
 apps/web/e2e/itinerary-day-place-flow.spec.ts
 apps/web/e2e/itinerary.spec.ts
 apps/web/e2e/place-actions.spec.ts
+apps/web/e2e/planning-conflicts.spec.ts
 docs/implementation/increments/rb-inc-198-itinerary-day-place-flow.md
 docs/implementation/context-packs/rb-inc-198-itinerary-day-place-flow.md
 docs/registry.md
 ```
 
-Os arquivos legados `apps/web/e2e/itinerary.spec.ts` e `apps/web/e2e/place-actions.spec.ts` podem ser ajustados apenas para atualizar assertions, locators e expectativas de redirect afetados pela nova hierarquia/rotulagem; eles não autorizam mudança adicional de produto.
+Os arquivos legados `apps/web/e2e/itinerary.spec.ts`, `apps/web/e2e/place-actions.spec.ts` e `apps/web/e2e/planning-conflicts.spec.ts` podem ser ajustados apenas para atualizar assertions, locators e expectativas de redirect afetados pela nova hierarquia/rotulagem; eles não autorizam mudança adicional de produto.
 
 ## 11. Testes mínimos
 

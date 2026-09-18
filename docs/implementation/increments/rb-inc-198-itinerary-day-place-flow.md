@@ -114,12 +114,13 @@ apps/web/app/viagens/[tripId]/lugares/[placeSlug]/actions.ts
 apps/web/e2e/itinerary-day-place-flow.spec.ts
 apps/web/e2e/itinerary.spec.ts
 apps/web/e2e/place-actions.spec.ts
+apps/web/e2e/planning-conflicts.spec.ts
 docs/implementation/increments/rb-inc-198-itinerary-day-place-flow.md
 docs/implementation/context-packs/rb-inc-198-itinerary-day-place-flow.md
 docs/registry.md
 ```
 
-As inclusões de `apps/web/e2e/itinerary.spec.ts` e `apps/web/e2e/place-actions.spec.ts` foram autorizadas durante a validação porque a nova hierarquia do Dia vazio, os novos CTAs e o redirect de Detalhes tornam assertions/locators legados incompatíveis. Nesses arquivos, o escopo é exclusivamente alinhar testes existentes à nova UX.
+As inclusões de `apps/web/e2e/itinerary.spec.ts`, `apps/web/e2e/place-actions.spec.ts` e `apps/web/e2e/planning-conflicts.spec.ts` foram autorizadas durante a validação porque a nova hierarquia do Dia vazio, os novos CTAs e o redirect de Detalhes tornam assertions/locators legados incompatíveis. Nesses arquivos, o escopo é exclusivamente alinhar testes existentes à nova UX.
 
 ## 8. Fora de escopo
 

@@ -1098,4 +1098,4 @@ Ao concluir um incremento:
 - Pureza: identidade e instante são injetados; o núcleo não gera UUID nem lê relógio do sistema e não depende de framework, banco ou Provider.
 - Compatibilidade: Saved Places, banco, Activity, Proposal e UI permanecem intocados.
 - Validação local após auditoria: compilação isolada do código-fonte com TypeScript passou e a verificação funcional isolada das invariantes principais passou.
-- Evidência autoritativa de regressão integral: CI do pull request, ainda pendente neste registro.
+- Evidência autoritativa de regressão integral no SHA `2e369e45964af17822b079a9a48fab02c928e71b`: Documentation Validation `35382464737`, Engineering Validation `35382464968` e Overture Place Discovery `35382465031` concluíram com sucesso. Engineering Validation aprovou formatação, docs, lint, typecheck, migrations, testes, smoke, build e Playwright/responsividade.

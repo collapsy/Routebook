@@ -59,7 +59,7 @@ Salvos também adicionava Activity, mas retornava à própria lista. Proposal e 
 - Em Discovery com Dia de destino, `Adicionar ao Dia X` vira ação primária de Place canônico.
 - `Salvar para depois` continua ação independente e não cria Activity.
 - `Ver detalhes` permanece disponível, mas não compete com a ação principal de planejamento.
-- Detalhes permite trocar o Dia antes de confirmar.
+- Detalhes permite trocar o Dia antes de confirmar; o CTA usa `Adicionar ao roteiro` para não exibir um número de Dia obsoleto depois da troca no seletor.
 - Horário e duração continuam opcionais.
 - Após inclusão bem-sucedida, o destino é o Roteiro no Dia efetivamente escolhido.
 - Erros preservam Place e Dia para correção sem perda de contexto.
@@ -113,12 +113,13 @@ apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx
 apps/web/app/viagens/[tripId]/lugares/[placeSlug]/actions.ts
 apps/web/e2e/itinerary-day-place-flow.spec.ts
 apps/web/e2e/itinerary.spec.ts
+apps/web/e2e/place-actions.spec.ts
 docs/implementation/increments/rb-inc-198-itinerary-day-place-flow.md
 docs/implementation/context-packs/rb-inc-198-itinerary-day-place-flow.md
 docs/registry.md
 ```
 
-A inclusão de `apps/web/e2e/itinerary.spec.ts` foi autorizada durante a validação porque a nova hierarquia do Dia vazio e os novos CTAs tornam assertions/locators legados ambíguos. Nesse arquivo, o escopo é exclusivamente alinhar testes existentes à nova UX.
+As inclusões de `apps/web/e2e/itinerary.spec.ts` e `apps/web/e2e/place-actions.spec.ts` foram autorizadas durante a validação porque a nova hierarquia do Dia vazio, os novos CTAs e o redirect de Detalhes tornam assertions/locators legados incompatíveis. Nesses arquivos, o escopo é exclusivamente alinhar testes existentes à nova UX.
 
 ## 8. Fora de escopo
 

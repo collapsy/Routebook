@@ -1,4 +1,7 @@
+import { sql } from "drizzle-orm";
+
 import {
+  check,
   date,
   doublePrecision,
   index,
@@ -106,9 +109,26 @@ export const savedPlaces = pgTable(
     placeId: uuid("place_id")
       .notNull()
       .references(() => places.id, { onDelete: "cascade" }),
+    intent: varchar("intent", { length: 24 }).notNull(),
+    priority: varchar("priority", { length: 24 }),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
   },
-  (table) => [uniqueIndex("saved_places_trip_place_unique").on(table.tripId, table.placeId)],
+  (table) => [
+    uniqueIndex("saved_places_trip_place_unique").on(table.tripId, table.placeId),
+    check(
+      "saved_places_intent_check",
+      sql`${table.intent} in ('WANT', 'MAYBE', 'NOT_INTERESTED')`,
+    ),
+    check(
+      "saved_places_priority_check",
+      sql`${table.priority} is null or ${table.priority} = 'MUST_DO'`,
+    ),
+    check(
+      "saved_places_priority_intent_check",
+      sql`${table.priority} is null or ${table.intent} = 'WANT'`,
+    ),
+  ],
 );
 
 export const recommendations = pgTable(

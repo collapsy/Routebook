@@ -20,6 +20,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@routebook/trip-collection':
+        specifier: workspace:*
+        version: link:../../modules/trip-collection
       '@mapbox/vector-tile':
         specifier: 3.0.0
         version: 3.0.0

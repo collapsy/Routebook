@@ -1085,3 +1085,17 @@ Ao concluir um incremento:
 | temporalidade | timezone IANA da Trip; passado, trecho transcorrido, Activity em andamento/sem horário no Dia atual, terminal ou `fixed` protegidos |
 | código e dados | nenhuma alteração executável, migration, Preview ou Production autorizada |
 | validação | SHA `97ec0bea`; Documentation `35375543711`, Engineering `35375543692` e Vercel verdes; 158 Playwright aprovados, com 1 flaky mobile conhecido recuperado no retry |
+
+## Evidências do RB-INC-200
+
+- Incremento: `docs/implementation/increments/rb-inc-200-trip-place-preference-core.md`.
+- Context Pack: `docs/implementation/context-packs/rb-inc-200-trip-place-preference-core.md`.
+- Issue: [#483](https://github.com/collapsy/Routebook/issues/483).
+- Branch: `codex/issue-483-trip-place-preference-core`.
+- Base validada: `e7e8a3bee1ed774515f9e572cd2d0e23f67e4f48`.
+- Domínio: novo workspace `@routebook/trip-collection` com `TripCollection` e `TripPlacePreference`.
+- Invariantes cobertas: intents canônicos, `MUST_DO` somente sobre `WANT`, ausência como não avaliado, unicidade por Trip e Place, idempotência e preservação de identidade/`createdAt` em mudanças reais.
+- Pureza: identidade e instante são injetados; o núcleo não gera UUID nem lê relógio do sistema e não depende de framework, banco ou Provider.
+- Compatibilidade: Saved Places, banco, Activity, Proposal e UI permanecem intocados.
+- Validação local após auditoria: compilação isolada do código-fonte com TypeScript passou e a verificação funcional isolada das invariantes principais passou.
+- Evidência autoritativa de regressão integral no SHA `2e369e45964af17822b079a9a48fab02c928e71b`: Documentation Validation `35382464737`, Engineering Validation `35382464968` e Overture Place Discovery `35382465031` concluíram com sucesso. Engineering Validation aprovou formatação, docs, lint, typecheck, migrations, testes, smoke, build e Playwright/responsividade.

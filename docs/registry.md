@@ -467,6 +467,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-199 | Contrato canônico de seleção e replanejamento | Implementation | Draft | 0.1.0 | [rb-inc-199-selection-replanning-contract.md](./implementation/increments/rb-inc-199-selection-replanning-contract.md) |
 | RB-CTX-199 | Context Pack do RB-INC-199 — Contrato canônico de seleção e replanejamento | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-199-selection-replanning-contract.md](./implementation/context-packs/rb-inc-199-selection-replanning-contract.md) |
+| RB-INC-200 | Núcleo puro de TripPlacePreference | Implementation | Draft | 0.1.0 | [rb-inc-200-trip-place-preference-core.md](./implementation/increments/rb-inc-200-trip-place-preference-core.md) |
+| RB-CTX-200 | Context Pack do RB-INC-200 — Núcleo puro de TripPlacePreference | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-200-trip-place-preference-core.md](./implementation/context-packs/rb-inc-200-trip-place-preference-core.md) |
 
 ## Status possíveis
 

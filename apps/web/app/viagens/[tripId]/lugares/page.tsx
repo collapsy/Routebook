@@ -525,7 +525,9 @@ export default async function PlacesPage({
       .replace(/[^\p{L}\p{N}\s._-]+/gu, " ")
       .replace(/\s+/g, " ")
       .trim();
-  const preferenceByPlaceId = new Map(preferences.map((preference) => [preference.placeId, preference]));
+  const preferenceByPlaceId = new Map(
+    preferences.map((preference) => [preference.placeId, preference]),
+  );
   const filteredPlaces = filterPlaces(
     publishedPlaces,
     {

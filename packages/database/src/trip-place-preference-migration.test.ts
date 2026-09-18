@@ -15,7 +15,7 @@ describe("0034_persist_trip_place_preferences", () => {
     const updatedAtNotNull = migration.indexOf('ALTER COLUMN "updated_at" SET NOT NULL');
 
     expect(backfill).toBeGreaterThanOrEqual(0);
-    expect(migration).toContain("\\\"intent\\\" = 'WANT'");
+    expect(migration).toContain("\"intent\" = 'WANT'");
     expect(migration).toContain('"priority" = NULL');
     expect(migration).toContain('"updated_at" = "created_at"');
     expect(intentNotNull).toBeGreaterThan(backfill);

@@ -1075,7 +1075,7 @@ Ao concluir um incremento:
 | incremento | `docs/implementation/increments/rb-inc-199-selection-replanning-contract.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-199-selection-replanning-contract.md` |
 | ADR | RB-ADR-028 — TripPlacePreference e janela temporal de replanejamento |
-| issue | [#481](https://github.com/collapsy/Routebook/issues/481) |
+| issue/PR | [#481](https://github.com/collapsy/Routebook/issues/481); [PR #482](https://github.com/collapsy/Routebook/pull/482) |
 | branch | `codex/issue-481-selection-replanning-contract` |
 | base | `origin/main@3beceb737edfc390c9e56eecf90f006fac8342b0` |
 | decisão humana | pacote de linguagem, intenção, prioridade, Planning Role e janela temporal aprovado em `2026-09-18` |
@@ -1084,4 +1084,4 @@ Ao concluir um incremento:
 | compatibilidade | Saved Place existente futuramente mapeado para `WANT` sem prioridade, sem perda de ID, associação ou Activity |
 | temporalidade | timezone IANA da Trip; passado, trecho transcorrido, Activity em andamento/sem horário no Dia atual, terminal ou `fixed` protegidos |
 | código e dados | nenhuma alteração executável, migration, Preview ou Production autorizada |
-| validação | `node scripts/validate-docs.mjs` e `pnpm format:check` obrigatórios |
+| validação | SHA `97ec0bea`; Documentation `35375543711`, Engineering `35375543692` e Vercel verdes; 158 Playwright aprovados, com 1 flaky mobile conhecido recuperado no retry |

@@ -27,6 +27,7 @@ Publicar a decisão de domínio e experiência que transforma Salvos em Minha se
 ## 2. Unidade de trabalho
 
 - issue: [#481](https://github.com/collapsy/Routebook/issues/481);
+- pull request: [#482](https://github.com/collapsy/Routebook/pull/482);
 - branch: `codex/issue-481-selection-replanning-contract`;
 - base: `origin/main@3beceb737edfc390c9e56eecf90f006fac8342b0`;
 - decisão humana: pacote aprovado em `2026-09-18`;

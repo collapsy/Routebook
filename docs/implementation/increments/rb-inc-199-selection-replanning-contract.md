@@ -38,6 +38,7 @@ O incremento é exclusivamente documental. Nenhuma mudança de código, banco, r
 ## 2. Unidade de trabalho
 
 - Issue: [#481](https://github.com/collapsy/Routebook/issues/481).
+- Pull Request: [#482](https://github.com/collapsy/Routebook/pull/482).
 - Branch: `codex/issue-481-selection-replanning-contract`.
 - Base: `origin/main@3beceb737edfc390c9e56eecf90f006fac8342b0`.
 - Decisão: RB-ADR-028, aprovada pelo responsável humano em `2026-09-18`.
@@ -131,6 +132,8 @@ pnpm format:check
 ```
 
 Não há justificativa para executar testes de código, build, migrations ou E2E porque nenhum artefato executável pode ser alterado.
+
+O pipeline do PR executa a regressão integral independentemente desse limite. No SHA `97ec0bea`, Documentation Validation `35375543711`, Engineering Validation `35375543692` e Vercel passaram. A suíte Playwright aprovou 158 testes; um caso mobile conhecido recuperou no retry e permaneceu anotado como flaky.
 
 ## 11. Critérios de aceite
 

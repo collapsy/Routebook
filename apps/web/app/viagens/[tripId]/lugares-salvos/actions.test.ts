@@ -43,7 +43,11 @@ vi.mock("../../../../lib/trip-route-access", () => ({
   resolveTripRouteAccess: accessMocks.resolve,
 }));
 
-import { clearSelectionPlacePreferenceAction, setSelectionPlacePreferenceAction } from "./actions";
+import {
+  addSelectedPlaceToItineraryAction,
+  clearSelectionPlacePreferenceAction,
+  setSelectionPlacePreferenceAction,
+} from "./actions";
 
 const tripId = "11111111-1111-4111-8111-111111111111";
 const place = {
@@ -130,4 +134,15 @@ describe("ações de Minha seleção", () => {
 
     expect(databaseMocks.savePreference).not.toHaveBeenCalled();
   });
+
+  it("não adiciona pelo fluxo de Minha seleção quando a intenção não é WANT", async () => {
+    databaseMocks.listPreferences.mockResolvedValue([preference("MAYBE")]);
+    const formData = form();
+    formData.set("dayDate", "2026-08-22");
+
+    await expect(addSelectedPlaceToItineraryAction(formData)).rejects.toThrow(
+      "NEXT_REDIRECT:/viagens/11111111-1111-4111-8111-111111111111/lugares-salvos?erro=Marque%20o%20lugar%20como%20Quero%20ir%20antes%20de%20adicion%C3%A1-lo%20ao%20Roteiro%20por%20Minha%20sele%C3%A7%C3%A3o.",
+    );
+  });
+
 });

@@ -72,7 +72,7 @@ test("Detalhes preserva o Dia de origem e mantém Salvar separado do Roteiro", a
   await page.goto(`/viagens/${trip.id}/lugares/praia-do-amor?dia=2026-08-24#adicionar-ao-roteiro`);
 
   await expect(page.getByText("Planejando o Dia 3", { exact: true })).toBeVisible();
-  await expect(page.getByLabel("Adicionar ao dia")).toHaveValue("2026-08-24");
+  await expect(page.getByLabel("Adicionar ao dia", { exact: true })).toHaveValue("2026-08-24");
   await expect(page.getByRole("button", { name: "Adicionar ao Dia 3" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Salvar para depois" })).toBeVisible();
   await expect(page.getByRole("link", { name: "← Voltar para lugares" })).toHaveAttribute(

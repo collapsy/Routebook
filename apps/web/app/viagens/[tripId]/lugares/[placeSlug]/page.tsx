@@ -297,7 +297,7 @@ export default async function PlaceDetailsPage({
           </div>
 
           <button className="product-button" type="submit">
-            {selectedDay ? `Adicionar ao Dia ${selectedDay.index}` : "Adicionar ao roteiro"}
+            Adicionar ao roteiro
           </button>
         </form>
       </section>

@@ -293,17 +293,17 @@ test("adiciona um lugar de Minha seleção ao roteiro sem remover a preferência
   const placeName = place!.name;
   await page.goto(`/viagens/${trip.id}/lugares-salvos`);
 
-  await page.getByLabel("Adicionar ao dia").selectOption("2026-08-23");
+  await page.getByLabel("Adicionar manualmente ao dia").selectOption("2026-08-23");
   await page.getByLabel("Horário opcional").fill("14:15");
   await page.getByLabel("Duração opcional").fill("120");
   await submitAndExpectActionRedirect(
     page,
     () => page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
     /adicionadoAoRoteiro=1$/,
-    "Lugar adicionado ao roteiro.",
+    "Lugar adicionado ao Roteiro.",
   );
 
-  await expect(page.getByRole("status")).toContainText("Lugar adicionado ao roteiro.");
+  await expect(page.getByRole("status")).toContainText("Lugar adicionado ao Roteiro.");
   await expect(page.getByRole("heading", { name: placeName })).toBeVisible();
 
   await page.getByRole("link", { name: "Abrir roteiro" }).click();

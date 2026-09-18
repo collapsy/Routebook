@@ -176,5 +176,6 @@ export {
   type SaveRecommendedPlaceCommand,
 } from "./recommendation-decision-service";
 export { DrizzleSavedPlaceRepository } from "./saved-place-repository";
+export { DrizzleTripPlacePreferenceRepository } from "./trip-place-preference-repository";
 export { DrizzleTravelerProfileRepository } from "./traveler-profile-repository";
 export { DrizzleTripRepository } from "./trip-repository";

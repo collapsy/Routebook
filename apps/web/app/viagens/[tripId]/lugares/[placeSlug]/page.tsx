@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import {
   DrizzlePlaceRepository,
-  DrizzleSavedPlaceRepository,
+  DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
 import type { PlaceCategory } from "@routebook/place-catalog";
@@ -19,7 +19,12 @@ import {
 import { findPipaPlacePracticalGuide } from "../../../../../lib/pipa-place-guide";
 import { resolvePlaceDiscoveryRegion } from "../../../../../lib/place-discovery-region";
 import { presentAccommodationDistance } from "../distance";
-import { addPlaceToItineraryAction, removePlaceAction, savePlaceAction } from "./actions";
+import {
+  addPlaceToItineraryAction,
+  clearPlacePreferenceAction,
+  setPlaceMustDoAction,
+  setPlacePreferenceAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -54,15 +59,16 @@ export default async function PlaceDetailsPage({
 }: {
   params: Promise<{ tripId: string; placeSlug: string }>;
   searchParams: Promise<{
-    saved?: string;
-    removed?: string;
+    preferencia?: string;
+    erroPreferencia?: string;
     adicionadoAoRoteiro?: string;
     dia?: string;
     erroRoteiro?: string;
   }>;
 }) {
   const { tripId, placeSlug } = await params;
-  const { saved, removed, adicionadoAoRoteiro, dia, erroRoteiro } = await searchParams;
+  const { preferencia, erroPreferencia, adicionadoAoRoteiro, dia, erroRoteiro } =
+    await searchParams;
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
 
   if (!trip) notFound();
@@ -80,7 +86,7 @@ export default async function PlaceDetailsPage({
   });
   if (!place) notFound();
 
-  const savedPlace = await new DrizzleSavedPlaceRepository().find(tripId, place.id);
+  const placePreference = await new DrizzleTripPlacePreferenceRepository().find(tripId, place.id);
   const accommodationDistance = presentAccommodationDistance(trip.accommodation?.coordinate, {
     latitude: place.latitude,
     longitude: place.longitude,
@@ -111,15 +117,21 @@ export default async function PlaceDetailsPage({
         </Link>
       </div>
 
-      {saved === "1" ? (
+      {preferencia === "atualizada" ? (
         <p className="success-banner" role="status">
-          Lugar salvo.
+          Preferência atualizada.
         </p>
       ) : null}
 
-      {removed === "1" ? (
+      {preferencia === "limpa" ? (
         <p className="success-banner" role="status">
-          Lugar removido dos salvos. O que já estiver no roteiro continua lá.
+          Preferência removida. O que já estiver no roteiro continua lá.
+        </p>
+      ) : null}
+
+      {erroPreferencia ? (
+        <p className="form-error itinerary-feedback" role="alert">
+          Não foi possível atualizar a preferência. Tente novamente.
         </p>
       ) : null}
 
@@ -208,8 +220,8 @@ export default async function PlaceDetailsPage({
             <p className="product-eyebrow">Planejar este lugar</p>
             <h2 id="place-itinerary-title">Adicionar ao roteiro</h2>
             <p>
-              Escolha o dia e, se quiser, defina horário e duração. Adicionar ao roteiro não salva o
-              lugar automaticamente nos Salvos.
+              Escolha o dia e, se quiser, defina horário e duração. Adicionar ao roteiro é uma ação
+              manual e não altera sua preferência por este lugar.
             </p>
           </div>
           {adicionadoAoRoteiro === "1" && selectedDay ? (
@@ -330,27 +342,84 @@ export default async function PlaceDetailsPage({
         </div>
       </section>
 
-      <section className="traveler-context-summary" aria-labelledby="saved-place-title">
-        <div className="section-heading-row">
-          <div>
-            <p className="product-eyebrow">Salvos</p>
-            <h2 id="saved-place-title">
-              {savedPlace ? "Este lugar está salvo" : "Salvar para depois"}
-            </h2>
+      <section
+        className="traveler-context-summary"
+        aria-labelledby="place-preference-title"
+        id="preferencia-do-lugar"
+      >
+        <div>
+          <p className="product-eyebrow">Minha seleção</p>
+          <h2 id="place-preference-title">O que você acha deste lugar?</h2>
+          <p>
+            Sua preferência ajuda a organizar a viagem e não adiciona nem remove este lugar do
+            roteiro automaticamente.
+          </p>
+          {placePreference ? (
             <p>
-              {savedPlace
-                ? "Remover dos salvos não remove o que já estiver no roteiro."
-                : "Salvar deixa este lugar disponível nos Salvos; não o adiciona ao roteiro."}
+              <strong>Preferência atual: </strong>
+              {placePreference.intent === "WANT"
+                ? "Quero ir"
+                : placePreference.intent === "MAYBE"
+                  ? "Talvez"
+                  : "Não tenho interesse"}
+              {placePreference.priority === "MUST_DO" ? " · Imperdível" : ""}
             </p>
-          </div>
-          <form action={savedPlace ? removePlaceAction : savePlaceAction}>
+          ) : (
+            <p>Você ainda não avaliou este lugar.</p>
+          )}
+        </div>
+
+        <div className="section-heading-row" aria-label="Preferência do lugar">
+          {(["WANT", "MAYBE", "NOT_INTERESTED"] as const).map((intent) => (
+            <form action={setPlacePreferenceAction} key={intent}>
+              <input name="tripId" type="hidden" value={tripId} />
+              <input name="placeSlug" type="hidden" value={placeSlug} />
+              <input name="intent" type="hidden" value={intent} />
+              <button
+                aria-pressed={placePreference?.intent === intent}
+                className="product-secondary-action"
+                type="submit"
+              >
+                {intent === "WANT"
+                  ? "Quero ir"
+                  : intent === "MAYBE"
+                    ? "Talvez"
+                    : "Não tenho interesse"}
+              </button>
+            </form>
+          ))}
+        </div>
+
+        {placePreference?.intent === "WANT" ? (
+          <form action={setPlaceMustDoAction}>
             <input name="tripId" type="hidden" value={tripId} />
             <input name="placeSlug" type="hidden" value={placeSlug} />
-            <button className="product-secondary-action" type="submit">
-              {savedPlace ? "Remover dos salvos" : "Salvar lugar"}
+            <input
+              name="enabled"
+              type="hidden"
+              value={placePreference.priority === "MUST_DO" ? "0" : "1"}
+            />
+            <button
+              aria-pressed={placePreference.priority === "MUST_DO"}
+              className="product-secondary-action"
+              type="submit"
+            >
+              {placePreference.priority === "MUST_DO"
+                ? "Remover de Imperdíveis"
+                : "Marcar como Imperdível"}
             </button>
           </form>
-        </div>
+        ) : null}
+
+        {placePreference ? (
+          <form action={clearPlacePreferenceAction}>
+            <input name="tripId" type="hidden" value={tripId} />
+            <input name="placeSlug" type="hidden" value={placeSlug} />
+            <button className="product-inline-link" type="submit">
+              Limpar preferência
+            </button>
+          </form>
+        ) : null}
       </section>
 
       <dl className="trip-overview-summary">

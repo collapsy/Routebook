@@ -22,10 +22,7 @@ import {
 } from "../../../../../lib/google-maps-links";
 import { findPipaPlacePracticalGuide } from "../../../../../lib/pipa-place-guide";
 import { resolvePlaceDiscoveryRegion } from "../../../../../lib/place-discovery-region";
-import {
-  clearPublishedPlacePreferenceAction,
-  setPublishedPlacePreferenceAction,
-} from "../actions";
+import { clearPublishedPlacePreferenceAction, setPublishedPlacePreferenceAction } from "../actions";
 import { presentAccommodationDistance } from "../distance";
 import { addPlaceToItineraryAction } from "./actions";
 

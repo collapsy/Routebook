@@ -4,6 +4,7 @@ import {
   changeTripPlacePreference,
   createTripPlacePreference,
   TripPlacePreferenceValidationError,
+  TRIP_PLACE_INTENTS,
   type TripPlaceIntent,
   type TripPlacePreference,
   type TripPlacePreferenceRepository,
@@ -69,4 +70,11 @@ export async function clearTripPlacePreference(
   placeId: string,
 ): Promise<void> {
   await repository.remove(tripId, placeId);
+}
+
+export function parseTripPlaceIntent(value: string): TripPlaceIntent | null {
+  const normalized = value.trim();
+  return TRIP_PLACE_INTENTS.includes(normalized as TripPlaceIntent)
+    ? (normalized as TripPlaceIntent)
+    : null;
 }

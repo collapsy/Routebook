@@ -4,7 +4,7 @@ import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
 test.setTimeout(180_000);
 
-test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e Guia", async ({
+test("valida São Paulo sem seed e preserva Discovery, Minha seleção, Roteiro, mapa e Guia", async ({
   page,
 }) => {
   const { trip } = await createAuthenticatedE2ETrip({
@@ -56,14 +56,14 @@ test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e G
     .locator('[data-place-source="external"]:not([data-place-category="unmapped"])')
     .first();
   await expect(promotable).toBeVisible();
-  await promotable.getByRole("button", { name: "Salvar lugar" }).click();
+  await promotable.getByRole("button", { name: "Quero ir" }).click();
   await expect(page).toHaveURL(new RegExp("/viagens/" + trip.id + "/lugares-salvos\\?salvo=1"), {
     timeout: 45_000,
   });
   await expect(
-    page.getByText("Lugar salvo. Agora você pode adicioná-lo ao roteiro."),
+    page.getByText("Lugar adicionado à Minha seleção como Quero ir."),
   ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Lugares salvos", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Minha seleção", exact: true })).toBeVisible();
   const savedCard = page.locator(".place-card").first();
   await expect(savedCard).toBeVisible();
   const selectedName = (await savedCard.getByRole("heading").innerText()).trim();
@@ -73,9 +73,9 @@ test("valida São Paulo sem seed e preserva Discovery, Salvos, Roteiro, mapa e G
     "2",
   );
 
-  await savedCard.getByLabel("Adicionar ao dia").selectOption("2026-11-11");
+  await savedCard.getByLabel("Adicionar manualmente ao dia").selectOption("2026-11-11");
   await savedCard.getByRole("button", { name: "Adicionar ao roteiro" }).click();
-  await expect(page.getByText(/Lugar adicionado ao roteiro/)).toBeVisible();
+  await expect(page.getByText(/Lugar adicionado ao Roteiro/)).toBeVisible();
 
   await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-11-11`);
   await expect(

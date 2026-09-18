@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import {
   DrizzlePlaceRepository,
-  DrizzleSavedPlaceRepository,
+  DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
 import type { PlaceCategory } from "@routebook/place-catalog";
@@ -12,14 +12,22 @@ import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../../components/place-primary-image";
 import {
+  TripPlacePreferenceControls,
+  tripPlaceIntentLabels,
+} from "../../../../../components/trip-place-preference-controls";
+import {
   buildGoogleMapsDirectionsUrl,
   buildGoogleMapsPlaceLabel,
   buildGoogleMapsSearchUrl,
 } from "../../../../../lib/google-maps-links";
 import { findPipaPlacePracticalGuide } from "../../../../../lib/pipa-place-guide";
 import { resolvePlaceDiscoveryRegion } from "../../../../../lib/place-discovery-region";
+import {
+  clearPublishedPlacePreferenceAction,
+  setPublishedPlacePreferenceAction,
+} from "../actions";
 import { presentAccommodationDistance } from "../distance";
-import { addPlaceToItineraryAction, removePlaceAction, savePlaceAction } from "./actions";
+import { addPlaceToItineraryAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -54,15 +62,13 @@ export default async function PlaceDetailsPage({
 }: {
   params: Promise<{ tripId: string; placeSlug: string }>;
   searchParams: Promise<{
-    saved?: string;
-    removed?: string;
     adicionadoAoRoteiro?: string;
     dia?: string;
     erroRoteiro?: string;
   }>;
 }) {
   const { tripId, placeSlug } = await params;
-  const { saved, removed, adicionadoAoRoteiro, dia, erroRoteiro } = await searchParams;
+  const { adicionadoAoRoteiro, dia, erroRoteiro } = await searchParams;
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
 
   if (!trip) notFound();
@@ -80,7 +86,7 @@ export default async function PlaceDetailsPage({
   });
   if (!place) notFound();
 
-  const savedPlace = await new DrizzleSavedPlaceRepository().find(tripId, place.id);
+  const preference = await new DrizzleTripPlacePreferenceRepository().find(tripId, place.id);
   const accommodationDistance = presentAccommodationDistance(trip.accommodation?.coordinate, {
     latitude: place.latitude,
     longitude: place.longitude,
@@ -110,18 +116,6 @@ export default async function PlaceDetailsPage({
           Visão da viagem
         </Link>
       </div>
-
-      {saved === "1" ? (
-        <p className="success-banner" role="status">
-          Lugar salvo.
-        </p>
-      ) : null}
-
-      {removed === "1" ? (
-        <p className="success-banner" role="status">
-          Lugar removido dos salvos. O que já estiver no roteiro continua lá.
-        </p>
-      ) : null}
 
       <header className="trip-overview-hero">
         <div>
@@ -330,27 +324,30 @@ export default async function PlaceDetailsPage({
         </div>
       </section>
 
-      <section className="traveler-context-summary" aria-labelledby="saved-place-title">
+      <section className="traveler-context-summary" aria-labelledby="place-preference-title">
         <div className="section-heading-row">
           <div>
-            <p className="product-eyebrow">Salvos</p>
-            <h2 id="saved-place-title">
-              {savedPlace ? "Este lugar está salvo" : "Salvar para depois"}
-            </h2>
+            <p className="product-eyebrow">Minha seleção</p>
+            <h2 id="place-preference-title">O que você quer fazer com este lugar?</h2>
             <p>
-              {savedPlace
-                ? "Remover dos salvos não remove o que já estiver no roteiro."
-                : "Salvar deixa este lugar disponível nos Salvos; não o adiciona ao roteiro."}
+              {preference
+                ? `Preferência atual: ${tripPlaceIntentLabels[preference.intent]}${preference.priority === "MUST_DO" ? " · Imperdível" : ""}.`
+                : "Este lugar ainda não foi avaliado para esta viagem."}
             </p>
+            <p>Alterar esta preferência não adiciona nem remove atividades do Roteiro.</p>
           </div>
-          <form action={savedPlace ? removePlaceAction : savePlaceAction}>
-            <input name="tripId" type="hidden" value={tripId} />
-            <input name="placeSlug" type="hidden" value={placeSlug} />
-            <button className="product-secondary-action" type="submit">
-              {savedPlace ? "Remover dos salvos" : "Salvar lugar"}
-            </button>
-          </form>
+          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares-salvos`}>
+            Ver Minha seleção
+          </Link>
         </div>
+        <TripPlacePreferenceControls
+          clearAction={clearPublishedPlacePreferenceAction}
+          placeName={place.name}
+          placeSlug={place.slug}
+          preference={preference}
+          setAction={setPublishedPlacePreferenceAction}
+          tripId={tripId}
+        />
       </section>
 
       <dl className="trip-overview-summary">

@@ -74,7 +74,7 @@ test("preserva contexto entre áreas e prioriza Hoje sem sobrescrever seleção 
 
   await page
     .getByRole("navigation", { name: "Navegação da viagem" })
-    .getByRole("link", { name: "Salvos" })
+    .getByRole("link", { name: "Minha seleção" })
     .click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares-salvos$`));
 

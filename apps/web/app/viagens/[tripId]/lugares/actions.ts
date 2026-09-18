@@ -5,16 +5,20 @@ import { notFound, redirect } from "next/navigation";
 
 import {
   DrizzlePlaceRepository,
-  DrizzleSavedPlaceRepository,
+  DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
   PlacePromotionServiceError,
   promoteExternalPlaceCandidate,
 } from "@routebook/database";
 import type { Place } from "@routebook/place-catalog";
-import { removePlaceFromTrip, savePlaceForTrip } from "@routebook/saved-places";
 import { findTripById } from "@routebook/trip-management";
 
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
+import {
+  clearTripPlacePreference,
+  parseTripPlaceIntent,
+  setTripPlacePreference,
+} from "../../../../lib/trip-place-preference";
 import { resolvePlaceDiscoveryRegion } from "../../../../lib/place-discovery-region";
 import { resolveTripRouteAccess } from "../../../../lib/trip-route-access";
 import { parseMaximumDistance, parsePlaceCategory, parsePlacePriceRange } from "./filters";
@@ -87,21 +91,27 @@ function revalidatePublishedPlaceSurfaces(tripId: string, placeSlug: string): vo
   revalidatePath(`/viagens/${tripId}/lugares-salvos`);
 }
 
-export async function savePublishedPlaceAction(formData: FormData): Promise<void> {
+export async function setPublishedPlacePreferenceAction(formData: FormData): Promise<void> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
+  const intent = parseTripPlaceIntent(String(formData.get("intent") ?? ""));
   const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
+  if (!intent) return;
 
-  await savePlaceForTrip(new DrizzleSavedPlaceRepository(), tripId, place.id);
+  await setTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), {
+    tripId,
+    placeId: place.id,
+    intent,
+  });
   revalidatePublishedPlaceSurfaces(tripId, placeSlug);
 }
 
-export async function removePublishedPlaceAction(formData: FormData): Promise<void> {
+export async function clearPublishedPlacePreferenceAction(formData: FormData): Promise<void> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
   const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
 
-  await removePlaceFromTrip(new DrizzleSavedPlaceRepository(), tripId, place.id);
+  await clearTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), tripId, place.id);
   revalidatePublishedPlaceSurfaces(tripId, placeSlug);
 }
 
@@ -272,8 +282,13 @@ export async function saveExternalPlaceAction(formData: FormData): Promise<never
   }
 
   try {
+    const intent = parseTripPlaceIntent(String(formData.get("intent") ?? "")) ?? "WANT";
     const result = await promoteExternalPlaceCandidate({ candidate });
-    await savePlaceForTrip(new DrizzleSavedPlaceRepository(), tripId, result.placeId);
+    await setTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), {
+      tripId,
+      placeId: result.placeId,
+      intent,
+    });
   } catch (error) {
     if (error instanceof PlacePromotionServiceError) {
       redirect(promotionReturnPath(tripId, formData, promotionErrorFeedback(error)));
@@ -283,5 +298,5 @@ export async function saveExternalPlaceAction(formData: FormData): Promise<never
 
   revalidatePath(placesPath);
   revalidatePath(`/viagens/${tripId}/lugares-salvos`);
-  redirect(`/viagens/${tripId}/lugares-salvos?salvo=1`);
+  redirect(promotionReturnPath(tripId, formData, { promocao: "salva" }));
 }

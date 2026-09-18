@@ -112,10 +112,13 @@ apps/web/app/viagens/[tripId]/lugares/page.tsx
 apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx
 apps/web/app/viagens/[tripId]/lugares/[placeSlug]/actions.ts
 apps/web/e2e/itinerary-day-place-flow.spec.ts
+apps/web/e2e/itinerary.spec.ts
 docs/implementation/increments/rb-inc-198-itinerary-day-place-flow.md
 docs/implementation/context-packs/rb-inc-198-itinerary-day-place-flow.md
 docs/registry.md
 ```
+
+A inclusão de `apps/web/e2e/itinerary.spec.ts` foi autorizada durante a validação porque a nova hierarquia do Dia vazio e os novos CTAs tornam assertions/locators legados ambíguos. Nesse arquivo, o escopo é exclusivamente alinhar testes existentes à nova UX.
 
 ## 8. Fora de escopo
 

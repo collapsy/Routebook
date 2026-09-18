@@ -122,8 +122,9 @@ Fora de modo de planejamento, a Discovery mantém sua hierarquia geral anterior.
 
 ### Detalhes
 
-- `Adicionar ao Dia X` usa o Dia de origem como default;
-- seletor continua permitindo outro Dia;
+- o Dia de origem continua como default do seletor;
+- o seletor continua permitindo outro Dia;
+- o CTA usa `Adicionar ao roteiro`, evitando exibir um número de Dia obsoleto após troca no seletor;
 - horário/duração opcionais;
 - `Salvar para depois` continua independente.
 
@@ -148,12 +149,13 @@ apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx
 apps/web/app/viagens/[tripId]/lugares/[placeSlug]/actions.ts
 apps/web/e2e/itinerary-day-place-flow.spec.ts
 apps/web/e2e/itinerary.spec.ts
+apps/web/e2e/place-actions.spec.ts
 docs/implementation/increments/rb-inc-198-itinerary-day-place-flow.md
 docs/implementation/context-packs/rb-inc-198-itinerary-day-place-flow.md
 docs/registry.md
 ```
 
-O arquivo legado `apps/web/e2e/itinerary.spec.ts` pode ser ajustado apenas para atualizar assertions e locators afetados pela nova hierarquia/rotulagem do Roteiro; ele não autoriza mudança adicional de produto.
+Os arquivos legados `apps/web/e2e/itinerary.spec.ts` e `apps/web/e2e/place-actions.spec.ts` podem ser ajustados apenas para atualizar assertions, locators e expectativas de redirect afetados pela nova hierarquia/rotulagem; eles não autorizam mudança adicional de produto.
 
 ## 11. Testes mínimos
 

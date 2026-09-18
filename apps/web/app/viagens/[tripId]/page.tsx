@@ -305,7 +305,7 @@ export default async function TripOverviewPage({
             Explorar lugares
           </Link>
           <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares-salvos`}>
-            Ver lugares salvos
+            Ver Minha seleção
           </Link>
         </div>
       </section>

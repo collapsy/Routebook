@@ -351,6 +351,9 @@ importers:
 
   packages/database:
     dependencies:
+      '@routebook/trip-collection':
+        specifier: workspace:*
+        version: link:../../modules/trip-collection
       '@routebook/decision-intelligence':
         specifier: workspace:*
         version: link:../../modules/decision-intelligence

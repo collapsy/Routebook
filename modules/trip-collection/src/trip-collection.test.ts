@@ -12,10 +12,7 @@ import { TripPlacePreferenceValidationError } from "./trip-place-preference";
 const createdAt = new Date("2026-09-18T12:00:00.000Z");
 
 function emptyCollection() {
-  return createTripCollection(
-    { tripId: "trip-1" },
-    { id: "collection-1", now: createdAt },
-  );
+  return createTripCollection({ tripId: "trip-1" }, { id: "collection-1", now: createdAt });
 }
 
 describe("TripCollection", () => {

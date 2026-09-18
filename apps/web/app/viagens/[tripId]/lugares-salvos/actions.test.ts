@@ -43,10 +43,7 @@ vi.mock("../../../../lib/trip-route-access", () => ({
   resolveTripRouteAccess: accessMocks.resolve,
 }));
 
-import {
-  clearSelectionPlacePreferenceAction,
-  setSelectionPlacePreferenceAction,
-} from "./actions";
+import { clearSelectionPlacePreferenceAction, setSelectionPlacePreferenceAction } from "./actions";
 
 const tripId = "11111111-1111-4111-8111-111111111111";
 const place = {
@@ -104,9 +101,7 @@ describe("ações de Minha seleção", () => {
         priority: null,
       }),
     );
-    expect(cacheMocks.revalidatePath).toHaveBeenCalledWith(
-      `/viagens/${tripId}/lugares-salvos`,
-    );
+    expect(cacheMocks.revalidatePath).toHaveBeenCalledWith(`/viagens/${tripId}/lugares-salvos`);
   });
 
   it("não persiste novamente quando a escolha é idempotente", async () => {

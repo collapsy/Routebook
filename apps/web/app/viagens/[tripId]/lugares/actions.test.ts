@@ -162,9 +162,7 @@ describe("setPublishedPlacePreferenceAction", () => {
     expect(cacheMocks.revalidatePath).toHaveBeenCalledWith(
       `/viagens/${tripId}/lugares/praia-do-amor`,
     );
-    expect(cacheMocks.revalidatePath).toHaveBeenCalledWith(
-      `/viagens/${tripId}/lugares-salvos`,
-    );
+    expect(cacheMocks.revalidatePath).toHaveBeenCalledWith(`/viagens/${tripId}/lugares-salvos`);
   });
 
   it("remove MUST_DO ao trocar WANT por MAYBE", async () => {

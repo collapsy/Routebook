@@ -150,6 +150,8 @@ apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx
 apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx
 apps/web/app/viagens/[tripId]/lugares-salvos/actions.ts
 apps/web/app/viagens/[tripId]/lugares-salvos/actions.test.ts
+apps/web/e2e/active-trip-experience.spec.ts
+apps/web/e2e/itinerary.spec.ts
 pnpm-lock.yaml
 docs/implementation/increments/rb-inc-202-trip-place-preference-ui.md
 docs/implementation/context-packs/rb-inc-202-trip-place-preference-ui.md

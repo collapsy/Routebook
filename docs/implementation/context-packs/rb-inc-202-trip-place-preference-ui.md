@@ -149,6 +149,7 @@ A adição manual ao Roteiro não altera a preferência.
 - Minha seleção inclui os três intents;
 - navegação não usa “Salvos” como conceito principal;
 - nenhum arquivo de schema/migration é alterado;
+- E2E usa a linguagem canônica “Minha seleção” preservando a rota técnica `/lugares-salvos`;
 - regressão integral permanece verde.
 
 ## 12. Gate humano

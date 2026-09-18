@@ -154,4 +154,6 @@ export async function addSelectedPlaceToItineraryAction(formData: FormData): Pro
 }
 
 // Alias transitório para chamadas internas antigas.
-export const addSavedPlaceToItineraryAction = addSelectedPlaceToItineraryAction;
+export async function addSavedPlaceToItineraryAction(formData: FormData): Promise<never> {
+  return addSelectedPlaceToItineraryAction(formData);
+}

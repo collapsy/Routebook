@@ -1,6 +1,6 @@
-import { randomUUID } from "node:crypto";
-
 "use server";
+
+import { randomUUID } from "node:crypto";
 
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
@@ -63,11 +63,7 @@ async function persistTripPlacePreference(
   const current = await repository.find(input.tripId, input.placeId);
   const now = new Date();
   const next = current
-    ? changeTripPlacePreference(
-        current,
-        { intent: input.intent, priority: input.priority },
-        now,
-      )
+    ? changeTripPlacePreference(current, { intent: input.intent, priority: input.priority }, now)
     : createTripPlacePreference(
         {
           tripId: input.tripId,

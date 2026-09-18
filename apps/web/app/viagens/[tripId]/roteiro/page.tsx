@@ -261,6 +261,8 @@ export default async function ItineraryPage({
     (leg) => leg.kind === "between-activities",
   );
   const returnLeg = selectedSpatialDay.legSummary.legs.find((leg) => leg.kind === "return");
+  const planningPlacesHref = `/viagens/${tripId}/lugares?dia=${encodeURIComponent(selectedDay.date)}`;
+  const savedPlacesHref = `/viagens/${tripId}/lugares-salvos?dia=${encodeURIComponent(selectedDay.date)}`;
 
   return (
     <section className="app-page itinerary-page">
@@ -284,7 +286,7 @@ export default async function ItineraryPage({
 
       {atividadeCriada === "1" ? (
         <p className="success-banner" role="status">
-          Atividade adicionada ao roteiro.
+          Atividade adicionada ao Dia {selectedDay.position}.
         </p>
       ) : null}
       {atividadeEditada === "1" ? (
@@ -394,7 +396,7 @@ export default async function ItineraryPage({
             <p>{selectedItemCount === 0 ? "Dia livre por enquanto" : selectedDaySummary}</p>
           </div>
           <a className={journeyStyles.quickAddLink} href="#planejar-dia">
-            + Planejar este Dia
+            + Adicionar ao Dia {selectedDay.position}
           </a>
         </header>
 
@@ -409,20 +411,22 @@ export default async function ItineraryPage({
               {selectedDay.activities.length === 0 && selectedDay.freePeriods.length === 0 ? (
                 <section className={journeyStyles.emptyGuide} aria-labelledby="empty-day-title">
                   <p className="product-eyebrow">Dia aberto</p>
-                  <h3 id="empty-day-title">Escolha um Lugar para começar este Dia</h3>
-                  <p>Você pode montar o Dia aos poucos ou mantê-lo livre.</p>
+                  <h3 id="empty-day-title">
+                    Comece adicionando um lugar ao Dia {selectedDay.position}
+                  </h3>
+                  <p>
+                    Escolha um lugar para este Dia. Você também pode usar um lugar salvo, criar uma
+                    atividade manual ou manter o Dia livre.
+                  </p>
                   <div className={journeyStyles.emptyActions}>
-                    <Link className="product-primary-action" href={`/viagens/${tripId}/lugares`}>
-                      Explorar Lugares
+                    <Link className="product-primary-action" href={planningPlacesHref}>
+                      Adicionar lugar ao Dia {selectedDay.position}
                     </Link>
-                    <Link
-                      className="product-secondary-action"
-                      href={`/viagens/${tripId}/lugares-salvos`}
-                    >
-                      Ver Lugares salvos
+                    <Link className="product-secondary-action" href={savedPlacesHref}>
+                      Usar lugar salvo
                     </Link>
-                    <a className="product-secondary-action" href="#planejar-dia">
-                      Criar atividade
+                    <a className="product-secondary-action" href="#adicionar-atividade-manual">
+                      Criar atividade manual
                     </a>
                   </div>
                 </section>
@@ -471,7 +475,9 @@ export default async function ItineraryPage({
                                   </summary>
                                   <div className={journeyStyles.activityMenuPanel}>
                                     {place ? (
-                                      <Link href={`/viagens/${tripId}/lugares/${place.slug}`}>
+                                      <Link
+                                        href={`/viagens/${tripId}/lugares/${place.slug}?dia=${encodeURIComponent(selectedDay.date)}`}
+                                      >
                                         Ver lugar
                                       </Link>
                                     ) : null}
@@ -622,7 +628,7 @@ export default async function ItineraryPage({
                               {place ? (
                                 <Link
                                   className={journeyStyles.placeContextLink}
-                                  href={`/viagens/${tripId}/lugares/${place.slug}`}
+                                  href={`/viagens/${tripId}/lugares/${place.slug}?dia=${encodeURIComponent(selectedDay.date)}`}
                                 >
                                   Ver informações do lugar →
                                 </Link>
@@ -657,10 +663,10 @@ export default async function ItineraryPage({
               <div className={journeyStyles.secondaryHeading}>
                 <div>
                   <p className="product-eyebrow">Planejar este Dia</p>
-                  <h2>Adicionar ao Dia</h2>
+                  <h2>Adicionar ao Dia {selectedDay.position}</h2>
                 </div>
-                <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
-                  Encontrar um Lugar
+                <Link className="product-secondary-action" href={planningPlacesHref}>
+                  Adicionar lugar
                 </Link>
               </div>
 

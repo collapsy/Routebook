@@ -463,6 +463,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 
 | RB-INC-196 | Compositor contextual inteligente de Proposta de Roteiro | Implementation | Draft | 0.1.0 | [rb-inc-196-contextual-itinerary-composer.md](./implementation/increments/rb-inc-196-contextual-itinerary-composer.md) |
 | RB-CTX-196 | Context Pack do RB-INC-196 — Compositor contextual inteligente de Proposta de Roteiro | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-196-contextual-itinerary-composer.md](./implementation/context-packs/rb-inc-196-contextual-itinerary-composer.md) |
+| RB-INC-198 | Contexto de Dia na jornada Roteiro → Lugar → Roteiro | Implementation Increment | Draft | 0.1.0 | [rb-inc-198-itinerary-day-place-flow.md](./implementation/increments/rb-inc-198-itinerary-day-place-flow.md) |
+| RB-CTX-198 | Context Pack do RB-INC-198 — Contexto de Dia na jornada Roteiro → Lugar → Roteiro | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-198-itinerary-day-place-flow.md](./implementation/context-packs/rb-inc-198-itinerary-day-place-flow.md) |
 
 ## Status possíveis
 

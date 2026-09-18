@@ -98,12 +98,16 @@ export default async function PlaceDetailsPage({
   const practicalGuide =
     place.destinationId === "pipa-rn-br" ? findPipaPlacePracticalGuide(place.slug) : undefined;
   const tripDays = deriveTripDays(trip.period);
-  const selectedDay = tripDays.find((day) => day.date === dia) ?? tripDays[0];
+  const requestedDay = tripDays.find((day) => day.date === dia);
+  const selectedDay = requestedDay ?? tripDays[0];
+  const placesBackHref = requestedDay
+    ? `/viagens/${tripId}/lugares?dia=${encodeURIComponent(requestedDay.date)}`
+    : `/viagens/${tripId}/lugares`;
 
   return (
     <section className="app-page trip-overview-page">
       <div className="section-heading-row">
-        <Link className="back-link" href={`/viagens/${tripId}/lugares`}>
+        <Link className="back-link" href={placesBackHref}>
           ← Voltar para lugares
         </Link>
         <Link className="product-secondary-action" href={`/viagens/${tripId}`}>
@@ -111,9 +115,28 @@ export default async function PlaceDetailsPage({
         </Link>
       </div>
 
+      {requestedDay ? (
+        <section className="traveler-context-summary" aria-labelledby="place-planning-context">
+          <p className="product-eyebrow">Planejando o Dia {requestedDay.index}</p>
+          <h2 id="place-planning-context">
+            Adicionar um lugar ao Dia {requestedDay.index} — {formatDayLabel(requestedDay.date)}
+          </h2>
+          <p>
+            Você pode adicionar este lugar diretamente ao Dia ou apenas salvá-lo para decidir
+            depois. Salvar não altera o Roteiro.
+          </p>
+          <Link
+            className="product-secondary-action"
+            href={`/viagens/${tripId}/roteiro?dia=${requestedDay.date}#dia-em-foco`}
+          >
+            Voltar ao Dia {requestedDay.index}
+          </Link>
+        </section>
+      ) : null}
+
       {saved === "1" ? (
         <p className="success-banner" role="status">
-          Lugar salvo.
+          Lugar salvo. Ele continua fora do Roteiro até você escolher um Dia.
         </p>
       ) : null}
 
@@ -206,7 +229,9 @@ export default async function PlaceDetailsPage({
         <div className="section-heading-row">
           <div>
             <p className="product-eyebrow">Planejar este lugar</p>
-            <h2 id="place-itinerary-title">Adicionar ao roteiro</h2>
+            <h2 id="place-itinerary-title">
+              {requestedDay ? `Adicionar ao Dia ${requestedDay.index}` : "Adicionar ao roteiro"}
+            </h2>
             <p>
               Escolha o dia e, se quiser, defina horário e duração. Adicionar ao roteiro não salva o
               lugar automaticamente nos Salvos.
@@ -346,8 +371,9 @@ export default async function PlaceDetailsPage({
           <form action={savedPlace ? removePlaceAction : savePlaceAction}>
             <input name="tripId" type="hidden" value={tripId} />
             <input name="placeSlug" type="hidden" value={placeSlug} />
+            {requestedDay ? <input name="dia" type="hidden" value={requestedDay.date} /> : null}
             <button className="product-secondary-action" type="submit">
-              {savedPlace ? "Remover dos salvos" : "Salvar lugar"}
+              {savedPlace ? "Remover dos salvos" : "Salvar para depois"}
             </button>
           </form>
         </div>

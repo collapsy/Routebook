@@ -13,6 +13,7 @@ import { removePlaceFromTrip, savePlaceForTrip } from "@routebook/saved-places";
 import {
   addActivity,
   createItinerary,
+  deriveTripDays,
   findTripById,
   ItineraryValidationError,
 } from "@routebook/trip-management";
@@ -61,26 +62,45 @@ function revalidatePlaceSurfaces(tripId: string, placeSlug: string): void {
   revalidatePath(`/viagens/${tripId}/lugares-salvos`);
 }
 
+function resolveRequestedDayDate(
+  trip: Awaited<ReturnType<typeof findTripById>>,
+  value: FormDataEntryValue | null,
+): string | undefined {
+  if (!trip) return undefined;
+  const requested = optionalText(value);
+  if (!requested) return undefined;
+  return deriveTripDays(trip.period).some((day) => day.date === requested) ? requested : undefined;
+}
+
+function placeDetailsPath(tripId: string, placeSlug: string, dayDate?: string): string {
+  const query = dayDate ? `?dia=${encodeURIComponent(dayDate)}` : "";
+  return `/viagens/${tripId}/lugares/${placeSlug}${query}`;
+}
+
 export async function savePlaceAction(formData: FormData): Promise<never> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
-  const { place } = await resolvePlaceForTrip(tripId, placeSlug);
+  const { trip, place } = await resolvePlaceForTrip(tripId, placeSlug);
+  const dayDate = resolveRequestedDayDate(trip, formData.get("dia"));
 
   await savePlaceForTrip(new DrizzleSavedPlaceRepository(), tripId, place.id);
 
   revalidatePlaceSurfaces(tripId, placeSlug);
-  redirect(`/viagens/${tripId}/lugares/${placeSlug}?saved=1#adicionar-ao-roteiro`);
+  const path = placeDetailsPath(tripId, placeSlug, dayDate);
+  redirect(`${path}${path.includes("?") ? "&" : "?"}saved=1#adicionar-ao-roteiro`);
 }
 
 export async function removePlaceAction(formData: FormData): Promise<never> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
-  const { place } = await resolvePlaceForTrip(tripId, placeSlug);
+  const { trip, place } = await resolvePlaceForTrip(tripId, placeSlug);
+  const dayDate = resolveRequestedDayDate(trip, formData.get("dia"));
 
   await removePlaceFromTrip(new DrizzleSavedPlaceRepository(), tripId, place.id);
 
   revalidatePlaceSurfaces(tripId, placeSlug);
-  redirect(`/viagens/${tripId}/lugares/${placeSlug}?removed=1#adicionar-ao-roteiro`);
+  const path = placeDetailsPath(tripId, placeSlug, dayDate);
+  redirect(`${path}${path.includes("?") ? "&" : "?"}removed=1#adicionar-ao-roteiro`);
 }
 
 export async function addPlaceToItineraryAction(formData: FormData): Promise<never> {
@@ -110,11 +130,11 @@ export async function addPlaceToItineraryAction(formData: FormData): Promise<nev
   } catch (error) {
     if (error instanceof ItineraryValidationError) {
       const message = Object.values(error.fieldErrors).find(Boolean) ?? error.message;
-      redirect(
-        `/viagens/${tripId}/lugares/${placeSlug}?erroRoteiro=${encodeURIComponent(
-          message,
-        )}#adicionar-ao-roteiro`,
-      );
+      const query = new URLSearchParams({
+        erroRoteiro: message,
+        ...(dayDate ? { dia: dayDate } : {}),
+      });
+      redirect(`/viagens/${tripId}/lugares/${placeSlug}?${query.toString()}#adicionar-ao-roteiro`);
     }
 
     throw error;
@@ -125,8 +145,6 @@ export async function addPlaceToItineraryAction(formData: FormData): Promise<nev
   revalidatePath(`/viagens/${tripId}/roteiro/revisao`);
   revalidatePath(`/viagens/${tripId}/lugares/${placeSlug}`);
   redirect(
-    `/viagens/${tripId}/lugares/${placeSlug}?adicionadoAoRoteiro=1&dia=${encodeURIComponent(
-      dayDate,
-    )}#adicionar-ao-roteiro`,
+    `/viagens/${tripId}/roteiro?atividadeCriada=1&dia=${encodeURIComponent(dayDate)}#dia-em-foco`,
   );
 }

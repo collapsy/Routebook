@@ -19,7 +19,7 @@ import {
   type PlaceQualitySignals,
 } from "@routebook/place-catalog";
 import { listSavedPlaces } from "@routebook/saved-places";
-import { findTripById } from "@routebook/trip-management";
+import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { ExternalPlaceImagePreview } from "../../../../components/external-place-image-preview";
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
@@ -53,6 +53,7 @@ import { resolveConfiguredPlaceQualityProvider } from "../../../../lib/place-qua
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
 import { resolvePlaceDiscoveryRegion } from "../../../../lib/place-discovery-region";
+import { addPlaceToItineraryAction } from "./[placeSlug]/actions";
 import {
   removePublishedPlaceAction,
   saveExternalPlaceAction,
@@ -85,7 +86,13 @@ type DiscoverySearchParams = {
   ordem?: string;
   descoberta?: string | undefined;
   erroPromocao?: string;
+  dia?: string;
 };
+
+type PlanningDayContext = Readonly<{
+  date: string;
+  index: number;
+}>;
 
 const distanceOptions = [1, 3, 5, 10] as const;
 const externalDiscoveryDisplayLimit = 60;
@@ -113,6 +120,26 @@ function discoveryHref(tripId: string, values: DiscoverySearchParams): string {
 
   const serialized = query.toString();
   return `/viagens/${tripId}/lugares${serialized ? `?${serialized}` : ""}`;
+}
+
+function placeDetailsHref(
+  tripId: string,
+  placeSlug: string,
+  planningDay?: PlanningDayContext,
+): string {
+  if (!planningDay) return `/viagens/${tripId}/lugares/${placeSlug}`;
+  return `/viagens/${tripId}/lugares/${placeSlug}?dia=${encodeURIComponent(
+    planningDay.date,
+  )}#adicionar-ao-roteiro`;
+}
+
+function formatDayLabel(value: string): string {
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "UTC",
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+  }).format(new Date(`${value}T00:00:00Z`));
 }
 
 function formatDistance(meters: number): string {
@@ -186,6 +213,7 @@ function CanonicalDiscoveryCard({
   categoryRank,
   externalMediaEnabled,
   timeZone,
+  planningDay,
 }: Readonly<{
   item: CanonicalDiscoveryItem;
   tripId: string;
@@ -200,6 +228,7 @@ function CanonicalDiscoveryCard({
   categoryRank?: number;
   externalMediaEnabled: boolean;
   timeZone: string;
+  planningDay?: PlanningDayContext;
 }>) {
   const { place, distanceMeters } = item;
   const candidate = item.kind === "enriched" ? item.candidate : undefined;
@@ -216,6 +245,7 @@ function CanonicalDiscoveryCard({
     name: place.name,
     addressLabel,
   });
+  const detailsHref = placeDetailsHref(tripId, place.slug, planningDay);
 
   return (
     <li
@@ -269,16 +299,32 @@ function CanonicalDiscoveryCard({
       />
 
       <div className={styles.cardActions}>
-        <Link className="product-primary-action" href={`/viagens/${tripId}/lugares/${place.slug}`}>
-          Ver detalhes
-        </Link>
+        {planningDay ? (
+          <form action={addPlaceToItineraryAction}>
+            <input name="tripId" type="hidden" value={tripId} />
+            <input name="placeSlug" type="hidden" value={place.slug} />
+            <input name="dayDate" type="hidden" value={planningDay.date} />
+            <button className="product-primary-action" type="submit">
+              Adicionar ao Dia {planningDay.index}
+            </button>
+          </form>
+        ) : (
+          <Link className="product-primary-action" href={detailsHref}>
+            Ver detalhes
+          </Link>
+        )}
         <form action={isSaved ? removePublishedPlaceAction : savePublishedPlaceAction}>
           <input name="tripId" type="hidden" value={tripId} />
           <input name="placeSlug" type="hidden" value={place.slug} />
           <button className="product-secondary-action" type="submit">
-            {isSaved ? "Remover dos salvos" : "Salvar lugar"}
+            {isSaved ? "Remover dos salvos" : planningDay ? "Salvar para depois" : "Salvar lugar"}
           </button>
         </form>
+        {planningDay ? (
+          <Link className="product-secondary-action" href={detailsHref}>
+            Ver detalhes
+          </Link>
+        ) : null}
       </div>
 
       <details className={styles.cardDetails}>
@@ -473,6 +519,7 @@ export default async function PlacesPage({
   if (!trip) notFound();
 
   const rawFilters = await searchParams;
+  const planningDay = deriveTripDays(trip.period).find((day) => day.date === rawFilters.dia);
   const search = rawFilters.busca?.trim().slice(0, 120) || undefined;
   const category = parsePlaceCategory(rawFilters.categoria);
   const priceRange = parsePlacePriceRange(rawFilters.preco);
@@ -531,6 +578,7 @@ export default async function PlacesPage({
     region?.center,
   );
   const baseParams: DiscoverySearchParams = {
+    ...(planningDay ? { dia: planningDay.date } : {}),
     ...(search ? { busca: search } : {}),
     ...(category ? { categoria: category } : {}),
     ...(maximumDistanceMeters ? { distancia: String(maximumDistanceMeters / 1_000) } : {}),
@@ -732,7 +780,7 @@ export default async function PlacesPage({
         kind: savedPlaceIds.has(item.place.id) ? "saved-place" : "published-place",
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
-        href: `/viagens/${tripId}/lugares/${item.place.slug}`,
+        href: placeDetailsHref(tripId, item.place.slug, planningDay),
       };
     }
 
@@ -785,9 +833,18 @@ export default async function PlacesPage({
 
   return (
     <section className="app-page trip-overview-page">
-      <Link className="back-link" href={`/viagens/${tripId}`}>
-        ← Voltar para a viagem
-      </Link>
+      {planningDay ? (
+        <Link
+          className="back-link"
+          href={`/viagens/${tripId}/roteiro?dia=${planningDay.date}#dia-em-foco`}
+        >
+          ← Voltar ao Dia {planningDay.index}
+        </Link>
+      ) : (
+        <Link className="back-link" href={`/viagens/${tripId}`}>
+          ← Voltar para a viagem
+        </Link>
+      )}
 
       <header className="trip-overview-hero">
         <div>
@@ -800,7 +857,21 @@ export default async function PlacesPage({
         </div>
       </header>
 
+      {planningDay ? (
+        <section className="traveler-context-summary" aria-labelledby="place-planning-day-title">
+          <p className="product-eyebrow">Planejando o Dia {planningDay.index}</p>
+          <h2 id="place-planning-day-title">
+            Escolha um lugar para o Dia {planningDay.index} — {formatDayLabel(planningDay.date)}
+          </h2>
+          <p>
+            Use “Adicionar ao Dia {planningDay.index}” para planejar agora. “Salvar para depois”
+            apenas guarda o lugar nos Salvos e não altera o Roteiro.
+          </p>
+        </section>
+      ) : null}
+
       <form action={`/viagens/${tripId}/lugares`} className={styles.filters} method="get">
+        {planningDay ? <input name="dia" type="hidden" value={planningDay.date} /> : null}
         {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
         {ranking.order !== "distance" ? (
           <input name="ordem" type="hidden" value={ranking.order} />
@@ -895,6 +966,7 @@ export default async function PlacesPage({
           <Link
             className="product-secondary-action"
             href={discoveryHref(tripId, {
+              ...(planningDay ? { dia: planningDay.date } : {}),
               ...(discoveryMode ? { descoberta: discoveryMode } : {}),
               ...(ranking.order === "distance" ? {} : { ordem: ranking.order }),
             })}
@@ -1077,6 +1149,7 @@ export default async function PlacesPage({
                 tripId={tripId}
                 {...(destinationId ? { destinationId } : {})}
                 {...(accommodationCoordinate ? { accommodationCoordinate } : {})}
+                {...(planningDay ? { planningDay } : {})}
               />
             ),
           )}
@@ -1086,7 +1159,10 @@ export default async function PlacesPage({
           <p className="product-eyebrow">Nenhum resultado</p>
           <h2>Nenhum lugar corresponde aos filtros</h2>
           <p>Remova um filtro, amplie a distância ou limpe todos para voltar à descoberta.</p>
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
+          <Link
+            className="product-secondary-action"
+            href={discoveryHref(tripId, planningDay ? { dia: planningDay.date } : {})}
+          >
             Limpar filtros
           </Link>
         </section>

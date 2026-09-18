@@ -111,7 +111,7 @@ test("ignora um risco e mantém seu histórico disponível", async ({ page }, te
   expect(itineraryHref).not.toBeNull();
   await page.goto(itineraryHref!);
   await expect(page).toHaveURL(/\/roteiro$/);
-  await page.getByRole("link", { name: /Dia 1/ }).click();
+  await page.getByRole("link", { name: /^Dia 1\b/ }).click();
   await expect(page).toHaveURL(/dia=2026-08-22/);
   await expect(page.getByText(firstActivity, { exact: true })).toBeVisible();
   await expect(page.getByText(secondActivity, { exact: true })).toBeVisible();

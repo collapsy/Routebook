@@ -199,8 +199,8 @@ export default async function PlaceDetailsPage({
             <p className="product-eyebrow">Planejar este lugar</p>
             <h2 id="place-itinerary-title">Adicionar ao roteiro</h2>
             <p>
-              Escolha o dia e, se quiser, defina horário e duração. Adicionar ao roteiro não salva o
-              lugar automaticamente nos Salvos.
+              Escolha o dia e, se quiser, defina horário e duração. Adicionar ao Roteiro não
+              altera automaticamente a preferência em Minha seleção.
             </p>
           </div>
           {adicionadoAoRoteiro === "1" && selectedDay ? (

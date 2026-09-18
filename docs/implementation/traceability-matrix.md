@@ -1099,3 +1099,17 @@ Ao concluir um incremento:
 - Compatibilidade: Saved Places, banco, Activity, Proposal e UI permanecem intocados.
 - Validação local após auditoria: compilação isolada do código-fonte com TypeScript passou e a verificação funcional isolada das invariantes principais passou.
 - Evidência autoritativa de regressão integral no SHA `2e369e45964af17822b079a9a48fab02c928e71b`: Documentation Validation `35382464737`, Engineering Validation `35382464968` e Overture Place Discovery `35382465031` concluíram com sucesso. Engineering Validation aprovou formatação, docs, lint, typecheck, migrations, testes, smoke, build e Playwright/responsividade.
+
+## Evidências do RB-INC-201
+
+- Incremento: `docs/implementation/increments/rb-inc-201-trip-place-preference-persistence.md`.
+- Context Pack: `docs/implementation/context-packs/rb-inc-201-trip-place-preference-persistence.md`.
+- Issue: [#485](https://github.com/collapsy/Routebook/issues/485).
+- Branch: `codex/issue-485-trip-place-preference-persistence`.
+- Base: `57fdd501f38413ddd1f644ba25ef9ef05526acc8`.
+- Migration: `0034_persist_trip_place_preferences`, com backfill Saved Place → `WANT`, prioridade nula e `updated_at = created_at`.
+- Persistência: repository port em `@routebook/trip-collection` e adapter Drizzle em `@routebook/database`.
+- Compatibilidade: Saved Places permanece adapter transitório; Find/List representam somente `WANT`, Save converte para `WANT` e Unsave limpa a preferência.
+- Save de Recommendation foi alinhado ao mesmo estado canônico.
+- Risco: migration contém `UPDATE` e `SET NOT NULL`, portanto deve ser classificada como high risk pela política de release. Nenhuma execução em Production faz parte do incremento.
+- Evidência autoritativa de regressão: pendente do CI do pull request.

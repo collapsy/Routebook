@@ -9,10 +9,10 @@ document_type: ux
 owner: Experience
 
 status: Published
-version: "0.1.0"
+version: "0.2.0"
 
 created: "2026-07-17"
-last_updated: null
+last_updated: "2026-09-18"
 
 authors:
 
@@ -228,7 +228,7 @@ RB-UF-001 — Criar Viagem
 <Qual objetivo?>
    ├── Explorar Lugares
    ├── Consultar Mapa
-   ├── Gerenciar Salvos
+   ├── Gerenciar Minha seleção
    ├── Montar Roteiro
    ├── Revisar Roteiro
    ├── Consultar Dia atual
@@ -250,8 +250,8 @@ Os fluxos críticos são:
 | RB-UF-005 | Pesquisar Lugar             |
 | RB-UF-006 | Filtrar Lugares             |
 | RB-UF-007 | Consultar Detalhes do Lugar |
-| RB-UF-008 | Salvar Lugar                |
-| RB-UF-009 | Consultar Salvos            |
+| RB-UF-008 | Expressar intenção por Lugar |
+| RB-UF-009 | Consultar Minha seleção      |
 | RB-UF-010 | Adicionar Lugar ao Roteiro  |
 | RB-UF-011 | Consultar Roteiro           |
 | RB-UF-012 | Editar Atividade            |
@@ -444,7 +444,7 @@ Priorizar:
 
 * próximo passo;
 * Roteiro;
-* Salvos;
+* Minha seleção;
 * alertas.
 
 #### Viagem em andamento
@@ -554,7 +554,7 @@ Descobrir opções relevantes no Destino.
 
 * navegação Explorar;
 * Visão Geral;
-* Estado vazio de Salvos;
+* Estado vazio de Minha seleção;
 * Dia vazio;
 * Recomendação contextual.
 
@@ -728,7 +728,7 @@ Avaliar um Lugar e decidir o que fazer com ele.
 
 * Explorar;
 * Mapa;
-* Salvos;
+* Minha seleção;
 * Roteiro;
 * Recomendação.
 
@@ -745,7 +745,7 @@ Avaliar um Lugar e decidir o que fazer com ele.
    ↓
 <Qual ação?>
    ├── Salvar
-   ├── Remover dos Salvos
+   ├── Limpar preferência
    ├── Adicionar ao Roteiro
    ├── Ver no Mapa
    ├── Abrir rota
@@ -783,30 +783,34 @@ A ausência de fotografias, horário ou preço não deve impedir acesso às dema
 
 ---
 
-## 21. RB-UF-008 — Salvar Lugar
+## 21. RB-UF-008 — Expressar intenção por Lugar
 
 ### Objetivo
 
-Manter um Lugar como opção sem adicioná-lo ao Roteiro.
+Definir uma TripPlacePreference sem criar Activity.
 
 ### Pontos de entrada
 
 * Cartão;
 * Detalhes;
 * Mapa;
-* Recomendação.
+* Recomendação ou Discovery.
 
 ### Fluxo principal
 
 ```text
 [Lugar]
    ↓
-{Selecionar Salvar}
+{Escolher Quero ir / Talvez / Não tenho interesse}
    ↓
-[Estado otimista ou salvando]
+[Estado otimista ou atualizando]
    ↓
-<Salvamento concluído?>
-   ├── Sim → [Estado Salvo]
+<Atualização concluída?>
+   ├── Sim → [Preferência refletida]
+   │             ↓
+   │       <Intent = WANT?>
+   │          ├── Sim → [Permitir marcar Imperdível]
+   │          └── Não → [Prioridade nula]
    └── Não → [Estado anterior + erro]
 ```
 
@@ -814,49 +818,52 @@ Manter um Lugar como opção sem adicioná-lo ao Roteiro.
 
 * A ação não deve redirecionar o usuário.
 * O estado deve mudar em todas as áreas.
-* Repetir a ação não deve criar duplicação.
-* Salvar não adiciona ao Roteiro.
+* Repetir a mesma ação não deve criar duplicação.
+* Expressar intenção não adiciona ao Roteiro.
+* Ausência de preferência significa não avaliado.
 
 ---
 
-## 22. Fluxo — Remover dos Salvos
+## 22. Fluxo — Limpar preferência
 
 ```text
-[Lugar salvo]
+[Place com preferência]
    ↓
-{Selecionar Remover dos Salvos}
+{Selecionar Limpar preferência}
    ↓
 <Está no Roteiro?>
-   ├── Não → [Remover associação]
-   └── Sim → [Remover dos Salvos e manter Atividade]
+   ├── Não → [Remover TripPlacePreference]
+   └── Sim → [Remover preferência e manter Activity]
          ↓
 [Atualizar estados]
 ```
 
 ---
 
-## 23. RB-UF-009 — Consultar Salvos
+## 23. RB-UF-009 — Consultar Minha seleção
 
 ### Objetivo
 
-Revisar Lugares mantidos como opções.
+Revisar intenções e prioridades por Place.
 
 ### Fluxo principal
 
 ```text
 [Viagem]
    ↓
-{Abrir Salvos}
+{Abrir Minha seleção}
    ↓
-<Existem Lugares salvos?>
+<Existem preferências?>
    ├── Não → [Estado vazio]
-   └── Sim → [Lista de Salvos]
+   └── Sim → [Lista de preferências]
                   ↓
           <Qual ação?>
              ├── Abrir Detalhes
              ├── Ver no Mapa
-             ├── Adicionar ao Roteiro
-             ├── Remover dos Salvos
+             ├── Alterar intenção ou prioridade
+             ├── Montar meu roteiro
+             ├── Adicionar manualmente ao Roteiro
+             ├── Limpar preferência
              └── Filtrar
 ```
 
@@ -879,7 +886,7 @@ Transformar um Lugar em uma Atividade planejada.
 * Detalhes;
 * Cartão;
 * Mapa;
-* Salvos;
+* Minha seleção;
 * Recomendação.
 
 ### Fluxo principal
@@ -1146,13 +1153,13 @@ Retirar uma Atividade do Roteiro.
           [Atualizar Roteiro]
                   ↓
           <Lugar estava salvo?>
-             ├── Sim → [Manter em Salvos]
+             ├── Sim → [Manter em Minha seleção]
              └── Não → [Nenhuma associação]
 ```
 
 ### Regras
 
-* Remover Atividade não remove dos Salvos.
+* Remover Activity não limpa TripPlacePreference.
 * O Dia deve permanecer selecionado.
 * Deslocamentos devem ser recalculados.
 
@@ -1213,7 +1220,7 @@ Compreender a distribuição geográfica dos elementos da Viagem.
           {Selecionar contexto}
              ├── Todos
              ├── Explorar
-             ├── Salvos
+             ├── Minha seleção
              ├── Roteiro
              └── Dia específico
                   ↓
@@ -1269,7 +1276,7 @@ Conhecer Distância e Tempo de deslocamento entre dois pontos.
 * Detalhes;
 * Roteiro;
 * Mapa;
-* Salvos.
+* Minha seleção.
 
 ### Fluxo principal
 
@@ -1346,7 +1353,7 @@ Receber uma organização inicial editável.
 * Roteiro vazio;
 * Roteiro parcial;
 * Visão Geral;
-* Salvos.
+* Minha seleção.
 
 ### Fluxo principal
 
@@ -1355,32 +1362,26 @@ Receber uma organização inicial editável.
    ↓
 {Selecionar Gerar proposta}
    ↓
-[Resumo do contexto utilizado]
+[Snapshot de Minha seleção]
    ↓
-<Dados suficientes?>
-   ├── Não → [Dados ausentes]
-   │             ↓
-   │       <Qual ação?>
-   │          ├── Completar contexto
-   │          ├── Adicionar Lugares
-   │          └── Gerar versão limitada
-   │
-   └── Sim
-         ↓
-      {Confirmar geração}
-         ↓
-      [Gerando proposta]
-         ↓
-      <Sucesso?>
-         ├── Não → [Erro + tentar novamente]
-         └── Sim → [Visualização da proposta]
-                         ↓
-                 <Qual ação?>
-                    ├── Aceitar
-                    ├── Aceitar parcialmente
-                    ├── Editar
-                    ├── Gerar novamente
-                    └── Descartar
+{Decidir se inclui MAYBE}
+   ↓
+[Resumo do contexto e limitações]
+   ↓
+{Confirmar geração}
+   ↓
+[Gerando proposta com preferências elegíveis]
+   ↓
+<Sucesso?>
+   ├── Não → [Erro + tentar novamente]
+   └── Sim → [Incluídos + excluídos + motivos]
+                   ↓
+           <Qual ação?>
+              ├── Aceitar
+              ├── Aceitar parcialmente
+              ├── Editar
+              ├── Gerar novamente
+              └── Descartar
 ```
 
 ### Regras
@@ -1388,6 +1389,48 @@ Receber uma organização inicial editável.
 * O Roteiro existente não deve ser substituído antes da aceitação.
 * Limitações devem ser apresentadas.
 * Restrições e Períodos livres bloqueados devem ser respeitados.
+* Não existe mínimo de preferências.
+* Place não avaliado e `NOT_INTERESTED` não entram automaticamente.
+* Replanejamento deve apresentar e respeitar ReplanningWindow.
+
+---
+
+## 37-A. Fluxo — Replanejar durante a Viagem
+
+```text
+[Roteiro atual]
+   ↓
+{Solicitar replanejamento}
+   ↓
+[Calcular data/hora no timezone da Trip]
+   ↓
+[Proteger passado + trecho transcorrido + fixed + terminal]
+   ↓
+[Gerar Proposal somente para futuro elegível]
+   ↓
+[Mostrar diff, incluídos, excluídos e motivos]
+   ↓
+{Aceitar integral/parcialmente ou descartar}
+```
+
+Activity sem horário no Dia atual deve permanecer protegida contra movimentação automática. O decorrer do tempo não deve concluir Activity.
+
+---
+
+## 37-B. Fluxo selection-first ponta a ponta
+
+1. uma nova Trip apresenta Explore como próximo passo e Minha seleção vazia;
+2. Explore permite avaliar Places sem exigir escolha de Dia;
+3. `WANT`, `MAYBE`, `NOT_INTERESTED` e `MUST_DO` registram somente TripPlacePreference;
+4. Minha seleção resume intenções, prioridades, Planning Roles e estado planejado;
+5. `Montar meu roteiro` solicita explicitamente uma Proposal e pergunta sobre `MAYBE`;
+6. a revisão mostra incluídos, excluídos, limitações e motivos antes de qualquer aplicação;
+7. aceite integral ou parcial converte somente operações aceitas em mudanças do Roteiro;
+8. continuar explorando depois disso altera apenas Minha seleção;
+9. nova organização exige ação explícita de replanejamento e nova Proposal;
+10. durante a Trip, apenas o futuro dentro da ReplanningWindow pode ser proposto para mudança.
+
+Adicionar manualmente ao Roteiro permanece disponível como fluxo avançado e secundário. Ele não substitui Minha seleção nem autoriza inferir preferência.
 
 ---
 
@@ -1529,7 +1572,7 @@ Acessar rapidamente o planejamento do dia em andamento.
    ↓
 <Qual ação?>
    ├── Explorar próximo
-   ├── Ver Salvos
+   ├── Ver Minha seleção
    ├── Adicionar Atividade
    └── Manter Dia livre
 ```
@@ -1669,7 +1712,7 @@ Negar permissão não deverá bloquear a funcionalidade principal.
    ├── Explorar
    ├── Mapa
    ├── Roteiro
-   └── Salvos
+   └── Minha seleção
 ```
 
 ### Regras
@@ -1796,8 +1839,8 @@ Selecionar um ponto deve identificar a Atividade.
 | Pesquisar Lugar      | Explorar       | Detalhes                 |
 | Filtrar Lugares      | Explorar       | Explorar                 |
 | Consultar Detalhes   | Várias         | Detalhes                 |
-| Salvar Lugar         | Várias         | Mesma área               |
-| Consultar Salvos     | Navegação      | Salvos                   |
+| Expressar intenção   | Várias         | Mesma área               |
+| Consultar seleção    | Navegação      | Minha seleção            |
 | Adicionar ao Roteiro | Várias         | Mesma área ou Roteiro    |
 | Consultar Roteiro    | Navegação      | Roteiro                  |
 | Editar Atividade     | Roteiro        | Roteiro                  |
@@ -1888,7 +1931,7 @@ Mudanças relevantes deverão ser anunciadas:
 
 * carregamento concluído;
 * filtro aplicado;
-* Lugar salvo;
+* Place com preferência;
 * Atividade adicionada;
 * erro;
 * conflito;
@@ -2092,7 +2135,7 @@ Os fluxos indicam a necessidade das seguintes superfícies:
 * Filtros;
 * Detalhes do Lugar;
 * Mapa;
-* Salvos;
+* Minha seleção;
 * Roteiro;
 * Dia da Viagem;
 * Detalhes da Atividade;
@@ -2181,7 +2224,7 @@ Antes de aprovar este documento, verificar:
 * Mapa possui alternativa;
 * ações destrutivas possuem confirmação;
 * automação não substitui o usuário;
-* Salvos e Roteiro permanecem distintos;
+* Minha seleção, Proposal e Roteiro permanecem distintos;
 * os rótulos seguem a Arquitetura da Informação;
 * os fluxos podem gerar telas e testes.
 
@@ -2201,6 +2244,6 @@ Eles conectam:
 * erros;
 * resultados.
 
-O produto deverá permitir que o usuário se mova entre Descoberta, Mapa, Salvos e Roteiro sem perder o contexto da Viagem.
+O produto deverá permitir que o usuário se mova entre Descoberta, Mapa, Minha seleção e Roteiro sem perder o contexto da Viagem.
 
 Cada fluxo deverá ser simples o suficiente para uso cotidiano, completo o suficiente para lidar com exceções e flexível o suficiente para respeitar diferentes formas de planejar e executar uma Viagem.

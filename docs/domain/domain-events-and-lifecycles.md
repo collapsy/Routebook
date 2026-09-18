@@ -9,10 +9,10 @@ document_type: domain
 owner: Domain
 
 status: Published
-version: "0.2.0"
+version: "0.3.0"
 
 created: "2026-07-18"
-last_updated: "2026-07-18"
+last_updated: "2026-09-18"
 
 authors:
 
@@ -491,7 +491,7 @@ Comandos sensíveis devem possuir mecanismo de idempotência quando repetição 
 
 * Activities;
 * Decisions;
-* Saved Places;
+* TripPlacePreferences;
 * aplicação de Proposta;
 * resolução de Planning Conflict.
 
@@ -1142,7 +1142,7 @@ Payload conceitual:
 
 Consequências:
 
-* atualização de Saved Places;
+* atualização de TripPlacePreferences;
 * atualização de Activities;
 * atualização de Recommendations;
 * prevenção de duplicidade.
@@ -1211,49 +1211,65 @@ Pode assumir:
 
 ## Parte X — Trip Collection
 
-### 77. PlaceSaved
+### 77. TripPlacePreferenceSet
 
 Produzido por:
 
 ```text
-SavePlace
+SetTripPlacePreference
 ```
 
-Só deve ser emitido quando houver mudança real.
+Registra `intent` e `priority` resultantes. Só deve ser emitido quando houver mudança real.
 
 Repetição idempotente não deve produzir duplicidade.
 
 ---
 
-### 78. PlaceUnsaved
+### 78. TripPlacePreferenceCleared
 
 Produzido por:
 
 ```text
-UnsavePlace
+ClearTripPlacePreference
 ```
 
 Não remove Activity relacionada.
 
+O Place retorna a não avaliado.
+
 ---
 
-### 79. SavedPlaceNoteChanged
+### 79. TripPlacePreferenceChanged
 
-Representa alteração de observação contextual.
+Representa alteração de intenção, prioridade ou observação contextual.
 
 Não deve alterar o Place canônico.
 
+`MUST_DO` somente pode aparecer com `WANT`.
+
 ---
 
-### 80. Fluxo de Saved Place
+### 80. Fluxo de TripPlacePreference
 
 ```mermaid
 stateDiagram-v2
-    [*] --> NotSaved
-    NotSaved --> Saved: SavePlace
-    Saved --> Saved: SavePlace idempotente
-    Saved --> NotSaved: UnsavePlace
+    [*] --> Unrated
+    Unrated --> Want: Set WANT
+    Unrated --> Maybe: Set MAYBE
+    Unrated --> NotInterested: Set NOT_INTERESTED
+    Want --> Want: alterar MUST_DO
+    Want --> Maybe: Set MAYBE
+    Want --> NotInterested: Set NOT_INTERESTED
+    Maybe --> Want: Set WANT
+    Maybe --> NotInterested: Set NOT_INTERESTED
+    NotInterested --> Want: Set WANT
+    NotInterested --> Maybe: Set MAYBE
+    Want --> Unrated: Clear
+    Maybe --> Unrated: Clear
+    NotInterested --> Unrated: Clear
 ```
+
+Durante a compatibilidade, `PlaceSaved` mapeia para `TripPlacePreferenceSet` com `WANT` e prioridade nula; `PlaceUnsaved` mapeia para `TripPlacePreferenceCleared`. Esses nomes legados não orientam novos contratos.
 
 ---
 
@@ -1403,7 +1419,7 @@ Representa necessidade de revisão sem afirmar inviabilidade definitiva.
 
 Representa retirada do Roteiro ativo.
 
-Não remove Place ou Saved Place.
+Não remove Place ou TripPlacePreference.
 
 ---
 
@@ -1840,7 +1856,14 @@ Deve possuir:
 * justificativas;
 * limitações;
 * validade;
-* Planning Conflicts conhecidos.
+* Planning Conflicts conhecidos;
+* escopo `INITIAL` ou `REPLAN`;
+* snapshot/versionamento da seleção explícita;
+* opção de inclusão de `MAYBE`;
+* resultados de candidatos incluídos e excluídos;
+* snapshot de ReplanningWindow quando o tempo da Trip restringir a mudança.
+
+Uma geração pode concluir sem Proposed Activities quando nenhuma alteração adequada existir. Isso não autoriza completar a Proposal com Places não avaliados.
 
 ---
 
@@ -2244,9 +2267,9 @@ Repetição com mesma chave idempotente deve retornar a mesma Trip ou resultado 
 
 ---
 
-### 157. Save Place
+### 157. Set Trip Place Preference
 
-Repetição não cria novo Saved Place.
+Repetição não cria nova TripPlacePreference.
 
 ---
 
@@ -2582,9 +2605,9 @@ Quando um agente iniciar uma operação permitida:
 
 ### 188. Trip Collection
 
-* PlaceSaved;
-* PlaceUnsaved;
-* SavedPlaceNoteChanged.
+* TripPlacePreferenceSet;
+* TripPlacePreferenceCleared;
+* TripPlacePreferenceChanged.
 
 ---
 

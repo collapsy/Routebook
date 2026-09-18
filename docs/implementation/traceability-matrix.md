@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: "2026-09-08"
+last_updated: "2026-09-18"
 authors:
   - RouteBook Team
 tags:
@@ -1067,3 +1067,21 @@ Ao concluir um incremento:
 | validação técnica | SHA `42638e98fe159f720ad3bb1ccd4f9a0931aee4ed`; Documentation run `34233429696` e Engineering run `34233429804` verdes; 151/151 Playwright, 401 testes web e 198 testes database aprovados |
 | Preview | `dpl_7qqQQF33GLatVT45FvwZEfRGprmM` READY no mesmo SHA, `target=null`, raiz HTTP 200 e `x-robots-tag: noindex`; inspeção visual desktop/mobile não foi marcada como concluída porque o navegador automatizado do ambiente foi bloqueado pelo sandbox de rede |
 | governança | PR permanece Draft; `main` e Production intocados; merge e aceite visual continuam gates humanos explícitos |
+
+## Evidências previstas do RB-INC-199
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-199-selection-replanning-contract.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-199-selection-replanning-contract.md` |
+| ADR | RB-ADR-028 — TripPlacePreference e janela temporal de replanejamento |
+| issue/PR | [#481](https://github.com/collapsy/Routebook/issues/481); [PR #482](https://github.com/collapsy/Routebook/pull/482) |
+| branch | `codex/issue-481-selection-replanning-contract` |
+| base | `origin/main@3beceb737edfc390c9e56eecf90f006fac8342b0` |
+| decisão humana | pacote de linguagem, intenção, prioridade, Planning Role e janela temporal aprovado em `2026-09-18` |
+| domínio | `TripPlacePreference`; `WANT`, `MAYBE`, `NOT_INTERESTED`; `MUST_DO` somente sobre `WANT`; não avaliado por ausência |
+| experiência | Explore → Minha seleção → Proposal explícita → aceite → Activity; adição manual secundária |
+| compatibilidade | Saved Place existente futuramente mapeado para `WANT` sem prioridade, sem perda de ID, associação ou Activity |
+| temporalidade | timezone IANA da Trip; passado, trecho transcorrido, Activity em andamento/sem horário no Dia atual, terminal ou `fixed` protegidos |
+| código e dados | nenhuma alteração executável, migration, Preview ou Production autorizada |
+| validação | SHA `97ec0bea`; Documentation `35375543711`, Engineering `35375543692` e Vercel verdes; 158 Playwright aprovados, com 1 flaky mobile conhecido recuperado no retry |

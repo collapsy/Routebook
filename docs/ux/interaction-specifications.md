@@ -9,10 +9,10 @@ document_type: ux
 owner: Experience
 
 status: Published
-version: "0.1.0"
+version: "0.2.0"
 
 created: "2026-07-17"
-last_updated: null
+last_updated: "2026-09-18"
 
 authors:
 
@@ -369,7 +369,7 @@ Permitir acesso contínuo às áreas principais.
 * Explorar;
 * Mapa;
 * Roteiro;
-* Salvos.
+* Minha seleção.
 
 ### Comportamento
 
@@ -619,7 +619,7 @@ Notificações temporárias poderão ser utilizadas para:
 Exemplo:
 
 ```text
-Lugar removido dos Salvos. Desfazer
+Preferência limpa. Desfazer
 ```
 
 ### Regras
@@ -649,7 +649,7 @@ A ação Desfazer deverá ser preferida para operações simples e reversíveis.
 
 Exemplos:
 
-* remover dos Salvos;
+* limpar preferência;
 * reordenar Atividade;
 * remover filtro;
 * arquivar futuramente.
@@ -926,7 +926,7 @@ A alteração de ordenação deverá:
 
 ---
 
-# Parte VII — Lugares, Salvos e planejamento
+# Parte VII — Lugares, Minha seleção e planejamento
 
 ## 48. RB-INT-034 — Abrir Detalhes do Lugar
 
@@ -939,24 +939,24 @@ Ao abrir os Detalhes:
 
 ---
 
-## 49. RB-INT-035 — Salvar Lugar
+## 49. RB-INT-035 — Expressar intenção por Lugar
 
 ### Fluxo
 
 ```text
-Não salvo
-→ usuário seleciona Salvar
-→ estado Salvando
+Não avaliado ou preferência atual
+→ usuário escolhe Quero ir / Talvez / Não tenho interesse
+→ estado Atualizando
 → sucesso
-→ estado Salvo
+→ preferência refletida em todas as superfícies
 ```
 
 ### Falha
 
 ```text
-Salvando
+Atualizando
 → falha
-→ retornar para Não salvo
+→ retornar para estado anterior
 → mostrar erro
 ```
 
@@ -965,21 +965,23 @@ Salvando
 * não redirecionar;
 * não criar duplicação;
 * atualizar todas as áreas;
-* preservar contexto.
+* preservar contexto;
+* permitir `MUST_DO` somente quando a intenção for `WANT`;
+* não criar Activity.
 
 ---
 
-## 50. RB-INT-036 — Remover dos Salvos
+## 50. RB-INT-036 — Limpar preferência
 
-Quando o Lugar não estiver planejado:
+Quando o Place não estiver planejado:
 
-* remover imediatamente;
+* limpar a TripPlacePreference;
 * oferecer Desfazer.
 
 Quando estiver planejado:
 
-* remover apenas dos Salvos;
-* manter a Atividade;
+* limpar apenas a preferência;
+* manter a Activity;
 * comunicar essa diferença.
 
 ---
@@ -996,6 +998,8 @@ Ao selecionar Adicionar ao Roteiro:
 6. confirmar;
 7. atualizar estados.
 
+Essa interação é secundária nas superfícies de descoberta. A ação primária é expressar intenção e usar Minha seleção para solicitar Proposal.
+
 ---
 
 ## 52. RB-INT-038 — Lugar já planejado
@@ -1008,18 +1012,35 @@ Quando um Lugar já estiver no Roteiro:
 
 ---
 
-## 53. RB-INT-039 — Estado Salvo e Planejado
+## 53. RB-INT-039 — Preferência e estado planejado
 
 Os estados deverão ser independentes.
 
 Possibilidades:
 
-* não salvo e não planejado;
-* salvo e não planejado;
-* não salvo e planejado;
-* salvo e planejado.
+* não avaliado e não planejado;
+* `WANT`/`MAYBE` e não planejado;
+* `NOT_INTERESTED` e não planejado;
+* não avaliado e planejado por adição manual;
+* selecionado e planejado após aceite ou adição manual;
+* `NOT_INTERESTED` e planejado como estado excepcional independente.
 
-A interface não deverá tratar Salvar e Planejar como equivalentes.
+A interface não deverá tratar preferência, Proposal e Activity como equivalentes.
+
+---
+
+## 53-A. RB-INT-103 — Montar e replanejar explicitamente
+
+Ao selecionar `Montar meu roteiro`:
+
+1. apresentar contagens por intenção e Planning Role;
+2. perguntar explicitamente se `MAYBE` deve ser incluído;
+3. permitir geração mesmo com seleção vazia ou pequena;
+4. apresentar incluídos e excluídos com motivo;
+5. manter a Proposal editável e não aplicada;
+6. exigir aceite integral ou parcial para alterar o Roteiro.
+
+Durante a Viagem, a revisão deve distinguir visualmente histórico protegido, trecho atual protegido e futuro elegível no timezone da Trip.
 
 ---
 
@@ -1097,7 +1118,7 @@ Ao alternar entre:
 
 * Todos;
 * Explorar;
-* Salvos;
+* Minha seleção;
 * Roteiro;
 * Dia;
 
@@ -1221,7 +1242,7 @@ Ao remover:
 
 * solicitar confirmação quando necessário;
 * comunicar impacto;
-* manter Lugar nos Salvos;
+* manter preferência em Minha seleção;
 * recalcular sequência;
 * recalcular Deslocamentos;
 * preservar Dia.
@@ -1740,7 +1761,7 @@ Navegação
 Mudanças relevantes deverão ser anunciadas:
 
 * filtro aplicado;
-* Lugar salvo;
+* Place com preferência;
 * Atividade adicionada;
 * Dia alterado;
 * erro;
@@ -1977,7 +1998,7 @@ Eventos conceituais:
 * Viagem criada;
 * Lugar pesquisado;
 * filtro aplicado;
-* Lugar salvo;
+* Place com preferência;
 * Lugar adicionado ao Roteiro;
 * Atividade editada;
 * Atividade movida;
@@ -2025,7 +2046,8 @@ A instrumentação deverá:
 | Especificação           | Superfícies principais          |
 | ----------------------- | ------------------------------- |
 | RB-INT-026 a RB-INT-033 | Explorar, pesquisa e filtros    |
-| RB-INT-034 a RB-INT-039 | Detalhes, Salvos e planejamento |
+| RB-INT-034 a RB-INT-039 | Detalhes, Minha seleção e planejamento |
+| RB-INT-103               | Minha seleção, Proposal e replanejamento |
 
 ---
 
@@ -2127,7 +2149,7 @@ A instrumentação deverá:
 1. Criar Viagem.
 2. Pesquisar Lugar.
 3. Aplicar filtro.
-4. Salvar Lugar.
+4. Expressar intenção por Lugar.
 5. Adicionar ao Roteiro.
 6. Escolher Dia.
 7. Editar Atividade.
@@ -2239,7 +2261,7 @@ Antes de aprovar este documento, verificar:
 * feedback está definido;
 * formulários estão definidos;
 * pesquisa e filtros estão definidos;
-* Salvos estão definidos;
+* Minha seleção está definida;
 * planejamento está definido;
 * Mapa está definido;
 * Roteiro está definido;
@@ -2267,7 +2289,7 @@ Elas estabelecem comportamentos consistentes para:
 * formulários;
 * feedback;
 * Descoberta;
-* Salvos;
+* Minha seleção;
 * Mapa;
 * Roteiro;
 * automação;

@@ -9,10 +9,10 @@ document_type: product
 owner: Product
 
 status: Published
-version: "0.1.0"
+version: "0.2.0"
 
 created: "2026-07-15"
-last_updated: null
+last_updated: "2026-09-18"
 
 authors:
 
@@ -228,7 +228,7 @@ As jornadas prioritárias são:
 2. Configurar o contexto da Viagem.
 3. Descobrir Lugares.
 4. Avaliar um Lugar.
-5. Salvar Lugares.
+5. Construir Minha seleção.
 6. Adicionar um Lugar ao Roteiro.
 7. Montar o Roteiro manualmente.
 8. Gerar uma proposta de Roteiro.
@@ -609,7 +609,7 @@ O produto deverá:
 * O usuário entende onde o Lugar está.
 * Filtros alteram os resultados.
 * A relação entre lista e mapa é compreensível.
-* O usuário consegue seguir para Detalhes, Salvos ou Roteiro.
+* O usuário consegue seguir para Detalhes, Minha seleção ou Roteiro.
 
 ---
 
@@ -713,11 +713,11 @@ O produto deverá:
 
 ---
 
-# Parte VI — Jornada 5: Salvar Lugares
+# Parte VI — Jornada 5: Construir Minha seleção
 
 ## 48. Objetivo
 
-Permitir que o usuário mantenha opções de interesse sem assumir compromisso com o Roteiro.
+Permitir que o usuário expresse intenção por Place sem assumir compromisso com o Roteiro.
 
 ---
 
@@ -733,39 +733,42 @@ Todas.
 
 ## 50. Gatilho
 
-O usuário encontra um Lugar interessante, mas ainda não decidiu quando ou se irá visitá-lo.
+O usuário encontra um Place e deseja registrar se quer considerá-lo, talvez considerá-lo ou excluí-lo.
 
 ---
 
 ## 51. Etapas principais
 
-1. O usuário seleciona a ação Salvar.
-2. O produto confirma a alteração visualmente.
-3. O Lugar passa a aparecer na área Salvos.
-4. O Marcador recebe indicação correspondente.
-5. O usuário continua explorando.
-6. Posteriormente, o usuário acessa os Lugares salvos.
-7. O usuário pode:
+1. O usuário escolhe `Quero ir`, `Talvez` ou `Não tenho interesse`.
+2. Se escolher `Quero ir`, poderá marcar `Imperdível`.
+3. O produto confirma a alteração visualmente.
+4. O Place passa a aparecer em Minha seleção.
+5. O Marcador recebe indicação correspondente.
+6. O usuário continua explorando.
+7. Posteriormente, o usuário acessa Minha seleção.
+8. O usuário pode:
 
    * abrir Detalhes;
    * visualizar no mapa;
-   * adicionar ao Roteiro;
-   * remover dos salvos.
+   * alterar intenção ou prioridade;
+   * solicitar uma Proposal;
+   * adicionar manualmente ao Roteiro como ação secundária;
+   * limpar a preferência.
 
 ---
 
 ## 52. Resultado esperado
 
-O usuário constrói uma coleção temporária de possibilidades para a Viagem.
+O usuário constrói uma seleção explícita e reversível para a Viagem.
 
 ---
 
 ## 53. Dificuldades possíveis
 
-* confusão entre salvar e adicionar ao Roteiro;
-* salvamento sem confirmação;
+* confusão entre selecionar e adicionar ao Roteiro;
+* intenção sem confirmação;
 * duplicação;
-* dificuldade para localizar Salvos;
+* dificuldade para localizar Minha seleção;
 * remoção acidental;
 * estados inconsistentes.
 
@@ -775,22 +778,23 @@ O usuário constrói uma coleção temporária de possibilidades para a Viagem.
 
 O produto deverá:
 
-* diferenciar claramente Salvo e Planejado;
+* diferenciar claramente preferência, Proposal e Activity;
 * permitir reversão;
 * manter estado sincronizado;
 * evitar duplicações;
 * atualizar lista, mapa e Detalhes;
-* permitir adição posterior ao Roteiro.
+* não criar Activity ao expressar intenção;
+* permitir geração posterior de Proposal.
 
 ---
 
 ## 55. Critérios de sucesso
 
-* O usuário entende o significado de Salvar.
+* O usuário entende cada intenção.
 * A ação é rápida.
-* O Lugar aparece em Salvos.
+* O Place aparece em Minha seleção.
 * O estado é consistente em todas as visualizações.
-* A remoção é possível.
+* A alteração ou limpeza é possível.
 
 ---
 
@@ -820,11 +824,11 @@ O usuário decidiu que deseja considerar a visita em um Dia da Viagem.
 
 ## 59. Pontos de entrada
 
-A ação poderá ser iniciada a partir de:
+A ação manual poderá ser iniciada, como fluxo secundário, a partir de:
 
 * Cartão de Lugar;
 * Detalhes do Lugar;
-* Lugares salvos;
+* Minha seleção;
 * Mapa;
 * sugestão;
 * Período livre.
@@ -909,7 +913,7 @@ Planejador Prático.
 
 ## 67. Gatilho
 
-O usuário possui Lugares salvos ou selecionados e deseja distribuí-los pelos dias.
+O usuário possui Places selecionados e deseja distribuí-los manualmente pelos dias.
 
 ---
 
@@ -1000,7 +1004,7 @@ Planejador Prático.
 O usuário possui:
 
 * Viagem criada;
-* alguns Lugares selecionados ou salvos;
+* zero ou mais TripPlacePreferences;
 * contexto mínimo;
 * desejo de reduzir o trabalho manual.
 
@@ -1009,15 +1013,16 @@ O usuário possui:
 ## 76. Etapas principais
 
 1. O usuário solicita uma proposta.
-2. O produto verifica as informações disponíveis.
-3. O produto informa possíveis limitações.
-4. O sistema agrupa Lugares por proximidade.
-5. O sistema considera duração e dias disponíveis.
-6. O sistema distribui Atividades.
-7. O sistema preserva margens e Períodos livres.
-8. O produto apresenta a proposta.
-9. O usuário revisa as Justificativas.
-10. O usuário pode:
+2. O produto apresenta o snapshot de Minha seleção.
+3. O usuário decide se deseja incluir `MAYBE`.
+4. O produto verifica informações e ReplanningWindow aplicáveis.
+5. O produto informa limitações.
+6. O sistema considera somente `WANT` e os `MAYBE` solicitados.
+7. O sistema agrupa Places por proximidade e Planning Role quando houver dados.
+8. O sistema preserva capacidade, Activities protegidas e Períodos livres.
+9. O produto apresenta a Proposal, incluídos e excluídos.
+10. O usuário revisa as Justificativas e os motivos de exclusão.
+11. O usuário pode:
 
     * aceitar;
     * editar;
@@ -1056,6 +1061,8 @@ O produto deverá:
 * respeitar Restrições;
 * não substituir escolhas sem informar;
 * evitar falsa precisão.
+* não preencher automaticamente com Places não avaliados;
+* aceitar seleção vazia ou pequena sem impor densidade mínima.
 
 ---
 
@@ -1219,7 +1226,10 @@ O usuário está no Destino e deseja saber o que fará em seguida.
 4. O usuário abre Detalhes, se necessário.
 5. O usuário inicia rota externa.
 6. O usuário marca mentalmente ou futuramente registra conclusão.
-7. O usuário retorna para consultar a próxima etapa.
+7. Se precisar adaptar o futuro, o usuário solicita replanejamento explícito.
+8. O produto preserva o passado e o trecho transcorrido do Dia atual.
+9. O usuário revisa a nova Proposal antes de aceitar qualquer alteração.
+10. O usuário retorna para consultar a próxima etapa.
 
 ---
 
@@ -1252,7 +1262,9 @@ O produto deverá:
 * reduzir conteúdo secundário;
 * permitir abrir rota;
 * informar mudanças relevantes;
-* oferecer alternativa em lista.
+* oferecer alternativa em lista;
+* separar histórico protegido de futuro elegível;
+* usar o timezone da Viagem, não o timezone do servidor.
 
 ---
 
@@ -1657,7 +1669,7 @@ O usuário retorna ao RouteBook após sair da aplicação.
    * explorar;
    * editar;
    * consultar o Roteiro;
-   * revisar Salvos;
+   * revisar Minha seleção;
    * alterar configurações.
 
 ---
@@ -1673,7 +1685,7 @@ O usuário recupera o estado completo da Viagem.
 * contexto;
 * Hospedagem;
 * Preferências;
-* Salvos;
+* Minha seleção;
 * Roteiro;
 * ordem das Atividades;
 * horários;
@@ -1748,7 +1760,7 @@ O produto deverá:
 ### Resposta esperada do produto
 
 * filtros;
-* Salvos;
+* Minha seleção;
 * mapa;
 * relevância;
 * informação progressiva.
@@ -1823,7 +1835,7 @@ O produto deverá:
 * Explorar;
 * Mapa;
 * Detalhes do Lugar;
-* Salvos;
+* Minha seleção;
 * Roteiro;
 * revisão;
 * consulta diária;
@@ -1938,7 +1950,7 @@ O produto deverá permitir acesso claro a:
 * Minha Viagem;
 * Explorar;
 * Mapa;
-* Salvos;
+* Minha seleção;
 * Roteiro.
 
 ---
@@ -1977,7 +1989,7 @@ Alterações deverão refletir em:
 
 * lista;
 * mapa;
-* Salvos;
+* Minha seleção;
 * Roteiro;
 * Detalhes.
 
@@ -2040,14 +2052,15 @@ Possíveis métricas:
 
 ---
 
-## 166. Salvos
+## 166. Minha seleção
 
 Possíveis métricas:
 
-* Lugares salvos;
-* remoções;
-* conversão de Salvo para Roteiro;
-* tempo entre salvar e planejar.
+* preferências definidas por intenção;
+* marcações `MUST_DO`;
+* alterações e limpezas;
+* conversão de seleção para Proposal aceita;
+* tempo entre selecionar e planejar.
 
 ---
 
@@ -2142,7 +2155,7 @@ O teste deverá incluir:
 * restaurantes;
 * bares;
 * vida noturna;
-* Salvos;
+* Minha seleção;
 * Roteiro;
 * distâncias;
 * consulta móvel.
@@ -2154,7 +2167,7 @@ O teste deverá incluir:
 * O usuário entende por onde começar?
 * O primeiro valor acontece cedo?
 * O mapa ajuda?
-* Salvos e Roteiro são claramente diferentes?
+* Minha seleção, Proposal e Roteiro são claramente diferentes?
 * O usuário entende as distâncias?
 * A edição é simples?
 * O Roteiro parece realista?
@@ -2264,7 +2277,7 @@ As jornadas deverão manter integração entre:
 * Contexto da Viagem;
 * Descoberta;
 * Mapa;
-* Salvos;
+* Minha seleção;
 * Roteiro;
 * Recomendações;
 * adaptação.

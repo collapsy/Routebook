@@ -9,10 +9,10 @@ document_type: product
 owner: Product
 
 status: Published
-version: "0.1.0"
+version: "0.2.0"
 
 created: "2026-07-15"
-last_updated: null
+last_updated: "2026-09-18"
 
 authors:
 
@@ -365,7 +365,7 @@ Organizador da Viagem.
    * Período;
    * Hospedagem;
    * Preferências;
-   * Lugares salvos;
+   * TripPlacePreferences;
    * resumo do Roteiro;
    * próxima ação recomendada.
 6. O usuário escolhe a área em que deseja continuar.
@@ -819,7 +819,7 @@ Organizador da Viagem.
 ### Ações possíveis
 
 * salvar;
-* remover dos salvos;
+* limpar preferência;
 * adicionar ao Roteiro;
 * visualizar no mapa;
 * abrir rota;
@@ -902,13 +902,13 @@ Obrigatório.
 
 ---
 
-# Parte III — Lugares salvos
+# Parte III — Minha seleção
 
-## 15. RB-UC-010 — Salvar Lugar
+## 15. RB-UC-010 — Definir preferência por Lugar
 
 ### Objetivo
 
-Permitir que o usuário mantenha um Lugar como opção de interesse.
+Permitir que o usuário defina `WANT`, `MAYBE` ou `NOT_INTERESTED` para um Place no contexto da Trip.
 
 ### Ator principal
 
@@ -921,38 +921,40 @@ Organizador da Viagem.
 
 ### Pós-condições
 
-* O Lugar fica associado à Viagem como Lugar salvo.
+* Uma TripPlacePreference fica associada à Trip e ao Place.
 * O estado é atualizado em todas as visualizações.
 
 ### Fluxo principal
 
-1. O usuário seleciona Salvar.
-2. O sistema associa o Lugar à Viagem.
-3. O sistema persiste a alteração.
-4. O sistema atualiza:
+1. O usuário escolhe uma intenção.
+2. O sistema associa TripPlacePreference à Trip e ao Place.
+3. Se a intenção for `WANT`, o usuário pode definir `MUST_DO`.
+4. O sistema persiste a alteração.
+5. O sistema atualiza:
 
    * Cartão de Lugar;
    * Detalhes;
    * Mapa;
-   * área Salvos.
-5. O sistema apresenta confirmação visual.
+   * Minha seleção.
+6. O sistema apresenta confirmação visual.
 
 ### Fluxos alternativos
 
-#### A1 — Lugar já salvo
+#### A1 — Preferência já existente
 
-O sistema não cria duplicação e mantém o estado atual.
+O sistema atualiza a associação existente sem criar duplicação.
 
 ### Exceções
 
-#### E1 — Falha ao salvar
+#### E1 — Falha ao definir preferência
 
 O sistema informa o erro e mantém o estado anterior.
 
 ### Regras relacionadas
 
-* Salvar não adiciona ao Roteiro.
-* O mesmo Lugar não deve ser salvo duplicadamente na mesma Viagem.
+* Definir preferência não adiciona ao Roteiro.
+* O mesmo Place não deve possuir preferências duplicadas na mesma Trip.
+* `MUST_DO` exige `WANT`.
 * O estado deve ser consistente em lista, mapa e Detalhes.
 
 ### Prioridade
@@ -965,11 +967,11 @@ Obrigatório.
 
 ---
 
-## 16. RB-UC-011 — Remover Lugar dos salvos
+## 16. RB-UC-011 — Limpar preferência por Lugar
 
 ### Objetivo
 
-Permitir que o usuário remova um Lugar da coleção de interesse.
+Permitir que o usuário retorne um Place ao estado não avaliado.
 
 ### Ator principal
 
@@ -977,16 +979,16 @@ Organizador da Viagem.
 
 ### Pré-condições
 
-* O Lugar está salvo.
+* Existe TripPlacePreference.
 
 ### Pós-condições
 
-* O Lugar deixa de aparecer em Salvos.
+* A TripPlacePreference é removida.
 * Uma Atividade já planejada não é removida automaticamente.
 
 ### Fluxo principal
 
-1. O usuário seleciona Remover dos salvos.
+1. O usuário seleciona Limpar preferência.
 2. O sistema remove a associação.
 3. O sistema persiste a alteração.
 4. O sistema atualiza todas as visualizações.
@@ -994,7 +996,7 @@ Organizador da Viagem.
 
 ### Regra relacionada
 
-Salvos e Roteiro são estados independentes.
+TripPlacePreference e Roteiro são estados independentes.
 
 ### Prioridade
 
@@ -1006,11 +1008,11 @@ Obrigatório.
 
 ---
 
-## 17. RB-UC-012 — Consultar Lugares salvos
+## 17. RB-UC-012 — Consultar Minha seleção
 
 ### Objetivo
 
-Permitir que o usuário consulte as opções mantidas para a Viagem.
+Permitir que o usuário consulte intenções, prioridades e estado planejado dos Places da Viagem.
 
 ### Ator principal
 
@@ -1022,24 +1024,26 @@ Organizador da Viagem.
 
 ### Pós-condições
 
-* O usuário visualiza os Lugares salvos.
+* O usuário visualiza Minha seleção.
 
 ### Fluxo principal
 
-1. O usuário acessa Salvos.
-2. O sistema carrega os Lugares associados.
+1. O usuário acessa Minha seleção.
+2. O sistema carrega TripPlacePreferences e Places associados.
 3. O sistema apresenta lista e, quando aplicável, mapa.
 4. O usuário poderá:
 
    * abrir Detalhes;
-   * remover;
-   * adicionar ao Roteiro;
+   * alterar intenção ou prioridade;
+   * solicitar Proposal;
+   * adicionar manualmente ao Roteiro;
+   * limpar preferência;
    * filtrar;
    * visualizar no mapa.
 
 ### Fluxo alternativo
 
-#### A1 — Nenhum Lugar salvo
+#### A1 — Nenhuma preferência
 
 O sistema apresenta Estado vazio e direciona para Explorar.
 
@@ -1540,7 +1544,7 @@ Organizador da Viagem.
 
 * A Viagem existe.
 * Existem Dias da Viagem.
-* Existem Lugares salvos, selecionados ou opções recomendáveis.
+* A Trip possui zero ou mais TripPlacePreferences.
 
 ### Pós-condições
 
@@ -1551,7 +1555,7 @@ Organizador da Viagem.
 
 1. O usuário solicita uma proposta.
 2. O sistema reúne o Contexto da Viagem.
-3. O sistema identifica Lugares disponíveis.
+3. O sistema captura a seleção explícita e a opção de incluir `MAYBE`.
 4. O sistema verifica Restrições.
 5. O sistema agrupa opções por proximidade.
 6. O sistema considera:
@@ -1562,9 +1566,9 @@ Organizador da Viagem.
    * ritmo;
    * orçamento;
    * categorias.
-7. O sistema cria uma proposta.
-8. O sistema apresenta limitações conhecidas.
-9. O sistema apresenta a proposta e Justificativas.
+7. O sistema cria uma proposta somente a partir de preferências elegíveis.
+8. O sistema apresenta limitações e candidatos excluídos com motivo.
+9. O sistema apresenta a proposta, Justificativas e ReplanningWindow quando aplicável.
 10. O usuário poderá:
 
     * aceitar integralmente;
@@ -1579,13 +1583,13 @@ Organizador da Viagem.
 
 O sistema informa o que falta e permite:
 
-* continuar com proposta limitada;
-* adicionar Lugares;
+* continuar com proposta limitada ou vazia;
+* expressar intenção por mais Places;
 * montar manualmente.
 
 #### A2 — Roteiro parcialmente existente
 
-O sistema preserva Atividades bloqueadas ou confirmadas e sugere preenchimento dos demais períodos.
+O sistema preserva passado, trecho transcorrido, Activities `fixed` ou terminais e Free Periods `protected`, sugerindo somente mudanças no futuro elegível.
 
 ### Exceções
 
@@ -1600,6 +1604,8 @@ O sistema não apresenta como concluída e informa os conflitos.
 * Lugares obrigatórios devem receber prioridade quando viáveis.
 * Restrições devem ser respeitadas.
 * O sistema deve evitar falsa precisão.
+* Place não avaliado e `NOT_INTERESTED` não entram automaticamente.
+* `MAYBE` exige solicitação explícita.
 
 ### Prioridade
 
@@ -1984,7 +1990,7 @@ Provedor de Mapas.
 
 * Hospedagem;
 * Lugares;
-* Salvos;
+* Minha seleção;
 * Atividades;
 * categorias;
 * Região;
@@ -2247,7 +2253,7 @@ Sistema de Persistência.
 
    * dados gerais;
    * Preferências;
-   * Salvos;
+   * Minha seleção;
    * Roteiro;
    * Atividades;
    * Períodos livres.
@@ -2301,7 +2307,7 @@ O usuário realiza uma alteração persistente.
 
 * dados da Viagem;
 * Preferências;
-* Salvos;
+* Minha seleção;
 * Roteiro;
 * Atividades;
 * ordem;
@@ -2421,7 +2427,7 @@ Pós-MVP.
 | RB-UC-002 | Consultar Viagem                            |
 | RB-UC-005 | Explorar Lugares                            |
 | RB-UC-008 | Consultar Detalhes do Lugar                 |
-| RB-UC-010 | Salvar Lugar                                |
+| RB-UC-010 | Definir preferência por Lugar               |
 | RB-UC-013 | Adicionar Lugar ao Roteiro                  |
 | RB-UC-016 | Reordenar Atividades                        |
 | RB-UC-018 | Editar Atividade                            |
@@ -2443,8 +2449,8 @@ Pós-MVP.
 | RB-UC-006 | Pesquisar Lugar               |
 | RB-UC-007 | Filtrar Lugares               |
 | RB-UC-009 | Visualizar Lugar no mapa      |
-| RB-UC-011 | Remover Lugar dos salvos      |
-| RB-UC-012 | Consultar Lugares salvos      |
+| RB-UC-011 | Limpar preferência por Lugar  |
+| RB-UC-012 | Consultar Minha seleção       |
 | RB-UC-015 | Adicionar Período livre       |
 | RB-UC-017 | Mover Atividade entre dias    |
 | RB-UC-021 | Visualizar dia no mapa        |
@@ -2556,7 +2562,7 @@ Casos de Uso que geram ou alteram o Roteiro deverão preservar a decisão final 
 
 ## 59. Consistência de estado
 
-Alterações em Lugares, Salvos e Atividades deverão refletir em:
+Alterações em Places, Minha seleção e Activities deverão refletir em:
 
 * lista;
 * mapa;
@@ -2615,14 +2621,14 @@ Exemplo:
 
 ```text
 Caso de Uso:
-RB-UC-010 — Salvar Lugar
+RB-UC-010 — Definir preferência por Lugar
 
 Requisitos derivados:
 - O usuário deve conseguir salvar um Lugar.
 - O sistema não deve criar duplicação.
 - O estado salvo deve aparecer na lista.
 - O estado salvo deve aparecer no mapa.
-- O Lugar salvo não deve ser adicionado automaticamente ao Roteiro.
+- A TripPlacePreference não deve criar Activity automaticamente.
 ```
 
 ---

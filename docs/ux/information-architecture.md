@@ -9,10 +9,10 @@ document_type: ux
 owner: Experience
 
 status: Published
-version: "0.1.0"
+version: "0.2.0"
 
 created: "2026-07-17"
-last_updated: null
+last_updated: "2026-09-18"
 
 authors:
 
@@ -161,7 +161,7 @@ A organização do RouteBook deverá preservar os seguintes princípios:
 
 1. A Viagem é o contexto central da experiência.
 2. O usuário deverá saber em qual Viagem está.
-3. Descoberta, Mapa, Salvos e Roteiro deverão funcionar como partes conectadas.
+3. Descoberta, Mapa, Minha seleção e Roteiro deverão funcionar como partes conectadas.
 4. O Mapa não deverá ser uma área isolada do restante do produto.
 5. A navegação deverá ser simples em dispositivos móveis.
 6. O usuário não deverá precisar conhecer a estrutura interna do sistema.
@@ -185,7 +185,7 @@ Minhas Viagens
     ├── Explorar
     ├── Mapa
     ├── Roteiro
-    ├── Salvos
+    ├── Minha seleção
     └── Configurações
 ```
 
@@ -231,7 +231,7 @@ Intervalo intencionalmente não preenchido.
 
 Sugestão contextual apresentada pelo produto.
 
-### Lugar salvo
+### Place com preferência
 
 Lugar mantido como opção de interesse.
 
@@ -285,7 +285,7 @@ Viagem
 ├── Explorar
 ├── Mapa
 ├── Roteiro
-├── Salvos
+├── Minha seleção
 └── Configurações
 ```
 
@@ -422,7 +422,7 @@ A navegação principal dentro de uma Viagem deverá possuir cinco áreas centra
 2. Explorar;
 3. Mapa;
 4. Roteiro;
-5. Salvos.
+5. Minha seleção.
 
 Configurações da Viagem deverão estar disponíveis como ação secundária.
 
@@ -448,7 +448,7 @@ Visão Geral
 ├── Resumo do contexto
 ├── Próximo passo
 ├── Resumo do Roteiro
-├── Lugares salvos
+├── Minha seleção
 ├── Alertas
 └── Ações rápidas
 ```
@@ -481,7 +481,7 @@ Exemplos:
 
 * completar Hospedagem;
 * explorar Lugares;
-* revisar Salvos;
+* revisar Minha seleção;
 * adicionar Atividades;
 * revisar conflito;
 * consultar Dia atual.
@@ -494,11 +494,12 @@ Exemplos:
 * alertas;
 * próxima Atividade.
 
-### Salvos
+### Minha seleção
 
-* quantidade;
-* itens recentes;
-* acesso à área completa.
+* quantidade por intenção e Planning Role;
+* Places `MUST_DO`;
+* `MAYBE` disponíveis para inclusão explícita;
+* acesso à área completa e à geração de Proposal.
 
 ---
 
@@ -619,7 +620,7 @@ Os Detalhes do Lugar deverão ser acessíveis a partir de:
 
 * Explorar;
 * Mapa;
-* Salvos;
+* Minha seleção;
 * Roteiro;
 * Recomendação;
 * pesquisa.
@@ -711,9 +712,9 @@ Mostra elementos gerais da Viagem.
 
 Mostra resultados da Descoberta.
 
-### Mapa de Salvos
+### Mapa de Minha seleção
 
-Mostra Lugares salvos.
+Mostra Places com TripPlacePreference.
 
 ### Mapa do Roteiro
 
@@ -733,7 +734,7 @@ O Mapa deverá poder representar:
 
 * Hospedagem;
 * Lugares;
-* Lugares salvos;
+* Places selecionados;
 * Lugares planejados;
 * Atividades;
 * sequência do Dia;
@@ -950,83 +951,95 @@ A área deverá permitir:
 
 ---
 
-# Parte VI — Salvos
+# Parte VI — Minha seleção
 
-## 39. Papel da área Salvos
+## 39. Papel da área Minha seleção
 
-Salvos deverá funcionar como espaço intermediário entre Descoberta e planejamento.
+Minha seleção deverá funcionar como espaço intermediário entre Descoberta e geração explícita de Proposal.
 
 Ela deverá responder:
 
-* Quais Lugares chamaram minha atenção?
+* Quais Places eu quero, talvez queira ou não quero considerar?
+* Quais são imperdíveis?
 * Quais ainda não foram planejados?
-* Onde estão?
-* Quais posso adicionar ao Roteiro?
+* Como se distribuem entre experiência, alimentação, vida noturna e outros?
+* Quais podem participar da próxima Proposal?
 
 ---
 
-## 40. Estrutura da área Salvos
+## 40. Estrutura da área Minha seleção
 
 ```text
-Salvos
-├── Resumo
+Minha seleção
+├── Resumo por intenção e papel
+├── Imperdíveis
 ├── Filtros
 ├── Lista
 ├── Mapa
 ├── Estados
-└── Ações
+└── Montar meu roteiro
 ```
 
 ---
 
-## 41. Organização dos Salvos
+## 41. Organização de Minha seleção
 
-Os Salvos poderão ser organizados por:
+Minha seleção poderá ser organizada por:
 
+* intenção;
+* prioridade;
+* Planning Role;
 * categoria;
 * Região;
 * distância;
 * estado planejado;
-* data de salvamento;
+* data de atualização;
 * relevância.
 
 No MVP, deverá existir pelo menos:
 
-* lista completa;
+* lista completa de preferências;
 * filtro por categoria;
-* identificação de planejado ou não planejado.
+* identificação de intenção, prioridade e planejado ou não planejado.
 
 ---
 
-## 42. Estados na área Salvos
+## 42. Estados na área Minha seleção
 
-Um Lugar salvo poderá estar:
+Um Place poderá estar:
 
-* salvo e não planejado;
-* salvo e planejado;
+* `WANT`, com ou sem `MUST_DO`;
+* `MAYBE`;
+* `NOT_INTERESTED`;
+* não avaliado, portanto ausente da área por padrão;
+* selecionado e não planejado;
+* selecionado e planejado;
 * temporariamente indisponível;
 * com dados incompletos.
 
-A diferença entre Salvo e Planejado deverá ser clara.
+A diferença entre preferência, Proposal e Activity deverá ser clara.
 
 ---
 
-## 43. Ações em Salvos
+## 43. Ações em Minha seleção
 
 O usuário deverá conseguir:
 
 * abrir Detalhes;
 * visualizar no Mapa;
-* adicionar ao Roteiro;
-* remover dos Salvos;
+* alterar intenção;
+* marcar ou desmarcar `MUST_DO` sobre `WANT`;
+* limpar preferência;
+* solicitar Proposal;
+* adicionar manualmente ao Roteiro como ação secundária;
 * filtrar;
 * comparar Distâncias.
 
 ---
 
-## 44. Estado vazio de Salvos
+## 44. Estado vazio de Minha seleção
 
-Quando não existirem Salvos, a área deverá:
+Quando não existirem preferências, a área deverá:
 
 * explicar sua finalidade;
 * direcionar para Explorar;
@@ -1126,7 +1139,7 @@ Navegação inferior
 ├── Explorar
 ├── Mapa
 ├── Roteiro
-└── Salvos
+└── Minha seleção
 ```
 
 Configurações poderão estar em:
@@ -1147,7 +1160,7 @@ Recomendação:
 * Explorar;
 * Mapa;
 * Roteiro;
-* Salvos.
+* Minha seleção.
 
 “Visão Geral” poderá ser representada como “Viagem” na navegação móvel para reduzir complexidade verbal.
 
@@ -1211,7 +1224,7 @@ Viagem Pipa
 ├── Explorar
 ├── Mapa
 ├── Roteiro
-├── Salvos
+├── Minha seleção
 └── Configurações
 ```
 
@@ -1235,7 +1248,7 @@ Telas maiores poderão apresentar:
 * Atividades ao centro;
 * Mapa ou Detalhes à direita.
 
-### Salvos
+### Minha seleção
 
 * lista e Mapa lado a lado.
 
@@ -1255,7 +1268,7 @@ Exemplos:
 * editar na Atividade;
 * abrir rota no Detalhe;
 * mover no item do Roteiro;
-* remover em Salvos.
+* limpar preferência em Minha seleção.
 
 ---
 
@@ -1314,16 +1327,16 @@ O retorno deverá preservar o contexto de Exploração.
 
 ---
 
-## 63. Detalhes para Salvos
+## 63. Detalhes para Minha seleção
 
 ```text
 Detalhes
-→ Salvar
+→ Quero ir / Talvez / Não tenho interesse
 → estado atualizado
 → permanecer nos Detalhes
 ```
 
-O usuário não deverá ser redirecionado obrigatoriamente para Salvos.
+O usuário não deverá ser redirecionado obrigatoriamente para Minha seleção.
 
 ---
 
@@ -1339,19 +1352,23 @@ Detalhes
 
 O usuário deverá escolher entre continuar explorando ou visualizar o Roteiro.
 
+Essa é uma ação manual secundária. Expressar preferência continua sendo a ação primária de planejamento em Explore e Detalhes.
+
 ---
 
-## 65. Salvos para Roteiro
+## 65. Minha seleção para Proposal e Roteiro
 
 ```text
-Salvos
-→ selecionar Lugar
-→ Adicionar ao Roteiro
-→ selecionar Dia
-→ confirmar
+Minha seleção
+→ revisar intenções e prioridades
+→ Montar meu roteiro
+→ decidir inclusão de MAYBE
+→ revisar Proposal
+→ aceitar integral ou parcialmente
+→ Roteiro atualizado
 ```
 
-O estado planejado deverá ser atualizado na área Salvos.
+O estado planejado deverá ser atualizado em Minha seleção somente após aplicação aceita.
 
 ---
 
@@ -1419,7 +1436,7 @@ Os rótulos deverão ser:
 | Descoberta               | Explorar                |
 | Representação geográfica | Mapa                    |
 | Planejamento temporal    | Roteiro                 |
-| Coleção de interesse     | Salvos                  |
+| Seleção da Viagem        | Minha seleção           |
 | Contexto geral           | Configurações da Viagem |
 
 ---
@@ -1430,7 +1447,7 @@ Os rótulos deverão ser:
 | ------------------------- | -------------------- |
 | Criar nova Viagem         | Criar Viagem         |
 | Manter Lugar como opção   | Salvar               |
-| Remover da coleção        | Remover dos Salvos   |
+| Retornar a não avaliado   | Limpar preferência   |
 | Planejar visita           | Adicionar ao Roteiro |
 | Consultar localização     | Ver no Mapa          |
 | Iniciar navegação externa | Abrir rota           |
@@ -1537,7 +1554,7 @@ Deverão existir Estados vazios específicos para:
 * Viagem sem Hospedagem;
 * nenhuma Preferência;
 * Explorar sem resultados;
-* nenhum Lugar salvo;
+* nenhuma preferência;
 * Roteiro vazio;
 * Dia vazio;
 * Mapa sem pontos;
@@ -1670,7 +1687,7 @@ Quando uma rota não existir ou o usuário não possuir acesso, o produto dever�
 3. Dia atual ou próximo Dia;
 4. resumo do Roteiro;
 5. alertas;
-6. Salvos;
+6. Minha seleção;
 7. contexto adicional.
 
 ---
@@ -1846,7 +1863,7 @@ o foco deverá ser direcionado adequadamente e devolvido ao elemento de origem a
 
 Mudanças como:
 
-* Lugar salvo;
+* Place com preferência;
 * Atividade adicionada;
 * filtro aplicado;
 * erro;
@@ -1933,7 +1950,7 @@ Uma futura capacidade offline deverá preservar acesso prioritário a:
 * Atividades;
 * endereços;
 * observações;
-* Salvos essenciais.
+* Minha seleção essencial.
 
 ---
 
@@ -1957,7 +1974,7 @@ Uma futura capacidade offline deverá preservar acesso prioritário a:
 * Explorar;
 * Mapa;
 * Roteiro;
-* Salvos;
+* Minha seleção;
 * Configurações.
 
 ---
@@ -1993,12 +2010,12 @@ O inventário detalhado será consolidado em documento posterior.
 
 ## 109. Matriz funcional
 
-| Capacidade           | Visão Geral |   Explorar |       Mapa |    Roteiro |     Salvos | Configurações |
+| Capacidade           | Visão Geral |   Explorar |       Mapa |    Roteiro | Minha seleção | Configurações |
 | -------------------- | ----------: | ---------: | ---------: | ---------: | ---------: | ------------: |
 | Consultar contexto   |   Principal | Secundário | Secundário | Secundário | Secundário |     Principal |
 | Descobrir Lugares    |      Atalho |  Principal |  Principal | Contextual | Contextual |           Não |
 | Consultar Detalhes   |  Contextual |  Principal |  Principal | Contextual |  Principal |           Não |
-| Salvar Lugar         |  Contextual |  Principal |  Principal | Contextual |  Principal |           Não |
+| Expressar intenção   |  Contextual |  Principal |  Principal | Contextual |  Principal |           Não |
 | Adicionar ao Roteiro |  Contextual |  Principal |  Principal |  Principal |  Principal |           Não |
 | Editar Roteiro       |      Resumo |        Não | Contextual |  Principal |        Não |           Não |
 | Consultar Distância  |      Resumo |  Principal |  Principal |  Principal |  Principal |           Não |
@@ -2029,7 +2046,7 @@ A mesma ação deverá produzir comportamento equivalente em diferentes áreas.
 
 ## 113. Continuidade
 
-O usuário deverá conseguir mover-se entre Descoberta, Salvos, Mapa e Roteiro sem perder contexto.
+O usuário deverá conseguir mover-se entre Descoberta, Minha seleção, Mapa e Roteiro sem perder contexto.
 
 ---
 
@@ -2079,7 +2096,7 @@ Os testes deverão verificar se o usuário consegue localizar:
 * Explorar;
 * Mapa;
 * Roteiro;
-* Salvos;
+* Minha seleção;
 * Preferências;
 * edição de Atividade;
 * abertura de rota.
@@ -2091,7 +2108,7 @@ Os testes deverão verificar se o usuário consegue localizar:
 Deverão validar se os usuários compreendem:
 
 * Explorar;
-* Salvos;
+* Minha seleção;
 * Roteiro;
 * Viagem;
 * Adicionar ao Roteiro;
@@ -2214,7 +2231,7 @@ Agentes de IA que criem telas ou fluxos deverão:
 * utilizar rótulos consistentes;
 * manter a Viagem como contexto central;
 * não criar novas áreas sem justificativa;
-* preservar relação entre lista, Mapa, Salvos e Roteiro;
+* preservar relação entre lista, Mapa, Minha seleção e Roteiro;
 * manter alternativa ao Mapa;
 * respeitar navegação móvel;
 * não misturar configurações globais e contextuais.
@@ -2232,7 +2249,7 @@ Antes de aprovar este documento, verificar:
 * navegação desktop está definida;
 * Detalhes do Lugar possuem local claro;
 * Mapa possui papel estrutural;
-* Salvos e Roteiro estão diferenciados;
+* Minha seleção, Proposal e Roteiro estão diferenciados;
 * Configurações estão separadas das ações frequentes;
 * Estados vazios estão contemplados;
 * erros estão contemplados;
@@ -2254,7 +2271,7 @@ Ela conecta cinco áreas principais:
 * Explorar;
 * Mapa;
 * Roteiro;
-* Salvos.
+* Minha seleção.
 
 Essas áreas não deverão funcionar como módulos isolados.
 
@@ -2263,7 +2280,7 @@ Elas deverão representar diferentes perspectivas sobre o mesmo contexto:
 * a Visão Geral resume;
 * Explorar apresenta possibilidades;
 * o Mapa apresenta localização;
-* Salvos preserva interesse;
+* Minha seleção preserva intenção;
 * o Roteiro organiza decisões.
 
 A qualidade da experiência dependerá da continuidade entre essas perspectivas.

@@ -1,7 +1,4 @@
-import type {
-  TripPlaceIntent,
-  TripPlacePreference,
-} from "@routebook/trip-collection";
+import type { TripPlaceIntent, TripPlacePreference } from "@routebook/trip-collection";
 
 type PreferenceAction = (formData: FormData) => Promise<void> | Promise<never>;
 

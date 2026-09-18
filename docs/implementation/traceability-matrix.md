@@ -1113,3 +1113,18 @@ Ao concluir um incremento:
 - Save de Recommendation foi alinhado ao mesmo estado canônico.
 - Risco: migration contém `UPDATE` e `SET NOT NULL`, portanto deve ser classificada como high risk pela política de release. Nenhuma execução em Production faz parte do incremento.
 - Evidência autoritativa no SHA `6655a401302020c374ec21046b68f8afa4e9bdc0`: Documentation Validation `35386173495`, Overture Place Discovery `35386173591`, Engineering Validation `35386173582` e Vercel concluíram com sucesso. A Engineering Validation aprovou migration policy, aplicação da 0034 em PostgreSQL, testes, smoke, build e Playwright. A política classifica a 0034 como `high` por `update-data` e `set-not-null`. Nenhuma ação em Production foi executada.
+
+## Evidências do RB-INC-202
+
+- Incremento: `docs/implementation/increments/rb-inc-202-trip-place-preference-ui.md`.
+- Context Pack: `docs/implementation/context-packs/rb-inc-202-trip-place-preference-ui.md`.
+- Issue: [#487](https://github.com/collapsy/Routebook/issues/487).
+- Branch: `codex/issue-487-trip-place-preference-ui`.
+- Base: `d2887427aa84834d8074c538f091fcb5898f86f6`.
+- Experiência: catálogo e detalhe deixam de tratar Saved Place como estado binário e passam a usar `TripPlacePreference`.
+- Linguagem: Quero ir, Talvez, Não tenho interesse, Imperdível e Minha seleção.
+- Seleção: a rota física `/lugares-salvos` é preservada, mas passa a listar `WANT`, `MAYBE` e `NOT_INTERESTED`.
+- Segurança semântica: preferência não cria/remove Activity; adição manual ao Roteiro permanece ação separada.
+- Compatibilidade externa: materialização por “Quero ir” persiste `WANT`.
+- Persistência: nenhuma migration ou alteração de schema.
+- Evidência autoritativa de regressão: pendente do CI do pull request.

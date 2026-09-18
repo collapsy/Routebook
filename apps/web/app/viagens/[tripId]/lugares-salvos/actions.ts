@@ -121,7 +121,15 @@ export async function addSelectedPlaceToItineraryAction(formData: FormData): Pro
   const startTime = optionalText(formData.get("startTime"));
   const durationValue = optionalText(formData.get("durationMinutes"));
   const durationMinutes = durationValue === undefined ? undefined : Number(durationValue);
-  const { trip, place } = await resolveSelectedPlace(tripId, placeSlug);
+  const { trip, place, preference } = await resolveSelectedPlace(tripId, placeSlug);
+
+  if (preference.intent !== "WANT") {
+    redirect(
+      `/viagens/${tripId}/lugares-salvos?erro=${encodeURIComponent(
+        "Marque o lugar como Quero ir antes de adicioná-lo ao Roteiro por Minha seleção.",
+      )}`,
+    );
+  }
 
   const itineraryRepository = new DrizzleItineraryRepository();
   const itinerary =

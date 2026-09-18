@@ -471,6 +471,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-200 | Context Pack do RB-INC-200 — Núcleo puro de TripPlacePreference | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-200-trip-place-preference-core.md](./implementation/context-packs/rb-inc-200-trip-place-preference-core.md) |
 | RB-INC-201 | Persistência de TripPlacePreference e compatibilidade Saved Places | Implementation | Draft | 0.1.0 | [rb-inc-201-trip-place-preference-persistence.md](./implementation/increments/rb-inc-201-trip-place-preference-persistence.md) |
 | RB-CTX-201 | Context Pack do RB-INC-201 — Persistência de TripPlacePreference | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-201-trip-place-preference-persistence.md](./implementation/context-packs/rb-inc-201-trip-place-preference-persistence.md) |
+| RB-INC-202 | Minha seleção e intenção por Lugar | Implementation | Draft | 0.1.0 | [rb-inc-202-trip-place-preference-ui.md](./implementation/increments/rb-inc-202-trip-place-preference-ui.md) |
+| RB-CTX-202 | Context Pack do RB-INC-202 — Minha seleção e intenção por Lugar | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-202-trip-place-preference-ui.md](./implementation/context-packs/rb-inc-202-trip-place-preference-ui.md) |
 
 ## Status possíveis
 

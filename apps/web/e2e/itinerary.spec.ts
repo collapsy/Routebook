@@ -23,7 +23,7 @@ async function createTripThroughUi(page: Page, tripName: string) {
 
 async function openManualComposer(page: Page) {
   if (!new URL(page.url()).searchParams.has("dia")) {
-    await page.getByRole("link", { name: /Dia 1/ }).click();
+    await page.getByRole("link", { name: /^Dia 1\b/ }).click();
     await expect(page).toHaveURL(/dia=2026-08-22/);
   }
   await page.getByText("Adicionar atividade manual", { exact: true }).click();
@@ -45,15 +45,15 @@ test("prioriza a timeline do dia vazio antes das ações secundárias", async ({
   await expect(page.getByRole("link", { name: "Revisar" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /Dia 1 —/ })).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Escolha um Lugar para começar este Dia" }),
+    page.getByRole("heading", { name: "Comece adicionando um lugar ao Dia 1" }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Explorar Lugares" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Adicionar lugar ao Dia 1" })).toHaveAttribute(
     "href",
-    `/viagens/${trip.id}/lugares`,
+    `/viagens/${trip.id}/lugares?dia=2026-08-22`,
   );
-  await expect(page.getByRole("link", { name: "Ver Lugares salvos" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Usar lugar salvo" })).toHaveAttribute(
     "href",
-    `/viagens/${trip.id}/lugares-salvos`,
+    `/viagens/${trip.id}/lugares-salvos?dia=2026-08-22`,
   );
   await expect(page.getByText("Adicionar atividade manual", { exact: true })).toBeVisible();
   await expect(
@@ -120,7 +120,7 @@ test("remove uma atividade e mantém o mesmo Dia em foco", async ({ page }, test
 
   await expect(page.getByText(activityTitle, { exact: true })).toHaveCount(0);
   await expect(
-    page.getByRole("heading", { name: "Escolha um Lugar para começar este Dia" }),
+    page.getByRole("heading", { name: "Comece adicionando um lugar ao Dia 1" }),
   ).toBeVisible();
 
   await page.reload();
@@ -257,13 +257,13 @@ test("move uma atividade para outro Dia e muda o foco para o destino", async ({
     page.locator(".itinerary-day-card").getByText("2 h 30 min", { exact: true }),
   ).toBeVisible();
 
-  await page.getByRole("link", { name: /Dia 1/ }).click();
+  await page.getByRole("link", { name: /^Dia 1\b/ }).click();
   await expect(page).toHaveURL(/dia=2026-08-22/);
   await expect(
     page.locator(".itinerary-day-card").getByText(activityTitle, { exact: true }),
   ).toHaveCount(0);
 
-  await page.getByRole("link", { name: /Dia 2/ }).click();
+  await page.getByRole("link", { name: /^Dia 2\b/ }).click();
   await expect(
     page.locator(".itinerary-day-card").getByText(activityTitle, { exact: true }),
   ).toBeVisible();
@@ -306,7 +306,7 @@ test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ 
 
   await page.getByRole("link", { name: "Abrir roteiro" }).click();
   await expect(page).toHaveURL(/\/roteiro$/);
-  await page.getByRole("link", { name: /Dia 2/ }).click();
+  await page.getByRole("link", { name: /^Dia 2\b/ }).click();
   await expect(page).toHaveURL(/dia=2026-08-23/);
   const focusedDay = page.locator(".itinerary-day-card");
   const savedPlaceActivity = focusedDay

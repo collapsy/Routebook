@@ -153,6 +153,7 @@ apps/web/app/viagens/[tripId]/lugares-salvos/actions.test.ts
 apps/web/e2e/active-trip-experience.spec.ts
 apps/web/e2e/itinerary.spec.ts
 apps/web/e2e/multi-destination-validation.spec.ts
+apps/web/e2e/place-actions.spec.ts
 pnpm-lock.yaml
 docs/implementation/increments/rb-inc-202-trip-place-preference-ui.md
 docs/implementation/context-packs/rb-inc-202-trip-place-preference-ui.md
@@ -196,6 +197,10 @@ pnpm build
 ```
 
 O CI do PR também executa migrations existentes, smoke e Playwright/responsividade.
+
+### 13.1. Regressão de ações de Place
+
+`apps/web/e2e/place-actions.spec.ts` faz parte da cobertura necessária porque o incremento substitui a linguagem e o comportamento binário de Saved Places nas superfícies de catálogo e detalhe. O E2E deve validar o contrato canônico `Quero ir / Minha seleção` e continuar provando que adicionar um Place diretamente ao Roteiro não cria preferência automaticamente.
 
 ## 14. Critérios de aceite
 

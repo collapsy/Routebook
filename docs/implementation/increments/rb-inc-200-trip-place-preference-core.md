@@ -119,15 +119,15 @@ O incremento não lê nem altera `saved_places`. O módulo legado permanece a su
 
 ## 11. Critérios de aceite
 
-- [ ] módulo canônico não depende de framework, banco ou Provider;
-- [ ] intents e prioridade seguem RB-ADR-028;
-- [ ] não avaliado permanece ausência de entidade;
-- [ ] unicidade por Trip e Place é preservada pelo agregado;
-- [ ] operações são imutáveis e idempotentes;
-- [ ] timestamps e identidades podem ser controlados nos testes;
-- [ ] nenhum efeito externo ou Activity é produzido;
-- [ ] testes unitários cobrem invariantes e transições;
-- [ ] documentação, formatação, lint, typecheck, testes e build passam.
+- [x] módulo canônico não depende de framework, banco ou Provider;
+- [x] intents e prioridade seguem RB-ADR-028;
+- [x] não avaliado permanece ausência de entidade;
+- [x] unicidade por Trip e Place é preservada pelo agregado;
+- [x] operações são imutáveis e idempotentes;
+- [x] timestamps e identidades podem ser controlados nos testes;
+- [x] nenhum efeito externo ou Activity é produzido;
+- [x] testes unitários cobrem invariantes e transições;
+- [x] documentação, formatação, lint, typecheck, testes e build passam.
 
 ## 12. Riscos e controles
 
@@ -166,4 +166,5 @@ Como não há persistência nem consumidor, o rollback consiste em remover o wor
 - o núcleo não possui gerador de UUID nem relógio do sistema: identidade e instante são fornecidos explicitamente pelo chamador;
 - compilação isolada do código-fonte com TypeScript passou após a revisão de pureza;
 - verificação funcional isolada das invariantes principais passou;
-- suíte Vitest, lint, typecheck, documentação, build e regressão integral permanecem como evidência autoritativa do CI do pull request.
+- no SHA `2e369e45964af17822b079a9a48fab02c928e71b`, Documentation Validation `35382464737`, Engineering Validation `35382464968` e Overture Place Discovery `35382465031` concluíram com sucesso;
+- Engineering Validation aprovou instalação congelada, formatação, validação documental, lint, typecheck, políticas de release/deployment, migrations, testes de componente e domínio, normalizador Overture, imagens curadas, smoke do servidor, build e Playwright/responsividade.

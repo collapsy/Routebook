@@ -4,24 +4,31 @@ import { notFound } from "next/navigation";
 
 import {
   DrizzlePlaceRepository,
-  DrizzleSavedPlaceRepository,
+  DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
 import type { PlaceCategory } from "@routebook/place-catalog";
-import { listSavedPlaces } from "@routebook/saved-places";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
+import {
+  TripPlacePreferenceControls,
+  tripPlaceIntentLabels,
+} from "../../../../components/trip-place-preference-controls";
 import { TripMap } from "../../../../components/trip-map";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { presentAccommodationDistance } from "../lugares/distance";
-import { addSavedPlaceToItineraryAction, removeSavedPlaceAction } from "./actions";
+import {
+  addSelectedPlaceToItineraryAction,
+  clearSelectionPlacePreferenceAction,
+  setSelectionPlacePreferenceAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Lugares salvos — RouteBook",
-  description: "Consulte os lugares selecionados para a sua viagem.",
+  title: "Minha seleção — RouteBook",
+  description: "Revise suas intenções e prioridades de lugares para a viagem.",
 };
 
 const categoryLabels: Record<PlaceCategory, string> = {
@@ -44,7 +51,7 @@ function formatDate(value: string): string {
   }).format(new Date(`${value}T00:00:00Z`));
 }
 
-export default async function SavedPlacesPage({
+export default async function TripSelectionPage({
   params,
   searchParams,
 }: {
@@ -61,12 +68,23 @@ export default async function SavedPlacesPage({
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const savedPlaces = await listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId);
+  const preferences = await new DrizzleTripPlacePreferenceRepository().listByTripId(tripId);
   const places = await new DrizzlePlaceRepository().listByIds(
-    savedPlaces.map((selection) => selection.placeId),
+    preferences.map((preference) => preference.placeId),
   );
+  const placeById = new Map(places.map((place) => [place.id, place]));
+  const entries = preferences.flatMap((preference) => {
+    const place = placeById.get(preference.placeId);
+    return place ? [{ place, preference }] : [];
+  });
   const tripDays = deriveTripDays(trip.period);
-  const mapPoints: TripMapPoint[] = places.map((place) => ({
+  const wantCount = preferences.filter((preference) => preference.intent === "WANT").length;
+  const maybeCount = preferences.filter((preference) => preference.intent === "MAYBE").length;
+  const notInterestedCount = preferences.filter(
+    (preference) => preference.intent === "NOT_INTERESTED",
+  ).length;
+
+  const mapPoints: TripMapPoint[] = entries.map(({ place }) => ({
     id: place.id,
     label: place.name,
     kind: "saved-place",
@@ -103,17 +121,17 @@ export default async function SavedPlacesPage({
 
       {salvo === "1" ? (
         <p className="success-banner" role="status">
-          Lugar salvo. Agora você pode adicioná-lo ao roteiro.
+          Lugar adicionado à Minha seleção como Quero ir.
         </p>
       ) : null}
       {removed === "1" ? (
         <p className="success-banner" role="status">
-          Lugar removido dos salvos.
+          Preferência removida. O que já estiver no Roteiro continua lá.
         </p>
       ) : null}
       {adicionadoAoRoteiro === "1" ? (
         <p className="success-banner" role="status">
-          Lugar adicionado ao roteiro.
+          Lugar adicionado ao Roteiro. A preferência em Minha seleção foi preservada.
         </p>
       ) : null}
       {erro ? (
@@ -124,34 +142,40 @@ export default async function SavedPlacesPage({
 
       <header className="trip-overview-hero">
         <div>
-          <p className="product-eyebrow">Sua seleção</p>
-          <h1>Lugares salvos</h1>
+          <p className="product-eyebrow">Coleção da viagem</p>
+          <h1>Minha seleção</h1>
           <p>
-            Salve opções para comparar durante a viagem para {trip.destination.name} e adicione ao
-            roteiro quando decidir o dia.
+            Revise o que você quer considerar para {trip.destination.name}. A seleção registra
+            intenção e prioridade, mas não altera o Roteiro automaticamente.
+          </p>
+          <p>
+            Quero ir: {wantCount} · Talvez: {maybeCount} · Não tenho interesse: {notInterestedCount}
           </p>
           <p>
             As distâncias exibidas são estimativas em linha reta a partir da hospedagem e não
             representam rota, trânsito ou tempo de deslocamento.
           </p>
         </div>
-        <span className="trip-context-version">{places.length} salvos</span>
+        <span className="trip-context-version">{entries.length} avaliados</span>
       </header>
 
-      <TripMap points={mapPoints} title="Hospedagem e lugares salvos" />
+      <TripMap points={mapPoints} title="Hospedagem e Minha seleção" />
 
-      {places.length === 0 ? (
-        <section className="traveler-context-summary" aria-labelledby="saved-empty-title">
+      {entries.length === 0 ? (
+        <section className="traveler-context-summary" aria-labelledby="selection-empty-title">
           <p className="product-eyebrow">Seleção vazia</p>
-          <h2 id="saved-empty-title">Você ainda não salvou nenhum lugar</h2>
-          <p>Explore lugares e salve as opções que quiser comparar depois.</p>
+          <h2 id="selection-empty-title">Você ainda não avaliou nenhum lugar</h2>
+          <p>
+            Explore lugares e marque Quero ir, Talvez ou Não tenho interesse. Nenhuma escolha
+            adiciona uma atividade automaticamente.
+          </p>
           <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
             Explorar lugares
           </Link>
         </section>
       ) : (
         <ul className="place-catalog-grid">
-          {places.map((place) => {
+          {entries.map(({ place, preference }) => {
             const accommodationDistance = presentAccommodationDistance(
               trip.accommodation?.coordinate,
               {
@@ -159,7 +183,7 @@ export default async function SavedPlacesPage({
                 longitude: place.longitude,
               },
             );
-            const titleId = `saved-place-${place.id}`;
+            const titleId = `selection-place-${place.id}`;
 
             return (
               <li className="place-card" key={place.id}>
@@ -168,7 +192,10 @@ export default async function SavedPlacesPage({
                   placeName={place.name}
                   primaryImage={place.primaryImage}
                 />
-                <p className="product-eyebrow">{categoryLabels[place.category]}</p>
+                <p className="product-eyebrow">
+                  {categoryLabels[place.category]} · {tripPlaceIntentLabels[preference.intent]}
+                  {preference.priority === "MUST_DO" ? " · Imperdível" : ""}
+                </p>
                 <h2 id={titleId}>{place.name}</h2>
                 <p>{place.summary}</p>
                 <p>
@@ -178,51 +205,67 @@ export default async function SavedPlacesPage({
                     : "informe a localização da hospedagem para calcular esta distância."}
                 </p>
 
-                <form
-                  action={addSavedPlaceToItineraryAction}
-                  aria-labelledby={titleId}
-                  className="saved-place-itinerary-form"
-                >
-                  <input name="tripId" type="hidden" value={tripId} />
-                  <input name="placeSlug" type="hidden" value={place.slug} />
+                <TripPlacePreferenceControls
+                  clearAction={clearSelectionPlacePreferenceAction}
+                  placeName={place.name}
+                  placeSlug={place.slug}
+                  preference={preference}
+                  setAction={setSelectionPlacePreferenceAction}
+                  tripId={tripId}
+                />
 
-                  <div className="form-field saved-place-itinerary-day">
-                    <label htmlFor={`day-${place.id}`}>Adicionar ao dia</label>
-                    <select
-                      defaultValue={tripDays[0]?.date}
-                      id={`day-${place.id}`}
-                      name="dayDate"
-                      required
-                    >
-                      {tripDays.map((day) => (
-                        <option key={day.date} value={day.date}>
-                          Dia {day.index} — {formatDate(day.date)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                {preference.intent === "WANT" ? (
+                  <form
+                    action={addSelectedPlaceToItineraryAction}
+                    aria-labelledby={titleId}
+                    className="saved-place-itinerary-form"
+                  >
+                    <input name="tripId" type="hidden" value={tripId} />
+                    <input name="placeSlug" type="hidden" value={place.slug} />
 
-                  <div className="form-field">
-                    <label htmlFor={`time-${place.id}`}>Horário opcional</label>
-                    <input id={`time-${place.id}`} name="startTime" type="time" />
-                  </div>
+                    <div className="form-field saved-place-itinerary-day">
+                      <label htmlFor={`day-${place.id}`}>Adicionar manualmente ao dia</label>
+                      <select
+                        defaultValue={tripDays[0]?.date}
+                        id={`day-${place.id}`}
+                        name="dayDate"
+                        required
+                      >
+                        {tripDays.map((day) => (
+                          <option key={day.date} value={day.date}>
+                            Dia {day.index} — {formatDate(day.date)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                  <div className="form-field">
-                    <label htmlFor={`duration-${place.id}`}>Duração opcional</label>
-                    <input
-                      id={`duration-${place.id}`}
-                      min={1}
-                      name="durationMinutes"
-                      placeholder="Minutos"
-                      step={1}
-                      type="number"
-                    />
-                  </div>
+                    <div className="form-field">
+                      <label htmlFor={`time-${place.id}`}>Horário opcional</label>
+                      <input id={`time-${place.id}`} name="startTime" type="time" />
+                    </div>
 
-                  <button className="product-button" type="submit">
-                    Adicionar ao roteiro
-                  </button>
-                </form>
+                    <div className="form-field">
+                      <label htmlFor={`duration-${place.id}`}>Duração opcional</label>
+                      <input
+                        id={`duration-${place.id}`}
+                        min={1}
+                        name="durationMinutes"
+                        placeholder="Minutos"
+                        step={1}
+                        type="number"
+                      />
+                    </div>
+
+                    <button className="product-button" type="submit">
+                      Adicionar ao roteiro
+                    </button>
+                  </form>
+                ) : (
+                  <p>
+                    Esta preferência não cria uma atividade. Você ainda pode abrir os detalhes e
+                    adicionar o lugar manualmente ao Roteiro se decidir fazer isso.
+                  </p>
+                )}
 
                 <div className="section-heading-row saved-place-card-actions">
                   <Link
@@ -231,13 +274,6 @@ export default async function SavedPlacesPage({
                   >
                     Ver detalhes
                   </Link>
-                  <form action={removeSavedPlaceAction}>
-                    <input name="tripId" type="hidden" value={tripId} />
-                    <input name="placeSlug" type="hidden" value={place.slug} />
-                    <button className="product-secondary-action" type="submit">
-                      Remover
-                    </button>
-                  </form>
                 </div>
               </li>
             );

@@ -3,10 +3,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
 
-import {
-  changeTripPlacePreference,
-  createTripPlacePreference,
-} from "@routebook/trip-collection";
+import { changeTripPlacePreference, createTripPlacePreference } from "@routebook/trip-collection";
 import { createSavedPlace } from "@routebook/saved-places";
 
 import { closeDatabase, getDatabase } from "./client";

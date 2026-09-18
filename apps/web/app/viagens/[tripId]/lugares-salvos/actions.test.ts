@@ -144,5 +144,4 @@ describe("ações de Minha seleção", () => {
       "NEXT_REDIRECT:/viagens/11111111-1111-4111-8111-111111111111/lugares-salvos?erro=Marque%20o%20lugar%20como%20Quero%20ir%20antes%20de%20adicion%C3%A1-lo%20ao%20Roteiro%20por%20Minha%20sele%C3%A7%C3%A3o.",
     );
   });
-
 });

@@ -50,7 +50,7 @@ async function createFixture() {
     slug: `trip-place-preference-${placeId}`,
     name: "Lugar de teste",
     summary: "Fixture de persistência de preferência.",
-    category: "attraction",
+    category: "nature",
     latitude: -23.5505,
     longitude: -46.6333,
     addressLabel: null,

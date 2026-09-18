@@ -116,10 +116,7 @@ export const savedPlaces = pgTable(
   },
   (table) => [
     uniqueIndex("saved_places_trip_place_unique").on(table.tripId, table.placeId),
-    check(
-      "saved_places_intent_check",
-      sql`${table.intent} in ('WANT', 'MAYBE', 'NOT_INTERESTED')`,
-    ),
+    check("saved_places_intent_check", sql`${table.intent} in ('WANT', 'MAYBE', 'NOT_INTERESTED')`),
     check(
       "saved_places_priority_check",
       sql`${table.priority} is null or ${table.priority} = 'MUST_DO'`,

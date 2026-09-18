@@ -172,7 +172,7 @@
   grid-template-columns: minmax(0, 1fr) minmax(8.5rem, auto);
   gap: 0.65rem;
   align-items: stretch;
-  margin-top: auto;
+  margin-top: 0.15rem;
 }
 
 .cardActions > a,
@@ -217,11 +217,32 @@
   gap: 0.6rem;
 }
 
+.cardDetailsSection {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.cardDetailsLabel {
+  color: var(--foreground);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .cardDetailsBody p,
 .cardDetailsBody small {
   margin: 0;
   color: var(--foreground-muted);
   line-height: 1.45;
+}
+
+.cardDetailsBody p {
+  font-size: 0.92rem;
+}
+
+.cardDetailsBody small {
+  font-size: 0.76rem;
 }
 
 .cardAuxiliaryActions {
@@ -238,11 +259,13 @@
 }
 
 .optionsGrid {
+  align-items: start;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
 .optionsGrid > li {
+  align-self: start;
   display: flex;
   min-width: 0;
   flex-direction: column;

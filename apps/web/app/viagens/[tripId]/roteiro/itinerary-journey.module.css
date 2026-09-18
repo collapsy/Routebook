@@ -31,6 +31,92 @@
   margin-top: 0.35rem;
 }
 
+.journeyGuide {
+  background: color-mix(in oklab, var(--primary) 5%, var(--surface));
+  border: 1px solid color-mix(in oklab, var(--primary) 24%, var(--border));
+  border-radius: 1rem;
+  display: grid;
+  gap: 0.8rem;
+  margin: 1rem 0 1.25rem;
+  padding: 1rem 1.1rem;
+}
+
+.journeyGuideHeader {
+  align-items: end;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.journeyGuideHeader p,
+.journeyGuideHeader h2 {
+  margin: 0;
+}
+
+.journeyGuideHeader h2 {
+  font-size: 1.15rem;
+  margin-top: 0.2rem;
+}
+
+.journeySteps {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.journeyStep,
+.journeyStepCurrent,
+.journeyStepDone {
+  align-items: center;
+  color: var(--foreground-muted);
+  display: flex;
+  font-size: 0.8rem;
+  font-weight: 750;
+  gap: 0.4rem;
+}
+
+.journeyStep span,
+.journeyStepCurrent span,
+.journeyStepDone span {
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: inline-flex;
+  flex: 0 0 1.55rem;
+  height: 1.55rem;
+  justify-content: center;
+  width: 1.55rem;
+}
+
+.journeyStepCurrent {
+  color: var(--primary-strong);
+}
+
+.journeyStepCurrent span {
+  background: var(--primary-strong);
+  border-color: var(--primary-strong);
+  color: var(--surface);
+}
+
+.journeyStepDone {
+  color: var(--foreground);
+}
+
+.journeyStepDone span {
+  background: color-mix(in oklab, var(--primary) 15%, var(--surface));
+  border-color: color-mix(in oklab, var(--primary) 35%, var(--border));
+  color: var(--primary-strong);
+}
+
+.journeyGuideHint {
+  color: var(--foreground-muted);
+  font-size: 0.82rem;
+  margin: 0;
+}
+
 .dayFocus {
   display: grid;
   gap: 1rem;
@@ -467,6 +553,7 @@
 @media (max-width: 760px) {
   .pageTopbar,
   .focusHeader,
+  .journeyGuideHeader,
   .secondaryHeading {
     align-items: stretch;
     flex-direction: column;
@@ -478,6 +565,27 @@
 
   .itineraryHeader {
     margin-top: 0.25rem;
+  }
+
+  .journeyGuideHeader {
+    align-items: stretch;
+    gap: 0.7rem;
+  }
+
+  .journeyGuideHeader > a {
+    align-self: flex-start;
+  }
+
+  .journeySteps {
+    gap: 0.35rem;
+  }
+
+  .journeyStep,
+  .journeyStepCurrent,
+  .journeyStepDone {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.25rem;
   }
 
   .focusHeader {

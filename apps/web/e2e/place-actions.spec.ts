@@ -105,7 +105,7 @@ test("mantém fallback compacto em Lugar salvo sem fotografia real", async ({ pa
     .first();
   const discoveryFallback = discoveryCard.locator('[data-place-image-fallback="true"]');
   await expect(discoveryFallback).toHaveAttribute("data-presentation", "compact");
-  await expect(discoveryFallback).toHaveText("Sem foto");
+  await expect(discoveryFallback.locator("strong")).toHaveText("Sem foto");
   await discoveryCard.getByRole("button", { name: "Salvar lugar" }).click();
   await expect(discoveryCard.getByRole("button", { name: "Remover dos salvos" })).toBeVisible({
     timeout: 15_000,
@@ -116,5 +116,5 @@ test("mantém fallback compacto em Lugar salvo sem fotografia real", async ({ pa
   const fallback = savedCard.locator('[data-place-image-fallback="true"]');
   await expect(fallback).toBeVisible();
   await expect(fallback).toHaveAttribute("data-presentation", "compact");
-  await expect(fallback).toHaveText("Sem foto");
+  await expect(fallback.locator("strong")).toHaveText("Sem foto");
 });

@@ -21,29 +21,129 @@
 }
 
 .noPhoto {
-  align-items: center;
-  background: var(--surface-soft);
-  border: 1px solid var(--border);
+  --fallback-accent: var(--primary);
+
+  align-items: flex-end;
+  aspect-ratio: 16 / 9;
+  background-image:
+    linear-gradient(180deg, rgb(15 23 42 / 4%) 18%, rgb(15 23 42 / 78%) 100%),
+    url("/category-illustrations/place.svg");
+  background-position: center;
+  background-size: cover;
+  border: 1px solid color-mix(in oklab, var(--fallback-accent) 35%, var(--border));
   border-radius: var(--radius-medium);
-  color: var(--foreground-muted);
+  color: #fff;
   display: flex;
-  font-size: 0.78rem;
-  font-weight: 700;
+  gap: 0.75rem;
+  justify-content: flex-start;
+  min-height: 0;
+  overflow: hidden;
+  padding: 1rem;
+  position: relative;
+  text-align: left;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 35%);
+}
+
+.noPhoto::before {
+  align-items: center;
+  background: rgb(255 255 255 / 84%);
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: 50%;
+  color: var(--primary-strong);
+  content: attr(data-place-initial);
+  display: inline-flex;
+  flex: 0 0 2.55rem;
+  font-size: 1.05rem;
+  height: 2.55rem;
   justify-content: center;
+  letter-spacing: 0;
+  width: 2.55rem;
+}
+
+.noPhotoCopy {
+  background: rgb(15 23 42 / 58%);
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 0.7rem;
+  display: grid;
+  gap: 0.16rem;
+  max-width: min(100%, 20rem);
+  padding: 0.48rem 0.65rem;
+}
+
+.noPhotoCopy strong {
+  font-size: 0.78rem;
   letter-spacing: 0.02em;
-  min-height: 4.25rem;
-  padding: 0.75rem;
-  text-align: center;
+  line-height: 1.15;
+}
+
+.noPhotoCopy small {
+  font-size: 0.68rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.noPhoto[data-place-category="beach"] {
+  --fallback-accent: var(--primary);
+  background-image:
+    linear-gradient(180deg, rgb(15 23 42 / 2%) 18%, rgb(15 23 42 / 74%) 100%),
+    url("/category-illustrations/beach.svg");
+}
+
+.noPhoto[data-place-category="gastronomy"] {
+  --fallback-accent: var(--accent);
+  background-image:
+    linear-gradient(180deg, rgb(15 23 42 / 2%) 18%, rgb(15 23 42 / 74%) 100%),
+    url("/category-illustrations/gastronomy.svg");
+}
+
+.noPhoto[data-place-category="nature"] {
+  background-image:
+    linear-gradient(180deg, rgb(15 23 42 / 2%) 18%, rgb(15 23 42 / 74%) 100%),
+    url("/category-illustrations/nature.svg");
+}
+
+.noPhoto[data-place-category="nightlife"] {
+  --fallback-accent: var(--primary-strong);
+  background-image:
+    linear-gradient(180deg, rgb(15 23 42 / 2%) 18%, rgb(15 23 42 / 78%) 100%),
+    url("/category-illustrations/nightlife.svg");
+}
+
+.noPhoto[data-place-category="attraction"] {
+  background-image:
+    linear-gradient(180deg, rgb(15 23 42 / 2%) 18%, rgb(15 23 42 / 74%) 100%),
+    url("/category-illustrations/attraction.svg");
+}
+
+.noPhoto[data-place-category="viewpoint"] {
+  background-image:
+    linear-gradient(180deg, rgb(15 23 42 / 2%) 18%, rgb(15 23 42 / 74%) 100%),
+    url("/category-illustrations/viewpoint.svg");
+}
+
+.noPhoto[data-place-category="tour"] {
+  background-image:
+    linear-gradient(180deg, rgb(15 23 42 / 2%) 18%, rgb(15 23 42 / 74%) 100%),
+    url("/category-illustrations/tour.svg");
+}
+
+.noPhoto[data-place-category="shopping"] {
+  background-image:
+    linear-gradient(180deg, rgb(15 23 42 / 2%) 18%, rgb(15 23 42 / 74%) 100%),
+    url("/category-illustrations/shopping.svg");
 }
 
 .noPhoto[data-presentation="descriptive"] {
-  aspect-ratio: 16 / 9;
-  min-height: 0;
+  padding: 1rem;
 }
 
 .caption {
+  align-items: baseline;
   color: var(--foreground-muted);
+  display: flex;
+  flex-wrap: wrap;
   font-size: 0.78rem;
+  gap: 0.2rem 0.55rem;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
@@ -51,4 +151,8 @@
 .caption a {
   color: var(--primary-strong);
   font-weight: 700;
+}
+
+.captionPlaceholder {
+  visibility: hidden;
 }

@@ -64,69 +64,7 @@ test("adiciona Place publicado ao Roteiro sem salvar automaticamente", async ({ 
   await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
 
   await expect(page).toHaveURL(
-    new RegExp(
-      `/viagens/${trip.id}/roteiro\\?atividadeCriada=1&dia=2026-08-23#dia-em-focoimport { expect, test } from "@playwright/test";
-
-import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
-
-test("salva no catálogo preservando filtros e abre o compositor do Lugar", async ({ page }) => {
-  const { trip } = await createAuthenticatedE2ETrip({
-    name: `Ações de Lugar ${test.info().project.name} ${Date.now()}`,
-    startDate: "2026-08-22",
-    endDate: "2026-08-29",
-    accommodationName: "Hospedagem central",
-    accommodationAddress: "Pipa, Tibau do Sul — RN",
-    accommodationLatitude: -6.2302,
-    accommodationLongitude: -35.0503,
-  });
-
-  await page.goto(
-    `/viagens/${trip.id}/lugares?descoberta=ocultar&busca=Praia%20do%20Amor&categoria=beach`,
-  );
-
-  const detailsHref = `/viagens/${trip.id}/lugares/praia-do-amor`;
-  const card = page
-    .getByRole("list", { name: "Opções de lugares" })
-    .locator('[data-place-source="published"]')
-    .filter({ has: page.locator(`a[href="${detailsHref}"]`) });
-  await expect(card).toHaveCount(1);
-  await expect(card.getByRole("button", { name: "Salvar lugar" })).toBeVisible();
-  await expect(card.getByRole("link", { name: "Ver detalhes" })).toHaveAttribute(
-    "href",
-    detailsHref,
-  );
-  await expect(card.getByRole("link", { name: "Adicionar ao roteiro" })).toHaveCount(0);
-
-  await card.getByRole("button", { name: "Salvar lugar" }).click();
-
-  await expect(page).toHaveURL(/descoberta=ocultar/);
-  await expect(page).toHaveURL(/busca=Praia(%20|\+)do(%20|\+)Amor/);
-  await expect(page).toHaveURL(/categoria=beach/);
-  await expect(card.getByRole("button", { name: "Remover dos salvos" })).toBeVisible({
-    timeout: 15_000,
-  });
-
-  await card.getByRole("link", { name: "Ver detalhes" }).click();
-  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares/praia-do-amor$`));
-  await expect(page.getByRole("heading", { name: "Praia do Amor", level: 1 })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Adicionar ao roteiro", level: 2 })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Adicionar ao roteiro" })).toBeVisible();
-});
-
-test("adiciona Place publicado ao Roteiro sem salvar automaticamente", async ({ page }) => {
-  const { trip } = await createAuthenticatedE2ETrip({
-    name: `Roteiro direto ${test.info().project.name} ${Date.now()}`,
-    startDate: "2026-08-22",
-    endDate: "2026-08-29",
-  });
-
-  await page.goto(`/viagens/${trip.id}/lugares/chapadao-de-pipa#adicionar-ao-roteiro`);
-
-  await expect(page.getByRole("heading", { name: "Salvar para depois" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Salvar para depois" })).toBeVisible();
-
-,
-    ),
+    new RegExp(`/viagens/${trip.id}/roteiro\\?atividadeCriada=1&dia=2026-08-23#dia-em-foco$`),
   );
   await expect(page.getByRole("status")).toContainText("Atividade adicionada ao Dia 2");
   await expect(

@@ -147,10 +147,13 @@ apps/web/app/viagens/[tripId]/lugares/page.tsx
 apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx
 apps/web/app/viagens/[tripId]/lugares/[placeSlug]/actions.ts
 apps/web/e2e/itinerary-day-place-flow.spec.ts
+apps/web/e2e/itinerary.spec.ts
 docs/implementation/increments/rb-inc-198-itinerary-day-place-flow.md
 docs/implementation/context-packs/rb-inc-198-itinerary-day-place-flow.md
 docs/registry.md
 ```
+
+O arquivo legado `apps/web/e2e/itinerary.spec.ts` pode ser ajustado apenas para atualizar assertions e locators afetados pela nova hierarquia/rotulagem do Roteiro; ele não autoriza mudança adicional de produto.
 
 ## 11. Testes mínimos
 

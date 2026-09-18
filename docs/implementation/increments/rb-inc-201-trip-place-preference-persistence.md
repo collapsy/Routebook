@@ -218,18 +218,18 @@ O CI do PR também aplica migrations em PostgreSQL, executa smoke e Playwright.
 
 ## 15. Critérios de aceite
 
-- [ ] legado preserva ID, Trip, Place e createdAt;
-- [ ] legado é convertido para WANT sem prioridade;
-- [ ] updatedAt legado nasce igual a createdAt;
-- [ ] banco protege intents e prioridade canônicos;
-- [ ] repository canônico faz round-trip das três intenções;
-- [ ] update canônico preserva ID e createdAt;
-- [ ] Saved Places expõe somente WANT;
-- [ ] Save legado converte MAYBE/NOT_INTERESTED para WANT;
-- [ ] Unsave legado limpa a preferência;
-- [ ] Save de Recommendation grava WANT;
-- [ ] Activity, Proposal e UI permanecem inalteradas;
-- [ ] validação integral do CI passa.
+- [x] legado preserva ID, Trip, Place e createdAt;
+- [x] legado é convertido para WANT sem prioridade;
+- [x] updatedAt legado nasce igual a createdAt;
+- [x] banco protege intents e prioridade canônicos;
+- [x] repository canônico faz round-trip das três intenções;
+- [x] update canônico preserva ID e createdAt;
+- [x] Saved Places expõe somente WANT;
+- [x] Save legado converte MAYBE/NOT_INTERESTED para WANT;
+- [x] Unsave legado limpa a preferência;
+- [x] Save de Recommendation grava WANT;
+- [x] Activity, Proposal e UI permanecem inalteradas;
+- [x] validação integral do CI passa.
 
 ## 16. Rollback
 
@@ -239,4 +239,25 @@ Depois que a migration for aplicada em um ambiente com dados reais, rollback fí
 
 ## 17. Evidências
 
-As evidências autoritativas serão registradas após o CI do pull request.
+No SHA `6655a401302020c374ec21046b68f8afa4e9bdc0`:
+
+- Documentation Validation `35386173495`: `success`;
+- Overture Place Discovery `35386173591`: `success`;
+- Engineering Validation `35386173582`: `success`;
+- Vercel: `success`.
+
+A Engineering Validation aprovou:
+
+- instalação com lockfile congelado;
+- Prettier e validação documental;
+- lint e typecheck;
+- política de migrations;
+- verificações de deployment;
+- aplicação da migration `0034_persist_trip_place_preferences` em PostgreSQL limpo;
+- testes de componente, domínio e integração;
+- testes do normalizador Overture e verificação de imagens;
+- smoke do servidor;
+- build;
+- Playwright/responsividade.
+
+A política de release define `UPDATE ... SET` como `update-data` e `SET NOT NULL` como `set-not-null`; ambos são padrões de alto risco. Portanto, a migration 0034 é `high risk`, como previsto. Nenhuma migration foi executada em Production.

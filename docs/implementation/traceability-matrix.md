@@ -1112,4 +1112,4 @@ Ao concluir um incremento:
 - Compatibilidade: Saved Places permanece adapter transitório; Find/List representam somente `WANT`, Save converte para `WANT` e Unsave limpa a preferência.
 - Save de Recommendation foi alinhado ao mesmo estado canônico.
 - Risco: migration contém `UPDATE` e `SET NOT NULL`, portanto deve ser classificada como high risk pela política de release. Nenhuma execução em Production faz parte do incremento.
-- Evidência autoritativa de regressão: pendente do CI do pull request.
+- Evidência autoritativa no SHA `6655a401302020c374ec21046b68f8afa4e9bdc0`: Documentation Validation `35386173495`, Overture Place Discovery `35386173591`, Engineering Validation `35386173582` e Vercel concluíram com sucesso. A Engineering Validation aprovou migration policy, aplicação da 0034 em PostgreSQL, testes, smoke, build e Playwright. A política classifica a 0034 como `high` por `update-data` e `set-not-null`. Nenhuma ação em Production foi executada.

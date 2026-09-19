@@ -37,7 +37,7 @@ export function TripContextNav({ tripId }: TripContextNavProps) {
     },
     {
       href: `${basePath}/lugares-salvos`,
-      label: "Salvos",
+      label: "Minha seleção",
       match: (value) => value.startsWith(`${basePath}/lugares-salvos`),
     },
     {

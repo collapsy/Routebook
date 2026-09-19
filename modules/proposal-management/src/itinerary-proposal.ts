@@ -27,8 +27,7 @@ export type ProposedActivityOperationType = (typeof proposedActivityOperationTyp
 
 export const itineraryProposalGenerationScopes = ["INITIAL", "REPLAN"] as const;
 
-export type ItineraryProposalGenerationScope =
-  (typeof itineraryProposalGenerationScopes)[number];
+export type ItineraryProposalGenerationScope = (typeof itineraryProposalGenerationScopes)[number];
 
 export type ItineraryProposalSelectionSnapshotItem = Readonly<{
   preferenceId: string;
@@ -379,10 +378,7 @@ function normalizedReplanningWindowSnapshot(
       "generationContext.replanningWindow.capturedAt": "Informe um instante ISO válido.",
     });
   }
-  const timeZone = requiredText(
-    value.timeZone,
-    "generationContext.replanningWindow.timeZone",
-  );
+  const timeZone = requiredText(value.timeZone, "generationContext.replanningWindow.timeZone");
   try {
     new Intl.DateTimeFormat("en-US", { timeZone }).format();
   } catch {
@@ -390,19 +386,13 @@ function normalizedReplanningWindowSnapshot(
       "generationContext.replanningWindow.timeZone": "Informe um timezone IANA válido.",
     });
   }
-  const localDate = requiredText(
-    value.localDate,
-    "generationContext.replanningWindow.localDate",
-  );
+  const localDate = requiredText(value.localDate, "generationContext.replanningWindow.localDate");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(localDate)) {
     throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
       "generationContext.replanningWindow.localDate": "Use YYYY-MM-DD.",
     });
   }
-  const localTime = requiredText(
-    value.localTime,
-    "generationContext.replanningWindow.localTime",
-  );
+  const localTime = requiredText(value.localTime, "generationContext.replanningWindow.localTime");
   if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(localTime)) {
     throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
       "generationContext.replanningWindow.localTime": "Use HH:mm.",

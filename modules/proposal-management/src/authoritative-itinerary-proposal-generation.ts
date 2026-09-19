@@ -1,13 +1,12 @@
 import type {
   GenerateItineraryProposalInput,
-  ItineraryProposalGenerationCandidate,
   ItineraryProposalGenerationPort,
 } from "./deterministic-itinerary-proposal-generator";
 import {
-  assembleItineraryProposalGenerationInput,
+  assembleTripPlacePreferenceItineraryProposalGenerationInput,
   type ItineraryProposalSourceItinerary,
   type ItineraryProposalSourcePlace,
-  type ItineraryProposalSourceRecommendation,
+  type ItineraryProposalSourceTripPlacePreference,
 } from "./itinerary-proposal-generation-input-assembler";
 import {
   generateAndPersistItineraryProposal,
@@ -23,7 +22,7 @@ export type LoadAuthoritativeItineraryProposalGenerationContextInput = Readonly<
 
 export type AuthoritativeItineraryProposalGenerationContext = Readonly<{
   itinerary: ItineraryProposalSourceItinerary;
-  recommendations: readonly ItineraryProposalSourceRecommendation[];
+  preferences: readonly ItineraryProposalSourceTripPlacePreference[];
   places: readonly ItineraryProposalSourcePlace[];
 }>;
 
@@ -40,7 +39,7 @@ export type GenerateAuthoritativeItineraryProposalCommand = Readonly<{
   asOf: Date;
   generatedAt: Date;
   createProposedActivityId: GenerateItineraryProposalInput["createProposedActivityId"];
-  additionalCandidates?: readonly ItineraryProposalGenerationCandidate[];
+  includeMaybe?: boolean;
   anchorCoordinate?: GenerateItineraryProposalInput["anchorCoordinate"];
 }>;
 
@@ -68,24 +67,6 @@ function requiredTripId(value: string): string {
   return normalized;
 }
 
-export function mergeItineraryProposalGenerationCandidates(
-  recommendationCandidates: readonly ItineraryProposalGenerationCandidate[],
-  additionalCandidates: readonly ItineraryProposalGenerationCandidate[] = [],
-): readonly ItineraryProposalGenerationCandidate[] {
-  const merged = [...recommendationCandidates];
-  const representedPlaceIds = new Set(
-    recommendationCandidates.flatMap((candidate) => (candidate.placeId ? [candidate.placeId] : [])),
-  );
-
-  for (const candidate of additionalCandidates) {
-    if (candidate.placeId && representedPlaceIds.has(candidate.placeId)) continue;
-    merged.push(candidate);
-    if (candidate.placeId) representedPlaceIds.add(candidate.placeId);
-  }
-
-  return Object.freeze(merged);
-}
-
 export async function generateAuthoritativeItineraryProposal(
   repository: ItineraryProposalRepository,
   generationPort: ItineraryProposalGenerationPort,
@@ -102,14 +83,12 @@ export async function generateAuthoritativeItineraryProposal(
     );
   }
 
-  const assembled = assembleItineraryProposalGenerationInput({
-    ...context,
-    asOf: command.asOf,
+  const assembled = assembleTripPlacePreferenceItineraryProposalGenerationInput({
+    itinerary: context.itinerary,
+    preferences: context.preferences,
+    places: context.places,
+    includeMaybe: command.includeMaybe === true,
   });
-  const candidates = mergeItineraryProposalGenerationCandidates(
-    assembled.candidates,
-    command.additionalCandidates,
-  );
 
   return generateAndPersistItineraryProposal(repository, generationPort, {
     request: command.request,
@@ -117,7 +96,6 @@ export async function generateAuthoritativeItineraryProposal(
     failedAt: command.failedAt,
     generation: {
       ...assembled,
-      candidates,
       generatedAt: command.generatedAt,
       createProposedActivityId: command.createProposedActivityId,
       ...(command.anchorCoordinate ? { anchorCoordinate: command.anchorCoordinate } : {}),

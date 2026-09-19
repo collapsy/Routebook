@@ -14,7 +14,7 @@ import {
   itineraryDays,
   itineraryFreePeriods,
   places,
-  recommendations,
+  savedPlaces,
   trips,
 } from "./schema";
 
@@ -32,8 +32,8 @@ const flexibleFreePeriodId = randomUUID();
 const protectedFreePeriodId = randomUUID();
 const firstPlaceId = randomUUID();
 const secondPlaceId = randomUUID();
-const firstRecommendationId = randomUUID();
-const secondRecommendationId = randomUUID();
+const firstPreferenceId = randomUUID();
+const secondPreferenceId = randomUUID();
 const tripIds = [tripId, tripWithoutItineraryId, tripWithoutDaysId];
 const placeIds = [firstPlaceId, secondPlaceId];
 
@@ -162,55 +162,23 @@ beforeAll(async () => {
       updatedAt: now,
     },
   ]);
-  await database.insert(recommendations).values([
+  await database.insert(savedPlaces).values([
     {
-      id: secondRecommendationId,
+      id: secondPreferenceId,
       tripId,
       placeId: secondPlaceId,
-      status: "generated",
-      contextSnapshot: { schemaVersion: 1, tripId },
-      contextFingerprint: "b".repeat(64),
-      reasons: [{ code: "scenic", message: "Boa opção para o segundo dia.", evidence: {} }],
-      limitations: [],
-      score: 0.8,
-      confidenceLevel: "high",
-      confidenceBasis: ["published-place"],
-      validFrom: new Date("2026-08-06T11:00:00.000Z"),
-      expiresAt: null,
-      generator: "deterministic",
-      policyVersion: "rb-inc-098",
-      generatedAt: new Date("2026-08-06T11:00:00.000Z"),
-      presentedAt: null,
-      resolvedAt: null,
-      linkedDecisionId: null,
-      statusReason: null,
-      supersededByRecommendationId: null,
-      createdAt: now,
+      intent: "WANT",
+      priority: "MUST_DO",
+      createdAt: new Date("2026-08-06T11:00:00.000Z"),
       updatedAt: now,
     },
     {
-      id: firstRecommendationId,
+      id: firstPreferenceId,
       tripId,
       placeId: firstPlaceId,
-      status: "presented",
-      contextSnapshot: { schemaVersion: 1, tripId },
-      contextFingerprint: "a".repeat(64),
-      reasons: [{ code: "wildlife", message: "Chance de observar golfinhos.", evidence: {} }],
-      limitations: [],
-      score: 0.9,
-      confidenceLevel: "high",
-      confidenceBasis: ["published-place"],
-      validFrom: new Date("2026-08-06T10:00:00.000Z"),
-      expiresAt: new Date("2026-08-07T10:00:00.000Z"),
-      generator: "deterministic",
-      policyVersion: "rb-inc-098",
-      generatedAt: new Date("2026-08-06T10:00:00.000Z"),
-      presentedAt: new Date("2026-08-06T10:30:00.000Z"),
-      resolvedAt: null,
-      linkedDecisionId: null,
-      statusReason: null,
-      supersededByRecommendationId: null,
-      createdAt: now,
+      intent: "WANT",
+      priority: null,
+      createdAt: new Date("2026-08-06T10:00:00.000Z"),
       updatedAt: now,
     },
   ]);
@@ -245,16 +213,15 @@ describe("PostgresAuthoritativeItineraryProposalGenerationContextPort", () => {
         },
       ],
     });
-    expect(
-      context.recommendations.map((recommendation) => recommendation.recommendationId),
-    ).toEqual([secondRecommendationId]);
-    expect(context.recommendations[0]).toMatchObject({
-      tripId,
-      placeId: secondPlaceId,
-      status: "generated",
-      score: 0.8,
-      reason: "Boa opção para o segundo dia.",
-    });
+    expect(context.preferences).toEqual([
+      {
+        preferenceId: secondPreferenceId,
+        tripId,
+        placeId: secondPlaceId,
+        intent: "WANT",
+        priority: "MUST_DO",
+      },
+    ]);
     expect(context.places).toEqual(
       [...context.places].sort((left, right) => left.placeId.localeCompare(right.placeId)),
     );

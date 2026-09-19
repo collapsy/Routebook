@@ -477,6 +477,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-203 | Context Pack do RB-INC-203 — TripPlacePreference na Itinerary Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-203-trip-selection-proposal-candidates.md](./implementation/context-packs/rb-inc-203-trip-selection-proposal-candidates.md) |
 | RB-INC-204 | Controles canônicos de estado de Activity | Implementation | Draft | 0.1.0 | [rb-inc-204-activity-state-controls.md](./implementation/increments/rb-inc-204-activity-state-controls.md) |
 | RB-CTX-204 | Context Pack do RB-INC-204 — Controles de estado de Activity | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-204-activity-state-controls.md](./implementation/context-packs/rb-inc-204-activity-state-controls.md) |
+| RB-INC-205 | ReplanningWindow e elegibilidade temporal de delta | Implementation | Draft | 0.1.0 | [rb-inc-205-replanning-window.md](./implementation/increments/rb-inc-205-replanning-window.md) |
+| RB-CTX-205 | Context Pack do RB-INC-205 — ReplanningWindow e delta temporal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-205-replanning-window.md](./implementation/context-packs/rb-inc-205-replanning-window.md) |
 
 ## Status possíveis
 

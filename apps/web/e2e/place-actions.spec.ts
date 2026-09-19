@@ -2,7 +2,9 @@ import { expect, test } from "@playwright/test";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
-test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lugar", async ({ page }) => {
+test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lugar", async ({
+  page,
+}) => {
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Ações de Lugar ${test.info().project.name} ${Date.now()}`,
     startDate: "2026-08-22",
@@ -52,7 +54,9 @@ test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lug
   await expect(page.getByText(/Preferência atual:/)).toBeVisible();
 });
 
-test("adiciona Place publicado ao Roteiro sem criar preferência automaticamente", async ({ page }) => {
+test("adiciona Place publicado ao Roteiro sem criar preferência automaticamente", async ({
+  page,
+}) => {
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Roteiro direto ${test.info().project.name} ${Date.now()}`,
     startDate: "2026-08-22",

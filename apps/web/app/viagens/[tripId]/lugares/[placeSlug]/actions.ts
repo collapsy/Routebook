@@ -72,7 +72,9 @@ export async function setPlacePreferenceAction(formData: FormData): Promise<neve
   const intent = parseTripPlaceIntent(String(formData.get("intent") ?? ""));
   const { place } = await resolvePlaceForTrip(tripId, placeSlug);
   if (!intent) {
-    redirect(`/viagens/${tripId}/lugares/${placeSlug}?erroPreferencia=preferencia-invalida#preferencia-do-lugar`);
+    redirect(
+      `/viagens/${tripId}/lugares/${placeSlug}?erroPreferencia=preferencia-invalida#preferencia-do-lugar`,
+    );
   }
 
   await setTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), {
@@ -90,11 +92,7 @@ export async function clearPlacePreferenceAction(formData: FormData): Promise<ne
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
   const { place } = await resolvePlaceForTrip(tripId, placeSlug);
 
-  await clearTripPlacePreference(
-    new DrizzleTripPlacePreferenceRepository(),
-    tripId,
-    place.id,
-  );
+  await clearTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), tripId, place.id);
 
   revalidatePlaceSurfaces(tripId, placeSlug);
   redirect(`/viagens/${tripId}/lugares/${placeSlug}?preferencia=limpa#preferencia-do-lugar`);
@@ -106,10 +104,11 @@ export async function setPlaceMustDoAction(formData: FormData): Promise<never> {
   const enabled = String(formData.get("enabled") ?? "") === "1";
   const { place } = await resolvePlaceForTrip(tripId, placeSlug);
 
-  await setTripPlaceMustDo(
-    new DrizzleTripPlacePreferenceRepository(),
-    { tripId, placeId: place.id, enabled },
-  );
+  await setTripPlaceMustDo(new DrizzleTripPlacePreferenceRepository(), {
+    tripId,
+    placeId: place.id,
+    enabled,
+  });
 
   revalidatePlaceSurfaces(tripId, placeSlug);
   redirect(`/viagens/${tripId}/lugares/${placeSlug}?preferencia=atualizada#preferencia-do-lugar`);

@@ -109,7 +109,10 @@ function contextPort(tripId = "trip-1"): AuthoritativeItineraryProposalGeneratio
   };
 }
 
-function command(includeMaybe = false) {
+function command(
+  includeMaybe = false,
+  generationScope: "INITIAL" | "REPLAN" = "INITIAL",
+) {
   return {
     request: {
       id: "proposal-1",
@@ -118,6 +121,7 @@ function command(includeMaybe = false) {
       baseTripContextVersion: 1,
       baseItineraryVersion: 1,
       contextSnapshotId: includeMaybe ? "snapshot-want-maybe" : "snapshot-want",
+      generationScope,
       requestedAt,
     },
     startedAt: requestedAt,
@@ -163,6 +167,96 @@ describe("generateAuthoritativeItineraryProposal", () => {
       "place-want",
       "place-maybe",
     ]);
+  });
+
+  it("restringe REPLAN aos Dias elegíveis e registra o snapshot autoritativo", async () => {
+    const inputs: GenerateItineraryProposalInput[] = [];
+    const port: AuthoritativeItineraryProposalGenerationContextPort = {
+      load: vi.fn(async () => ({
+        itinerary: {
+          tripId: "trip-1",
+          days: [
+            {
+              tripDayId: "day-past",
+              date: "2026-08-22",
+              activities: [{ activityId: "activity-past" }],
+              freePeriods: [],
+            },
+            {
+              tripDayId: "day-future",
+              date: "2026-08-24",
+              activities: [],
+              freePeriods: [],
+            },
+          ],
+        },
+        preferences: [
+          {
+            preferenceId: "preference-want",
+            tripId: "trip-1",
+            placeId: "place-want",
+            intent: "WANT" as const,
+            priority: null,
+          },
+        ],
+        places: [{ placeId: "place-want", title: "Praia escolhida", category: "beach" }],
+        replanningWindow: {
+          capturedAt: "2026-08-23T15:00:00.000Z",
+          timeZone: "America/Fortaleza",
+          localDate: "2026-08-23",
+          localTime: "12:00",
+          eligibleDayIds: ["day-future"],
+          eligibleActivityIds: [],
+          protectedActivityIds: ["activity-past"],
+          reasonByActivityId: { "activity-past": "PAST_DAY" },
+        },
+      })),
+    };
+
+    const proposal = await generateAuthoritativeItineraryProposal(
+      repository(),
+      generationPort(inputs),
+      port,
+      command(false, "REPLAN"),
+    );
+
+    expect(inputs[0]?.days.map(({ tripDayId }) => tripDayId)).toEqual(["day-future"]);
+    expect(proposal.generationScope).toBe("REPLAN");
+    expect(proposal.generationContext).toMatchObject({
+      schemaVersion: 1,
+      includeMaybe: false,
+      selection: [
+        {
+          preferenceId: "preference-want",
+          placeId: "place-want",
+          intent: "WANT",
+          priority: null,
+        },
+      ],
+      replanningWindow: {
+        eligibleDayIds: ["day-future"],
+        protectedActivityIds: ["activity-past"],
+      },
+    });
+    expect(port.load).toHaveBeenCalledWith({
+      tripId: "trip-1",
+      asOf: requestedAt,
+      generationScope: "REPLAN",
+    });
+  });
+
+  it("rejeita REPLAN quando o contexto não fornece ReplanningWindow", async () => {
+    await expect(
+      generateAuthoritativeItineraryProposal(
+        repository(),
+        generationPort([]),
+        contextPort(),
+        command(false, "REPLAN"),
+      ),
+    ).rejects.toMatchObject({
+      name: "AuthoritativeItineraryProposalGenerationError",
+      code: "replanning-window-required",
+    });
   });
 
   it("rejeita contexto autoritativo pertencente a outra Trip", async () => {

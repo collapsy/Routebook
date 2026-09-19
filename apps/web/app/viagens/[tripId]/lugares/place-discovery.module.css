@@ -190,12 +190,8 @@
 
 .cardActions form,
 .promotionForm {
-  margin: 0;
-}
-
-.cardActions form,
-.promotionForm {
   display: flex;
+  margin: 0;
   flex-wrap: wrap;
   gap: 0.45rem;
 }

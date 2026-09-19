@@ -17,7 +17,7 @@ import { TripPlacePreferenceControls } from "../../../../components/trip-place-p
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { setPublishedPlacePreferenceAction } from "../lugares/actions";
 import { presentAccommodationDistance } from "../lugares/distance";
-import { addSavedPlaceToItineraryAction, removeSavedPlaceAction } from "./actions";
+import { addSavedPlaceToItineraryAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -255,13 +255,7 @@ export default async function SavedPlacesPage({
                   >
                     Ver detalhes
                   </Link>
-                  <form action={removeSavedPlaceAction}>
-                    <input name="tripId" type="hidden" value={tripId} />
-                    <input name="placeSlug" type="hidden" value={place.slug} />
-                    <button className="product-secondary-action" type="submit">
-                      Limpar escolha
-                    </button>
-                  </form>
+
                 </div>
               </li>
             );

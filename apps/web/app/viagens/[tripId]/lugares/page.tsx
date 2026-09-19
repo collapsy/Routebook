@@ -192,7 +192,7 @@ function CanonicalDiscoveryCard({
   destinationId?: string;
   distanceReferenceLabel: string;
   accommodationCoordinate?: Readonly<{ latitude: number; longitude: number }>;
-  preference?: TripPlacePreference;
+  preference: TripPlacePreference | undefined;
   rankingPosition: number;
   rankingOrderLabel: string;
   quality?: PlaceQualityScore;

@@ -27,7 +27,7 @@ Integrar o valor calculado no RB-INC-205 ao pipeline existente de Proposal, pers
 ## 2. Unidade de trabalho
 
 - issue: [#499](https://github.com/collapsy/Routebook/issues/499);
-- PR: a abrir;
+- PR: [#500](https://github.com/collapsy/Routebook/pull/500);
 - branch: `codex/issue-499-proposal-replan-snapshot`;
 - base: `main@9a37084ca36da79e74c89328a57a4d2585c4d660`;
 - merge na main exige gate humano.

@@ -111,7 +111,6 @@ export default async function PlaceDetailsPage({
         </Link>
       </div>
 
-
       <header className="trip-overview-hero">
         <div>
           <p className="product-eyebrow">{categoryLabels[place.category]}</p>
@@ -197,7 +196,8 @@ export default async function PlaceDetailsPage({
             <p className="product-eyebrow">Planejar este lugar</p>
             <h2 id="place-itinerary-title">Adicionar ao roteiro</h2>
             <p>
-              Escolha o dia e, se quiser, defina horário e duração. Adicionar ao roteiro não altera automaticamente a sua escolha em Minha seleção.
+              Escolha o dia e, se quiser, defina horário e duração. Adicionar ao roteiro não altera
+              automaticamente a sua escolha em Minha seleção.
             </p>
           </div>
           {adicionadoAoRoteiro === "1" && selectedDay ? (

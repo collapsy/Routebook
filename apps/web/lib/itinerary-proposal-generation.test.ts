@@ -73,7 +73,6 @@ function deps() {
     tripRepository: { findById: vi.fn().mockResolvedValue(trip) },
     itineraryRepository: { findByTripId: vi.fn().mockResolvedValue(itinerary) },
     generationService: { generate: vi.fn().mockResolvedValue(readyProposal()) },
-    loadAdditionalCandidates: vi.fn().mockResolvedValue([]),
     now: () => instant,
     createItineraryProposalId: () => proposalId,
     createProposedActivityId: () => "44444444-4444-4444-8444-444444444444",
@@ -87,7 +86,6 @@ describe("executeGenerateItineraryProposalAction", () => {
       executeGenerateItineraryProposalAction({ tripId: "invalid" }, dependencies),
     ).resolves.toMatchObject({ status: "error", code: "invalid-request" });
     expect(dependencies.resolveAccess).not.toHaveBeenCalled();
-    expect(dependencies.loadAdditionalCandidates).not.toHaveBeenCalled();
   });
 
   it("não consulta dados nem gera quando não há sessão", async () => {
@@ -100,7 +98,6 @@ describe("executeGenerateItineraryProposalAction", () => {
       code: "unauthenticated",
     });
     expect(dependencies.tripRepository.findById).not.toHaveBeenCalled();
-    expect(dependencies.loadAdditionalCandidates).not.toHaveBeenCalled();
     expect(dependencies.generationService.generate).not.toHaveBeenCalled();
   });
 
@@ -120,7 +117,6 @@ describe("executeGenerateItineraryProposalAction", () => {
       tripId,
       action: "trip:edit",
     });
-    expect(dependencies.loadAdditionalCandidates).toHaveBeenCalledWith(trip, itinerary);
     expect(dependencies.generationService.generate).toHaveBeenCalledWith(
       expect.objectContaining({
         request: expect.objectContaining({
@@ -132,7 +128,7 @@ describe("executeGenerateItineraryProposalAction", () => {
           contextSnapshotId: `authoritative:${tripId}:8:12`,
         }),
         asOf: instant,
-        additionalCandidates: [],
+        includeMaybe: false,
       }),
     );
   });
@@ -154,10 +150,6 @@ describe("executeGenerateItineraryProposalAction", () => {
 
     await executeGenerateItineraryProposalAction({ tripId }, dependencies);
 
-    expect(dependencies.loadAdditionalCandidates).toHaveBeenCalledWith(
-      tripWithAccommodation,
-      itinerary,
-    );
     expect(dependencies.generationService.generate).toHaveBeenCalledWith(
       expect.objectContaining({
         anchorCoordinate: {
@@ -168,22 +160,13 @@ describe("executeGenerateItineraryProposalAction", () => {
     );
   });
 
-  it("encaminha candidatos adicionais da Discovery sem alterar o estado autoritativo lido", async () => {
+  it("encaminha opt-in explícito de MAYBE para a geração", async () => {
     const dependencies = deps();
-    const additionalCandidates = [
-      {
-        candidateId: "discovery:overture:cafe",
-        placeId: "55555555-5555-4555-8555-555555555555",
-        title: "Café descoberto",
-        reason: "Lugar selecionado entre opções seguras da área desta Viagem.",
-      },
-    ];
-    dependencies.loadAdditionalCandidates.mockResolvedValue(additionalCandidates);
 
-    await executeGenerateItineraryProposalAction({ tripId }, dependencies);
+    await executeGenerateItineraryProposalAction({ tripId, includeMaybe: true }, dependencies);
 
     expect(dependencies.generationService.generate).toHaveBeenCalledWith(
-      expect.objectContaining({ additionalCandidates }),
+      expect.objectContaining({ includeMaybe: true }),
     );
   });
 
@@ -196,7 +179,6 @@ describe("executeGenerateItineraryProposalAction", () => {
       status: "error",
       code: "itinerary-not-found",
     });
-    expect(dependencies.loadAdditionalCandidates).not.toHaveBeenCalled();
     expect(dependencies.generationService.generate).not.toHaveBeenCalled();
   });
 });

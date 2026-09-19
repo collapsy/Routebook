@@ -7,6 +7,7 @@ import type {
 import {
   AuthoritativeItineraryProposalGenerationError,
   generateAuthoritativeItineraryProposal,
+  type AuthoritativeItineraryProposalGenerationContext,
   type AuthoritativeItineraryProposalGenerationContextPort,
 } from "./authoritative-itinerary-proposal-generation";
 import type {
@@ -48,9 +49,8 @@ function generationPort(inputs: GenerateItineraryProposalInput[]): ItineraryProp
 }
 
 function contextPort(tripId = "trip-1"): AuthoritativeItineraryProposalGenerationContextPort {
-  return {
-    load: vi.fn(async () => ({
-      itinerary: {
+  const context: AuthoritativeItineraryProposalGenerationContext = {
+    itinerary: {
         tripId,
         days: [
           {
@@ -89,7 +89,11 @@ function contextPort(tripId = "trip-1"): AuthoritativeItineraryProposalGeneratio
         { placeId: "place-maybe", title: "Café talvez", category: "gastronomy" },
         { placeId: "place-no", title: "Lugar sem interesse", category: "shopping" },
       ],
-    })),
+    },
+  };
+
+  return {
+    load: vi.fn(async () => context),
   };
 }
 

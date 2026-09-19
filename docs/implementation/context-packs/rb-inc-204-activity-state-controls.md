@@ -27,7 +27,7 @@ Implementar somente o núcleo puro dos controles explícitos de Activity exigido
 ## 2. Unidade de trabalho
 
 - issue: [#495](https://github.com/collapsy/Routebook/issues/495);
-- PR: pendente;
+- PR: [#496](https://github.com/collapsy/Routebook/pull/496);
 - branch: `codex/issue-495-activity-state-controls`;
 - base: `main@9de76487959adc3ebfa96bb2bbd4f7711af71115`;
 - merge na `main` permanece gate humano.

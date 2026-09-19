@@ -1153,7 +1153,7 @@ Ao concluir um incremento:
 | incremento | `docs/implementation/increments/rb-inc-204-activity-state-controls.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-204-activity-state-controls.md` |
 | issue | [#495](https://github.com/collapsy/Routebook/issues/495) |
-| PR | pendente |
+| PR | [#496](https://github.com/collapsy/Routebook/pull/496) |
 | branch | `codex/issue-495-activity-state-controls` |
 | base | `main@9de76487959adc3ebfa96bb2bbd4f7711af71115` |
 | lifecycle | `planned -> tentative`; `planned|tentative -> completed|skipped`; `planned|tentative|needs-review -> cancelled` |

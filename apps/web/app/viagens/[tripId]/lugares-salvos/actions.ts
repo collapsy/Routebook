@@ -36,7 +36,9 @@ export async function addSavedPlaceToItineraryAction(formData: FormData): Promis
   const preferenceRepository = new DrizzleTripPlacePreferenceRepository();
   const preferences = await preferenceRepository.listByTripId(tripId);
   const place = (
-    await new DrizzlePlaceRepository().listByIds(preferences.map((preference) => preference.placeId))
+    await new DrizzlePlaceRepository().listByIds(
+      preferences.map((preference) => preference.placeId),
+    )
   ).find((item) => item.slug === placeSlug);
   if (!place) notFound();
 
@@ -89,7 +91,9 @@ export async function removeSavedPlaceAction(formData: FormData): Promise<never>
   const preferenceRepository = new DrizzleTripPlacePreferenceRepository();
   const preferences = await preferenceRepository.listByTripId(tripId);
   const place = (
-    await new DrizzlePlaceRepository().listByIds(preferences.map((preference) => preference.placeId))
+    await new DrizzlePlaceRepository().listByIds(
+      preferences.map((preference) => preference.placeId),
+    )
   ).find((item) => item.slug === placeSlug);
   if (!place) notFound();
 

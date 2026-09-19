@@ -12,11 +12,14 @@ const database = getDatabase();
 const tripId = randomUUID();
 const itineraryId = randomUUID();
 const dayId = randomUUID();
+const futureDayId = randomUUID();
 const placeId = randomUUID();
 const recommendationId = randomUUID();
 const preferenceId = randomUUID();
 const proposalId = randomUUID();
+const replanProposalId = randomUUID();
 const proposedActivityId = randomUUID();
+const replanProposedActivityId = randomUUID();
 const requestedAt = new Date("2026-08-07T10:00:00.000Z");
 const startedAt = new Date("2026-08-07T10:00:01.000Z");
 const generatedAt = new Date("2026-08-07T10:00:02.000Z");
@@ -56,12 +59,20 @@ beforeAll(async () => {
     createdAt: requestedAt,
     updatedAt: requestedAt,
   });
-  await database.insert(itineraryDays).values({
-    id: dayId,
-    itineraryId,
-    date: "2026-08-22",
-    position: 1,
-  });
+  await database.insert(itineraryDays).values([
+    {
+      id: dayId,
+      itineraryId,
+      date: "2026-08-22",
+      position: 1,
+    },
+    {
+      id: futureDayId,
+      itineraryId,
+      date: "2026-08-24",
+      position: 2,
+    },
+  ]);
   await database.insert(places).values({
     id: placeId,
     destinationId: "pipa-rn",
@@ -152,6 +163,59 @@ describe("createPostgresAuthoritativeItineraryProposalGenerationService", () => 
           targetTripDayId: dayId,
           placeId,
           title: "Praia do Amor",
+          operationType: "add",
+        }),
+      ],
+    });
+
+    const persisted = await new DrizzleItineraryProposalRepository(database).findById(
+      tripId,
+      result.id,
+    );
+    expect(persisted).toEqual(result);
+  });
+
+  it("gera REPLAN apenas em Dia elegível e persiste o snapshot temporal", async () => {
+    const service = createPostgresAuthoritativeItineraryProposalGenerationService(database);
+    const replanAsOf = new Date("2026-08-23T15:00:00.000Z");
+
+    const result = await service.generate({
+      request: {
+        id: replanProposalId,
+        tripId,
+        itineraryId,
+        baseTripContextVersion: 4,
+        baseItineraryVersion: 7,
+        contextSnapshotId: `authoritative:${tripId}:4:7:replan`,
+        generationScope: "REPLAN",
+        requestedAt: replanAsOf,
+      },
+      startedAt: replanAsOf,
+      failedAt: replanAsOf,
+      asOf: replanAsOf,
+      generatedAt: replanAsOf,
+      createProposedActivityId: () => replanProposedActivityId,
+    });
+
+    expect(result).toMatchObject({
+      status: "ready",
+      generationScope: "REPLAN",
+      generationContext: {
+        schemaVersion: 1,
+        includeMaybe: false,
+        replanningWindow: {
+          capturedAt: replanAsOf.toISOString(),
+          timeZone: "America/Fortaleza",
+          localDate: "2026-08-23",
+          localTime: "12:00",
+          eligibleDayIds: [futureDayId],
+        },
+      },
+      proposedActivities: [
+        expect.objectContaining({
+          proposedActivityId: replanProposedActivityId,
+          targetTripDayId: futureDayId,
+          placeId,
           operationType: "add",
         }),
       ],

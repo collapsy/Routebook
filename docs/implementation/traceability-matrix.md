@@ -883,7 +883,7 @@ Ao concluir um incremento:
 | Overture | PMTiles transitório em Preview/teste; GeoParquet + STAC como direção sustentável |
 | segunda cidade | Florianópolis zero seed/config |
 | observabilidade | source/raio/contagens/duração sem coordenadas precisas |
-| validação | Documentation/Engineering pendentes no SHA final |
+| validação | SHA `9ba25b31dd1c86aabf73bb49f7f4f921062f2391`: Documentation #2132, Engineering #2614 e Vercel verdes; consolidação documental posterior deve ser revalidada no HEAD final |
 
 
 ## Evidências previstas do RB-INC-176
@@ -1169,6 +1169,7 @@ Ao concluir um incremento:
 | incremento | `docs/implementation/increments/rb-inc-205-replanning-window.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-205-replanning-window.md` |
 | issue | [#497](https://github.com/collapsy/Routebook/issues/497) |
+| PR | [#498](https://github.com/collapsy/Routebook/pull/498) |
 | branch | `codex/issue-497-replanning-window` |
 | base | `main@61169a75249744743df8b65081f5a4d4712f91cc` |
 | janela | data/hora local derivadas do timezone IANA da Trip; passado e trecho transcorrido do Dia atual protegidos |

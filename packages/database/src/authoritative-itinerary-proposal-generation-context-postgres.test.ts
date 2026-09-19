@@ -297,6 +297,31 @@ describe("PostgresAuthoritativeItineraryProposalGenerationContextPort", () => {
     );
   });
 
+  it("calcula ReplanningWindow autoritativa com timezone e estado real das Activities", async () => {
+    const port = createPostgresAuthoritativeItineraryProposalGenerationContextPort(database);
+    const replanAsOf = new Date("2026-08-22T18:00:00.000Z");
+
+    const context = await port.load({
+      tripId,
+      asOf: replanAsOf,
+      generationScope: "REPLAN",
+    });
+
+    expect(context.replanningWindow).toEqual({
+      capturedAt: replanAsOf.toISOString(),
+      timeZone: "America/Fortaleza",
+      localDate: "2026-08-22",
+      localTime: "15:00",
+      eligibleDayIds: [firstDayId, secondDayId],
+      eligibleActivityIds: [],
+      protectedActivityIds: [activeActivityId, removedActivityId],
+      reasonByActivityId: {
+        [activeActivityId]: "CURRENT_DAY_ELAPSED",
+        [removedActivityId]: "TERMINAL_ACTIVITY",
+      },
+    });
+  });
+
   it("considera Activity removed como inativa na seleção e na densidade da Proposal", async () => {
     const port = createPostgresAuthoritativeItineraryProposalGenerationContextPort(database);
     const context = await port.load({ tripId, asOf: now });

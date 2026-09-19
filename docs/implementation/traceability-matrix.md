@@ -1177,3 +1177,19 @@ Ao concluir um incremento:
 | delta | add/move/update/remove validados contra Dias/Activities elegíveis sem aplicar a Proposal |
 | pureza | funções em memória, relógio explícito, sem banco, UI, Provider, migration ou status automático |
 | validação | Documentation/Engineering pendentes no SHA final |
+
+## Evidências previstas do RB-INC-206
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-206-proposal-replan-snapshot.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-206-proposal-replan-snapshot.md` |
+| issue | [#499](https://github.com/collapsy/Routebook/issues/499) |
+| branch | `codex/issue-499-proposal-replan-snapshot` |
+| base | `main@9a37084ca36da79e74c89328a57a4d2585c4d660` |
+| scope | Itinerary Proposal distingue INITIAL e REPLAN; caller legado permanece INITIAL |
+| snapshot | seleção, includeMaybe e ReplanningWindow persistidos em generation_context |
+| janela | adapter PostgreSQL calcula ReplanningWindow canônica usando timezone e Activities reais |
+| composição | REPLAN reutiliza o compositor existente, limitado a eligibleDayIds e sem move/update/remove automático |
+| migration | 0035 aditiva: generation_scope + generation_context, sem DROP/DELETE/UPDATE |
+| validação | Documentation/Engineering pendentes no SHA final |

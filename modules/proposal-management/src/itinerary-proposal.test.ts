@@ -102,6 +102,92 @@ describe("Itinerary Proposal", () => {
     expect(Object.isFrozen(proposal)).toBe(true);
   });
 
+  it("mantém INITIAL como scope compatível quando o caller legado não informa geração", () => {
+    const proposal = requestProposal();
+
+    expect(proposal.generationScope).toBe("INITIAL");
+    expect(proposal.generationContext).toBeUndefined();
+  });
+
+  it("rejeita REPLAN sem snapshot de geração e ReplanningWindow", () => {
+    expect(() =>
+      requestItineraryProposal({
+        id: "proposal-replan",
+        tripId: "trip-1",
+        itineraryId: "itinerary-1",
+        baseTripContextVersion: 3,
+        baseItineraryVersion: 13,
+        contextSnapshotId: "snapshot-replan",
+        generationScope: "REPLAN",
+        requestedAt,
+      }),
+    ).toThrowError(ItineraryProposalValidationError);
+  });
+
+  it("normaliza e congela o snapshot de uma Proposal REPLAN", () => {
+    const generationContext = {
+      schemaVersion: 1 as const,
+      includeMaybe: true,
+      selection: [
+        {
+          preferenceId: " preference-1 ",
+          placeId: " place-1 ",
+          intent: "WANT" as const,
+          priority: "MUST_DO" as const,
+        },
+      ],
+      replanningWindow: {
+        capturedAt: "2026-08-24T15:00:00-03:00",
+        timeZone: "America/Fortaleza",
+        localDate: "2026-08-24",
+        localTime: "15:00",
+        eligibleDayIds: [" day-3 ", "day-4"],
+        eligibleActivityIds: [" activity-future "],
+        protectedActivityIds: [" activity-past "],
+        reasonByActivityId: { "activity-past": "PAST_DAY" },
+      },
+    };
+
+    const proposal = requestItineraryProposal({
+      id: "proposal-replan",
+      tripId: "trip-1",
+      itineraryId: "itinerary-1",
+      baseTripContextVersion: 3,
+      baseItineraryVersion: 13,
+      contextSnapshotId: "snapshot-replan",
+      generationScope: "REPLAN",
+      generationContext,
+      requestedAt,
+    });
+
+    expect(proposal.generationScope).toBe("REPLAN");
+    expect(proposal.generationContext).toEqual({
+      schemaVersion: 1,
+      includeMaybe: true,
+      selection: [
+        {
+          preferenceId: "preference-1",
+          placeId: "place-1",
+          intent: "WANT",
+          priority: "MUST_DO",
+        },
+      ],
+      replanningWindow: {
+        capturedAt: "2026-08-24T18:00:00.000Z",
+        timeZone: "America/Fortaleza",
+        localDate: "2026-08-24",
+        localTime: "15:00",
+        eligibleDayIds: ["day-3", "day-4"],
+        eligibleActivityIds: ["activity-future"],
+        protectedActivityIds: ["activity-past"],
+        reasonByActivityId: { "activity-past": "PAST_DAY" },
+      },
+    });
+    expect(Object.isFrozen(proposal.generationContext)).toBe(true);
+    expect(Object.isFrozen(proposal.generationContext?.selection)).toBe(true);
+    expect(Object.isFrozen(proposal.generationContext?.replanningWindow)).toBe(true);
+  });
+
   it("gera identidade quando ela não é fornecida e normaliza uma identidade conhecida", () => {
     expect(createItineraryProposalId(" proposal-known ")).toBe("proposal-known");
     expect(createItineraryProposalId()).toMatch(/^[0-9a-f-]{36}$/);

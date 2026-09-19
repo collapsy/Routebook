@@ -12,18 +12,25 @@ import {
   generateAndPersistItineraryProposal,
   type GenerateAndPersistItineraryProposalCommand,
 } from "./itinerary-proposal-generation-service";
-import type { ItineraryProposal } from "./itinerary-proposal";
+import type {
+  ItineraryProposal,
+  ItineraryProposalGenerationContext,
+  ItineraryProposalGenerationScope,
+  ItineraryProposalReplanningWindowSnapshot,
+} from "./itinerary-proposal";
 import type { ItineraryProposalRepository } from "./repository";
 
 export type LoadAuthoritativeItineraryProposalGenerationContextInput = Readonly<{
   tripId: string;
   asOf: Date;
+  generationScope?: ItineraryProposalGenerationScope;
 }>;
 
 export type AuthoritativeItineraryProposalGenerationContext = Readonly<{
   itinerary: ItineraryProposalSourceItinerary;
   preferences: readonly ItineraryProposalSourcePreference[];
   places: readonly ItineraryProposalSourcePlace[];
+  replanningWindow?: ItineraryProposalReplanningWindowSnapshot;
 }>;
 
 export interface AuthoritativeItineraryProposalGenerationContextPort {
@@ -44,7 +51,10 @@ export type GenerateAuthoritativeItineraryProposalCommand = Readonly<{
 }>;
 
 export type AuthoritativeItineraryProposalGenerationErrorCode =
-  "invalid-trip-id" | "context-trip-mismatch";
+  | "invalid-trip-id"
+  | "context-trip-mismatch"
+  | "replanning-window-required"
+  | "replanning-window-day-mismatch";
 
 export class AuthoritativeItineraryProposalGenerationError extends Error {
   constructor(
@@ -67,6 +77,54 @@ function requiredTripId(value: string): string {
   return normalized;
 }
 
+function generationContextFrom(
+  context: AuthoritativeItineraryProposalGenerationContext,
+  includeMaybe: boolean,
+  generationScope: ItineraryProposalGenerationScope,
+): ItineraryProposalGenerationContext {
+  if (generationScope === "REPLAN" && !context.replanningWindow) {
+    throw new AuthoritativeItineraryProposalGenerationError(
+      "REPLAN exige uma ReplanningWindow autoritativa.",
+      "replanning-window-required",
+    );
+  }
+
+  return Object.freeze({
+    schemaVersion: 1 as const,
+    includeMaybe,
+    selection: Object.freeze(
+      context.preferences.map((preference) =>
+        Object.freeze({
+          preferenceId: preference.preferenceId,
+          placeId: preference.placeId,
+          intent: preference.intent,
+          priority: preference.priority,
+        }),
+      ),
+    ),
+    ...(generationScope === "REPLAN" && context.replanningWindow
+      ? { replanningWindow: context.replanningWindow }
+      : {}),
+  });
+}
+
+function eligibleReplanningDays(
+  days: GenerateItineraryProposalInput["days"],
+  window: ItineraryProposalReplanningWindowSnapshot,
+): GenerateItineraryProposalInput["days"] {
+  const dayIds = new Set(days.map(({ tripDayId }) => tripDayId));
+  for (const eligibleDayId of window.eligibleDayIds) {
+    if (!dayIds.has(eligibleDayId)) {
+      throw new AuthoritativeItineraryProposalGenerationError(
+        "A ReplanningWindow referencia um Dia que não existe no Itinerary autoritativo.",
+        "replanning-window-day-mismatch",
+      );
+    }
+  }
+  const eligible = new Set(window.eligibleDayIds);
+  return Object.freeze(days.filter(({ tripDayId }) => eligible.has(tripDayId)));
+}
+
 export async function generateAuthoritativeItineraryProposal(
   repository: ItineraryProposalRepository,
   generationPort: ItineraryProposalGenerationPort,
@@ -74,7 +132,13 @@ export async function generateAuthoritativeItineraryProposal(
   command: GenerateAuthoritativeItineraryProposalCommand,
 ): Promise<ItineraryProposal> {
   const tripId = requiredTripId(command.request.tripId);
-  const context = await contextPort.load({ tripId, asOf: command.asOf });
+  const generationScope = command.request.generationScope ?? "INITIAL";
+  const includeMaybe = command.includeMaybe === true;
+  const context = await contextPort.load({
+    tripId,
+    asOf: command.asOf,
+    generationScope,
+  });
 
   if (context.itinerary.tripId.trim() !== tripId) {
     throw new AuthoritativeItineraryProposalGenerationError(
@@ -85,16 +149,26 @@ export async function generateAuthoritativeItineraryProposal(
 
   const assembled = assembleItineraryProposalGenerationInputFromSelection({
     ...context,
-    includeMaybe: command.includeMaybe === true,
+    includeMaybe,
     asOf: command.asOf,
   });
+  const generationContext = generationContextFrom(context, includeMaybe, generationScope);
+  const days =
+    generationScope === "REPLAN"
+      ? eligibleReplanningDays(assembled.days, generationContext.replanningWindow!)
+      : assembled.days;
 
   return generateAndPersistItineraryProposal(repository, generationPort, {
-    request: command.request,
+    request: {
+      ...command.request,
+      generationScope,
+      generationContext,
+    },
     startedAt: command.startedAt,
     failedAt: command.failedAt,
     generation: {
       ...assembled,
+      days,
       generatedAt: command.generatedAt,
       createProposedActivityId: command.createProposedActivityId,
       ...(command.anchorCoordinate ? { anchorCoordinate: command.anchorCoordinate } : {}),

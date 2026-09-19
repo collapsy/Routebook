@@ -479,6 +479,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-204 | Context Pack do RB-INC-204 — Controles de estado de Activity | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-204-activity-state-controls.md](./implementation/context-packs/rb-inc-204-activity-state-controls.md) |
 | RB-INC-205 | ReplanningWindow e elegibilidade temporal de delta | Implementation | Draft | 0.1.0 | [rb-inc-205-replanning-window.md](./implementation/increments/rb-inc-205-replanning-window.md) |
 | RB-CTX-205 | Context Pack do RB-INC-205 — ReplanningWindow e delta temporal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-205-replanning-window.md](./implementation/context-packs/rb-inc-205-replanning-window.md) |
+| RB-INC-206 | Proposal REPLAN autoritativa e snapshot temporal | Implementation | Draft | 0.1.0 | [rb-inc-206-proposal-replan-snapshot.md](./implementation/increments/rb-inc-206-proposal-replan-snapshot.md) |
+| RB-CTX-206 | Context Pack do RB-INC-206 — Proposal REPLAN e snapshot temporal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-206-proposal-replan-snapshot.md](./implementation/context-packs/rb-inc-206-proposal-replan-snapshot.md) |
 
 ## Status possíveis
 

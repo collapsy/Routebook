@@ -212,6 +212,87 @@ export default async function PlaceDetailsPage({
 
       <section
         className="traveler-context-summary"
+        aria-labelledby="place-preference-title"
+        id="preferencia-do-lugar"
+      >
+        <div>
+          <p className="product-eyebrow">Minha seleção</p>
+          <h2 id="place-preference-title">O que você acha deste lugar?</h2>
+          <p>
+            Sua preferência ajuda a organizar a viagem e não adiciona nem remove este lugar do
+            roteiro automaticamente.
+          </p>
+          {placePreference ? (
+            <p>
+              <strong>Preferência atual: </strong>
+              {placePreference.intent === "WANT"
+                ? "Quero ir"
+                : placePreference.intent === "MAYBE"
+                  ? "Talvez"
+                  : "Não tenho interesse"}
+              {placePreference.priority === "MUST_DO" ? " · Imperdível" : ""}
+            </p>
+          ) : (
+            <p>Você ainda não avaliou este lugar.</p>
+          )}
+        </div>
+
+        <div className="section-heading-row" aria-label="Preferência do lugar">
+          {(["WANT", "MAYBE", "NOT_INTERESTED"] as const).map((intent) => (
+            <form action={setPlacePreferenceAction} key={intent}>
+              <input name="tripId" type="hidden" value={tripId} />
+              <input name="placeSlug" type="hidden" value={placeSlug} />
+              <input name="intent" type="hidden" value={intent} />
+              <button
+                aria-pressed={placePreference?.intent === intent}
+                className="product-secondary-action"
+                type="submit"
+              >
+                {intent === "WANT"
+                  ? "Quero ir"
+                  : intent === "MAYBE"
+                    ? "Talvez"
+                    : "Não tenho interesse"}
+              </button>
+            </form>
+          ))}
+        </div>
+
+        {placePreference?.intent === "WANT" ? (
+          <form action={setPlaceMustDoAction}>
+            <input name="tripId" type="hidden" value={tripId} />
+            <input name="placeSlug" type="hidden" value={placeSlug} />
+            <input
+              name="enabled"
+              type="hidden"
+              value={placePreference.priority === "MUST_DO" ? "0" : "1"}
+            />
+            <button
+              aria-pressed={placePreference.priority === "MUST_DO"}
+              className="product-secondary-action"
+              type="submit"
+            >
+              {placePreference.priority === "MUST_DO"
+                ? "Remover de Imperdíveis"
+                : "Marcar como Imperdível"}
+            </button>
+          </form>
+        ) : null}
+
+        {placePreference ? (
+          <form action={clearPlacePreferenceAction}>
+            <input name="tripId" type="hidden" value={tripId} />
+            <input name="placeSlug" type="hidden" value={placeSlug} />
+            <button className="product-inline-link" type="submit">
+              Limpar preferência
+            </button>
+          </form>
+        ) : null}
+      </section>
+
+
+      <section
+        className="traveler-context-summary"
         aria-labelledby="place-itinerary-title"
         id="adicionar-ao-roteiro"
       >
@@ -340,86 +421,6 @@ export default async function PlaceDetailsPage({
             ) : null}
           </div>
         </div>
-      </section>
-
-      <section
-        className="traveler-context-summary"
-        aria-labelledby="place-preference-title"
-        id="preferencia-do-lugar"
-      >
-        <div>
-          <p className="product-eyebrow">Minha seleção</p>
-          <h2 id="place-preference-title">O que você acha deste lugar?</h2>
-          <p>
-            Sua preferência ajuda a organizar a viagem e não adiciona nem remove este lugar do
-            roteiro automaticamente.
-          </p>
-          {placePreference ? (
-            <p>
-              <strong>Preferência atual: </strong>
-              {placePreference.intent === "WANT"
-                ? "Quero ir"
-                : placePreference.intent === "MAYBE"
-                  ? "Talvez"
-                  : "Não tenho interesse"}
-              {placePreference.priority === "MUST_DO" ? " · Imperdível" : ""}
-            </p>
-          ) : (
-            <p>Você ainda não avaliou este lugar.</p>
-          )}
-        </div>
-
-        <div className="section-heading-row" aria-label="Preferência do lugar">
-          {(["WANT", "MAYBE", "NOT_INTERESTED"] as const).map((intent) => (
-            <form action={setPlacePreferenceAction} key={intent}>
-              <input name="tripId" type="hidden" value={tripId} />
-              <input name="placeSlug" type="hidden" value={placeSlug} />
-              <input name="intent" type="hidden" value={intent} />
-              <button
-                aria-pressed={placePreference?.intent === intent}
-                className="product-secondary-action"
-                type="submit"
-              >
-                {intent === "WANT"
-                  ? "Quero ir"
-                  : intent === "MAYBE"
-                    ? "Talvez"
-                    : "Não tenho interesse"}
-              </button>
-            </form>
-          ))}
-        </div>
-
-        {placePreference?.intent === "WANT" ? (
-          <form action={setPlaceMustDoAction}>
-            <input name="tripId" type="hidden" value={tripId} />
-            <input name="placeSlug" type="hidden" value={placeSlug} />
-            <input
-              name="enabled"
-              type="hidden"
-              value={placePreference.priority === "MUST_DO" ? "0" : "1"}
-            />
-            <button
-              aria-pressed={placePreference.priority === "MUST_DO"}
-              className="product-secondary-action"
-              type="submit"
-            >
-              {placePreference.priority === "MUST_DO"
-                ? "Remover de Imperdíveis"
-                : "Marcar como Imperdível"}
-            </button>
-          </form>
-        ) : null}
-
-        {placePreference ? (
-          <form action={clearPlacePreferenceAction}>
-            <input name="tripId" type="hidden" value={tripId} />
-            <input name="placeSlug" type="hidden" value={placeSlug} />
-            <button className="product-inline-link" type="submit">
-              Limpar preferência
-            </button>
-          </form>
-        ) : null}
       </section>
 
       <dl className="trip-overview-summary">

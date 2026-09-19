@@ -99,9 +99,10 @@ const tripPlaceIntents = new Set<TripPlaceIntent>(["WANT", "MAYBE", "NOT_INTERES
 function parseTripPlaceIntent(value: FormDataEntryValue | null): TripPlaceIntent | null {
   const normalized = typeof value === "string" ? value.trim() : "";
   if (!normalized) return null;
-  return tripPlaceIntents.has(normalized as TripPlaceIntent)
-    ? (normalized as TripPlaceIntent)
-    : null;
+  if (!tripPlaceIntents.has(normalized as TripPlaceIntent)) {
+    throw new Error("Intenção de lugar inválida.");
+  }
+  return normalized as TripPlaceIntent;
 }
 
 function parseTripPlacePriority(

@@ -4,7 +4,7 @@ import type {
   AuthoritativeItineraryProposalGenerationContext,
   AuthoritativeItineraryProposalGenerationContextPort,
   ItineraryProposalSourcePlace,
-  ItineraryProposalSourceRecommendation,
+  ItineraryProposalSourcePreference,
   LoadAuthoritativeItineraryProposalGenerationContextInput,
 } from "@routebook/proposal-management";
 
@@ -15,13 +15,12 @@ import {
   itineraryDays,
   itineraryFreePeriods,
   places,
-  recommendations,
+  savedPlaces,
   trips,
 } from "./schema";
 
 type Database = ReturnType<typeof getDatabase>;
 type ReadExecutor = Pick<Database, "select">;
-type RecommendationRow = typeof recommendations.$inferSelect;
 
 export type PostgresAuthoritativeItineraryProposalGenerationContextErrorCode =
   | "invalid-trip-id"
@@ -64,16 +63,8 @@ function requireAsOf(value: Date): Date {
   return new Date(value.getTime());
 }
 
-function firstRecommendationReason(row: RecommendationRow): string | undefined {
-  if (!Array.isArray(row.reasons)) return undefined;
-
-  for (const value of row.reasons) {
-    if (!value || typeof value !== "object") continue;
-    const message = Reflect.get(value, "message");
-    if (typeof message === "string" && message.trim()) return message.trim();
-  }
-
-  return undefined;
+function isActivePlannedActivityStatus(status: string): boolean {
+  return status !== "removed" && status !== "cancelled";
 }
 
 async function loadContext(
@@ -129,6 +120,7 @@ async function loadContext(
       id: itineraryActivities.id,
       itineraryDayId: itineraryActivities.itineraryDayId,
       order: itineraryActivities.order,
+      status: itineraryActivities.status,
       placeId: itineraryActivities.placeId,
     })
     .from(itineraryActivities)
@@ -170,18 +162,27 @@ async function loadContext(
   }
 
   const plannedPlaceIds = new Set(
-    activityRows.flatMap((activity) => (activity.placeId ? [activity.placeId] : [])),
+    activityRows.flatMap((activity) =>
+      activity.placeId && isActivePlannedActivityStatus(activity.status) ? [activity.placeId] : [],
+    ),
   );
 
-  const allRecommendationRows = await database
-    .select()
-    .from(recommendations)
-    .where(eq(recommendations.tripId, tripId))
-    .orderBy(asc(recommendations.generatedAt), asc(recommendations.id));
-  const recommendationRows = allRecommendationRows.filter(
-    (recommendation) => !plannedPlaceIds.has(recommendation.placeId),
+  const allPreferenceRows = await database
+    .select({
+      id: savedPlaces.id,
+      tripId: savedPlaces.tripId,
+      placeId: savedPlaces.placeId,
+      intent: savedPlaces.intent,
+      priority: savedPlaces.priority,
+      createdAt: savedPlaces.createdAt,
+    })
+    .from(savedPlaces)
+    .where(eq(savedPlaces.tripId, tripId))
+    .orderBy(asc(savedPlaces.createdAt), asc(savedPlaces.id));
+  const preferenceRows = allPreferenceRows.filter(
+    (preference) => !plannedPlaceIds.has(preference.placeId),
   );
-  const placeIds = [...new Set(recommendationRows.map((recommendation) => recommendation.placeId))];
+  const placeIds = [...new Set(preferenceRows.map((preference) => preference.placeId))];
   const placeRows =
     placeIds.length === 0
       ? []
@@ -200,25 +201,21 @@ async function loadContext(
 
   if (placeRows.length !== placeIds.length) {
     throw new PostgresAuthoritativeItineraryProposalGenerationContextError(
-      "O contexto autoritativo possui Recommendation sem Place correspondente.",
+      "O contexto autoritativo possui TripPlacePreference sem Place correspondente.",
       "context-inconsistent",
     );
   }
 
-  const sourceRecommendations: readonly ItineraryProposalSourceRecommendation[] = Object.freeze(
-    recommendationRows.map((row) => {
-      const reason = firstRecommendationReason(row);
-      return Object.freeze({
-        recommendationId: row.id,
+  const sourcePreferences: readonly ItineraryProposalSourcePreference[] = Object.freeze(
+    preferenceRows.map((row) =>
+      Object.freeze({
+        preferenceId: row.id,
         tripId: row.tripId,
         placeId: row.placeId,
-        status: row.status,
-        score: row.score,
-        validFrom: new Date(row.validFrom.getTime()),
-        ...(row.expiresAt ? { expiresAt: new Date(row.expiresAt.getTime()) } : {}),
-        ...(reason ? { reason } : {}),
-      });
-    }),
+        intent: row.intent as ItineraryProposalSourcePreference["intent"],
+        priority: row.priority as ItineraryProposalSourcePreference["priority"],
+      }),
+    ),
   );
   const sourcePlaces: readonly ItineraryProposalSourcePlace[] = Object.freeze(
     placeRows.map((row) =>
@@ -247,7 +244,7 @@ async function loadContext(
         ),
       ),
     }),
-    recommendations: sourceRecommendations,
+    preferences: sourcePreferences,
     places: sourcePlaces,
   });
 }

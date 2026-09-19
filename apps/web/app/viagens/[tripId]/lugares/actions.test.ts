@@ -415,4 +415,13 @@ describe("setPublishedPlacePreferenceAction", () => {
     expect(databaseMocks.removePreference).toHaveBeenCalledWith(tripId, "place-1");
     expect(databaseMocks.savePreference).not.toHaveBeenCalled();
   });
+
+  it("rejeita intenção inválida sem limpar estado existente", async () => {
+    await expect(setPublishedPlacePreferenceAction(preferenceForm("INVALID"))).rejects.toThrow(
+      "Intenção de lugar inválida.",
+    );
+
+    expect(databaseMocks.removePreference).not.toHaveBeenCalled();
+    expect(databaseMocks.savePreference).not.toHaveBeenCalled();
+  });
 });

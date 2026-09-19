@@ -51,45 +51,44 @@ function generationPort(inputs: GenerateItineraryProposalInput[]): ItineraryProp
 function contextPort(tripId = "trip-1"): AuthoritativeItineraryProposalGenerationContextPort {
   const context: AuthoritativeItineraryProposalGenerationContext = {
     itinerary: {
-        tripId,
-        days: [
-          {
-            tripDayId: "day-1",
-            date: "2026-08-22",
-            activities: [],
-            freePeriods: [],
-          },
-        ],
-      },
-      preferences: [
+      tripId,
+      days: [
         {
-          preferenceId: "preference-want",
-          tripId,
-          placeId: "place-want",
-          intent: "WANT",
-          priority: null,
+          tripDayId: "day-1",
+          date: "2026-08-22",
+          activities: [],
+          freePeriods: [],
         },
-        {
-          preferenceId: "preference-maybe",
-          tripId,
-          placeId: "place-maybe",
-          intent: "MAYBE",
-          priority: null,
-        },
-        {
-          preferenceId: "preference-no",
-          tripId,
-          placeId: "place-no",
-          intent: "NOT_INTERESTED",
-          priority: null,
-        },
-      ],
-      places: [
-        { placeId: "place-want", title: "Praia escolhida", category: "beach" },
-        { placeId: "place-maybe", title: "Café talvez", category: "gastronomy" },
-        { placeId: "place-no", title: "Lugar sem interesse", category: "shopping" },
       ],
     },
+    preferences: [
+      {
+        preferenceId: "preference-want",
+        tripId,
+        placeId: "place-want",
+        intent: "WANT",
+        priority: null,
+      },
+      {
+        preferenceId: "preference-maybe",
+        tripId,
+        placeId: "place-maybe",
+        intent: "MAYBE",
+        priority: null,
+      },
+      {
+        preferenceId: "preference-no",
+        tripId,
+        placeId: "place-no",
+        intent: "NOT_INTERESTED",
+        priority: null,
+      },
+    ],
+    places: [
+      { placeId: "place-want", title: "Praia escolhida", category: "beach" },
+      { placeId: "place-maybe", title: "Café talvez", category: "gastronomy" },
+      { placeId: "place-no", title: "Lugar sem interesse", category: "shopping" },
+    ],
   };
 
   return {

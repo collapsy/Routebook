@@ -111,6 +111,7 @@ modules/proposal-management/src/itinerary-proposal-generation-input-assembler.te
 modules/proposal-management/src/index.ts
 packages/database/src/authoritative-itinerary-proposal-generation-context.ts
 packages/database/src/authoritative-itinerary-proposal-generation-context-postgres.test.ts
+packages/database/src/authoritative-itinerary-proposal-generation-service-postgres.test.ts
 apps/web/lib/itinerary-proposal-generation.ts
 apps/web/lib/itinerary-proposal-generation.test.ts
 apps/web/app/viagens/[tripId]/roteiro/proposta/generate-action.ts

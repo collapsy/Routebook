@@ -139,6 +139,8 @@ export {
 export type {
   CompleteItineraryProposalGenerationInput,
   ItineraryProposal,
+  ItineraryProposalGenerationContext,
+  ItineraryProposalGenerationScope,
   ItineraryProposalId,
   ItineraryProposalStatus,
   ProposedActivity,

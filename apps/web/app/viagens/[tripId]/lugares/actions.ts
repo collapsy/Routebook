@@ -94,9 +94,12 @@ function revalidatePublishedPlaceSurfaces(tripId: string, placeSlug: string): vo
 export async function setPublishedPlacePreferenceAction(formData: FormData): Promise<void> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
-  const intent = parseTripPlaceIntent(String(formData.get("intent") ?? ""));
+  const rawIntent = String(formData.get("intent") ?? "").trim();
+  const intent = parseTripPlaceIntent(rawIntent);
   const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
-  if (!intent) return;
+  if (!intent) {
+    throw new Error("Intenção de lugar inválida.");
+  }
 
   await setTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), {
     tripId,
@@ -282,7 +285,11 @@ export async function saveExternalPlaceAction(formData: FormData): Promise<never
   }
 
   try {
-    const intent = parseTripPlaceIntent(String(formData.get("intent") ?? "")) ?? "WANT";
+    const rawIntent = String(formData.get("intent") ?? "").trim();
+    const intent = rawIntent ? parseTripPlaceIntent(rawIntent) : "WANT";
+    if (!intent) {
+      redirect(promotionReturnPath(tripId, formData, { erroPromocao: "candidato-invalido" }));
+    }
     const result = await promoteExternalPlaceCandidate({ candidate });
     await setTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), {
       tripId,

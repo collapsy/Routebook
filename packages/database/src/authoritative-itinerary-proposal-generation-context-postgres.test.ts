@@ -92,12 +92,14 @@ beforeAll(async () => {
       tripRow(tripWithoutItineraryId, "Viagem sem itinerary"),
       tripRow(tripWithoutDaysId, "Viagem sem dias"),
     ]);
-  await database.insert(places).values([
-    placeRow(plannedPlaceId, "Baía planejada", "beach", -6.221),
-    placeRow(wantedPlaceId, "Praia do Amor", "beach", -6.235),
-    placeRow(removedPlaceId, "Passeio removido", "tour", -6.24),
-    placeRow(notInterestedPlaceId, "Loja sem interesse", "shopping", -6.23),
-  ]);
+  await database
+    .insert(places)
+    .values([
+      placeRow(plannedPlaceId, "Baía planejada", "beach", -6.221),
+      placeRow(wantedPlaceId, "Praia do Amor", "beach", -6.235),
+      placeRow(removedPlaceId, "Passeio removido", "tour", -6.24),
+      placeRow(notInterestedPlaceId, "Loja sem interesse", "shopping", -6.23),
+    ]);
   await database.insert(itineraries).values([
     {
       id: itineraryId,

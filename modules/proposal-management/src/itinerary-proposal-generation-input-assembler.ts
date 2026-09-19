@@ -529,13 +529,15 @@ function normalizeSelectionCandidates(
 
   const ids = new Set<string>();
   const placeIds = new Set<string>();
-  const eligible: Array<Readonly<{
-    preferenceId: string;
-    placeId: string;
-    intent: "WANT" | "MAYBE";
-    priority: "MUST_DO" | null;
-    inputIndex: number;
-  }>> = [];
+  const eligible: Array<
+    Readonly<{
+      preferenceId: string;
+      placeId: string;
+      intent: "WANT" | "MAYBE";
+      priority: "MUST_DO" | null;
+      inputIndex: number;
+    }>
+  > = [];
 
   preferences.forEach((source, inputIndex) => {
     if (!source || typeof source !== "object") {

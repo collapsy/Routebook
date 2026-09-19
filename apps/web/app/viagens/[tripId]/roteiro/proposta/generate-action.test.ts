@@ -61,7 +61,7 @@ describe("generateItineraryProposalAction", () => {
     await expect(generateItineraryProposalAction(tripId)).rejects.toThrow("NEXT_REDIRECT");
 
     expect(generationMocks.execute).toHaveBeenCalledWith(
-      { tripId },
+      { tripId, includeMaybe: false },
       expect.objectContaining({
         resolveAccess: accessMocks.resolve,
         generationService: databaseMocks.generationService,
@@ -70,6 +70,20 @@ describe("generateItineraryProposalAction", () => {
     expect(cacheMocks.revalidatePath).toHaveBeenCalledTimes(3);
     expect(navigationMocks.redirect).toHaveBeenCalledWith(
       `/viagens/${tripId}/roteiro/proposta?propostaGerada=${proposalId}`,
+    );
+  });
+
+  it("encaminha includeMaybe quando o usuário opta por considerar Talvez", async () => {
+    generationMocks.execute.mockResolvedValue(success);
+
+    await expect(generateItineraryProposalAction(tripId, true)).rejects.toThrow("NEXT_REDIRECT");
+
+    expect(generationMocks.execute).toHaveBeenCalledWith(
+      { tripId, includeMaybe: true },
+      expect.objectContaining({
+        resolveAccess: accessMocks.resolve,
+        generationService: databaseMocks.generationService,
+      }),
     );
   });
 

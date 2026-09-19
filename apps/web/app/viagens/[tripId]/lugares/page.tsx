@@ -784,7 +784,11 @@ export default async function PlacesPage({
       return {
         id: item.id,
         label: item.place.name,
-        kind: savedPlaceIds.has(item.place.id) ? "saved-place" : "published-place",
+        kind:
+          preferencesByPlaceId.get(item.place.id)?.intent !== "NOT_INTERESTED" &&
+          preferencesByPlaceId.has(item.place.id)
+            ? "saved-place"
+            : "published-place",
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
         href: `/viagens/${tripId}/lugares/${item.place.slug}`,

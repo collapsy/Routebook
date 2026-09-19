@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { ApplyProposalItem } from "./proposal-application";
-import {
-  ReplanningDeltaValidationError,
-  validateReplanningDelta,
-} from "./replanning-delta";
+import { ReplanningDeltaValidationError, validateReplanningDelta } from "./replanning-delta";
 import type { ReplanningWindow } from "./replanning-window";
 
 const window: ReplanningWindow = Object.freeze({
@@ -51,26 +48,23 @@ describe("validateReplanningDelta", () => {
     expect(validateReplanningDelta(window, items)).toEqual(items);
   });
 
-  it.each(["update", "remove"] as const)(
-    "aceita %s para Activity elegível",
-    (operationType) => {
-      const item: ApplyProposalItem =
-        operationType === "update"
-          ? {
-              proposedActivityId: "proposal-update",
-              operationType,
-              sourceActivityId: "activity-future",
-              title: "Passeio atualizado",
-            }
-          : {
-              proposedActivityId: "proposal-remove",
-              operationType,
-              sourceActivityId: "activity-future",
-            };
+  it.each(["update", "remove"] as const)("aceita %s para Activity elegível", (operationType) => {
+    const item: ApplyProposalItem =
+      operationType === "update"
+        ? {
+            proposedActivityId: "proposal-update",
+            operationType,
+            sourceActivityId: "activity-future",
+            title: "Passeio atualizado",
+          }
+        : {
+            proposedActivityId: "proposal-remove",
+            operationType,
+            sourceActivityId: "activity-future",
+          };
 
-      expect(validateReplanningDelta(window, [item])).toEqual([item]);
-    },
-  );
+    expect(validateReplanningDelta(window, [item])).toEqual([item]);
+  });
 
   it("rejeita Dia alvo fora da janela", () => {
     try {
@@ -85,9 +79,7 @@ describe("validateReplanningDelta", () => {
       throw new Error("A validação deveria falhar.");
     } catch (error) {
       expect(error).toBeInstanceOf(ReplanningDeltaValidationError);
-      expect((error as ReplanningDeltaValidationError).code).toBe(
-        "target-day-outside-window",
-      );
+      expect((error as ReplanningDeltaValidationError).code).toBe("target-day-outside-window");
     }
   });
 
@@ -142,9 +134,7 @@ describe("validateReplanningDelta", () => {
       },
     ];
 
-    expect(() => validateReplanningDelta(window, items)).toThrow(
-      ReplanningDeltaValidationError,
-    );
+    expect(() => validateReplanningDelta(window, items)).toThrow(ReplanningDeltaValidationError);
   });
 
   it("rejeita janela inconsistente", () => {

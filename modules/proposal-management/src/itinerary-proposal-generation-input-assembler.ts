@@ -48,6 +48,21 @@ export type ItineraryProposalSourcePlace = Readonly<{
   longitude?: number;
 }>;
 
+export type ItineraryProposalSourceTripPlacePreference = Readonly<{
+  preferenceId: string;
+  tripId: string;
+  placeId: string;
+  intent: "WANT" | "MAYBE" | "NOT_INTERESTED";
+  priority: "MUST_DO" | null;
+}>;
+
+export type AssembleTripPlacePreferenceItineraryProposalGenerationInput = Readonly<{
+  itinerary: ItineraryProposalSourceItinerary;
+  preferences: readonly ItineraryProposalSourceTripPlacePreference[];
+  places: readonly ItineraryProposalSourcePlace[];
+  includeMaybe: boolean;
+}>;
+
 export type AssembleItineraryProposalGenerationInput = Readonly<{
   itinerary: ItineraryProposalSourceItinerary;
   recommendations: readonly ItineraryProposalSourceRecommendation[];
@@ -72,6 +87,9 @@ export type ItineraryProposalGenerationInputAssemblyErrorCode =
   | "invalid-place"
   | "duplicate-place"
   | "place-not-found"
+  | "invalid-preference"
+  | "duplicate-preference"
+  | "preference-trip-mismatch"
   | "invalid-as-of";
 
 export class ItineraryProposalGenerationInputAssemblyError extends Error {
@@ -508,5 +526,145 @@ export function assembleItineraryProposalGenerationInput(
   );
   const placesById = normalizePlaces(input?.places);
   const candidates = normalizeCandidates(tripId, input?.recommendations, placesById, asOf);
+  return Object.freeze({ days, candidates });
+}
+
+
+function normalizePreferenceCandidates(
+  tripId: string,
+  preferences: readonly ItineraryProposalSourceTripPlacePreference[],
+  placesById: ReadonlyMap<string, ItineraryProposalSourcePlace>,
+  includeMaybe: boolean,
+): readonly ItineraryProposalGenerationCandidate[] {
+  if (!Array.isArray(preferences)) {
+    throw new ItineraryProposalGenerationInputAssemblyError(
+      "Informe uma coleção de TripPlacePreferences.",
+      "invalid-preference",
+    );
+  }
+
+  const ids = new Set<string>();
+  const eligible: ItineraryProposalSourceTripPlacePreference[] = [];
+
+  for (const source of preferences) {
+    if (!source || typeof source !== "object") {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Informe uma TripPlacePreference válida.",
+        "invalid-preference",
+      );
+    }
+    const preferenceId = requiredText(
+      source.preferenceId,
+      "invalid-preference",
+      "Informe um TripPlacePreferenceId válido.",
+    );
+    if (ids.has(preferenceId)) {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Cada TripPlacePreference deve possuir identidade única.",
+        "duplicate-preference",
+      );
+    }
+    ids.add(preferenceId);
+    const preferenceTripId = requiredText(
+      source.tripId,
+      "invalid-preference",
+      "Informe o TripId da TripPlacePreference.",
+    );
+    if (preferenceTripId !== tripId) {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "A TripPlacePreference não pertence à Trip do Itinerary.",
+        "preference-trip-mismatch",
+      );
+    }
+    const placeId = requiredText(
+      source.placeId,
+      "invalid-preference",
+      "Informe o PlaceId da TripPlacePreference.",
+    );
+    if (
+      source.intent !== "WANT" &&
+      source.intent !== "MAYBE" &&
+      source.intent !== "NOT_INTERESTED"
+    ) {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Informe uma intenção válida para a TripPlacePreference.",
+        "invalid-preference",
+      );
+    }
+    if (source.priority !== null && source.priority !== "MUST_DO") {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Informe uma prioridade válida para a TripPlacePreference.",
+        "invalid-preference",
+      );
+    }
+    if (source.priority === "MUST_DO" && source.intent !== "WANT") {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "MUST_DO somente pode ser usado com WANT.",
+        "invalid-preference",
+      );
+    }
+
+    if (source.intent === "WANT" || (includeMaybe && source.intent === "MAYBE")) {
+      eligible.push({ ...source, preferenceId, tripId: preferenceTripId, placeId });
+    }
+  }
+
+  eligible.sort(
+    (left, right) =>
+      Number(right.priority === "MUST_DO") - Number(left.priority === "MUST_DO") ||
+      compareCanonicalText(left.preferenceId, right.preferenceId),
+  );
+
+  return Object.freeze(
+    eligible.map((preference) => {
+      const place = placesById.get(preference.placeId);
+      if (!place) {
+        throw new ItineraryProposalGenerationInputAssemblyError(
+          `Place ${preference.placeId} não encontrado para TripPlacePreference elegível.`,
+          "place-not-found",
+        );
+      }
+      return Object.freeze({
+        candidateId: `preference:${preference.preferenceId}`,
+        placeId: place.placeId,
+        title: place.title,
+        ...(place.description ? { description: place.description } : {}),
+        ...(place.durationMinutes !== undefined ? { durationMinutes: place.durationMinutes } : {}),
+        ...(preference.priority === "MUST_DO"
+          ? { reason: "Marcado como imperdível na seleção da viagem." }
+          : preference.intent === "MAYBE"
+            ? { reason: "Incluído a partir dos lugares marcados como Talvez." }
+            : {}),
+        ...(place.estimatedCostAmount !== undefined
+          ? { estimatedCostAmount: place.estimatedCostAmount }
+          : {}),
+        ...(place.estimatedCostCurrency
+          ? { estimatedCostCurrency: place.estimatedCostCurrency }
+          : {}),
+        ...(place.category ? { category: place.category } : {}),
+        ...(place.latitude !== undefined && place.longitude !== undefined
+          ? { latitude: place.latitude, longitude: place.longitude }
+          : {}),
+      });
+    }),
+  );
+}
+
+export function assembleTripPlacePreferenceItineraryProposalGenerationInput(
+  input: AssembleTripPlacePreferenceItineraryProposalGenerationInput,
+): AssembledItineraryProposalGenerationInput {
+  const days = normalizeDays(input?.itinerary);
+  const tripId = requiredText(
+    input.itinerary.tripId,
+    "invalid-itinerary",
+    "Informe um TripId válido.",
+  );
+  const placesById = normalizePlaces(input?.places);
+  const candidates = normalizePreferenceCandidates(
+    tripId,
+    input?.preferences,
+    placesById,
+    input?.includeMaybe === true,
+  );
   return Object.freeze({ days, candidates });
 }

@@ -269,7 +269,9 @@ test("move uma atividade para outro Dia e muda o foco para o destino", async ({
   ).toBeVisible();
 });
 
-test("adiciona um lugar de Minha seleção ao roteiro sem remover a preferência", async ({ page }, testInfo) => {
+test("adiciona um lugar de Minha seleção ao roteiro sem remover a preferência", async ({
+  page,
+}, testInfo) => {
   const tripName = `Lugar no roteiro ${testInfo.project.name} ${Date.now()}`;
   const now = new Date();
   const { trip } = await createAuthenticatedE2ETrip(

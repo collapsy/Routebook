@@ -119,6 +119,7 @@ apps/web/app/viagens/[tripId]/roteiro/proposta/generate-action.test.ts
 apps/web/components/itinerary-proposal-generation-control.tsx
 apps/web/components/itinerary-proposal-generation-control.test.tsx
 apps/web/e2e/itinerary-proposal-generation.spec.ts
+apps/web/e2e/itinerary-proposal-review.spec.ts
 docs/implementation/increments/rb-inc-203-trip-selection-proposal-candidates.md
 docs/implementation/context-packs/rb-inc-203-trip-selection-proposal-candidates.md
 docs/implementation/traceability-matrix.md

@@ -48,6 +48,7 @@ export const initialGenerateItineraryProposalActionState: GenerateItineraryPropo
 
 export type GenerateItineraryProposalActionInput = Readonly<{
   tripId: string;
+  includeMaybe?: boolean;
 }>;
 
 type TripAccessResolver = (input: {
@@ -59,17 +60,11 @@ type GenerationService = Readonly<{
   generate(command: GenerateAuthoritativeItineraryProposalCommand): Promise<ItineraryProposal>;
 }>;
 
-type AdditionalCandidateLoader = (
-  trip: Trip,
-  itinerary: Itinerary,
-) => Promise<readonly ItineraryProposalGenerationCandidate[]>;
-
 export type GenerateItineraryProposalActionDependencies = Readonly<{
   resolveAccess: TripAccessResolver;
   tripRepository: Pick<TripRepository, "findById">;
   itineraryRepository: Pick<ItineraryRepository, "findByTripId">;
   generationService: GenerationService;
-  loadAdditionalCandidates?: AdditionalCandidateLoader;
   now?: () => Date;
   createItineraryProposalId?: () => string;
   createProposedActivityId?: GenerateAuthoritativeItineraryProposalCommand["createProposedActivityId"];
@@ -138,9 +133,6 @@ export async function executeGenerateItineraryProposalAction(
   }
 
   const createProposedActivityId = dependencies.createProposedActivityId ?? (() => randomUUID());
-  const additionalCandidates = dependencies.loadAdditionalCandidates
-    ? await dependencies.loadAdditionalCandidates(trip, itinerary)
-    : undefined;
   const accommodationCoordinate = trip.accommodation?.coordinate;
 
   const proposal = await dependencies.generationService.generate({
@@ -158,7 +150,7 @@ export async function executeGenerateItineraryProposalAction(
     asOf: cloneInstant(now),
     generatedAt: cloneInstant(now),
     createProposedActivityId,
-    ...(additionalCandidates ? { additionalCandidates } : {}),
+    includeMaybe: input.includeMaybe === true,
     ...(accommodationCoordinate
       ? {
           anchorCoordinate: {

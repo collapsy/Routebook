@@ -35,6 +35,13 @@ export type ItineraryProposalSourceRecommendation = Readonly<{
   expiresAt?: Date;
   reason?: string;
 }>;
+export type ItineraryProposalSourcePreference = Readonly<{
+  preferenceId: string;
+  tripId: string;
+  placeId: string;
+  intent: "WANT" | "MAYBE" | "NOT_INTERESTED";
+  priority: "MUST_DO" | null;
+}>;
 
 export type ItineraryProposalSourcePlace = Readonly<{
   placeId: string;
@@ -55,6 +62,14 @@ export type AssembleItineraryProposalGenerationInput = Readonly<{
   asOf: Date;
 }>;
 
+export type AssembleItineraryProposalGenerationFromSelectionInput = Readonly<{
+  itinerary: ItineraryProposalSourceItinerary;
+  preferences: readonly ItineraryProposalSourcePreference[];
+  places: readonly ItineraryProposalSourcePlace[];
+  includeMaybe?: boolean;
+  asOf: Date;
+}>;
+
 export type AssembledItineraryProposalGenerationInput = Readonly<{
   days: readonly ItineraryProposalGenerationDay[];
   candidates: readonly ItineraryProposalGenerationCandidate[];
@@ -69,6 +84,9 @@ export type ItineraryProposalGenerationInputAssemblyErrorCode =
   | "invalid-recommendation"
   | "duplicate-recommendation"
   | "recommendation-trip-mismatch"
+  | "invalid-preference"
+  | "duplicate-preference"
+  | "preference-trip-mismatch"
   | "invalid-place"
   | "duplicate-place"
   | "place-not-found"
@@ -494,6 +512,176 @@ function normalizeCandidates(
       });
     }),
   );
+}
+
+function normalizeSelectionCandidates(
+  tripId: string,
+  preferences: readonly ItineraryProposalSourcePreference[],
+  placesById: ReadonlyMap<string, ItineraryProposalSourcePlace>,
+  includeMaybe: boolean,
+): readonly ItineraryProposalGenerationCandidate[] {
+  if (!Array.isArray(preferences)) {
+    throw new ItineraryProposalGenerationInputAssemblyError(
+      "Informe uma coleção de TripPlacePreferences.",
+      "invalid-preference",
+    );
+  }
+
+  const ids = new Set<string>();
+  const placeIds = new Set<string>();
+  const eligible: Array<
+    Readonly<{
+      preferenceId: string;
+      placeId: string;
+      intent: "WANT" | "MAYBE";
+      priority: "MUST_DO" | null;
+      inputIndex: number;
+    }>
+  > = [];
+
+  preferences.forEach((source, inputIndex) => {
+    if (!source || typeof source !== "object") {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Informe uma TripPlacePreference válida.",
+        "invalid-preference",
+      );
+    }
+
+    const preferenceId = requiredText(
+      source.preferenceId,
+      "invalid-preference",
+      "Informe um TripPlacePreferenceId válido.",
+    );
+    if (ids.has(preferenceId)) {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Cada TripPlacePreference deve possuir identidade única.",
+        "duplicate-preference",
+      );
+    }
+    ids.add(preferenceId);
+
+    const preferenceTripId = requiredText(
+      source.tripId,
+      "invalid-preference",
+      "Informe o TripId da TripPlacePreference.",
+    );
+    if (preferenceTripId !== tripId) {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "A TripPlacePreference não pertence à Trip do Itinerary.",
+        "preference-trip-mismatch",
+      );
+    }
+
+    const placeId = requiredText(
+      source.placeId,
+      "invalid-preference",
+      "Informe o PlaceId da TripPlacePreference.",
+    );
+    if (placeIds.has(placeId)) {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Cada Place pode possuir somente uma TripPlacePreference por Trip.",
+        "duplicate-preference",
+      );
+    }
+    placeIds.add(placeId);
+
+    if (!["WANT", "MAYBE", "NOT_INTERESTED"].includes(source.intent)) {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Informe uma intenção válida na TripPlacePreference.",
+        "invalid-preference",
+      );
+    }
+    if (source.priority !== null && source.priority !== "MUST_DO") {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "Informe uma prioridade válida na TripPlacePreference.",
+        "invalid-preference",
+      );
+    }
+    if (source.priority === "MUST_DO" && source.intent !== "WANT") {
+      throw new ItineraryProposalGenerationInputAssemblyError(
+        "MUST_DO somente pode qualificar WANT.",
+        "invalid-preference",
+      );
+    }
+
+    if (source.intent === "WANT" || (source.intent === "MAYBE" && includeMaybe)) {
+      eligible.push({
+        preferenceId,
+        placeId,
+        intent: source.intent,
+        priority: source.priority,
+        inputIndex,
+      });
+    }
+  });
+
+  eligible.sort((left, right) => {
+    const priorityRank = (value: typeof left) =>
+      value.priority === "MUST_DO" ? 0 : value.intent === "WANT" ? 1 : 2;
+    return (
+      priorityRank(left) - priorityRank(right) ||
+      left.inputIndex - right.inputIndex ||
+      compareCanonicalText(left.preferenceId, right.preferenceId)
+    );
+  });
+
+  return Object.freeze(
+    eligible.map((preference) => {
+      const place = placesById.get(preference.placeId);
+      if (!place) {
+        throw new ItineraryProposalGenerationInputAssemblyError(
+          `Place ${preference.placeId} não encontrado para TripPlacePreference elegível.`,
+          "place-not-found",
+        );
+      }
+
+      const reason =
+        preference.priority === "MUST_DO"
+          ? "Lugar marcado como Imperdível na Minha seleção."
+          : preference.intent === "MAYBE"
+            ? "Lugar marcado como Talvez e incluído explicitamente nesta geração."
+            : "Lugar escolhido como Quero ir na Minha seleção.";
+
+      return Object.freeze({
+        candidateId: preference.preferenceId,
+        placeId: place.placeId,
+        title: place.title,
+        ...(place.description ? { description: place.description } : {}),
+        ...(place.durationMinutes !== undefined ? { durationMinutes: place.durationMinutes } : {}),
+        reason,
+        ...(place.estimatedCostAmount !== undefined
+          ? { estimatedCostAmount: place.estimatedCostAmount }
+          : {}),
+        ...(place.estimatedCostCurrency
+          ? { estimatedCostCurrency: place.estimatedCostCurrency }
+          : {}),
+        ...(place.category ? { category: place.category } : {}),
+        ...(place.latitude !== undefined && place.longitude !== undefined
+          ? { latitude: place.latitude, longitude: place.longitude }
+          : {}),
+      });
+    }),
+  );
+}
+
+export function assembleItineraryProposalGenerationInputFromSelection(
+  input: AssembleItineraryProposalGenerationFromSelectionInput,
+): AssembledItineraryProposalGenerationInput {
+  validDate(input?.asOf, "invalid-as-of", "Informe um instante asOf válido.");
+  const days = normalizeDays(input?.itinerary);
+  const tripId = requiredText(
+    input.itinerary.tripId,
+    "invalid-itinerary",
+    "Informe um TripId válido.",
+  );
+  const placesById = normalizePlaces(input?.places);
+  const candidates = normalizeSelectionCandidates(
+    tripId,
+    input?.preferences,
+    placesById,
+    input?.includeMaybe === true,
+  );
+  return Object.freeze({ days, candidates });
 }
 
 export function assembleItineraryProposalGenerationInput(

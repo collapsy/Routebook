@@ -7,9 +7,9 @@ import {
   DrizzleDecisionRepository,
   DrizzleItineraryProposalRepository,
   DrizzleItineraryRepository,
+  DrizzleTripPlacePreferenceRepository,
   getDatabase,
   places,
-  recommendations,
   trips,
 } from "@routebook/database";
 import {
@@ -178,7 +178,7 @@ async function createItineraryWithoutProposal(tripName: string): Promise<string>
 async function createProposalRecoveryCandidate(tripId: string): Promise<string> {
   const now = new Date();
   const placeId = crypto.randomUUID();
-  const recommendationId = crypto.randomUUID();
+  const preferenceId = crypto.randomUUID();
   const placeTitle = `Praia para nova proposta ${placeId.slice(0, 8)}`;
   const database = getDatabase();
 
@@ -196,34 +196,12 @@ async function createProposalRecoveryCandidate(tripId: string): Promise<string> 
     createdAt: now,
     updatedAt: now,
   });
-  await database.insert(recommendations).values({
-    id: recommendationId,
+  await new DrizzleTripPlacePreferenceRepository().save({
+    id: preferenceId,
     tripId,
     placeId,
-    status: "presented",
-    contextSnapshot: { schemaVersion: 1, tripId },
-    contextFingerprint: recommendationId.replaceAll("-", "").padEnd(64, "0").slice(0, 64),
-    reasons: [
-      {
-        code: "proposal-recovery-e2e",
-        message: "Boa opção para compor a nova proposta.",
-        evidence: {},
-      },
-    ],
-    limitations: [],
-    score: 0.9,
-    confidenceLevel: "high",
-    confidenceBasis: ["published-place"],
-    validFrom: new Date(now.getTime() - 60_000),
-    expiresAt: new Date(now.getTime() + 86_400_000),
-    generator: "deterministic",
-    policyVersion: "rb-inc-191-recovery-e2e",
-    generatedAt: new Date(now.getTime() - 120_000),
-    presentedAt: new Date(now.getTime() - 60_000),
-    resolvedAt: null,
-    linkedDecisionId: null,
-    statusReason: null,
-    supersededByRecommendationId: null,
+    intent: "WANT",
+    priority: null,
     createdAt: now,
     updatedAt: now,
   });

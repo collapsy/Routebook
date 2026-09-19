@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   assembleItineraryProposalGenerationInput,
+  assembleItineraryProposalGenerationInputFromSelection,
   ItineraryProposalGenerationInputAssemblyError,
+  type AssembleItineraryProposalGenerationFromSelectionInput,
   type AssembleItineraryProposalGenerationInput,
 } from "./itinerary-proposal-generation-input-assembler";
 
@@ -351,6 +353,162 @@ describe("assembleItineraryProposalGenerationInput", () => {
     expectCode(
       () => assembleItineraryProposalGenerationInput(input({ asOf: new Date("invalid") })),
       "invalid-as-of",
+    );
+  });
+});
+
+function selectionInput(
+  overrides: Partial<AssembleItineraryProposalGenerationFromSelectionInput> = {},
+): AssembleItineraryProposalGenerationFromSelectionInput {
+  return {
+    itinerary: {
+      tripId: "trip-1",
+      days: [{ tripDayId: "day-1", date: "2026-08-22", activities: [], freePeriods: [] }],
+    },
+    preferences: [
+      {
+        preferenceId: "preference-want",
+        tripId: "trip-1",
+        placeId: "place-want",
+        intent: "WANT",
+        priority: null,
+      },
+      {
+        preferenceId: "preference-must",
+        tripId: "trip-1",
+        placeId: "place-must",
+        intent: "WANT",
+        priority: "MUST_DO",
+      },
+      {
+        preferenceId: "preference-maybe",
+        tripId: "trip-1",
+        placeId: "place-maybe",
+        intent: "MAYBE",
+        priority: null,
+      },
+      {
+        preferenceId: "preference-no",
+        tripId: "trip-1",
+        placeId: "place-no",
+        intent: "NOT_INTERESTED",
+        priority: null,
+      },
+    ],
+    places: [
+      { placeId: "place-want", title: "Praia escolhida", category: "beach" },
+      { placeId: "place-must", title: "Passeio imperdível", category: "tour" },
+      { placeId: "place-maybe", title: "Café talvez", category: "gastronomy" },
+      { placeId: "place-no", title: "Lugar sem interesse", category: "shopping" },
+    ],
+    asOf,
+    ...overrides,
+  };
+}
+
+describe("assembleItineraryProposalGenerationInputFromSelection", () => {
+  it("usa WANT por padrão, exclui MAYBE e NOT_INTERESTED e prioriza MUST_DO", () => {
+    const result = assembleItineraryProposalGenerationInputFromSelection(selectionInput());
+
+    expect(result.candidates.map(({ placeId }) => placeId)).toEqual(["place-must", "place-want"]);
+    expect(result.candidates[0]).toMatchObject({
+      candidateId: "preference-must",
+      reason: "Lugar marcado como Imperdível na Minha seleção.",
+    });
+    expect(result.candidates[1]).toMatchObject({
+      candidateId: "preference-want",
+      reason: "Lugar escolhido como Quero ir na Minha seleção.",
+    });
+  });
+
+  it("inclui MAYBE somente com opt-in explícito e após WANT", () => {
+    const result = assembleItineraryProposalGenerationInputFromSelection(
+      selectionInput({ includeMaybe: true }),
+    );
+
+    expect(result.candidates.map(({ placeId }) => placeId)).toEqual([
+      "place-must",
+      "place-want",
+      "place-maybe",
+    ]);
+    expect(result.candidates[2]).toMatchObject({
+      reason: "Lugar marcado como Talvez e incluído explicitamente nesta geração.",
+    });
+  });
+
+  it("não exige Place para preferência inelegível", () => {
+    const source = selectionInput();
+    const result = assembleItineraryProposalGenerationInputFromSelection(
+      selectionInput({
+        preferences: source.preferences.filter(({ intent }) => intent === "NOT_INTERESTED"),
+        places: [],
+      }),
+    );
+
+    expect(result.candidates).toEqual([]);
+  });
+
+  it("rejeita MUST_DO fora de WANT", () => {
+    const source = selectionInput();
+    expectCode(
+      () =>
+        assembleItineraryProposalGenerationInputFromSelection(
+          selectionInput({
+            preferences: [
+              {
+                ...source.preferences[2]!,
+                priority: "MUST_DO",
+              },
+            ],
+          }),
+        ),
+      "invalid-preference",
+    );
+  });
+
+  it("rejeita preferência de outra Trip", () => {
+    const source = selectionInput();
+    expectCode(
+      () =>
+        assembleItineraryProposalGenerationInputFromSelection(
+          selectionInput({
+            preferences: [{ ...source.preferences[0]!, tripId: "trip-2" }],
+          }),
+        ),
+      "preference-trip-mismatch",
+    );
+  });
+
+  it("rejeita duas preferências para o mesmo Place", () => {
+    const source = selectionInput();
+    expectCode(
+      () =>
+        assembleItineraryProposalGenerationInputFromSelection(
+          selectionInput({
+            preferences: [
+              source.preferences[0]!,
+              {
+                ...source.preferences[0]!,
+                preferenceId: "preference-duplicate-place",
+              },
+            ],
+          }),
+        ),
+      "duplicate-preference",
+    );
+  });
+
+  it("rejeita Place ausente para preferência elegível", () => {
+    const source = selectionInput();
+    expectCode(
+      () =>
+        assembleItineraryProposalGenerationInputFromSelection(
+          selectionInput({
+            preferences: [source.preferences[0]!],
+            places: [],
+          }),
+        ),
+      "place-not-found",
     );
   });
 });

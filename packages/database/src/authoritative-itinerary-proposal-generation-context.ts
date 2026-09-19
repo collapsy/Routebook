@@ -132,6 +132,7 @@ async function loadContext(
     );
   const activitiesByDay = new Map<string, readonly Readonly<{ activityId: string }>[]>();
   for (const row of activityRows) {
+    if (!isActivePlannedActivityStatus(row.status)) continue;
     const activities = [...(activitiesByDay.get(row.itineraryDayId) ?? [])];
     activities.push(Object.freeze({ activityId: row.id }));
     activitiesByDay.set(row.itineraryDayId, Object.freeze(activities));

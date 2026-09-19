@@ -103,9 +103,7 @@ export default async function TripSelectionPage({
       day.activities
         .filter(
           (activity) =>
-            activity.placeId &&
-            activity.status !== "removed" &&
-            activity.status !== "cancelled",
+            activity.placeId && activity.status !== "removed" && activity.status !== "cancelled",
         )
         .map((activity) => activity.placeId!),
     ) ?? [],

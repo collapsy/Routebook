@@ -4,13 +4,14 @@ import { notFound } from "next/navigation";
 
 import {
   DrizzlePlaceRepository,
-  DrizzleSavedPlaceRepository,
+  DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
 import type { PlaceCategory } from "@routebook/place-catalog";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../../components/place-primary-image";
+import { TripPlacePreferenceControls } from "../../../../../components/trip-place-preference-controls";
 import {
   buildGoogleMapsDirectionsUrl,
   buildGoogleMapsPlaceLabel,
@@ -19,7 +20,8 @@ import {
 import { findPipaPlacePracticalGuide } from "../../../../../lib/pipa-place-guide";
 import { resolvePlaceDiscoveryRegion } from "../../../../../lib/place-discovery-region";
 import { presentAccommodationDistance } from "../distance";
-import { addPlaceToItineraryAction, removePlaceAction, savePlaceAction } from "./actions";
+import { setPublishedPlacePreferenceAction } from "../actions";
+import { addPlaceToItineraryAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -80,7 +82,7 @@ export default async function PlaceDetailsPage({
   });
   if (!place) notFound();
 
-  const savedPlace = await new DrizzleSavedPlaceRepository().find(tripId, place.id);
+  const preference = await new DrizzleTripPlacePreferenceRepository().find(tripId, place.id);
   const accommodationDistance = presentAccommodationDistance(trip.accommodation?.coordinate, {
     latitude: place.latitude,
     longitude: place.longitude,
@@ -111,17 +113,6 @@ export default async function PlaceDetailsPage({
         </Link>
       </div>
 
-      {saved === "1" ? (
-        <p className="success-banner" role="status">
-          Lugar salvo.
-        </p>
-      ) : null}
-
-      {removed === "1" ? (
-        <p className="success-banner" role="status">
-          Lugar removido dos salvos. O que já estiver no roteiro continua lá.
-        </p>
-      ) : null}
 
       <header className="trip-overview-hero">
         <div>
@@ -208,8 +199,7 @@ export default async function PlaceDetailsPage({
             <p className="product-eyebrow">Planejar este lugar</p>
             <h2 id="place-itinerary-title">Adicionar ao roteiro</h2>
             <p>
-              Escolha o dia e, se quiser, defina horário e duração. Adicionar ao roteiro não salva o
-              lugar automaticamente nos Salvos.
+              Escolha o dia e, se quiser, defina horário e duração. Adicionar ao roteiro não altera automaticamente a sua escolha em Minha seleção.
             </p>
           </div>
           {adicionadoAoRoteiro === "1" && selectedDay ? (
@@ -330,27 +320,21 @@ export default async function PlaceDetailsPage({
         </div>
       </section>
 
-      <section className="traveler-context-summary" aria-labelledby="saved-place-title">
-        <div className="section-heading-row">
-          <div>
-            <p className="product-eyebrow">Salvos</p>
-            <h2 id="saved-place-title">
-              {savedPlace ? "Este lugar está salvo" : "Salvar para depois"}
-            </h2>
-            <p>
-              {savedPlace
-                ? "Remover dos salvos não remove o que já estiver no roteiro."
-                : "Salvar deixa este lugar disponível nos Salvos; não o adiciona ao roteiro."}
-            </p>
-          </div>
-          <form action={savedPlace ? removePlaceAction : savePlaceAction}>
-            <input name="tripId" type="hidden" value={tripId} />
-            <input name="placeSlug" type="hidden" value={placeSlug} />
-            <button className="product-secondary-action" type="submit">
-              {savedPlace ? "Remover dos salvos" : "Salvar lugar"}
-            </button>
-          </form>
+      <section className="traveler-context-summary" aria-labelledby="trip-selection-title">
+        <div>
+          <p className="product-eyebrow">Minha seleção</p>
+          <h2 id="trip-selection-title">O que você pensa deste lugar?</h2>
+          <p>
+            Escolher Quero ir, Talvez ou Não tenho interesse organiza a viagem sem alterar o roteiro
+            automaticamente.
+          </p>
         </div>
+        <TripPlacePreferenceControls
+          action={setPublishedPlacePreferenceAction}
+          placeSlug={placeSlug}
+          preference={preference}
+          tripId={tripId}
+        />
       </section>
 
       <dl className="trip-overview-summary">

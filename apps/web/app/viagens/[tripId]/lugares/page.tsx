@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import {
   DrizzlePlaceExternalReferenceRepository,
   DrizzlePlaceRepository,
-  DrizzleSavedPlaceRepository,
+  DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
 import {
@@ -18,13 +18,14 @@ import {
   type PlaceQualitySignalMatch,
   type PlaceQualitySignals,
 } from "@routebook/place-catalog";
-import { listSavedPlaces } from "@routebook/saved-places";
+import type { TripPlacePreference } from "@routebook/trip-collection";
 import { findTripById } from "@routebook/trip-management";
 
 import { ExternalPlaceImagePreview } from "../../../../components/external-place-image-preview";
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
 import { PlaceRankingMeta } from "../../../../components/place-ranking-meta";
 import { TripMap } from "../../../../components/trip-map";
+import { TripPlacePreferenceControls } from "../../../../components/trip-place-preference-controls";
 import {
   buildGoogleMapsDirectionsUrl,
   buildGoogleMapsPlaceLabel,
@@ -53,11 +54,7 @@ import { resolveConfiguredPlaceQualityProvider } from "../../../../lib/place-qua
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
 import { resolvePlaceDiscoveryRegion } from "../../../../lib/place-discovery-region";
-import {
-  removePublishedPlaceAction,
-  saveExternalPlaceAction,
-  savePublishedPlaceAction,
-} from "./actions";
+import { saveExternalPlaceAction, setPublishedPlacePreferenceAction } from "./actions";
 import {
   categoryLabels,
   filterPlaces,
@@ -178,7 +175,7 @@ function CanonicalDiscoveryCard({
   destinationId,
   distanceReferenceLabel,
   accommodationCoordinate,
-  isSaved,
+  preference,
   rankingPosition,
   rankingOrderLabel,
   quality,
@@ -192,7 +189,7 @@ function CanonicalDiscoveryCard({
   destinationId?: string;
   distanceReferenceLabel: string;
   accommodationCoordinate?: Readonly<{ latitude: number; longitude: number }>;
-  isSaved: boolean;
+  preference?: TripPlacePreference | null;
   rankingPosition: number;
   rankingOrderLabel: string;
   quality?: PlaceQualityScore;
@@ -243,7 +240,17 @@ function CanonicalDiscoveryCard({
 
       <div className={styles.cardIdentity}>
         <span>{categoryLabels[place.category]}</span>
-        {isSaved ? <span>Salvo</span> : null}
+        {preference ? (
+          <span>
+            {preference.intent === "WANT"
+              ? preference.priority === "MUST_DO"
+                ? "Quero ir · Imperdível"
+                : "Quero ir"
+              : preference.intent === "MAYBE"
+                ? "Talvez"
+                : "Não tenho interesse"}
+          </span>
+        ) : null}
       </div>
 
       <h3 className={styles.cardTitle}>{place.name}</h3>
@@ -272,13 +279,12 @@ function CanonicalDiscoveryCard({
         <Link className="product-primary-action" href={`/viagens/${tripId}/lugares/${place.slug}`}>
           Ver detalhes
         </Link>
-        <form action={isSaved ? removePublishedPlaceAction : savePublishedPlaceAction}>
-          <input name="tripId" type="hidden" value={tripId} />
-          <input name="placeSlug" type="hidden" value={place.slug} />
-          <button className="product-secondary-action" type="submit">
-            {isSaved ? "Remover dos salvos" : "Salvar lugar"}
-          </button>
-        </form>
+        <TripPlacePreferenceControls
+          action={setPublishedPlacePreferenceAction}
+          placeSlug={place.slug}
+          preference={preference}
+          tripId={tripId}
+        />
       </div>
 
       <details className={styles.cardDetails}>
@@ -425,7 +431,7 @@ function ExternalDiscoveryCard({
             {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
             {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
             <button className="product-secondary-action" type="submit">
-              Salvar lugar
+              Quero ir
             </button>
           </form>
         ) : null}
@@ -503,14 +509,14 @@ export default async function PlacesPage({
   });
   const maximumDistanceMeters = region ? requestedMaximumDistanceMeters : undefined;
   const placeRepository = new DrizzlePlaceRepository();
-  const [publishedPlaces, savedPlaces] = await Promise.all([
+  const [publishedPlaces, preferences] = await Promise.all([
     region
       ? placeRepository.listPublishedWithinRadius({
           center: region.center,
           radiusMeters: region.curatedRadiusMeters,
         })
       : [],
-    listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
+    new DrizzleTripPlacePreferenceRepository().listByTripId(tripId),
   ]);
   const destinationId =
     resolveCuratedDestinationId(publishedPlaces) ??
@@ -519,7 +525,9 @@ export default async function PlacesPage({
       .replace(/[^\p{L}\p{N}\s._-]+/gu, " ")
       .replace(/\s+/g, " ")
       .trim();
-  const savedPlaceIds = new Set(savedPlaces.map((selection) => selection.placeId));
+  const preferenceByPlaceId = new Map(
+    preferences.map((preference) => [preference.placeId, preference] as const),
+  );
   const filteredPlaces = filterPlaces(
     publishedPlaces,
     {
@@ -729,7 +737,7 @@ export default async function PlacesPage({
       return {
         id: item.id,
         label: item.place.name,
-        kind: savedPlaceIds.has(item.place.id) ? "saved-place" : "published-place",
+        kind: preferenceByPlaceId.has(item.place.id) ? "saved-place" : "published-place",
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
         href: `/viagens/${tripId}/lugares/${item.place.slug}`,
@@ -1071,7 +1079,7 @@ export default async function PlacesPage({
                   ? { categoryRank: categoryRankByItemId.get(item.id)! }
                   : {})}
                 distanceReferenceLabel={distanceReferenceLabel}
-                isSaved={savedPlaceIds.has(item.place.id)}
+                preference={preferenceByPlaceId.get(item.place.id)}
                 item={item}
                 timeZone={trip.destination.timeZone}
                 tripId={tripId}

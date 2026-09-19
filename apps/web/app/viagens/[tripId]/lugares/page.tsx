@@ -466,20 +466,10 @@ function ExternalDiscoveryCard({
             ) : null}
             {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
             {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
-            <button
-              className="product-secondary-action"
-              name="intent"
-              type="submit"
-              value="WANT"
-            >
+            <button className="product-secondary-action" name="intent" type="submit" value="WANT">
               Quero ir
             </button>
-            <button
-              className="product-secondary-action"
-              name="intent"
-              type="submit"
-              value="MAYBE"
-            >
+            <button className="product-secondary-action" name="intent" type="submit" value="MAYBE">
               Talvez
             </button>
             <button

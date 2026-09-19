@@ -13,6 +13,7 @@ import {
 
 class MemoryPreferenceRepository implements TripPlacePreferenceRepository {
   readonly records = new Map<string, TripPlacePreference>();
+  saveCalls = 0;
 
   private key(tripId: string, placeId: string): string {
     return `${tripId}:${placeId}`;
@@ -27,6 +28,7 @@ class MemoryPreferenceRepository implements TripPlacePreferenceRepository {
   }
 
   async save(preference: TripPlacePreference): Promise<TripPlacePreference> {
+    this.saveCalls += 1;
     this.records.set(this.key(preference.tripId, preference.placeId), preference);
     return preference;
   }
@@ -57,6 +59,40 @@ describe("trip-place-preference web application helper", () => {
     expect(changed.createdAt).toEqual(createdAt);
     expect(changed.updatedAt).toEqual(updatedAt);
     expect(changed.intent).toBe("MAYBE");
+  });
+
+  it("preserva Imperdível ao repetir Quero ir e limpa ao trocar intenção", async () => {
+    const repository = new MemoryPreferenceRepository();
+    const created = await setTripPlacePreference(
+      repository,
+      {
+        tripId: "trip-1",
+        placeId: "place-1",
+        intent: "WANT",
+        priority: "MUST_DO",
+      },
+      new Date("2026-09-18T20:00:00.000Z"),
+    );
+    const savesAfterCreation = repository.saveCalls;
+
+    const repeated = await setTripPlacePreference(
+      repository,
+      { tripId: "trip-1", placeId: "place-1", intent: "WANT" },
+      new Date("2026-09-18T21:00:00.000Z"),
+    );
+
+    expect(repeated).toBe(created);
+    expect(repeated.priority).toBe("MUST_DO");
+    expect(repository.saveCalls).toBe(savesAfterCreation);
+
+    const changed = await setTripPlacePreference(
+      repository,
+      { tripId: "trip-1", placeId: "place-1", intent: "MAYBE" },
+      new Date("2026-09-18T22:00:00.000Z"),
+    );
+
+    expect(changed.intent).toBe("MAYBE");
+    expect(changed.priority).toBeNull();
   });
 
   it("permite Imperdível somente sobre Quero ir", async () => {

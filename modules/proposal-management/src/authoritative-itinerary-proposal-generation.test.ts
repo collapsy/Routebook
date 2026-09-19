@@ -9,7 +9,10 @@ import {
   generateAuthoritativeItineraryProposal,
   type AuthoritativeItineraryProposalGenerationContextPort,
 } from "./authoritative-itinerary-proposal-generation";
-import type { CompleteItineraryProposalGenerationInput, ItineraryProposal } from "./itinerary-proposal";
+import type {
+  CompleteItineraryProposalGenerationInput,
+  ItineraryProposal,
+} from "./itinerary-proposal";
 import type { ItineraryProposalRepository } from "./repository";
 
 const requestedAt = new Date("2026-08-22T12:00:00.000Z");
@@ -25,9 +28,7 @@ function repository(): ItineraryProposalRepository {
   };
 }
 
-function generationPort(
-  inputs: GenerateItineraryProposalInput[],
-): ItineraryProposalGenerationPort {
+function generationPort(inputs: GenerateItineraryProposalInput[]): ItineraryProposalGenerationPort {
   return {
     generate: vi.fn(async (input: GenerateItineraryProposalInput) => {
       inputs.push(input);
@@ -46,9 +47,7 @@ function generationPort(
   };
 }
 
-function contextPort(
-  tripId = "trip-1",
-): AuthoritativeItineraryProposalGenerationContextPort {
+function contextPort(tripId = "trip-1"): AuthoritativeItineraryProposalGenerationContextPort {
   return {
     load: vi.fn(async () => ({
       itinerary: {

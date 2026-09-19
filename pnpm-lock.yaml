@@ -47,6 +47,9 @@ importers:
       '@routebook/traveler-profile':
         specifier: workspace:*
         version: link:../../modules/traveler-profile
+      '@routebook/trip-collection':
+        specifier: workspace:*
+        version: link:../../modules/trip-collection
       '@routebook/trip-management':
         specifier: workspace:*
         version: link:../../modules/trip-management

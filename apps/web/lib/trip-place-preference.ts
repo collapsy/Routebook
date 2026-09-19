@@ -22,7 +22,12 @@ export async function setTripPlacePreference(
   now = new Date(),
 ): Promise<TripPlacePreference> {
   const current = await repository.find(input.tripId, input.placeId);
-  const priority = input.priority ?? null;
+  const priority =
+    input.priority === undefined
+      ? current?.intent === "WANT" && input.intent === "WANT"
+        ? current.priority
+        : null
+      : input.priority;
   const next = current
     ? changeTripPlacePreference(current, { intent: input.intent, priority }, now)
     : createTripPlacePreference(

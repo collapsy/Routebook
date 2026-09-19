@@ -97,8 +97,8 @@ beforeAll(async () => {
     .values([
       placeRow(plannedPlaceId, "Baía planejada", "beach", -6.221),
       placeRow(wantedPlaceId, "Praia do Amor", "beach", -6.235),
-      placeRow(removedPlaceId, "Passeio removido", "tour", -6.24),
-      placeRow(notInterestedPlaceId, "Loja sem interesse", "shopping", -6.23),
+      placeRow(removedPlaceId, "Passeio removido", "beach", -6.24),
+      placeRow(notInterestedPlaceId, "Loja sem interesse", "beach", -6.23),
     ]);
   await database.insert(itineraries).values([
     {
@@ -286,12 +286,12 @@ describe("PostgresAuthoritativeItineraryProposalGenerationContextPort", () => {
         expect.objectContaining({
           placeId: removedPlaceId,
           title: "Passeio removido",
-          category: "tour",
+          category: "beach",
         }),
         expect.objectContaining({
           placeId: notInterestedPlaceId,
           title: "Loja sem interesse",
-          category: "shopping",
+          category: "beach",
         }),
       ]),
     );

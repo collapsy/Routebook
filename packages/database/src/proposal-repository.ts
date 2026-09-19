@@ -11,6 +11,8 @@ import {
   requestItineraryProposal,
   startItineraryProposalGeneration,
   type ItineraryProposal,
+  type ItineraryProposalGenerationContext,
+  type ItineraryProposalGenerationScope,
   type ItineraryProposalId,
   type ItineraryProposalRepository,
   type ProposedActivity,
@@ -127,6 +129,10 @@ function rehydrateItineraryProposal(
       baseTripContextVersion: row.baseTripContextVersion,
       baseItineraryVersion: row.baseItineraryVersion,
       contextSnapshotId: row.contextSnapshotId,
+      generationScope: row.generationScope as ItineraryProposalGenerationScope,
+      ...(row.generationContext
+        ? { generationContext: row.generationContext as ItineraryProposalGenerationContext }
+        : {}),
       requestedAt: row.requestedAt,
     });
 
@@ -241,6 +247,8 @@ function valuesFor(proposal: ItineraryProposal): ItineraryProposalInsert {
     baseTripContextVersion: proposal.baseTripContextVersion,
     baseItineraryVersion: proposal.baseItineraryVersion,
     contextSnapshotId: proposal.contextSnapshotId,
+    generationScope: proposal.generationScope,
+    generationContext: proposal.generationContext ?? null,
     status: proposal.status,
     requestedAt: proposal.requestedAt,
     updatedAt: proposal.updatedAt,

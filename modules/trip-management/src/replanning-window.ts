@@ -10,8 +10,7 @@ export const replanningWindowProtectionReasons = [
   "CURRENT_DAY_STARTED_WITHOUT_DURATION",
 ] as const;
 
-export type ReplanningWindowProtectionReason =
-  (typeof replanningWindowProtectionReasons)[number];
+export type ReplanningWindowProtectionReason = (typeof replanningWindowProtectionReasons)[number];
 
 export type ReplanningWindow = Readonly<{
   capturedAt: Date;
@@ -83,11 +82,7 @@ function validCapturedAt(value: Date): Date {
 }
 
 function validTimeZone(value: string): string {
-  const timeZone = requiredText(
-    value,
-    "invalid-time-zone",
-    "Informe o timezone IANA da Trip.",
-  );
+  const timeZone = requiredText(value, "invalid-time-zone", "Informe o timezone IANA da Trip.");
   try {
     new Intl.DateTimeFormat("en-US", { timeZone }).format();
   } catch {
@@ -159,16 +154,9 @@ function activityMinute(activity: Activity): number | undefined {
 
 function validateActivity(activity: Activity): string {
   if (!activity || typeof activity !== "object") {
-    throw new ReplanningWindowValidationError(
-      "Informe uma Activity válida.",
-      "invalid-activity",
-    );
+    throw new ReplanningWindowValidationError("Informe uma Activity válida.", "invalid-activity");
   }
-  const id = requiredText(
-    activity.id,
-    "invalid-activity",
-    "Informe um ActivityId válido.",
-  );
+  const id = requiredText(activity.id, "invalid-activity", "Informe um ActivityId válido.");
   if (!ACTIVITY_STATUSES.has(activity.status)) {
     throw new ReplanningWindowValidationError(
       "Activity possui status inválido.",
@@ -222,10 +210,7 @@ export function createReplanningWindow(
   capturedAtInput: Date,
 ): ReplanningWindow {
   if (!itinerary || typeof itinerary !== "object" || !Array.isArray(itinerary.days)) {
-    throw new ReplanningWindowValidationError(
-      "Informe um Itinerary válido.",
-      "invalid-day",
-    );
+    throw new ReplanningWindowValidationError("Informe um Itinerary válido.", "invalid-day");
   }
 
   const capturedAt = validCapturedAt(capturedAtInput);

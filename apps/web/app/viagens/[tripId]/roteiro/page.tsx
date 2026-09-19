@@ -419,7 +419,7 @@ export default async function ItineraryPage({
                       className="product-secondary-action"
                       href={`/viagens/${tripId}/lugares-salvos`}
                     >
-                      Ver Lugares salvos
+                      Ver Minha seleção
                     </Link>
                     <a className="product-secondary-action" href="#planejar-dia">
                       Criar atividade

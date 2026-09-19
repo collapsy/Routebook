@@ -11,7 +11,7 @@ const migration = fs.readFileSync(migrationPath, "utf8");
 describe("0035_persist_itinerary_proposal_generation_context", () => {
   it("é aditiva e preserva Proposals existentes como INITIAL", () => {
     expect(migration).toContain(
-      'ADD COLUMN "generation_scope" varchar(16) DEFAULT \'INITIAL\' NOT NULL',
+      "ADD COLUMN \"generation_scope\" varchar(16) DEFAULT 'INITIAL' NOT NULL",
     );
     expect(migration).toContain('ADD COLUMN "generation_context" jsonb');
     expect(migration).toContain("itinerary_proposals_generation_scope_check");

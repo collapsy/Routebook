@@ -6,10 +6,8 @@ import { notFound, redirect } from "next/navigation";
 import {
   DrizzleItineraryRepository,
   DrizzlePlaceRepository,
-  DrizzleSavedPlaceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
-import { removePlaceFromTrip, savePlaceForTrip } from "@routebook/saved-places";
 import {
   addActivity,
   createItinerary,
@@ -59,28 +57,6 @@ function revalidatePlaceSurfaces(tripId: string, placeSlug: string): void {
   revalidatePath(`/viagens/${tripId}/lugares`);
   revalidatePath(`/viagens/${tripId}/lugares/${placeSlug}`);
   revalidatePath(`/viagens/${tripId}/lugares-salvos`);
-}
-
-export async function savePlaceAction(formData: FormData): Promise<never> {
-  const tripId = String(formData.get("tripId") ?? "").trim();
-  const placeSlug = String(formData.get("placeSlug") ?? "").trim();
-  const { place } = await resolvePlaceForTrip(tripId, placeSlug);
-
-  await savePlaceForTrip(new DrizzleSavedPlaceRepository(), tripId, place.id);
-
-  revalidatePlaceSurfaces(tripId, placeSlug);
-  redirect(`/viagens/${tripId}/lugares/${placeSlug}?saved=1#adicionar-ao-roteiro`);
-}
-
-export async function removePlaceAction(formData: FormData): Promise<never> {
-  const tripId = String(formData.get("tripId") ?? "").trim();
-  const placeSlug = String(formData.get("placeSlug") ?? "").trim();
-  const { place } = await resolvePlaceForTrip(tripId, placeSlug);
-
-  await removePlaceFromTrip(new DrizzleSavedPlaceRepository(), tripId, place.id);
-
-  revalidatePlaceSurfaces(tripId, placeSlug);
-  redirect(`/viagens/${tripId}/lugares/${placeSlug}?removed=1#adicionar-ao-roteiro`);
 }
 
 export async function addPlaceToItineraryAction(formData: FormData): Promise<never> {

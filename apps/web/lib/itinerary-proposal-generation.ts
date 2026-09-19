@@ -3,7 +3,6 @@ import { randomUUID } from "node:crypto";
 import type {
   GenerateAuthoritativeItineraryProposalCommand,
   ItineraryProposal,
-  ItineraryProposalGenerationCandidate,
 } from "@routebook/proposal-management";
 import type {
   Itinerary,

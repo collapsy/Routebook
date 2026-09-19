@@ -18,6 +18,41 @@ test("exibe Minhas viagens com ação de criação", async ({ page }) => {
   await expect(page.getByRole("link", { name: /Criar (primeira|nova) viagem/ })).toBeVisible();
 });
 
+test("mantém a navegação global completa no desktop", async ({ page }) => {
+  await page.setViewportSize({ height: 800, width: 1280 });
+  await page.goto("/viagens");
+
+  const header = page.getByRole("banner");
+  const navigation = header.getByRole("navigation", { name: "Navegação global" });
+
+  await expect(navigation.getByRole("link", { name: "Minhas viagens" })).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "Sobre o projeto" })).toBeVisible();
+  await expect(navigation.getByRole("button", { name: "Sair" })).toBeVisible();
+  await expect(header.getByLabel("Abrir menu da conta")).toBeHidden();
+});
+
+test("prioriza viagens e conta em uma única linha no mobile", async ({ page }) => {
+  await page.setViewportSize({ height: 844, width: 390 });
+  await page.goto("/viagens");
+
+  const header = page.getByRole("banner");
+  const navigation = header.getByRole("navigation", { name: "Navegação global" });
+  const accountTrigger = navigation.getByLabel("Abrir menu da conta");
+
+  await expect(navigation.getByRole("link", { name: "Minhas viagens" })).toBeVisible();
+  await expect(accountTrigger).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "Sobre o projeto" })).toBeHidden();
+  await expect(navigation.getByRole("button", { name: "Sair" })).toBeHidden();
+
+  const headerBox = await header.boundingBox();
+  expect(headerBox?.height).toBeLessThanOrEqual(80);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+
+  await accountTrigger.click();
+  await expect(navigation.getByRole("link", { name: "Sobre o projeto" })).toBeVisible();
+  await expect(navigation.getByRole("button", { name: "Sair" })).toBeVisible();
+});
+
 test("cria, abre e mantém uma viagem persistida", async ({ page }, testInfo) => {
   const tripName = `Pipa persistida ${testInfo.project.name} ${Date.now()}`;
 

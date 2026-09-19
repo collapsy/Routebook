@@ -27,6 +27,7 @@ Implementar o passo 5 do RB-ADR-028: TripPlacePreference passa a ser a origem au
 ## 2. Unidade de trabalho
 
 - issue: [#492](https://github.com/collapsy/Routebook/issues/492);
+- PR: [#493](https://github.com/collapsy/Routebook/pull/493);
 - branch: `codex/issue-492-trip-selection-proposal-candidates`;
 - base: `main@8818b948d0d0de478ae16965d4681586ac4f7c8f`;
 - merge na main permanece gate humano.
@@ -99,7 +100,8 @@ Estados removidos/cancelados não devem transformar um Place em “planejado” 
 - default `false`;
 - controlado explicitamente pelo usuário;
 - não persistido como alteração da TripPlacePreference;
-- deve participar da evidência/critério gerado quando MAYBE efetivamente fizer parte do conjunto.
+- `contextSnapshotId` registra `selection:want` ou `selection:want-maybe`;
+- quando MAYBE entrar, a justificativa do candidato explicita que houve inclusão intencional.
 
 ## 9. Caminhos
 

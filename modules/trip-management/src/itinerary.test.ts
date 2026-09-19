@@ -456,24 +456,19 @@ describe("Activity status controls", () => {
     expect(updated.version).toBe(itinerary.version + 1);
     expect(updated.updatedAt).toEqual(updatedAt);
     expect(itinerary.days[1]?.activities[0]?.status).toBe("planned");
-    expect(itinerary.days[1]?.activities[0]?.updatedAt).toEqual(
-      new Date("2026-07-30T03:00:00Z"),
-    );
+    expect(itinerary.days[1]?.activities[0]?.updatedAt).toEqual(new Date("2026-07-30T03:00:00Z"));
   });
 
-  it.each(["planned", "tentative"] as const)(
-    "conclui Activity em estado %s",
-    (status) => {
-      const itinerary = createWithStatus(status);
-      const activityId = itinerary.days[1]?.activities[0]?.id;
-      expect(activityId).toBeDefined();
+  it.each(["planned", "tentative"] as const)("conclui Activity em estado %s", (status) => {
+    const itinerary = createWithStatus(status);
+    const activityId = itinerary.days[1]?.activities[0]?.id;
+    expect(activityId).toBeDefined();
 
-      const updated = completeActivity(itinerary, { activityId: activityId! });
+    const updated = completeActivity(itinerary, { activityId: activityId! });
 
-      expect(updated.days[1]?.activities[0]?.status).toBe("completed");
-      expect(updated.version).toBe(itinerary.version + 1);
-    },
-  );
+    expect(updated.days[1]?.activities[0]?.status).toBe("completed");
+    expect(updated.version).toBe(itinerary.version + 1);
+  });
 
   it.each(["planned", "tentative"] as const)(
     "marca Activity em estado %s como skipped",

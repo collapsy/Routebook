@@ -357,7 +357,6 @@ describe("assembleItineraryProposalGenerationInput", () => {
   });
 });
 
-
 function selectionInput(
   overrides: Partial<AssembleItineraryProposalGenerationFromSelectionInput> = {},
 ): AssembleItineraryProposalGenerationFromSelectionInput {
@@ -411,10 +410,7 @@ describe("assembleItineraryProposalGenerationInputFromSelection", () => {
   it("usa WANT por padrão, exclui MAYBE e NOT_INTERESTED e prioriza MUST_DO", () => {
     const result = assembleItineraryProposalGenerationInputFromSelection(selectionInput());
 
-    expect(result.candidates.map(({ placeId }) => placeId)).toEqual([
-      "place-must",
-      "place-want",
-    ]);
+    expect(result.candidates.map(({ placeId }) => placeId)).toEqual(["place-must", "place-want"]);
     expect(result.candidates[0]).toMatchObject({
       candidateId: "preference-must",
       reason: "Lugar marcado como Imperdível na Minha seleção.",

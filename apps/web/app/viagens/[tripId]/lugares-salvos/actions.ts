@@ -6,10 +6,9 @@ import { notFound, redirect } from "next/navigation";
 import {
   DrizzleItineraryRepository,
   DrizzlePlaceRepository,
-  DrizzleSavedPlaceRepository,
+  DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
-import { removePlaceFromTrip } from "@routebook/saved-places";
 import {
   addActivity,
   createItinerary,
@@ -34,20 +33,18 @@ export async function addSavedPlaceToItineraryAction(formData: FormData): Promis
 
   if (!trip) notFound();
 
-  const savedPlaceRepository = new DrizzleSavedPlaceRepository();
-  const savedSelections = await savedPlaceRepository.listByTripId(tripId);
+  const preferenceRepository = new DrizzleTripPlacePreferenceRepository();
+  const preferences = await preferenceRepository.listByTripId(tripId);
   const place = (
-    await new DrizzlePlaceRepository().listByIds(
-      savedSelections.map((selection) => selection.placeId),
-    )
+    await new DrizzlePlaceRepository().listByIds(preferences.map((preference) => preference.placeId))
   ).find((item) => item.slug === placeSlug);
   if (!place) notFound();
 
-  const savedPlace = await savedPlaceRepository.find(tripId, place.id);
-  if (!savedPlace) {
+  const preference = await preferenceRepository.find(tripId, place.id);
+  if (!preference || preference.intent !== "WANT") {
     redirect(
       `/viagens/${tripId}/lugares-salvos?erro=${encodeURIComponent(
-        "Salve o lugar nesta viagem antes de adicioná-lo ao roteiro.",
+        "Marque o lugar como Quero ir antes de adicioná-lo ao roteiro.",
       )}`,
     );
   }
@@ -89,16 +86,14 @@ export async function removeSavedPlaceAction(formData: FormData): Promise<never>
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const savedPlaceRepository = new DrizzleSavedPlaceRepository();
-  const savedSelections = await savedPlaceRepository.listByTripId(tripId);
+  const preferenceRepository = new DrizzleTripPlacePreferenceRepository();
+  const preferences = await preferenceRepository.listByTripId(tripId);
   const place = (
-    await new DrizzlePlaceRepository().listByIds(
-      savedSelections.map((selection) => selection.placeId),
-    )
+    await new DrizzlePlaceRepository().listByIds(preferences.map((preference) => preference.placeId))
   ).find((item) => item.slug === placeSlug);
   if (!place) notFound();
 
-  await removePlaceFromTrip(savedPlaceRepository, tripId, place.id);
+  await preferenceRepository.remove(tripId, place.id);
 
   revalidatePath(`/viagens/${tripId}`);
   revalidatePath(`/viagens/${tripId}/lugares`);

@@ -50,7 +50,7 @@ function readyProposal(): ItineraryProposal {
     itineraryId,
     baseTripContextVersion: 8,
     baseItineraryVersion: 12,
-    contextSnapshotId: `authoritative:${tripId}:8:12`,
+    contextSnapshotId: `authoritative:${tripId}:8:12:selection:want`,
     status: "ready",
     requestedAt: instant,
     updatedAt: instant,
@@ -125,7 +125,7 @@ describe("executeGenerateItineraryProposalAction", () => {
           itineraryId,
           baseTripContextVersion: 8,
           baseItineraryVersion: 12,
-          contextSnapshotId: `authoritative:${tripId}:8:12`,
+          contextSnapshotId: `authoritative:${tripId}:8:12:selection:want`,
         }),
         asOf: instant,
         includeMaybe: false,
@@ -166,7 +166,12 @@ describe("executeGenerateItineraryProposalAction", () => {
     await executeGenerateItineraryProposalAction({ tripId, includeMaybe: true }, dependencies);
 
     expect(dependencies.generationService.generate).toHaveBeenCalledWith(
-      expect.objectContaining({ includeMaybe: true }),
+      expect.objectContaining({
+        includeMaybe: true,
+        request: expect.objectContaining({
+          contextSnapshotId: `authoritative:${tripId}:8:12:selection:want-maybe`,
+        }),
+      }),
     );
   });
 

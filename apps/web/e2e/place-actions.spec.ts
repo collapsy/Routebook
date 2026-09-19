@@ -2,7 +2,9 @@ import { expect, test } from "@playwright/test";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
-test("salva no catálogo preservando filtros e abre o compositor do Lugar", async ({ page }) => {
+test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lugar", async ({
+  page,
+}) => {
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Ações de Lugar ${test.info().project.name} ${Date.now()}`,
     startDate: "2026-08-22",
@@ -23,30 +25,38 @@ test("salva no catálogo preservando filtros e abre o compositor do Lugar", asyn
     .locator('[data-place-source="published"]')
     .filter({ has: page.locator(`a[href="${detailsHref}"]`) });
   await expect(card).toHaveCount(1);
-  await expect(card.getByRole("button", { name: "Salvar lugar" })).toBeVisible();
+  const wantButton = card.getByRole("button", { name: "Quero ir" });
+  await expect(wantButton).toBeVisible();
+  await expect(wantButton).toHaveAttribute("aria-pressed", "false");
   await expect(card.getByRole("link", { name: "Ver detalhes" })).toHaveAttribute(
     "href",
     detailsHref,
   );
   await expect(card.getByRole("link", { name: "Adicionar ao roteiro" })).toHaveCount(0);
 
-  await card.getByRole("button", { name: "Salvar lugar" }).click();
+  await wantButton.click();
 
   await expect(page).toHaveURL(/descoberta=ocultar/);
   await expect(page).toHaveURL(/busca=Praia(%20|\+)do(%20|\+)Amor/);
   await expect(page).toHaveURL(/categoria=beach/);
-  await expect(card.getByRole("button", { name: "Remover dos salvos" })).toBeVisible({
-    timeout: 15_000,
-  });
+  await expect(card.getByRole("button", { name: "Quero ir" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+    { timeout: 15_000 },
+  );
+  await expect(card.getByRole("button", { name: "Limpar" })).toBeVisible();
 
   await card.getByRole("link", { name: "Ver detalhes" }).click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares/praia-do-amor$`));
   await expect(page.getByRole("heading", { name: "Praia do Amor", level: 1 })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Adicionar ao roteiro", level: 2 })).toBeVisible();
   await expect(page.getByRole("button", { name: "Adicionar ao roteiro" })).toBeVisible();
+  await expect(page.getByText(/Preferência atual:/)).toBeVisible();
 });
 
-test("adiciona Place publicado ao Roteiro sem salvar automaticamente", async ({ page }) => {
+test("adiciona Place ao Roteiro manualmente sem sobrescrever Não tenho interesse", async ({
+  page,
+}) => {
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Roteiro direto ${test.info().project.name} ${Date.now()}`,
     startDate: "2026-08-22",
@@ -55,8 +65,22 @@ test("adiciona Place publicado ao Roteiro sem salvar automaticamente", async ({ 
 
   await page.goto(`/viagens/${trip.id}/lugares/chapadao-de-pipa#adicionar-ao-roteiro`);
 
-  await expect(page.getByRole("heading", { name: "Salvar para depois" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Salvar lugar" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "O que você acha deste lugar?" })).toBeVisible();
+  await expect(page.getByText("Você ainda não avaliou este lugar.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Quero ir" })).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
+
+  await page.getByRole("button", { name: "Não tenho interesse" }).click();
+  const preferenceSummary = page
+    .locator("#preferencia-do-lugar p")
+    .filter({ hasText: "Preferência atual:" });
+  await expect(preferenceSummary).toContainText("Não tenho interesse");
+  await expect(page.getByRole("button", { name: "Não tenho interesse" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
 
   await page.getByLabel("Adicionar ao dia").selectOption("2026-08-23");
   await page.getByLabel("Horário opcional").fill("16:30");
@@ -64,7 +88,11 @@ test("adiciona Place publicado ao Roteiro sem salvar automaticamente", async ({ 
   await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
 
   await expect(page.getByText(/Chapadão de Pipa foi adicionado ao Dia 2/)).toBeVisible();
-  await expect(page.getByRole("button", { name: "Salvar lugar" })).toBeVisible();
+  await expect(preferenceSummary).toContainText("Não tenho interesse");
+  await expect(page.getByRole("button", { name: "Não tenho interesse" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   const itineraryLink = page.getByRole("link", { name: "Ver dia no roteiro" });
   await expect(itineraryLink).toHaveAttribute(
     "href",
@@ -84,9 +112,9 @@ test("adiciona Place publicado ao Roteiro sem salvar automaticamente", async ({ 
   await expect(chapadaoActivity.locator("small")).toContainText("1 h");
 });
 
-test("mantém fallback compacto em Lugar salvo sem fotografia real", async ({ page }) => {
+test("mantém fallback compacto em Lugar de Minha seleção sem fotografia real", async ({ page }) => {
   const { trip } = await createAuthenticatedE2ETrip({
-    name: `Salvos com fallback visual ${test.info().project.name} ${Date.now()}`,
+    name: `Seleção com fallback visual ${test.info().project.name} ${Date.now()}`,
     startDate: "2026-08-22",
     endDate: "2026-08-29",
     accommodationName: "Hospedagem central",
@@ -106,15 +134,18 @@ test("mantém fallback compacto em Lugar salvo sem fotografia real", async ({ pa
   const discoveryFallback = discoveryCard.locator('[data-place-image-fallback="true"]');
   await expect(discoveryFallback).toHaveAttribute("data-presentation", "compact");
   await expect(discoveryFallback).toHaveText("Sem foto");
-  await discoveryCard.getByRole("button", { name: "Salvar lugar" }).click();
-  await expect(discoveryCard.getByRole("button", { name: "Remover dos salvos" })).toBeVisible({
-    timeout: 15_000,
-  });
+  await discoveryCard.getByRole("button", { name: "Quero ir" }).click();
+  await expect(discoveryCard.getByRole("button", { name: "Quero ir" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+    { timeout: 15_000 },
+  );
 
   await page.goto(`/viagens/${trip.id}/lugares-salvos`);
-  const savedCard = page.locator(".place-card").filter({ hasText: "Praia das Minas" }).first();
-  const fallback = savedCard.locator('[data-place-image-fallback="true"]');
+  const selectedCard = page.locator(".place-card").filter({ hasText: "Praia das Minas" }).first();
+  const fallback = selectedCard.locator('[data-place-image-fallback="true"]');
   await expect(fallback).toBeVisible();
   await expect(fallback).toHaveAttribute("data-presentation", "compact");
   await expect(fallback).toHaveText("Sem foto");
+  await expect(selectedCard).toContainText("Preferência: Quero ir");
 });

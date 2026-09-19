@@ -65,7 +65,7 @@ test("destino zero-seed recebe sugestões de lugares sem expor lifecycle interno
 
   await page.goto(`${tripHref}/lugares-salvos`);
   await expect(
-    page.getByRole("heading", { name: "Você ainda não salvou nenhum lugar", exact: true }),
+    page.getByRole("heading", { name: "Você ainda não avaliou nenhum lugar", exact: true }),
   ).toBeVisible();
 
   await page.goto(`${tripHref}/roteiro`);

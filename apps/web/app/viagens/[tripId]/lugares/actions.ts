@@ -5,16 +5,20 @@ import { notFound, redirect } from "next/navigation";
 
 import {
   DrizzlePlaceRepository,
-  DrizzleSavedPlaceRepository,
+  DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
   PlacePromotionServiceError,
   promoteExternalPlaceCandidate,
 } from "@routebook/database";
 import type { Place } from "@routebook/place-catalog";
-import { removePlaceFromTrip, savePlaceForTrip } from "@routebook/saved-places";
 import { findTripById } from "@routebook/trip-management";
 
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
+import {
+  clearTripPlacePreference,
+  parseTripPlaceIntent,
+  setTripPlacePreference,
+} from "../../../../lib/trip-place-preference";
 import { resolvePlaceDiscoveryRegion } from "../../../../lib/place-discovery-region";
 import { resolveTripRouteAccess } from "../../../../lib/trip-route-access";
 import { parseMaximumDistance, parsePlaceCategory, parsePlacePriceRange } from "./filters";
@@ -87,30 +91,58 @@ function revalidatePublishedPlaceSurfaces(tripId: string, placeSlug: string): vo
   revalidatePath(`/viagens/${tripId}/lugares-salvos`);
 }
 
-export async function savePublishedPlaceAction(formData: FormData): Promise<void> {
-  const tripId = String(formData.get("tripId") ?? "").trim();
-  const placeSlug = String(formData.get("placeSlug") ?? "").trim();
-  const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
+function resolvePlacesReturnPath(tripId: string, value: FormDataEntryValue | null): string {
+  const basePath = `/viagens/${tripId}/lugares`;
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return basePath;
 
-  await savePlaceForTrip(new DrizzleSavedPlaceRepository(), tripId, place.id);
-  revalidatePublishedPlaceSurfaces(tripId, placeSlug);
+  try {
+    const parsed = new URL(raw, "https://routebook.local");
+    if (parsed.pathname !== basePath) return basePath;
+    return `${basePath}${parsed.search}`;
+  } catch {
+    return basePath;
+  }
 }
 
-export async function removePublishedPlaceAction(formData: FormData): Promise<void> {
+export async function setPublishedPlacePreferenceAction(formData: FormData): Promise<never> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
+  const rawIntent = String(formData.get("intent") ?? "").trim();
+  const intent = parseTripPlaceIntent(rawIntent);
+  const returnPath = resolvePlacesReturnPath(tripId, formData.get("returnTo"));
+  const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
+  if (!intent) {
+    throw new Error("Intenção de lugar inválida.");
+  }
+
+  await setTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), {
+    tripId,
+    placeId: place.id,
+    intent,
+  });
+  revalidatePublishedPlaceSurfaces(tripId, placeSlug);
+  redirect(returnPath);
+}
+
+export async function clearPublishedPlacePreferenceAction(formData: FormData): Promise<never> {
+  const tripId = String(formData.get("tripId") ?? "").trim();
+  const placeSlug = String(formData.get("placeSlug") ?? "").trim();
+  const returnPath = resolvePlacesReturnPath(tripId, formData.get("returnTo"));
   const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
 
-  await removePlaceFromTrip(new DrizzleSavedPlaceRepository(), tripId, place.id);
+  await clearTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), tripId, place.id);
   revalidatePublishedPlaceSurfaces(tripId, placeSlug);
+  redirect(returnPath);
 }
 
 function promotionReturnPath(
   tripId: string,
   formData: FormData,
   feedback: PromotionFeedback,
+  discoveryMode: "externa" | "ocultar" = "externa",
 ): string {
-  const query = new URLSearchParams({ descoberta: "externa" });
+  const query = new URLSearchParams({ descoberta: discoveryMode });
   const search = String(formData.get("busca") ?? "")
     .trim()
     .slice(0, 120);
@@ -272,16 +304,30 @@ export async function saveExternalPlaceAction(formData: FormData): Promise<never
   }
 
   try {
+    const rawIntent = String(formData.get("intent") ?? "").trim();
+    const intent = rawIntent ? parseTripPlaceIntent(rawIntent) : "WANT";
+    if (!intent) {
+      redirect(promotionReturnPath(tripId, formData, { erroPromocao: "candidato-invalido" }));
+    }
     const result = await promoteExternalPlaceCandidate({ candidate });
-    await savePlaceForTrip(new DrizzleSavedPlaceRepository(), tripId, result.placeId);
+    await setTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), {
+      tripId,
+      placeId: result.placeId,
+      intent,
+    });
   } catch (error) {
     if (error instanceof PlacePromotionServiceError) {
       redirect(promotionReturnPath(tripId, formData, promotionErrorFeedback(error)));
     }
-    throw error;
+    console.error("Falha técnica ao definir preferência para candidato externo", {
+      tripId,
+      externalId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "erro-tecnico" }));
   }
 
   revalidatePath(placesPath);
   revalidatePath(`/viagens/${tripId}/lugares-salvos`);
-  redirect(`/viagens/${tripId}/lugares-salvos?salvo=1`);
+  redirect(promotionReturnPath(tripId, formData, { promocao: "salva" }, "ocultar"));
 }

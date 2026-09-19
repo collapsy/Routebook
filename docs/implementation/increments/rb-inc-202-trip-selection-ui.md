@@ -66,6 +66,8 @@ RB-INC-201 publicou a persistência canônica, porém a interface ainda usava Sa
   - Adicionar ao roteiro somente como ação manual secundária;
 - navegação e visão geral com o rótulo Minha seleção;
 - autorização `trip:edit` nas mutações da coleção;
+- ajuste dos textos de compatibilidade em Roteiro/Mapa para eliminar “Salvos” como linguagem visível;
+- atualização dos E2Es afetados pela mudança de linguagem e comportamento;
 - testes e documentação.
 
 ## 5. Contrato visual
@@ -131,7 +133,11 @@ Nenhum dado externo enviado pelo browser é tratado como fonte autoritativa.
 apps/web/app/viagens/[tripId]/lugares/**
 apps/web/app/viagens/[tripId]/lugares-salvos/**
 apps/web/app/viagens/[tripId]/page.tsx
+apps/web/app/viagens/[tripId]/roteiro/page.tsx
 apps/web/components/trip-context-nav.tsx
+apps/web/components/trip-map.tsx
+apps/web/components/trip-map.test.tsx
+apps/web/e2e/**
 apps/web/lib/trip-place-preference.ts
 apps/web/lib/trip-place-preference.test.ts
 apps/web/package.json

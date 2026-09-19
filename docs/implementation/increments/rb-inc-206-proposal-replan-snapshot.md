@@ -108,6 +108,7 @@ A migration é aditiva; não remove nem reescreve conteúdo de Proposal existent
 ```text
 modules/proposal-management/src/itinerary-proposal.ts
 modules/proposal-management/src/itinerary-proposal.test.ts
+modules/proposal-management/src/index.ts
 modules/proposal-management/src/authoritative-itinerary-proposal-generation.ts
 modules/proposal-management/src/authoritative-itinerary-proposal-generation.test.ts
 packages/database/src/authoritative-itinerary-proposal-generation-context.ts

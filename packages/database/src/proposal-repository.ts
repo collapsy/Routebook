@@ -247,7 +247,7 @@ function valuesFor(proposal: ItineraryProposal): ItineraryProposalInsert {
     baseTripContextVersion: proposal.baseTripContextVersion,
     baseItineraryVersion: proposal.baseItineraryVersion,
     contextSnapshotId: proposal.contextSnapshotId,
-    generationScope: proposal.generationScope,
+    generationScope: proposal.generationScope ?? "INITIAL",
     generationContext: proposal.generationContext ?? null,
     status: proposal.status,
     requestedAt: proposal.requestedAt,

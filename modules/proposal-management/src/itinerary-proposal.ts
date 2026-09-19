@@ -92,7 +92,8 @@ export type ItineraryProposal = Readonly<{
   baseTripContextVersion: number;
   baseItineraryVersion: number;
   contextSnapshotId: string;
-  generationScope: ItineraryProposalGenerationScope;
+  /** Ausência em objetos legados equivale a INITIAL. Novas Proposals sempre materializam o scope. */
+  generationScope?: ItineraryProposalGenerationScope;
   generationContext?: ItineraryProposalGenerationContext;
   status: ItineraryProposalStatus;
   requestedAt: Date;

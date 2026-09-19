@@ -1113,3 +1113,17 @@ Ao concluir um incremento:
 - Save de Recommendation foi alinhado ao mesmo estado canônico.
 - Risco: migration contém `UPDATE` e `SET NOT NULL`, portanto deve ser classificada como high risk pela política de release. Nenhuma execução em Production faz parte do incremento.
 - Evidência autoritativa no SHA `6655a401302020c374ec21046b68f8afa4e9bdc0`: Documentation Validation `35386173495`, Overture Place Discovery `35386173591`, Engineering Validation `35386173582` e Vercel concluíram com sucesso. A Engineering Validation aprovou migration policy, aplicação da 0034 em PostgreSQL, testes, smoke, build e Playwright. A política classifica a 0034 como `high` por `update-data` e `set-not-null`. Nenhuma ação em Production foi executada.
+
+## Evidências do RB-INC-202
+
+- Incremento: `docs/implementation/increments/rb-inc-202-trip-selection-ui.md`.
+- Context Pack: `docs/implementation/context-packs/rb-inc-202-trip-selection-ui.md`.
+- Issue: [#489](https://github.com/collapsy/Routebook/issues/489).
+- Branch: `codex/issue-489-trip-selection-ui`.
+- Base: `d2887427aa84834d8074c538f091fcb5898f86f6`.
+- Interface: Explorar, Detalhes e a rota legada `/lugares-salvos` passam a consumir `TripPlacePreference`.
+- Linguagem visível: Quero ir, Talvez, Não tenho interesse, Imperdível e Minha seleção.
+- Planejado: derivado de Activities ativas do Itinerary; não é persistido.
+- Compatibilidade: rota física e adapter Saved Places permanecem disponíveis, mas deixam de ser a linguagem principal nas superfícies migradas.
+- Proposal, Planning Role e ReplanningWindow permanecem fora deste incremento.
+- Evidência autoritativa de regressão: pendente do CI do pull request.

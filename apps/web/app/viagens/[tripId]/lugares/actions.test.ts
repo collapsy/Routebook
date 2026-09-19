@@ -25,8 +25,8 @@ const databaseMocks = vi.hoisted(() => {
   return {
     listPublishedWithinRadius: vi.fn(),
     promote: vi.fn(),
-    findSaved: vi.fn(),
-    saveSelection: vi.fn(),
+    findPreference: vi.fn(),
+    savePreference: vi.fn(),
     PlacePromotionServiceError,
   };
 });
@@ -43,9 +43,11 @@ vi.mock("@routebook/database", () => ({
   DrizzlePlaceRepository: class {
     listPublishedWithinRadius = databaseMocks.listPublishedWithinRadius;
   },
-  DrizzleSavedPlaceRepository: class {
-    find = databaseMocks.findSaved;
-    save = databaseMocks.saveSelection;
+  DrizzleTripPlacePreferenceRepository: class {
+    find = databaseMocks.findPreference;
+    save = databaseMocks.savePreference;
+    remove = vi.fn();
+    listByTripId = vi.fn();
   },
   DrizzleTripRepository: class {
     findById = vi.fn();
@@ -144,8 +146,8 @@ describe("promoteExternalPlaceAction", () => {
       slug: "praia-externa-revalidada",
       publicationStatus: "draft",
     });
-    databaseMocks.findSaved.mockResolvedValue(null);
-    databaseMocks.saveSelection.mockImplementation(async (selection) => selection);
+    databaseMocks.findPreference.mockResolvedValue(null);
+    databaseMocks.savePreference.mockImplementation(async (selection) => selection);
   });
 
   it("exige trip:edit e bloqueia a promoção sem sessão", async () => {
@@ -301,19 +303,43 @@ describe("saveExternalPlaceAction", () => {
       slug: "praia-externa-revalidada",
       publicationStatus: "draft",
     });
-    databaseMocks.findSaved.mockResolvedValue(null);
-    databaseMocks.saveSelection.mockImplementation(async (selection) => selection);
+    databaseMocks.findPreference.mockResolvedValue(null);
+    databaseMocks.savePreference.mockImplementation(async (selection) => selection);
   });
 
   it("revalida, materializa como Place global e salva sem publicar", async () => {
     await expect(saveExternalPlaceAction(promotionForm())).rejects.toThrow("NEXT_REDIRECT");
 
     expect(databaseMocks.promote).toHaveBeenCalledWith({ candidate });
-    expect(databaseMocks.saveSelection).toHaveBeenCalledWith(
-      expect.objectContaining({ tripId, placeId: "global-place-1" }),
+    expect(databaseMocks.savePreference).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tripId,
+        placeId: "global-place-1",
+        intent: "WANT",
+        priority: null,
+      }),
     );
     expect(navigationMocks.redirect).toHaveBeenCalledWith(
-      `/viagens/${tripId}/lugares-salvos?salvo=1`,
+      expect.stringContaining(`/viagens/${tripId}/lugares?`),
+    );
+    expect(navigationMocks.redirect).toHaveBeenCalledWith(
+      expect.stringContaining("promocao=salva"),
+    );
+  });
+
+  it("preserva a intenção escolhida ao materializar candidato externo", async () => {
+    const formData = promotionForm();
+    formData.set("intent", "MAYBE");
+
+    await expect(saveExternalPlaceAction(formData)).rejects.toThrow("NEXT_REDIRECT");
+
+    expect(databaseMocks.savePreference).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tripId,
+        placeId: "global-place-1",
+        intent: "MAYBE",
+        priority: null,
+      }),
     );
   });
 });

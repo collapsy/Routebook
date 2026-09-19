@@ -137,24 +137,35 @@ O CI continua como evidência autoritativa para migrations existentes, smoke e P
 
 ## 10. Critérios de aceite
 
-- [ ] timezone IANA da Trip determina data/hora locais;
-- [ ] fronteira de meia-noite é coberta;
-- [ ] cenário DST é coberto sem depender do timezone do servidor;
-- [ ] Dias passados ficam protegidos;
-- [ ] Dia atual protege trecho transcorrido e Activities sem horário;
-- [ ] Activities futuras elegíveis são identificadas;
-- [ ] fixed e terminais são protegidas;
-- [ ] unavailable/needs-review futuros podem ser elegíveis;
-- [ ] add/move/update/remove respeitam a janela;
-- [ ] validação inválida falha sem mutação;
-- [ ] IDs e inputs inválidos falham de forma estruturada;
-- [ ] implementação permanece pura e independente de banco/UI;
-- [ ] Documentation e Engineering Validation ficam verdes no mesmo SHA.
+- [x] timezone IANA da Trip determina data/hora locais;
+- [x] fronteira de meia-noite é coberta;
+- [x] cenário DST é coberto sem depender do timezone do servidor;
+- [x] Dias passados ficam protegidos;
+- [x] Dia atual protege trecho transcorrido e Activities sem horário;
+- [x] Activities futuras elegíveis são identificadas;
+- [x] fixed e terminais são protegidas;
+- [x] unavailable/needs-review futuros podem ser elegíveis;
+- [x] add/move/update/remove respeitam a janela;
+- [x] validação inválida falha sem mutação;
+- [x] IDs e inputs inválidos falham de forma estruturada;
+- [x] implementação permanece pura e independente de banco/UI;
+- [x] Documentation e Engineering Validation ficam verdes no mesmo SHA.
 
-## 11. Próximo passo
+## 11. Evidência de validação
+
+No SHA `9ba25b31dd1c86aabf73bb49f7f4f921062f2391`, antes desta consolidação documental:
+
+- Documentation Validation #2132: `success`;
+- Engineering Validation #2614: `success`;
+- Vercel: `success`;
+- formatação, documentação, lint, typecheck, políticas de deployment/migration, migrations, testes de domínio/componentes, normalizer, verificação de imagens, smoke, build e Playwright/responsividade passaram.
+
+A consolidação desta evidência é documental e deve receber nova validação no HEAD final antes do merge.
+
+## 12. Próximo passo
 
 Integrar o snapshot temporal ao fluxo de geração `REPLAN`, persistir os metadados necessários na Itinerary Proposal e gerar deltas reais sem criar pipeline paralelo.
 
-## 12. Rollback
+## 13. Rollback
 
 Sem migration, persistência ou UI. O rollback remove os contratos puros e seus testes sem alterar estado persistido.

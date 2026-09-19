@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { addActivity, createItinerary, type Itinerary } from "./itinerary";
-import {
-  createReplanningWindow,
-  ReplanningWindowValidationError,
-} from "./replanning-window";
+import { createReplanningWindow, ReplanningWindowValidationError } from "./replanning-window";
 
 function createFortalezaItinerary(): Itinerary {
   return createItinerary(
@@ -20,20 +17,14 @@ function createFortalezaItinerary(): Itinerary {
   );
 }
 
-function add(
-  itinerary: Itinerary,
-  input: Parameters<typeof addActivity>[1],
-): Itinerary {
+function add(itinerary: Itinerary, input: Parameters<typeof addActivity>[1]): Itinerary {
   return addActivity(itinerary, input, new Date("2026-08-01T01:00:00.000Z"));
 }
 
 describe("createReplanningWindow", () => {
   it("usa o timezone da Trip e não o timezone do servidor na fronteira de data", () => {
     const itinerary = createFortalezaItinerary();
-    const window = createReplanningWindow(
-      itinerary,
-      new Date("2026-08-24T01:30:00.000Z"),
-    );
+    const window = createReplanningWindow(itinerary, new Date("2026-08-24T01:30:00.000Z"));
 
     expect(window.localDate).toBe("2026-08-23");
     expect(window.localTime).toBe("22:30");
@@ -88,10 +79,7 @@ describe("createReplanningWindow", () => {
     const unscheduled = itinerary.days[1]!.activities[3]!;
     const future = itinerary.days[1]!.activities[4]!;
 
-    const window = createReplanningWindow(
-      itinerary,
-      new Date("2026-08-23T15:00:00.000Z"),
-    );
+    const window = createReplanningWindow(itinerary, new Date("2026-08-23T15:00:00.000Z"));
 
     expect(window.localTime).toBe("12:00");
     expect(window.reasonByActivityId[past.id]).toBe("PAST_DAY");
@@ -144,10 +132,7 @@ describe("createReplanningWindow", () => {
     });
 
     const activities = itinerary.days[2]!.activities;
-    const window = createReplanningWindow(
-      itinerary,
-      new Date("2026-08-23T15:00:00.000Z"),
-    );
+    const window = createReplanningWindow(itinerary, new Date("2026-08-23T15:00:00.000Z"));
 
     expect(window.reasonByActivityId[activities[0]!.id]).toBe("FIXED_ACTIVITY");
     for (const activity of activities.slice(1)) {
@@ -169,10 +154,7 @@ describe("createReplanningWindow", () => {
     });
 
     const activities = itinerary.days[2]!.activities;
-    const window = createReplanningWindow(
-      itinerary,
-      new Date("2026-08-23T15:00:00.000Z"),
-    );
+    const window = createReplanningWindow(itinerary, new Date("2026-08-23T15:00:00.000Z"));
 
     expect(window.eligibleActivityIds).toEqual(
       expect.arrayContaining([activities[0]!.id, activities[1]!.id]),
@@ -192,10 +174,7 @@ describe("createReplanningWindow", () => {
       new Date("2026-02-01T00:00:00.000Z"),
     );
 
-    const window = createReplanningWindow(
-      itinerary,
-      new Date("2026-03-08T07:30:00.000Z"),
-    );
+    const window = createReplanningWindow(itinerary, new Date("2026-03-08T07:30:00.000Z"));
 
     expect(window.localDate).toBe("2026-03-08");
     expect(window.localTime).toBe("03:30");
@@ -244,26 +223,18 @@ describe("createReplanningWindow", () => {
       days: [itinerary.days[0]!, { ...itinerary.days[1]!, id: itinerary.days[0]!.id }],
     };
     expect(() =>
-      createReplanningWindow(
-        duplicateDay,
-        new Date("2026-08-23T15:00:00.000Z"),
-      ),
+      createReplanningWindow(duplicateDay, new Date("2026-08-23T15:00:00.000Z")),
     ).toThrow(ReplanningWindowValidationError);
 
     const activity = itinerary.days[2]!.activities[0]!;
     const duplicateActivity = {
       ...itinerary,
       days: itinerary.days.map((day, index) =>
-        index === 3
-          ? { ...day, activities: [{ ...activity }] }
-          : day,
+        index === 3 ? { ...day, activities: [{ ...activity }] } : day,
       ),
     };
     expect(() =>
-      createReplanningWindow(
-        duplicateActivity,
-        new Date("2026-08-23T15:00:00.000Z"),
-      ),
+      createReplanningWindow(duplicateActivity, new Date("2026-08-23T15:00:00.000Z")),
     ).toThrow(ReplanningWindowValidationError);
   });
 });

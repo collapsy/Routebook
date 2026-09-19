@@ -91,11 +91,29 @@ function revalidatePublishedPlaceSurfaces(tripId: string, placeSlug: string): vo
   revalidatePath(`/viagens/${tripId}/lugares-salvos`);
 }
 
-export async function setPublishedPlacePreferenceAction(formData: FormData): Promise<void> {
+function resolvePlacesReturnPath(
+  tripId: string,
+  value: FormDataEntryValue | null,
+): string {
+  const basePath = `/viagens/${tripId}/lugares`;
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return basePath;
+
+  try {
+    const parsed = new URL(raw, "https://routebook.local");
+    if (parsed.pathname !== basePath) return basePath;
+    return `${basePath}${parsed.search}`;
+  } catch {
+    return basePath;
+  }
+}
+
+export async function setPublishedPlacePreferenceAction(formData: FormData): Promise<never> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
   const rawIntent = String(formData.get("intent") ?? "").trim();
   const intent = parseTripPlaceIntent(rawIntent);
+  const returnPath = resolvePlacesReturnPath(tripId, formData.get("returnTo"));
   const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
   if (!intent) {
     throw new Error("Intenção de lugar inválida.");
@@ -107,23 +125,27 @@ export async function setPublishedPlacePreferenceAction(formData: FormData): Pro
     intent,
   });
   revalidatePublishedPlaceSurfaces(tripId, placeSlug);
+  redirect(returnPath);
 }
 
-export async function clearPublishedPlacePreferenceAction(formData: FormData): Promise<void> {
+export async function clearPublishedPlacePreferenceAction(formData: FormData): Promise<never> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
+  const returnPath = resolvePlacesReturnPath(tripId, formData.get("returnTo"));
   const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
 
   await clearTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), tripId, place.id);
   revalidatePublishedPlaceSurfaces(tripId, placeSlug);
+  redirect(returnPath);
 }
 
 function promotionReturnPath(
   tripId: string,
   formData: FormData,
   feedback: PromotionFeedback,
+  discoveryMode: "externa" | "ocultar" = "externa",
 ): string {
-  const query = new URLSearchParams({ descoberta: "externa" });
+  const query = new URLSearchParams({ descoberta: discoveryMode });
   const search = String(formData.get("busca") ?? "")
     .trim()
     .slice(0, 120);
@@ -310,5 +332,5 @@ export async function saveExternalPlaceAction(formData: FormData): Promise<never
 
   revalidatePath(placesPath);
   revalidatePath(`/viagens/${tripId}/lugares-salvos`);
-  redirect(promotionReturnPath(tripId, formData, { promocao: "salva" }));
+  redirect(promotionReturnPath(tripId, formData, { promocao: "salva" }, "ocultar"));
 }

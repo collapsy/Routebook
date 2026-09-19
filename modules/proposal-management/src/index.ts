@@ -72,11 +72,13 @@ export type {
 } from "./deterministic-itinerary-proposal-generator";
 export {
   assembleItineraryProposalGenerationInput,
+  assembleTripPlacePreferenceItineraryProposalGenerationInput,
   eligibleItineraryProposalRecommendationStatuses,
   ItineraryProposalGenerationInputAssemblyError,
 } from "./itinerary-proposal-generation-input-assembler";
 export type {
   AssembleItineraryProposalGenerationInput,
+  AssembleTripPlacePreferenceItineraryProposalGenerationInput,
   AssembledItineraryProposalGenerationInput,
   EligibleItineraryProposalRecommendationStatus,
   ItineraryProposalGenerationInputAssemblyErrorCode,
@@ -84,6 +86,7 @@ export type {
   ItineraryProposalSourceItinerary,
   ItineraryProposalSourcePlace,
   ItineraryProposalSourceRecommendation,
+  ItineraryProposalSourceTripPlacePreference,
 } from "./itinerary-proposal-generation-input-assembler";
 export {
   generateAndPersistItineraryProposal,

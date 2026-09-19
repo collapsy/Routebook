@@ -8,14 +8,8 @@ import {
   DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
-import {
-  PLACE_CATEGORIES,
-  type PlaceCategory,
-} from "@routebook/place-catalog";
-import type {
-  TripPlaceIntent,
-  TripPlacePreference,
-} from "@routebook/trip-collection";
+import { PLACE_CATEGORIES, type PlaceCategory } from "@routebook/place-catalog";
+import type { TripPlaceIntent, TripPlacePreference } from "@routebook/trip-collection";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
@@ -254,9 +248,7 @@ export default async function TripSelectionPage({
         <section className="traveler-context-summary" aria-labelledby="selection-empty-title">
           <p className="product-eyebrow">Seleção vazia</p>
           <h2 id="selection-empty-title">Você ainda não avaliou nenhum lugar</h2>
-          <p>
-            Explore o destino e marque lugares como Quero ir, Talvez ou Não tenho interesse.
-          </p>
+          <p>Explore o destino e marque lugares como Quero ir, Talvez ou Não tenho interesse.</p>
           <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
             Explorar lugares
           </Link>

@@ -339,9 +339,7 @@ test("Recommendation sem TripPlacePreference não alimenta a Proposal", async ({
   expect(await recommendationRepository.listByTripId(fixture.tripId)).toHaveLength(1);
 });
 
-test("respeita densidade diária usando somente a seleção explícita", async ({
-  page,
-}, testInfo) => {
+test("respeita densidade diária usando somente a seleção explícita", async ({ page }, testInfo) => {
   const tripId = await createDensityFixture(
     `Densidade seleção ${testInfo.project.name} ${Date.now()}`,
     5,
@@ -380,8 +378,8 @@ test("não propõe novamente Place que já está em Activity ativa", async ({ pa
     proposalId,
   );
   expect(proposal).toMatchObject({ status: "ready" });
-  expect(proposal?.proposedActivities?.some((activity) => activity.placeId === fixture.placeId)).toBe(
-    false,
-  );
+  expect(
+    proposal?.proposedActivities?.some((activity) => activity.placeId === fixture.placeId),
+  ).toBe(false);
   expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
 });

@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 import { closeDatabase, getDatabase } from "./client";
 import { createPostgresAuthoritativeItineraryProposalGenerationService } from "./authoritative-itinerary-proposal-generation-service";
 import { DrizzleItineraryProposalRepository } from "./proposal-repository";
-import { itineraries, itineraryDays, places, recommendations, trips } from "./schema";
+import { itineraries, itineraryDays, places, recommendations, savedPlaces, trips } from "./schema";
 
 const database = getDatabase();
 const tripId = randomUUID();
@@ -14,6 +14,7 @@ const itineraryId = randomUUID();
 const dayId = randomUUID();
 const placeId = randomUUID();
 const recommendationId = randomUUID();
+const preferenceId = randomUUID();
 const proposalId = randomUUID();
 const proposedActivityId = randomUUID();
 const requestedAt = new Date("2026-08-07T10:00:00.000Z");
@@ -97,6 +98,15 @@ beforeAll(async () => {
     linkedDecisionId: null,
     statusReason: null,
     supersededByRecommendationId: null,
+    createdAt: requestedAt,
+    updatedAt: requestedAt,
+  });
+  await database.insert(savedPlaces).values({
+    id: preferenceId,
+    tripId,
+    placeId,
+    intent: "WANT",
+    priority: null,
     createdAt: requestedAt,
     updatedAt: requestedAt,
   });

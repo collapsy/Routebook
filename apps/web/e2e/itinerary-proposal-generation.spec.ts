@@ -29,6 +29,7 @@ async function createGenerationFixture(
   tripName: string,
   withEligiblePreference: boolean,
   withPlaceAlreadyPlanned = false,
+  intent: "WANT" | "MAYBE" = "WANT",
 ): Promise<GenerationFixture> {
   const now = new Date();
   const { trip } = await createAuthenticatedE2ETrip(
@@ -67,7 +68,7 @@ async function createGenerationFixture(
     id: preferenceId,
     tripId: trip.id,
     placeId,
-    intent: "WANT",
+    intent,
     priority: null,
     createdAt: now,
     updatedAt: now,
@@ -162,6 +163,7 @@ async function createFullDensityEmptyFixture(tripName: string): Promise<string> 
 async function generateProposalFromEmptyState(
   page: Page,
   tripId: string,
+  includeMaybe = false,
 ): Promise<ItineraryProposalId> {
   await page.goto(`/viagens/${tripId}/roteiro`);
   const proposalEntryPoint = page.getByRole("link", { name: "Gerar proposta" });
@@ -169,6 +171,12 @@ async function generateProposalFromEmptyState(
   await expect(proposalEntryPoint).toHaveAttribute("href", proposalPath);
   await page.goto(proposalPath);
   await expect(page.getByRole("heading", { name: "Nenhuma proposta disponível" })).toBeVisible();
+
+  const maybeOption = page.getByRole("checkbox", {
+    name: "Incluir lugares marcados como Talvez nesta proposta",
+  });
+  await expect(maybeOption).not.toBeChecked();
+  if (includeMaybe) await maybeOption.check();
 
   const generateButton = page.getByRole("button", { name: "Gerar proposta de roteiro" });
   await expect(generateButton).toBeEnabled();
@@ -235,6 +243,36 @@ test("gera uma Proposal ready da UI ao PostgreSQL sem alterar o Itinerary", asyn
     await new DrizzleItineraryProposalRepository().findById(fixture.tripId, proposalId),
   ).toEqual(proposal);
   expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
+});
+
+test("Talvez só participa quando o usuário ativa a opção da geração", async ({ page }, testInfo) => {
+  const withoutMaybe = await createGenerationFixture(
+    `Talvez desativado ${testInfo.project.name} ${Date.now()}`,
+    true,
+    false,
+    "MAYBE",
+  );
+  const proposalWithoutMaybeId = await generateProposalFromEmptyState(page, withoutMaybe.tripId);
+  const proposalWithoutMaybe = await new DrizzleItineraryProposalRepository().findById(
+    withoutMaybe.tripId,
+    proposalWithoutMaybeId,
+  );
+  expect(proposalWithoutMaybe?.proposedActivities).toEqual([]);
+
+  const withMaybe = await createGenerationFixture(
+    `Talvez ativado ${testInfo.project.name} ${Date.now()}`,
+    true,
+    false,
+    "MAYBE",
+  );
+  const proposalWithMaybeId = await generateProposalFromEmptyState(page, withMaybe.tripId, true);
+  const proposalWithMaybe = await new DrizzleItineraryProposalRepository().findById(
+    withMaybe.tripId,
+    proposalWithMaybeId,
+  );
+  expect(proposalWithMaybe?.proposedActivities).toEqual(
+    expect.arrayContaining([expect.objectContaining({ placeId: withMaybe.placeId })]),
+  );
 });
 
 test("limita a densidade diária sem alterar o Itinerary antes do aceite", async ({

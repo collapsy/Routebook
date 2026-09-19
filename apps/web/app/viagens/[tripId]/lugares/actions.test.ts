@@ -65,7 +65,11 @@ vi.mock("../../../../lib/overture-place-search", () => ({
   },
 }));
 
-import { promoteExternalPlaceAction, saveExternalPlaceAction } from "./actions";
+import {
+  promoteExternalPlaceAction,
+  saveExternalPlaceAction,
+  setPublishedPlacePreferenceAction,
+} from "./actions";
 
 const tripId = "11111111-1111-4111-8111-111111111111";
 const candidate = Object.freeze({
@@ -108,6 +112,68 @@ function promotionForm(): FormData {
   formData.set("preco", "free");
   return formData;
 }
+
+describe("setPublishedPlacePreferenceAction", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    accessMocks.resolve.mockResolvedValue({ status: "authorized" });
+    tripMocks.findTripById.mockResolvedValue(trip);
+    databaseMocks.listPublishedWithinRadius.mockResolvedValue([
+      {
+        id: "place-1",
+        destinationId: "pipa-rn-br",
+        slug: "praia-do-amor",
+        name: "Praia do Amor",
+        summary: "Lugar publicado usado apenas como identidade editorial no teste.",
+        category: "beach",
+        latitude: -6.2386,
+        longitude: -35.0455,
+        publicationStatus: "published",
+        createdAt: new Date("2026-08-16T12:00:00Z"),
+        updatedAt: new Date("2026-08-16T12:00:00Z"),
+      },
+    ]);
+    databaseMocks.findPreference.mockResolvedValue(null);
+    databaseMocks.savePreference.mockImplementation(async (selection) => selection);
+  });
+
+  it("persiste a preferência e volta ao catálogo preservando o contexto validado", async () => {
+    const formData = new FormData();
+    formData.set("tripId", tripId);
+    formData.set("placeSlug", "praia-do-amor");
+    formData.set("intent", "WANT");
+    formData.set(
+      "returnTo",
+      `/viagens/${tripId}/lugares?descoberta=ocultar&busca=Praia+do+Amor&categoria=beach`,
+    );
+
+    await expect(setPublishedPlacePreferenceAction(formData)).rejects.toThrow("NEXT_REDIRECT");
+
+    expect(databaseMocks.savePreference).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tripId,
+        placeId: "place-1",
+        intent: "WANT",
+        priority: null,
+      }),
+    );
+    expect(navigationMocks.redirect).toHaveBeenCalledWith(
+      `/viagens/${tripId}/lugares?descoberta=ocultar&busca=Praia+do+Amor&categoria=beach`,
+    );
+  });
+
+  it("não aceita returnTo fora da rota de Lugares da própria viagem", async () => {
+    const formData = new FormData();
+    formData.set("tripId", tripId);
+    formData.set("placeSlug", "praia-do-amor");
+    formData.set("intent", "MAYBE");
+    formData.set("returnTo", "https://example.invalid/phishing");
+
+    await expect(setPublishedPlacePreferenceAction(formData)).rejects.toThrow("NEXT_REDIRECT");
+
+    expect(navigationMocks.redirect).toHaveBeenCalledWith(`/viagens/${tripId}/lugares`);
+  });
+});
 
 describe("promoteExternalPlaceAction", () => {
   beforeEach(() => {

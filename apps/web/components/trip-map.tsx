@@ -74,7 +74,7 @@ const kindLabels: Record<TripMapPointKind, string> = {
   accommodation: "Hospedagem",
   "published-place": "Lugar",
   "external-place": "Lugar",
-  "saved-place": "Lugar salvo",
+  "saved-place": "Lugar da seleção",
   "itinerary-activity": "Atividade planejada",
 };
 

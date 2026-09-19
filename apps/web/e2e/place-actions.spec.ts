@@ -73,7 +73,10 @@ test("adiciona Place ao Roteiro manualmente sem sobrescrever Não tenho interess
   );
 
   await page.getByRole("button", { name: "Não tenho interesse" }).click();
-  await expect(page.getByText(/Preferência atual:/)).toContainText("Não tenho interesse");
+  const preferenceSummary = page
+    .locator("#preferencia-do-lugar p")
+    .filter({ hasText: "Preferência atual:" });
+  await expect(preferenceSummary).toContainText("Não tenho interesse");
   await expect(page.getByRole("button", { name: "Não tenho interesse" })).toHaveAttribute(
     "aria-pressed",
     "true",
@@ -85,7 +88,7 @@ test("adiciona Place ao Roteiro manualmente sem sobrescrever Não tenho interess
   await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
 
   await expect(page.getByText(/Chapadão de Pipa foi adicionado ao Dia 2/)).toBeVisible();
-  await expect(page.getByText(/Preferência atual:/)).toContainText("Não tenho interesse");
+  await expect(preferenceSummary).toContainText("Não tenho interesse");
   await expect(page.getByRole("button", { name: "Não tenho interesse" })).toHaveAttribute(
     "aria-pressed",
     "true",

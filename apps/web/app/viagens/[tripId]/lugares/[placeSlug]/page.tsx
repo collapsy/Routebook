@@ -290,7 +290,6 @@ export default async function PlaceDetailsPage({
         ) : null}
       </section>
 
-
       <section
         className="traveler-context-summary"
         aria-labelledby="place-itinerary-title"

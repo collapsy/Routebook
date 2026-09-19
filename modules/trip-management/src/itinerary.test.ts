@@ -521,9 +521,9 @@ describe("Activity status controls", () => {
   });
 
   it("rejeita identidade vazia ou Activity ausente do Itinerary", () => {
-    expect(() =>
-      markActivityTentative(createBaseItinerary(), { activityId: " " }),
-    ).toThrow(ItineraryValidationError);
+    expect(() => markActivityTentative(createBaseItinerary(), { activityId: " " })).toThrow(
+      ItineraryValidationError,
+    );
 
     try {
       completeActivity(createBaseItinerary(), { activityId: "activity-inexistente" });

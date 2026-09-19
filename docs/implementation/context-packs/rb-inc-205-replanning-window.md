@@ -27,7 +27,7 @@ Implementar somente o núcleo puro do passo 7 do RB-ADR-028 necessário para cla
 ## 2. Unidade de trabalho
 
 - issue: [#497](https://github.com/collapsy/Routebook/issues/497);
-- PR: a abrir;
+- PR: [#498](https://github.com/collapsy/Routebook/pull/498);
 - branch: `codex/issue-497-replanning-window`;
 - base: `main@61169a75249744743df8b65081f5a4d4712f91cc`;
 - merge na `main` permanece gate humano.

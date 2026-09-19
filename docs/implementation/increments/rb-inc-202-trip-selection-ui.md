@@ -63,7 +63,7 @@ RB-INC-201 publicou a persistência canônica, porém a interface ainda usava Sa
   - Imperdível;
   - Planejado / Ainda não planejado derivado do Itinerary;
   - alteração e limpeza de preferência;
-  - Adicionar ao roteiro somente como ação manual secundária;
+  - Adicionar ao roteiro somente como ação manual secundária, independente da intenção atual;
 - navegação e visão geral com o rótulo Minha seleção;
 - autorização `trip:edit` nas mutações da coleção;
 - ajuste dos textos de compatibilidade em Roteiro/Mapa para eliminar “Salvos” como linguagem visível;
@@ -98,6 +98,7 @@ Activities com status `removed` ou `cancelled` não contam como planejamento ati
 
 - preferência não cria Activity;
 - preferência não remove Activity;
+- intenção não bloqueia uma adição manual explícita ao Roteiro;
 - limpar preferência não altera o Roteiro;
 - MUST_DO só existe com WANT;
 - trocar intenção preserva a identidade da preferência;

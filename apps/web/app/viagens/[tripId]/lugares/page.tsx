@@ -490,7 +490,7 @@ function ExternalDiscoveryCard({
           <p>{candidate.addressLabel ?? "Endereço não informado"}</p>
           <small>Fonte: Overture · licença: {candidate.sourceLicense}</small>
           {!candidate.category ? (
-            <small>Salvar ainda não está disponível para este lugar.</small>
+            <small>Definir uma preferência ainda não está disponível para este lugar.</small>
           ) : null}
           <div className={styles.cardAuxiliaryActions}>
             <a

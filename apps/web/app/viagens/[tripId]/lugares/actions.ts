@@ -91,10 +91,7 @@ function revalidatePublishedPlaceSurfaces(tripId: string, placeSlug: string): vo
   revalidatePath(`/viagens/${tripId}/lugares-salvos`);
 }
 
-function resolvePlacesReturnPath(
-  tripId: string,
-  value: FormDataEntryValue | null,
-): string {
+function resolvePlacesReturnPath(tripId: string, value: FormDataEntryValue | null): string {
   const basePath = `/viagens/${tripId}/lugares`;
   const raw = typeof value === "string" ? value.trim() : "";
   if (!raw) return basePath;

@@ -473,6 +473,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-201 | Context Pack do RB-INC-201 — Persistência de TripPlacePreference | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-201-trip-place-preference-persistence.md](./implementation/context-packs/rb-inc-201-trip-place-preference-persistence.md) |
 | RB-INC-202 | Minha seleção e preferências de lugar na interface | Implementation | Draft | 0.1.0 | [rb-inc-202-trip-selection-ui.md](./implementation/increments/rb-inc-202-trip-selection-ui.md) |
 | RB-CTX-202 | Context Pack do RB-INC-202 — Minha seleção | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-202-trip-selection-ui.md](./implementation/context-packs/rb-inc-202-trip-selection-ui.md) |
+| RB-INC-203 | TripPlacePreference como fonte autoritativa da Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-203-trip-selection-proposal-candidates.md](./implementation/increments/rb-inc-203-trip-selection-proposal-candidates.md) |
+| RB-CTX-203 | Context Pack do RB-INC-203 — TripPlacePreference na Itinerary Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-203-trip-selection-proposal-candidates.md](./implementation/context-packs/rb-inc-203-trip-selection-proposal-candidates.md) |
 
 ## Status possíveis
 

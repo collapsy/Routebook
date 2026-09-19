@@ -1,8 +1,5 @@
 import type { ApplyProposalItem } from "./proposal-application";
-import type {
-  ReplanningWindow,
-  ReplanningWindowProtectionReason,
-} from "./replanning-window";
+import type { ReplanningWindow, ReplanningWindowProtectionReason } from "./replanning-window";
 
 export type ReplanningDeltaValidationErrorCode =
   | "invalid-window"
@@ -174,22 +171,12 @@ export function validateReplanningDelta(
         assertTargetDay(item.targetTripDayId, index, eligibleDays);
         return;
       case "move":
-        assertSourceActivity(
-          item.sourceActivityId,
-          index,
-          eligibleActivities,
-          protectedReasons,
-        );
+        assertSourceActivity(item.sourceActivityId, index, eligibleActivities, protectedReasons);
         assertTargetDay(item.targetTripDayId, index, eligibleDays);
         return;
       case "update":
       case "remove":
-        assertSourceActivity(
-          item.sourceActivityId,
-          index,
-          eligibleActivities,
-          protectedReasons,
-        );
+        assertSourceActivity(item.sourceActivityId, index, eligibleActivities, protectedReasons);
         return;
       default:
         throw new ReplanningDeltaValidationError(

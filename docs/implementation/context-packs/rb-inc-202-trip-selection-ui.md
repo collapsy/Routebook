@@ -63,6 +63,7 @@ Tornar TripPlacePreference utilizável na interface sem introduzir novo conceito
 ## 5. Regras de implementação
 
 - usar `DrizzleTripPlacePreferenceRepository`;
+- declarar `@routebook/trip-collection` como dependência direta do app web e manter o lockfile sincronizado;
 - usar funções puras do módulo Trip Collection por meio do helper de aplicação web;
 - gerar ID/tempo na fronteira de aplicação, não no domínio;
 - não escrever diretamente em `saved_places`;

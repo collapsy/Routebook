@@ -4,12 +4,7 @@ import type {
   GenerateAuthoritativeItineraryProposalCommand,
   ItineraryProposal,
 } from "@routebook/proposal-management";
-import type {
-  Itinerary,
-  ItineraryRepository,
-  Trip,
-  TripRepository,
-} from "@routebook/trip-management";
+import type { ItineraryRepository, TripRepository } from "@routebook/trip-management";
 
 import type { TripRouteAccessResult } from "./trip-route-access";
 

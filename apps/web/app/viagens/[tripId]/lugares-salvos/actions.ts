@@ -128,15 +128,7 @@ export async function addSelectionPlaceToItineraryAction(formData: FormData): Pr
   const startTime = optionalText(formData.get("startTime"));
   const durationValue = optionalText(formData.get("durationMinutes"));
   const durationMinutes = durationValue === undefined ? undefined : Number(durationValue);
-  const { trip, place, preference } = await resolveSelectionPlace(tripId, placeSlug);
-
-  if (preference.intent === "NOT_INTERESTED") {
-    redirect(
-      `/viagens/${tripId}/lugares-salvos?erro=${encodeURIComponent(
-        "Altere a preferência antes de adicionar este lugar ao roteiro.",
-      )}`,
-    );
-  }
+  const { trip, place } = await resolveSelectionPlace(tripId, placeSlug);
 
   const itineraryRepository = new DrizzleItineraryRepository();
   const itinerary =

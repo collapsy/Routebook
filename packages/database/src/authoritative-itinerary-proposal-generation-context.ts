@@ -290,38 +290,34 @@ async function loadContext(
               position: day.position,
               activities: activityRows
                 .filter((activity) => activity.itineraryDayId === day.id)
-                .map(
-                  (activity): Activity => ({
-                    id: activity.id,
-                    title: activity.title,
-                    type: activity.type as Activity["type"],
-                    status: activity.status as Activity["status"],
-                    flexibility: activity.flexibility as Activity["flexibility"],
-                    ...(activity.startTime ? { startTime: activity.startTime } : {}),
-                    ...(activity.durationMinutes !== null
-                      ? { durationMinutes: activity.durationMinutes }
-                      : {}),
-                    order: activity.order,
-                    ...(activity.placeId ? { placeId: activity.placeId } : {}),
-                    createdAt: new Date(activity.createdAt.getTime()),
-                    updatedAt: new Date(activity.updatedAt.getTime()),
-                  }),
-                ),
+                .map((activity): Activity => ({
+                  id: activity.id,
+                  title: activity.title,
+                  type: activity.type as Activity["type"],
+                  status: activity.status as Activity["status"],
+                  flexibility: activity.flexibility as Activity["flexibility"],
+                  ...(activity.startTime ? { startTime: activity.startTime } : {}),
+                  ...(activity.durationMinutes !== null
+                    ? { durationMinutes: activity.durationMinutes }
+                    : {}),
+                  order: activity.order,
+                  ...(activity.placeId ? { placeId: activity.placeId } : {}),
+                  createdAt: new Date(activity.createdAt.getTime()),
+                  updatedAt: new Date(activity.updatedAt.getTime()),
+                })),
               freePeriods: freePeriodRows
                 .filter((period) => period.itineraryDayId === day.id)
-                .map(
-                  (period): FreePeriod => ({
-                    id: period.id,
-                    mode: period.mode as FreePeriod["mode"],
-                    ...(period.startTime ? { startTime: period.startTime } : {}),
-                    ...(period.durationMinutes !== null
-                      ? { durationMinutes: period.durationMinutes }
-                      : {}),
-                    order: period.order,
-                    createdAt: new Date(period.createdAt.getTime()),
-                    updatedAt: new Date(period.updatedAt.getTime()),
-                  }),
-                ),
+                .map((period): FreePeriod => ({
+                  id: period.id,
+                  mode: period.mode as FreePeriod["mode"],
+                  ...(period.startTime ? { startTime: period.startTime } : {}),
+                  ...(period.durationMinutes !== null
+                    ? { durationMinutes: period.durationMinutes }
+                    : {}),
+                  order: period.order,
+                  createdAt: new Date(period.createdAt.getTime()),
+                  updatedAt: new Date(period.updatedAt.getTime()),
+                })),
             })),
           } satisfies Itinerary,
           asOf,

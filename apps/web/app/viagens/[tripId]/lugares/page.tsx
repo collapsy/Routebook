@@ -180,6 +180,7 @@ function CanonicalDiscoveryCard({
   distanceReferenceLabel,
   accommodationCoordinate,
   preference,
+  returnTo,
   rankingPosition,
   rankingOrderLabel,
   quality,
@@ -194,6 +195,7 @@ function CanonicalDiscoveryCard({
   distanceReferenceLabel: string;
   accommodationCoordinate?: Readonly<{ latitude: number; longitude: number }>;
   preference: TripPlacePreference | undefined;
+  returnTo: string;
   rankingPosition: number;
   rankingOrderLabel: string;
   quality?: PlaceQualityScore;
@@ -285,6 +287,7 @@ function CanonicalDiscoveryCard({
         <form action={setPublishedPlacePreferenceAction}>
           <input name="tripId" type="hidden" value={tripId} />
           <input name="placeSlug" type="hidden" value={place.slug} />
+          <input name="returnTo" type="hidden" value={returnTo} />
           <button
             aria-pressed={preference?.intent === "WANT"}
             className="product-secondary-action"
@@ -317,6 +320,7 @@ function CanonicalDiscoveryCard({
           <form action={clearPublishedPlacePreferenceAction}>
             <input name="tripId" type="hidden" value={tripId} />
             <input name="placeSlug" type="hidden" value={place.slug} />
+            <input name="returnTo" type="hidden" value={returnTo} />
             <button className="product-inline-link" type="submit">
               Limpar
             </button>
@@ -1139,6 +1143,7 @@ export default async function PlacesPage({
                   : {})}
                 distanceReferenceLabel={distanceReferenceLabel}
                 preference={preferencesByPlaceId.get(item.place.id)}
+                returnTo={discoveryHref(tripId, canonicalParams)}
                 item={item}
                 timeZone={trip.destination.timeZone}
                 tripId={tripId}

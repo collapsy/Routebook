@@ -54,7 +54,7 @@ test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lug
   await expect(page.getByText(/Preferência atual:/)).toBeVisible();
 });
 
-test("adiciona Place publicado ao Roteiro sem criar preferência automaticamente", async ({
+test("adiciona Place ao Roteiro manualmente sem sobrescrever Não tenho interesse", async ({
   page,
 }) => {
   const { trip } = await createAuthenticatedE2ETrip({
@@ -72,16 +72,23 @@ test("adiciona Place publicado ao Roteiro sem criar preferência automaticamente
     "false",
   );
 
+  await page.getByRole("button", { name: "Não tenho interesse" }).click();
+  await expect(page.getByText(/Preferência atual:/)).toContainText("Não tenho interesse");
+  await expect(page.getByRole("button", { name: "Não tenho interesse" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+
   await page.getByLabel("Adicionar ao dia").selectOption("2026-08-23");
   await page.getByLabel("Horário opcional").fill("16:30");
   await page.getByLabel("Duração opcional").fill("60");
   await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
 
   await expect(page.getByText(/Chapadão de Pipa foi adicionado ao Dia 2/)).toBeVisible();
-  await expect(page.getByText("Você ainda não avaliou este lugar.")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Quero ir" })).toHaveAttribute(
+  await expect(page.getByText(/Preferência atual:/)).toContainText("Não tenho interesse");
+  await expect(page.getByRole("button", { name: "Não tenho interesse" })).toHaveAttribute(
     "aria-pressed",
-    "false",
+    "true",
   );
   const itineraryLink = page.getByRole("link", { name: "Ver dia no roteiro" });
   await expect(itineraryLink).toHaveAttribute(

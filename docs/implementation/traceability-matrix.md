@@ -7,7 +7,7 @@ owner: Delivery
 status: Published
 version: "1.0.0"
 created: "2026-07-28"
-last_updated: "2026-09-18"
+last_updated: "2026-09-19"
 authors:
   - RouteBook Team
 tags:
@@ -1144,4 +1144,20 @@ Ao concluir um incremento:
 | origem | Recommendation e Discovery deixam de alimentar automaticamente a Proposal |
 | UX | opção explícita para incluir MAYBE na geração |
 | auditoria | `contextSnapshotId` distingue `selection:want` e `selection:want-maybe` |
+| validação | Documentation/Engineering pendentes no SHA final |
+
+## Evidências previstas do RB-INC-204
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-204-activity-state-controls.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-204-activity-state-controls.md` |
+| issue | [#495](https://github.com/collapsy/Routebook/issues/495) |
+| PR | pendente |
+| branch | `codex/issue-495-activity-state-controls` |
+| base | `main@9de76487959adc3ebfa96bb2bbd4f7711af71115` |
+| lifecycle | `planned -> tentative`; `planned|tentative -> completed|skipped`; `planned|tentative|needs-review -> cancelled` |
+| pureza | transições em memória, sem banco, UI, Provider ou relógio implícito além do instante injetável existente |
+| concorrência | PR #480 toca Roteiro; RB-INC-204 evita essa superfície |
+| próximo passo | ReplanningWindow e delta permanecem para incremento posterior |
 | validação | Documentation/Engineering pendentes no SHA final |

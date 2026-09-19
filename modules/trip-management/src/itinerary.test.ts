@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import {
   addActivity,
+  cancelActivity,
+  completeActivity,
   createItinerary,
   ItineraryValidationError,
+  markActivityTentative,
   moveActivity,
   removeActivity,
   reorderActivities,
+  skipActivity,
   updateActivity,
 } from "./itinerary";
 
@@ -395,6 +399,134 @@ describe("removeActivity", () => {
 
     try {
       removeActivity(createBaseItinerary(), { activityId: "activity-inexistente" });
+      throw new Error("A validação deveria falhar.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ItineraryValidationError);
+      expect((error as ItineraryValidationError).fieldErrors.activityId).toBeDefined();
+    }
+  });
+});
+
+describe("Activity status controls", () => {
+  function createWithStatus(
+    status: "planned" | "tentative" | "completed" | "skipped" | "cancelled" | "needs-review",
+  ) {
+    return addActivity(
+      createBaseItinerary(),
+      {
+        dayDate: "2026-08-23",
+        title: "Passeio principal",
+        type: "tour",
+        status,
+        flexibility: "fixed",
+        startTime: "10:30",
+        durationMinutes: 120,
+        placeId: "place-passeio-principal",
+      },
+      new Date("2026-07-30T03:00:00Z"),
+    );
+  }
+
+  it("marca planned como tentative preservando os demais atributos e o input", () => {
+    const itinerary = createWithStatus("planned");
+    const originalActivity = itinerary.days[1]?.activities[0];
+    expect(originalActivity).toBeDefined();
+
+    const updatedAt = new Date("2026-07-30T04:00:00Z");
+    const updated = markActivityTentative(
+      itinerary,
+      { activityId: originalActivity!.id },
+      updatedAt,
+    );
+    const activity = updated.days[1]?.activities[0];
+
+    expect(activity).toMatchObject({
+      id: originalActivity!.id,
+      title: "Passeio principal",
+      type: "tour",
+      status: "tentative",
+      flexibility: "fixed",
+      startTime: "10:30",
+      durationMinutes: 120,
+      order: 1,
+      placeId: "place-passeio-principal",
+      createdAt: originalActivity!.createdAt,
+      updatedAt,
+    });
+    expect(updated.version).toBe(itinerary.version + 1);
+    expect(updated.updatedAt).toEqual(updatedAt);
+    expect(itinerary.days[1]?.activities[0]?.status).toBe("planned");
+    expect(itinerary.days[1]?.activities[0]?.updatedAt).toEqual(
+      new Date("2026-07-30T03:00:00Z"),
+    );
+  });
+
+  it.each(["planned", "tentative"] as const)(
+    "conclui Activity em estado %s",
+    (status) => {
+      const itinerary = createWithStatus(status);
+      const activityId = itinerary.days[1]?.activities[0]?.id;
+      expect(activityId).toBeDefined();
+
+      const updated = completeActivity(itinerary, { activityId: activityId! });
+
+      expect(updated.days[1]?.activities[0]?.status).toBe("completed");
+      expect(updated.version).toBe(itinerary.version + 1);
+    },
+  );
+
+  it.each(["planned", "tentative"] as const)(
+    "marca Activity em estado %s como skipped",
+    (status) => {
+      const itinerary = createWithStatus(status);
+      const activityId = itinerary.days[1]?.activities[0]?.id;
+      expect(activityId).toBeDefined();
+
+      const updated = skipActivity(itinerary, { activityId: activityId! });
+
+      expect(updated.days[1]?.activities[0]?.status).toBe("skipped");
+      expect(updated.version).toBe(itinerary.version + 1);
+    },
+  );
+
+  it.each(["planned", "tentative", "needs-review"] as const)(
+    "cancela Activity em estado %s",
+    (status) => {
+      const itinerary = createWithStatus(status);
+      const activityId = itinerary.days[1]?.activities[0]?.id;
+      expect(activityId).toBeDefined();
+
+      const updated = cancelActivity(itinerary, { activityId: activityId! });
+
+      expect(updated.days[1]?.activities[0]?.status).toBe("cancelled");
+      expect(updated.version).toBe(itinerary.version + 1);
+    },
+  );
+
+  it("rejeita transição fora do lifecycle sem mutar a Activity", () => {
+    const itinerary = createWithStatus("completed");
+    const activity = itinerary.days[1]?.activities[0];
+    expect(activity).toBeDefined();
+
+    try {
+      cancelActivity(itinerary, { activityId: activity!.id });
+      throw new Error("A validação deveria falhar.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ItineraryValidationError);
+      expect((error as ItineraryValidationError).fieldErrors.status).toBeDefined();
+    }
+
+    expect(itinerary.days[1]?.activities[0]?.status).toBe("completed");
+    expect(itinerary.version).toBe(2);
+  });
+
+  it("rejeita identidade vazia ou Activity ausente do Itinerary", () => {
+    expect(() =>
+      markActivityTentative(createBaseItinerary(), { activityId: " " }),
+    ).toThrow(ItineraryValidationError);
+
+    try {
+      completeActivity(createBaseItinerary(), { activityId: "activity-inexistente" });
       throw new Error("A validação deveria falhar.");
     } catch (error) {
       expect(error).toBeInstanceOf(ItineraryValidationError);

@@ -300,7 +300,12 @@ export async function saveExternalPlaceAction(formData: FormData): Promise<never
     if (error instanceof PlacePromotionServiceError) {
       redirect(promotionReturnPath(tripId, formData, promotionErrorFeedback(error)));
     }
-    throw error;
+    console.error("Falha técnica ao definir preferência para candidato externo", {
+      tripId,
+      externalId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "erro-tecnico" }));
   }
 
   revalidatePath(placesPath);

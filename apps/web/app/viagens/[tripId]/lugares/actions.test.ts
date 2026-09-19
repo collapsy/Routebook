@@ -377,9 +377,7 @@ describe("setPublishedPlacePreferenceAction", () => {
           priority: null,
         }),
       );
-      expect(cacheMocks.revalidatePath).toHaveBeenCalledWith(
-        `/viagens/${tripId}/lugares-salvos`,
-      );
+      expect(cacheMocks.revalidatePath).toHaveBeenCalledWith(`/viagens/${tripId}/lugares-salvos`);
     },
   );
 

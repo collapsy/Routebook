@@ -425,7 +425,7 @@ function normalizedReplanningWindowSnapshot(
   const reasonByActivityId: Record<string, string> = {};
   for (const activityId of protectedActivityIds) {
     reasonByActivityId[activityId] = requiredText(
-      value.reasonByActivityId[activityId],
+      value.reasonByActivityId[activityId] ?? "",
       `generationContext.replanningWindow.reasonByActivityId.${activityId}`,
     );
   }

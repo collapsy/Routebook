@@ -1,6 +1,5 @@
 import type {
   GenerateItineraryProposalInput,
-  ItineraryProposalGenerationCandidate,
   ItineraryProposalGenerationPort,
 } from "./deterministic-itinerary-proposal-generator";
 import {
@@ -66,24 +65,6 @@ function requiredTripId(value: string): string {
     );
   }
   return normalized;
-}
-
-export function mergeItineraryProposalGenerationCandidates(
-  recommendationCandidates: readonly ItineraryProposalGenerationCandidate[],
-  additionalCandidates: readonly ItineraryProposalGenerationCandidate[] = [],
-): readonly ItineraryProposalGenerationCandidate[] {
-  const merged = [...recommendationCandidates];
-  const representedPlaceIds = new Set(
-    recommendationCandidates.flatMap((candidate) => (candidate.placeId ? [candidate.placeId] : [])),
-  );
-
-  for (const candidate of additionalCandidates) {
-    if (candidate.placeId && representedPlaceIds.has(candidate.placeId)) continue;
-    merged.push(candidate);
-    if (candidate.placeId) representedPlaceIds.add(candidate.placeId);
-  }
-
-  return Object.freeze(merged);
 }
 
 export async function generateAuthoritativeItineraryProposal(

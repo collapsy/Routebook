@@ -109,10 +109,7 @@ function contextPort(tripId = "trip-1"): AuthoritativeItineraryProposalGeneratio
   };
 }
 
-function command(
-  includeMaybe = false,
-  generationScope: "INITIAL" | "REPLAN" = "INITIAL",
-) {
+function command(includeMaybe = false, generationScope: "INITIAL" | "REPLAN" = "INITIAL") {
   return {
     request: {
       id: "proposal-1",

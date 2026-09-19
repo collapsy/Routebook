@@ -84,6 +84,7 @@ type DiscoverySearchParams = {
   preco?: string;
   ordem?: string;
   descoberta?: string | undefined;
+  promocao?: string;
   erroPromocao?: string;
 };
 
@@ -533,6 +534,7 @@ export default async function PlacesPage({
   const discoverExternal = rawFilters.descoberta !== "ocultar";
   const showAllExternal = rawFilters.descoberta === "todas";
   const discoveryMode = !discoverExternal ? "ocultar" : showAllExternal ? "todas" : undefined;
+  const preferenceSaved = rawFilters.promocao === "salva";
   const placeActionError = placeActionErrorMessage(rawFilters.erroPromocao);
   const accommodationCoordinate = trip.accommodation?.coordinate;
   const requestedMaximumDistanceMeters = parseMaximumDistance(rawFilters.distancia);
@@ -847,6 +849,12 @@ export default async function PlacesPage({
       <Link className="back-link" href={`/viagens/${tripId}`}>
         ← Voltar para a viagem
       </Link>
+
+      {preferenceSaved ? (
+        <p className="success-banner" role="status">
+          Preferência atualizada. O lugar entrou em Minha seleção.
+        </p>
+      ) : null}
 
       <header className="trip-overview-hero">
         <div>

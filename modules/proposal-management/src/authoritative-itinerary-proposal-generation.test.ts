@@ -21,11 +21,25 @@ const generatedAt = new Date("2026-08-22T12:00:01.000Z");
 const validUntil = new Date("2026-08-23T12:00:01.000Z");
 
 function repository(): ItineraryProposalRepository {
+  const proposals = new Map<string, ItineraryProposal>();
+  const key = (tripId: string, itineraryProposalId: string) =>
+    `${tripId}:${itineraryProposalId}`;
+
   return {
-    create: vi.fn(async (proposal: ItineraryProposal) => proposal),
-    save: vi.fn(async (proposal: ItineraryProposal) => proposal),
-    findById: vi.fn(async () => null),
-    listByTripId: vi.fn(async () => []),
+    create: vi.fn(async (proposal: ItineraryProposal) => {
+      proposals.set(key(proposal.tripId, proposal.id), proposal);
+      return proposal;
+    }),
+    save: vi.fn(async (proposal: ItineraryProposal) => {
+      proposals.set(key(proposal.tripId, proposal.id), proposal);
+      return proposal;
+    }),
+    findById: vi.fn(async (tripId, itineraryProposalId) => {
+      return proposals.get(key(tripId, itineraryProposalId)) ?? null;
+    }),
+    listByTripId: vi.fn(async (tripId) => {
+      return [...proposals.values()].filter((proposal) => proposal.tripId === tripId);
+    }),
   };
 }
 

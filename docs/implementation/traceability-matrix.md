@@ -1113,3 +1113,16 @@ Ao concluir um incremento:
 - Save de Recommendation foi alinhado ao mesmo estado canônico.
 - Risco: migration contém `UPDATE` e `SET NOT NULL`, portanto deve ser classificada como high risk pela política de release. Nenhuma execução em Production faz parte do incremento.
 - Evidência autoritativa no SHA `6655a401302020c374ec21046b68f8afa4e9bdc0`: Documentation Validation `35386173495`, Overture Place Discovery `35386173591`, Engineering Validation `35386173582` e Vercel concluíram com sucesso. A Engineering Validation aprovou migration policy, aplicação da 0034 em PostgreSQL, testes, smoke, build e Playwright. A política classifica a 0034 como `high` por `update-data` e `set-not-null`. Nenhuma ação em Production foi executada.
+
+## Evidências do RB-INC-202
+
+- Incremento: `docs/implementation/increments/rb-inc-202-trip-selection-ui.md`.
+- Context Pack: `docs/implementation/context-packs/rb-inc-202-trip-selection-ui.md`.
+- Issue: [#487](https://github.com/collapsy/Routebook/issues/487).
+- Branch: `codex/issue-487-trip-selection-ui`.
+- Base: `d2887427aa84834d8074c538f091fcb5898f86f6`.
+- Interface: catálogo, detalhe e rota técnica `/lugares-salvos` passam a projetar `TripPlacePreference` como Minha seleção.
+- Mutação: Server Action canônica de Set/Clear com WANT, MAYBE, NOT_INTERESTED e MUST_DO.
+- Compatibilidade: candidato externo materializado por Quero ir persiste WANT; rota técnica legada permanece.
+- Activity/Proposal: não alteradas.
+- Evidência autoritativa de regressão: pendente do CI do pull request.

@@ -883,7 +883,7 @@ Ao concluir um incremento:
 | Overture | PMTiles transitório em Preview/teste; GeoParquet + STAC como direção sustentável |
 | segunda cidade | Florianópolis zero seed/config |
 | observabilidade | source/raio/contagens/duração sem coordenadas precisas |
-| validação | Documentation/Engineering pendentes no SHA final |
+| validação | SHA `9ba25b31dd1c86aabf73bb49f7f4f921062f2391`: Documentation #2132, Engineering #2614 e Vercel verdes; consolidação documental posterior deve ser revalidada no HEAD final |
 
 
 ## Evidências previstas do RB-INC-176
@@ -1160,4 +1160,20 @@ Ao concluir um incremento:
 | pureza | transições em memória, sem banco, UI, Provider ou relógio implícito além do instante injetável existente |
 | concorrência | PR #480 toca Roteiro; RB-INC-204 evita essa superfície |
 | próximo passo | ReplanningWindow e delta permanecem para incremento posterior |
+| validação | Documentation/Engineering pendentes no SHA final |
+
+## Evidências previstas do RB-INC-205
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-205-replanning-window.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-205-replanning-window.md` |
+| issue | [#497](https://github.com/collapsy/Routebook/issues/497) |
+| PR | [#498](https://github.com/collapsy/Routebook/pull/498) |
+| branch | `codex/issue-497-replanning-window` |
+| base | `main@61169a75249744743df8b65081f5a4d4712f91cc` |
+| janela | data/hora local derivadas do timezone IANA da Trip; passado e trecho transcorrido do Dia atual protegidos |
+| Activities | future não-fixed elegível; fixed e estados terminais protegidos; unavailable/needs-review futuros podem permanecer elegíveis |
+| delta | add/move/update/remove validados contra Dias/Activities elegíveis sem aplicar a Proposal |
+| pureza | funções em memória, relógio explícito, sem banco, UI, Provider, migration ou status automático |
 | validação | Documentation/Engineering pendentes no SHA final |

@@ -126,6 +126,7 @@ export async function executeGenerateItineraryProposalAction(
     throw new Error("GenerateItineraryProposalAction received an invalid clock value.");
   }
 
+  const includeMaybe = input.includeMaybe === true;
   const proposalId = dependencies.createItineraryProposalId?.() ?? randomUUID();
   if (!uuidPattern.test(proposalId)) {
     throw new Error("GenerateItineraryProposalAction generated an invalid proposal id.");
@@ -141,7 +142,7 @@ export async function executeGenerateItineraryProposalAction(
       itineraryId: itinerary.id,
       baseTripContextVersion: trip.contextVersion,
       baseItineraryVersion: itinerary.version,
-      contextSnapshotId: `authoritative:${tripId}:${trip.contextVersion}:${itinerary.version}`,
+      contextSnapshotId: `authoritative:${tripId}:${trip.contextVersion}:${itinerary.version}:selection:${includeMaybe ? "want-maybe" : "want"}`,
       requestedAt: cloneInstant(now),
     },
     startedAt: cloneInstant(now),
@@ -149,7 +150,7 @@ export async function executeGenerateItineraryProposalAction(
     asOf: cloneInstant(now),
     generatedAt: cloneInstant(now),
     createProposedActivityId,
-    includeMaybe: input.includeMaybe === true,
+    includeMaybe,
     ...(accommodationCoordinate
       ? {
           anchorCoordinate: {

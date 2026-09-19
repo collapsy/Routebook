@@ -124,9 +124,10 @@ Quando um candidato externo ainda não possui Place canônico:
 1. a ação revalida o candidato no servidor;
 2. promove/materializa o Place;
 3. aplica a intenção escolhida via TripPlacePreference;
-4. permanece na experiência de Explorar.
+4. retorna à experiência de Explorar com feedback de sucesso;
+5. a confirmação suprime uma segunda descoberta externa (`descoberta=ocultar`) para que o estado já persistido não dependa novamente do provider.
 
-Nenhum dado externo enviado pelo browser é tratado como fonte autoritativa.
+Os filtros relevantes continuam preservados no retorno. Nenhum dado externo enviado pelo browser é tratado como fonte autoritativa.
 
 ## 9. Caminhos permitidos
 

@@ -236,7 +236,7 @@ describe("PostgresAuthoritativeItineraryProposalGenerationContextPort", () => {
         {
           tripDayId: firstDayId,
           date: "2026-08-22",
-          activities: [{ activityId: activeActivityId }, { activityId: removedActivityId }],
+          activities: [{ activityId: activeActivityId }],
           freePeriods: [{ freePeriodId: flexibleFreePeriodId, mode: "flexible" }],
         },
         {
@@ -297,7 +297,7 @@ describe("PostgresAuthoritativeItineraryProposalGenerationContextPort", () => {
     );
   });
 
-  it("considera Activity removed como não planejada para a seleção da Proposal", async () => {
+  it("considera Activity removed como inativa na seleção e na densidade da Proposal", async () => {
     const port = createPostgresAuthoritativeItineraryProposalGenerationContextPort(database);
     const context = await port.load({ tripId, asOf: now });
 

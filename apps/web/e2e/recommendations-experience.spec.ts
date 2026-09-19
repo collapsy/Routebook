@@ -169,7 +169,7 @@ test("mostra decisão contextual sem aplicar uma escolha", async ({ page }) => {
   await page.goto(`${tripUrl}/lugares-salvos`);
   await expect(
     page.getByRole("heading", {
-      name: "Você ainda não salvou nenhum lugar",
+      name: "Você ainda não avaliou nenhum lugar",
       exact: true,
     }),
   ).toBeVisible();
@@ -353,7 +353,7 @@ test("ignora Recommendation sem efeitos colaterais", async ({ page }) => {
   await page.goto(`${tripUrl}/lugares-salvos`);
   await expect(
     page.getByRole("heading", {
-      name: "Você ainda não salvou nenhum lugar",
+      name: "Você ainda não avaliou nenhum lugar",
       exact: true,
     }),
   ).toBeVisible();

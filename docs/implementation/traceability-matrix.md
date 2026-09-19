@@ -1161,3 +1161,18 @@ Ao concluir um incremento:
 | concorrência | PR #480 toca Roteiro; RB-INC-204 evita essa superfície |
 | próximo passo | ReplanningWindow e delta permanecem para incremento posterior |
 | validação | Documentation/Engineering pendentes no SHA final |
+
+## Evidências previstas do RB-INC-205
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-205-replanning-window.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-205-replanning-window.md` |
+| issue | [#497](https://github.com/collapsy/Routebook/issues/497) |
+| branch | `codex/issue-497-replanning-window` |
+| base | `main@61169a75249744743df8b65081f5a4d4712f91cc` |
+| janela | data/hora local derivadas do timezone IANA da Trip; passado e trecho transcorrido do Dia atual protegidos |
+| Activities | future não-fixed elegível; fixed e estados terminais protegidos; unavailable/needs-review futuros podem permanecer elegíveis |
+| delta | add/move/update/remove validados contra Dias/Activities elegíveis sem aplicar a Proposal |
+| pureza | funções em memória, relógio explícito, sem banco, UI, Provider, migration ou status automático |
+| validação | Documentation/Engineering pendentes no SHA final |

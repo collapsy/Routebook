@@ -1127,3 +1127,19 @@ Ao concluir um incremento:
 - Compatibilidade: rota física e adapter Saved Places permanecem disponíveis, mas deixam de ser a linguagem principal nas superfícies migradas.
 - Proposal, Planning Role e ReplanningWindow permanecem fora deste incremento.
 - Evidência autoritativa de regressão: pendente do CI do pull request.
+
+
+## Evidências previstas do RB-INC-203
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-203-trip-selection-proposal-candidates.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-203-trip-selection-proposal-candidates.md` |
+| issue | [#492](https://github.com/collapsy/Routebook/issues/492) |
+| branch | `codex/issue-492-trip-selection-proposal-candidates` |
+| base | `main@8818b948d0d0de478ae16965d4681586ac4f7c8f` |
+| candidate set | WANT por padrão; MAYBE somente com opt-in; NOT_INTERESTED/não avaliado excluídos |
+| prioridade | MUST_DO precede WANT comum sem alterar restrições do compositor |
+| origem | Recommendation e Discovery deixam de alimentar automaticamente a Proposal |
+| UX | opção explícita para incluir MAYBE na geração |
+| validação | Documentation/Engineering pendentes no SHA final |

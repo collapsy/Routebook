@@ -105,7 +105,7 @@ Estados removidos/cancelados não devem transformar um Place em “planejado” 
 
 ## 9. Caminhos
 
-Alterar somente os caminhos declarados no RB-INC-203.
+Alterar somente os caminhos declarados no RB-INC-203. O teste PostgreSQL do serviço autoritativo também integra o escopo porque precisa deixar de preparar Recommendation como fonte da geração e passar a preparar TripPlacePreference explícita.
 
 ## 10. Proibições
 

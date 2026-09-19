@@ -25,6 +25,7 @@ ai_context:
 `Draft`
 
 - issue: [#492](https://github.com/collapsy/Routebook/issues/492);
+- PR: [#493](https://github.com/collapsy/Routebook/pull/493);
 - branch: `codex/issue-492-trip-selection-proposal-candidates`;
 - base: `main@8818b948d0d0de478ae16965d4681586ac4f7c8f`.
 
@@ -75,6 +76,8 @@ A ação **Gerar proposta de roteiro** oferece uma opção explícita:
 O padrão é desativado.
 
 A opção afeta somente aquela geração e não modifica TripPlacePreference.
+
+Para auditoria sem novo schema, o `contextSnapshotId` diferencia gerações `selection:want` de `selection:want-maybe`.
 
 ## 6. Fronteira arquitetural
 

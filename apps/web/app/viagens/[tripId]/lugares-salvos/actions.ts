@@ -112,7 +112,8 @@ export async function setSelectionMustDoAction(formData: FormData): Promise<neve
       enabled,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Não foi possível atualizar Imperdível.";
+    const message =
+      error instanceof Error ? error.message : "Não foi possível atualizar Imperdível.";
     redirect(`/viagens/${tripId}/lugares-salvos?erro=${encodeURIComponent(message)}`);
   }
 

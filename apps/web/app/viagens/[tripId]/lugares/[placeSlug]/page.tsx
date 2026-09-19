@@ -56,15 +56,13 @@ export default async function PlaceDetailsPage({
 }: {
   params: Promise<{ tripId: string; placeSlug: string }>;
   searchParams: Promise<{
-    saved?: string;
-    removed?: string;
     adicionadoAoRoteiro?: string;
     dia?: string;
     erroRoteiro?: string;
   }>;
 }) {
   const { tripId, placeSlug } = await params;
-  const { saved, removed, adicionadoAoRoteiro, dia, erroRoteiro } = await searchParams;
+  const { adicionadoAoRoteiro, dia, erroRoteiro } = await searchParams;
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
 
   if (!trip) notFound();

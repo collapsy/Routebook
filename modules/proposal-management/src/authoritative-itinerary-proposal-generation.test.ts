@@ -22,8 +22,7 @@ const validUntil = new Date("2026-08-23T12:00:01.000Z");
 
 function repository(): ItineraryProposalRepository {
   const proposals = new Map<string, ItineraryProposal>();
-  const key = (tripId: string, itineraryProposalId: string) =>
-    `${tripId}:${itineraryProposalId}`;
+  const key = (tripId: string, itineraryProposalId: string) => `${tripId}:${itineraryProposalId}`;
 
   return {
     create: vi.fn(async (proposal: ItineraryProposal) => {

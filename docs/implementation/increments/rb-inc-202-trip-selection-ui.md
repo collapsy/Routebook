@@ -134,6 +134,8 @@ apps/web/app/viagens/[tripId]/page.tsx
 apps/web/components/trip-context-nav.tsx
 apps/web/lib/trip-place-preference.ts
 apps/web/lib/trip-place-preference.test.ts
+apps/web/package.json
+pnpm-lock.yaml
 docs/implementation/increments/rb-inc-202-trip-selection-ui.md
 docs/implementation/context-packs/rb-inc-202-trip-selection-ui.md
 docs/implementation/traceability-matrix.md

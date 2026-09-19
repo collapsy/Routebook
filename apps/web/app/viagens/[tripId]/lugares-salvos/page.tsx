@@ -4,24 +4,26 @@ import { notFound } from "next/navigation";
 
 import {
   DrizzlePlaceRepository,
-  DrizzleSavedPlaceRepository,
+  DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
 import type { PlaceCategory } from "@routebook/place-catalog";
-import { listSavedPlaces } from "@routebook/saved-places";
+import type { TripPlacePreference } from "@routebook/trip-collection";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
 import { TripMap } from "../../../../components/trip-map";
+import { TripPlacePreferenceControls } from "../../../../components/trip-place-preference-controls";
 import type { TripMapPoint } from "../../../../lib/trip-map";
+import { setPublishedPlacePreferenceAction } from "../lugares/actions";
 import { presentAccommodationDistance } from "../lugares/distance";
 import { addSavedPlaceToItineraryAction, removeSavedPlaceAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Lugares salvos — RouteBook",
-  description: "Consulte os lugares selecionados para a sua viagem.",
+  title: "Minha seleção — RouteBook",
+  description: "Consulte e ajuste as suas escolhas de lugares para a viagem.",
 };
 
 const categoryLabels: Record<PlaceCategory, string> = {
@@ -44,26 +46,36 @@ function formatDate(value: string): string {
   }).format(new Date(`${value}T00:00:00Z`));
 }
 
+function preferenceLabel(preference: TripPlacePreference): string {
+  if (preference.intent === "WANT") {
+    return preference.priority === "MUST_DO" ? "Quero ir · Imperdível" : "Quero ir";
+  }
+  return preference.intent === "MAYBE" ? "Talvez" : "Não tenho interesse";
+}
+
 export default async function SavedPlacesPage({
   params,
   searchParams,
 }: {
   params: Promise<{ tripId: string }>;
   searchParams: Promise<{
-    salvo?: string;
+    selecionado?: string;
     removed?: string;
     adicionadoAoRoteiro?: string;
     erro?: string;
   }>;
 }) {
   const { tripId } = await params;
-  const { salvo, removed, adicionadoAoRoteiro, erro } = await searchParams;
+  const { selecionado, removed, adicionadoAoRoteiro, erro } = await searchParams;
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const savedPlaces = await listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId);
+  const preferences = await new DrizzleTripPlacePreferenceRepository().listByTripId(tripId);
+  const preferenceByPlaceId = new Map(
+    preferences.map((preference) => [preference.placeId, preference] as const),
+  );
   const places = await new DrizzlePlaceRepository().listByIds(
-    savedPlaces.map((selection) => selection.placeId),
+    preferences.map((preference) => preference.placeId),
   );
   const tripDays = deriveTripDays(trip.period);
   const mapPoints: TripMapPoint[] = places.map((place) => ({
@@ -101,14 +113,14 @@ export default async function SavedPlacesPage({
         </div>
       </div>
 
-      {salvo === "1" ? (
+      {selecionado === "1" ? (
         <p className="success-banner" role="status">
-          Lugar salvo. Agora você pode adicioná-lo ao roteiro.
+          Lugar adicionado à sua seleção como Quero ir.
         </p>
       ) : null}
       {removed === "1" ? (
         <p className="success-banner" role="status">
-          Lugar removido dos salvos.
+          Lugar removido da sua seleção. O que já estiver no roteiro continua lá.
         </p>
       ) : null}
       {adicionadoAoRoteiro === "1" ? (
@@ -125,26 +137,26 @@ export default async function SavedPlacesPage({
       <header className="trip-overview-hero">
         <div>
           <p className="product-eyebrow">Sua seleção</p>
-          <h1>Lugares salvos</h1>
+          <h1>Minha seleção</h1>
           <p>
-            Salve opções para comparar durante a viagem para {trip.destination.name} e adicione ao
-            roteiro quando decidir o dia.
+            Organize os lugares de {trip.destination.name} entre Quero ir, Talvez e Não tenho
+            interesse. Essas escolhas não alteram o roteiro automaticamente.
           </p>
           <p>
             As distâncias exibidas são estimativas em linha reta a partir da hospedagem e não
             representam rota, trânsito ou tempo de deslocamento.
           </p>
         </div>
-        <span className="trip-context-version">{places.length} salvos</span>
+        <span className="trip-context-version">{places.length} escolhidos</span>
       </header>
 
-      <TripMap points={mapPoints} title="Hospedagem e lugares salvos" />
+      <TripMap points={mapPoints} title="Hospedagem e lugares da sua seleção" />
 
       {places.length === 0 ? (
-        <section className="traveler-context-summary" aria-labelledby="saved-empty-title">
+        <section className="traveler-context-summary" aria-labelledby="selection-empty-title">
           <p className="product-eyebrow">Seleção vazia</p>
-          <h2 id="saved-empty-title">Você ainda não salvou nenhum lugar</h2>
-          <p>Explore lugares e salve as opções que quiser comparar depois.</p>
+          <h2 id="selection-empty-title">Você ainda não fez nenhuma escolha</h2>
+          <p>Explore lugares e marque Quero ir, Talvez ou Não tenho interesse.</p>
           <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
             Explorar lugares
           </Link>
@@ -159,7 +171,8 @@ export default async function SavedPlacesPage({
                 longitude: place.longitude,
               },
             );
-            const titleId = `saved-place-${place.id}`;
+            const titleId = `selected-place-${place.id}`;
+            const preference = preferenceByPlaceId.get(place.id)!;
 
             return (
               <li className="place-card" key={place.id}>
@@ -168,7 +181,9 @@ export default async function SavedPlacesPage({
                   placeName={place.name}
                   primaryImage={place.primaryImage}
                 />
-                <p className="product-eyebrow">{categoryLabels[place.category]}</p>
+                <p className="product-eyebrow">
+                  {categoryLabels[place.category]} · {preferenceLabel(preference)}
+                </p>
                 <h2 id={titleId}>{place.name}</h2>
                 <p>{place.summary}</p>
                 <p>
@@ -178,6 +193,14 @@ export default async function SavedPlacesPage({
                     : "informe a localização da hospedagem para calcular esta distância."}
                 </p>
 
+                <TripPlacePreferenceControls
+                  action={setPublishedPlacePreferenceAction}
+                  placeSlug={place.slug}
+                  preference={preference}
+                  tripId={tripId}
+                />
+
+                {preference.intent === "WANT" ? (
                 <form
                   action={addSavedPlaceToItineraryAction}
                   aria-labelledby={titleId}
@@ -223,6 +246,7 @@ export default async function SavedPlacesPage({
                     Adicionar ao roteiro
                   </button>
                 </form>
+                ) : null}
 
                 <div className="section-heading-row saved-place-card-actions">
                   <Link
@@ -235,7 +259,7 @@ export default async function SavedPlacesPage({
                     <input name="tripId" type="hidden" value={tripId} />
                     <input name="placeSlug" type="hidden" value={place.slug} />
                     <button className="product-secondary-action" type="submit">
-                      Remover
+                      Limpar escolha
                     </button>
                   </form>
                 </div>

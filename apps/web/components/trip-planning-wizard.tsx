@@ -33,7 +33,7 @@ export function TripPlanningWizard({ tripId, currentView }: TripPlanningWizardPr
           <strong>Lugares</strong>
         </li>
         {futureSteps.map((step, index) => (
-          <li aria-disabled="true" className={styles.futureStep} key={step}>
+          <li className={styles.futureStep} key={step}>
             <span>{index + 2}</span>
             <span>{step}</span>
           </li>

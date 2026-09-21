@@ -24,6 +24,7 @@ import { findTripById } from "@routebook/trip-management";
 import { ExternalPlaceImagePreview } from "../../../../components/external-place-image-preview";
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
 import { PlaceRankingMeta } from "../../../../components/place-ranking-meta";
+import { TripPlacePreferenceControls } from "../../../../components/trip-place-preference-controls";
 import { TripMap } from "../../../../components/trip-map";
 import {
   buildGoogleMapsDirectionsUrl,
@@ -180,7 +181,6 @@ function CanonicalDiscoveryCard({
   distanceReferenceLabel,
   accommodationCoordinate,
   preference,
-  returnTo,
   rankingPosition,
   rankingOrderLabel,
   quality,
@@ -195,7 +195,6 @@ function CanonicalDiscoveryCard({
   distanceReferenceLabel: string;
   accommodationCoordinate?: Readonly<{ latitude: number; longitude: number }>;
   preference: TripPlacePreference | undefined;
-  returnTo: string;
   rankingPosition: number;
   rankingOrderLabel: string;
   quality?: PlaceQualityScore;
@@ -284,48 +283,15 @@ function CanonicalDiscoveryCard({
         <Link className="product-primary-action" href={`/viagens/${tripId}/lugares/${place.slug}`}>
           Ver detalhes
         </Link>
-        <form action={setPublishedPlacePreferenceAction}>
-          <input name="tripId" type="hidden" value={tripId} />
-          <input name="placeSlug" type="hidden" value={place.slug} />
-          <input name="returnTo" type="hidden" value={returnTo} />
-          <button
-            aria-pressed={preference?.intent === "WANT"}
-            className="product-secondary-action"
-            name="intent"
-            type="submit"
-            value="WANT"
-          >
-            Quero ir
-          </button>
-          <button
-            aria-pressed={preference?.intent === "MAYBE"}
-            className="product-secondary-action"
-            name="intent"
-            type="submit"
-            value="MAYBE"
-          >
-            Talvez
-          </button>
-          <button
-            aria-pressed={preference?.intent === "NOT_INTERESTED"}
-            className="product-secondary-action"
-            name="intent"
-            type="submit"
-            value="NOT_INTERESTED"
-          >
-            Não tenho interesse
-          </button>
-        </form>
-        {preference ? (
-          <form action={clearPublishedPlacePreferenceAction}>
-            <input name="tripId" type="hidden" value={tripId} />
-            <input name="placeSlug" type="hidden" value={place.slug} />
-            <input name="returnTo" type="hidden" value={returnTo} />
-            <button className="product-inline-link" type="submit">
-              Limpar
-            </button>
-          </form>
-        ) : null}
+        <TripPlacePreferenceControls
+          className={styles.promotionForm}
+          clearAction={clearPublishedPlacePreferenceAction}
+          currentIntent={preference?.intent}
+          currentPriority={preference?.priority}
+          fields={{ tripId, placeSlug: place.slug }}
+          label={`Preferência para ${place.name}`}
+          setAction={setPublishedPlacePreferenceAction}
+        />
       </div>
 
       <details className={styles.cardDetails}>
@@ -461,31 +427,21 @@ function ExternalDiscoveryCard({
           Ver mapa e fotos
         </a>
         {candidate.category ? (
-          <form action={saveExternalPlaceAction} className={styles.promotionForm}>
-            <input name="tripId" type="hidden" value={tripId} />
-            <input name="externalId" type="hidden" value={candidate.externalId} />
-            {search ? <input name="busca" type="hidden" value={search} /> : null}
-            {category ? <input name="categoria" type="hidden" value={category} /> : null}
-            {maximumDistanceMeters ? (
-              <input name="distancia" type="hidden" value={String(maximumDistanceMeters / 1_000)} />
-            ) : null}
-            {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
-            {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
-            <button className="product-secondary-action" name="intent" type="submit" value="WANT">
-              Quero ir
-            </button>
-            <button className="product-secondary-action" name="intent" type="submit" value="MAYBE">
-              Talvez
-            </button>
-            <button
-              className="product-secondary-action"
-              name="intent"
-              type="submit"
-              value="NOT_INTERESTED"
-            >
-              Não tenho interesse
-            </button>
-          </form>
+          <TripPlacePreferenceControls
+            className={styles.promotionForm}
+            fields={{
+              tripId,
+              externalId: candidate.externalId,
+              busca: search,
+              categoria: category,
+              distancia: maximumDistanceMeters ? String(maximumDistanceMeters / 1_000) : undefined,
+              preco: priceRange,
+              descoberta: discoveryMode,
+            }}
+            label={`Preferência para ${candidate.name}`}
+            refreshOnSuccess={false}
+            setAction={saveExternalPlaceAction}
+          />
         ) : null}
       </div>
 
@@ -1143,7 +1099,6 @@ export default async function PlacesPage({
                   : {})}
                 distanceReferenceLabel={distanceReferenceLabel}
                 preference={preferencesByPlaceId.get(item.place.id)}
-                returnTo={discoveryHref(tripId, canonicalParams)}
                 item={item}
                 timeZone={trip.destination.timeZone}
                 tripId={tripId}

@@ -91,7 +91,9 @@ describe("TripPlacePreferenceControls", () => {
         monitorFrame = callback;
         return 1;
       });
-    const cancelAnimationFrameSpy = vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => undefined);
+    const cancelAnimationFrameSpy = vi
+      .spyOn(window, "cancelAnimationFrame")
+      .mockImplementation(() => undefined);
     const action = vi.fn(async () => ({
       status: "success" as const,
       message: "Preferência atualizada.",

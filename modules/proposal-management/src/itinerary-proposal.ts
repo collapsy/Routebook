@@ -420,14 +420,8 @@ function normalizedCandidateSnapshot(
           [`${field}.provenance`]: "Informe proveniência estruturada.",
         });
       }
-      const sourceId = optionalText(
-        item.provenance.sourceId,
-        `${field}.provenance.sourceId`,
-      );
-      const reasonCode = optionalText(
-        item.provenance.reasonCode,
-        `${field}.provenance.reasonCode`,
-      );
+      const sourceId = optionalText(item.provenance.sourceId, `${field}.provenance.sourceId`);
+      const reasonCode = optionalText(item.provenance.reasonCode, `${field}.provenance.reasonCode`);
       if (item.origin === "USER_SELECTED" && !sourceId) {
         throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
           [`${field}.provenance.sourceId`]: "USER_SELECTED exige a origem da preferência.",
@@ -435,8 +429,7 @@ function normalizedCandidateSnapshot(
       }
       if (item.origin === "ROUTEBOOK_RECOMMENDED" && !reasonCode) {
         throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
-          [`${field}.provenance.reasonCode`]:
-            "ROUTEBOOK_RECOMMENDED exige uma razão estrutural.",
+          [`${field}.provenance.reasonCode`]: "ROUTEBOOK_RECOMMENDED exige uma razão estrutural.",
         });
       }
       return Object.freeze({

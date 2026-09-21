@@ -263,6 +263,7 @@ docs/domain/business-rules-and-invariants.md
 docs/ux/information-architecture.md
 docs/ux/user-flows.md
 docs/architecture/modules-and-bounded-contexts.md
+docs/architecture/adrs/rb-adr-028-trip-place-preference-and-temporal-replanning.md
 docs/architecture/adrs/rb-adr-029-complementary-proposal-candidates.md
 docs/implementation/increments/rb-inc-207-planning-journey-redesign.md
 docs/implementation/context-packs/rb-inc-207-planning-journey-redesign.md

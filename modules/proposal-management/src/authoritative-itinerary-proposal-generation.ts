@@ -14,6 +14,7 @@ import {
 } from "./itinerary-proposal-generation-service";
 import type {
   ItineraryProposal,
+  ItineraryProposalCandidateProvenance,
   ItineraryProposalGenerationContext,
   ItineraryProposalGenerationScope,
   ItineraryProposalReplanningWindowSnapshot,
@@ -53,6 +54,7 @@ export type GenerateAuthoritativeItineraryProposalCommand = Readonly<{
 export type AuthoritativeItineraryProposalGenerationErrorCode =
   | "invalid-trip-id"
   | "context-trip-mismatch"
+  | "candidate-provenance-missing"
   | "replanning-window-required"
   | "replanning-window-day-mismatch";
 
@@ -81,6 +83,7 @@ function generationContextFrom(
   context: AuthoritativeItineraryProposalGenerationContext,
   includeMaybe: boolean,
   generationScope: ItineraryProposalGenerationScope,
+  candidates: GenerateItineraryProposalInput["candidates"],
 ): ItineraryProposalGenerationContext {
   if (generationScope === "REPLAN" && !context.replanningWindow) {
     throw new AuthoritativeItineraryProposalGenerationError(
@@ -88,6 +91,35 @@ function generationContextFrom(
       "replanning-window-required",
     );
   }
+
+  const candidateProvenance = Object.freeze(
+    candidates.map((candidate): ItineraryProposalCandidateProvenance => {
+      const placeId = candidate.placeId?.trim();
+      const provenance = candidate.provenance;
+      if (!placeId || !provenance) {
+        throw new AuthoritativeItineraryProposalGenerationError(
+          "A geração autoritativa exige proveniência para cada candidato.",
+          "candidate-provenance-missing",
+        );
+      }
+
+      if (provenance.origin === "USER_SELECTED") {
+        return Object.freeze({
+          candidateId: candidate.candidateId,
+          placeId,
+          origin: "USER_SELECTED" as const,
+          sourcePreferenceId: provenance.sourcePreferenceId,
+        });
+      }
+
+      return Object.freeze({
+        candidateId: candidate.candidateId,
+        placeId,
+        origin: "ROUTEBOOK_RECOMMENDED" as const,
+        reasonCode: provenance.reasonCode,
+      });
+    }),
+  );
 
   return Object.freeze({
     schemaVersion: 1 as const,
@@ -102,6 +134,7 @@ function generationContextFrom(
         }),
       ),
     ),
+    candidateProvenance,
     ...(generationScope === "REPLAN" && context.replanningWindow
       ? { replanningWindow: context.replanningWindow }
       : {}),
@@ -152,7 +185,12 @@ export async function generateAuthoritativeItineraryProposal(
     includeMaybe,
     asOf: command.asOf,
   });
-  const generationContext = generationContextFrom(context, includeMaybe, generationScope);
+  const generationContext = generationContextFrom(
+    context,
+    includeMaybe,
+    generationScope,
+    assembled.candidates,
+  );
   const days =
     generationScope === "REPLAN"
       ? eligibleReplanningDays(assembled.days, generationContext.replanningWindow!)

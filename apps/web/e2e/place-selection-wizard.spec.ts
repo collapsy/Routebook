@@ -24,10 +24,9 @@ test("prepara a viagem escolhendo lugares sem criar Activity", async ({ page }) 
     }),
   ).toBeVisible();
   await expect(page.locator('[data-planning-wizard-step="places"]')).toBeVisible();
-  await expect(page.getByRole("link", { name: "Minha seleção" })).toHaveAttribute(
-    "href",
-    `/viagens/${trip.id}/lugares-salvos?preparar=1`,
-  );
+  await expect(
+    page.getByLabel("Lugares da preparação").getByRole("link", { name: "Minha seleção" }),
+  ).toHaveAttribute("href", `/viagens/${trip.id}/lugares-salvos?preparar=1`);
 
   const card = page
     .getByRole("list", { name: "Opções de lugares" })

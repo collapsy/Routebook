@@ -128,6 +128,7 @@ export {
   expireItineraryProposalByTime,
   failItineraryProposalGeneration,
   finalizeAppliedItineraryProposalAcceptance,
+  itineraryProposalCandidateOrigins,
   itineraryProposalStatuses,
   ItineraryProposalTransitionError,
   ItineraryProposalValidationError,
@@ -139,6 +140,9 @@ export {
 export type {
   CompleteItineraryProposalGenerationInput,
   ItineraryProposal,
+  ItineraryProposalCandidateOrigin,
+  ItineraryProposalCandidateProvenance,
+  ItineraryProposalCandidateSource,
   ItineraryProposalGenerationContext,
   ItineraryProposalGenerationScope,
   ItineraryProposalId,

@@ -1202,7 +1202,7 @@ Ao concluir um incremento:
 | incremento | `docs/implementation/increments/rb-inc-207-planning-journey-redesign.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-207-planning-journey-redesign.md` |
 | decisão | RB-ADR-029 — candidatos complementares e proveniência na Itinerary Proposal |
-| issue | [#503](https://github.com/collapsy/Routebook/issues/503) |
+| issue | [#503](https://github.com/collapsy/Routebook/issues/503) |\n| PR | [#504](https://github.com/collapsy/Routebook/pull/504) |
 | branch | `codex/issue-503-planning-journey-redesign` |
 | base | `main@6b4833a5179b42fca9ddf882ae62da8ebb3946f7` |
 | jornada | Explorar → Escolher → Planejar → Proposal → Roteiro → Replanejamento |

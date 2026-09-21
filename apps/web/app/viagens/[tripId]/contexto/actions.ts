@@ -32,9 +32,7 @@ function parseSection(value: string): TravelerContextSection {
 function existingOptionalContext(profile: TravelerProfile): Partial<SaveTravelerProfileInput> {
   return {
     ...(profile.pace ? { pace: profile.pace } : {}),
-    ...(profile.transportPreference
-      ? { transportPreference: profile.transportPreference }
-      : {}),
+    ...(profile.transportPreference ? { transportPreference: profile.transportPreference } : {}),
     ...(profile.budget ? { budgetTotalCents: profile.budget.totalCents } : {}),
   };
 }
@@ -65,9 +63,7 @@ function buildTravelerProfileInput(
       travelerCount: current.travelerCount,
       interests: formData.getAll("interests").map(String),
       ...(pace ? { pace } : {}),
-      ...(current.transportPreference
-        ? { transportPreference: current.transportPreference }
-        : {}),
+      ...(current.transportPreference ? { transportPreference: current.transportPreference } : {}),
       ...(current.budget ? { budgetTotalCents: current.budget.totalCents } : {}),
     };
   }

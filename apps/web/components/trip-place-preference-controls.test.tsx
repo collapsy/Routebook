@@ -79,7 +79,6 @@ describe("TripPlacePreferenceControls", () => {
 
   it("restaura um salto programático ao topo durante a mutação inline", async () => {
     let scrollY = 640;
-    let monitorFrame: FrameRequestCallback | undefined;
     const scrollYSpy = vi.spyOn(window, "scrollY", "get").mockImplementation(() => scrollY);
     const scrollXSpy = vi.spyOn(window, "scrollX", "get").mockReturnValue(0);
     const scrollToSpy = vi.spyOn(window, "scrollTo").mockImplementation((_x, y) => {
@@ -87,10 +86,7 @@ describe("TripPlacePreferenceControls", () => {
     });
     const requestAnimationFrameSpy = vi
       .spyOn(window, "requestAnimationFrame")
-      .mockImplementation((callback) => {
-        monitorFrame = callback;
-        return 1;
-      });
+      .mockImplementation(() => 1);
     const cancelAnimationFrameSpy = vi
       .spyOn(window, "cancelAnimationFrame")
       .mockImplementation(() => undefined);
@@ -112,7 +108,7 @@ describe("TripPlacePreferenceControls", () => {
     expect(await screen.findByRole("status")).toHaveTextContent("Preferência atualizada.");
 
     scrollY = 0;
-    monitorFrame?.(0);
+    window.dispatchEvent(new Event("scroll"));
 
     expect(scrollToSpy).toHaveBeenCalledWith(0, 640);
     window.dispatchEvent(new Event("wheel"));

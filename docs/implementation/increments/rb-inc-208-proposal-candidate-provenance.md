@@ -159,19 +159,31 @@ pnpm build
 
 O CI permanece evidência autoritativa para PostgreSQL, migrations, smoke e E2E.
 
+### Evidência real
+
+No HEAD funcional `8e78b39688a6c64b06d6dc727431d29e1eefc36c`:
+
+- Documentation Validation #2172 (run `35636053786`): `success`;
+- Engineering Validation #2654 (run `35636053788`): `success`;
+- format, validação documental, lint e typecheck: `success`;
+- políticas de migration/deploy e migrations PostgreSQL: `success`;
+- testes de componente/domínio e normalização Overture: `success`;
+- verificação offline de imagens, smoke, build e testes responsivos: `success`;
+- Vercel Preview: `READY`.
+
 ## 11. Critérios de aceite
 
-- [ ] origem USER_SELECTED e ROUTEBOOK_RECOMMENDED tipada;
-- [ ] TripPlacePreference elegível produz USER_SELECTED;
-- [ ] proveniência USER_SELECTED referencia a preferência;
-- [ ] ROUTEBOOK_RECOMMENDED exige razão estrutural;
-- [ ] NOT_INTERESTED não vira complemento automático;
-- [ ] MAYBE continua opt-in;
-- [ ] snapshot antigo sem candidates continua legível;
-- [ ] snapshot novo preserva origem/proveniência no round-trip JSONB;
-- [ ] nenhuma geração real de complemento foi conectada;
-- [ ] nenhuma migration ou estado de wizard foi criado;
-- [ ] documentação e CI ficam verdes.
+- [x] origem USER_SELECTED e ROUTEBOOK_RECOMMENDED tipada;
+- [x] TripPlacePreference elegível produz USER_SELECTED;
+- [x] proveniência USER_SELECTED referencia a preferência;
+- [x] ROUTEBOOK_RECOMMENDED exige razão estrutural;
+- [x] NOT_INTERESTED não vira complemento automático;
+- [x] MAYBE continua opt-in;
+- [x] snapshot antigo sem candidates continua legível;
+- [x] snapshot novo preserva origem/proveniência no round-trip JSONB;
+- [x] nenhuma geração real de complemento foi conectada;
+- [x] nenhuma migration ou estado de wizard foi criado;
+- [x] documentação e CI ficam verdes.
 
 ## 12. Riscos
 

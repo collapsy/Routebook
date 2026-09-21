@@ -29,7 +29,7 @@ Introduzir somente os contratos executáveis mínimos de origem/proveniência do
 - issue: [#505](https://github.com/collapsy/Routebook/issues/505);
 - branch: `codex/issue-505-proposal-candidate-provenance`;
 - base: `main@9d9f8b5c3e8315c0f2e40d94e9d8111e523928fc`;
-- PR: a abrir;
+- PR: [#506](https://github.com/collapsy/Routebook/pull/506);
 - merge na main exige gate humano.
 
 ## 3. Leitura obrigatória

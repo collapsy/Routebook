@@ -29,6 +29,37 @@ export const itineraryProposalGenerationScopes = ["INITIAL", "REPLAN"] as const;
 
 export type ItineraryProposalGenerationScope = (typeof itineraryProposalGenerationScopes)[number];
 
+export const itineraryProposalCandidateOrigins = [
+  "USER_SELECTED",
+  "ROUTEBOOK_RECOMMENDED",
+] as const;
+
+export type ItineraryProposalCandidateOrigin = (typeof itineraryProposalCandidateOrigins)[number];
+
+export type ItineraryProposalCandidateSource =
+  | Readonly<{
+      origin: "USER_SELECTED";
+      sourcePreferenceId: string;
+    }>
+  | Readonly<{
+      origin: "ROUTEBOOK_RECOMMENDED";
+      reasonCode: string;
+    }>;
+
+export type ItineraryProposalCandidateProvenance =
+  | Readonly<{
+      candidateId: string;
+      placeId: string;
+      origin: "USER_SELECTED";
+      sourcePreferenceId: string;
+    }>
+  | Readonly<{
+      candidateId: string;
+      placeId: string;
+      origin: "ROUTEBOOK_RECOMMENDED";
+      reasonCode: string;
+    }>;
+
 export type ItineraryProposalSelectionSnapshotItem = Readonly<{
   preferenceId: string;
   placeId: string;
@@ -51,6 +82,7 @@ export type ItineraryProposalGenerationContext = Readonly<{
   schemaVersion: 1;
   includeMaybe: boolean;
   selection: readonly ItineraryProposalSelectionSnapshotItem[];
+  candidateProvenance?: readonly ItineraryProposalCandidateProvenance[];
   replanningWindow?: ItineraryProposalReplanningWindowSnapshot;
 }>;
 
@@ -365,6 +397,89 @@ function normalizedSelectionSnapshot(
   );
 }
 
+function normalizedCandidateProvenance(
+  values: readonly ItineraryProposalCandidateProvenance[] | undefined,
+  selection: readonly ItineraryProposalSelectionSnapshotItem[],
+  includeMaybe: boolean,
+): readonly ItineraryProposalCandidateProvenance[] | undefined {
+  if (values === undefined) return undefined;
+  if (!Array.isArray(values)) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.candidateProvenance": "Informe uma coleção de proveniências.",
+    });
+  }
+
+  const candidateIds = new Set<string>();
+  const placeIds = new Set<string>();
+
+  return Object.freeze(
+    values.map((item, index) => {
+      const field = `generationContext.candidateProvenance.${index}`;
+      if (!item || typeof item !== "object") {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [field]: "Informe uma proveniência de candidato válida.",
+        });
+      }
+
+      const candidateId = requiredText(item.candidateId, `${field}.candidateId`);
+      const placeId = requiredText(item.placeId, `${field}.placeId`);
+      if (candidateIds.has(candidateId) || placeIds.has(placeId)) {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [field]: "Cada candidato e Place devem possuir proveniência única.",
+        });
+      }
+      candidateIds.add(candidateId);
+      placeIds.add(placeId);
+
+      if (item.origin === "USER_SELECTED") {
+        const sourcePreferenceId = requiredText(
+          item.sourcePreferenceId,
+          `${field}.sourcePreferenceId`,
+        );
+        const preference = selection.find(({ preferenceId }) => preferenceId === sourcePreferenceId);
+        if (
+          !preference ||
+          preference.placeId !== placeId ||
+          preference.intent === "NOT_INTERESTED" ||
+          (preference.intent === "MAYBE" && !includeMaybe)
+        ) {
+          throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+            [field]: "USER_SELECTED deve referenciar uma preferência elegível do mesmo Place.",
+          });
+        }
+
+        return Object.freeze({
+          candidateId,
+          placeId,
+          origin: "USER_SELECTED" as const,
+          sourcePreferenceId,
+        });
+      }
+
+      if (item.origin === "ROUTEBOOK_RECOMMENDED") {
+        const reasonCode = requiredText(item.reasonCode, `${field}.reasonCode`);
+        if (selection.some((preference) => preference.placeId === placeId)) {
+          throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+            [field]:
+              "ROUTEBOOK_RECOMMENDED não pode representar um Place com TripPlacePreference.",
+          });
+        }
+
+        return Object.freeze({
+          candidateId,
+          placeId,
+          origin: "ROUTEBOOK_RECOMMENDED" as const,
+          reasonCode,
+        });
+      }
+
+      throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+        `${field}.origin`: "Use USER_SELECTED ou ROUTEBOOK_RECOMMENDED.",
+      });
+    }),
+  );
+}
+
 function normalizedReplanningWindowSnapshot(
   value: ItineraryProposalReplanningWindowSnapshot,
 ): ItineraryProposalReplanningWindowSnapshot {
@@ -467,6 +582,11 @@ function normalizedGenerationContext(
   }
 
   const selection = normalizedSelectionSnapshot(value.selection);
+  const candidateProvenance = normalizedCandidateProvenance(
+    value.candidateProvenance,
+    selection,
+    value.includeMaybe,
+  );
   const replanningWindow = value.replanningWindow
     ? normalizedReplanningWindowSnapshot(value.replanningWindow)
     : undefined;
@@ -485,6 +605,7 @@ function normalizedGenerationContext(
     schemaVersion: 1 as const,
     includeMaybe: value.includeMaybe,
     selection,
+    ...(candidateProvenance ? { candidateProvenance } : {}),
     ...(replanningWindow ? { replanningWindow } : {}),
   });
 }

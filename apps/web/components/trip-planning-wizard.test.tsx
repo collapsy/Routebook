@@ -23,7 +23,7 @@ describe("TripPlanningWizard", () => {
     expect(screen.getByRole("link", { name: "Explorar" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: "Minha seleção" })).toHaveAttribute(
       "href",
-      "/viagens/trip-1/lugares-salvos",
+      "/viagens/trip-1/lugares-salvos?preparar=1",
     );
     expect(screen.queryByRole("link", { name: "Contexto" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Revisão" })).not.toBeInTheDocument();

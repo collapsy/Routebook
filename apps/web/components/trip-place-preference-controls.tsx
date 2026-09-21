@@ -36,6 +36,53 @@ const intentLabels: Readonly<Record<TripPlaceIntent, string>> = Object.freeze({
 
 const subscribeToHydration = () => () => undefined;
 
+const scrollIntentKeys = new Set(["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "]);
+
+function guardInlineMutationScroll(scrollX: number, scrollY: number): () => void {
+  if (scrollY <= 2) return () => undefined;
+
+  let active = true;
+  let settleTimeoutId: number | undefined;
+  const safetyTimeoutId = window.setTimeout(() => cleanup(), 60_000);
+
+  function cleanup() {
+    if (!active) return;
+    active = false;
+    window.clearTimeout(safetyTimeoutId);
+    if (settleTimeoutId !== undefined) window.clearTimeout(settleTimeoutId);
+    window.removeEventListener("scroll", restoreFrameworkJump);
+    window.removeEventListener("wheel", cancelForUserIntent);
+    window.removeEventListener("touchstart", cancelForUserIntent);
+    window.removeEventListener("keydown", cancelForKeyboardIntent);
+  }
+
+  function restoreFrameworkJump() {
+    if (!active || window.scrollY > 2) return;
+    cleanup();
+    window.scrollTo(scrollX, scrollY);
+  }
+
+  function cancelForUserIntent() {
+    cleanup();
+  }
+
+  function cancelForKeyboardIntent(event: KeyboardEvent) {
+    if (scrollIntentKeys.has(event.key)) cleanup();
+  }
+
+  // Next.js 16 can apply default scroll behavior to a same-URL Server Action RSC patch
+  // (vercel/next.js#98323). Guard only the unexpected jump to the document top.
+  window.addEventListener("scroll", restoreFrameworkJump, { passive: true });
+  window.addEventListener("wheel", cancelForUserIntent, { passive: true });
+  window.addEventListener("touchstart", cancelForUserIntent, { passive: true });
+  window.addEventListener("keydown", cancelForKeyboardIntent);
+
+  return () => {
+    if (!active) return;
+    settleTimeoutId = window.setTimeout(cleanup, 1_000);
+  };
+}
+
 function createFormData(
   fields: Props["fields"],
   values: Readonly<Record<string, string>>,
@@ -81,7 +128,10 @@ export function TripPlacePreferenceControls({
 
     const previousIntent = intent;
     const previousPriority = priority;
-    const scrollY = window.scrollY;
+    const shouldRefresh = refreshOnSuccess || (operation === "clear" && refreshOnClearSuccess);
+    const settleScrollGuard = shouldRefresh
+      ? () => undefined
+      : guardInlineMutationScroll(window.scrollX, window.scrollY);
     if (operation === "clear") {
       setIntent(undefined);
       setPriority(null);
@@ -116,16 +166,12 @@ export function TripPlacePreferenceControls({
         };
         window.dispatchEvent(new CustomEvent(TRIP_PLACE_PREFERENCE_CHANGED_EVENT, { detail }));
 
-        const shouldRefresh = refreshOnSuccess || (operation === "clear" && refreshOnClearSuccess);
         if (shouldRefresh) {
           router.refresh();
-          return;
         }
-
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => window.scrollTo(window.scrollX, scrollY));
-        });
+        settleScrollGuard();
       } catch {
+        settleScrollGuard();
         setIntent(previousIntent);
         setPriority(previousPriority);
         setFeedback({

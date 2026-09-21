@@ -381,10 +381,7 @@ export default async function TripSelectionPage({
               ? "Sua seleção está salva. O próximo passo usa o contexto da viagem sem adicionar nenhuma escolha ao roteiro."
               : "Você ainda não marcou lugares como Quero ir ou Talvez. Uma seleção vazia também é válida e não bloqueia o contexto da viagem."}
           </p>
-          <Link
-            className="product-primary-action"
-            href={`/viagens/${tripId}/contexto?preparar=1`}
-          >
+          <Link className="product-primary-action" href={`/viagens/${tripId}/contexto?preparar=1`}>
             Continuar para Contexto
           </Link>
         </section>

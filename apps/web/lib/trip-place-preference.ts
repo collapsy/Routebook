@@ -83,3 +83,32 @@ export function parseTripPlaceIntent(value: string): TripPlaceIntent | null {
     ? (normalized as TripPlaceIntent)
     : null;
 }
+
+export type TripPlacePreferenceActionState =
+  | Readonly<{
+      status: "success";
+      message: string;
+      preference: Readonly<{
+        intent: TripPlaceIntent;
+        priority: TripPlacePriority | null;
+      }> | null;
+    }>
+  | Readonly<{
+      status: "error";
+      message: string;
+    }>;
+
+export function tripPlacePreferenceActionSuccess(
+  preference: Pick<TripPlacePreference, "intent" | "priority"> | null,
+  message = "Preferência atualizada.",
+): TripPlacePreferenceActionState {
+  return {
+    status: "success",
+    message,
+    preference: preference ? { intent: preference.intent, priority: preference.priority } : null,
+  };
+}
+
+export function tripPlacePreferenceActionError(message: string): TripPlacePreferenceActionState {
+  return { status: "error", message };
+}

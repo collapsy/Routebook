@@ -114,9 +114,7 @@ export function TripPlacePreferenceControls({
           previousPriority,
           nextPriority,
         };
-        window.dispatchEvent(
-          new CustomEvent(TRIP_PLACE_PREFERENCE_CHANGED_EVENT, { detail }),
-        );
+        window.dispatchEvent(new CustomEvent(TRIP_PLACE_PREFERENCE_CHANGED_EVENT, { detail }));
 
         if (refreshOnSuccess || (operation === "clear" && refreshOnClearSuccess)) {
           router.refresh();

@@ -109,8 +109,8 @@ export function TripPlacePreferenceControls({
         setPriority(nextPriority);
 
         const detail: TripPlacePreferenceChangedDetail = {
-          previousIntent,
-          nextIntent,
+          ...(previousIntent ? { previousIntent } : {}),
+          ...(nextIntent ? { nextIntent } : {}),
           previousPriority,
           nextPriority,
         };

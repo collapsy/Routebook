@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { TRIP_PLACE_PREFERENCE_CHANGED_EVENT } from "./trip-place-preference-events";
@@ -30,16 +30,18 @@ describe("TripPlaceSelectionProgress", () => {
       />,
     );
 
-    window.dispatchEvent(
-      new CustomEvent(TRIP_PLACE_PREFERENCE_CHANGED_EVENT, {
-        detail: {
-          previousIntent: "WANT",
-          nextIntent: "MAYBE",
-          previousPriority: "MUST_DO",
-          nextPriority: null,
-        },
-      }),
-    );
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent(TRIP_PLACE_PREFERENCE_CHANGED_EVENT, {
+          detail: {
+            previousIntent: "WANT",
+            nextIntent: "MAYBE",
+            previousPriority: "MUST_DO",
+            nextPriority: null,
+          },
+        }),
+      );
+    });
 
     const summary = screen.getByLabelText("Resumo das preferências");
     expect(summary).toHaveTextContent("Quero ir0");

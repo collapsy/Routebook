@@ -87,10 +87,7 @@ describe("Itinerary Proposal", () => {
   });
 
   it("publica as duas origens canônicas de candidato da Proposal", () => {
-    expect(itineraryProposalCandidateOrigins).toEqual([
-      "USER_SELECTED",
-      "ROUTEBOOK_RECOMMENDED",
-    ]);
+    expect(itineraryProposalCandidateOrigins).toEqual(["USER_SELECTED", "ROUTEBOOK_RECOMMENDED"]);
   });
 
   it("cria uma solicitação vinculada às versões e ao snapshot base", () => {

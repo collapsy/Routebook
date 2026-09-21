@@ -99,7 +99,16 @@ function guardInlineMutationScroll(scrollX: number, scrollY: number): () => void
 
   return () => {
     if (!active) return;
-    settleTimeoutId = window.setTimeout(cleanup, 10_000);
+
+    // The RSC patch can reset scroll as the Server Action settles. Restore the
+    // captured position explicitly here, then keep the guard alive briefly for
+    // a late framework scroll. Real user scroll intent cancels the guard above.
+    window.scrollTo(scrollX, scrollY);
+    monitorFrameId = window.requestAnimationFrame(() => {
+      if (!active) return;
+      window.scrollTo(scrollX, scrollY);
+    });
+    settleTimeoutId = window.setTimeout(cleanup, 1_000);
   };
 }
 

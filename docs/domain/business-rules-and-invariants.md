@@ -9,10 +9,10 @@ document_type: domain
 owner: Domain
 
 status: Published
-version: "0.3.0"
+version: "0.4.0"
 
 created: "2026-07-18"
-last_updated: "2026-09-18"
+last_updated: "2026-09-21"
 
 authors:
 
@@ -2923,7 +2923,53 @@ Antes de aprovar:
 
 ## Parte XXVII — Declaração final
 
-### 176. Declaração normativa
+### 176. Invariantes da jornada guiada
+
+#### RB-BR-SEL-001 — Preferência não altera Itinerary
+
+Criar, alterar ou limpar `TripPlacePreference` não cria, move, remove ou atualiza Activity.
+
+#### RB-BR-SEL-002 — Origem da Proposal é explícita
+
+Todo candidato apresentado para composição deve ser distinguível como `USER_SELECTED` ou `ROUTEBOOK_RECOMMENDED`.
+
+`USER_SELECTED` exige preferência elegível. `ROUTEBOOK_RECOMMENDED` não pode ser apresentado como escolha do usuário.
+
+#### RB-BR-SEL-003 — NOT_INTERESTED exclui participação automática
+
+Place com `NOT_INTERESTED` não pode entrar automaticamente em Proposal, inclusive como complemento do RouteBook.
+
+#### RB-BR-SEL-004 — MAYBE exige opt-in
+
+`MAYBE` participa somente quando a geração autoriza explicitamente sua inclusão. O opt-in não altera a preferência persistida.
+
+#### RB-BR-SEL-005 — MUST_DO não supera invariantes
+
+`MUST_DO` só qualifica WANT e aumenta precedência. Não autoriza violar capacidade, restrição, horário conhecido, Planning Conflict ou ReplanningWindow.
+
+#### RB-BR-PRP-004 — Complemento exige benefício e Justificativa
+
+`ROUTEBOOK_RECOMMENDED` somente pode ser considerado quando houver benefício funcional justificável. Capacidade matemática ou tempo livre, isoladamente, não são justificativa suficiente.
+
+#### RB-BR-PRP-005 — Complemento não cria preferência
+
+Aceitar candidato `ROUTEBOOK_RECOMMENDED` pode aplicar a Activity aceita, mas não cria ou altera `TripPlacePreference`.
+
+#### RB-BR-PRP-006 — Período livre é resultado válido
+
+Densidade é limite/contexto e não meta. Proposal vazia, dia com poucos itens e Free Period são resultados válidos.
+
+#### RB-BR-PRP-007 — Explicação usa somente evidência conhecida
+
+Motivos de inclusão ou exclusão não podem converter ausência de dados em fechamento, indisponibilidade, conflito ou distância confirmados.
+
+#### RB-BR-RPL-001 — Nova seleção não reescreve passado
+
+Durante a Viagem, preferência nova só pode influenciar uma Proposal de replanejamento na parte futura elegível de `ReplanningWindow`.
+
+---
+
+### 177. Declaração normativa
 
 As Regras de Negócio e Invariantes do RouteBook estabelecem as condições obrigatórias que governam o comportamento do domínio.
 

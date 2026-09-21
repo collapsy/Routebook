@@ -57,9 +57,11 @@ test("valida São Paulo sem seed e preserva Discovery, Minha seleção, Roteiro,
     .first();
   await expect(promotable).toBeVisible();
   await promotable.evaluate((element) => element.scrollIntoView({ block: "center" }));
+  const wantButton = promotable.getByRole("button", { name: "Quero ir" });
+  await wantButton.scrollIntoViewIfNeeded();
   const discoveryUrl = page.url();
   const discoveryScrollY = await page.evaluate(() => window.scrollY);
-  await promotable.getByRole("button", { name: "Quero ir" }).click();
+  await wantButton.click();
   await expect(
     page.getByText("Preferência atualizada. O lugar entrou em Minha seleção.", { exact: true }),
   ).toBeVisible({ timeout: 45_000 });

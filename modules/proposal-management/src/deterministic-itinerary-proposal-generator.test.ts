@@ -157,9 +157,25 @@ describe("DeterministicItineraryProposalGenerator", () => {
           candidates: [
             {
               candidateId: "recommended-invalid",
+              placeId: "place-recommended-invalid",
               title: "Sugestão sem razão",
               origin: "ROUTEBOOK_RECOMMENDED",
               provenance: {},
+            },
+          ],
+        }),
+      ),
+    ).rejects.toMatchObject({ code: "invalid-candidate" });
+
+    await expect(
+      generator.generate(
+        input({
+          candidates: [
+            {
+              candidateId: "recommended-without-place",
+              title: "Sugestão sem Place",
+              origin: "ROUTEBOOK_RECOMMENDED",
+              provenance: { reasonCode: "NEAR_SELECTED_PLACES" },
             },
           ],
         }),

@@ -88,14 +88,6 @@ async function resolvePublishedPlaceForMutation(tripId: string, placeSlug: strin
   return matches[0]!;
 }
 
-function revalidatePublishedPlaceSurfaces(tripId: string, placeSlug: string): void {
-  revalidatePath(`/viagens/${tripId}`);
-  // The catalog updates its preference controls locally. Revalidating this
-  // current route replaces the long card grid and resets the user's scroll.
-  revalidatePath(`/viagens/${tripId}/lugares/${placeSlug}`);
-  revalidatePath(`/viagens/${tripId}/lugares-salvos`);
-}
-
 export async function setPublishedPlacePreferenceAction(
   formData: FormData,
 ): Promise<TripPlacePreferenceActionState> {
@@ -113,7 +105,6 @@ export async function setPublishedPlacePreferenceAction(
     placeId: place.id,
     intent,
   });
-  revalidatePublishedPlaceSurfaces(tripId, placeSlug);
   return tripPlacePreferenceActionSuccess(preference);
 }
 
@@ -125,7 +116,6 @@ export async function clearPublishedPlacePreferenceAction(
   const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
 
   await clearTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), tripId, place.id);
-  revalidatePublishedPlaceSurfaces(tripId, placeSlug);
   return tripPlacePreferenceActionSuccess(
     null,
     "Preferência removida. O que já estiver no roteiro continua lá.",

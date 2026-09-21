@@ -1243,6 +1243,7 @@ Ao concluir um incremento:
 | incremento | `docs/implementation/increments/rb-inc-209-place-selection-wizard.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-209-place-selection-wizard.md` |
 | issue | [#509](https://github.com/collapsy/Routebook/issues/509) |
+| PR | [#510](https://github.com/collapsy/Routebook/pull/510) |
 | branch | `codex/issue-509-place-selection-wizard` |
 | base | `main@a961028491c06586af040d37f817f2d9c3c39ac5` |
 | auditoria | Explorar, Minha seleção, detalhe, TripPlacePreference e PR #502 auditados antes da implementação |

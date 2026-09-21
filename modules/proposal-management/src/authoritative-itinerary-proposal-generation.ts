@@ -53,6 +53,7 @@ export type GenerateAuthoritativeItineraryProposalCommand = Readonly<{
 export type AuthoritativeItineraryProposalGenerationErrorCode =
   | "invalid-trip-id"
   | "context-trip-mismatch"
+  | "candidate-provenance-missing"
   | "replanning-window-required"
   | "replanning-window-day-mismatch";
 
@@ -104,16 +105,21 @@ function generationContextFrom(
       ),
     ),
     candidates: Object.freeze(
-      candidates
-        .filter((candidate) => candidate.origin !== undefined && candidate.provenance !== undefined)
-        .map((candidate) =>
-          Object.freeze({
-            candidateId: candidate.candidateId,
-            ...(candidate.placeId ? { placeId: candidate.placeId } : {}),
-            origin: candidate.origin!,
-            provenance: candidate.provenance!,
-          }),
-        ),
+      candidates.map((candidate) => {
+        const placeId = candidate.placeId?.trim();
+        if (!placeId || !candidate.origin || !candidate.provenance) {
+          throw new AuthoritativeItineraryProposalGenerationError(
+            "A geração autoritativa exige PlaceId, origem e proveniência para cada candidato.",
+            "candidate-provenance-missing",
+          );
+        }
+        return Object.freeze({
+          candidateId: candidate.candidateId,
+          placeId,
+          origin: candidate.origin,
+          provenance: candidate.provenance,
+        });
+      }),
     ),
     ...(generationScope === "REPLAN" && context.replanningWindow
       ? { replanningWindow: context.replanningWindow }

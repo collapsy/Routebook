@@ -186,9 +186,19 @@ pnpm build
 
 A execução local integral não é possível no ambiente do agente porque `github.com` não resolve para clone. O GitHub Actions permanece evidência canônica para os gates integrados, PostgreSQL, build, smoke, E2E e responsividade.
 
-### Evidência
+### Evidência real
 
-Pendente da PR e do CI deste incremento. Não registrar como verde antes do resultado real.
+No HEAD validado `e9a4b3d2066b0692edc8c128da35f36ce82a302e`:
+
+- Documentation Validation #2237 (run `35662223423`): `success`;
+- Engineering Validation #2719 (run `35662223426`): `success`;
+- format, validação documental, lint e typecheck: `success`;
+- políticas de migration/deploy e migrations PostgreSQL: `success`;
+- testes de componente/domínio e normalização Overture: `success`;
+- verificação offline de imagens, smoke e build: `success`;
+- testes responsivos/E2E, incluindo seleção inline sem perda de scroll e fronteira do wizard: `success`.
+
+O Vercel Preview do HEAD funcional `338712363c9ccfb2798be59744c8be7176cd7e2f` ficou `READY`. Os commits posteriores até o HEAD validado alteram somente o teste E2E `place-selection-wizard.spec.ts` e sua formatação; novas tentativas de deploy desses commits foram bloqueadas pelo limite de builds do plano, sem alteração no bundle funcional da aplicação.
 
 ## 11. Critérios de aceite
 
@@ -205,8 +215,8 @@ Pendente da PR e do CI deste incremento. Não registrar como verde antes do resu
 - [x] Minha seleção não cria Activity;
 - [x] catálogo, detalhe, ranking, filtros, mapa, imagens e distância preservados;
 - [x] nenhuma migration ou estado paralelo criado;
-- [ ] gates de CI verdes;
-- [ ] Vercel Preview READY.
+- [x] gates de CI verdes;
+- [x] Vercel Preview READY.
 
 ## 12. Riscos e pendências
 

@@ -220,8 +220,77 @@ describe("Itinerary Proposal", () => {
           candidates: [
             {
               candidateId: "recommended-1",
+              placeId: "place-recommended",
               origin: "ROUTEBOOK_RECOMMENDED",
               provenance: {},
+            },
+          ],
+        },
+        requestedAt,
+      }),
+    ).toThrowError(ItineraryProposalValidationError);
+  });
+
+  it("impede ROUTEBOOK_RECOMMENDED para Place já avaliado, inclusive NOT_INTERESTED", () => {
+    expect(() =>
+      requestItineraryProposal({
+        id: "proposal-recommended-not-interested",
+        tripId: "trip-1",
+        itineraryId: "itinerary-1",
+        baseTripContextVersion: 3,
+        baseItineraryVersion: 13,
+        contextSnapshotId: "snapshot-not-interested",
+        generationContext: {
+          schemaVersion: 1,
+          includeMaybe: false,
+          selection: [
+            {
+              preferenceId: "preference-not-interested",
+              placeId: "place-blocked",
+              intent: "NOT_INTERESTED",
+              priority: null,
+            },
+          ],
+          candidates: [
+            {
+              candidateId: "recommended-blocked",
+              placeId: "place-blocked",
+              origin: "ROUTEBOOK_RECOMMENDED",
+              provenance: { reasonCode: "NEAR_SELECTED_PLACES" },
+            },
+          ],
+        },
+        requestedAt,
+      }),
+    ).toThrowError(ItineraryProposalValidationError);
+  });
+
+  it("exige que USER_SELECTED aponte para preferência elegível do mesmo Place", () => {
+    expect(() =>
+      requestItineraryProposal({
+        id: "proposal-selected-mismatch",
+        tripId: "trip-1",
+        itineraryId: "itinerary-1",
+        baseTripContextVersion: 3,
+        baseItineraryVersion: 13,
+        contextSnapshotId: "snapshot-selected-mismatch",
+        generationContext: {
+          schemaVersion: 1,
+          includeMaybe: false,
+          selection: [
+            {
+              preferenceId: "preference-maybe",
+              placeId: "place-maybe",
+              intent: "MAYBE",
+              priority: null,
+            },
+          ],
+          candidates: [
+            {
+              candidateId: "selected-maybe",
+              placeId: "place-maybe",
+              origin: "USER_SELECTED",
+              provenance: { sourceId: "preference-maybe" },
             },
           ],
         },

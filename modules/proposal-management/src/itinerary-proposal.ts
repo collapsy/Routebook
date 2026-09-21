@@ -29,6 +29,22 @@ export const itineraryProposalGenerationScopes = ["INITIAL", "REPLAN"] as const;
 
 export type ItineraryProposalGenerationScope = (typeof itineraryProposalGenerationScopes)[number];
 
+export const proposalCandidateOrigins = ["USER_SELECTED", "ROUTEBOOK_RECOMMENDED"] as const;
+
+export type ProposalCandidateOrigin = (typeof proposalCandidateOrigins)[number];
+
+export type ProposalCandidateProvenance = Readonly<{
+  sourceId?: string;
+  reasonCode?: string;
+}>;
+
+export type ItineraryProposalCandidateSnapshotItem = Readonly<{
+  candidateId: string;
+  placeId?: string;
+  origin: ProposalCandidateOrigin;
+  provenance: ProposalCandidateProvenance;
+}>;
+
 export type ItineraryProposalSelectionSnapshotItem = Readonly<{
   preferenceId: string;
   placeId: string;
@@ -51,6 +67,8 @@ export type ItineraryProposalGenerationContext = Readonly<{
   schemaVersion: 1;
   includeMaybe: boolean;
   selection: readonly ItineraryProposalSelectionSnapshotItem[];
+  /** Ausência preserva compatibilidade com snapshots anteriores ao RB-INC-208. */
+  candidates?: readonly ItineraryProposalCandidateSnapshotItem[];
   replanningWindow?: ItineraryProposalReplanningWindowSnapshot;
 }>;
 
@@ -365,6 +383,69 @@ function normalizedSelectionSnapshot(
   );
 }
 
+function normalizedCandidateSnapshot(
+  value: readonly ItineraryProposalCandidateSnapshotItem[] | undefined,
+): readonly ItineraryProposalCandidateSnapshotItem[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value)) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.candidates": "Informe uma coleção válida.",
+    });
+  }
+
+  const candidateIds = new Set<string>();
+  return Object.freeze(
+    value.map((item, index) => {
+      const field = `generationContext.candidates.${index}`;
+      if (!item || typeof item !== "object") {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [field]: "Informe um candidato válido.",
+        });
+      }
+      const candidateId = requiredText(item.candidateId, `${field}.candidateId`);
+      if (candidateIds.has(candidateId)) {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [field]: "Cada candidato deve possuir identidade única.",
+        });
+      }
+      candidateIds.add(candidateId);
+      const placeId = optionalText(item.placeId, `${field}.placeId`);
+      if (!proposalCandidateOrigins.includes(item.origin)) {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [`${field}.origin`]: "Use USER_SELECTED ou ROUTEBOOK_RECOMMENDED.",
+        });
+      }
+      if (!item.provenance || typeof item.provenance !== "object") {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [`${field}.provenance`]: "Informe proveniência estruturada.",
+        });
+      }
+      const sourceId = optionalText(item.provenance.sourceId, `${field}.provenance.sourceId`);
+      const reasonCode = optionalText(item.provenance.reasonCode, `${field}.provenance.reasonCode`);
+      if (item.origin === "USER_SELECTED" && !sourceId) {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [`${field}.provenance.sourceId`]: "USER_SELECTED exige a origem da preferência.",
+        });
+      }
+      if (item.origin === "ROUTEBOOK_RECOMMENDED" && !reasonCode) {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [`${field}.provenance.reasonCode`]:
+            "ROUTEBOOK_RECOMMENDED exige uma razão estrutural.",
+        });
+      }
+      return Object.freeze({
+        candidateId,
+        ...(placeId ? { placeId } : {}),
+        origin: item.origin,
+        provenance: Object.freeze({
+          ...(sourceId ? { sourceId } : {}),
+          ...(reasonCode ? { reasonCode } : {}),
+        }),
+      });
+    }),
+  );
+}
+
 function normalizedReplanningWindowSnapshot(
   value: ItineraryProposalReplanningWindowSnapshot,
 ): ItineraryProposalReplanningWindowSnapshot {
@@ -467,6 +548,7 @@ function normalizedGenerationContext(
   }
 
   const selection = normalizedSelectionSnapshot(value.selection);
+  const candidates = normalizedCandidateSnapshot(value.candidates);
   const replanningWindow = value.replanningWindow
     ? normalizedReplanningWindowSnapshot(value.replanningWindow)
     : undefined;
@@ -485,6 +567,7 @@ function normalizedGenerationContext(
     schemaVersion: 1 as const,
     includeMaybe: value.includeMaybe,
     selection,
+    ...(candidates ? { candidates } : {}),
     ...(replanningWindow ? { replanningWindow } : {}),
   });
 }

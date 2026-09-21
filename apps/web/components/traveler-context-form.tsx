@@ -43,11 +43,7 @@ function formatBudget(profile: TravelerProfile | null): string {
   });
 }
 
-function sectionHref(
-  tripId: string,
-  section: TravelerContextSection,
-  preparing: boolean,
-): string {
+function sectionHref(tripId: string, section: TravelerContextSection, preparing: boolean): string {
   const query = new URLSearchParams();
   if (preparing) query.set("preparar", "1");
   query.set("grupo", section);
@@ -76,7 +72,9 @@ export function TravelerContextForm({
         <div>
           <p className="product-eyebrow">Contexto progressivo</p>
           <h2 id="traveler-context-form-title">Informe em pequenos grupos</h2>
-          <p>Salve um grupo por vez. Voltar ou navegar entre grupos não apaga o que já foi salvo.</p>
+          <p>
+            Salve um grupo por vez. Voltar ou navegar entre grupos não apaga o que já foi salvo.
+          </p>
         </div>
       </div>
 
@@ -201,7 +199,8 @@ export function TravelerContextForm({
                 />
               </div>
               <p className="field-hint">
-                Campo opcional. O valor representa uma estimativa em reais, não um limite confirmado.
+                Campo opcional. O valor representa uma estimativa em reais, não um limite
+                confirmado.
               </p>
               <FieldError message={state.fieldErrors.budget} />
             </div>

@@ -828,7 +828,6 @@ Ao concluir um incremento:
 | segurança | secrets somente server-side; nenhum secret em UI/log/relatório |
 | Provider | Google Places autorizado e provisionado somente em Preview em 01/09/2026; comparação live confirmou a integração e motivou correção de cobertura; Production continua gate humano separado |
 | validação | Documentation, Engineering/Playwright e Vercel Preview pendentes no HEAD final |
-\n
 
 ## Evidências previstas do RB-INC-173
 

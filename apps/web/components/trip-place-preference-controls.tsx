@@ -69,9 +69,7 @@ function guardInlineMutationScroll(scrollX: number, scrollY: number): () => void
   function monitorFrameworkScroll() {
     if (!active) return;
     if (window.scrollY <= 2) {
-      cleanup();
       window.scrollTo(scrollX, scrollY);
-      return;
     }
     monitorFrameId = window.requestAnimationFrame(monitorFrameworkScroll);
   }

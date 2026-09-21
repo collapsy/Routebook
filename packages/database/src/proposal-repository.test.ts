@@ -177,6 +177,7 @@ describe("DrizzleItineraryProposalRepository", () => {
           },
           {
             candidateId: "recommended-round-trip",
+            placeId: randomUUID(),
             origin: "ROUTEBOOK_RECOMMENDED",
             provenance: { reasonCode: "NEAR_SELECTED_PLACES" },
           },

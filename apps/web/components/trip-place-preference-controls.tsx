@@ -7,11 +7,6 @@ import type { TripPlaceIntent, TripPlacePriority } from "@routebook/trip-collect
 
 import type { TripPlacePreferenceActionState } from "@/lib/trip-place-preference";
 import {
-  tripPlacePreferenceChangedEvent,
-  type TripPlacePreferenceChangedDetail,
-} from "./trip-place-selection-summary";
-
-import {
   TRIP_PLACE_PREFERENCE_CHANGED_EVENT,
   type TripPlacePreferenceChangedDetail,
 } from "./trip-place-preference-events";

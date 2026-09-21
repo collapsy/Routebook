@@ -450,8 +450,7 @@ function normalizedCandidateSnapshot(
         }
         if (selection.some((item) => item.placeId === placeId)) {
           throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
-            [field]:
-              "ROUTEBOOK_RECOMMENDED não pode representar um Place com TripPlacePreference.",
+            [field]: "ROUTEBOOK_RECOMMENDED não pode representar um Place com TripPlacePreference.",
           });
         }
       }
@@ -570,11 +569,7 @@ function normalizedGenerationContext(
   }
 
   const selection = normalizedSelectionSnapshot(value.selection);
-  const candidates = normalizedCandidateSnapshot(
-    value.candidates,
-    selection,
-    value.includeMaybe,
-  );
+  const candidates = normalizedCandidateSnapshot(value.candidates, selection, value.includeMaybe);
   const replanningWindow = value.replanningWindow
     ? normalizedReplanningWindowSnapshot(value.replanningWindow)
     : undefined;

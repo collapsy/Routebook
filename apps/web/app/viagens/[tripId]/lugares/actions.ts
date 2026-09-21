@@ -318,7 +318,6 @@ export async function saveExternalPlaceAction(
     );
   }
 
-  let promotedSlug: string;
   let preference: TripPlacePreference;
   try {
     const rawIntent = String(formData.get("intent") ?? "").trim();
@@ -329,7 +328,6 @@ export async function saveExternalPlaceAction(
       );
     }
     const result = await promoteExternalPlaceCandidate({ candidate });
-    promotedSlug = result.slug;
     preference = await setTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), {
       tripId,
       placeId: result.placeId,
@@ -351,9 +349,6 @@ export async function saveExternalPlaceAction(
     );
   }
 
-  revalidatePath(`/viagens/${tripId}`);
-  revalidatePath(`/viagens/${tripId}/lugares/${promotedSlug}`);
-  revalidatePath(`/viagens/${tripId}/lugares-salvos`);
   return tripPlacePreferenceActionSuccess(
     preference,
     promotionFeedbackMessage({ promocao: "salva" }),

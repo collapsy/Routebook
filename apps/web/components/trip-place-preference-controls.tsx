@@ -50,6 +50,7 @@ function guardInlineMutationScroll(scrollX: number, scrollY: number): () => void
   if (scrollY <= 2) return () => undefined;
 
   let active = true;
+  let monitorFrameId: number | undefined;
   let settleTimeoutId: number | undefined;
   const safetyTimeoutId = window.setTimeout(() => cleanup(), 60_000);
 
@@ -58,16 +59,21 @@ function guardInlineMutationScroll(scrollX: number, scrollY: number): () => void
     active = false;
     window.clearTimeout(safetyTimeoutId);
     if (settleTimeoutId !== undefined) window.clearTimeout(settleTimeoutId);
-    window.removeEventListener("scroll", restoreFrameworkJump);
+    if (monitorFrameId !== undefined) window.cancelAnimationFrame(monitorFrameId);
     window.removeEventListener("wheel", cancelForUserIntent);
     window.removeEventListener("touchstart", cancelForUserIntent);
+    window.removeEventListener("pointerdown", cancelForUserIntent);
     window.removeEventListener("keydown", cancelForKeyboardIntent);
   }
 
-  function restoreFrameworkJump() {
-    if (!active || window.scrollY > 2) return;
-    cleanup();
-    window.scrollTo(scrollX, scrollY);
+  function monitorFrameworkScroll() {
+    if (!active) return;
+    if (window.scrollY <= 2) {
+      cleanup();
+      window.scrollTo(scrollX, scrollY);
+      return;
+    }
+    monitorFrameId = window.requestAnimationFrame(monitorFrameworkScroll);
   }
 
   function cancelForUserIntent() {
@@ -79,15 +85,16 @@ function guardInlineMutationScroll(scrollX: number, scrollY: number): () => void
   }
 
   // Next.js 16 can apply default scroll behavior to a same-URL Server Action RSC patch
-  // (vercel/next.js#98323). Guard only the unexpected jump to the document top.
-  window.addEventListener("scroll", restoreFrameworkJump, { passive: true });
+  // (vercel/next.js#98323). Monitor only the unexpected jump to the document top.
   window.addEventListener("wheel", cancelForUserIntent, { passive: true });
   window.addEventListener("touchstart", cancelForUserIntent, { passive: true });
+  window.addEventListener("pointerdown", cancelForUserIntent, { passive: true });
   window.addEventListener("keydown", cancelForKeyboardIntent);
+  monitorFrameId = window.requestAnimationFrame(monitorFrameworkScroll);
 
   return () => {
     if (!active) return;
-    settleTimeoutId = window.setTimeout(cleanup, 1_000);
+    settleTimeoutId = window.setTimeout(cleanup, 10_000);
   };
 }
 

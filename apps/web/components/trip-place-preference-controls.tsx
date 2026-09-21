@@ -60,17 +60,23 @@ function guardInlineMutationScroll(scrollX: number, scrollY: number): () => void
     window.clearTimeout(safetyTimeoutId);
     if (settleTimeoutId !== undefined) window.clearTimeout(settleTimeoutId);
     if (monitorFrameId !== undefined) window.cancelAnimationFrame(monitorFrameId);
+    window.removeEventListener("scroll", restoreFrameworkScroll);
     window.removeEventListener("wheel", cancelForUserIntent);
     window.removeEventListener("touchstart", cancelForUserIntent);
     window.removeEventListener("pointerdown", cancelForUserIntent);
     window.removeEventListener("keydown", cancelForKeyboardIntent);
   }
 
-  function monitorFrameworkScroll() {
+  function restoreFrameworkScroll() {
     if (!active) return;
     if (window.scrollY <= 2) {
       window.scrollTo(scrollX, scrollY);
     }
+  }
+
+  function monitorFrameworkScroll() {
+    if (!active) return;
+    restoreFrameworkScroll();
     monitorFrameId = window.requestAnimationFrame(monitorFrameworkScroll);
   }
 
@@ -83,7 +89,8 @@ function guardInlineMutationScroll(scrollX: number, scrollY: number): () => void
   }
 
   // Next.js 16 can apply default scroll behavior to a same-URL Server Action RSC patch
-  // (vercel/next.js#98323). Monitor only the unexpected jump to the document top.
+  // (vercel/next.js#98323). Restore the unexpected jump while preserving real user scroll intent.
+  window.addEventListener("scroll", restoreFrameworkScroll, { passive: true });
   window.addEventListener("wheel", cancelForUserIntent, { passive: true });
   window.addEventListener("touchstart", cancelForUserIntent, { passive: true });
   window.addEventListener("pointerdown", cancelForUserIntent, { passive: true });

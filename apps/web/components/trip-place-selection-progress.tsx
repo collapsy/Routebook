@@ -75,7 +75,9 @@ export function TripPlaceSelectionProgress({
         <div>
           <p className="product-eyebrow">Progresso da seleção</p>
           <h2 id="trip-place-selection-progress-title">
-            {consideredCount > 0 ? "Sua seleção está tomando forma" : "Comece pelo que desperta interesse"}
+            {consideredCount > 0
+              ? "Sua seleção está tomando forma"
+              : "Comece pelo que desperta interesse"}
           </h2>
         </div>
         {reviewHref ? (

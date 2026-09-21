@@ -19,7 +19,7 @@ export function TripPlanningWizard({ tripId, currentView }: TripPlanningWizardPr
       <div className={styles.intro}>
         <div>
           <p className="product-eyebrow">Preparar viagem · Etapa 1 de 4</p>
-          <h1 id="trip-planning-wizard-title">Escolha os lugares que fazem sentido para você</h1>
+          <h2 id="trip-planning-wizard-title">Escolha os lugares que fazem sentido para você</h2>
           <p>
             Explore opções e marque sua intenção. Esta seleção ajuda a preparar a futura proposta,
             mas ainda não coloca nenhum lugar no roteiro.
@@ -46,7 +46,7 @@ export function TripPlanningWizard({ tripId, currentView }: TripPlanningWizardPr
           className={
             currentView === "explore" ? "product-primary-action" : "product-secondary-action"
           }
-          href={`/viagens/${tripId}/lugares`}
+          href={`/viagens/${tripId}/lugares?preparar=1`}
         >
           Explorar
         </Link>
@@ -55,7 +55,7 @@ export function TripPlanningWizard({ tripId, currentView }: TripPlanningWizardPr
           className={
             currentView === "selection" ? "product-primary-action" : "product-secondary-action"
           }
-          href={`/viagens/${tripId}/lugares-salvos`}
+          href={`/viagens/${tripId}/lugares-salvos?preparar=1`}
         >
           Minha seleção
         </Link>

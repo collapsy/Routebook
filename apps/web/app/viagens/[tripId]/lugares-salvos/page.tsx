@@ -10,15 +10,16 @@ import {
 } from "@routebook/database";
 import { PLACE_CATEGORIES, type PlaceCategory } from "@routebook/place-catalog";
 import type { TripPlacePreference } from "@routebook/trip-collection";
-import { deriveTripDays, findTripById } from "@routebook/trip-management";
+import { findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
 import { TripPlacePreferenceControls } from "../../../../components/trip-place-preference-controls";
+import { TripPlaceSelectionProgress } from "../../../../components/trip-place-selection-progress";
+import { TripPlanningWizard } from "../../../../components/trip-planning-wizard";
 import { TripMap } from "../../../../components/trip-map";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { presentAccommodationDistance } from "../lugares/distance";
 import {
-  addSelectionPlaceToItineraryAction,
   clearSelectionPreferenceAction,
   setSelectionMustDoAction,
   setSelectionPreferenceAction,
@@ -41,15 +42,6 @@ const categoryLabels: Record<PlaceCategory, string> = {
   tour: "Passeio",
   shopping: "Compras",
 };
-
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat("pt-BR", {
-    timeZone: "UTC",
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-  }).format(new Date(`${value}T00:00:00Z`));
-}
 
 function parseCategory(value?: string): PlaceCategory | undefined {
   return PLACE_CATEGORIES.includes(value as PlaceCategory) ? (value as PlaceCategory) : undefined;
@@ -103,7 +95,6 @@ export default async function TripSelectionPage({
         .map((activity) => activity.placeId!),
     ) ?? [],
   );
-  const tripDays = deriveTripDays(trip.period);
   const counts = preferences.reduce(
     (summary, selection) => {
       summary[selection.intent] += 1;
@@ -139,19 +130,11 @@ export default async function TripSelectionPage({
 
   return (
     <section className="app-page trip-overview-page">
-      <div className="section-heading-row">
-        <Link className="back-link" href={`/viagens/${tripId}`}>
-          ← Voltar para a viagem
-        </Link>
-        <div className="section-heading-row">
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
-            Abrir roteiro
-          </Link>
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
-            Explorar lugares
-          </Link>
-        </div>
-      </div>
+      <Link className="back-link" href={`/viagens/${tripId}`}>
+        ← Voltar para a viagem
+      </Link>
+
+      <TripPlanningWizard currentView="selection" tripId={tripId} />
 
       {preferencia === "atualizada" ? (
         <p className="success-banner" role="status">
@@ -176,8 +159,8 @@ export default async function TripSelectionPage({
 
       <header className="trip-overview-hero">
         <div>
-          <p className="product-eyebrow">Coleção da viagem</p>
-          <h1>Minha seleção</h1>
+          <p className="product-eyebrow">Revisar escolhas</p>
+          <h2>Minha seleção</h2>
           <p>
             Revise o que você quer considerar em {trip.destination.name}. Sua preferência não
             adiciona nem remove lugares do roteiro automaticamente.
@@ -190,24 +173,7 @@ export default async function TripSelectionPage({
         <span className="trip-context-version">{preferences.length} avaliados</span>
       </header>
 
-      <dl className="trip-overview-summary" aria-label="Resumo da seleção">
-        <div>
-          <dt>Quero ir</dt>
-          <dd>{counts.WANT}</dd>
-        </div>
-        <div>
-          <dt>Talvez</dt>
-          <dd>{counts.MAYBE}</dd>
-        </div>
-        <div>
-          <dt>Não tenho interesse</dt>
-          <dd>{counts.NOT_INTERESTED}</dd>
-        </div>
-        <div>
-          <dt>Imperdíveis</dt>
-          <dd>{counts.mustDo}</dd>
-        </div>
-      </dl>
+      <TripPlaceSelectionProgress initialCounts={counts} />
 
       <section className="traveler-context-summary" aria-labelledby="selection-filter-title">
         <div className="section-heading-row">
@@ -303,51 +269,6 @@ export default async function TripSelectionPage({
                   summaryLabel="Preferência"
                 />
 
-                <form
-                  action={addSelectionPlaceToItineraryAction}
-                  aria-labelledby={titleId}
-                  className="saved-place-itinerary-form"
-                >
-                  <input name="tripId" type="hidden" value={tripId} />
-                  <input name="placeSlug" type="hidden" value={place.slug} />
-
-                  <div className="form-field saved-place-itinerary-day">
-                    <label htmlFor={`day-${place.id}`}>Adicionar ao dia</label>
-                    <select
-                      defaultValue={tripDays[0]?.date}
-                      id={`day-${place.id}`}
-                      name="dayDate"
-                      required
-                    >
-                      {tripDays.map((day) => (
-                        <option key={day.date} value={day.date}>
-                          Dia {day.index} — {formatDate(day.date)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor={`time-${place.id}`}>Horário opcional</label>
-                    <input id={`time-${place.id}`} name="startTime" type="time" />
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor={`duration-${place.id}`}>Duração opcional</label>
-                    <input
-                      id={`duration-${place.id}`}
-                      min={1}
-                      name="durationMinutes"
-                      placeholder="Minutos"
-                      step={1}
-                      type="number"
-                    />
-                  </div>
-
-                  <button className="product-button" type="submit">
-                    Adicionar ao roteiro
-                  </button>
-                </form>
 
                 <div className="section-heading-row saved-place-card-actions">
                   <Link
@@ -362,6 +283,19 @@ export default async function TripSelectionPage({
           })}
         </ul>
       )}
+
+      <section className="traveler-context-summary" aria-labelledby="places-next-step-title">
+        <p className="product-eyebrow">Próxima etapa</p>
+        <h2 id="places-next-step-title">Contexto da viagem</h2>
+        <p>
+          Depois de revisar os lugares, o planejamento continuará com o contexto da viagem.
+          Nesta etapa, ajuste suas escolhas ou volte a explorar; nada daqui cria atividades no
+          roteiro automaticamente.
+        </p>
+        <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
+          Continuar explorando
+        </Link>
+      </section>
     </section>
   );
 }

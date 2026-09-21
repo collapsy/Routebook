@@ -9,10 +9,10 @@ document_type: ux
 owner: Experience
 
 status: Published
-version: "0.2.0"
+version: "0.3.0"
 
 created: "2026-07-17"
-last_updated: "2026-09-18"
+last_updated: "2026-09-21"
 
 authors:
 
@@ -2230,7 +2230,94 @@ Antes de aprovar este documento, verificar:
 
 ---
 
-## 80. Declaração final
+## 80. Fluxos da jornada guiada
+
+### Fluxo A — primeira Trip
+
+```text
+Criar Trip
+→ Explorar
+→ Expressar intenção
+→ Minha seleção
+→ Completar contexto mínimo
+→ Revisar
+→ Gerar Proposal
+→ Revisar Proposal
+→ Aceitar total/parcialmente
+→ Roteiro criado
+```
+
+Selecionar um Place nunca cria Activity por efeito colateral.
+
+### Fluxo B — poucas escolhas
+
+```text
+Seleção pequena
+→ identificar se existe lacuna funcional real
+→ manter período livre
+   OU
+→ incluir ROUTEBOOK_RECOMMENDED justificável na Proposal
+→ usuário decide
+```
+
+Não existe meta de completar todos os períodos.
+
+### Fluxo C — muitas escolhas
+
+```text
+Seleção excede capacidade
+→ priorizar MUST_DO/WANT e viabilidade
+→ compor subconjunto
+→ apresentar não planejados + motivo
+→ usuário decide
+```
+
+Os excluídos permanecem em Minha seleção.
+
+### Fluxo D — nenhuma escolha
+
+```text
+Minha seleção vazia
+→ orientar Explorar
+→ permitir continuar configurando Trip
+→ não criar Roteiro completo silenciosamente
+```
+
+Uma futura ação explícita para receber sugestões ainda produz Recommendation/Proposal, não estado aplicado.
+
+### Fluxo E — alteração antes da Trip
+
+```text
+Alterar TripPlacePreference
+→ Minha seleção atualiza
+→ Roteiro permanece
+→ usuário pode solicitar nova Proposal
+→ revisão
+→ aceite
+```
+
+### Fluxo F — alteração durante a Trip
+
+```text
+Alterar/adicionar TripPlacePreference
+→ Roteiro permanece
+→ solicitar Replanejar
+→ calcular ReplanningWindow
+→ gerar Proposal REPLAN
+→ revisar
+→ aceitar total/parcialmente
+→ somente futuro elegível muda
+```
+
+Dias passados, trecho transcorrido do Dia atual, Activities protegidas e Free Periods protegidos não podem ser reescritos pela Proposal.
+
+### Retorno ao produto após o wizard
+
+Depois do primeiro planejamento aceito, retornar à Trip abre a experiência operacional, não o passo inicial do wizard. O usuário ainda pode acessar Explorar e Minha seleção a qualquer momento.
+
+---
+
+## 81. Declaração final
 
 Os Fluxos do Usuário definem como as capacidades do RouteBook serão utilizadas na prática.
 

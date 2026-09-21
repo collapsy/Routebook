@@ -117,7 +117,7 @@ export async function setSelectionMustDoAction(
       placeId: place.id,
       enabled,
     });
-      return tripPlacePreferenceActionSuccess(preference);
+    return tripPlacePreferenceActionSuccess(preference);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Não foi possível atualizar Imperdível.";

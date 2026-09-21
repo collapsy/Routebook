@@ -299,9 +299,24 @@ A proveniência registra `placeId` único no candidate set. Não é criada colun
 - [x] nenhum estado de wizard;
 - [x] nenhuma geração real de complemento;
 - [x] nenhuma Activity ou preferência criada por efeito colateral;
-- [ ] testes e CI verdes no HEAD final;
+- [x] testes e CI verdes no HEAD funcional validado;
 - [ ] PR revisada para integração.
 
-## 14. Próximo passo
+## 14. Evidência de validação
+
+HEAD funcional validado: `51f261b81dad7f05e231949b72d6979556cd33d8`.
+
+- Documentation Validation #2160, run `35629147608`: success;
+- Engineering Validation #2642, run `35629147276`: success;
+- format, docs, lint e typecheck: success;
+- políticas de deployment/migration e aplicação das migrations existentes: success;
+- testes de componentes/domínio: success;
+- normalizer, imagens e smoke: success;
+- build: success;
+- Playwright responsivo/persistência: 161 passed em 3.8m.
+
+Nenhum teste local é declarado: o ambiente desta execução não possuía clone GitHub funcional. O GitHub Actions é a evidência executável autoritativa.
+
+## 15. Próximo passo
 
 Após integração desta etapa, a próxima conversa deve tratar exclusivamente da Etapa 3 — Wizard de escolha de lugares, consumindo os contratos aqui publicados sem reinventá-los.

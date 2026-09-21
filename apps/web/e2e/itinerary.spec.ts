@@ -289,7 +289,7 @@ test("mantém Minha seleção separada do roteiro durante o wizard", async ({ pa
   );
 
   const placeName = place!.name;
-  await page.goto(`/viagens/${trip.id}/lugares-salvos`);
+  await page.goto(`/viagens/${trip.id}/lugares-salvos?preparar=1`);
 
   await expect(page.getByRole("heading", { name: placeName })).toBeVisible();
   await expect(page.getByText("Preparar viagem · Etapa 1 de 4")).toBeVisible();

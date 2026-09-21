@@ -105,10 +105,7 @@ function generationContextFrom(
     ),
     candidates: Object.freeze(
       candidates
-        .filter(
-          (candidate) =>
-            candidate.origin !== undefined && candidate.provenance !== undefined,
-        )
+        .filter((candidate) => candidate.origin !== undefined && candidate.provenance !== undefined)
         .map((candidate) =>
           Object.freeze({
             candidateId: candidate.candidateId,

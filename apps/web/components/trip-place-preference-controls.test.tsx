@@ -79,11 +79,19 @@ describe("TripPlacePreferenceControls", () => {
 
   it("restaura um salto programático ao topo durante a mutação inline", async () => {
     let scrollY = 640;
+    let monitorFrame: FrameRequestCallback | undefined;
     const scrollYSpy = vi.spyOn(window, "scrollY", "get").mockImplementation(() => scrollY);
     const scrollXSpy = vi.spyOn(window, "scrollX", "get").mockReturnValue(0);
     const scrollToSpy = vi.spyOn(window, "scrollTo").mockImplementation((_x, y) => {
       scrollY = Number(y);
     });
+    const requestAnimationFrameSpy = vi
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation((callback) => {
+        monitorFrame = callback;
+        return 1;
+      });
+    const cancelAnimationFrameSpy = vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => undefined);
     const action = vi.fn(async () => ({
       status: "success" as const,
       message: "Preferência atualizada.",
@@ -102,13 +110,15 @@ describe("TripPlacePreferenceControls", () => {
     expect(await screen.findByRole("status")).toHaveTextContent("Preferência atualizada.");
 
     scrollY = 0;
-    window.dispatchEvent(new Event("scroll"));
+    monitorFrame?.(0);
 
     expect(scrollToSpy).toHaveBeenCalledWith(0, 640);
 
     scrollYSpy.mockRestore();
     scrollXSpy.mockRestore();
     scrollToSpy.mockRestore();
+    requestAnimationFrameSpy.mockRestore();
+    cancelAnimationFrameSpy.mockRestore();
   });
 
   it("restaura a seleção anterior e anuncia o erro quando a ação falha", async () => {

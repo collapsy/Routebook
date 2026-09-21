@@ -2,6 +2,7 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import type { TripPlacePreferenceActionState } from "@/lib/trip-place-preference";
 import { TripPlacePreferenceControls } from "./trip-place-preference-controls";
 
 const navigationMocks = vi.hoisted(() => ({ refresh: vi.fn() }));
@@ -77,8 +78,9 @@ describe("TripPlacePreferenceControls", () => {
     );
   });
 
-  it("restaura um salto programático ao topo durante a mutação inline", async () => {
+  it("restaura o scroll quando o patch da Server Action salta ao topo", async () => {
     let scrollY = 640;
+    let resolveAction: ((value: TripPlacePreferenceActionState) => void) | undefined;
     const scrollYSpy = vi.spyOn(window, "scrollY", "get").mockImplementation(() => scrollY);
     const scrollXSpy = vi.spyOn(window, "scrollX", "get").mockReturnValue(0);
     const scrollToSpy = vi.spyOn(window, "scrollTo").mockImplementation((_x, y) => {
@@ -90,11 +92,12 @@ describe("TripPlacePreferenceControls", () => {
     const cancelAnimationFrameSpy = vi
       .spyOn(window, "cancelAnimationFrame")
       .mockImplementation(() => undefined);
-    const action = vi.fn(async () => ({
-      status: "success" as const,
-      message: "Preferência atualizada.",
-      preference: { intent: "WANT" as const, priority: null },
-    }));
+    const action = vi.fn(
+      () =>
+        new Promise<TripPlacePreferenceActionState>((resolve) => {
+          resolveAction = resolve;
+        }),
+    );
 
     render(
       <TripPlacePreferenceControls
@@ -105,12 +108,18 @@ describe("TripPlacePreferenceControls", () => {
     );
 
     await userEvent.click(screen.getByRole("button", { name: "Quero ir" }));
-    expect(await screen.findByRole("status")).toHaveTextContent("Preferência atualizada.");
+    await waitFor(() => expect(action).toHaveBeenCalledTimes(1));
 
     scrollY = 0;
-    window.dispatchEvent(new Event("scroll"));
+    resolveAction?.({
+      status: "success",
+      message: "Preferência atualizada.",
+      preference: { intent: "WANT", priority: null },
+    });
 
-    expect(scrollToSpy).toHaveBeenCalledWith(0, 640);
+    expect(await screen.findByRole("status")).toHaveTextContent("Preferência atualizada.");
+    await waitFor(() => expect(scrollToSpy).toHaveBeenCalledWith(0, 640));
+    expect(scrollY).toBe(640);
     window.dispatchEvent(new Event("wheel"));
 
     scrollYSpy.mockRestore();

@@ -484,6 +484,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-206 | Context Pack do RB-INC-206 — Proposal REPLAN e snapshot temporal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-206-proposal-replan-snapshot.md](./implementation/context-packs/rb-inc-206-proposal-replan-snapshot.md) |
 | RB-INC-207 | Redesenho funcional da jornada guiada de planejamento | Implementation | Draft | 0.1.0 | [rb-inc-207-planning-journey-redesign.md](./implementation/increments/rb-inc-207-planning-journey-redesign.md) |
 | RB-CTX-207 | Context Pack do RB-INC-207 — Jornada guiada de planejamento | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-207-planning-journey-redesign.md](./implementation/context-packs/rb-inc-207-planning-journey-redesign.md) |
+| RB-INC-208 | Proveniência executável de candidatos da Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-208-proposal-candidate-provenance.md](./implementation/increments/rb-inc-208-proposal-candidate-provenance.md) |
+| RB-CTX-208 | Context Pack do RB-INC-208 — Proveniência executável de candidatos | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-208-proposal-candidate-provenance.md](./implementation/context-packs/rb-inc-208-proposal-candidate-provenance.md) |
 
 ## Status possíveis
 

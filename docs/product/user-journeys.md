@@ -9,10 +9,10 @@ document_type: product
 owner: Product
 
 status: Published
-version: "0.2.0"
+version: "0.3.0"
 
 created: "2026-07-15"
-last_updated: "2026-09-18"
+last_updated: "2026-09-21"
 
 authors:
 
@@ -2247,7 +2247,87 @@ Validarão a conclusão das jornadas críticas.
 
 ---
 
-## 179. Checklist de consistência
+## 179. Jornada guiada de preparação e operação
+
+A preparação da Trip passa a seguir um fluxo progressivo. O wizard é um modo temporário de preparação, não a navegação permanente da Viagem.
+
+```text
+Criar Trip
+→ Explorar
+→ Escolher
+→ completar contexto mínimo
+→ revisar Minha seleção
+→ gerar Itinerary Proposal
+→ revisar e decidir
+→ Roteiro
+```
+
+### Início e término
+
+O wizard pode começar assim que a Trip possui destino e período suficientes para iniciar descoberta. Ele termina quando uma Proposal é aceita e passa a existir um planejamento atual utilizável.
+
+Depois disso, a experiência principal muda para operação da Trip. Explorar e Minha seleção continuam disponíveis, mas não alteram o Roteiro silenciosamente.
+
+### Passos
+
+1. **Lugares** — pesquisar, filtrar, abrir detalhes e registrar `TripPlacePreference`.
+2. **Contexto da viagem** — solicitar progressivamente apenas dados necessários para uma composição segura.
+3. **Revisão** — apresentar intenções, prioridades, Planning Roles, lacunas e excesso de escolhas.
+4. **Gerar Proposal** — usar WANT; MAYBE somente quando autorizado; complementos do RouteBook somente quando permitidos e justificáveis.
+5. **Revisar Proposal** — distinguir origem, explicar inclusões/exclusões e permitir aceite total, parcial ou rejeição.
+
+### Diferença entre superfícies
+
+- **Explorar** apresenta possibilidades ainda não decididas.
+- **Minha seleção** apresenta Places avaliados no contexto da Trip e é derivada de `TripPlacePreference`.
+- **Proposal** apresenta uma mudança sugerida, ainda não aplicada.
+- **Roteiro** apresenta o Itinerary aplicado.
+
+Selecionar Lugar não significa planejar. Aceitar um item recomendado na Proposal não transforma automaticamente o Place em WANT.
+
+### Participação das intenções
+
+- `WANT` participa por padrão.
+- `MAYBE` só participa quando o usuário autoriza naquela geração.
+- `NOT_INTERESTED` não participa de composição automática nem de recomendação complementar.
+- `MUST_DO` prioriza WANT, mas não supera restrições, capacidade ou proteção temporal.
+
+### Planning Roles
+
+A categoria factual do Place não define sozinha sua função na composição.
+
+- `EXPERIENCE`: experiências e atrações.
+- `FOOD`: contexto de refeição.
+- `NIGHTLIFE`: janelas noturnas quando compatíveis com a Trip.
+- `OTHER`: sem composição especializada até existir política.
+
+### Poucas, muitas e nenhuma escolha
+
+Seleção pequena é válida. O RouteBook pode manter períodos livres ou apresentar complemento opcional com origem e justificativa.
+
+Quando há escolhas demais, a Proposal inclui o subconjunto viável e mantém os demais em Minha seleção como ainda não planejados, com motivos sustentados por evidência.
+
+Sem escolhas, o RouteBook orienta exploração. Não monta silenciosamente uma viagem completa. Uma capacidade futura de “quero sugestões” continua produzindo Recommendation/Proposal, nunca estado aplicado.
+
+### Depois da geração
+
+A experiência passa conceitualmente a:
+
+```text
+Minha viagem
+→ Hoje
+→ Roteiro
+→ Explorar
+→ Minha seleção
+→ Mapa
+→ Configurações
+```
+
+Nova preferência mantém o Itinerary atual. Antes da Viagem, o usuário pode solicitar nova Proposal. Durante a Viagem, replanejamento usa `generationScope = REPLAN` e somente a janela futura elegível de `ReplanningWindow`.
+
+---
+
+## 180. Checklist de consistência
 
 Antes de aprovar uma jornada, verificar:
 
@@ -2266,7 +2346,7 @@ Antes de aprovar uma jornada, verificar:
 
 ---
 
-## 180. Declaração final
+## 181. Declaração final
 
 As Jornadas do Usuário representam como o RouteBook transforma sua proposta de valor em experiências concretas.
 

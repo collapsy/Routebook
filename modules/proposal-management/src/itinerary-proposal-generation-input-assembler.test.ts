@@ -413,12 +413,17 @@ describe("assembleItineraryProposalGenerationInputFromSelection", () => {
     expect(result.candidates.map(({ placeId }) => placeId)).toEqual(["place-must", "place-want"]);
     expect(result.candidates[0]).toMatchObject({
       candidateId: "preference-must",
+      origin: "USER_SELECTED",
+      provenance: { sourceId: "preference-must" },
       reason: "Lugar marcado como Imperdível na Minha seleção.",
     });
     expect(result.candidates[1]).toMatchObject({
       candidateId: "preference-want",
+      origin: "USER_SELECTED",
+      provenance: { sourceId: "preference-want" },
       reason: "Lugar escolhido como Quero ir na Minha seleção.",
     });
+    expect(result.candidates.some(({ placeId }) => placeId === "place-no")).toBe(false);
   });
 
   it("inclui MAYBE somente com opt-in explícito e após WANT", () => {
@@ -432,6 +437,8 @@ describe("assembleItineraryProposalGenerationInputFromSelection", () => {
       "place-maybe",
     ]);
     expect(result.candidates[2]).toMatchObject({
+      origin: "USER_SELECTED",
+      provenance: { sourceId: "preference-maybe" },
       reason: "Lugar marcado como Talvez e incluído explicitamente nesta geração.",
     });
   });

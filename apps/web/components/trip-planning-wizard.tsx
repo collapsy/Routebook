@@ -25,9 +25,7 @@ export function TripPlanningWizard({
     >
       <div className={styles.intro}>
         <div>
-          <p className="product-eyebrow">
-            Preparar viagem · Etapa {contextStep ? "2" : "1"} de 4
-          </p>
+          <p className="product-eyebrow">Preparar viagem · Etapa {contextStep ? "2" : "1"} de 4</p>
           <h2 id="trip-planning-wizard-title">
             {contextStep
               ? "Conte o que ajuda a planejar esta viagem"
@@ -47,10 +45,7 @@ export function TripPlanningWizard({
           className={contextStep ? styles.completedStep : styles.activeStep}
         >
           {contextStep ? (
-            <Link
-              className={styles.stepLink}
-              href={`/viagens/${tripId}/lugares-salvos?preparar=1`}
-            >
+            <Link className={styles.stepLink} href={`/viagens/${tripId}/lugares-salvos?preparar=1`}>
               <span>1</span>
               <strong>Lugares</strong>
             </Link>

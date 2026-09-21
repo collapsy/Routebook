@@ -50,11 +50,8 @@ test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lug
   );
   await expect(card.getByRole("button", { name: "Limpar" })).toBeVisible();
   await expect
-    .poll(() => page.evaluate(() => window.scrollY))
-    .toBeGreaterThanOrEqual(initialScrollY - 2);
-  expect(
-    Math.abs((await page.evaluate(() => window.scrollY)) - initialScrollY),
-  ).toBeLessThanOrEqual(2);
+    .poll(async () => Math.abs((await page.evaluate(() => window.scrollY)) - initialScrollY))
+    .toBeLessThanOrEqual(2);
 
   await card.getByRole("link", { name: "Ver detalhes" }).click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares/praia-do-amor$`));

@@ -1214,4 +1214,4 @@ Ao concluir um incremento:
 | pós-wizard | experiência muda de preparação para Trip planejada e, depois, Trip em andamento |
 | replanejamento | explícito, via Proposal REPLAN, limitado por ReplanningWindow |
 | implementação | nenhuma alteração executável, banco, migration, Provider, Preview ou Production |
-| validação | pendente de execução no SHA final |
+| validação | SHA `81644277819c6549f2106eeed41d8075dac7fcab`: Documentation Validation `35617897831` success; Engineering Validation `35617897561` success, incluindo format, docs, lint, typecheck, migrations, testes, smoke, build e testes responsivos |

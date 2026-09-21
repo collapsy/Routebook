@@ -26,7 +26,7 @@ import { PlacePrimaryImage } from "../../../../components/place-primary-image";
 import { PlaceRankingMeta } from "../../../../components/place-ranking-meta";
 import { TripPlanningWizard } from "../../../../components/trip-planning-wizard";
 import { TripPlacePreferenceControls } from "../../../../components/trip-place-preference-controls";
-import { TripPlaceSelectionSummary } from "../../../../components/trip-place-selection-summary";
+import { TripPlaceSelectionProgress } from "../../../../components/trip-place-selection-progress";
 import { TripMap } from "../../../../components/trip-map";
 import {
   buildGoogleMapsDirectionsUrl,
@@ -554,7 +554,6 @@ export default async function PlacesPage({
     },
     { WANT: 0, MAYBE: 0, NOT_INTERESTED: 0, mustDo: 0 },
   );
-  const planningCandidateCount = selectionCounts.WANT + selectionCounts.MAYBE;
   const filteredPlaces = filterPlaces(
     publishedPlaces,
     {
@@ -849,31 +848,10 @@ export default async function PlacesPage({
       </header>
 
       {wizardMode ? (
-        <>
-          <TripPlaceSelectionSummary initialCounts={selectionCounts} />
-          <section className="traveler-context-summary" aria-labelledby="place-selection-progress-title">
-            <div className="section-heading-row">
-              <div>
-                <p className="product-eyebrow">Seu progresso</p>
-                <h2 id="place-selection-progress-title">
-                  {planningCandidateCount > 0
-                    ? `${planningCandidateCount} ${planningCandidateCount === 1 ? "lugar pode" : "lugares podem"} seguir para o planejamento`
-                    : "Escolha pelo menos um lugar para continuar preparando a viagem"}
-                </h2>
-                <p>
-                  Quero ir e Talvez representam opções para a futura proposta. Não tenho interesse
-                  continua registrado para o RouteBook respeitar sua decisão.
-                </p>
-              </div>
-              <Link
-                className="product-primary-action"
-                href={`/viagens/${tripId}/lugares-salvos?preparar=1`}
-              >
-                Revisar seleção
-              </Link>
-            </div>
-          </section>
-        </>
+        <TripPlaceSelectionProgress
+          initialCounts={selectionCounts}
+          reviewHref={`/viagens/${tripId}/lugares-salvos?preparar=1`}
+        />
       ) : null}
 
       <form action={`/viagens/${tripId}/lugares`} className={styles.filters} method="get">

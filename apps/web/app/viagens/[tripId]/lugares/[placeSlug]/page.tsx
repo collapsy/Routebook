@@ -223,19 +223,6 @@ export default async function PlaceDetailsPage({
             Sua preferência ajuda a organizar a viagem e não adiciona nem remove este lugar do
             roteiro automaticamente.
           </p>
-          {placePreference ? (
-            <p>
-              <strong>Preferência atual: </strong>
-              {placePreference.intent === "WANT"
-                ? "Quero ir"
-                : placePreference.intent === "MAYBE"
-                  ? "Talvez"
-                  : "Não tenho interesse"}
-              {placePreference.priority === "MUST_DO" ? " · Imperdível" : ""}
-            </p>
-          ) : (
-            <p>Você ainda não avaliou este lugar.</p>
-          )}
         </div>
 
         <TripPlacePreferenceControls
@@ -247,6 +234,7 @@ export default async function PlaceDetailsPage({
           label={`Preferência para ${place.name}`}
           mustDoAction={setPlaceMustDoAction}
           setAction={setPlacePreferenceAction}
+          summaryLabel="Preferência atual"
         />
       </section>
 

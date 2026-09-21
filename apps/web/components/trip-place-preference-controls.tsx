@@ -20,6 +20,8 @@ type Props = Readonly<{
   clearAction?: PreferenceAction;
   mustDoAction?: PreferenceAction;
   refreshOnSuccess?: boolean;
+  refreshOnClearSuccess?: boolean;
+  summaryLabel?: string;
   className?: string | undefined;
 }>;
 
@@ -51,7 +53,9 @@ export function TripPlacePreferenceControls({
   setAction,
   clearAction,
   mustDoAction,
-  refreshOnSuccess = true,
+  refreshOnSuccess = false,
+  refreshOnClearSuccess = false,
+  summaryLabel,
   className,
 }: Props) {
   const router = useRouter();
@@ -97,7 +101,9 @@ export function TripPlacePreferenceControls({
 
         setIntent(result.preference?.intent);
         setPriority(result.preference?.priority ?? null);
-        if (refreshOnSuccess) router.refresh();
+        if (refreshOnSuccess || (operation === "clear" && refreshOnClearSuccess)) {
+          router.refresh();
+        }
       } catch {
         setIntent(previousIntent);
         setPriority(previousPriority);
@@ -118,6 +124,20 @@ export function TripPlacePreferenceControls({
       className={[styles.controls, className].filter(Boolean).join(" ")}
       data-trip-place-preference-controls="true"
     >
+      {summaryLabel ? (
+        intent ? (
+          <p className={styles.summary} data-preference-summary="true">
+            <strong>{summaryLabel}: </strong>
+            {intentLabels[intent]}
+            {priority === "MUST_DO" ? " · Imperdível" : ""}
+          </p>
+        ) : (
+          <p className={styles.summary} data-preference-summary="true">
+            Você ainda não avaliou este lugar.
+          </p>
+        )
+      ) : null}
+
       {(["WANT", "MAYBE", "NOT_INTERESTED"] as const).map((nextIntent) => (
         <button
           aria-pressed={intent === nextIntent}

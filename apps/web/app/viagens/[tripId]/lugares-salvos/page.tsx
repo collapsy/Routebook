@@ -9,7 +9,7 @@ import {
   DrizzleTripRepository,
 } from "@routebook/database";
 import { PLACE_CATEGORIES, type PlaceCategory } from "@routebook/place-catalog";
-import type { TripPlaceIntent, TripPlacePreference } from "@routebook/trip-collection";
+import type { TripPlacePreference } from "@routebook/trip-collection";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
@@ -40,12 +40,6 @@ const categoryLabels: Record<PlaceCategory, string> = {
   viewpoint: "Mirante",
   tour: "Passeio",
   shopping: "Compras",
-};
-
-const intentLabels: Record<TripPlaceIntent, string> = {
-  WANT: "Quero ir",
-  MAYBE: "Talvez",
-  NOT_INTERESTED: "Não tenho interesse",
 };
 
 function formatDate(value: string): string {
@@ -286,11 +280,6 @@ export default async function TripSelectionPage({
                 <h2 id={titleId}>{place.name}</h2>
                 <p>{place.summary}</p>
                 <p>
-                  <strong>Preferência: </strong>
-                  {intentLabels[selection.intent]}
-                  {selection.priority === "MUST_DO" ? " · Imperdível" : ""}
-                </p>
-                <p>
                   <strong>Roteiro: </strong>
                   {planned ? "Planejado" : "Ainda não planejado"}
                 </p>
@@ -309,7 +298,9 @@ export default async function TripSelectionPage({
                   fields={{ tripId, placeSlug: place.slug }}
                   label={`Preferência para ${place.name}`}
                   mustDoAction={setSelectionMustDoAction}
+                  refreshOnClearSuccess
                   setAction={setSelectionPreferenceAction}
+                  summaryLabel="Preferência"
                 />
 
                 <form

@@ -30,6 +30,7 @@ describe("TripPlacePreferenceControls", () => {
         currentIntent="WANT"
         fields={{ tripId: "trip-1", placeSlug: "praia-do-amor" }}
         label="Preferência para Praia do Amor"
+        refreshOnSuccess
         setAction={action}
       />,
     );
@@ -121,6 +122,7 @@ describe("TripPlacePreferenceControls", () => {
         label="Preferência para Praia do Amor"
         mustDoAction={action}
         setAction={action}
+        summaryLabel="Preferência"
       />,
     );
 
@@ -133,5 +135,8 @@ describe("TripPlacePreferenceControls", () => {
     expect(
       screen.queryByRole("button", { name: "Marcar como Imperdível" }),
     ).not.toBeInTheDocument();
+    expect(container.querySelector('[data-preference-summary="true"]')).toHaveTextContent(
+      "Preferência: Talvez",
+    );
   });
 });

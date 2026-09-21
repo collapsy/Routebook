@@ -649,6 +649,10 @@ function normalizeSelectionCandidates(
         ...(place.description ? { description: place.description } : {}),
         ...(place.durationMinutes !== undefined ? { durationMinutes: place.durationMinutes } : {}),
         reason,
+        provenance: Object.freeze({
+          origin: "USER_SELECTED" as const,
+          sourcePreferenceId: preference.preferenceId,
+        }),
         ...(place.estimatedCostAmount !== undefined
           ? { estimatedCostAmount: place.estimatedCostAmount }
           : {}),

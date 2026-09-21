@@ -160,7 +160,8 @@ describe("setPublishedPlacePreferenceAction", () => {
         priority: null,
       }),
     );
-    expect(cacheMocks.revalidatePath).not.toHaveBeenCalled();
+    expect(cacheMocks.revalidatePath).not.toHaveBeenCalledWith(`/viagens/${tripId}/lugares`);
+    expect(cacheMocks.revalidatePath).toHaveBeenCalledWith(`/viagens/${tripId}/lugares-salvos`);
     expect(navigationMocks.redirect).not.toHaveBeenCalled();
   });
 

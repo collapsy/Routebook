@@ -168,6 +168,14 @@ describe("DrizzleItineraryProposalRepository", () => {
             priority: null,
           },
         ],
+        candidateProvenance: [
+          {
+            candidateId: preferenceId,
+            placeId,
+            origin: "USER_SELECTED",
+            sourcePreferenceId: preferenceId,
+          },
+        ],
         replanningWindow: {
           capturedAt: requestedAt.toISOString(),
           timeZone: fixture.itinerary.period.timeZone,

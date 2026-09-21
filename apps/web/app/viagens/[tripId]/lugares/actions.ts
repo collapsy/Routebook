@@ -90,7 +90,8 @@ async function resolvePublishedPlaceForMutation(tripId: string, placeSlug: strin
 
 function revalidatePublishedPlaceSurfaces(tripId: string, placeSlug: string): void {
   revalidatePath(`/viagens/${tripId}`);
-  revalidatePath(`/viagens/${tripId}/lugares`);
+  // The catalog updates its preference controls locally. Revalidating this
+  // current route replaces the long card grid and resets the user's scroll.
   revalidatePath(`/viagens/${tripId}/lugares/${placeSlug}`);
   revalidatePath(`/viagens/${tripId}/lugares-salvos`);
 }

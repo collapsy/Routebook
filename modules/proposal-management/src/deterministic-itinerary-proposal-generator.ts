@@ -234,6 +234,12 @@ function normalizeCandidate(
       "invalid-candidate",
     );
   }
+  if (origin !== undefined && !placeId) {
+    throw new DeterministicItineraryProposalGenerationError(
+      "Candidato com origem explícita exige PlaceId.",
+      "invalid-candidate",
+    );
+  }
   if (candidate.provenance !== undefined && origin === undefined) {
     throw new DeterministicItineraryProposalGenerationError(
       "Proveniência exige origem explícita do candidato.",

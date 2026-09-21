@@ -30,6 +30,7 @@ Evoluir os contratos existentes de Proposal Management para representar origem e
 - Branch: `codex/issue-507-proposal-candidate-provenance`.
 - Base: `main@9d9f8b5c3e8315c0f2e40d94e9d8111e523928fc`.
 - Incremento: RB-INC-208.
+- Pull Request: [#508](https://github.com/collapsy/Routebook/pull/508).
 - Merge na `main` exige autorização humana explícita.
 
 ## 3. Leitura obrigatória

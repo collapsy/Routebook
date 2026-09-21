@@ -128,8 +128,10 @@ export default async function TravelerContextPage({
           <h2 id="preparation-review-boundary">Contexto preparado para uma futura Revisão</h2>
           <p>
             A preparação agora consegue reunir {reviewModel.selection.considered}{" "}
-            {reviewModel.selection.considered === 1 ? "lugar em consideração" : "lugares em consideração"} e
-            o contexto persistido dos viajantes sem criar Activity ou Proposal.
+            {reviewModel.selection.considered === 1
+              ? "lugar em consideração"
+              : "lugares em consideração"}{" "}
+            e o contexto persistido dos viajantes sem criar Activity ou Proposal.
           </p>
           {reviewModel.context.missingOptional.length > 0 ? (
             <p>

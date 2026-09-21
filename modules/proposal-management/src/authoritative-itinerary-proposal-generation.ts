@@ -79,6 +79,7 @@ function requiredTripId(value: string): string {
 
 function generationContextFrom(
   context: AuthoritativeItineraryProposalGenerationContext,
+  candidates: GenerateItineraryProposalInput["candidates"],
   includeMaybe: boolean,
   generationScope: ItineraryProposalGenerationScope,
 ): ItineraryProposalGenerationContext {
@@ -101,6 +102,21 @@ function generationContextFrom(
           priority: preference.priority,
         }),
       ),
+    ),
+    candidates: Object.freeze(
+      candidates
+        .filter(
+          (candidate) =>
+            candidate.origin !== undefined && candidate.provenance !== undefined,
+        )
+        .map((candidate) =>
+          Object.freeze({
+            candidateId: candidate.candidateId,
+            ...(candidate.placeId ? { placeId: candidate.placeId } : {}),
+            origin: candidate.origin!,
+            provenance: candidate.provenance!,
+          }),
+        ),
     ),
     ...(generationScope === "REPLAN" && context.replanningWindow
       ? { replanningWindow: context.replanningWindow }
@@ -152,7 +168,12 @@ export async function generateAuthoritativeItineraryProposal(
     includeMaybe,
     asOf: command.asOf,
   });
-  const generationContext = generationContextFrom(context, includeMaybe, generationScope);
+  const generationContext = generationContextFrom(
+    context,
+    assembled.candidates,
+    includeMaybe,
+    generationScope,
+  );
   const days =
     generationScope === "REPLAN"
       ? eligibleReplanningDays(assembled.days, generationContext.replanningWindow!)

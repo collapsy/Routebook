@@ -436,7 +436,9 @@ function normalizedCandidateProvenance(
           item.sourcePreferenceId,
           `${field}.sourcePreferenceId`,
         );
-        const preference = selection.find(({ preferenceId }) => preferenceId === sourcePreferenceId);
+        const preference = selection.find(
+          ({ preferenceId }) => preferenceId === sourcePreferenceId,
+        );
         if (
           !preference ||
           preference.placeId !== placeId ||
@@ -460,8 +462,7 @@ function normalizedCandidateProvenance(
         const reasonCode = requiredText(item.reasonCode, `${field}.reasonCode`);
         if (selection.some((preference) => preference.placeId === placeId)) {
           throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
-            [field]:
-              "ROUTEBOOK_RECOMMENDED não pode representar um Place com TripPlacePreference.",
+            [field]: "ROUTEBOOK_RECOMMENDED não pode representar um Place com TripPlacePreference.",
           });
         }
 

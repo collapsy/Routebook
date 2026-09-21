@@ -8,10 +8,10 @@ document_type: domain
 owner: Domain
 
 status: Published
-version: "0.3.0"
+version: "0.4.0"
 
 created: "2026-07-17"
-last_updated: "2026-09-18"
+last_updated: "2026-09-21"
 
 authors:
   - RouteBook Team
@@ -3338,7 +3338,60 @@ Antes de aprovar:
 
 ---
 
-### 142. Declaração final
+### 142. Seleção, candidatos e composição da Proposal
+
+`TripPlacePreference` representa intenção explícita do viajante sobre um Place no contexto de uma Trip. Ela continua pertencendo à Trip Collection e não representa planejamento aplicado.
+
+A composição da `ItineraryProposal` distingue semanticamente a origem de candidatos:
+
+```text
+USER_SELECTED
+ROUTEBOOK_RECOMMENDED
+```
+
+`USER_SELECTED` é derivado exclusivamente de TripPlacePreference elegível. `ROUTEBOOK_RECOMMENDED` representa um Place apresentado pelo RouteBook apenas dentro da Proposal para uma lacuna justificável.
+
+A segunda origem não cria uma nova preferência, não modifica a Trip Collection e não transfere ownership de Place para Proposal Management.
+
+#### Relação canônica
+
+```text
+Place
+  ↓ avaliação explícita
+TripPlacePreference
+  ↓
+Minha seleção
+  ↓
+USER_SELECTED ─────────┐
+                       ├→ ItineraryProposal → aceite → Activity
+Recommendation/context ─→ ROUTEBOOK_RECOMMENDED ┘
+```
+
+`NOT_INTERESTED` bloqueia participação automática em ambos os grupos. Place não avaliado somente pode aparecer como `ROUTEBOOK_RECOMMENDED` quando uma política explícita permitir complemento e houver Justificativa sustentada.
+
+#### Planning Role
+
+`PlanningRole` descreve a função de composição de um candidato e permanece distinto da categoria factual do Place:
+
+```text
+EXPERIENCE | FOOD | NIGHTLIFE | OTHER
+```
+
+O papel pode orientar janelas e contexto, mas não redefine o Place.
+
+#### Planejado é derivado
+
+O estado de um Place como planejado continua derivado da presença de Activity correspondente no Itinerary. Ele não é atributo de TripPlacePreference.
+
+Aceitar `ROUTEBOOK_RECOMMENDED` pode criar Activity por meio da Proposal aceita, mas não cria WANT implicitamente.
+
+#### Planejamento parcial
+
+Um Itinerary pode conter poucos itens e Free Periods. Ausência de atividade não é lacuna que deva obrigatoriamente ser preenchida.
+
+---
+
+### 143. Declaração final
 
 O Modelo de Domínio do RouteBook estabelece a representação conceitual oficial do produto.
 

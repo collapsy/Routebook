@@ -9,10 +9,10 @@ document_type: architecture
 owner: Architecture
 
 status: Published
-version: "0.3.0"
+version: "0.4.0"
 
 created: "2026-07-17"
-last_updated: "2026-09-18"
+last_updated: "2026-09-21"
 
 authors:
 
@@ -4305,7 +4305,65 @@ Antes de aprovar:
 
 ## Parte XXXVII — Declaração final
 
-### 224. Declaração arquitetural
+### 224. Fronteira arquitetural da jornada guiada
+
+A jornada guiada é uma orquestração de capacidades existentes e não cria novo Bounded Context.
+
+#### Ownership
+
+- **Trip Management** fornece Trip, período, timezone e contexto de hospedagem.
+- **Place Catalog** fornece Place e fatos catalogados.
+- **Trip Collection** é owner de `TripPlacePreference` e Minha seleção.
+- **Decision Intelligence** pode produzir Recommendation e Justificativa, sem registrar preferência.
+- **Proposal Management** é owner da `ItineraryProposal` e da proveniência dos candidatos apresentados nela.
+- **Itinerary Planning** é owner de Activity, Free Period, Itinerary e `ReplanningWindow`.
+- **Planning Assurance** continua responsável por conflitos de planejamento.
+
+#### Candidatos
+
+Proposal Management pode consumir duas origens semanticamente distintas:
+
+```text
+Trip Collection
+  → USER_SELECTED
+
+Decision Intelligence / políticas de composição
+  → ROUTEBOOK_RECOMMENDED
+```
+
+A segunda origem não pode escrever na Trip Collection.
+
+`ROUTEBOOK_RECOMMENDED` deve referenciar Place canônico e carregar proveniência/Justificativa suficientes para auditoria. A forma física do contrato pertence a incremento posterior.
+
+#### Fluxo inicial
+
+```text
+Trip Collection ─┐
+Place Catalog ───┼→ Proposal Management → Itinerary Proposal
+Trip Management ─┤                         ↓ aceite
+Mobility ────────┤                     Itinerary Planning
+Decision Intel. ─┘
+```
+
+#### Fluxo de replanejamento
+
+O mesmo pipeline é reutilizado com `generationScope = REPLAN`. Itinerary Planning fornece `ReplanningWindow`; Proposal Management não pode propor efeito fora da janela elegível.
+
+#### Proibição de estado duplicado
+
+O wizard não cria uma cópia canônica de:
+
+- TripPlacePreference;
+- Itinerary;
+- Activity;
+- Proposal;
+- estado “planejado”.
+
+Qualquer estado de progresso futuro do wizard deve representar somente progresso de interação/configuração, nunca duplicar esses agregados.
+
+---
+
+### 225. Declaração arquitetural
 
 A arquitetura modular do RouteBook deverá preservar limites explícitos entre as capacidades do produto.
 

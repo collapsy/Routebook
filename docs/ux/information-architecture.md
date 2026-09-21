@@ -9,10 +9,10 @@ document_type: ux
 owner: Experience
 
 status: Published
-version: "0.2.0"
+version: "0.3.0"
 
 created: "2026-07-17"
-last_updated: "2026-09-18"
+last_updated: "2026-09-21"
 
 authors:
 
@@ -2261,7 +2261,74 @@ Antes de aprovar este documento, verificar:
 
 ---
 
-## 129. Declaração final
+## 129. Modos da experiência da Trip
+
+A arquitetura da informação distingue três momentos sem criar produtos separados:
+
+```text
+PREPARAÇÃO
+→ PLANEJADA
+→ EM ANDAMENTO
+```
+
+### Preparação
+
+Enquanto ainda não existe planejamento aceito, a experiência pode assumir forma de wizard progressivo:
+
+```text
+Lugares
+→ Contexto da viagem
+→ Revisão
+→ Gerar Proposal
+→ Revisar Proposal
+```
+
+O wizard orienta a ordem de decisão, mas não elimina acesso a Explorar, detalhes do Lugar ou Minha seleção.
+
+### Trip planejada
+
+Depois que uma Proposal é aceita, o wizard deixa de ser a moldura principal. A arquitetura conceitual prioriza:
+
+```text
+Minha viagem
+├── Hoje
+├── Roteiro
+├── Explorar
+├── Minha seleção
+├── Mapa
+└── Configurações da viagem
+```
+
+Minha seleção continua existindo como intenção. Roteiro continua sendo planejamento aplicado.
+
+### Trip em andamento
+
+“Hoje” ganha prioridade operacional. Alterações de preferência permanecem possíveis, mas qualquer impacto no Roteiro passa por replanejamento explícito e `ReplanningWindow`.
+
+### Revisão da seleção
+
+A revisão anterior à geração deve tornar visíveis:
+
+- WANT, MAYBE e NOT_INTERESTED;
+- MUST_DO;
+- distribuição por Planning Role;
+- itens já planejados e ainda não planejados;
+- seleção pequena, excesso de escolhas e lacunas relevantes.
+
+O estado “planejado” é projeção do Itinerary e não parte da preferência.
+
+### Origem na Proposal
+
+A revisão da Proposal deve diferenciar:
+
+- **Selecionado por você** — `USER_SELECTED`;
+- **Recomendado pelo RouteBook** — `ROUTEBOOK_RECOMMENDED`.
+
+A distinção deve ser compreensível sem depender apenas de cor e deve permitir responder “por que este lugar apareceu?”.
+
+---
+
+## 130. Declaração final
 
 A Arquitetura da Informação do RouteBook organiza o produto ao redor da Viagem.
 

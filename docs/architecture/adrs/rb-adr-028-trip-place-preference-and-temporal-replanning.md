@@ -5,14 +5,14 @@ description: Define TripPlacePreference como contrato canônico entre Place e It
 document_type: architecture_decision_record
 owner: Architecture
 status: Draft
-version: "0.1.0"
+version: "0.2.0"
 created: "2026-09-18"
-last_updated: "2026-09-18"
+last_updated: "2026-09-21"
 authors: [RouteBook Team]
 tags: [architecture, adr, trip-collection, place, itinerary-proposal, replanning, timezone]
-related_documents: [RB-CORE-0004, RB-PRD-004, RB-PRD-005, RB-PRD-006, RB-PRD-007, RB-DOM-001, RB-DOM-002, RB-DOM-003, RB-DOM-004, RB-UX-001, RB-UX-002, RB-UX-005, RB-ARC-002, RB-ADR-027, RB-INC-199, RB-CTX-199]
+related_documents: [RB-CORE-0004, RB-PRD-004, RB-PRD-005, RB-PRD-006, RB-PRD-007, RB-DOM-001, RB-DOM-002, RB-DOM-003, RB-DOM-004, RB-UX-001, RB-UX-002, RB-UX-005, RB-ARC-002, RB-ADR-027, RB-INC-199, RB-CTX-199, RB-ADR-029]
 prerequisites: [RB-ADR-027]
-next_documents: []
+next_documents: [RB-ADR-029]
 ai_context:
   priority: critical
   index: true
@@ -256,3 +256,12 @@ Cada passo exige incremento próprio. Este ADR não autoriza implementação ou 
 ## 13. Rollback da decisão
 
 Antes de implementação, o rollback consiste em superseder este ADR por nova decisão. Depois de existir persistência, qualquer reversão deverá preservar intenções e associações já registradas; retornar silenciosamente ao modelo binário não será permitido.
+
+
+## 14. Evolução posterior da origem de candidatos
+
+RB-ADR-029, aprovado em `2026-09-21`, evolui especificamente a exclusividade definida na seção 6.2.
+
+Permanece válido que `WANT` e `MAYBE` autorizado são a única fonte para representar **escolhas do viajante**. Entretanto, a Itinerary Proposal pode também apresentar `ROUTEBOOK_RECOMMENDED` como candidato complementar distinto, com proveniência e Justificativa explícitas, sem criar `TripPlacePreference` e sem aplicar Activity antes do aceite.
+
+Todas as demais decisões deste ADR, incluindo invariantes de `TripPlacePreference`, `MUST_DO`, Planning Role, Proposal não aplicada e `ReplanningWindow`, permanecem vigentes.

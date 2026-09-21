@@ -5,9 +5,9 @@ description: Mantém a ligação entre requisitos, decisões, incrementos, issue
 document_type: implementation-governance
 owner: Delivery
 status: Published
-version: "1.0.0"
+version: "1.1.0"
 created: "2026-07-28"
-last_updated: "2026-09-19"
+last_updated: "2026-09-21"
 authors:
   - RouteBook Team
 tags:
@@ -828,7 +828,6 @@ Ao concluir um incremento:
 | segurança | secrets somente server-side; nenhum secret em UI/log/relatório |
 | Provider | Google Places autorizado e provisionado somente em Preview em 01/09/2026; comparação live confirmou a integração e motivou correção de cobertura; Production continua gate humano separado |
 | validação | Documentation, Engineering/Playwright e Vercel Preview pendentes no HEAD final |
-\n
 
 ## Evidências previstas do RB-INC-173
 
@@ -1193,3 +1192,26 @@ Ao concluir um incremento:
 | composição | REPLAN reutiliza o compositor existente, limitado a eligibleDayIds e sem move/update/remove automático |
 | migration | 0035 aditiva: generation_scope + generation_context, sem DROP/DELETE/UPDATE |
 | validação | Documentation/Engineering pendentes no SHA final |
+
+
+## Evidências previstas do RB-INC-207
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-207-planning-journey-redesign.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-207-planning-journey-redesign.md` |
+| decisão | RB-ADR-029 — candidatos complementares e proveniência na Itinerary Proposal |
+| issue | [#503](https://github.com/collapsy/Routebook/issues/503) |
+| PR | [#504](https://github.com/collapsy/Routebook/pull/504) |
+| branch | `codex/issue-503-planning-journey-redesign` |
+| base | `main@6b4833a5179b42fca9ddf882ae62da8ebb3946f7` |
+| jornada | Explorar → Escolher → Planejar → Proposal → Roteiro → Replanejamento |
+| seleção | TripPlacePreference permanece fonte autoritativa das escolhas do usuário; planejado continua derivado do Itinerary |
+| intenções | WANT padrão; MAYBE opt-in; NOT_INTERESTED excluído; MUST_DO não viola restrições |
+| Planning Roles | EXPERIENCE, FOOD, NIGHTLIFE e OTHER permanecem função de composição distinta da categoria factual |
+| proveniência | Proposal distingue USER_SELECTED de ROUTEBOOK_RECOMMENDED |
+| complementos | somente opcionais, justificáveis e não usados como meta de densidade |
+| pós-wizard | experiência muda de preparação para Trip planejada e, depois, Trip em andamento |
+| replanejamento | explícito, via Proposal REPLAN, limitado por ReplanningWindow |
+| implementação | nenhuma alteração executável, banco, migration, Provider, Preview ou Production |
+| validação | SHA `81644277819c6549f2106eeed41d8075dac7fcab`: Documentation Validation `35617897831` success; Engineering Validation `35617897561` success, incluindo format, docs, lint, typecheck, migrations, testes, smoke, build e testes responsivos |

@@ -34,6 +34,7 @@ describe("TripPlacePreferenceControls", () => {
       />,
     );
 
+    expect(document.querySelector('[data-preference-feedback-slot="true"]')).toBeInTheDocument();
     const maybeButton = screen.getByRole("button", { name: "Talvez" });
     await userEvent.click(maybeButton);
 

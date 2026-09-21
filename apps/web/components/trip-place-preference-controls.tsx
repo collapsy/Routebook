@@ -178,17 +178,19 @@ export function TripPlacePreferenceControls({
         </button>
       ) : null}
 
-      {feedback ? (
-        <p
-          aria-live="polite"
-          className={[styles.status, feedback.status === "error" ? styles.error : ""]
-            .filter(Boolean)
-            .join(" ")}
-          role={feedback.status === "error" ? "alert" : "status"}
-        >
-          {feedback.message}
-        </p>
-      ) : null}
+      <div className={styles.feedbackSlot} data-preference-feedback-slot="true">
+        {feedback ? (
+          <p
+            aria-live="polite"
+            className={[styles.status, feedback.status === "error" ? styles.error : ""]
+              .filter(Boolean)
+              .join(" ")}
+            role={feedback.status === "error" ? "alert" : "status"}
+          >
+            {feedback.message}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }

@@ -13,8 +13,12 @@
   visibility: hidden;
 }
 
-.status {
+.feedbackSlot {
   flex: 1 0 100%;
+  min-height: 2.4rem;
+}
+
+.status {
   margin: 0;
   color: var(--foreground-muted);
   font-size: 0.82rem;

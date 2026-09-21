@@ -436,6 +436,24 @@ describe("DeterministicItineraryProposalGenerator", () => {
     await expect(
       generator.generate(
         input({
+          candidates: [
+            {
+              candidateId: "candidate-recommended",
+              placeId: "place-recommended",
+              title: "Lugar recomendado",
+              provenance: {
+                origin: "ROUTEBOOK_RECOMMENDED",
+                reasonCode: " ",
+              },
+            },
+          ],
+        }),
+      ),
+    ).rejects.toMatchObject({ code: "invalid-candidate" });
+
+    await expect(
+      generator.generate(
+        input({
           days: [{ tripDayId: "day-invalid", date: "2026-02-30", existingActivityCount: 0 }],
         }),
       ),

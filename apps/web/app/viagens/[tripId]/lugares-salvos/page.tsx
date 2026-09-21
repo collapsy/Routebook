@@ -13,7 +13,9 @@ import type { TripPlacePreference } from "@routebook/trip-collection";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
+import { TripPlanningWizard } from "../../../../components/trip-planning-wizard";
 import { TripPlacePreferenceControls } from "../../../../components/trip-place-preference-controls";
+import { TripPlaceSelectionSummary } from "../../../../components/trip-place-selection-summary";
 import { TripMap } from "../../../../components/trip-map";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { presentAccommodationDistance } from "../lugares/distance";
@@ -72,10 +74,12 @@ export default async function TripSelectionPage({
     preferencia?: string;
     adicionadoAoRoteiro?: string;
     erro?: string;
+    preparar?: string;
   }>;
 }) {
   const { tripId } = await params;
-  const { categoria, preferencia, adicionadoAoRoteiro, erro } = await searchParams;
+  const { categoria, preferencia, adicionadoAoRoteiro, erro, preparar } = await searchParams;
+  const wizardMode = preparar === "1";
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
@@ -112,6 +116,7 @@ export default async function TripSelectionPage({
     },
     { WANT: 0, MAYBE: 0, NOT_INTERESTED: 0, mustDo: 0 },
   );
+  const planningCandidateCount = counts.WANT + counts.MAYBE;
   const mapPoints: TripMapPoint[] = filteredPreferences.flatMap((selection) => {
     const place = placesById.get(selection.placeId);
     if (!place) return [];
@@ -122,7 +127,7 @@ export default async function TripSelectionPage({
         kind: "saved-place" as const,
         latitude: place.latitude,
         longitude: place.longitude,
-        href: `/viagens/${tripId}/lugares/${place.slug}`,
+        href: `/viagens/${tripId}/lugares/${place.slug}${wizardMode ? "?preparar=1" : ""}`,
       },
     ];
   });
@@ -144,14 +149,21 @@ export default async function TripSelectionPage({
           ← Voltar para a viagem
         </Link>
         <div className="section-heading-row">
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
-            Abrir roteiro
-          </Link>
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
+          {!wizardMode ? (
+            <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
+              Abrir roteiro
+            </Link>
+          ) : null}
+          <Link
+            className="product-secondary-action"
+            href={`/viagens/${tripId}/lugares${wizardMode ? "?preparar=1" : ""}`}
+          >
             Explorar lugares
           </Link>
         </div>
       </div>
+
+      {wizardMode ? <TripPlanningWizard currentView="selection" tripId={tripId} /> : null}
 
       {preferencia === "atualizada" ? (
         <p className="success-banner" role="status">
@@ -190,24 +202,7 @@ export default async function TripSelectionPage({
         <span className="trip-context-version">{preferences.length} avaliados</span>
       </header>
 
-      <dl className="trip-overview-summary" aria-label="Resumo da seleção">
-        <div>
-          <dt>Quero ir</dt>
-          <dd>{counts.WANT}</dd>
-        </div>
-        <div>
-          <dt>Talvez</dt>
-          <dd>{counts.MAYBE}</dd>
-        </div>
-        <div>
-          <dt>Não tenho interesse</dt>
-          <dd>{counts.NOT_INTERESTED}</dd>
-        </div>
-        <div>
-          <dt>Imperdíveis</dt>
-          <dd>{counts.mustDo}</dd>
-        </div>
-      </dl>
+      <TripPlaceSelectionSummary initialCounts={counts} />
 
       <section className="traveler-context-summary" aria-labelledby="selection-filter-title">
         <div className="section-heading-row">
@@ -216,7 +211,10 @@ export default async function TripSelectionPage({
             <h2 id="selection-filter-title">Categoria</h2>
           </div>
           {selectedCategory ? (
-            <Link className="product-inline-link" href={`/viagens/${tripId}/lugares-salvos`}>
+            <Link
+              className="product-inline-link"
+              href={`/viagens/${tripId}/lugares-salvos${wizardMode ? "?preparar=1" : ""}`}
+            >
               Limpar filtro
             </Link>
           ) : null}
@@ -226,7 +224,7 @@ export default async function TripSelectionPage({
             <Link
               aria-current={selectedCategory === category ? "page" : undefined}
               className="product-secondary-action"
-              href={`/viagens/${tripId}/lugares-salvos?categoria=${category}`}
+              href={`/viagens/${tripId}/lugares-salvos?${wizardMode ? "preparar=1&" : ""}categoria=${category}`}
               key={category}
             >
               {categoryLabels[category]}
@@ -242,7 +240,10 @@ export default async function TripSelectionPage({
           <p className="product-eyebrow">Seleção vazia</p>
           <h2 id="selection-empty-title">Você ainda não avaliou nenhum lugar</h2>
           <p>Explore o destino e marque lugares como Quero ir, Talvez ou Não tenho interesse.</p>
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
+          <Link
+            className="product-secondary-action"
+            href={`/viagens/${tripId}/lugares${wizardMode ? "?preparar=1" : ""}`}
+          >
             Explorar lugares
           </Link>
         </section>
@@ -250,7 +251,10 @@ export default async function TripSelectionPage({
         <section className="traveler-context-summary" aria-labelledby="selection-filter-empty">
           <p className="product-eyebrow">Nenhum resultado</p>
           <h2 id="selection-filter-empty">Nenhum lugar desta categoria está na sua seleção</h2>
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares-salvos`}>
+          <Link
+            className="product-secondary-action"
+            href={`/viagens/${tripId}/lugares-salvos${wizardMode ? "?preparar=1" : ""}`}
+          >
             Ver seleção completa
           </Link>
         </section>
@@ -303,7 +307,8 @@ export default async function TripSelectionPage({
                   summaryLabel="Preferência"
                 />
 
-                <form
+                {!wizardMode ? (
+                  <form
                   action={addSelectionPlaceToItineraryAction}
                   aria-labelledby={titleId}
                   className="saved-place-itinerary-form"
@@ -347,12 +352,13 @@ export default async function TripSelectionPage({
                   <button className="product-button" type="submit">
                     Adicionar ao roteiro
                   </button>
-                </form>
+                  </form>
+                ) : null}
 
                 <div className="section-heading-row saved-place-card-actions">
                   <Link
                     className="product-secondary-action"
-                    href={`/viagens/${tripId}/lugares/${place.slug}`}
+                    href={`/viagens/${tripId}/lugares/${place.slug}${wizardMode ? "?preparar=1" : ""}`}
                   >
                     Ver detalhes
                   </Link>
@@ -362,6 +368,27 @@ export default async function TripSelectionPage({
           })}
         </ul>
       )}
+
+      {wizardMode ? (
+        <section className="traveler-context-summary" aria-labelledby="wizard-places-boundary-title">
+          <p className="product-eyebrow">Fim do passo Lugares</p>
+          <h2 id="wizard-places-boundary-title">
+            {planningCandidateCount > 0
+              ? "Sua seleção está pronta para a próxima etapa"
+              : "Continue explorando antes de avançar"}
+          </h2>
+          <p>
+            {planningCandidateCount > 0
+              ? "A próxima etapa será Contexto da viagem. Ela será conectada no próximo incremento; nenhuma Activity foi criada por esta seleção."
+              : "Marque pelo menos um lugar como Quero ir ou Talvez. Não existe quantidade mínima além de ter uma opção para considerar no planejamento."}
+          </p>
+          {planningCandidateCount === 0 ? (
+            <Link className="product-primary-action" href={`/viagens/${tripId}/lugares?preparar=1`}>
+              Continuar explorando
+            </Link>
+          ) : null}
+        </section>
+      ) : null}
     </section>
   );
 }

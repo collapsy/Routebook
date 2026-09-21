@@ -82,6 +82,7 @@ export function TripPlacePreferenceControls({
 
     const previousIntent = intent;
     const previousPriority = priority;
+    const scrollY = window.scrollY;
     if (operation === "clear") {
       setIntent(undefined);
       setPriority(null);
@@ -116,9 +117,16 @@ export function TripPlacePreferenceControls({
         };
         window.dispatchEvent(new CustomEvent(TRIP_PLACE_PREFERENCE_CHANGED_EVENT, { detail }));
 
-        if (refreshOnSuccess || (operation === "clear" && refreshOnClearSuccess)) {
+        const shouldRefresh =
+          refreshOnSuccess || (operation === "clear" && refreshOnClearSuccess);
+        if (shouldRefresh) {
           router.refresh();
+          return;
         }
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => window.scrollTo(window.scrollX, scrollY));
+        });
       } catch {
         setIntent(previousIntent);
         setPriority(previousPriority);

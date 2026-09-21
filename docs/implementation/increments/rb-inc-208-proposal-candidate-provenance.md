@@ -27,7 +27,7 @@ ai_context:
 - issue: [#505](https://github.com/collapsy/Routebook/issues/505);
 - branch: `codex/issue-505-proposal-candidate-provenance`;
 - base: `main@9d9f8b5c3e8315c0f2e40d94e9d8111e523928fc`;
-- PR: a abrir;
+- PR: [#506](https://github.com/collapsy/Routebook/pull/506);
 - merge na `main`: gate humano explícito.
 
 ## 2. Resultado vertical

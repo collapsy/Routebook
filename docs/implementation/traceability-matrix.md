@@ -1215,3 +1215,25 @@ Ao concluir um incremento:
 | replanejamento | explícito, via Proposal REPLAN, limitado por ReplanningWindow |
 | implementação | nenhuma alteração executável, banco, migration, Provider, Preview ou Production |
 | validação | SHA `81644277819c6549f2106eeed41d8075dac7fcab`: Documentation Validation `35617897831` success; Engineering Validation `35617897561` success, incluindo format, docs, lint, typecheck, migrations, testes, smoke, build e testes responsivos |
+
+## Evidências previstas do RB-INC-208
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-208-proposal-candidate-provenance.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-208-proposal-candidate-provenance.md` |
+| issue | [#505](https://github.com/collapsy/Routebook/issues/505) |
+| branch | `codex/issue-505-proposal-candidate-provenance` |
+| base | `main@9d9f8b5c3e8315c0f2e40d94e9d8111e523928fc` |
+| Candidate | `ItineraryProposalGenerationCandidate` reutilizado; nenhuma abstração paralela criada |
+| origem | `USER_SELECTED | ROUTEBOOK_RECOMMENDED` tipados em Proposal Management |
+| seleção | WANT e MAYBE opt-in recebem proveniência USER_SELECTED ligada à TripPlacePreference |
+| proteção | ROUTEBOOK_RECOMMENDED é inválido para Place presente no snapshot de TripPlacePreference, incluindo NOT_INTERESTED |
+| razão | candidato recomendado exige `reasonCode` estrutural não vazio; taxonomia completa permanece aberta |
+| snapshot | `generationContext.candidateProvenance?` aditivo no schemaVersion 1 |
+| compatibilidade | Proposals antigas sem `candidateProvenance` permanecem legíveis |
+| persistência | JSONB existente reutilizado; nenhuma migration/schema novo |
+| efeitos | nenhuma preferência ou Activity criada; Proposal continua não aplicada antes do aceite |
+| complementos | nenhum caminho de produção gera ROUTEBOOK_RECOMMENDED neste incremento |
+| validação | Documentation/Engineering pendentes no HEAD final |
+

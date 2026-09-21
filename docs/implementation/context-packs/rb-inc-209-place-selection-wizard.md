@@ -70,7 +70,7 @@ A geração automática de ROUTEBOOK_RECOMMENDED não existe e permanece fora de
 
 ### Wizard
 
-O wizard é somente uma moldura de UX.
+O wizard é somente uma moldura de UX, ativada por contexto transitório de navegação (`preparar=1`) e sem estado persistido próprio.
 
 Etapas futuras aparecem como progresso informativo, sem links para páginas ainda inexistentes.
 
@@ -99,7 +99,7 @@ Esse evento é estado de apresentação, não novo estado canônico.
 
 Nenhuma ação de preferência cria Activity.
 
-Minha seleção deixa de expor o formulário `addSelectionPlaceToItineraryAction` durante o wizard.
+Minha seleção deixa de expor o formulário `addSelectionPlaceToItineraryAction` durante o wizard. O detalhe também oculta sua ação manual de Activity nesse contexto; fora do wizard, a capacidade legada permanece compatível.
 
 ## 6. Caminhos permitidos
 

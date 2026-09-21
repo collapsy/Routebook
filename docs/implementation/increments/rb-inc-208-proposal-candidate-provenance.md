@@ -64,8 +64,12 @@ ProposalCandidateProvenance
 
 Regras mínimas:
 
+- candidato com origem explícita exige `placeId`;
 - `USER_SELECTED` exige `sourceId`, atualmente o ID da `TripPlacePreference`;
+- o `sourceId` de `USER_SELECTED` deve apontar para preferência elegível do mesmo Place;
+- `MAYBE` somente valida como `USER_SELECTED` quando `includeMaybe=true`;
 - `ROUTEBOOK_RECOMMENDED` exige `reasonCode`;
+- `ROUTEBOOK_RECOMMENDED` não pode representar Place que possua qualquer `TripPlacePreference`, incluindo `NOT_INTERESTED`;
 - proveniência não existe sem origem explícita;
 - candidato selecionado continua derivado somente de preferência elegível;
 - candidato recomendado não cria `TripPlacePreference`;
@@ -85,7 +89,7 @@ Regras mínimas:
 
 - WANT participa normalmente;
 - MAYBE exige opt-in;
-- NOT_INTERESTED não participa do caminho automático atual;
+- NOT_INTERESTED não participa do caminho automático atual e não pode ser reclassificado como ROUTEBOOK_RECOMMENDED;
 - MUST_DO somente qualifica WANT;
 - TripPlacePreference não cria Activity;
 - Proposal não altera Itinerary antes do aceite;

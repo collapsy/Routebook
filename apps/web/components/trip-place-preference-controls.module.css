@@ -9,6 +9,10 @@
   flex: 1 1 7.5rem;
 }
 
+.placeholder {
+  visibility: hidden;
+}
+
 .status {
   flex: 1 0 100%;
   margin: 0;

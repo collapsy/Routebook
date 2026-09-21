@@ -105,4 +105,32 @@ describe("TripPlacePreferenceControls", () => {
     );
     expect(navigationMocks.refresh).not.toHaveBeenCalled();
   });
+
+  it("preserva o espaço de Imperdível ao trocar para uma intenção que não é Quero ir", async () => {
+    const action = vi.fn(async () => ({
+      status: "success" as const,
+      message: "Preferência atualizada.",
+      preference: { intent: "MAYBE" as const, priority: null },
+    }));
+
+    const { container } = render(
+      <TripPlacePreferenceControls
+        currentIntent="WANT"
+        fields={{ tripId: "trip-1", placeSlug: "praia-do-amor" }}
+        label="Preferência para Praia do Amor"
+        mustDoAction={action}
+        setAction={action}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Marcar como Imperdível" })).toBeVisible();
+    await userEvent.click(screen.getByRole("button", { name: "Talvez" }));
+
+    await waitFor(() =>
+      expect(container.querySelector('[data-must-do-placeholder="true"]')).toBeInTheDocument(),
+    );
+    expect(
+      screen.queryByRole("button", { name: "Marcar como Imperdível" }),
+    ).not.toBeInTheDocument();
+  });
 });

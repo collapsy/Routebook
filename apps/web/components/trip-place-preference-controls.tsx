@@ -136,22 +136,35 @@ export function TripPlacePreferenceControls({
         </button>
       ))}
 
-      {intent === "WANT" && mustDoAction ? (
-        <button
-          aria-pressed={priority === "MUST_DO"}
-          className="product-secondary-action"
-          disabled={disabled}
-          onClick={() =>
-            mutate("must-do", mustDoAction, { enabled: priority === "MUST_DO" ? "0" : "1" })
-          }
-          type="button"
-        >
-          {pendingOperation === "must-do"
-            ? "Atualizando…"
-            : priority === "MUST_DO"
-              ? "Remover de Imperdíveis"
-              : "Marcar como Imperdível"}
-        </button>
+      {mustDoAction ? (
+        intent === "WANT" ? (
+          <button
+            aria-pressed={priority === "MUST_DO"}
+            className="product-secondary-action"
+            disabled={disabled}
+            onClick={() =>
+              mutate("must-do", mustDoAction, { enabled: priority === "MUST_DO" ? "0" : "1" })
+            }
+            type="button"
+          >
+            {pendingOperation === "must-do"
+              ? "Atualizando…"
+              : priority === "MUST_DO"
+                ? "Remover de Imperdíveis"
+                : "Marcar como Imperdível"}
+          </button>
+        ) : (
+          <button
+            aria-hidden="true"
+            className={["product-secondary-action", styles.placeholder].join(" ")}
+            data-must-do-placeholder="true"
+            disabled
+            tabIndex={-1}
+            type="button"
+          >
+            Marcar como Imperdível
+          </button>
+        )
       ) : null}
 
       {intent && clearAction ? (

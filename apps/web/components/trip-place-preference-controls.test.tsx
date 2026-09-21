@@ -115,6 +115,7 @@ describe("TripPlacePreferenceControls", () => {
     monitorFrame?.(0);
 
     expect(scrollToSpy).toHaveBeenCalledWith(0, 640);
+    window.dispatchEvent(new Event("wheel"));
 
     scrollYSpy.mockRestore();
     scrollXSpy.mockRestore();

@@ -1234,3 +1234,24 @@ Ao concluir um incremento:
 | complementos | contrato representável, mas geração real de ROUTEBOOK_RECOMMENDED permanece fora do incremento |
 | wizard | nenhum estado ou UI de wizard criado |
 | validação | HEAD funcional `8e78b39688a6c64b06d6dc727431d29e1eefc36c`: Documentation Validation #2172 (`35636053786`) success; Engineering Validation #2654 (`35636053788`) success; Vercel Preview READY |
+
+
+## Evidências previstas do RB-INC-209
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-209-place-selection-wizard.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-209-place-selection-wizard.md` |
+| issue | [#509](https://github.com/collapsy/Routebook/issues/509) |
+| PR | [#510](https://github.com/collapsy/Routebook/pull/510) |
+| branch | `codex/issue-509-place-selection-wizard` |
+| base | `main@a961028491c06586af040d37f817f2d9c3c39ac5` |
+| auditoria | Explorar, Minha seleção, detalhe, TripPlacePreference e PR #502 auditados antes da implementação |
+| wizard | Etapa 1 Lugares orquestra Explorar e Minha seleção via contexto transitório `preparar=1`; Contexto/Revisão/Proposta aparecem apenas como progresso informativo |
+| preferência | WANT/MAYBE/NOT_INTERESTED atualizados inline; MUST_DO permanece prioridade sobre WANT |
+| progresso | contagens de intenção derivadas da persistência e atualizadas localmente após mutação bem-sucedida |
+| external places | promoção/reconciliação canônica preservada antes de TripPlacePreference |
+| Activity | no modo wizard, Minha seleção e Detalhe não expõem adição direta ao roteiro; E2E exige zero Activities após apenas selecionar Place |
+| compatibilidade | URLs, catálogo, filtros, ranking, imagens, mapa, distância e detalhe preservados; sem migration |
+| origem relacionada | correção funcional da issue #501 / PR #502 reconciliada nesta branch para evitar redirect e perda de scroll |
+| validação | pendente da PR e CI; não considerar verde até resultado real |

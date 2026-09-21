@@ -34,8 +34,13 @@ test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lug
   );
   await expect(card.getByRole("link", { name: "Adicionar ao roteiro" })).toHaveCount(0);
 
+  await card.evaluate((element) => element.scrollIntoView({ block: "center" }));
+  await wantButton.scrollIntoViewIfNeeded();
+  const initialUrl = page.url();
+  const initialScrollY = await page.evaluate(() => window.scrollY);
   await wantButton.click();
 
+  expect(page.url()).toBe(initialUrl);
   await expect(page).toHaveURL(/descoberta=ocultar/);
   await expect(page).toHaveURL(/busca=Praia(%20|\+)do(%20|\+)Amor/);
   await expect(page).toHaveURL(/categoria=beach/);
@@ -45,6 +50,9 @@ test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lug
     { timeout: 15_000 },
   );
   await expect(card.getByRole("button", { name: "Limpar" })).toBeVisible();
+  await expect
+    .poll(async () => Math.abs((await page.evaluate(() => window.scrollY)) - initialScrollY))
+    .toBeLessThanOrEqual(2);
 
   await card.getByRole("link", { name: "Ver detalhes" }).click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares/praia-do-amor$`));

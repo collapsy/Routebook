@@ -11,6 +11,8 @@ import type { PlaceCategory } from "@routebook/place-catalog";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../../components/place-primary-image";
+import { TripPlanningWizard } from "../../../../../components/trip-planning-wizard";
+import { TripPlacePreferenceControls } from "../../../../../components/trip-place-preference-controls";
 import {
   buildGoogleMapsDirectionsUrl,
   buildGoogleMapsPlaceLabel,
@@ -64,11 +66,13 @@ export default async function PlaceDetailsPage({
     adicionadoAoRoteiro?: string;
     dia?: string;
     erroRoteiro?: string;
+    preparar?: string;
   }>;
 }) {
   const { tripId, placeSlug } = await params;
-  const { preferencia, erroPreferencia, adicionadoAoRoteiro, dia, erroRoteiro } =
+  const { preferencia, erroPreferencia, adicionadoAoRoteiro, dia, erroRoteiro, preparar } =
     await searchParams;
+  const wizardMode = preparar === "1";
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
 
   if (!trip) notFound();
@@ -109,13 +113,18 @@ export default async function PlaceDetailsPage({
   return (
     <section className="app-page trip-overview-page">
       <div className="section-heading-row">
-        <Link className="back-link" href={`/viagens/${tripId}/lugares`}>
+        <Link
+          className="back-link"
+          href={`/viagens/${tripId}/lugares${wizardMode ? "?preparar=1" : ""}`}
+        >
           ← Voltar para lugares
         </Link>
         <Link className="product-secondary-action" href={`/viagens/${tripId}`}>
           Visão da viagem
         </Link>
       </div>
+
+      {wizardMode ? <TripPlanningWizard currentView="explore" tripId={tripId} /> : null}
 
       {preferencia === "atualizada" ? (
         <p className="success-banner" role="status">
@@ -222,152 +231,119 @@ export default async function PlaceDetailsPage({
             Sua preferência ajuda a organizar a viagem e não adiciona nem remove este lugar do
             roteiro automaticamente.
           </p>
-          {placePreference ? (
-            <p>
-              <strong>Preferência atual: </strong>
-              {placePreference.intent === "WANT"
-                ? "Quero ir"
-                : placePreference.intent === "MAYBE"
-                  ? "Talvez"
-                  : "Não tenho interesse"}
-              {placePreference.priority === "MUST_DO" ? " · Imperdível" : ""}
-            </p>
-          ) : (
-            <p>Você ainda não avaliou este lugar.</p>
-          )}
         </div>
 
-        <div className="section-heading-row" aria-label="Preferência do lugar">
-          {(["WANT", "MAYBE", "NOT_INTERESTED"] as const).map((intent) => (
-            <form action={setPlacePreferenceAction} key={intent}>
-              <input name="tripId" type="hidden" value={tripId} />
-              <input name="placeSlug" type="hidden" value={placeSlug} />
-              <input name="intent" type="hidden" value={intent} />
-              <button
-                aria-pressed={placePreference?.intent === intent}
-                className="product-secondary-action"
-                type="submit"
+        <TripPlacePreferenceControls
+          className="section-heading-row"
+          clearAction={clearPlacePreferenceAction}
+          currentIntent={placePreference?.intent}
+          currentPriority={placePreference?.priority}
+          fields={{ tripId, placeSlug }}
+          label={`Preferência para ${place.name}`}
+          mustDoAction={setPlaceMustDoAction}
+          setAction={setPlacePreferenceAction}
+          summaryLabel="Preferência atual"
+        />
+      </section>
+
+      {!wizardMode ? (
+        <section
+          className="traveler-context-summary"
+          aria-labelledby="place-itinerary-title"
+          id="adicionar-ao-roteiro"
+        >
+          <div className="section-heading-row">
+            <div>
+              <p className="product-eyebrow">Planejar este lugar</p>
+              <h2 id="place-itinerary-title">Adicionar ao roteiro</h2>
+              <p>
+                Escolha o dia e, se quiser, defina horário e duração. Adicionar ao roteiro é uma
+                ação manual e não altera sua preferência por este lugar.
+              </p>
+            </div>
+            {adicionadoAoRoteiro === "1" && selectedDay ? (
+              <Link
+                className="product-primary-action"
+                href={`/viagens/${tripId}/roteiro?dia=${selectedDay.date}#dia-em-foco`}
               >
-                {intent === "WANT"
-                  ? "Quero ir"
-                  : intent === "MAYBE"
-                    ? "Talvez"
-                    : "Não tenho interesse"}
-              </button>
-            </form>
-          ))}
-        </div>
-
-        {placePreference?.intent === "WANT" ? (
-          <form action={setPlaceMustDoAction}>
-            <input name="tripId" type="hidden" value={tripId} />
-            <input name="placeSlug" type="hidden" value={placeSlug} />
-            <input
-              name="enabled"
-              type="hidden"
-              value={placePreference.priority === "MUST_DO" ? "0" : "1"}
-            />
-            <button
-              aria-pressed={placePreference.priority === "MUST_DO"}
-              className="product-secondary-action"
-              type="submit"
-            >
-              {placePreference.priority === "MUST_DO"
-                ? "Remover de Imperdíveis"
-                : "Marcar como Imperdível"}
-            </button>
-          </form>
-        ) : null}
-
-        {placePreference ? (
-          <form action={clearPlacePreferenceAction}>
-            <input name="tripId" type="hidden" value={tripId} />
-            <input name="placeSlug" type="hidden" value={placeSlug} />
-            <button className="product-inline-link" type="submit">
-              Limpar preferência
-            </button>
-          </form>
-        ) : null}
-      </section>
-
-      <section
-        className="traveler-context-summary"
-        aria-labelledby="place-itinerary-title"
-        id="adicionar-ao-roteiro"
-      >
-        <div className="section-heading-row">
-          <div>
-            <p className="product-eyebrow">Planejar este lugar</p>
-            <h2 id="place-itinerary-title">Adicionar ao roteiro</h2>
-            <p>
-              Escolha o dia e, se quiser, defina horário e duração. Adicionar ao roteiro é uma ação
-              manual e não altera sua preferência por este lugar.
-            </p>
+                Ver dia no roteiro
+              </Link>
+            ) : null}
           </div>
+
           {adicionadoAoRoteiro === "1" && selectedDay ? (
-            <Link
-              className="product-primary-action"
-              href={`/viagens/${tripId}/roteiro?dia=${selectedDay.date}#dia-em-foco`}
-            >
-              Ver dia no roteiro
-            </Link>
+            <p className="success-banner" role="status">
+              {place.name} foi adicionado ao Dia {selectedDay.index} —{" "}
+              {formatDayLabel(selectedDay.date)}.
+            </p>
           ) : null}
-        </div>
+          {erroRoteiro ? (
+            <p className="form-error itinerary-feedback" role="alert">
+              {erroRoteiro}
+            </p>
+          ) : null}
 
-        {adicionadoAoRoteiro === "1" && selectedDay ? (
-          <p className="success-banner" role="status">
-            {place.name} foi adicionado ao Dia {selectedDay.index} —{" "}
-            {formatDayLabel(selectedDay.date)}.
+          <form action={addPlaceToItineraryAction} className="saved-place-itinerary-form">
+            <input name="tripId" type="hidden" value={tripId} />
+            <input name="placeSlug" type="hidden" value={placeSlug} />
+
+            <div className="form-field saved-place-itinerary-day">
+              <label htmlFor="place-itinerary-day">Adicionar ao dia</label>
+              <select
+                defaultValue={selectedDay?.date}
+                id="place-itinerary-day"
+                name="dayDate"
+                required
+              >
+                {tripDays.map((day) => (
+                  <option key={day.date} value={day.date}>
+                    Dia {day.index} — {formatDayLabel(day.date)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="place-itinerary-time">Horário opcional</label>
+              <input id="place-itinerary-time" name="startTime" type="time" />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="place-itinerary-duration">Duração opcional</label>
+              <input
+                id="place-itinerary-duration"
+                min={1}
+                name="durationMinutes"
+                placeholder="Minutos"
+                step={1}
+                type="number"
+              />
+            </div>
+
+            <button className="product-button" type="submit">
+              Adicionar ao roteiro
+            </button>
+          </form>
+        </section>
+      ) : (
+        <section
+          className="traveler-context-summary"
+          aria-labelledby="wizard-detail-boundary-title"
+        >
+          <p className="product-eyebrow">Preparação da viagem</p>
+          <h2 id="wizard-detail-boundary-title">Escolher não é adicionar ao roteiro</h2>
+          <p>
+            Neste passo, use Quero ir, Talvez ou Não tenho interesse. O RouteBook só transformará
+            escolhas em planejamento depois da futura Proposal e da sua revisão explícita.
           </p>
-        ) : null}
-        {erroRoteiro ? (
-          <p className="form-error itinerary-feedback" role="alert">
-            {erroRoteiro}
-          </p>
-        ) : null}
-
-        <form action={addPlaceToItineraryAction} className="saved-place-itinerary-form">
-          <input name="tripId" type="hidden" value={tripId} />
-          <input name="placeSlug" type="hidden" value={placeSlug} />
-
-          <div className="form-field saved-place-itinerary-day">
-            <label htmlFor="place-itinerary-day">Adicionar ao dia</label>
-            <select
-              defaultValue={selectedDay?.date}
-              id="place-itinerary-day"
-              name="dayDate"
-              required
-            >
-              {tripDays.map((day) => (
-                <option key={day.date} value={day.date}>
-                  Dia {day.index} — {formatDayLabel(day.date)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="place-itinerary-time">Horário opcional</label>
-            <input id="place-itinerary-time" name="startTime" type="time" />
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="place-itinerary-duration">Duração opcional</label>
-            <input
-              id="place-itinerary-duration"
-              min={1}
-              name="durationMinutes"
-              placeholder="Minutos"
-              step={1}
-              type="number"
-            />
-          </div>
-
-          <button className="product-button" type="submit">
-            Adicionar ao roteiro
-          </button>
-        </form>
-      </section>
+          <Link
+            className="product-primary-action"
+            href={`/viagens/${tripId}/lugares-salvos?preparar=1`}
+          >
+            Revisar seleção
+          </Link>
+        </section>
+      )}
 
       <section className="traveler-context-summary" aria-labelledby="place-route-title">
         <div className="section-heading-row">

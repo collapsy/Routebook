@@ -22,6 +22,9 @@ import {
   parseTripPlaceIntent,
   setTripPlaceMustDo,
   setTripPlacePreference,
+  tripPlacePreferenceActionError,
+  tripPlacePreferenceActionSuccess,
+  type TripPlacePreferenceActionState,
 } from "../../../../../lib/trip-place-preference";
 import { resolvePlaceDiscoveryRegion } from "../../../../../lib/place-discovery-region";
 
@@ -59,59 +62,56 @@ async function resolvePlaceForTrip(tripId: string, placeSlug: string) {
   return { trip, place };
 }
 
-function revalidatePlaceSurfaces(tripId: string, placeSlug: string): void {
-  revalidatePath(`/viagens/${tripId}`);
-  revalidatePath(`/viagens/${tripId}/lugares`);
-  revalidatePath(`/viagens/${tripId}/lugares/${placeSlug}`);
-  revalidatePath(`/viagens/${tripId}/lugares-salvos`);
-}
-
-export async function setPlacePreferenceAction(formData: FormData): Promise<never> {
+export async function setPlacePreferenceAction(
+  formData: FormData,
+): Promise<TripPlacePreferenceActionState> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
   const intent = parseTripPlaceIntent(String(formData.get("intent") ?? ""));
   const { place } = await resolvePlaceForTrip(tripId, placeSlug);
   if (!intent) {
-    redirect(
-      `/viagens/${tripId}/lugares/${placeSlug}?erroPreferencia=preferencia-invalida#preferencia-do-lugar`,
-    );
+    return tripPlacePreferenceActionError("Escolha uma preferência válida para este lugar.");
   }
 
-  await setTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), {
+  const preference = await setTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), {
     tripId,
     placeId: place.id,
     intent,
   });
 
-  revalidatePlaceSurfaces(tripId, placeSlug);
-  redirect(`/viagens/${tripId}/lugares/${placeSlug}?preferencia=atualizada#preferencia-do-lugar`);
+  return tripPlacePreferenceActionSuccess(preference);
 }
 
-export async function clearPlacePreferenceAction(formData: FormData): Promise<never> {
+export async function clearPlacePreferenceAction(
+  formData: FormData,
+): Promise<TripPlacePreferenceActionState> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
   const { place } = await resolvePlaceForTrip(tripId, placeSlug);
 
   await clearTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), tripId, place.id);
 
-  revalidatePlaceSurfaces(tripId, placeSlug);
-  redirect(`/viagens/${tripId}/lugares/${placeSlug}?preferencia=limpa#preferencia-do-lugar`);
+  return tripPlacePreferenceActionSuccess(
+    null,
+    "Preferência removida. O que já estiver no roteiro continua lá.",
+  );
 }
 
-export async function setPlaceMustDoAction(formData: FormData): Promise<never> {
+export async function setPlaceMustDoAction(
+  formData: FormData,
+): Promise<TripPlacePreferenceActionState> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
   const enabled = String(formData.get("enabled") ?? "") === "1";
   const { place } = await resolvePlaceForTrip(tripId, placeSlug);
 
-  await setTripPlaceMustDo(new DrizzleTripPlacePreferenceRepository(), {
+  const preference = await setTripPlaceMustDo(new DrizzleTripPlacePreferenceRepository(), {
     tripId,
     placeId: place.id,
     enabled,
   });
 
-  revalidatePlaceSurfaces(tripId, placeSlug);
-  redirect(`/viagens/${tripId}/lugares/${placeSlug}?preferencia=atualizada#preferencia-do-lugar`);
+  return tripPlacePreferenceActionSuccess(preference);
 }
 
 export async function addPlaceToItineraryAction(formData: FormData): Promise<never> {

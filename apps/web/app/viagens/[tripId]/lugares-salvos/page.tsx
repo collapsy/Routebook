@@ -9,10 +9,13 @@ import {
   DrizzleTripRepository,
 } from "@routebook/database";
 import { PLACE_CATEGORIES, type PlaceCategory } from "@routebook/place-catalog";
-import type { TripPlaceIntent, TripPlacePreference } from "@routebook/trip-collection";
+import type { TripPlacePreference } from "@routebook/trip-collection";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
+import { TripPlanningWizard } from "../../../../components/trip-planning-wizard";
+import { TripPlacePreferenceControls } from "../../../../components/trip-place-preference-controls";
+import { TripPlaceSelectionProgress } from "../../../../components/trip-place-selection-progress";
 import { TripMap } from "../../../../components/trip-map";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { presentAccommodationDistance } from "../lugares/distance";
@@ -39,12 +42,6 @@ const categoryLabels: Record<PlaceCategory, string> = {
   viewpoint: "Mirante",
   tour: "Passeio",
   shopping: "Compras",
-};
-
-const intentLabels: Record<TripPlaceIntent, string> = {
-  WANT: "Quero ir",
-  MAYBE: "Talvez",
-  NOT_INTERESTED: "Não tenho interesse",
 };
 
 function formatDate(value: string): string {
@@ -77,10 +74,12 @@ export default async function TripSelectionPage({
     preferencia?: string;
     adicionadoAoRoteiro?: string;
     erro?: string;
+    preparar?: string;
   }>;
 }) {
   const { tripId } = await params;
-  const { categoria, preferencia, adicionadoAoRoteiro, erro } = await searchParams;
+  const { categoria, preferencia, adicionadoAoRoteiro, erro, preparar } = await searchParams;
+  const wizardMode = preparar === "1";
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
@@ -117,6 +116,7 @@ export default async function TripSelectionPage({
     },
     { WANT: 0, MAYBE: 0, NOT_INTERESTED: 0, mustDo: 0 },
   );
+  const planningCandidateCount = counts.WANT + counts.MAYBE;
   const mapPoints: TripMapPoint[] = filteredPreferences.flatMap((selection) => {
     const place = placesById.get(selection.placeId);
     if (!place) return [];
@@ -127,7 +127,7 @@ export default async function TripSelectionPage({
         kind: "saved-place" as const,
         latitude: place.latitude,
         longitude: place.longitude,
-        href: `/viagens/${tripId}/lugares/${place.slug}`,
+        href: `/viagens/${tripId}/lugares/${place.slug}${wizardMode ? "?preparar=1" : ""}`,
       },
     ];
   });
@@ -149,14 +149,21 @@ export default async function TripSelectionPage({
           ← Voltar para a viagem
         </Link>
         <div className="section-heading-row">
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
-            Abrir roteiro
-          </Link>
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
+          {!wizardMode ? (
+            <Link className="product-secondary-action" href={`/viagens/${tripId}/roteiro`}>
+              Abrir roteiro
+            </Link>
+          ) : null}
+          <Link
+            className="product-secondary-action"
+            href={`/viagens/${tripId}/lugares${wizardMode ? "?preparar=1" : ""}`}
+          >
             Explorar lugares
           </Link>
         </div>
       </div>
+
+      {wizardMode ? <TripPlanningWizard currentView="selection" tripId={tripId} /> : null}
 
       {preferencia === "atualizada" ? (
         <p className="success-banner" role="status">
@@ -195,24 +202,7 @@ export default async function TripSelectionPage({
         <span className="trip-context-version">{preferences.length} avaliados</span>
       </header>
 
-      <dl className="trip-overview-summary" aria-label="Resumo da seleção">
-        <div>
-          <dt>Quero ir</dt>
-          <dd>{counts.WANT}</dd>
-        </div>
-        <div>
-          <dt>Talvez</dt>
-          <dd>{counts.MAYBE}</dd>
-        </div>
-        <div>
-          <dt>Não tenho interesse</dt>
-          <dd>{counts.NOT_INTERESTED}</dd>
-        </div>
-        <div>
-          <dt>Imperdíveis</dt>
-          <dd>{counts.mustDo}</dd>
-        </div>
-      </dl>
+      <TripPlaceSelectionProgress initialCounts={counts} />
 
       <section className="traveler-context-summary" aria-labelledby="selection-filter-title">
         <div className="section-heading-row">
@@ -221,7 +211,10 @@ export default async function TripSelectionPage({
             <h2 id="selection-filter-title">Categoria</h2>
           </div>
           {selectedCategory ? (
-            <Link className="product-inline-link" href={`/viagens/${tripId}/lugares-salvos`}>
+            <Link
+              className="product-inline-link"
+              href={`/viagens/${tripId}/lugares-salvos${wizardMode ? "?preparar=1" : ""}`}
+            >
               Limpar filtro
             </Link>
           ) : null}
@@ -231,7 +224,7 @@ export default async function TripSelectionPage({
             <Link
               aria-current={selectedCategory === category ? "page" : undefined}
               className="product-secondary-action"
-              href={`/viagens/${tripId}/lugares-salvos?categoria=${category}`}
+              href={`/viagens/${tripId}/lugares-salvos?${wizardMode ? "preparar=1&" : ""}categoria=${category}`}
               key={category}
             >
               {categoryLabels[category]}
@@ -247,7 +240,10 @@ export default async function TripSelectionPage({
           <p className="product-eyebrow">Seleção vazia</p>
           <h2 id="selection-empty-title">Você ainda não avaliou nenhum lugar</h2>
           <p>Explore o destino e marque lugares como Quero ir, Talvez ou Não tenho interesse.</p>
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
+          <Link
+            className="product-secondary-action"
+            href={`/viagens/${tripId}/lugares${wizardMode ? "?preparar=1" : ""}`}
+          >
             Explorar lugares
           </Link>
         </section>
@@ -255,7 +251,10 @@ export default async function TripSelectionPage({
         <section className="traveler-context-summary" aria-labelledby="selection-filter-empty">
           <p className="product-eyebrow">Nenhum resultado</p>
           <h2 id="selection-filter-empty">Nenhum lugar desta categoria está na sua seleção</h2>
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares-salvos`}>
+          <Link
+            className="product-secondary-action"
+            href={`/viagens/${tripId}/lugares-salvos${wizardMode ? "?preparar=1" : ""}`}
+          >
             Ver seleção completa
           </Link>
         </section>
@@ -285,11 +284,6 @@ export default async function TripSelectionPage({
                 <h2 id={titleId}>{place.name}</h2>
                 <p>{place.summary}</p>
                 <p>
-                  <strong>Preferência: </strong>
-                  {intentLabels[selection.intent]}
-                  {selection.priority === "MUST_DO" ? " · Imperdível" : ""}
-                </p>
-                <p>
                   <strong>Roteiro: </strong>
                   {planned ? "Planejado" : "Ainda não planejado"}
                 </p>
@@ -300,110 +294,104 @@ export default async function TripSelectionPage({
                     : "informe a localização da hospedagem para calcular esta distância."}
                 </p>
 
-                <div className="section-heading-row" aria-label={`Preferência para ${place.name}`}>
-                  {(["WANT", "MAYBE", "NOT_INTERESTED"] as const).map((intent) => (
-                    <form action={setSelectionPreferenceAction} key={intent}>
-                      <input name="tripId" type="hidden" value={tripId} />
-                      <input name="placeSlug" type="hidden" value={place.slug} />
-                      <input name="intent" type="hidden" value={intent} />
-                      <button
-                        aria-pressed={selection.intent === intent}
-                        className="product-secondary-action"
-                        type="submit"
-                      >
-                        {intentLabels[intent]}
-                      </button>
-                    </form>
-                  ))}
-                </div>
+                <TripPlacePreferenceControls
+                  className="section-heading-row"
+                  clearAction={clearSelectionPreferenceAction}
+                  currentIntent={selection.intent}
+                  currentPriority={selection.priority}
+                  fields={{ tripId, placeSlug: place.slug }}
+                  label={`Preferência para ${place.name}`}
+                  mustDoAction={setSelectionMustDoAction}
+                  refreshOnClearSuccess
+                  setAction={setSelectionPreferenceAction}
+                  summaryLabel="Preferência"
+                />
 
-                {selection.intent === "WANT" ? (
-                  <form action={setSelectionMustDoAction}>
+                {!wizardMode ? (
+                  <form
+                    action={addSelectionPlaceToItineraryAction}
+                    aria-labelledby={titleId}
+                    className="saved-place-itinerary-form"
+                  >
                     <input name="tripId" type="hidden" value={tripId} />
                     <input name="placeSlug" type="hidden" value={place.slug} />
-                    <input
-                      name="enabled"
-                      type="hidden"
-                      value={selection.priority === "MUST_DO" ? "0" : "1"}
-                    />
-                    <button
-                      aria-pressed={selection.priority === "MUST_DO"}
-                      className="product-secondary-action"
-                      type="submit"
-                    >
-                      {selection.priority === "MUST_DO"
-                        ? "Remover de Imperdíveis"
-                        : "Marcar como Imperdível"}
+
+                    <div className="form-field saved-place-itinerary-day">
+                      <label htmlFor={`day-${place.id}`}>Adicionar ao dia</label>
+                      <select
+                        defaultValue={tripDays[0]?.date}
+                        id={`day-${place.id}`}
+                        name="dayDate"
+                        required
+                      >
+                        {tripDays.map((day) => (
+                          <option key={day.date} value={day.date}>
+                            Dia {day.index} — {formatDate(day.date)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor={`time-${place.id}`}>Horário opcional</label>
+                      <input id={`time-${place.id}`} name="startTime" type="time" />
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor={`duration-${place.id}`}>Duração opcional</label>
+                      <input
+                        id={`duration-${place.id}`}
+                        min={1}
+                        name="durationMinutes"
+                        placeholder="Minutos"
+                        step={1}
+                        type="number"
+                      />
+                    </div>
+
+                    <button className="product-button" type="submit">
+                      Adicionar ao roteiro
                     </button>
                   </form>
                 ) : null}
 
-                <form
-                  action={addSelectionPlaceToItineraryAction}
-                  aria-labelledby={titleId}
-                  className="saved-place-itinerary-form"
-                >
-                  <input name="tripId" type="hidden" value={tripId} />
-                  <input name="placeSlug" type="hidden" value={place.slug} />
-
-                  <div className="form-field saved-place-itinerary-day">
-                    <label htmlFor={`day-${place.id}`}>Adicionar ao dia</label>
-                    <select
-                      defaultValue={tripDays[0]?.date}
-                      id={`day-${place.id}`}
-                      name="dayDate"
-                      required
-                    >
-                      {tripDays.map((day) => (
-                        <option key={day.date} value={day.date}>
-                          Dia {day.index} — {formatDate(day.date)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor={`time-${place.id}`}>Horário opcional</label>
-                    <input id={`time-${place.id}`} name="startTime" type="time" />
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor={`duration-${place.id}`}>Duração opcional</label>
-                    <input
-                      id={`duration-${place.id}`}
-                      min={1}
-                      name="durationMinutes"
-                      placeholder="Minutos"
-                      step={1}
-                      type="number"
-                    />
-                  </div>
-
-                  <button className="product-button" type="submit">
-                    Adicionar ao roteiro
-                  </button>
-                </form>
-
                 <div className="section-heading-row saved-place-card-actions">
                   <Link
                     className="product-secondary-action"
-                    href={`/viagens/${tripId}/lugares/${place.slug}`}
+                    href={`/viagens/${tripId}/lugares/${place.slug}${wizardMode ? "?preparar=1" : ""}`}
                   >
                     Ver detalhes
                   </Link>
-                  <form action={clearSelectionPreferenceAction}>
-                    <input name="tripId" type="hidden" value={tripId} />
-                    <input name="placeSlug" type="hidden" value={place.slug} />
-                    <button className="product-secondary-action" type="submit">
-                      Limpar preferência
-                    </button>
-                  </form>
                 </div>
               </li>
             );
           })}
         </ul>
       )}
+
+      {wizardMode ? (
+        <section
+          className="traveler-context-summary"
+          aria-labelledby="wizard-places-boundary-title"
+        >
+          <p className="product-eyebrow">Fim do passo Lugares</p>
+          <h2 id="wizard-places-boundary-title">
+            {planningCandidateCount > 0
+              ? "Sua seleção está pronta para a próxima etapa"
+              : "Continue explorando antes de avançar"}
+          </h2>
+          <p>
+            {planningCandidateCount > 0
+              ? "Sua seleção está salva. O próximo passo será definir o Contexto da viagem; nenhuma escolha deste passo foi adicionada ao roteiro."
+              : "Marque ao menos uma opção como Quero ir ou Talvez para existir algo a considerar no planejamento. Fora isso, não há quantidade mínima."}
+          </p>
+          {planningCandidateCount === 0 ? (
+            <Link className="product-primary-action" href={`/viagens/${tripId}/lugares?preparar=1`}>
+              Continuar explorando
+            </Link>
+          ) : null}
+        </section>
+      ) : null}
     </section>
   );
 }

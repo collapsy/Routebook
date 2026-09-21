@@ -379,8 +379,8 @@ export default async function TripSelectionPage({
           </h2>
           <p>
             {planningCandidateCount > 0
-              ? "A próxima etapa será Contexto da viagem. Ela será conectada no próximo incremento; nenhuma Activity foi criada por esta seleção."
-              : "Marque pelo menos um lugar como Quero ir ou Talvez. Não existe quantidade mínima além de ter uma opção para considerar no planejamento."}
+              ? "Sua seleção está salva. O próximo passo será definir o Contexto da viagem; nenhuma escolha deste passo foi adicionada ao roteiro."
+              : "Marque ao menos uma opção como Quero ir ou Talvez para existir algo a considerar no planejamento. Fora isso, não há quantidade mínima."}
           </p>
           {planningCandidateCount === 0 ? (
             <Link className="product-primary-action" href={`/viagens/${tripId}/lugares?preparar=1`}>

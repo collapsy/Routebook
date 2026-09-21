@@ -25,7 +25,7 @@ ai_context:
 - Issue: [#509](https://github.com/collapsy/Routebook/issues/509).
 - Branch: `codex/issue-509-place-selection-wizard`.
 - Base: `main@a961028491c06586af040d37f817f2d9c3c39ac5`.
-- Pull Request: pendente de abertura.
+- Pull Request: [#510](https://github.com/collapsy/Routebook/pull/510).
 - Merge na `main`: gate humano explícito.
 
 ## 2. Objetivo

@@ -25,8 +25,6 @@ import { ExternalPlaceImagePreview } from "../../../../components/external-place
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
 import { PlaceRankingMeta } from "../../../../components/place-ranking-meta";
 import { TripPlacePreferenceControls } from "../../../../components/trip-place-preference-controls";
-import { TripPlaceSelectionProgress } from "../../../../components/trip-place-selection-progress";
-import { TripPlanningWizard } from "../../../../components/trip-planning-wizard";
 import { TripMap } from "../../../../components/trip-map";
 import {
   buildGoogleMapsDirectionsUrl,
@@ -539,14 +537,6 @@ export default async function PlacesPage({
   const preferencesByPlaceId = new Map(
     preferences.map((selection) => [selection.placeId, selection]),
   );
-  const selectionCounts = preferences.reduce(
-    (summary, selection) => {
-      summary[selection.intent] += 1;
-      if (selection.priority === "MUST_DO") summary.mustDo += 1;
-      return summary;
-    },
-    { WANT: 0, MAYBE: 0, NOT_INTERESTED: 0, mustDo: 0 },
-  );
   const filteredPlaces = filterPlaces(
     publishedPlaces,
     {
@@ -820,13 +810,6 @@ export default async function PlacesPage({
         ← Voltar para a viagem
       </Link>
 
-      <TripPlanningWizard currentView="explore" tripId={tripId} />
-
-      <TripPlaceSelectionProgress
-        initialCounts={selectionCounts}
-        reviewHref={`/viagens/${tripId}/lugares-salvos`}
-      />
-
       {preferenceSaved ? (
         <p className="success-banner" role="status">
           Preferência atualizada. O lugar entrou em Minha seleção.
@@ -835,8 +818,8 @@ export default async function PlacesPage({
 
       <header className="trip-overview-hero">
         <div>
-          <p className="product-eyebrow">Explorar</p>
-          <h2>Lugares em {trip.destination.name}</h2>
+          <p className="product-eyebrow">Guia de viagem</p>
+          <h1>Lugares em {trip.destination.name}</h1>
           <p>
             Compare lugares para decidir o que vale visitar. As distâncias da lista são em linha
             reta; use as ações de rota para trajetos e tempo de deslocamento.

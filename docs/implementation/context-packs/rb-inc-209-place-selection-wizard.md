@@ -32,7 +32,7 @@ Não criar agregado, persistência, migration ou intenção de domínio específ
 - Branch: `codex/issue-509-place-selection-wizard`.
 - Base: `main@a961028491c06586af040d37f817f2d9c3c39ac5`.
 - Incremento: RB-INC-209.
-- Pull Request: pendente de abertura.
+- Pull Request: [#510](https://github.com/collapsy/Routebook/pull/510).
 - Merge exige autorização humana explícita.
 
 ## 3. Leitura obrigatória

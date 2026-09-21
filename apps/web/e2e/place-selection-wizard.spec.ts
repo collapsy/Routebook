@@ -45,7 +45,7 @@ test("prepara a viagem escolhendo lugares sem criar Activity", async ({ page }) 
   );
 
   const summary = page.getByLabel("Resumo das preferências");
-  await expect(summary).toHaveTextContent("Quero ir1");
+  await expect(summary).toContainText("Quero ir1");
 
   await page.getByRole("link", { name: "Revisar seleção" }).first().click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares-salvos\\?preparar=1$`));

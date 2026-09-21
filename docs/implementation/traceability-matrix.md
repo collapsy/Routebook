@@ -1233,4 +1233,4 @@ Ao concluir um incremento:
 | persistência | sem schema/migration; round-trip de candidate provenance coberto em teste PostgreSQL |
 | complementos | contrato representável, mas geração real de ROUTEBOOK_RECOMMENDED permanece fora do incremento |
 | wizard | nenhum estado ou UI de wizard criado |
-| validação | pendente do CI do pull request |
+| validação | HEAD funcional `8e78b39688a6c64b06d6dc727431d29e1eefc36c`: Documentation Validation #2172 (`35636053786`) success; Engineering Validation #2654 (`35636053788`) success; Vercel Preview READY |

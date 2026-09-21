@@ -137,7 +137,7 @@ describe("setPublishedPlacePreferenceAction", () => {
     databaseMocks.savePreference.mockImplementation(async (selection) => selection);
   });
 
-  it("persiste a preferência e volta ao catálogo preservando o contexto validado", async () => {
+  it("persiste a preferência sem navegar para preservar o contexto da tela", async () => {
     const formData = new FormData();
     formData.set("tripId", tripId);
     formData.set("placeSlug", "praia-do-amor");
@@ -147,7 +147,10 @@ describe("setPublishedPlacePreferenceAction", () => {
       `/viagens/${tripId}/lugares?descoberta=ocultar&busca=Praia+do+Amor&categoria=beach`,
     );
 
-    await expect(setPublishedPlacePreferenceAction(formData)).rejects.toThrow("NEXT_REDIRECT");
+    await expect(setPublishedPlacePreferenceAction(formData)).resolves.toMatchObject({
+      status: "success",
+      preference: { intent: "WANT", priority: null },
+    });
 
     expect(databaseMocks.savePreference).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -157,21 +160,24 @@ describe("setPublishedPlacePreferenceAction", () => {
         priority: null,
       }),
     );
-    expect(navigationMocks.redirect).toHaveBeenCalledWith(
-      `/viagens/${tripId}/lugares?descoberta=ocultar&busca=Praia+do+Amor&categoria=beach`,
-    );
+    expect(cacheMocks.revalidatePath).not.toHaveBeenCalledWith(`/viagens/${tripId}/lugares`);
+    expect(cacheMocks.revalidatePath).toHaveBeenCalledWith(`/viagens/${tripId}/lugares-salvos`);
+    expect(navigationMocks.redirect).not.toHaveBeenCalled();
   });
 
-  it("não aceita returnTo fora da rota de Lugares da própria viagem", async () => {
+  it("ignora returnTo externo porque a atualização inline não navega", async () => {
     const formData = new FormData();
     formData.set("tripId", tripId);
     formData.set("placeSlug", "praia-do-amor");
     formData.set("intent", "MAYBE");
     formData.set("returnTo", "https://example.invalid/phishing");
 
-    await expect(setPublishedPlacePreferenceAction(formData)).rejects.toThrow("NEXT_REDIRECT");
+    await expect(setPublishedPlacePreferenceAction(formData)).resolves.toMatchObject({
+      status: "success",
+      preference: { intent: "MAYBE", priority: null },
+    });
 
-    expect(navigationMocks.redirect).toHaveBeenCalledWith(`/viagens/${tripId}/lugares`);
+    expect(navigationMocks.redirect).not.toHaveBeenCalled();
   });
 });
 
@@ -374,7 +380,10 @@ describe("saveExternalPlaceAction", () => {
   });
 
   it("revalida, materializa como Place global e salva sem publicar", async () => {
-    await expect(saveExternalPlaceAction(promotionForm())).rejects.toThrow("NEXT_REDIRECT");
+    await expect(saveExternalPlaceAction(promotionForm())).resolves.toMatchObject({
+      status: "success",
+      preference: { intent: "WANT", priority: null },
+    });
 
     expect(databaseMocks.promote).toHaveBeenCalledWith({ candidate });
     expect(databaseMocks.savePreference).toHaveBeenCalledWith(
@@ -385,19 +394,17 @@ describe("saveExternalPlaceAction", () => {
         priority: null,
       }),
     );
-    expect(navigationMocks.redirect).toHaveBeenCalledWith(
-      expect.stringContaining(`/viagens/${tripId}/lugares?`),
-    );
-    expect(navigationMocks.redirect).toHaveBeenCalledWith(
-      expect.stringContaining("promocao=salva"),
-    );
+    expect(navigationMocks.redirect).not.toHaveBeenCalled();
   });
 
   it("preserva a intenção escolhida ao materializar candidato externo", async () => {
     const formData = promotionForm();
     formData.set("intent", "MAYBE");
 
-    await expect(saveExternalPlaceAction(formData)).rejects.toThrow("NEXT_REDIRECT");
+    await expect(saveExternalPlaceAction(formData)).resolves.toMatchObject({
+      status: "success",
+      preference: { intent: "MAYBE", priority: null },
+    });
 
     expect(databaseMocks.savePreference).toHaveBeenCalledWith(
       expect.objectContaining({

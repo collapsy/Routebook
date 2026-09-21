@@ -1223,6 +1223,7 @@ Ao concluir um incremento:
 | incremento | `docs/implementation/increments/rb-inc-208-proposal-candidate-provenance.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-208-proposal-candidate-provenance.md` |
 | issue | [#505](https://github.com/collapsy/Routebook/issues/505) |
+| PR | [#506](https://github.com/collapsy/Routebook/pull/506) |
 | branch | `codex/issue-505-proposal-candidate-provenance` |
 | base | `main@9d9f8b5c3e8315c0f2e40d94e9d8111e523928fc` |
 | Candidate | `ItineraryProposalGenerationCandidate` reutilizado; nenhuma abstração paralela criada |
@@ -1235,5 +1236,5 @@ Ao concluir um incremento:
 | persistência | JSONB existente reutilizado; nenhuma migration/schema novo |
 | efeitos | nenhuma preferência ou Activity criada; Proposal continua não aplicada antes do aceite |
 | complementos | nenhum caminho de produção gera ROUTEBOOK_RECOMMENDED neste incremento |
-| validação | Documentation/Engineering pendentes no HEAD final |
+| validação | HEAD funcional `51f261b81dad7f05e231949b72d6979556cd33d8`: Documentation #2160 run `35629147608` success; Engineering #2642 run `35629147276` success; format, docs, lint, typecheck, migrations, testes, smoke, build e 161 Playwright responsivos verdes |
 

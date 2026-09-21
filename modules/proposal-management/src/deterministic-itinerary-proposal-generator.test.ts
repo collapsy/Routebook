@@ -120,6 +120,82 @@ describe("DeterministicItineraryProposalGenerator", () => {
     );
   });
 
+  it("preserva origem e proveniência tipadas no contrato de candidato", async () => {
+    const generator = new DeterministicItineraryProposalGenerator();
+    const seen: GenerateItineraryProposalInput["candidates"][number][] = [];
+
+    await generator.generate(
+      input({
+        candidates: [
+          {
+            candidateId: "recommended-1",
+            placeId: "place-recommended",
+            title: "Sugestão complementar",
+            origin: "ROUTEBOOK_RECOMMENDED",
+            provenance: { reasonCode: "NEAR_SELECTED_PLACES" },
+          },
+        ],
+        createProposedActivityId: (candidate) => {
+          seen.push(candidate);
+          return "proposed-recommended";
+        },
+      }),
+    );
+
+    expect(seen[0]).toMatchObject({
+      origin: "ROUTEBOOK_RECOMMENDED",
+      provenance: { reasonCode: "NEAR_SELECTED_PLACES" },
+    });
+  });
+
+  it("rejeita proveniência incompleta ou desacoplada da origem", async () => {
+    const generator = new DeterministicItineraryProposalGenerator();
+
+    await expect(
+      generator.generate(
+        input({
+          candidates: [
+            {
+              candidateId: "recommended-invalid",
+              title: "Sugestão sem razão",
+              origin: "ROUTEBOOK_RECOMMENDED",
+              provenance: {},
+            },
+          ],
+        }),
+      ),
+    ).rejects.toMatchObject({ code: "invalid-candidate" });
+
+    await expect(
+      generator.generate(
+        input({
+          candidates: [
+            {
+              candidateId: "selected-invalid",
+              title: "Seleção sem preferência",
+              origin: "USER_SELECTED",
+              provenance: {},
+            },
+          ],
+        }),
+      ),
+    ).rejects.toMatchObject({ code: "invalid-candidate" });
+
+    await expect(
+      generator.generate(
+        input({
+          candidates: [
+            {
+              candidateId: "provenance-without-origin",
+              title: "Proveniência sem origem",
+              provenance: { reasonCode: "NEAR_SELECTED_PLACES" },
+            },
+          ],
+        }),
+      ),
+    ).rejects.toMatchObject({ code: "invalid-candidate" });
+  });
+
   it("preenche Dias elegíveis até a meta de densidade sem ultrapassá-la", async () => {
     const generator = new DeterministicItineraryProposalGenerator();
     const candidates = Array.from({ length: 8 }, (_, index) => ({

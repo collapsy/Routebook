@@ -1247,11 +1247,11 @@ Ao concluir um incremento:
 | branch | `codex/issue-509-place-selection-wizard` |
 | base | `main@a961028491c06586af040d37f817f2d9c3c39ac5` |
 | auditoria | Explorar, Minha seleção, detalhe, TripPlacePreference e PR #502 auditados antes da implementação |
-| wizard | Etapa 1 Lugares orquestra Explorar e Minha seleção; Contexto/Revisão/Proposta aparecem apenas como progresso informativo |
+| wizard | Etapa 1 Lugares orquestra Explorar e Minha seleção via contexto transitório `preparar=1`; Contexto/Revisão/Proposta aparecem apenas como progresso informativo |
 | preferência | WANT/MAYBE/NOT_INTERESTED atualizados inline; MUST_DO permanece prioridade sobre WANT |
 | progresso | contagens de intenção derivadas da persistência e atualizadas localmente após mutação bem-sucedida |
 | external places | promoção/reconciliação canônica preservada antes de TripPlacePreference |
-| Activity | Minha seleção não expõe adição direta ao roteiro; E2E exige zero Activities após apenas selecionar Place |
+| Activity | no modo wizard, Minha seleção e Detalhe não expõem adição direta ao roteiro; E2E exige zero Activities após apenas selecionar Place |
 | compatibilidade | URLs, catálogo, filtros, ranking, imagens, mapa, distância e detalhe preservados; sem migration |
 | origem relacionada | correção funcional da issue #501 / PR #502 reconciliada nesta branch para evitar redirect e perda de scroll |
 | validação | pendente da PR e CI; não considerar verde até resultado real |

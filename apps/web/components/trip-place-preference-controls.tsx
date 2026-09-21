@@ -7,6 +7,10 @@ import type { TripPlaceIntent, TripPlacePriority } from "@routebook/trip-collect
 
 import type { TripPlacePreferenceActionState } from "@/lib/trip-place-preference";
 
+import {
+  TRIP_PLACE_PREFERENCE_CHANGED_EVENT,
+  type TripPlacePreferenceChangedDetail,
+} from "./trip-place-preference-events";
 import styles from "./trip-place-preference-controls.module.css";
 
 type PreferenceAction = (formData: FormData) => Promise<TripPlacePreferenceActionState>;
@@ -99,8 +103,21 @@ export function TripPlacePreferenceControls({
           return;
         }
 
-        setIntent(result.preference?.intent);
-        setPriority(result.preference?.priority ?? null);
+        const nextIntent = result.preference?.intent;
+        const nextPriority = result.preference?.priority ?? null;
+        setIntent(nextIntent);
+        setPriority(nextPriority);
+
+        const detail: TripPlacePreferenceChangedDetail = {
+          previousIntent,
+          nextIntent,
+          previousPriority,
+          nextPriority,
+        };
+        window.dispatchEvent(
+          new CustomEvent(TRIP_PLACE_PREFERENCE_CHANGED_EVENT, { detail }),
+        );
+
         if (refreshOnSuccess || (operation === "clear" && refreshOnClearSuccess)) {
           router.refresh();
         }

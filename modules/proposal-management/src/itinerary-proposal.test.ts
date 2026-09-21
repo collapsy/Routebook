@@ -7,6 +7,7 @@ import {
   expireItineraryProposalByTime,
   failItineraryProposalGeneration,
   finalizeAppliedItineraryProposalAcceptance,
+  itineraryProposalCandidateOrigins,
   itineraryProposalStatuses,
   ItineraryProposalTransitionError,
   ItineraryProposalValidationError,
@@ -85,6 +86,13 @@ describe("Itinerary Proposal", () => {
     expect(proposedActivityOperationTypes).toEqual(["add", "move", "update", "remove"]);
   });
 
+  it("publica as duas origens canônicas de candidato da Proposal", () => {
+    expect(itineraryProposalCandidateOrigins).toEqual([
+      "USER_SELECTED",
+      "ROUTEBOOK_RECOMMENDED",
+    ]);
+  });
+
   it("cria uma solicitação vinculada às versões e ao snapshot base", () => {
     const proposal = requestProposal();
 
@@ -136,6 +144,14 @@ describe("Itinerary Proposal", () => {
           priority: "MUST_DO" as const,
         },
       ],
+      candidateProvenance: [
+        {
+          candidateId: " candidate-1 ",
+          placeId: " place-1 ",
+          origin: "USER_SELECTED" as const,
+          sourcePreferenceId: " preference-1 ",
+        },
+      ],
       replanningWindow: {
         capturedAt: "2026-08-24T15:00:00-03:00",
         timeZone: "America/Fortaleza",
@@ -172,6 +188,14 @@ describe("Itinerary Proposal", () => {
           priority: "MUST_DO",
         },
       ],
+      candidateProvenance: [
+        {
+          candidateId: "candidate-1",
+          placeId: "place-1",
+          origin: "USER_SELECTED",
+          sourcePreferenceId: "preference-1",
+        },
+      ],
       replanningWindow: {
         capturedAt: "2026-08-24T18:00:00.000Z",
         timeZone: "America/Fortaleza",
@@ -185,7 +209,96 @@ describe("Itinerary Proposal", () => {
     });
     expect(Object.isFrozen(proposal.generationContext)).toBe(true);
     expect(Object.isFrozen(proposal.generationContext?.selection)).toBe(true);
+    expect(Object.isFrozen(proposal.generationContext?.candidateProvenance)).toBe(true);
     expect(Object.isFrozen(proposal.generationContext?.replanningWindow)).toBe(true);
+  });
+
+  it("mantém legível o generationContext legado sem candidateProvenance", () => {
+    const proposal = requestItineraryProposal({
+      id: "proposal-legacy-context",
+      tripId: "trip-1",
+      itineraryId: "itinerary-1",
+      baseTripContextVersion: 3,
+      baseItineraryVersion: 13,
+      contextSnapshotId: "snapshot-legacy",
+      generationContext: {
+        schemaVersion: 1,
+        includeMaybe: false,
+        selection: [
+          {
+            preferenceId: "preference-legacy",
+            placeId: "place-legacy",
+            intent: "WANT",
+            priority: null,
+          },
+        ],
+      },
+      requestedAt,
+    });
+
+    expect(proposal.generationContext?.candidateProvenance).toBeUndefined();
+    expect(proposal.generationContext?.selection).toHaveLength(1);
+  });
+
+  it("impede ROUTEBOOK_RECOMMENDED sobre Place que já possui TripPlacePreference", () => {
+    expect(() =>
+      requestItineraryProposal({
+        id: "proposal-invalid-recommended",
+        tripId: "trip-1",
+        itineraryId: "itinerary-1",
+        baseTripContextVersion: 3,
+        baseItineraryVersion: 13,
+        contextSnapshotId: "snapshot-invalid-recommended",
+        generationContext: {
+          schemaVersion: 1,
+          includeMaybe: false,
+          selection: [
+            {
+              preferenceId: "preference-no",
+              placeId: "place-no",
+              intent: "NOT_INTERESTED",
+              priority: null,
+            },
+          ],
+          candidateProvenance: [
+            {
+              candidateId: "candidate-recommended",
+              placeId: "place-no",
+              origin: "ROUTEBOOK_RECOMMENDED",
+              reasonCode: "MEAL_CONTEXT_GAP",
+            },
+          ],
+        },
+        requestedAt,
+      }),
+    ).toThrowError(ItineraryProposalValidationError);
+  });
+
+  it("exige razão estrutural não vazia para ROUTEBOOK_RECOMMENDED", () => {
+    expect(() =>
+      requestItineraryProposal({
+        id: "proposal-invalid-reason",
+        tripId: "trip-1",
+        itineraryId: "itinerary-1",
+        baseTripContextVersion: 3,
+        baseItineraryVersion: 13,
+        contextSnapshotId: "snapshot-invalid-reason",
+        generationContext: {
+          schemaVersion: 1,
+          includeMaybe: false,
+          selection: [],
+          candidateProvenance: [
+            {
+              candidateId: "candidate-recommended",
+              placeId: "place-recommended",
+              origin: "ROUTEBOOK_RECOMMENDED",
+              reasonCode: " ",
+            },
+          ],
+        },
+        requestedAt,
+      }),
+    ).toThrowError(ItineraryProposalValidationError);
   });
 
   it("gera identidade quando ela não é fornecida e normaliza uma identidade conhecida", () => {

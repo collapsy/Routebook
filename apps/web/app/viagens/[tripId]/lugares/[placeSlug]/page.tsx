@@ -252,88 +252,94 @@ export default async function PlaceDetailsPage({
           aria-labelledby="place-itinerary-title"
           id="adicionar-ao-roteiro"
         >
-        <div className="section-heading-row">
-          <div>
-            <p className="product-eyebrow">Planejar este lugar</p>
-            <h2 id="place-itinerary-title">Adicionar ao roteiro</h2>
-            <p>
-              Escolha o dia e, se quiser, defina horário e duração. Adicionar ao roteiro é uma ação
-              manual e não altera sua preferência por este lugar.
-            </p>
+          <div className="section-heading-row">
+            <div>
+              <p className="product-eyebrow">Planejar este lugar</p>
+              <h2 id="place-itinerary-title">Adicionar ao roteiro</h2>
+              <p>
+                Escolha o dia e, se quiser, defina horário e duração. Adicionar ao roteiro é uma
+                ação manual e não altera sua preferência por este lugar.
+              </p>
+            </div>
+            {adicionadoAoRoteiro === "1" && selectedDay ? (
+              <Link
+                className="product-primary-action"
+                href={`/viagens/${tripId}/roteiro?dia=${selectedDay.date}#dia-em-foco`}
+              >
+                Ver dia no roteiro
+              </Link>
+            ) : null}
           </div>
+
           {adicionadoAoRoteiro === "1" && selectedDay ? (
-            <Link
-              className="product-primary-action"
-              href={`/viagens/${tripId}/roteiro?dia=${selectedDay.date}#dia-em-foco`}
-            >
-              Ver dia no roteiro
-            </Link>
+            <p className="success-banner" role="status">
+              {place.name} foi adicionado ao Dia {selectedDay.index} —{" "}
+              {formatDayLabel(selectedDay.date)}.
+            </p>
           ) : null}
-        </div>
+          {erroRoteiro ? (
+            <p className="form-error itinerary-feedback" role="alert">
+              {erroRoteiro}
+            </p>
+          ) : null}
 
-        {adicionadoAoRoteiro === "1" && selectedDay ? (
-          <p className="success-banner" role="status">
-            {place.name} foi adicionado ao Dia {selectedDay.index} —{" "}
-            {formatDayLabel(selectedDay.date)}.
-          </p>
-        ) : null}
-        {erroRoteiro ? (
-          <p className="form-error itinerary-feedback" role="alert">
-            {erroRoteiro}
-          </p>
-        ) : null}
+          <form action={addPlaceToItineraryAction} className="saved-place-itinerary-form">
+            <input name="tripId" type="hidden" value={tripId} />
+            <input name="placeSlug" type="hidden" value={placeSlug} />
 
-        <form action={addPlaceToItineraryAction} className="saved-place-itinerary-form">
-          <input name="tripId" type="hidden" value={tripId} />
-          <input name="placeSlug" type="hidden" value={placeSlug} />
+            <div className="form-field saved-place-itinerary-day">
+              <label htmlFor="place-itinerary-day">Adicionar ao dia</label>
+              <select
+                defaultValue={selectedDay?.date}
+                id="place-itinerary-day"
+                name="dayDate"
+                required
+              >
+                {tripDays.map((day) => (
+                  <option key={day.date} value={day.date}>
+                    Dia {day.index} — {formatDayLabel(day.date)}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div className="form-field saved-place-itinerary-day">
-            <label htmlFor="place-itinerary-day">Adicionar ao dia</label>
-            <select
-              defaultValue={selectedDay?.date}
-              id="place-itinerary-day"
-              name="dayDate"
-              required
-            >
-              {tripDays.map((day) => (
-                <option key={day.date} value={day.date}>
-                  Dia {day.index} — {formatDayLabel(day.date)}
-                </option>
-              ))}
-            </select>
-          </div>
+            <div className="form-field">
+              <label htmlFor="place-itinerary-time">Horário opcional</label>
+              <input id="place-itinerary-time" name="startTime" type="time" />
+            </div>
 
-          <div className="form-field">
-            <label htmlFor="place-itinerary-time">Horário opcional</label>
-            <input id="place-itinerary-time" name="startTime" type="time" />
-          </div>
+            <div className="form-field">
+              <label htmlFor="place-itinerary-duration">Duração opcional</label>
+              <input
+                id="place-itinerary-duration"
+                min={1}
+                name="durationMinutes"
+                placeholder="Minutos"
+                step={1}
+                type="number"
+              />
+            </div>
 
-          <div className="form-field">
-            <label htmlFor="place-itinerary-duration">Duração opcional</label>
-            <input
-              id="place-itinerary-duration"
-              min={1}
-              name="durationMinutes"
-              placeholder="Minutos"
-              step={1}
-              type="number"
-            />
-          </div>
-
-          <button className="product-button" type="submit">
-            Adicionar ao roteiro
-          </button>
-        </form>
+            <button className="product-button" type="submit">
+              Adicionar ao roteiro
+            </button>
+          </form>
         </section>
       ) : (
-        <section className="traveler-context-summary" aria-labelledby="wizard-detail-boundary-title">
+        <section
+          className="traveler-context-summary"
+          aria-labelledby="wizard-detail-boundary-title"
+        >
           <p className="product-eyebrow">Preparação da viagem</p>
           <h2 id="wizard-detail-boundary-title">Escolher não é adicionar ao roteiro</h2>
           <p>
             Neste passo, use Quero ir, Talvez ou Não tenho interesse. O RouteBook só transformará
             escolhas em planejamento depois da futura Proposal e da sua revisão explícita.
           </p>
-          <Link className="product-primary-action" href={`/viagens/${tripId}/lugares-salvos?preparar=1`}>
+          <Link
+            className="product-primary-action"
+            href={`/viagens/${tripId}/lugares-salvos?preparar=1`}
+          >
             Revisar seleção
           </Link>
         </section>

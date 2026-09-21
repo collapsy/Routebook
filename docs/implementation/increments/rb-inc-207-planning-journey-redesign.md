@@ -25,7 +25,7 @@ ai_context:
 - Issue: [#503](https://github.com/collapsy/Routebook/issues/503).
 - Branch: `codex/issue-503-planning-journey-redesign`.
 - Base: `main@6b4833a5179b42fca9ddf882ae62da8ebb3946f7`.
-- Pull Request: a registrar após abertura.
+- Pull Request: [#504](https://github.com/collapsy/Routebook/pull/504).
 - Tipo: exclusivamente documental.
 - Merge na `main`: gate humano explícito.
 

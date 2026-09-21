@@ -15,7 +15,7 @@ import { deriveTripDays, findTripById } from "@routebook/trip-management";
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
 import { TripPlanningWizard } from "../../../../components/trip-planning-wizard";
 import { TripPlacePreferenceControls } from "../../../../components/trip-place-preference-controls";
-import { TripPlaceSelectionSummary } from "../../../../components/trip-place-selection-summary";
+import { TripPlaceSelectionProgress } from "../../../../components/trip-place-selection-progress";
 import { TripMap } from "../../../../components/trip-map";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { presentAccommodationDistance } from "../lugares/distance";
@@ -202,7 +202,7 @@ export default async function TripSelectionPage({
         <span className="trip-context-version">{preferences.length} avaliados</span>
       </header>
 
-      <TripPlaceSelectionSummary initialCounts={counts} />
+      <TripPlaceSelectionProgress initialCounts={counts} />
 
       <section className="traveler-context-summary" aria-labelledby="selection-filter-title">
         <div className="section-heading-row">

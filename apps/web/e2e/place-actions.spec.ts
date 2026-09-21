@@ -35,6 +35,7 @@ test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lug
   await expect(card.getByRole("link", { name: "Adicionar ao roteiro" })).toHaveCount(0);
 
   await card.evaluate((element) => element.scrollIntoView({ block: "center" }));
+  await wantButton.scrollIntoViewIfNeeded();
   const initialUrl = page.url();
   const initialScrollY = await page.evaluate(() => window.scrollY);
   await wantButton.click();

@@ -377,7 +377,7 @@ export default async function TripSelectionPage({
           <p className="product-eyebrow">Fim do passo Lugares</p>
           <h2 id="wizard-places-boundary-title">Continue para Contexto quando quiser</h2>
           <p>
-            {counts.WANT + counts.MAYBE > 0
+            {planningCandidateCount > 0
               ? "Sua seleção está salva. O próximo passo usa o contexto da viagem sem adicionar nenhuma escolha ao roteiro."
               : "Você ainda não marcou lugares como Quero ir ou Talvez. Uma seleção vazia também é válida e não bloqueia o contexto da viagem."}
           </p>

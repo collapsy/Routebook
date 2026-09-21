@@ -64,9 +64,9 @@ test("valida São Paulo sem seed e preserva Discovery, Minha seleção, Roteiro,
     page.getByText("Preferência atualizada. O lugar entrou em Minha seleção.", { exact: true }),
   ).toBeVisible({ timeout: 45_000 });
   expect(page.url()).toBe(discoveryUrl);
-  expect(
-    Math.abs((await page.evaluate(() => window.scrollY)) - discoveryScrollY),
-  ).toBeLessThanOrEqual(2);
+  await expect
+    .poll(async () => Math.abs((await page.evaluate(() => window.scrollY)) - discoveryScrollY))
+    .toBeLessThanOrEqual(2);
 
   await page.goto(`/viagens/${trip.id}/lugares-salvos`);
   await expect(page.getByRole("heading", { name: "Minha seleção", exact: true })).toBeVisible();

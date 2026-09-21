@@ -36,7 +36,15 @@ const intentLabels: Readonly<Record<TripPlaceIntent, string>> = Object.freeze({
 
 const subscribeToHydration = () => () => undefined;
 
-const scrollIntentKeys = new Set(["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "]);
+const scrollIntentKeys = new Set([
+  "ArrowUp",
+  "ArrowDown",
+  "PageUp",
+  "PageDown",
+  "Home",
+  "End",
+  " ",
+]);
 
 function guardInlineMutationScroll(scrollX: number, scrollY: number): () => void {
   if (scrollY <= 2) return () => undefined;
@@ -169,15 +177,15 @@ export function TripPlacePreferenceControls({
         if (shouldRefresh) {
           router.refresh();
         }
-        settleScrollGuard();
       } catch {
-        settleScrollGuard();
         setIntent(previousIntent);
         setPriority(previousPriority);
         setFeedback({
           status: "error",
           message: "Não foi possível atualizar sua preferência agora. Tente novamente.",
         });
+      } finally {
+        settleScrollGuard();
       }
     });
   }

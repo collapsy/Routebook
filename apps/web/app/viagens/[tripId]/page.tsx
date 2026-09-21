@@ -140,7 +140,13 @@ export default async function TripOverviewPage({
           <p>Veja os principais dados da viagem e continue de onde parou.</p>
         </div>
         <div className="section-heading-row">
-          <Link className="product-primary-action" href={`/viagens/${tripId}/lugares`}>
+          <Link
+            className="product-primary-action"
+            href={`/viagens/${tripId}/lugares?preparar=1`}
+          >
+            Preparar viagem
+          </Link>
+          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
             Explorar lugares
           </Link>
         </div>

@@ -117,8 +117,7 @@ export function TripPlacePreferenceControls({
         };
         window.dispatchEvent(new CustomEvent(TRIP_PLACE_PREFERENCE_CHANGED_EVENT, { detail }));
 
-        const shouldRefresh =
-          refreshOnSuccess || (operation === "clear" && refreshOnClearSuccess);
+        const shouldRefresh = refreshOnSuccess || (operation === "clear" && refreshOnClearSuccess);
         if (shouldRefresh) {
           router.refresh();
           return;

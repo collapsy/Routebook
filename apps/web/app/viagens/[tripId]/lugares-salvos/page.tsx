@@ -13,6 +13,7 @@ import type { TripPlaceIntent, TripPlacePreference } from "@routebook/trip-colle
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
+import { TripPlacePreferenceControls } from "../../../../components/trip-place-preference-controls";
 import { TripMap } from "../../../../components/trip-map";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { presentAccommodationDistance } from "../lugares/distance";
@@ -300,43 +301,16 @@ export default async function TripSelectionPage({
                     : "informe a localização da hospedagem para calcular esta distância."}
                 </p>
 
-                <div className="section-heading-row" aria-label={`Preferência para ${place.name}`}>
-                  {(["WANT", "MAYBE", "NOT_INTERESTED"] as const).map((intent) => (
-                    <form action={setSelectionPreferenceAction} key={intent}>
-                      <input name="tripId" type="hidden" value={tripId} />
-                      <input name="placeSlug" type="hidden" value={place.slug} />
-                      <input name="intent" type="hidden" value={intent} />
-                      <button
-                        aria-pressed={selection.intent === intent}
-                        className="product-secondary-action"
-                        type="submit"
-                      >
-                        {intentLabels[intent]}
-                      </button>
-                    </form>
-                  ))}
-                </div>
-
-                {selection.intent === "WANT" ? (
-                  <form action={setSelectionMustDoAction}>
-                    <input name="tripId" type="hidden" value={tripId} />
-                    <input name="placeSlug" type="hidden" value={place.slug} />
-                    <input
-                      name="enabled"
-                      type="hidden"
-                      value={selection.priority === "MUST_DO" ? "0" : "1"}
-                    />
-                    <button
-                      aria-pressed={selection.priority === "MUST_DO"}
-                      className="product-secondary-action"
-                      type="submit"
-                    >
-                      {selection.priority === "MUST_DO"
-                        ? "Remover de Imperdíveis"
-                        : "Marcar como Imperdível"}
-                    </button>
-                  </form>
-                ) : null}
+                <TripPlacePreferenceControls
+                  className="section-heading-row"
+                  clearAction={clearSelectionPreferenceAction}
+                  currentIntent={selection.intent}
+                  currentPriority={selection.priority}
+                  fields={{ tripId, placeSlug: place.slug }}
+                  label={`Preferência para ${place.name}`}
+                  mustDoAction={setSelectionMustDoAction}
+                  setAction={setSelectionPreferenceAction}
+                />
 
                 <form
                   action={addSelectionPlaceToItineraryAction}
@@ -391,13 +365,6 @@ export default async function TripSelectionPage({
                   >
                     Ver detalhes
                   </Link>
-                  <form action={clearSelectionPreferenceAction}>
-                    <input name="tripId" type="hidden" value={tripId} />
-                    <input name="placeSlug" type="hidden" value={place.slug} />
-                    <button className="product-secondary-action" type="submit">
-                      Limpar preferência
-                    </button>
-                  </form>
                 </div>
               </li>
             );

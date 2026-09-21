@@ -1126,6 +1126,7 @@ Ao concluir um incremento:
 - Planejado: derivado de Activities ativas do Itinerary; não é persistido.
 - Compatibilidade: rota física e adapter Saved Places permanecem disponíveis, mas deixam de ser a linguagem principal nas superfícies migradas.
 - Proposal, Planning Role e ReplanningWindow permanecem fora deste incremento.
+- Correção de UX: issue [#501](https://github.com/collapsy/Routebook/issues/501), branch `codex/issue-501-place-preference-scroll`; mutações de preferência passam a preservar URL, filtros e posição de rolagem, com feedback localizado.
 - Evidência autoritativa de regressão: pendente do CI do pull request.
 
 

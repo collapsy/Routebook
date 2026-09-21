@@ -11,6 +11,7 @@ import type { PlaceCategory } from "@routebook/place-catalog";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../../components/place-primary-image";
+import { TripPlacePreferenceControls } from "../../../../../components/trip-place-preference-controls";
 import {
   buildGoogleMapsDirectionsUrl,
   buildGoogleMapsPlaceLabel,
@@ -237,57 +238,16 @@ export default async function PlaceDetailsPage({
           )}
         </div>
 
-        <div className="section-heading-row" aria-label="Preferência do lugar">
-          {(["WANT", "MAYBE", "NOT_INTERESTED"] as const).map((intent) => (
-            <form action={setPlacePreferenceAction} key={intent}>
-              <input name="tripId" type="hidden" value={tripId} />
-              <input name="placeSlug" type="hidden" value={placeSlug} />
-              <input name="intent" type="hidden" value={intent} />
-              <button
-                aria-pressed={placePreference?.intent === intent}
-                className="product-secondary-action"
-                type="submit"
-              >
-                {intent === "WANT"
-                  ? "Quero ir"
-                  : intent === "MAYBE"
-                    ? "Talvez"
-                    : "Não tenho interesse"}
-              </button>
-            </form>
-          ))}
-        </div>
-
-        {placePreference?.intent === "WANT" ? (
-          <form action={setPlaceMustDoAction}>
-            <input name="tripId" type="hidden" value={tripId} />
-            <input name="placeSlug" type="hidden" value={placeSlug} />
-            <input
-              name="enabled"
-              type="hidden"
-              value={placePreference.priority === "MUST_DO" ? "0" : "1"}
-            />
-            <button
-              aria-pressed={placePreference.priority === "MUST_DO"}
-              className="product-secondary-action"
-              type="submit"
-            >
-              {placePreference.priority === "MUST_DO"
-                ? "Remover de Imperdíveis"
-                : "Marcar como Imperdível"}
-            </button>
-          </form>
-        ) : null}
-
-        {placePreference ? (
-          <form action={clearPlacePreferenceAction}>
-            <input name="tripId" type="hidden" value={tripId} />
-            <input name="placeSlug" type="hidden" value={placeSlug} />
-            <button className="product-inline-link" type="submit">
-              Limpar preferência
-            </button>
-          </form>
-        ) : null}
+        <TripPlacePreferenceControls
+          className="section-heading-row"
+          clearAction={clearPlacePreferenceAction}
+          currentIntent={placePreference?.intent}
+          currentPriority={placePreference?.priority}
+          fields={{ tripId, placeSlug }}
+          label={`Preferência para ${place.name}`}
+          mustDoAction={setPlaceMustDoAction}
+          setAction={setPlacePreferenceAction}
+        />
       </section>
 
       <section

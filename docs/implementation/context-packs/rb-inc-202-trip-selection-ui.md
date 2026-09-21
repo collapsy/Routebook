@@ -7,7 +7,7 @@ owner: Delivery
 status: Draft
 version: "0.1.0"
 created: "2026-09-18"
-last_updated: "2026-09-18"
+last_updated: "2026-09-21"
 authors: [RouteBook Team]
 tags: [implementation, context-pack, trip-collection, ux, selection]
 related_documents: [RB-INC-202, RB-INC-201, RB-ADR-028, RB-CORE-0004, RB-DOM-001, RB-DOM-002, RB-DOM-003, RB-DOM-004, RB-UX-001, RB-UX-002, RB-UX-005]
@@ -30,6 +30,7 @@ Tornar TripPlacePreference utilizável na interface sem introduzir novo conceito
 - incremento: RB-INC-202;
 - branch: `codex/issue-489-trip-selection-ui`;
 - base: `d2887427aa84834d8074c538f091fcb5898f86f6`.
+- correção: issue [#501](https://github.com/collapsy/Routebook/issues/501), branch `codex/issue-501-place-preference-scroll`.
 
 ## 3. Leitura obrigatória
 
@@ -70,6 +71,9 @@ Tornar TripPlacePreference utilizável na interface sem introduzir novo conceito
 - não usar `DrizzleSavedPlaceRepository` nas superfícies migradas;
 - validar autorização antes de mutation;
 - revalidar as superfícies afetadas;
+- executar mutações de preferência inline, sem redirect de sucesso;
+- manter rota, query string, filtros e posição de rolagem;
+- limitar estado pendente e feedback ao controle acionado;
 - não criar/remover Activity ao alterar preferência.
 
 ## 6. Estado planejado
@@ -117,6 +121,8 @@ Alterar somente os caminhos declarados no RB-INC-202.
 - estado Planejado ignora removed/cancelled;
 - mutações usam trip:edit;
 - textos visíveis evitam Salvos como conceito principal;
+- atualização de preferência não navega nem reinicia a posição da tela;
+- erro restaura a preferência anterior e é anunciado no próprio controle;
 - CI completo verde.
 
 ## 11. Gate humano

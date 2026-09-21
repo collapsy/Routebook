@@ -16,7 +16,9 @@ describe("TripPlaceSelectionProgress", () => {
     );
 
     expect(screen.getByText("Comece pelo que desperta interesse")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent("não existe quantidade mínima obrigatória");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "não existe quantidade mínima obrigatória",
+    );
     expect(screen.getByRole("link", { name: "Revisar seleção" })).toHaveAttribute(
       "href",
       "/viagens/trip-1/lugares-salvos",

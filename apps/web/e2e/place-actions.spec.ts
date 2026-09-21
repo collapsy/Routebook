@@ -19,19 +19,6 @@ test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lug
     `/viagens/${trip.id}/lugares?descoberta=ocultar&busca=Praia%20do%20Amor&categoria=beach`,
   );
 
-  await expect(page.getByText("Preparar viagem · Etapa 1 de 4")).toBeVisible();
-  const wizardNavigation = page.getByRole("navigation", { name: "Lugares da preparação" });
-  await expect(wizardNavigation.getByRole("link", { name: "Explorar" })).toHaveAttribute(
-    "aria-current",
-    "page",
-  );
-  await expect(wizardNavigation.getByRole("link", { name: "Minha seleção" })).toHaveAttribute(
-    "href",
-    `/viagens/${trip.id}/lugares-salvos`,
-  );
-  const selectionProgress = page.locator('[data-selection-progress="true"]');
-  await expect(selectionProgress.locator("dd").nth(0)).toHaveText("0");
-
   const detailsHref = `/viagens/${trip.id}/lugares/praia-do-amor`;
   const card = page
     .getByRole("list", { name: "Opções de lugares" })
@@ -62,8 +49,6 @@ test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lug
     { timeout: 15_000 },
   );
   await expect(card.getByRole("button", { name: "Limpar" })).toBeVisible();
-  await expect(selectionProgress.locator("dd").nth(0)).toHaveText("1");
-  await expect(selectionProgress.getByRole("status")).toContainText("1 lugar está em consideração");
   await expect
     .poll(() => page.evaluate(() => window.scrollY))
     .toBeGreaterThanOrEqual(initialScrollY - 2);

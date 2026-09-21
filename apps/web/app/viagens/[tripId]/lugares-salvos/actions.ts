@@ -85,7 +85,6 @@ export async function setSelectionPreferenceAction(
     intent,
   });
 
-  revalidateSelectionSurfaces(tripId, placeSlug);
   return tripPlacePreferenceActionSuccess(preference);
 }
 
@@ -98,7 +97,6 @@ export async function clearSelectionPreferenceAction(
 
   await clearTripPlacePreference(preferenceRepository, tripId, place.id);
 
-  revalidateSelectionSurfaces(tripId, placeSlug);
   return tripPlacePreferenceActionSuccess(
     null,
     "Preferência removida. O que já estiver no roteiro continua lá.",
@@ -119,8 +117,7 @@ export async function setSelectionMustDoAction(
       placeId: place.id,
       enabled,
     });
-    revalidateSelectionSurfaces(tripId, placeSlug);
-    return tripPlacePreferenceActionSuccess(preference);
+      return tripPlacePreferenceActionSuccess(preference);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Não foi possível atualizar Imperdível.";

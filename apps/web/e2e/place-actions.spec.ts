@@ -63,9 +63,7 @@ test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lug
   );
   await expect(card.getByRole("button", { name: "Limpar" })).toBeVisible();
   await expect(selectionProgress.locator("dd").nth(0)).toHaveText("1");
-  await expect(selectionProgress.getByRole("status")).toContainText(
-    "1 lugar está em consideração",
-  );
+  await expect(selectionProgress.getByRole("status")).toContainText("1 lugar está em consideração");
   await expect
     .poll(() => page.evaluate(() => window.scrollY))
     .toBeGreaterThanOrEqual(initialScrollY - 2);

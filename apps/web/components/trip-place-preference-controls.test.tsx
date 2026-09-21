@@ -77,6 +77,40 @@ describe("TripPlacePreferenceControls", () => {
     );
   });
 
+  it("restaura um salto programático ao topo durante a mutação inline", async () => {
+    let scrollY = 640;
+    const scrollYSpy = vi.spyOn(window, "scrollY", "get").mockImplementation(() => scrollY);
+    const scrollXSpy = vi.spyOn(window, "scrollX", "get").mockReturnValue(0);
+    const scrollToSpy = vi.spyOn(window, "scrollTo").mockImplementation((_x, y) => {
+      scrollY = Number(y);
+    });
+    const action = vi.fn(async () => ({
+      status: "success" as const,
+      message: "Preferência atualizada.",
+      preference: { intent: "WANT" as const, priority: null },
+    }));
+
+    render(
+      <TripPlacePreferenceControls
+        fields={{ tripId: "trip-1", placeSlug: "praia-do-amor" }}
+        label="Preferência para Praia do Amor"
+        setAction={action}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Quero ir" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("Preferência atualizada.");
+
+    scrollY = 0;
+    window.dispatchEvent(new Event("scroll"));
+
+    expect(scrollToSpy).toHaveBeenCalledWith(0, 640);
+
+    scrollYSpy.mockRestore();
+    scrollXSpy.mockRestore();
+    scrollToSpy.mockRestore();
+  });
+
   it("restaura a seleção anterior e anuncia o erro quando a ação falha", async () => {
     const action = vi.fn(async () => ({
       status: "error" as const,

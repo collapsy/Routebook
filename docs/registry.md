@@ -487,7 +487,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-208 | Contratos executáveis de origem e proveniência da Proposal | Implementation | Draft | 0.1.0 | [rb-inc-208-proposal-candidate-provenance.md](./implementation/increments/rb-inc-208-proposal-candidate-provenance.md) |
 | RB-CTX-208 | Context Pack do RB-INC-208 — Origem e proveniência da Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-208-proposal-candidate-provenance.md](./implementation/context-packs/rb-inc-208-proposal-candidate-provenance.md) |
 | RB-INC-209 | Wizard de preparação — escolha de lugares | Implementation | Draft | 0.1.0 | [rb-inc-209-place-selection-wizard.md](./implementation/increments/rb-inc-209-place-selection-wizard.md) |
-| RB-CTX-209 | Context Pack do RB-INC-209 — Wizard de escolha de lugares | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-209-place-selection-wizard.md](./implementation/context-packs/rb-inc-209-place-selection-wizard.md) |
+| RB-CTX-209 | Context Pack do RB-INC-209 — Wizard de escolha de lugares | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-209-place-selection-wizard.md](./implementation/context-packs/rb-inc-209-place-selection-wizard.md) |\n| RB-INC-210 | Wizard de preparação — contexto da viagem | Implementation | Draft | 0.1.0 | [rb-inc-210-trip-context-wizard.md](./implementation/increments/rb-inc-210-trip-context-wizard.md) |\n| RB-CTX-210 | Context Pack do RB-INC-210 — Contexto progressivo do wizard | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-210-trip-context-wizard.md](./implementation/context-packs/rb-inc-210-trip-context-wizard.md) |
 
 ## Status possíveis
 

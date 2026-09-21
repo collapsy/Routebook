@@ -63,7 +63,6 @@ export function TripPlacePreferenceControls({
   const [intent, setIntent] = useState<TripPlaceIntent | undefined>(currentIntent);
   const [priority, setPriority] = useState<TripPlacePriority | null>(currentPriority);
   const [feedback, setFeedback] = useState<TripPlacePreferenceActionState | null>(null);
-  const [pendingOperation, setPendingOperation] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function mutate(
@@ -86,8 +85,6 @@ export function TripPlacePreferenceControls({
       if (nextIntent !== "WANT") setPriority(null);
     }
     setFeedback(null);
-    setPendingOperation(operation);
-
     startTransition(async () => {
       try {
         const result = await action(createFormData(fields, values));
@@ -108,8 +105,6 @@ export function TripPlacePreferenceControls({
           status: "error",
           message: "Não foi possível atualizar sua preferência agora. Tente novamente.",
         });
-      } finally {
-        setPendingOperation(null);
       }
     });
   }
@@ -132,7 +127,7 @@ export function TripPlacePreferenceControls({
           onClick={() => mutate(nextIntent, setAction, { intent: nextIntent })}
           type="button"
         >
-          {pendingOperation === nextIntent ? "Atualizando…" : intentLabels[nextIntent]}
+          {intentLabels[nextIntent]}
         </button>
       ))}
 
@@ -147,11 +142,7 @@ export function TripPlacePreferenceControls({
             }
             type="button"
           >
-            {pendingOperation === "must-do"
-              ? "Atualizando…"
-              : priority === "MUST_DO"
-                ? "Remover de Imperdíveis"
-                : "Marcar como Imperdível"}
+            {priority === "MUST_DO" ? "Remover de Imperdíveis" : "Marcar como Imperdível"}
           </button>
         ) : (
           <button
@@ -174,7 +165,7 @@ export function TripPlacePreferenceControls({
           onClick={() => mutate("clear", clearAction, {})}
           type="button"
         >
-          {pendingOperation === "clear" ? "Limpando…" : "Limpar preferência"}
+          Limpar preferência
         </button>
       ) : null}
 
@@ -188,6 +179,10 @@ export function TripPlacePreferenceControls({
             role={feedback.status === "error" ? "alert" : "status"}
           >
             {feedback.message}
+          </p>
+        ) : isPending ? (
+          <p aria-live="polite" className={styles.status} role="status">
+            Atualizando preferência…
           </p>
         ) : null}
       </div>

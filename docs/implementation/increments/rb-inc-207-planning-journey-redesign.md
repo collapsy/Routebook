@@ -291,6 +291,18 @@ pnpm format:check
 
 Além dos gates documentais exigidos pelo AGENTS.md/CI.
 
+### Evidência real
+
+No SHA `81644277819c6549f2106eeed41d8075dac7fcab`:
+
+- Documentation Validation, run `35617897831`: `success`;
+- Engineering Validation, run `35617897561`: `success`;
+- `Check formatting`: `success`;
+- `Validate documentation`: `success`;
+- lint, typecheck, migrations, testes de componente/domínio, smoke, build e testes responsivos: `success`.
+
+A tentativa de validação local não executou os comandos do projeto porque o ambiente disponível não resolveu `github.com` para clonar a branch. A evidência canônica desta etapa é o GitHub Actions do PR #504.
+
 ## 17. Critérios de aceite
 
 - [x] jornada completa e limites do wizard documentados;
@@ -305,8 +317,8 @@ Além dos gates documentais exigidos pelo AGENTS.md/CI.
 - [x] experiência pós-wizard especificada;
 - [x] replanejamento temporalmente protegido;
 - [x] nenhum conceito concorrente com TripPlacePreference;
-- [ ] validação documental executada;
-- [ ] CI verde.
+- [x] validação documental executada;
+- [x] CI verde.
 
 ## 18. Próximas etapas recomendadas
 

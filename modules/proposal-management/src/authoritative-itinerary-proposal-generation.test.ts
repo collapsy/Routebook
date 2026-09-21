@@ -146,8 +146,18 @@ describe("generateAuthoritativeItineraryProposal", () => {
     expect(inputs[0]?.candidates.map(({ placeId }) => placeId)).toEqual(["place-want"]);
     expect(inputs[0]?.candidates[0]).toMatchObject({
       candidateId: "preference-want",
+      origin: "USER_SELECTED",
+      provenance: { sourceId: "preference-want" },
       reason: "Lugar escolhido como Quero ir na Minha seleção.",
     });
+    expect(proposal.generationContext?.candidates).toEqual([
+      {
+        candidateId: "preference-want",
+        placeId: "place-want",
+        origin: "USER_SELECTED",
+        provenance: { sourceId: "preference-want" },
+      },
+    ]);
   });
 
   it("inclui MAYBE somente quando o comando possui opt-in explícito", async () => {
@@ -228,6 +238,14 @@ describe("generateAuthoritativeItineraryProposal", () => {
           placeId: "place-want",
           intent: "WANT",
           priority: null,
+        },
+      ],
+      candidates: [
+        {
+          candidateId: "preference-want",
+          placeId: "place-want",
+          origin: "USER_SELECTED",
+          provenance: { sourceId: "preference-want" },
         },
       ],
       replanningWindow: {

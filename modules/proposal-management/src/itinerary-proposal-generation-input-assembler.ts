@@ -645,6 +645,10 @@ function normalizeSelectionCandidates(
       return Object.freeze({
         candidateId: preference.preferenceId,
         placeId: place.placeId,
+        origin: "USER_SELECTED" as const,
+        provenance: Object.freeze({
+          sourceId: preference.preferenceId,
+        }),
         title: place.title,
         ...(place.description ? { description: place.description } : {}),
         ...(place.durationMinutes !== undefined ? { durationMinutes: place.durationMinutes } : {}),

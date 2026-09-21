@@ -109,6 +109,196 @@ describe("Itinerary Proposal", () => {
     expect(proposal.generationContext).toBeUndefined();
   });
 
+  it("mantém snapshot legado schemaVersion 1 válido sem candidates", () => {
+    const proposal = requestItineraryProposal({
+      id: "proposal-initial-legacy-context",
+      tripId: "trip-1",
+      itineraryId: "itinerary-1",
+      baseTripContextVersion: 3,
+      baseItineraryVersion: 13,
+      contextSnapshotId: "snapshot-initial",
+      generationScope: "INITIAL",
+      generationContext: {
+        schemaVersion: 1,
+        includeMaybe: false,
+        selection: [
+          {
+            preferenceId: "preference-1",
+            placeId: "place-1",
+            intent: "WANT",
+            priority: null,
+          },
+        ],
+      },
+      requestedAt,
+    });
+
+    expect(proposal.generationContext).toEqual({
+      schemaVersion: 1,
+      includeMaybe: false,
+      selection: [
+        {
+          preferenceId: "preference-1",
+          placeId: "place-1",
+          intent: "WANT",
+          priority: null,
+        },
+      ],
+    });
+    expect(proposal.generationContext).not.toHaveProperty("candidates");
+  });
+
+  it("normaliza candidatos USER_SELECTED e ROUTEBOOK_RECOMMENDED no snapshot", () => {
+    const proposal = requestItineraryProposal({
+      id: "proposal-candidate-snapshot",
+      tripId: "trip-1",
+      itineraryId: "itinerary-1",
+      baseTripContextVersion: 3,
+      baseItineraryVersion: 13,
+      contextSnapshotId: "snapshot-candidates",
+      generationScope: "INITIAL",
+      generationContext: {
+        schemaVersion: 1,
+        includeMaybe: false,
+        selection: [
+          {
+            preferenceId: "preference-1",
+            placeId: "place-1",
+            intent: "WANT",
+            priority: null,
+          },
+        ],
+        candidates: [
+          {
+            candidateId: " selected-1 ",
+            placeId: " place-1 ",
+            origin: "USER_SELECTED",
+            provenance: { sourceId: " preference-1 " },
+          },
+          {
+            candidateId: " recommended-1 ",
+            placeId: " place-2 ",
+            origin: "ROUTEBOOK_RECOMMENDED",
+            provenance: { reasonCode: " NEAR_SELECTED_PLACES " },
+          },
+        ],
+      },
+      requestedAt,
+    });
+
+    expect(proposal.generationContext?.candidates).toEqual([
+      {
+        candidateId: "selected-1",
+        placeId: "place-1",
+        origin: "USER_SELECTED",
+        provenance: { sourceId: "preference-1" },
+      },
+      {
+        candidateId: "recommended-1",
+        placeId: "place-2",
+        origin: "ROUTEBOOK_RECOMMENDED",
+        provenance: { reasonCode: "NEAR_SELECTED_PLACES" },
+      },
+    ]);
+    expect(Object.isFrozen(proposal.generationContext?.candidates)).toBe(true);
+    expect(Object.isFrozen(proposal.generationContext?.candidates?.[0]?.provenance)).toBe(true);
+  });
+
+  it("rejeita candidato recomendado sem razão estrutural", () => {
+    expect(() =>
+      requestItineraryProposal({
+        id: "proposal-invalid-recommended",
+        tripId: "trip-1",
+        itineraryId: "itinerary-1",
+        baseTripContextVersion: 3,
+        baseItineraryVersion: 13,
+        contextSnapshotId: "snapshot-invalid",
+        generationContext: {
+          schemaVersion: 1,
+          includeMaybe: false,
+          selection: [],
+          candidates: [
+            {
+              candidateId: "recommended-1",
+              placeId: "place-recommended",
+              origin: "ROUTEBOOK_RECOMMENDED",
+              provenance: {},
+            },
+          ],
+        },
+        requestedAt,
+      }),
+    ).toThrowError(ItineraryProposalValidationError);
+  });
+
+  it("impede ROUTEBOOK_RECOMMENDED para Place já avaliado, inclusive NOT_INTERESTED", () => {
+    expect(() =>
+      requestItineraryProposal({
+        id: "proposal-recommended-not-interested",
+        tripId: "trip-1",
+        itineraryId: "itinerary-1",
+        baseTripContextVersion: 3,
+        baseItineraryVersion: 13,
+        contextSnapshotId: "snapshot-not-interested",
+        generationContext: {
+          schemaVersion: 1,
+          includeMaybe: false,
+          selection: [
+            {
+              preferenceId: "preference-not-interested",
+              placeId: "place-blocked",
+              intent: "NOT_INTERESTED",
+              priority: null,
+            },
+          ],
+          candidates: [
+            {
+              candidateId: "recommended-blocked",
+              placeId: "place-blocked",
+              origin: "ROUTEBOOK_RECOMMENDED",
+              provenance: { reasonCode: "NEAR_SELECTED_PLACES" },
+            },
+          ],
+        },
+        requestedAt,
+      }),
+    ).toThrowError(ItineraryProposalValidationError);
+  });
+
+  it("exige que USER_SELECTED aponte para preferência elegível do mesmo Place", () => {
+    expect(() =>
+      requestItineraryProposal({
+        id: "proposal-selected-mismatch",
+        tripId: "trip-1",
+        itineraryId: "itinerary-1",
+        baseTripContextVersion: 3,
+        baseItineraryVersion: 13,
+        contextSnapshotId: "snapshot-selected-mismatch",
+        generationContext: {
+          schemaVersion: 1,
+          includeMaybe: false,
+          selection: [
+            {
+              preferenceId: "preference-maybe",
+              placeId: "place-maybe",
+              intent: "MAYBE",
+              priority: null,
+            },
+          ],
+          candidates: [
+            {
+              candidateId: "selected-maybe",
+              placeId: "place-maybe",
+              origin: "USER_SELECTED",
+              provenance: { sourceId: "preference-maybe" },
+            },
+          ],
+        },
+        requestedAt,
+      }),
+    ).toThrowError(ItineraryProposalValidationError);
+  });
+
   it("rejeita REPLAN sem snapshot de geração e ReplanningWindow", () => {
     expect(() =>
       requestItineraryProposal({

@@ -53,6 +53,7 @@ export type GenerateAuthoritativeItineraryProposalCommand = Readonly<{
 export type AuthoritativeItineraryProposalGenerationErrorCode =
   | "invalid-trip-id"
   | "context-trip-mismatch"
+  | "candidate-provenance-missing"
   | "replanning-window-required"
   | "replanning-window-day-mismatch";
 
@@ -79,6 +80,7 @@ function requiredTripId(value: string): string {
 
 function generationContextFrom(
   context: AuthoritativeItineraryProposalGenerationContext,
+  candidates: GenerateItineraryProposalInput["candidates"],
   includeMaybe: boolean,
   generationScope: ItineraryProposalGenerationScope,
 ): ItineraryProposalGenerationContext {
@@ -101,6 +103,23 @@ function generationContextFrom(
           priority: preference.priority,
         }),
       ),
+    ),
+    candidates: Object.freeze(
+      candidates.map((candidate) => {
+        const placeId = candidate.placeId?.trim();
+        if (!placeId || !candidate.origin || !candidate.provenance) {
+          throw new AuthoritativeItineraryProposalGenerationError(
+            "A geração autoritativa exige PlaceId, origem e proveniência para cada candidato.",
+            "candidate-provenance-missing",
+          );
+        }
+        return Object.freeze({
+          candidateId: candidate.candidateId,
+          placeId,
+          origin: candidate.origin,
+          provenance: candidate.provenance,
+        });
+      }),
     ),
     ...(generationScope === "REPLAN" && context.replanningWindow
       ? { replanningWindow: context.replanningWindow }
@@ -152,7 +171,12 @@ export async function generateAuthoritativeItineraryProposal(
     includeMaybe,
     asOf: command.asOf,
   });
-  const generationContext = generationContextFrom(context, includeMaybe, generationScope);
+  const generationContext = generationContextFrom(
+    context,
+    assembled.candidates,
+    includeMaybe,
+    generationScope,
+  );
   const days =
     generationScope === "REPLAN"
       ? eligibleReplanningDays(assembled.days, generationContext.replanningWindow!)

@@ -1215,3 +1215,22 @@ Ao concluir um incremento:
 | replanejamento | explícito, via Proposal REPLAN, limitado por ReplanningWindow |
 | implementação | nenhuma alteração executável, banco, migration, Provider, Preview ou Production |
 | validação | SHA `81644277819c6549f2106eeed41d8075dac7fcab`: Documentation Validation `35617897831` success; Engineering Validation `35617897561` success, incluindo format, docs, lint, typecheck, migrations, testes, smoke, build e testes responsivos |
+
+## Evidências previstas do RB-INC-208
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-208-proposal-candidate-provenance.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-208-proposal-candidate-provenance.md` |
+| issue | [#507](https://github.com/collapsy/Routebook/issues/507) |
+| branch | `codex/issue-507-proposal-candidate-provenance` |
+| base | `main@9d9f8b5c3e8315c0f2e40d94e9d8111e523928fc` |
+| contrato existente | `ItineraryProposalGenerationCandidate` evoluído; nenhuma abstração paralela criada |
+| origem | `USER_SELECTED | ROUTEBOOK_RECOMMENDED` |
+| proveniência | `sourceId` mínimo para USER_SELECTED e `reasonCode` mínimo para ROUTEBOOK_RECOMMENDED |
+| snapshot | `generationContext.candidates` opcional e backward-compatible, persistido no JSONB existente |
+| seleção | WANT padrão; MAYBE opt-in; NOT_INTERESTED excluído; MUST_DO preservado |
+| persistência | sem schema/migration; round-trip de candidate provenance coberto em teste PostgreSQL |
+| complementos | contrato representável, mas geração real de ROUTEBOOK_RECOMMENDED permanece fora do incremento |
+| wizard | nenhum estado ou UI de wizard criado |
+| validação | HEAD funcional `8e78b39688a6c64b06d6dc727431d29e1eefc36c`: Documentation Validation #2172 (`35636053786`) success; Engineering Validation #2654 (`35636053788`) success; Vercel Preview READY |

@@ -11,6 +11,7 @@ import type { PlaceCategory } from "@routebook/place-catalog";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { PlacePrimaryImage } from "../../../../../components/place-primary-image";
+import { TripPlanningWizard } from "../../../../../components/trip-planning-wizard";
 import { TripPlacePreferenceControls } from "../../../../../components/trip-place-preference-controls";
 import {
   buildGoogleMapsDirectionsUrl,
@@ -65,11 +66,13 @@ export default async function PlaceDetailsPage({
     adicionadoAoRoteiro?: string;
     dia?: string;
     erroRoteiro?: string;
+    preparar?: string;
   }>;
 }) {
   const { tripId, placeSlug } = await params;
-  const { preferencia, erroPreferencia, adicionadoAoRoteiro, dia, erroRoteiro } =
+  const { preferencia, erroPreferencia, adicionadoAoRoteiro, dia, erroRoteiro, preparar } =
     await searchParams;
+  const wizardMode = preparar === "1";
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
 
   if (!trip) notFound();
@@ -110,13 +113,18 @@ export default async function PlaceDetailsPage({
   return (
     <section className="app-page trip-overview-page">
       <div className="section-heading-row">
-        <Link className="back-link" href={`/viagens/${tripId}/lugares`}>
+        <Link
+          className="back-link"
+          href={`/viagens/${tripId}/lugares${wizardMode ? "?preparar=1" : ""}`}
+        >
           ← Voltar para lugares
         </Link>
         <Link className="product-secondary-action" href={`/viagens/${tripId}`}>
           Visão da viagem
         </Link>
       </div>
+
+      {wizardMode ? <TripPlanningWizard currentView="explore" tripId={tripId} /> : null}
 
       {preferencia === "atualizada" ? (
         <p className="success-banner" role="status">
@@ -238,11 +246,12 @@ export default async function PlaceDetailsPage({
         />
       </section>
 
-      <section
-        className="traveler-context-summary"
-        aria-labelledby="place-itinerary-title"
-        id="adicionar-ao-roteiro"
-      >
+      {!wizardMode ? (
+        <section
+          className="traveler-context-summary"
+          aria-labelledby="place-itinerary-title"
+          id="adicionar-ao-roteiro"
+        >
         <div className="section-heading-row">
           <div>
             <p className="product-eyebrow">Planejar este lugar</p>
@@ -315,7 +324,20 @@ export default async function PlaceDetailsPage({
             Adicionar ao roteiro
           </button>
         </form>
-      </section>
+        </section>
+      ) : (
+        <section className="traveler-context-summary" aria-labelledby="wizard-detail-boundary-title">
+          <p className="product-eyebrow">Preparação da viagem</p>
+          <h2 id="wizard-detail-boundary-title">Escolher não é adicionar ao roteiro</h2>
+          <p>
+            Neste passo, use Quero ir, Talvez ou Não tenho interesse. O RouteBook só transformará
+            escolhas em planejamento depois da futura Proposal e da sua revisão explícita.
+          </p>
+          <Link className="product-primary-action" href={`/viagens/${tripId}/lugares-salvos?preparar=1`}>
+            Revisar seleção
+          </Link>
+        </section>
+      )}
 
       <section className="traveler-context-summary" aria-labelledby="place-route-title">
         <div className="section-heading-row">

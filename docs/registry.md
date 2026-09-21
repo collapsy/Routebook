@@ -19,13 +19,13 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-PRD-001 | Visão Geral do Produto | Product | Published | 0.1.0 | [product-overview.md](./product/product-overview.md) |
 | RB-PRD-002 | Definição do MVP | Product | Published | 0.1.0 | [mvp-definition.md](./product/mvp-definition.md) |
 | RB-PRD-003 | Personas | Product | Published | 0.1.0 | [personas.md](./product/personas.md) |
-| RB-PRD-004 | Jornadas do Usuário | Product | Published | 0.2.0 | [user-journeys.md](./product/user-journeys.md) |
+| RB-PRD-004 | Jornadas do Usuário | Product | Published | 0.3.0 | [user-journeys.md](./product/user-journeys.md) |
 | RB-PRD-005 | Casos de Uso | Product | Published | 0.2.0 | [use-cases.md](./product/use-cases.md) |
 | RB-PRD-006 | Requisitos Funcionais | Product | Published | 0.2.0 | [functional-requirements.md](./product/functional-requirements.md) |
 | RB-PRD-007 | Regras de Negócio | Product | Published | 0.2.0 | [business-rules.md](./product/business-rules.md) |
 | RB-PRD-008 | Requisitos Não Funcionais | Product | Published | 0.1.0 | [non-functional-requirements.md](./product/non-functional-requirements.md) |
-| RB-UX-001 | Arquitetura da Informação | Experience | Published | 0.2.0 | [information-architecture.md](./ux/information-architecture.md) |
-| RB-UX-002 | Fluxos do Usuário | Experience | Published | 0.2.0 | [user-flows.md](./ux/user-flows.md) |
+| RB-UX-001 | Arquitetura da Informação | Experience | Published | 0.3.0 | [information-architecture.md](./ux/information-architecture.md) |
+| RB-UX-002 | Fluxos do Usuário | Experience | Published | 0.3.0 | [user-flows.md](./ux/user-flows.md) |
 | RB-UX-003 | Inventário de Telas | Experience | Published | 0.2.0 | [screen-inventory.md](./ux/screen-inventory.md) |
 | RB-UX-004 | Wireframes | Experience | Published | 0.3.0 | [wireframes.md](./ux/wireframes.md) |
 | RB-UX-005 | Especificações de Interação | Experience | Published | 0.2.0 | [interaction-specifications.md](./ux/interaction-specifications.md) |
@@ -34,12 +34,12 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-DS-002 | Component Library | Experience | Published | 0.1.0 | [component-library.md](./design-system/component-library.md) |
 | RB-DS-003 | UI Patterns | Experience | Published | 0.1.0 | [ui-patterns.md](./design-system/ui-patterns.md) |
 | RB-DS-004 | Design System Governance | Experience | Published | 0.1.0 | [governance.md](./design-system/governance.md) |
-| RB-DOM-001 | Modelo de Domínio | Domain | Published | 0.3.0 | [domain-model.md](./domain/domain-model.md) |
+| RB-DOM-001 | Modelo de Domínio | Domain | Published | 0.4.0 | [domain-model.md](./domain/domain-model.md) |
 | RB-DOM-002 | Linguagem Ubíqua e Glossário de Domínio | Domain | Published | 0.3.0 | [ubiquitous-language.md](./domain/ubiquitous-language.md) |
-| RB-DOM-003 | Regras de Negócio e Invariantes | Domain | Published | 0.3.0 | [business-rules-and-invariants.md](./domain/business-rules-and-invariants.md) |
+| RB-DOM-003 | Regras de Negócio e Invariantes | Domain | Published | 0.4.0 | [business-rules-and-invariants.md](./domain/business-rules-and-invariants.md) |
 | RB-DOM-004 | Eventos de Domínio e Ciclos de Vida | Domain | Published | 0.3.0 | [domain-events-and-lifecycles.md](./domain/domain-events-and-lifecycles.md) |
 | RB-ARC-001 | Visão Geral da Arquitetura | Architecture | Published | 0.2.0 | [architecture-overview.md](./architecture/architecture-overview.md) |
-| RB-ARC-002 | Arquitetura de Módulos e Contextos Delimitados | Architecture | Published | 0.3.0 | [modules-and-bounded-contexts.md](./architecture/modules-and-bounded-contexts.md) |
+| RB-ARC-002 | Arquitetura de Módulos e Contextos Delimitados | Architecture | Published | 0.4.0 | [modules-and-bounded-contexts.md](./architecture/modules-and-bounded-contexts.md) |
 | RB-ARC-003 | Arquitetura de Integrações e Portas | Architecture | Published | 0.1.0 | [integrations-and-ports.md](./architecture/integrations-and-ports.md) |
 | RB-ARC-004 | Arquitetura de Dados e Persistência | Architecture | Published | 0.1.0 | [data-and-persistence.md](./architecture/data-and-persistence.md) |
 | RB-ARC-005 | Arquitetura de IA e Agentes | Architecture | Published | 0.1.0 | [ai-and-agents.md](./architecture/ai-and-agents.md) |
@@ -101,7 +101,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-ADR-025 | Estratégia de Governança de Custos, Quotas e Capacidade | Architecture Decision Record | Published | 0.1.0 | [rb-adr-025-cost-governance-quotas-and-capacity.md](./architecture/adrs/rb-adr-025-cost-governance-quotas-and-capacity.md) |
 | RB-ADR-026 | Estratégia de Evolução Arquitetural, Depreciação e Ciclo de Vida Tecnológico | Architecture Decision Record | Published | 0.1.0 | [rb-adr-026-architecture-evolution-deprecation-and-technology-lifecycle.md](./architecture/adrs/rb-adr-026-architecture-evolution-deprecation-and-technology-lifecycle.md) |
 | RB-ADR-027 | Transação Local para Aplicação de Itinerary Proposal | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-027-local-transaction-for-itinerary-proposal-application.md](./architecture/adrs/rb-adr-027-local-transaction-for-itinerary-proposal-application.md) |
-| RB-ADR-028 | TripPlacePreference e janela temporal de replanejamento | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-028-trip-place-preference-and-temporal-replanning.md](./architecture/adrs/rb-adr-028-trip-place-preference-and-temporal-replanning.md) |
+| RB-ADR-028 | TripPlacePreference e janela temporal de replanejamento | Architecture Decision Record | Draft | 0.2.0 | [rb-adr-028-trip-place-preference-and-temporal-replanning.md](./architecture/adrs/rb-adr-028-trip-place-preference-and-temporal-replanning.md) |\n| RB-ADR-029 | Candidatos complementares e proveniência na Itinerary Proposal | Architecture Decision Record | Draft | 0.1.0 | [rb-adr-029-complementary-proposal-candidates.md](./architecture/adrs/rb-adr-029-complementary-proposal-candidates.md) |
 | RB-OPS-003 | Runbook de Backup e Restauração | Operations Runbook | Published | 0.1.0 | [rb-ops-003-backup-and-restore-runbook.md](./operations/rb-ops-003-backup-and-restore-runbook.md) |
 | RB-OPS-004 | Plano de Teste de Recuperação de Desastres | Operations Test Plan | Published | 0.1.0 | [rb-ops-004-disaster-recovery-test-plan.md](./operations/rb-ops-004-disaster-recovery-test-plan.md) |
 | RB-OPS-005 | Runbook de Resposta a Incidentes | Operations Runbook | Published | 0.1.0 | [rb-ops-005-incident-response-runbook.md](./operations/rb-ops-005-incident-response-runbook.md) |
@@ -109,7 +109,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-IMP-001 | Operação de Implementação por Incrementos | Implementation | Published | 1.0.0 | [README.md](./implementation/README.md) |
 | RB-IMP-002 | Template de Incremento Vertical | Implementation | Published | 1.0.0 | [increment-template.md](./implementation/increment-template.md) |
 | RB-IMP-003 | Template de Context Pack | Implementation | Published | 1.0.0 | [context-pack-template.md](./implementation/context-pack-template.md) |
-| RB-IMP-004 | Matriz de Rastreabilidade da Implementação | Implementation | Published | 1.0.0 | [traceability-matrix.md](./implementation/traceability-matrix.md) |
+| RB-IMP-004 | Matriz de Rastreabilidade da Implementação | Implementation | Published | 1.1.0 | [traceability-matrix.md](./implementation/traceability-matrix.md) |
 | RB-INC-000 | Implementation Readiness | Implementation Increment | Published | 1.0.0 | [rb-inc-000-implementation-readiness.md](./implementation/increments/rb-inc-000-implementation-readiness.md) |
 | RB-INC-001 | Bootstrap do Monorepo | Implementation Increment | Published | 1.0.0 | [rb-inc-001-monorepo-bootstrap.md](./implementation/increments/rb-inc-001-monorepo-bootstrap.md) |
 | RB-INC-002 | Product Shell e Minhas Viagens | Implementation Increment | Published | 1.0.0 | [rb-inc-002-product-shell.md](./implementation/increments/rb-inc-002-product-shell.md) |
@@ -480,7 +480,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-INC-205 | ReplanningWindow e elegibilidade temporal de delta | Implementation | Draft | 0.1.0 | [rb-inc-205-replanning-window.md](./implementation/increments/rb-inc-205-replanning-window.md) |
 | RB-CTX-205 | Context Pack do RB-INC-205 — ReplanningWindow e delta temporal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-205-replanning-window.md](./implementation/context-packs/rb-inc-205-replanning-window.md) |
 | RB-INC-206 | Proposal REPLAN autoritativa e snapshot temporal | Implementation | Draft | 0.1.0 | [rb-inc-206-proposal-replan-snapshot.md](./implementation/increments/rb-inc-206-proposal-replan-snapshot.md) |
-| RB-CTX-206 | Context Pack do RB-INC-206 — Proposal REPLAN e snapshot temporal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-206-proposal-replan-snapshot.md](./implementation/context-packs/rb-inc-206-proposal-replan-snapshot.md) |
+| RB-CTX-206 | Context Pack do RB-INC-206 — Proposal REPLAN e snapshot temporal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-206-proposal-replan-snapshot.md](./implementation/context-packs/rb-inc-206-proposal-replan-snapshot.md) |\n| RB-INC-207 | Redesenho funcional da jornada guiada de planejamento | Implementation | Draft | 0.1.0 | [rb-inc-207-planning-journey-redesign.md](./implementation/increments/rb-inc-207-planning-journey-redesign.md) |\n| RB-CTX-207 | Context Pack do RB-INC-207 — Jornada guiada de planejamento | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-207-planning-journey-redesign.md](./implementation/context-packs/rb-inc-207-planning-journey-redesign.md) |
 
 ## Status possíveis
 

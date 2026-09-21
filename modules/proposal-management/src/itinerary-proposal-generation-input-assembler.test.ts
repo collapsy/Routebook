@@ -414,10 +414,18 @@ describe("assembleItineraryProposalGenerationInputFromSelection", () => {
     expect(result.candidates[0]).toMatchObject({
       candidateId: "preference-must",
       reason: "Lugar marcado como Imperdível na Minha seleção.",
+      provenance: {
+        origin: "USER_SELECTED",
+        sourcePreferenceId: "preference-must",
+      },
     });
     expect(result.candidates[1]).toMatchObject({
       candidateId: "preference-want",
       reason: "Lugar escolhido como Quero ir na Minha seleção.",
+      provenance: {
+        origin: "USER_SELECTED",
+        sourcePreferenceId: "preference-want",
+      },
     });
   });
 
@@ -433,6 +441,10 @@ describe("assembleItineraryProposalGenerationInputFromSelection", () => {
     ]);
     expect(result.candidates[2]).toMatchObject({
       reason: "Lugar marcado como Talvez e incluído explicitamente nesta geração.",
+      provenance: {
+        origin: "USER_SELECTED",
+        sourcePreferenceId: "preference-maybe",
+      },
     });
   });
 

@@ -41,7 +41,7 @@ Preparar viagem
 → fronteira para Contexto da viagem
 ```
 
-O wizard é orquestração da experiência. A fonte canônica permanece `TripPlacePreference`.
+O wizard é orquestração da experiência. A fonte canônica permanece `TripPlacePreference`. A moldura é ativada por contexto transitório de navegação (`preparar=1`), sem persistência própria, para que Explorar e Minha seleção continuem funcionando normalmente fora da preparação.
 
 ## 3. Auditoria da implementação herdada
 
@@ -117,7 +117,7 @@ O wizard não usa `addSelectionPlaceToItineraryAction`.
 
 O formulário de adição direta ao roteiro foi removido da superfície Minha seleção durante o passo Lugares.
 
-O detalhe de Place mantém a ação manual de planejamento preexistente como capacidade distinta e explicitamente rotulada, fora da ação de preferência.
+No modo wizard, o detalhe de Place também oculta a adição manual ao roteiro e mantém apenas a decisão de preferência. Fora do wizard, a capacidade manual preexistente continua disponível por compatibilidade e permanece distinta da ação de preferência.
 
 A suíte E2E passa a comprovar:
 

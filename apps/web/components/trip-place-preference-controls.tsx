@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 import type { TripPlaceIntent, TripPlacePriority } from "@routebook/trip-collection";
 
 import type { TripPlacePreferenceActionState } from "@/lib/trip-place-preference";
+import {
+  tripPlacePreferenceChangedEvent,
+  type TripPlacePreferenceChangedDetail,
+} from "./trip-place-selection-summary";
 
 import {
   TRIP_PLACE_PREFERENCE_CHANGED_EVENT,

@@ -20,10 +20,7 @@ describe("TripPlanningWizard", () => {
     expect(steps).toHaveTextContent("Revisão");
     expect(steps).toHaveTextContent("Proposta");
 
-    expect(screen.getByRole("link", { name: "Explorar" })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
+    expect(screen.getByRole("link", { name: "Explorar" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: "Minha seleção" })).toHaveAttribute(
       "href",
       "/viagens/trip-1/lugares-salvos",

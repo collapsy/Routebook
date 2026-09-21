@@ -7,7 +7,7 @@
   background: var(--surface-raised, #fff);
 }
 
-.intro h1,
+.intro h2,
 .intro p {
   margin-top: 0;
 }

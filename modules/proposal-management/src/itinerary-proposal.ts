@@ -474,7 +474,7 @@ function normalizedCandidateProvenance(
       }
 
       throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
-        `${field}.origin`: "Use USER_SELECTED ou ROUTEBOOK_RECOMMENDED.",
+        [`${field}.origin`]: "Use USER_SELECTED ou ROUTEBOOK_RECOMMENDED.",
       });
     }),
   );

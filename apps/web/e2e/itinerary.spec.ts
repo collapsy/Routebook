@@ -269,9 +269,7 @@ test("move uma atividade para outro Dia e muda o foco para o destino", async ({
   ).toBeVisible();
 });
 
-test("mantém Minha seleção separada do roteiro durante o wizard", async ({
-  page,
-}, testInfo) => {
+test("mantém Minha seleção separada do roteiro durante o wizard", async ({ page }, testInfo) => {
   const tripName = `Seleção sem Activity ${testInfo.project.name} ${Date.now()}`;
   const now = new Date();
   const { trip } = await createAuthenticatedE2ETrip(
@@ -300,7 +298,7 @@ test("mantém Minha seleção separada do roteiro durante o wizard", async ({
 
   await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-08-22`);
   await expect(page.getByText(/8 dias · 0 atividades/)).toBeVisible();
-  await expect(page.locator(".itinerary-day-card").getByText(placeName, { exact: true })).toHaveCount(
-    0,
-  );
+  await expect(
+    page.locator(".itinerary-day-card").getByText(placeName, { exact: true }),
+  ).toHaveCount(0);
 });

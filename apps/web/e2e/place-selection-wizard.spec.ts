@@ -68,7 +68,9 @@ test("prepara a viagem escolhendo lugares sem criar Activity", async ({ page }) 
   await expect(
     page.getByRole("heading", { name: "Escolher não é adicionar ao roteiro", level: 2 }),
   ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Adicionar ao roteiro", level: 2 })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Adicionar ao roteiro", level: 2 })).toHaveCount(
+    0,
+  );
 
   await page.goto(`/viagens/${trip.id}/roteiro`);
   await expect(

@@ -269,7 +269,6 @@ export default async function TripSelectionPage({
                   summaryLabel="Preferência"
                 />
 
-
                 <div className="section-heading-row saved-place-card-actions">
                   <Link
                     className="product-secondary-action"
@@ -288,9 +287,9 @@ export default async function TripSelectionPage({
         <p className="product-eyebrow">Próxima etapa</p>
         <h2 id="places-next-step-title">Contexto da viagem</h2>
         <p>
-          Depois de revisar os lugares, o planejamento continuará com o contexto da viagem.
-          Nesta etapa, ajuste suas escolhas ou volte a explorar; nada daqui cria atividades no
-          roteiro automaticamente.
+          Depois de revisar os lugares, o planejamento continuará com o contexto da viagem. Nesta
+          etapa, ajuste suas escolhas ou volte a explorar; nada daqui cria atividades no roteiro
+          automaticamente.
         </p>
         <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
           Continuar explorando

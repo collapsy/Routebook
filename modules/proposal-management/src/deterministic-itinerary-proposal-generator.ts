@@ -1,5 +1,6 @@
 import type {
   CompleteItineraryProposalGenerationInput,
+  ItineraryProposalCandidateSource,
   ProposedActivityInput,
 } from "./itinerary-proposal";
 
@@ -35,6 +36,7 @@ export type ItineraryProposalGenerationCandidate = Readonly<{
   category?: string;
   latitude?: number;
   longitude?: number;
+  provenance?: ItineraryProposalCandidateSource;
 }>;
 
 export type GenerateItineraryProposalInput = Readonly<{
@@ -188,6 +190,45 @@ function normalizeDay(day: ItineraryProposalGenerationDay): ItineraryProposalGen
   });
 }
 
+function normalizedCandidateSource(
+  source: ItineraryProposalCandidateSource | undefined,
+): ItineraryProposalCandidateSource | undefined {
+  if (source === undefined) return undefined;
+  if (!source || typeof source !== "object") {
+    throw new DeterministicItineraryProposalGenerationError(
+      "Informe uma proveniência válida para o candidato.",
+      "invalid-candidate",
+    );
+  }
+
+  if (source.origin === "USER_SELECTED") {
+    return Object.freeze({
+      origin: "USER_SELECTED" as const,
+      sourcePreferenceId: requiredText(
+        source.sourcePreferenceId,
+        "invalid-candidate",
+        "USER_SELECTED exige sourcePreferenceId.",
+      ),
+    });
+  }
+
+  if (source.origin === "ROUTEBOOK_RECOMMENDED") {
+    return Object.freeze({
+      origin: "ROUTEBOOK_RECOMMENDED" as const,
+      reasonCode: requiredText(
+        source.reasonCode,
+        "invalid-candidate",
+        "ROUTEBOOK_RECOMMENDED exige reasonCode estruturado.",
+      ),
+    });
+  }
+
+  throw new DeterministicItineraryProposalGenerationError(
+    "Use USER_SELECTED ou ROUTEBOOK_RECOMMENDED como origem do candidato.",
+    "invalid-candidate",
+  );
+}
+
 function normalizeCandidate(
   candidate: ItineraryProposalGenerationCandidate,
 ): ItineraryProposalGenerationCandidate {
@@ -233,6 +274,7 @@ function normalizeCandidate(
     "invalid-candidate",
     "Informe uma moeda válida.",
   )?.toUpperCase();
+  const provenance = normalizedCandidateSource(candidate.provenance);
 
   if (
     candidate.durationMinutes !== undefined &&
@@ -294,6 +336,7 @@ function normalizeCandidate(
     ...(hasLatitude && hasLongitude
       ? { latitude: candidate.latitude!, longitude: candidate.longitude! }
       : {}),
+    ...(provenance ? { provenance } : {}),
   });
 }
 

@@ -62,13 +62,15 @@ Evoluir os contratos existentes de Proposal Management para representar origem e
 origin = USER_SELECTED | ROUTEBOOK_RECOMMENDED
 ```
 
-- USER_SELECTED exige `provenance.sourceId`;
+- candidato com origem explícita exige `placeId`;
+- USER_SELECTED exige `provenance.sourceId` apontando para preferência elegível do mesmo Place;
 - ROUTEBOOK_RECOMMENDED exige `provenance.reasonCode`;
+- ROUTEBOOK_RECOMMENDED não pode representar Place que possua TripPlacePreference;
 - proveniência sem origem é inválida;
 - seleção autoritativa atual produz somente USER_SELECTED;
 - WANT entra por padrão;
 - MAYBE entra somente com `includeMaybe=true`;
-- NOT_INTERESTED nunca entra nesse caminho;
+- NOT_INTERESTED nunca entra nesse caminho nem pode ser reclassificado como recomendação complementar;
 - MUST_DO só qualifica WANT;
 - não criar preferência, Activity ou mudança no Itinerary por representar candidato.
 
@@ -108,10 +110,10 @@ Qualquer arquivo adicional indispensável deve ser incluído primeiro no increme
 
 ## 9. Verificações mínimas
 
-- USER_SELECTED carrega sourceId da preferência;
+- USER_SELECTED carrega sourceId da preferência e coincide com o mesmo Place;
 - MAYBE continua condicionado ao opt-in;
-- NOT_INTERESTED continua ausente;
-- candidato ROUTEBOOK_RECOMMENDED é representável somente com razão estrutural;
+- NOT_INTERESTED continua ausente e bloqueia reclassificação como ROUTEBOOK_RECOMMENDED;
+- candidato ROUTEBOOK_RECOMMENDED exige Place sem TripPlacePreference e razão estrutural;
 - snapshot legado continua válido;
 - snapshot novo normaliza e congela proveniência;
 - round-trip JSONB preserva candidatos;

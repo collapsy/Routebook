@@ -148,6 +148,7 @@ test("mantém fallback compacto em Lugar de Minha seleção sem fotografia real"
     "true",
     { timeout: 15_000 },
   );
+  await expect(page.getByText("Preferência atualizada.", { exact: true })).toBeVisible();
 
   await page.goto(`/viagens/${trip.id}/lugares-salvos`);
   const selectedCard = page.locator(".place-card").filter({ hasText: "Praia das Minas" }).first();

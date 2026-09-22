@@ -127,8 +127,29 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     .filter({ hasText: "Praia das Minas" })
     .first();
   const praiaDasMinasFallback = praiaDasMinasCard.locator('[data-place-image-fallback="true"]');
+  await expect(praiaDasMinasFallback).toHaveAttribute("data-place-category", "beach");
+  await expect(praiaDasMinasFallback).toHaveAttribute("data-place-initial", "P");
   await expect(praiaDasMinasFallback).toHaveAttribute("data-presentation", "compact");
-  await expect(praiaDasMinasFallback).toHaveText("Sem foto");
+  await expect(praiaDasMinasFallback.locator("strong")).toHaveText("Sem foto");
+  await expect(praiaDasMinasFallback).toContainText("Referência visual · não é foto do local");
+  const compactCardLayout = await praiaDasMinasCard.evaluate((card) => {
+    const primaryAction = Array.from(card.querySelectorAll("a")).find(
+      (link) => link.textContent?.trim() === "Ver detalhes",
+    );
+    const actions = primaryAction?.parentElement;
+    const precedingContent = actions?.previousElementSibling;
+
+    return {
+      alignSelf: window.getComputedStyle(card).alignSelf,
+      actionGap:
+        actions && precedingContent
+          ? actions.getBoundingClientRect().top - precedingContent.getBoundingClientRect().bottom
+          : null,
+    };
+  });
+  expect(compactCardLayout.alignSelf).toBe("start");
+  expect(compactCardLayout.actionGap).not.toBeNull();
+  expect(compactCardLayout.actionGap!).toBeLessThan(32);
 
   await page.goto(`/viagens/${trip.id}/lugares`);
   await page.getByLabel("Nome ou termo").fill("gastronomico");

@@ -33,6 +33,7 @@ export function PlaceRankingMeta({
   categoryRank,
   categoryLabel,
   timeZone,
+  detailsOnly = false,
 }: Readonly<{
   position: number;
   orderLabel: string;
@@ -41,6 +42,7 @@ export function PlaceRankingMeta({
   categoryRank?: number;
   categoryLabel: string;
   timeZone: string;
+  detailsOnly?: boolean;
 }>) {
   if (!quality && !signals) return null;
 
@@ -73,8 +75,7 @@ export function PlaceRankingMeta({
         </div>
       ) : null}
 
-      <details className={styles.details}>
-        <summary>Por que aparece assim?</summary>
+      {detailsOnly ? (
         <div className={styles.evidence}>
           <span>
             #{position} · {orderLabel}
@@ -102,7 +103,38 @@ export function PlaceRankingMeta({
             <span className={styles.reason}>{quality.reasons.join(" · ")}</span>
           ) : null}
         </div>
-      </details>
+      ) : (
+        <details className={styles.details}>
+          <summary>Por que aparece assim?</summary>
+          <div className={styles.evidence}>
+            <span>
+              #{position} · {orderLabel}
+            </span>
+            {categoryRank && categoryRank > 1 ? (
+              <span>
+                #{categoryRank} em {categoryLabel}
+              </span>
+            ) : null}
+            {signals?.rating?.reviewCount !== undefined ? (
+              <span>
+                {new Intl.NumberFormat("pt-BR").format(signals.rating.reviewCount)} avaliações
+              </span>
+            ) : null}
+            {popularityPercent !== undefined ? (
+              <span>{popularityPercent}% de popularidade relativa</span>
+            ) : null}
+            {signals ? (
+              <span>
+                Fonte: {providerLabel(signals.provider)} · atualizado em{" "}
+                {formatCollectedAt(signals.collectedAt, timeZone)}
+              </span>
+            ) : null}
+            {quality && quality.reasons.length > 0 ? (
+              <span className={styles.reason}>{quality.reasons.join(" · ")}</span>
+            ) : null}
+          </div>
+        </details>
+      )}
     </section>
   );
 }

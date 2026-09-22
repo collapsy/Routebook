@@ -1,7 +1,7 @@
 ---
 id: RB-INC-188
-title: Fotos reais dos lugares, fallback compacto e qualidade do catálogo
-description: Generaliza a resolução governada de imagens reais para qualquer Destination, reduz o fallback ilustrativo nos Place Cards e endurece a elegibilidade de POIs genéricos na Discovery.
+title: Fotos reais dos lugares, fallback visual contextual e qualidade do catálogo
+description: Generaliza a resolução governada de imagens reais para qualquer Destination, define um fallback ilustrado e não fotográfico por categoria e endurece a elegibilidade de POIs genéricos na Discovery.
 document_type: implementation-increment
 owner: Place Catalog and Traveler Experience
 status: Draft
@@ -18,7 +18,7 @@ ai_context:
   index: true
 ---
 
-# RB-INC-188 — Fotos reais dos lugares, fallback compacto e qualidade do catálogo
+# RB-INC-188 — Fotos reais dos lugares, fallback visual contextual e qualidade do catálogo
 
 ## 1. Resultado vertical
 
@@ -27,7 +27,7 @@ A tela **Explorar Lugares** deve se comportar como um guia visual de qualquer De
 O viajante deve encontrar:
 
 1. fotografia real do Lugar quando existir correspondência segura e licenciada;
-2. um card compacto e honesto quando uma foto real não estiver disponível;
+2. um card honesto com fallback visual contextual quando uma foto real não estiver disponível;
 3. menos POIs genéricos ou de identidade fraca competindo com lugares úteis;
 4. nome, categoria, distância e próxima ação acima de explicações de ranking, Provenance ou implementação.
 
@@ -56,7 +56,8 @@ A inspeção manual do Preview mobile da PR #445 em 2026-09-08 mostrou um card p
 O usuário confirmou duas decisões de produto:
 
 1. o catálogo **deve continuar visual**, portanto retirar mídia sem buscar fotos reais não é solução;
-2. a prioridade deve ser **imagem real do Lugar**, e ilustração genérica não deve substituir uma fotografia como hero dominante.
+2. a prioridade deve ser **imagem real do Lugar**, e uma ilustração contextual nunca deve ser apresentada como fotografia;
+3. quando a foto real não estiver disponível, o card deve preservar uma área visual próxima da foto, usando a categoria apenas como referência visual explícita e não fotográfica.
 
 ## 4. Diagnóstico técnico confirmado
 
@@ -87,7 +88,7 @@ A cadeia alvo é:
 ```text
 Place.primaryImage governada
 → preview Wikimedia seguro com contexto real do Destination
-→ fallback compacto sem hero fotográfico fictício
+→ fallback visual contextual sem fotografia fictícia
 ```
 
 ### 5.1 Foto canônica
@@ -111,11 +112,12 @@ Para um candidato provider-first sem foto canônica:
 
 Quando não existir fotografia real segura:
 
-- não usar a ilustração genérica de categoria como hero dominante do Place Card;
-- manter um estado visual compacto, estável e acessível;
+- usar uma ilustração contextual da categoria em uma área visual próxima da proporção da foto real;
+- exibir `Sem foto` e uma indicação curta de que se trata de referência visual, não de fotografia do local;
+- manter o fallback estável, acessível e visualmente menor ou igual ao hero fotográfico;
 - não preencher o espaço com fotografia sintética;
 - não usar uma foto genérica do Destination para simular o estabelecimento/atração;
-- conteúdo e ações continuam íntegros sem mídia.
+- conteúdo e ações continuam íntegros sem depender da mídia.
 
 Ilustrações de categoria podem continuar existindo em superfícies em que são claramente referência visual genérica, como experiências temporais do Guia. A mudança deste incremento é específica à representação de **Lugar** na Discovery e superfícies diretamente equivalentes.
 
@@ -193,7 +195,7 @@ divulgação secundária quando necessária
 ### Sem foto real
 
 ```text
-categoria curta + estado visual neutro discreto
+fallback visual contextual + categoria curta
 nome
 resumo útil opcional
 distância qualificada
@@ -203,7 +205,7 @@ sinal compacto de qualidade somente se real
 divulgação secundária quando necessária
 ```
 
-O card sem foto deve ser materialmente menor que o card atual com ilustração hero.
+O fallback sem foto deve ser visualmente distinto, não maior que o hero fotográfico e não deve criar espaço vazio artificial no restante do card.
 
 ## 9. Microcopy e divulgação progressiva
 
@@ -224,8 +226,8 @@ O card sem foto deve ser materialmente menor que o card atual com ilustração h
 - manter proxy, cache, host/MIME/tamanho e regras de licença existentes;
 - criar/ajustar política de nome/identidade útil para candidatos Overture;
 - aplicar a elegibilidade antes de exibir candidatos provider-first;
-- compactar o Place Card sem fotografia real;
-- reduzir protagonismo do fallback ilustrativo na Discovery;
+- preservar a densidade do Place Card sem fotografia real;
+- tornar o fallback ilustrativo contextual, explícito e não fotográfico na Discovery;
 - simplificar disclosure de ranking e rota conforme feedback humano;
 - testes unitários, componente e E2E multi-destino;
 - documentação, Registry e rastreabilidade;
@@ -284,9 +286,11 @@ docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
 
-`apps/web/e2e/place-actions.spec.ts` foi incluído após a Engineering Validation do SHA `0231cbf0aef91eb2b1169e1ceaaae1cd6d269152` revelar uma asserção legada que ainda exigia a ilustração de categoria removida pelo fallback compacto deste incremento. A alteração autorizada é restrita a alinhar o contrato E2E ao estado neutro `Sem foto`, sem alterar Salvos, persistência ou a jornada coberta.
+`apps/web/e2e/place-actions.spec.ts` foi incluído após a Engineering Validation do SHA `0231cbf0aef91eb2b1169e1ceaaae1cd6d269152` revelar uma asserção legada que ainda exigia a ilustração de categoria removida pelo fallback anterior deste incremento. A alteração autorizada é restrita a alinhar o contrato E2E ao estado sem foto, sem alterar Salvos, persistência ou a jornada coberta.
 
-`apps/web/e2e/recommendations-experience.spec.ts` foi incluído após a Engineering Validation do SHA `d1b32e6e2d13249aa04224b394fa6d5d53e2d17f` revelar que uma Recommendation reutilizando a mídia de Place ainda exigia a ilustração de categoria removida pelo fallback compacto. A alteração autorizada é restrita a alinhar essa expectativa ao estado neutro `Sem foto`, sem alterar decisões, efeitos colaterais ou semântica de Recommendation.
+`apps/web/e2e/recommendations-experience.spec.ts` foi incluído após a Engineering Validation do SHA `d1b32e6e2d13249aa04224b394fa6d5d53e2d17f` revelar que uma Recommendation reutilizando a mídia de Place ainda exigia a ilustração de categoria removida pelo fallback anterior. A alteração autorizada é restrita a alinhar essa expectativa ao estado sem foto, sem alterar decisões, efeitos colaterais ou semântica de Recommendation.
+
+`apps/web/e2e/place-discovery-anywhere.spec.ts` foi incluído após a Engineering Validation do SHA `9192b879` revelar que sua asserção de Provenance usava o texto anterior `Fonte: Overture`. A alteração autorizada limita-se a alinhar a expectativa ao texto canônico já exibido, `Dados de localização: Overture`, sem mudar a política de descoberta ou de Provenance.
 
 Arquivo adicional indispensável deve ser registrado no incremento/Context Pack antes da alteração e justificado na PR.
 
@@ -298,8 +302,8 @@ Arquivo adicional indispensável deve ser registrado no incremento/Context Pack 
 - [ ] Pipa mantém cobertura existente sem regressão;
 - [ ] pelo menos dois Destinations zero-seed exercitam a resolução destination-agnostic;
 - [ ] Place com foto real mostra fotografia correta e Provenance/licença auditável;
-- [ ] candidato sem foto real não exibe ilustração genérica como hero dominante;
-- [ ] card sem foto é materialmente mais compacto no mobile;
+- [ ] candidato sem foto real exibe fallback ilustrado contextual, explicitamente não fotográfico;
+- [ ] fallback sem foto preserva o ritmo visual da lista sem ser maior que a foto real;
 - [ ] nenhuma fotografia artificial ou regional genérica é apresentada como foto do Lugar;
 - [ ] candidato claramente genérico/sem identidade suficiente é filtrado por política determinística coberta por testes;
 - [ ] candidatos válidos não são removidos apenas por ausência de foto, rating ou review;
@@ -337,7 +341,7 @@ Arquivo adicional indispensável deve ser registrado no incremento/Context Pack 
 ### UI
 
 - foto real mantém precedência;
-- fallback sem foto não renderiza hero ilustrativo dominante;
+- fallback sem foto renderiza referência visual contextual e não fotográfica;
 - loading/miss não causa layout shift severo;
 - `Ver rota` continua acessível;
 - ranking sem signal não fabrica informação;

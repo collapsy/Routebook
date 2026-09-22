@@ -141,19 +141,20 @@ test("mantém fallback compacto em Lugar de Minha seleção sem fotografia real"
     .first();
   const discoveryFallback = discoveryCard.locator('[data-place-image-fallback="true"]');
   await expect(discoveryFallback).toHaveAttribute("data-presentation", "compact");
-  await expect(discoveryFallback).toHaveText("Sem foto");
+  await expect(discoveryFallback.locator("strong")).toHaveText("Sem foto");
   await discoveryCard.getByRole("button", { name: "Quero ir" }).click();
   await expect(discoveryCard.getByRole("button", { name: "Quero ir" })).toHaveAttribute(
     "aria-pressed",
     "true",
     { timeout: 15_000 },
   );
+  await expect(page.getByText("Preferência atualizada.", { exact: true })).toBeVisible();
 
   await page.goto(`/viagens/${trip.id}/lugares-salvos`);
   const selectedCard = page.locator(".place-card").filter({ hasText: "Praia das Minas" }).first();
   const fallback = selectedCard.locator('[data-place-image-fallback="true"]');
   await expect(fallback).toBeVisible();
   await expect(fallback).toHaveAttribute("data-presentation", "compact");
-  await expect(fallback).toHaveText("Sem foto");
+  await expect(fallback.locator("strong")).toHaveText("Sem foto");
   await expect(selectedCard).toContainText("Preferência: Quero ir");
 });

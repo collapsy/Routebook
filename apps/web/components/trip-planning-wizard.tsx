@@ -8,8 +8,6 @@ type TripPlanningWizardProps = Readonly<{
   currentView?: "explore" | "selection";
 }>;
 
-const futureSteps = ["Revisão", "Proposta"] as const;
-
 export function TripPlanningWizard({
   tripId,
   currentStep = "places",

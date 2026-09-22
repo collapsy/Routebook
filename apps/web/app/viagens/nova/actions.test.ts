@@ -102,7 +102,7 @@ beforeEach(() => {
     resolver: { resolve: resolverMocks.resolveText },
   });
   resolverMocks.resolveText.mockResolvedValue({ status: "resolved", value: resolvedDestination });
-  databaseMocks.createTrip.mockResolvedValue({ id: "trip-1" });
+  databaseMocks.createTrip.mockResolvedValue({ trip: { id: "trip-1" } });
   geocoderMocks.resolve.mockReturnValue({ geocode: geocoderMocks.geocode });
   geocoderMocks.geocode.mockResolvedValue({
     normalizedAddress: "Avenida Paulista, São Paulo - SP, Brasil",
@@ -114,7 +114,7 @@ beforeEach(() => {
 describe("createTripAction destination selection", () => {
   it("revalida referência selecionada e geocodifica a hospedagem antes de criar a Trip", async () => {
     await expect(createTripAction({ fieldErrors: {} }, tripForm())).rejects.toThrow(
-      "NEXT_REDIRECT:/viagens?created=1",
+      "NEXT_REDIRECT:/viagens/trip-1/lugares?preparar=1&onboarding=1",
     );
 
     expect(suggestionMocks.resolveSelected).toHaveBeenCalledWith({
@@ -165,7 +165,7 @@ describe("createTripAction destination selection", () => {
     });
 
     await expect(createTripAction({ fieldErrors: {} }, formData)).rejects.toThrow(
-      "NEXT_REDIRECT:/viagens?created=1",
+      "NEXT_REDIRECT:/viagens/trip-1/lugares?preparar=1&onboarding=1",
     );
 
     expect(geocoderMocks.geocode).toHaveBeenCalledWith(
@@ -195,7 +195,7 @@ describe("createTripAction destination selection", () => {
     const formData = tripForm({ accommodationAddress: "" });
 
     await expect(createTripAction({ fieldErrors: {} }, formData)).rejects.toThrow(
-      "NEXT_REDIRECT:/viagens?created=1",
+      "NEXT_REDIRECT:/viagens/trip-1/lugares?preparar=1&onboarding=1",
     );
 
     expect(databaseMocks.createTrip).toHaveBeenCalledWith(
@@ -213,7 +213,7 @@ describe("createTripAction destination selection", () => {
     const formData = tripForm({ accommodationAddress: "" });
 
     await expect(createTripAction({ fieldErrors: {} }, formData)).rejects.toThrow(
-      "NEXT_REDIRECT:/viagens?created=1",
+      "NEXT_REDIRECT:/viagens/trip-1/lugares?preparar=1&onboarding=1",
     );
 
     const call = databaseMocks.createTrip.mock.calls[0]?.[0];
@@ -226,7 +226,7 @@ describe("createTripAction destination selection", () => {
     const formData = tripForm({ accommodationName: "", accommodationAddress: "" });
 
     await expect(createTripAction({ fieldErrors: {} }, formData)).rejects.toThrow(
-      "NEXT_REDIRECT:/viagens?created=1",
+      "NEXT_REDIRECT:/viagens/trip-1/lugares?preparar=1&onboarding=1",
     );
 
     expect(geocoderMocks.geocode).not.toHaveBeenCalled();
@@ -297,7 +297,7 @@ describe("createTripAction destination selection", () => {
     });
 
     await expect(createTripAction({ fieldErrors: {} }, formData)).rejects.toThrow(
-      "NEXT_REDIRECT:/viagens?created=1",
+      "NEXT_REDIRECT:/viagens/trip-1/lugares?preparar=1&onboarding=1",
     );
 
     expect(resolverMocks.resolveConfigured).toHaveBeenCalledTimes(1);

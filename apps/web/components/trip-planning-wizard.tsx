@@ -6,12 +6,14 @@ type TripPlanningWizardProps = Readonly<{
   tripId: string;
   currentStep?: "places" | "context" | "review";
   currentView?: "explore" | "selection";
+  onboarding?: boolean;
 }>;
 
 export function TripPlanningWizard({
   tripId,
   currentStep = "places",
   currentView = "explore",
+  onboarding = false,
 }: TripPlanningWizardProps) {
   const contextStep = currentStep === "context";
   const reviewStep = currentStep === "review";
@@ -31,14 +33,18 @@ export function TripPlanningWizard({
               ? "Confira as escolhas para a futura proposta"
               : contextStep
                 ? "Conte o que ajuda a planejar esta viagem"
-                : "Escolha os lugares que fazem sentido para você"}
+                : onboarding
+                  ? "Vamos preparar sua viagem"
+                  : "Escolha os lugares que fazem sentido para você"}
           </h2>
           <p>
             {reviewStep
               ? "Revise os dados conhecidos e as suas intenções antes da próxima etapa. Esta revisão não cria atividades nem proposta automaticamente."
               : contextStep
                 ? "Use o que o RouteBook já sabe sobre a Viagem e informe somente o contexto adicional que fizer sentido. Nada aqui cria atividades ou proposta automaticamente."
-                : "Explore opções e marque sua intenção. Esta seleção ajuda a preparar a futura proposta, mas ainda não coloca nenhum lugar no roteiro."}
+                : onboarding
+                  ? "Este é o primeiro passo: explore lugares e marque o que combina com você. Depois, vamos completar o contexto e revisar tudo antes de montar uma proposta."
+                  : "Explore opções e marque sua intenção. Esta seleção ajuda a preparar a futura proposta, mas ainda não coloca nenhum lugar no roteiro."}
           </p>
         </div>
       </div>

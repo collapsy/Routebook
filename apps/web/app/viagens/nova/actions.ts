@@ -5,7 +5,10 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { createPostgresAuthenticatedTrip } from "@routebook/database";
+import {
+  createPostgresAuthenticatedTrip,
+  type CreateAuthenticatedTripResult,
+} from "@routebook/database";
 import { TripValidationError, type CreateTripInput } from "@routebook/trip-management";
 
 import { resolveAccommodationLocation } from "@/lib/accommodation-geocoding";
@@ -171,11 +174,12 @@ export async function createTripAction(
     }
   }
 
+  let createdTrip: CreateAuthenticatedTripResult;
   try {
     const requestedName = String(formData.get("name") ?? "").trim();
     const accommodation = await accommodationForCreation(resolution.value.destination, formData);
 
-    await createPostgresAuthenticatedTrip({
+    createdTrip = await createPostgresAuthenticatedTrip({
       userId: session.user.id,
       destinationProvenance: resolution.value.provenance,
       trip: {
@@ -207,5 +211,5 @@ export async function createTripAction(
   }
 
   revalidatePath("/viagens");
-  redirect("/viagens?created=1");
+  redirect(`/viagens/${createdTrip.trip.id}/lugares?preparar=1&onboarding=1`);
 }

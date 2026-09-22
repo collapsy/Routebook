@@ -91,6 +91,7 @@ type DiscoverySearchParams = {
   promocao?: string;
   erroPromocao?: string;
   preparar?: string;
+  onboarding?: string;
 };
 
 const distanceOptions = [1, 3, 5, 10] as const;
@@ -530,6 +531,7 @@ export default async function PlacesPage({
 
   const rawFilters = await searchParams;
   const wizardMode = rawFilters.preparar === "1";
+  const onboarding = wizardMode && trip.status === "draft";
   const search = rawFilters.busca?.trim().slice(0, 120) || undefined;
   const category = parsePlaceCategory(rawFilters.categoria);
   const priceRange = parsePlacePriceRange(rawFilters.preco);
@@ -878,7 +880,9 @@ export default async function PlacesPage({
         </p>
       ) : null}
 
-      {wizardMode ? <TripPlanningWizard currentView="explore" tripId={tripId} /> : null}
+      {wizardMode ? (
+        <TripPlanningWizard currentView="explore" onboarding={onboarding} tripId={tripId} />
+      ) : null}
 
       <header className="trip-overview-hero">
         <div>

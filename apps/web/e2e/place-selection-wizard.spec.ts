@@ -19,7 +19,7 @@ test("prepara a viagem escolhendo lugares sem criar Activity", async ({ page }) 
 
   await expect(
     page.getByRole("heading", {
-      name: "Escolha os lugares que fazem sentido para você",
+      name: "Vamos preparar sua viagem",
       level: 2,
     }),
   ).toBeVisible();
@@ -50,7 +50,7 @@ test("prepara a viagem escolhendo lugares sem criar Activity", async ({ page }) 
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares-salvos\\?preparar=1$`));
   await expect(
     page.getByRole("heading", {
-      name: "Escolha os lugares que fazem sentido para você",
+      name: "Vamos preparar sua viagem",
       level: 2,
     }),
   ).toBeVisible();

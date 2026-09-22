@@ -1287,3 +1287,16 @@ Ao concluir um incremento:
 | revisão | Etapa 3 de 4; projeção derivada e não persistida; edição de Lugares e Contexto preserva `preparar=1` |
 | invariantes | nenhuma Activity, ItineraryProposal ou `ROUTEBOOK_RECOMMENDED` criada pela Revisão |
 | validação | pendente da PR, CI e Preview; preencher somente com resultados reais |
+
+## Evidências previstas do RB-INC-212
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-212-preparation-onboarding.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-212-preparation-onboarding.md` |
+| issue | [#515](https://github.com/collapsy/Routebook/issues/515) |
+| branch | `codex/rb-inc-212-preparation-onboarding` |
+| base | `main@b73f39f3c7856dc7f2b185d88958edd3b57d4909` |
+| jornada | criação válida entra diretamente em Lugares; Trip `draft` retoma o onboarding a partir das fontes canônicas mesmo sem parâmetro efêmero |
+| estado | nenhum WizardState/WizardSession/cookie/snapshot persistido; `Trip.status` determina se a introdução ainda se aplica |
+| validação | pendente da PR, CI e Preview; preencher somente com resultados reais |

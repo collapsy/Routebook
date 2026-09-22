@@ -21,8 +21,15 @@ test("destino zero-seed recebe sugestões de lugares sem expor lifecycle interno
   expect(tripHref).toMatch(/^\/viagens\/[0-9a-f-]+$/);
 
   await page.goto(`${tripHref}/contexto`);
+  await page.getByLabel("Quantidade de viajantes").fill("3");
+  await page.getByRole("button", { name: "Salvar e continuar" }).click();
+  await expect(page).toHaveURL(/\/contexto\?grupo=preferencias&salvo=1$/);
+
   await page.getByRole("checkbox", { name: "Natureza" }).check();
-  await page.getByRole("button", { name: "Salvar contexto" }).click();
+  await page.getByRole("button", { name: "Salvar e continuar" }).click();
+  await expect(page).toHaveURL(/\/contexto\?grupo=logistica&salvo=1$/);
+
+  await page.getByRole("button", { name: "Salvar contexto e voltar" }).click();
   await expect(page).toHaveURL(/\/viagens\/[^/]+\?contextUpdated=1$/);
 
   await page.goto(`${tripHref}/hospedagem`);

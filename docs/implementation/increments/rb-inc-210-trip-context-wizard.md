@@ -7,7 +7,7 @@ owner: Experience and Traveler Profile
 status: Draft
 version: "0.1.0"
 created: "2026-09-21"
-last_updated: "2026-09-21"
+last_updated: "2026-09-22"
 authors: [RouteBook Team]
 tags: [implementation, wizard, traveler-profile, trip-context, progressive-personalization, review]
 related_documents: [RB-CORE-0004, RB-DOM-001, RB-DOM-003, RB-ADR-027, RB-ADR-028, RB-ADR-029, RB-INC-005, RB-INC-207, RB-INC-208, RB-INC-209, RB-CTX-210]
@@ -169,9 +169,15 @@ GitHub Actions é a evidência canônica dos gates integrados.
 
 ## 12. Preview e merge
 
-O Vercel Preview deve ser validado no HEAD funcional.
+Evidência final:
 
-Mesmo com CI, Preview e mergeabilidade verdes, o merge permanece bloqueado até autorização humana explícita.
+- Engineering Validation: verde no HEAD `b9ab80241038c49796121f31620846ce4968dcfb`;
+- Documentation Validation: verde no mesmo HEAD;
+- Vercel Preview: verde em `2cb1db5158075a6a138e36c4b425154fcfa24996`;
+- entre `2cb1db` e `b9ab802`, somente arquivos E2E foram alterados, portanto o bundle funcional validado pelo Preview permaneceu inalterado;
+- o check Vercel posterior ficou bloqueado externamente por `build-rate-limit`, sem evidência de falha de código.
+
+Mesmo com CI, Preview reutilizável e mergeabilidade verdes, o merge permanece bloqueado até autorização humana explícita.
 
 ## 13. Fora de escopo
 

@@ -74,7 +74,7 @@ Geração/aplicação de Proposal, novo estado persistido de onboarding, persona
 
 ## Caminhos
 
-Implementação: `apps/web/app/viagens/nova/actions.ts`, `apps/web/app/viagens/nova/actions.test.ts`, `apps/web/app/viagens/[tripId]/lugares/page.tsx`, `apps/web/components/trip-planning-wizard.tsx` e E2Es relacionados à criação de Trip.
+Implementação: `apps/web/app/viagens/nova/actions.ts`, `apps/web/app/viagens/nova/actions.test.ts`, `apps/web/app/viagens/[tripId]/lugares/page.tsx`, `apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx`, `apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx`, `apps/web/components/trip-planning-wizard.tsx` e E2Es relacionados à criação e retomada da preparação.
 
 Documentação: este incremento, `docs/implementation/context-packs/rb-inc-212-preparation-onboarding.md`, `docs/registry.md` e `docs/implementation/traceability-matrix.md`.
 

@@ -163,7 +163,13 @@ export default async function TripSelectionPage({
         </div>
       </div>
 
-      {wizardMode ? <TripPlanningWizard currentView="selection" tripId={tripId} /> : null}
+      {wizardMode ? (
+        <TripPlanningWizard
+          currentView="selection"
+          onboarding={trip.status === "draft"}
+          tripId={tripId}
+        />
+      ) : null}
 
       {preferencia === "atualizada" ? (
         <p className="success-banner" role="status">

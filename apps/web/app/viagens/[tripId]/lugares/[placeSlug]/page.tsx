@@ -124,7 +124,13 @@ export default async function PlaceDetailsPage({
         </Link>
       </div>
 
-      {wizardMode ? <TripPlanningWizard currentView="explore" tripId={tripId} /> : null}
+      {wizardMode ? (
+        <TripPlanningWizard
+          currentView="explore"
+          onboarding={trip.status === "draft"}
+          tripId={tripId}
+        />
+      ) : null}
 
       {preferencia === "atualizada" ? (
         <p className="success-banner" role="status">

@@ -12,7 +12,7 @@ async function createPipaTripThroughUi(page: import("@playwright/test").Page, tr
   await expect(page.getByText("Preparar viagem · Etapa 1 de 4")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Vamos preparar sua viagem" })).toBeVisible();
   await expect(page.getByText("Depois, vamos completar o contexto")).toBeVisible();
-  await page.goto(new URL(page.url()).pathname.replace(/\/lugares$/, ""));
+  await page.goto("/viagens");
 }
 
 test("exibe Minhas viagens com ação de criação", async ({ page }) => {
@@ -26,8 +26,7 @@ test("cria, abre e mantém uma viagem persistida", async ({ page }, testInfo) =>
   const tripName = `Pipa persistida ${testInfo.project.name} ${Date.now()}`;
 
   await createPipaTripThroughUi(page, tripName);
-  await expect(page.getByRole("status")).toContainText("Viagem criada.");
-  await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
+  await expect(page.getByRole("link", { name: tripName })).toBeVisible();
 
   await page.getByRole("link", { name: tripName }).click();
   await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+$/);

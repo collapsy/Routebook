@@ -8,7 +8,11 @@ async function createPipaTripThroughUi(page: import("@playwright/test").Page, tr
   await page.getByLabel("Quando termina?").fill("2026-08-29");
   await page.getByLabel("Onde vai ficar?").fill("Condomínio Solar Água");
   await page.getByRole("button", { name: "Criar meu guia" }).click();
-  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+  await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\/lugares\?preparar=1&onboarding=1$/);
+  await expect(page.getByText("Preparar viagem · Etapa 1 de 4")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Vamos preparar sua viagem" })).toBeVisible();
+  await expect(page.getByText("Depois, vamos completar o contexto")).toBeVisible();
+  await page.goto(new URL(page.url()).pathname.replace(/\/lugares$/, ""));
 }
 
 test("exibe Minhas viagens com ação de criação", async ({ page }) => {

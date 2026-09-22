@@ -14,10 +14,9 @@ test("destino zero-seed recebe sugestões de lugares sem expor lifecycle interno
   await page.getByLabel("Quando começa?").fill("2026-11-10");
   await page.getByLabel("Quando termina?").fill("2026-11-12");
   await page.getByRole("button", { name: "Criar meu guia" }).click();
-  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+  await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\/lugares\?preparar=1&onboarding=1$/);
 
-  const tripLink = page.getByRole("link", { name: tripName });
-  const tripHref = await tripLink.getAttribute("href");
+  const tripHref = new URL(page.url()).pathname.replace(/\/lugares$/, "");
   expect(tripHref).toMatch(/^\/viagens\/[0-9a-f-]+$/);
 
   await page.goto(`${tripHref}/contexto`);

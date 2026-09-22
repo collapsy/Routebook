@@ -29,7 +29,8 @@ test("cria Trip autenticada e impede leitura por outro User", async ({ page }, t
   await page.getByLabel("Quando termina?").fill("2026-10-12");
   await page.getByRole("button", { name: "Criar meu guia" }).click();
 
-  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+  await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\/lugares\?preparar=1&onboarding=1$/);
+  await page.goto("/viagens");
   const tripLink = page.getByRole("link", { name: tripName });
   await expect(tripLink).toBeVisible();
   const tripHref = await tripLink.getAttribute("href");
@@ -79,7 +80,8 @@ test("cria Trip para Florianópolis sem destino fixo na interface", async ({ pag
   await page.getByLabel("Quando termina?").fill("2026-11-17");
   await page.getByRole("button", { name: "Criar meu guia" }).click();
 
-  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+  await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\/lugares\?preparar=1&onboarding=1$/);
+  await page.goto("/viagens");
   const card = page.getByRole("article").filter({ hasText: tripName });
   await expect(card).toContainText("Florianópolis, SC");
 });
@@ -105,7 +107,8 @@ test("hospedagem é localizada ao salvar e habilita contexto espacial", async ({
   await page.getByLabel("Quando começa?").fill("2026-11-20");
   await page.getByLabel("Quando termina?").fill("2026-11-23");
   await page.getByRole("button", { name: "Criar meu guia" }).click();
-  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+  await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\/lugares\?preparar=1&onboarding=1$/);
+  await page.goto("/viagens");
 
   const tripLink = page.getByRole("link", { name: tripName });
   const tripHref = await tripLink.getAttribute("href");
@@ -158,7 +161,8 @@ test("hospedagem somente por nome na criação alimenta mapa e lugares próximos
   await page.getByLabel("Onde vai ficar?").fill("Hotel RouteBook Nome");
   await expect(page.getByLabel("Endereço da hospedagem")).toHaveValue("");
   await page.getByRole("button", { name: "Criar meu guia" }).click();
-  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+  await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\/lugares\?preparar=1&onboarding=1$/);
+  await page.goto("/viagens");
 
   const tripLink = page.getByRole("link", { name: tripName });
   const tripHref = await tripLink.getAttribute("href");
@@ -207,7 +211,8 @@ test("cria Trip para São Paulo selecionando sugestão de Destination", async ({
   await page.getByLabel("Quando termina?").fill("2026-11-12");
   await page.getByRole("button", { name: "Criar meu guia" }).click();
 
-  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+  await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\/lugares\?preparar=1&onboarding=1$/);
+  await page.goto("/viagens");
   const card = page.getByRole("article").filter({ hasText: tripName });
   await expect(card).toContainText("São Paulo, SP");
 });
@@ -233,7 +238,8 @@ test("owner cancela ou confirma a exclusão definitiva da própria Trip", async 
   await page.getByLabel("Quando começa?").fill("2026-12-01");
   await page.getByLabel("Quando termina?").fill("2026-12-03");
   await page.getByRole("button", { name: "Criar meu guia" }).click();
-  await expect(page).toHaveURL(/\/viagens\?created=1$/);
+  await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\/lugares\?preparar=1&onboarding=1$/);
+  await page.goto("/viagens");
 
   await page.getByRole("link", { name: tripName }).click();
   await page.getByRole("button", { name: "Excluir viagem" }).click();

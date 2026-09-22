@@ -175,7 +175,7 @@ export async function createTripAction(
     const requestedName = String(formData.get("name") ?? "").trim();
     const accommodation = await accommodationForCreation(resolution.value.destination, formData);
 
-    await createPostgresAuthenticatedTrip({
+    const createdTrip = await createPostgresAuthenticatedTrip({
       userId: session.user.id,
       destinationProvenance: resolution.value.provenance,
       trip: {
@@ -207,5 +207,5 @@ export async function createTripAction(
   }
 
   revalidatePath("/viagens");
-  redirect("/viagens?created=1");
+  redirect(`/viagens/${createdTrip.trip.id}/lugares?preparar=1&onboarding=1`);
 }

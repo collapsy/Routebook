@@ -25,13 +25,10 @@ async function createTripWithoutContext(page: Page) {
 
   await fillTripCreationBasics(page, tripName);
   await Promise.all([
-    page.waitForURL(/\/viagens\?created=1$/),
+    page.waitForURL(/\/viagens\/[0-9a-f-]+\/lugares\?preparar=1&onboarding=1$/),
     page.getByRole("button", { name: "Criar meu guia" }).click(),
   ]);
-  await Promise.all([
-    page.waitForURL(/\/viagens\/[^/?]+$/),
-    page.getByRole("link", { name: tripName }).click(),
-  ]);
+  await page.goto(new URL(page.url()).pathname.replace(/\/lugares$/, ""));
   await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
 
   return { tripName, tripUrl: new URL(page.url()).pathname };
@@ -42,13 +39,10 @@ async function createTripWithRecommendationContext(page: Page) {
 
   await fillTripCreationBasics(page, tripName);
   await Promise.all([
-    page.waitForURL(/\/viagens\?created=1$/),
+    page.waitForURL(/\/viagens\/[0-9a-f-]+\/lugares\?preparar=1&onboarding=1$/),
     page.getByRole("button", { name: "Criar meu guia" }).click(),
   ]);
-  await Promise.all([
-    page.waitForURL(/\/viagens\/[^/?]+$/),
-    page.getByRole("link", { name: tripName }).click(),
-  ]);
+  await page.goto(new URL(page.url()).pathname.replace(/\/lugares$/, ""));
   await expect(page.getByRole("heading", { name: tripName })).toBeVisible();
   const tripUrl = new URL(page.url()).pathname;
 

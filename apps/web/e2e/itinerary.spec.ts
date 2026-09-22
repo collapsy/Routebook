@@ -23,7 +23,10 @@ async function createTripThroughUi(page: Page, tripName: string) {
 
 async function openManualComposer(page: Page) {
   if (!new URL(page.url()).searchParams.has("dia")) {
-    await page.getByRole("link", { name: /Dia 1/ }).first().click();
+    await page
+      .getByRole("navigation", { name: "Selecionar Dia do roteiro" })
+      .getByRole("link", { name: /Dia 1/ })
+      .click();
     await expect(page).toHaveURL(/dia=2026-08-22/);
   }
   await page.getByText("Adicionar atividade manual", { exact: true }).click();

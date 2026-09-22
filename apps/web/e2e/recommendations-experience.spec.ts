@@ -59,12 +59,25 @@ async function createTripWithRecommendationContext(page: Page) {
       .getByRole("link", { name: "Informar preferências" })
       .click(),
   ]);
+  await page.getByLabel("Quantidade de viajantes").fill("3");
+  await submitAndExpectRedirect(
+    page,
+    () => page.getByRole("button", { name: "Salvar e continuar" }).click(),
+    /\/contexto\?grupo=preferencias&salvo=1$/,
+  );
+
   await page.getByRole("checkbox", { name: "Praias" }).check();
   await page.getByRole("checkbox", { name: "Natureza" }).check();
-  await Promise.all([
-    page.waitForURL(/\/viagens\/[^/]+\?contextUpdated=1$/),
-    page.getByRole("button", { name: "Salvar contexto" }).click(),
-  ]);
+  await submitAndExpectRedirect(
+    page,
+    () => page.getByRole("button", { name: "Salvar e continuar" }).click(),
+    /\/contexto\?grupo=logistica&salvo=1$/,
+  );
+  await submitAndExpectRedirect(
+    page,
+    () => page.getByRole("button", { name: "Salvar contexto e voltar" }).click(),
+    /\/viagens\/[^/]+\?contextUpdated=1$/,
+  );
 
   await page.goto(`${tripUrl}/hospedagem`);
   await page.getByLabel("Nome da hospedagem").fill("Condomínio Solar Água");

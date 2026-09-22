@@ -1255,3 +1255,22 @@ Ao concluir um incremento:
 | compatibilidade | URLs, catálogo, filtros, ranking, imagens, mapa, distância e detalhe preservados; sem migration |
 | origem relacionada | correção funcional da issue #501 / PR #502 reconciliada nesta branch para evitar redirect e perda de scroll |
 | validação | pendente da PR e CI; não considerar verde até resultado real |
+
+
+## Evidências previstas do RB-INC-210
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-210-trip-context-wizard.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-210-trip-context-wizard.md` |
+| issue | [#511](https://github.com/collapsy/Routebook/issues/511) |
+| branch | `codex/issue-511-trip-context-wizard` |
+| base | `main@1267507c82f706c2cf812300e2552ebcff524947` |
+| auditoria | TravelerProfile, Trip, TripPlacePreference, contexto atual, RB-INC-005 e RB-INC/CTX 207–209 auditados antes da implementação |
+| wizard | Contexto integrado como Etapa 2 de 4; Lugares permanece navegável e `preparar=1` é preservado |
+| persistência | grupos progressivos reutilizam TravelerProfile e preservam campos de outros grupos |
+| dados conhecidos | destino, período, hospedagem e responsável são derivados da Trip, sem duplicação |
+| revisão | `TripPreparationReviewModel` é projeção derivada de Trip + TripPlacePreference[] + TravelerProfile |
+| Activity/Proposal | nenhuma alteração de Itinerary e nenhuma ItineraryProposal gerada pelo contexto |
+| migration | nenhuma; schema existente é suficiente |
+| validação | PR #512; Engineering Validation e Documentation Validation verdes no HEAD `b9ab80241038c49796121f31620846ce4968dcfb`; Vercel Preview verde em `2cb1db5158075a6a138e36c4b425154fcfa24996`; commits posteriores até `b9ab802` alteraram somente E2E, sem mudança no bundle funcional; check Vercel do HEAD bloqueado externamente por build-rate-limit |

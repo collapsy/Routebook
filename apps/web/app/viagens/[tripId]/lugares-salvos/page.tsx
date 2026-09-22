@@ -375,21 +375,15 @@ export default async function TripSelectionPage({
           aria-labelledby="wizard-places-boundary-title"
         >
           <p className="product-eyebrow">Fim do passo Lugares</p>
-          <h2 id="wizard-places-boundary-title">
-            {planningCandidateCount > 0
-              ? "Sua seleção está pronta para a próxima etapa"
-              : "Continue explorando antes de avançar"}
-          </h2>
+          <h2 id="wizard-places-boundary-title">Continue para Contexto quando quiser</h2>
           <p>
             {planningCandidateCount > 0
-              ? "Sua seleção está salva. O próximo passo será definir o Contexto da viagem; nenhuma escolha deste passo foi adicionada ao roteiro."
-              : "Marque ao menos uma opção como Quero ir ou Talvez para existir algo a considerar no planejamento. Fora isso, não há quantidade mínima."}
+              ? "Sua seleção está salva. O próximo passo usa o contexto da viagem sem adicionar nenhuma escolha ao roteiro."
+              : "Você ainda não marcou lugares como Quero ir ou Talvez. Uma seleção vazia também é válida e não bloqueia o contexto da viagem."}
           </p>
-          {planningCandidateCount === 0 ? (
-            <Link className="product-primary-action" href={`/viagens/${tripId}/lugares?preparar=1`}>
-              Continuar explorando
-            </Link>
-          ) : null}
+          <Link className="product-primary-action" href={`/viagens/${tripId}/contexto?preparar=1`}>
+            Continuar para Contexto
+          </Link>
         </section>
       ) : null}
     </section>

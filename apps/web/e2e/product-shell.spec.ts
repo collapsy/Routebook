@@ -50,13 +50,19 @@ test("configura e mantém o contexto progressivo da viagem", async ({ page }, te
     .getByRole("link", { name: "Informar preferências" })
     .click();
   await page.getByLabel("Quantidade de viajantes").fill("3");
+  await page.getByRole("button", { name: "Salvar e continuar" }).click();
+
+  await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\/contexto\?grupo=preferencias&salvo=1$/);
   await page.getByLabel("Praias").check();
   await page.getByLabel("Gastronomia").check();
   await page.getByLabel("Vida noturna").check();
   await page.getByLabel("Ritmo da viagem").selectOption("balanced");
+  await page.getByRole("button", { name: "Salvar e continuar" }).click();
+
+  await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\/contexto\?grupo=logistica&salvo=1$/);
   await page.getByLabel("Transporte preferencial").selectOption("ride-hailing");
   await page.getByLabel("Orçamento total estimado").fill("4.500,00");
-  await page.getByRole("button", { name: "Salvar contexto" }).click();
+  await page.getByRole("button", { name: "Salvar contexto e voltar" }).click();
 
   await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\?contextUpdated=1$/);
   await expect(page.getByRole("status")).toContainText("Preferências da viagem salvas.");
@@ -72,6 +78,7 @@ test("configura e mantém o contexto progressivo da viagem", async ({ page }, te
     .getByRole("link", { name: "Editar preferências" })
     .click();
   await expect(page.getByLabel("Quantidade de viajantes")).toHaveValue("3");
+  await page.getByRole("link", { name: "2. Interesses e ritmo" }).click();
   await expect(page.getByLabel("Praias")).toBeChecked();
 });
 

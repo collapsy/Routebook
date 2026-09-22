@@ -4,62 +4,95 @@ import styles from "./trip-planning-wizard.module.css";
 
 type TripPlanningWizardProps = Readonly<{
   tripId: string;
-  currentView: "explore" | "selection";
+  currentStep?: "places" | "context";
+  currentView?: "explore" | "selection";
 }>;
 
-const futureSteps = ["Contexto", "Revisão", "Proposta"] as const;
+const futureSteps = ["Revisão", "Proposta"] as const;
 
-export function TripPlanningWizard({ tripId, currentView }: TripPlanningWizardProps) {
+export function TripPlanningWizard({
+  tripId,
+  currentStep = "places",
+  currentView = "explore",
+}: TripPlanningWizardProps) {
+  const contextStep = currentStep === "context";
+
   return (
     <section
       aria-labelledby="trip-planning-wizard-title"
       className={styles.wizard}
-      data-planning-wizard-step="places"
+      data-planning-wizard-step={currentStep}
     >
       <div className={styles.intro}>
         <div>
-          <p className="product-eyebrow">Preparar viagem · Etapa 1 de 4</p>
-          <h2 id="trip-planning-wizard-title">Escolha os lugares que fazem sentido para você</h2>
+          <p className="product-eyebrow">Preparar viagem · Etapa {contextStep ? "2" : "1"} de 4</p>
+          <h2 id="trip-planning-wizard-title">
+            {contextStep
+              ? "Conte o que ajuda a planejar esta viagem"
+              : "Escolha os lugares que fazem sentido para você"}
+          </h2>
           <p>
-            Explore opções e marque sua intenção. Esta seleção ajuda a preparar a futura proposta,
-            mas ainda não coloca nenhum lugar no roteiro.
+            {contextStep
+              ? "Use o que o RouteBook já sabe sobre a Viagem e informe somente o contexto adicional que fizer sentido. Nada aqui cria atividades ou proposta automaticamente."
+              : "Explore opções e marque sua intenção. Esta seleção ajuda a preparar a futura proposta, mas ainda não coloca nenhum lugar no roteiro."}
           </p>
         </div>
       </div>
 
       <ol aria-label="Etapas da preparação da viagem" className={styles.steps}>
-        <li aria-current="step" className={styles.activeStep}>
-          <span>1</span>
-          <strong>Lugares</strong>
+        <li
+          aria-current={!contextStep ? "step" : undefined}
+          className={contextStep ? styles.completedStep : styles.activeStep}
+        >
+          {contextStep ? (
+            <Link className={styles.stepLink} href={`/viagens/${tripId}/lugares-salvos?preparar=1`}>
+              <span>1</span>
+              <strong>Lugares</strong>
+            </Link>
+          ) : (
+            <>
+              <span>1</span>
+              <strong>Lugares</strong>
+            </>
+          )}
+        </li>
+        <li
+          aria-current={contextStep ? "step" : undefined}
+          className={contextStep ? styles.activeStep : styles.futureStep}
+        >
+          <span>2</span>
+          {contextStep ? <strong>Contexto</strong> : <span>Contexto</span>}
         </li>
         {futureSteps.map((step, index) => (
           <li className={styles.futureStep} key={step}>
-            <span>{index + 2}</span>
+            <span>{index + 3}</span>
             <span>{step}</span>
           </li>
         ))}
       </ol>
 
-      <nav aria-label="Lugares da preparação" className={styles.views}>
-        <Link
-          aria-current={currentView === "explore" ? "page" : undefined}
-          className={
-            currentView === "explore" ? "product-primary-action" : "product-secondary-action"
-          }
-          href={`/viagens/${tripId}/lugares?preparar=1`}
-        >
-          Explorar
-        </Link>
-        <Link
-          aria-current={currentView === "selection" ? "page" : undefined}
-          className={
-            currentView === "selection" ? "product-primary-action" : "product-secondary-action"
-          }
-          href={`/viagens/${tripId}/lugares-salvos?preparar=1`}
-        >
-          Minha seleção
-        </Link>
-      </nav>
+      {!contextStep ? (
+        <nav aria-label="Lugares da preparação" className={styles.views}>
+          <Link
+            aria-current={currentView === "explore" ? "page" : undefined}
+            className={
+              currentView === "explore" ? "product-primary-action" : "product-secondary-action"
+            }
+            href={`/viagens/${tripId}/lugares?preparar=1`}
+          >
+            Explorar
+          </Link>
+          <Link
+            aria-current={currentView === "selection" ? "page" : undefined}
+            className={
+              currentView === "selection" ? "product-primary-action" : "product-secondary-action"
+            }
+            href={`/viagens/${tripId}/lugares-salvos?preparar=1`}
+          >
+            Minha seleção
+          </Link>
+        </nav>
+      ) : null}
     </section>
   );
 }

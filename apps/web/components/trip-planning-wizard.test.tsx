@@ -29,4 +29,23 @@ describe("TripPlanningWizard", () => {
     expect(screen.queryByRole("link", { name: "Revisão" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Proposta" })).not.toBeInTheDocument();
   });
+
+  it("marca Contexto como etapa 2 e permite voltar a Lugares sem inventar Revisão ou Proposta", () => {
+    render(<TripPlanningWizard currentStep="context" tripId="trip-1" />);
+
+    expect(
+      screen.getByRole("heading", { name: "Conte o que ajuda a planejar esta viagem" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Preparar viagem · Etapa 2 de 4")).toBeInTheDocument();
+
+    const wizard = screen.getByLabelText("Etapas da preparação da viagem").closest("section");
+    expect(wizard).toHaveAttribute("data-planning-wizard-step", "context");
+    expect(screen.getByRole("link", { name: /Lugares/ })).toHaveAttribute(
+      "href",
+      "/viagens/trip-1/lugares-salvos?preparar=1",
+    );
+    expect(screen.getByText("Contexto").closest("li")).toHaveAttribute("aria-current", "step");
+    expect(screen.queryByRole("link", { name: "Revisão" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Proposta" })).not.toBeInTheDocument();
+  });
 });

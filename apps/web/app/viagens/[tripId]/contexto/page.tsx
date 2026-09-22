@@ -149,7 +149,7 @@ export default async function TravelerContextPage({
       ) : (
         <section className="traveler-context-summary" aria-labelledby="preparation-context-start">
           <p className="product-eyebrow">Primeiro grupo</p>
-          <h2 id="preparation-context-start">Comece pela quantidade de viajantes</h2>
+          <h2 id="preparation-context-start">Defina o tamanho do grupo</h2>
           <p>
             Este é o único dado obrigatório do contrato atual de TravelerProfile. Interesses, ritmo,
             transporte e orçamento continuam opcionais.

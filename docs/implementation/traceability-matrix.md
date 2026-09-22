@@ -1297,6 +1297,6 @@ Ao concluir um incremento:
 | issue | [#515](https://github.com/collapsy/Routebook/issues/515) |
 | branch | `codex/rb-inc-212-preparation-onboarding` |
 | base | `main@b73f39f3c7856dc7f2b185d88958edd3b57d4909` |
-| jornada | criação válida entra diretamente em Lugares como Etapa 1; onboarding explica a sequência e preserva `preparar=1` |
-| estado | nenhum WizardState/WizardSession/cookie/snapshot persistido |
+| jornada | criação válida entra diretamente em Lugares; Trip `draft` retoma o onboarding a partir das fontes canônicas mesmo sem parâmetro efêmero |
+| estado | nenhum WizardState/WizardSession/cookie/snapshot persistido; `Trip.status` determina se a introdução ainda se aplica |
 | validação | pendente da PR, CI e Preview; preencher somente com resultados reais |

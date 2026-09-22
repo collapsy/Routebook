@@ -49,9 +49,10 @@ O onboarding deve explicar a sequência, permitir sair e retomar pela Trip e nã
 ## Decisões
 
 - O redirecionamento pós-criação usa o `trip.id` retornado pelo serviço canônico.
-- `preparar=1` continua sendo contexto transitório da URL; `onboarding=1` apenas personaliza a primeira entrada.
+- `preparar=1` continua sendo contexto transitório da URL; a apresentação de onboarding é derivada de `Trip.status=draft` sempre que a preparação é aberta.
+- Ao sair e voltar para uma Trip ainda em rascunho, a preparação reabre no passo Lugares; preferências e contexto já informados continuam sendo lidos de suas fontes canônicas.
+- A apresentação de onboarding termina quando o estado canônico da Trip deixa de ser `draft` após a aplicação de planejamento; nenhuma etapa paralela é persistida.
 - Nenhum `WizardState`, `WizardSession`, snapshot, tabela ou cookie de progresso será criado.
-- O onboarding termina quando o usuário sai da preparação; a Trip continua acessível normalmente.
 - A seleção continua sendo `TripPlacePreference`, não Activity ou Roteiro.
 
 ## Critérios de aceite
@@ -60,7 +61,9 @@ O onboarding deve explicar a sequência, permitir sair e retomar pela Trip e nã
 - a primeira tela explica “Vamos preparar sua viagem” e os quatro passos;
 - o usuário entende que Lugares é o primeiro passo e que nada entra automaticamente no Roteiro;
 - links para Explorar, Minha seleção e Contexto preservam o fluxo;
-- sair e abrir a Trip novamente oferece retomada clara da preparação;
+- sair e abrir novamente uma Trip `draft` retoma o onboarding mesmo sem `onboarding=1` na URL;
+- preferências e contexto já salvos continuam presentes ao retomar; a entrada recomeça pelo passo Lugares;
+- Trip planejada não reapresenta o onboarding inicial;
 - fluxo normal fora do wizard permanece compatível;
 - acessibilidade, mobile e estados de erro permanecem cobertos;
 - nenhuma Activity, Proposal ou recomendação automática é criada pela entrada no onboarding.

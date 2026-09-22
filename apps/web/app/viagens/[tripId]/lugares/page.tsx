@@ -497,7 +497,7 @@ export default async function PlacesPage({
 
   const rawFilters = await searchParams;
   const wizardMode = rawFilters.preparar === "1";
-  const onboarding = rawFilters.onboarding === "1";
+  const onboarding = wizardMode && trip.status === "draft";
   const search = rawFilters.busca?.trim().slice(0, 120) || undefined;
   const category = parsePlaceCategory(rawFilters.categoria);
   const priceRange = parsePlacePriceRange(rawFilters.preco);

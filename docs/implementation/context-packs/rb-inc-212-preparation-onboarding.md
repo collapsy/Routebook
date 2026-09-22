@@ -32,7 +32,9 @@ Transformar a criação de uma Trip na entrada natural da preparação, sem intr
 
 - `createPostgresAuthenticatedTrip` retorna a Trip criada e continua sendo a fronteira canônica.
 - `preparar=1` é contexto transitório do wizard.
-- `onboarding=1` é somente uma indicação de primeira entrada na UI.
+- A moldura introdutória é derivada de `Trip.status=draft` em toda entrada no wizard, não da presença de `onboarding=1`.
+- Retomar reabre em Lugares; as respostas existentes continuam derivadas de `TripPlacePreference` e `TravelerProfile`.
+- A aplicação de planejamento que muda Trip para `planned` encerra a apresentação de onboarding.
 - Trip, TripPlacePreference, TravelerProfile, Activity e Proposal mantêm responsabilidades distintas.
 
 ## Caminhos permitidos
@@ -61,6 +63,9 @@ Não criar WizardState, WizardSession, cookie de progresso, migration, Activity,
 
 - [ ] criação válida redireciona à Etapa 1;
 - [ ] onboarding apresenta sequência e próximo passo;
+- [ ] uma Trip `draft` reabre o onboarding sem depender de parâmetro efêmero;
+- [ ] retomar começa em Lugares e mantém seleções/contexto já persistidos;
+- [ ] Trip planejada não reapresenta o onboarding inicial;
 - [ ] links preservam `preparar=1`;
 - [ ] retomada pela visão da Trip continua disponível;
 - [ ] erros de criação permanecem na página de criação;

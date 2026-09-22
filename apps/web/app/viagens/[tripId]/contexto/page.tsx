@@ -141,10 +141,15 @@ export default async function TravelerContextPage({
           ) : (
             <p>Todos os campos opcionais representáveis pelo perfil atual foram informados.</p>
           )}
-          <p>
-            A tela de Revisão será implementada no próximo corte. Nenhuma proposta de roteiro é
-            gerada ao concluir este passo.
-          </p>
+          <p>A Revisão reúne os dados atuais sem criar nenhuma proposta de roteiro.</p>
+          {preparing ? (
+            <Link
+              className="product-primary-action"
+              href={`/viagens/${tripId}/preparacao/revisao?preparar=1`}
+            >
+              Continuar para Revisão
+            </Link>
+          ) : null}
         </section>
       ) : (
         <section className="traveler-context-summary" aria-labelledby="preparation-context-start">

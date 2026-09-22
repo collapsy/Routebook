@@ -12,6 +12,11 @@ export type TripPreparationReviewModel = Readonly<{
   }>;
   selection: Readonly<{
     evaluated: number;
+    items: readonly Readonly<{
+      placeId: string;
+      intent: TripPlacePreference["intent"];
+      priority: TripPlacePreference["priority"];
+    }>[];
     WANT: number;
     MAYBE: number;
     NOT_INTERESTED: number;
@@ -61,6 +66,15 @@ export function deriveTripPreparationReviewModel({
     }),
     selection: Object.freeze({
       evaluated: preferences.length,
+      items: Object.freeze(
+        preferences.map((preference) =>
+          Object.freeze({
+            placeId: preference.placeId,
+            intent: preference.intent,
+            priority: preference.priority,
+          }),
+        ),
+      ),
       ...selection,
       considered: selection.WANT + selection.MAYBE,
     }),

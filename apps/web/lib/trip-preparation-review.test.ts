@@ -84,6 +84,11 @@ describe("deriveTripPreparationReviewModel", () => {
     });
     expect(model.selection).toEqual({
       evaluated: 3,
+      items: [
+        { placeId: "place-1", intent: "WANT", priority: "MUST_DO" },
+        { placeId: "place-2", intent: "MAYBE", priority: null },
+        { placeId: "place-3", intent: "NOT_INTERESTED", priority: null },
+      ],
       WANT: 1,
       MAYBE: 1,
       NOT_INTERESTED: 1,

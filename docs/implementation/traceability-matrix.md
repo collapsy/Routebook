@@ -1274,3 +1274,16 @@ Ao concluir um incremento:
 | Activity/Proposal | nenhuma alteração de Itinerary e nenhuma ItineraryProposal gerada pelo contexto |
 | migration | nenhuma; schema existente é suficiente |
 | validação | PR #512; Engineering Validation e Documentation Validation verdes no HEAD `b9ab80241038c49796121f31620846ce4968dcfb`; Vercel Preview verde em `2cb1db5158075a6a138e36c4b425154fcfa24996`; commits posteriores até `b9ab802` alteraram somente E2E, sem mudança no bundle funcional; check Vercel do HEAD bloqueado externamente por build-rate-limit |
+
+## Evidências previstas do RB-INC-211
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-211-trip-preparation-review.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-211-trip-preparation-review.md` |
+| issue | [#513](https://github.com/collapsy/Routebook/issues/513) |
+| branch | `codex/rb-inc-211-trip-preparation-review` |
+| base | `main@e56afb11a989efd867a640faa8da53ae3da760c2` |
+| revisão | Etapa 3 de 4; projeção derivada e não persistida; edição de Lugares e Contexto preserva `preparar=1` |
+| invariantes | nenhuma Activity, ItineraryProposal ou `ROUTEBOOK_RECOMMENDED` criada pela Revisão |
+| validação | pendente da PR, CI e Preview; preencher somente com resultados reais |

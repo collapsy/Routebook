@@ -19,7 +19,7 @@ async function createTripThroughUi(page: Page, tripName: string) {
   await page.getByLabel("Quando termina?").fill("2026-08-29");
   await page.getByRole("button", { name: "Criar meu guia" }).click();
   await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\/lugares\?preparar=1&onboarding=1$/);
-  await page.goto(new URL(page.url()).pathname.replace(/\/lugares$/, ""));
+  await page.goto("/viagens");
 }
 
 async function openManualComposer(page: Page) {

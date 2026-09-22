@@ -39,6 +39,7 @@ Transformar a criação de uma Trip na entrada natural da preparação, sem intr
 
 ```text
 apps/web/app/viagens/nova/actions.ts
+apps/web/app/viagens/nova/actions.test.ts
 apps/web/app/viagens/[tripId]/lugares/page.tsx
 apps/web/components/trip-planning-wizard.tsx
 apps/web/e2e/authenticated-trips.spec.ts

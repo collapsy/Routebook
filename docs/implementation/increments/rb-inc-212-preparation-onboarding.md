@@ -69,6 +69,12 @@ O onboarding deve explicar a sequência, permitir sair e retomar pela Trip e nã
 
 Geração/aplicação de Proposal, novo estado persistido de onboarding, personalização baseada em analytics, mudanças de autenticação, mudanças em Production e redesign completo da visão da Trip.
 
+## Caminhos
+
+Implementação: `apps/web/app/viagens/nova/actions.ts`, `apps/web/app/viagens/nova/actions.test.ts`, `apps/web/app/viagens/[tripId]/lugares/page.tsx`, `apps/web/components/trip-planning-wizard.tsx` e E2Es relacionados à criação de Trip.
+
+Documentação: este incremento, `docs/implementation/context-packs/rb-inc-212-preparation-onboarding.md`, `docs/registry.md` e `docs/implementation/traceability-matrix.md`.
+
 ## Validação
 
 `node scripts/validate-docs.mjs`, `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` e E2E aplicável. CI e Vercel Preview serão a evidência final.

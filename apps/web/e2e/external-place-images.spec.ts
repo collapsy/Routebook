@@ -66,7 +66,6 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
     timeout: 20_000,
   });
   await expect(externalCard.getByRole("img", { name: preview.altText })).toBeVisible();
-  await expect(externalCard).toContainText("Fonte: Overture");
   await expect(externalCard).not.toContainText("Candidato externo — ainda não publicado");
   await expect(externalCard).toContainText("Teste RouteBook");
   await expect(externalCard).toContainText("CC BY-SA 4.0");
@@ -78,6 +77,7 @@ test("enriquece candidato externo com foto licenciada sem substituir Overture ne
 
   const name = (await externalCard.getByRole("heading", { level: 3 }).innerText()).trim();
   await externalCard.getByText("Mais informações", { exact: true }).click();
+  await expect(externalCard).toContainText("Dados de localização: Overture");
   const routeLink = externalCard.getByRole("link", { name: "Ver rota" });
   await expect(routeLink).toBeVisible();
   const routeHref = await routeLink.getAttribute("href");

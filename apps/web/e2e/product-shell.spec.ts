@@ -78,6 +78,7 @@ test("configura e mantém o contexto progressivo da viagem", async ({ page }, te
     .getByRole("link", { name: "Editar preferências" })
     .click();
   await expect(page.getByLabel("Quantidade de viajantes")).toHaveValue("3");
+  await page.getByRole("link", { name: "2. Interesses e ritmo" }).click();
   await expect(page.getByLabel("Praias")).toBeChecked();
 });
 

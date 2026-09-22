@@ -1273,4 +1273,4 @@ Ao concluir um incremento:
 | revisão | `TripPreparationReviewModel` é projeção derivada de Trip + TripPlacePreference[] + TravelerProfile |
 | Activity/Proposal | nenhuma alteração de Itinerary e nenhuma ItineraryProposal gerada pelo contexto |
 | migration | nenhuma; schema existente é suficiente |
-| validação | pendente da PR, CI e Preview; não considerar verde até evidência real |
+| validação | PR #512; Engineering Validation e Documentation Validation verdes no HEAD `b9ab80241038c49796121f31620846ce4968dcfb`; Vercel Preview verde em `2cb1db5158075a6a138e36c4b425154fcfa24996`; commits posteriores até `b9ab802` alteraram somente E2E, sem mudança no bundle funcional; check Vercel do HEAD bloqueado externamente por build-rate-limit |

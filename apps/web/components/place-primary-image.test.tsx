@@ -30,9 +30,12 @@ describe("PlacePrimaryImage", () => {
     const fallback = screen.getByRole("img", {
       name: "Foto não disponível para Praia do Amor",
     });
+    expect(fallback).toHaveAttribute("data-place-category", "beach");
     expect(fallback).toHaveAttribute("data-place-image-fallback", "true");
+    expect(fallback).toHaveAttribute("data-place-initial", "P");
     expect(fallback).toHaveAttribute("data-presentation", "compact");
     expect(screen.getByText("Sem foto")).toBeInTheDocument();
+    expect(screen.getByText("Referência visual · não é foto do local")).toBeInTheDocument();
     expect(screen.queryByText("Imagem ilustrativa")).not.toBeInTheDocument();
     expect(screen.queryByText("Referência visual")).not.toBeInTheDocument();
   });

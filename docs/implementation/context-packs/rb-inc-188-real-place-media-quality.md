@@ -1,7 +1,7 @@
 ---
 id: RB-CTX-188
-title: Context Pack do RB-INC-188 — Fotos reais e qualidade do catálogo
-description: Delimita a generalização de mídia real para qualquer Destination, o fallback compacto sem foto e a filtragem conservadora de POIs genéricos na Discovery.
+title: Context Pack do RB-INC-188 — Fotos reais e fallback visual contextual
+description: Delimita a generalização de mídia real para qualquer Destination, o fallback visual contextual sem foto e a filtragem conservadora de POIs genéricos na Discovery.
 document_type: implementation-context-pack
 owner: Place Catalog and Traveler Experience
 status: Draft
@@ -18,11 +18,11 @@ ai_context:
   index: true
 ---
 
-# RB-CTX-188 — Fotos reais e qualidade do catálogo
+# RB-CTX-188 — Fotos reais e fallback visual contextual
 
 ## 1. Missão
 
-Fazer com que **Explorar Lugares** seja visual e confiável em qualquer Destination: priorizar fotografia real corretamente atribuída, degradar de forma compacta quando não houver foto e impedir que registros externos claramente genéricos sejam tratados como opções de viagem normais.
+Fazer com que **Explorar Lugares** seja visual e confiável em qualquer Destination: priorizar fotografia real corretamente atribuída, degradar com uma referência visual contextual quando não houver foto e impedir que registros externos claramente genéricos sejam tratados como opções de viagem normais.
 
 A missão não é aumentar cobertura a qualquer custo. Mídia errada ou identidade inventada é pior que ausência de mídia.
 
@@ -145,7 +145,7 @@ A foto pode ser o hero. Abaixo dela: categoria, nome, distância, sinal real de 
 
 ### Foto real indisponível
 
-O card não reserva a mesma área de hero para uma ilustração genérica. O estado visual deve ser menor e neutro, preservando ritmo e consistência da lista.
+O card reserva uma área visual próxima da foto real, preenchida por uma ilustração contextual da categoria. A superfície deve indicar claramente que é referência visual e não fotografia do local, preservando ritmo e consistência da lista sem aumentar o card além do hero fotográfico.
 
 A diferença entre esses estados deve ser clara sem texto longo de justificativa.
 
@@ -188,7 +188,7 @@ RB-INC-186/187 continuam válidos:
 
 ### Lote C — card e fallback
 
-1. remover hero ilustrativo dominante quando não houver foto real;
+1. substituir o fallback genérico por referência visual contextual quando não houver foto real;
 2. ajustar densidade mobile;
 3. reduzir ranking sem evidência;
 4. `Ver rota`;
@@ -208,9 +208,11 @@ Cada lote deve registrar evidência antes → depois na PR ou no incremento ante
 
 Somente os caminhos listados no RB-INC-188.
 
-Durante a Engineering Validation do SHA `0231cbf0aef91eb2b1169e1ceaaae1cd6d269152`, `apps/web/e2e/place-actions.spec.ts` tornou-se indispensável porque o cenário pré-existente ainda exigia a ilustração genérica removida por este incremento. A alteração autorizada nesse arquivo fica restrita a alinhar a expectativa E2E ao fallback compacto `Sem foto`, sem ampliar a jornada coberta.
+Durante a Engineering Validation do SHA `0231cbf0aef91eb2b1169e1ceaaae1cd6d269152`, `apps/web/e2e/place-actions.spec.ts` tornou-se indispensável porque o cenário pré-existente ainda exigia a ilustração genérica removida pelo fallback anterior deste incremento. A alteração autorizada nesse arquivo fica restrita a alinhar a expectativa E2E ao estado sem foto, sem ampliar a jornada coberta.
 
-Durante a Engineering Validation do SHA `d1b32e6e2d13249aa04224b394fa6d5d53e2d17f`, `apps/web/e2e/recommendations-experience.spec.ts` tornou-se indispensável porque uma Recommendation que reutiliza a mídia de Place ainda exigia a ilustração genérica removida pelo fallback compacto. A alteração autorizada nesse arquivo fica restrita a alinhar a expectativa ao estado neutro `Sem foto`, sem ampliar decisões, efeitos colaterais ou a jornada de Recommendation.
+Durante a Engineering Validation do SHA `d1b32e6e2d13249aa04224b394fa6d5d53e2d17f`, `apps/web/e2e/recommendations-experience.spec.ts` tornou-se indispensável porque uma Recommendation que reutiliza a mídia de Place ainda exigia a ilustração genérica removida pelo fallback anterior. A alteração autorizada nesse arquivo fica restrita a alinhar a expectativa ao estado sem foto, sem ampliar decisões, efeitos colaterais ou a jornada de Recommendation.
+
+Durante a Engineering Validation do SHA `9192b879`, `apps/web/e2e/place-discovery-anywhere.spec.ts` exigiu alinhar a asserção de Provenance ao texto canônico atual `Dados de localização: Overture`; a alteração fica restrita à microcopy já exibida, sem mudar a política de descoberta ou de Provenance.
 
 Qualquer outro arquivo adicional indispensável exige atualização prévia do Increment e deste Context Pack.
 

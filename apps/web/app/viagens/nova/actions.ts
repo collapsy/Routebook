@@ -179,7 +179,7 @@ export async function createTripAction(
     const requestedName = String(formData.get("name") ?? "").trim();
     const accommodation = await accommodationForCreation(resolution.value.destination, formData);
 
-    const createdTrip = await createPostgresAuthenticatedTrip({
+    createdTrip = await createPostgresAuthenticatedTrip({
       userId: session.user.id,
       destinationProvenance: resolution.value.provenance,
       trip: {

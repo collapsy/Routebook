@@ -212,6 +212,8 @@ Durante a Engineering Validation do SHA `0231cbf0aef91eb2b1169e1ceaaae1cd6d26915
 
 Durante a Engineering Validation do SHA `d1b32e6e2d13249aa04224b394fa6d5d53e2d17f`, `apps/web/e2e/recommendations-experience.spec.ts` tornou-se indispensável porque uma Recommendation que reutiliza a mídia de Place ainda exigia a ilustração genérica removida pelo fallback anterior. A alteração autorizada nesse arquivo fica restrita a alinhar a expectativa ao estado sem foto, sem ampliar decisões, efeitos colaterais ou a jornada de Recommendation.
 
+Durante a Engineering Validation do SHA `9192b879`, `apps/web/e2e/place-discovery-anywhere.spec.ts` exigiu alinhar a asserção de Provenance ao texto canônico atual `Dados de localização: Overture`; a alteração fica restrita à microcopy já exibida, sem mudar a política de descoberta ou de Provenance.
+
 Qualquer outro arquivo adicional indispensável exige atualização prévia do Increment e deste Context Pack.
 
 ## 14. Testes mínimos

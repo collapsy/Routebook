@@ -290,6 +290,8 @@ docs/registry.md
 
 `apps/web/e2e/recommendations-experience.spec.ts` foi incluído após a Engineering Validation do SHA `d1b32e6e2d13249aa04224b394fa6d5d53e2d17f` revelar que uma Recommendation reutilizando a mídia de Place ainda exigia a ilustração de categoria removida pelo fallback anterior. A alteração autorizada é restrita a alinhar essa expectativa ao estado sem foto, sem alterar decisões, efeitos colaterais ou semântica de Recommendation.
 
+`apps/web/e2e/place-discovery-anywhere.spec.ts` foi incluído após a Engineering Validation do SHA `9192b879` revelar que sua asserção de Provenance usava o texto anterior `Fonte: Overture`. A alteração autorizada limita-se a alinhar a expectativa ao texto canônico já exibido, `Dados de localização: Overture`, sem mudar a política de descoberta ou de Provenance.
+
 Arquivo adicional indispensável deve ser registrado no incremento/Context Pack antes da alteração e justificado na PR.
 
 ## 13. Critérios de aceite

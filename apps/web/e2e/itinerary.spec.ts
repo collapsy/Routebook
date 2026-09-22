@@ -256,7 +256,10 @@ test("move uma atividade para outro Dia e muda o foco para o destino", async ({
     page.locator(".itinerary-day-card").getByText("2 h 30 min", { exact: true }),
   ).toBeVisible();
 
-  await page.getByRole("link", { name: /Dia 1/ }).click();
+  await page
+    .getByRole("navigation", { name: "Selecionar Dia do roteiro" })
+    .getByRole("link", { name: /Dia 1/ })
+    .click();
   await expect(page).toHaveURL(/dia=2026-08-22/);
   await expect(
     page.locator(".itinerary-day-card").getByText(activityTitle, { exact: true }),

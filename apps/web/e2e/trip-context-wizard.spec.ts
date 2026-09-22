@@ -82,3 +82,30 @@ test("preenche Contexto progressivamente sem criar Activity ou Proposal", async 
   await expect(page.locator('[data-planning-wizard-step="context"]')).toHaveCount(0);
   await expect(page.getByLabel("Praias")).toBeChecked();
 });
+
+test("revisa a preparação como Etapa 3 e retorna para editar sem criar Proposal", async ({
+  page,
+}) => {
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: `Wizard de revisão ${test.info().project.name} ${Date.now()}`,
+    startDate: "2026-08-22",
+    endDate: "2026-08-29",
+  });
+
+  await page.goto(`/viagens/${trip.id}/contexto?preparar=1`);
+  await page.getByLabel("Quantidade de viajantes").fill("3");
+  await page.getByRole("button", { name: "Salvar e continuar" }).click();
+  await page.getByRole("button", { name: "Salvar e continuar" }).click();
+  await page.getByRole("button", { name: "Salvar contexto" }).click();
+  await page.getByRole("link", { name: "Continuar para Revisão" }).click();
+
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/preparacao/revisao\\?preparar=1$`));
+  await expect(page.getByText("Preparar viagem · Etapa 3 de 4")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Veja o que será considerado" })).toBeVisible();
+  await expect(page.getByText("Tudo pronto para montar sua proposta")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Montar proposta de roteiro" })).toBeDisabled();
+
+  await page.getByRole("link", { name: "Editar Contexto" }).click();
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/contexto\\?preparar=1$`));
+  await expect(page.locator('[data-planning-wizard-step="context"]')).toBeVisible();
+});

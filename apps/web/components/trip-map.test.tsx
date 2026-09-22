@@ -68,7 +68,7 @@ describe("TripMap", () => {
     expect(screen.getByRole("list", { name: "Legenda do mapa" })).toBeInTheDocument();
     expect(screen.getAllByText("Condomínio Solar Água").length).toBeGreaterThan(0);
     expect(
-      screen.getByRole("link", { name: "Lugar salvo: Praia do Amor. Abrir detalhes." }),
+      screen.getByRole("link", { name: "Lugar da seleção: Praia do Amor. Abrir detalhes." }),
     ).toHaveAttribute("href", "/viagens/trip-1/lugares/praia-do-amor");
 
     const leafletScript = document.head.querySelector<HTMLScriptElement>(
@@ -162,7 +162,7 @@ describe("TripMap", () => {
     expect(markerContents[1]).toBeInstanceOf(HTMLAnchorElement);
     expect(markerContents[1]).toHaveAttribute(
       "aria-label",
-      "Lugar salvo: Praia </script><script>não executar</script> do Amor. Abrir detalhes.",
+      "Lugar da seleção: Praia </script><script>não executar</script> do Amor. Abrir detalhes.",
     );
     expect(markerContents[1]?.querySelector("script")).toBeNull();
     expect(markerContents[1]).toHaveTextContent(

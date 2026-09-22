@@ -8,10 +8,10 @@ document_type: domain
 owner: Domain
 
 status: Published
-version: "0.2.0"
+version: "0.4.0"
 
 created: "2026-07-17"
-last_updated: "2026-07-17"
+last_updated: "2026-09-21"
 
 authors:
   - RouteBook Team
@@ -661,10 +661,12 @@ classDiagram
         +TripId tripId
     }
 
-    class SavedPlace {
+    class TripPlacePreference {
         <<entity>>
-        +SavedPlaceId id
+        +TripPlacePreferenceId id
         +PlaceId placeId
+        +TripPlaceIntent intent
+        +TripPlacePriority priority
     }
 
     class Place {
@@ -732,8 +734,8 @@ classDiagram
     TravelerProfile "1" *-- "1..*" Traveler : contém
 
     Trip "1" --> "1" TripCollection : possui coleção
-    TripCollection "1" *-- "0..*" SavedPlace : contém
-    SavedPlace "*" --> "1" Place : referencia
+    TripCollection "1" *-- "0..*" TripPlacePreference : contém
+    TripPlacePreference "*" --> "1" Place : referencia
 
     Trip "1" --> "1" Itinerary : possui
     Itinerary "1" *-- "1..*" TripDay : organiza
@@ -852,7 +854,7 @@ Trip
 
 - Viajantes;
 - Preferências;
-- Lugares Salvos;
+- preferências por Lugar;
 - Dias;
 - Atividades;
 - Recomendações;
@@ -1406,7 +1408,7 @@ Não deve depender exclusivamente de:
 - Destination.
 
 Um candidato externo revalidado pode originar um Place global em rascunho para continuidade em
-Saved Place e Activity. Isso não publica o Lugar nem o transforma em Recommendation. Promoção
+TripPlacePreference e Activity. Isso não publica o Lugar nem o transforma em Recommendation. Promoção
 editorial permanece uma decisão separada e explícita.
 
 ---
@@ -1507,36 +1509,75 @@ TripCollection
 
 #### Responsabilidades de Trip Collection
 
-- Lugares Salvos da Viagem;
+- preferências explícitas por Lugar no contexto da Viagem;
 - observações;
 - origem;
 - tags futuras;
-- unicidade por Viagem e Lugar.
+- unicidade por Viagem e Lugar;
+- compatibilidade transitória com Saved Place.
 
 ---
 
-### 49. SavedPlace
+### 49. TripPlacePreference
 
-#### Identidade de SavedPlace
+#### Identidade de TripPlacePreference
 
 ```text
-SavedPlaceId
+TripPlacePreferenceId
 ```
 
-#### Chave natural contextual de SavedPlace
+#### Chave natural contextual de TripPlacePreference
 
 ```text
 TripId + PlaceId
 ```
 
-#### Invariantes de SavedPlace
+#### Intenção
 
-- um Lugar é salvo no máximo uma vez por Viagem;
-- salvar é idempotente;
-- salvar não cria Atividade;
-- remover dos Salvos não remove Atividade;
+```text
+WANT | MAYBE | NOT_INTERESTED
+```
+
+#### Prioridade
+
+```text
+MUST_DO | null
+```
+
+#### Invariantes de TripPlacePreference
+
+- uma preferência existe no máximo uma vez por Viagem e Lugar;
+- ausência de preferência significa Lugar não avaliado;
+- não existe estado persistido `UNRATED`;
+- `MUST_DO` somente é válido com intenção `WANT`;
+- `MAYBE` e `NOT_INTERESTED` não possuem prioridade;
+- definir a mesma preferência é idempotente;
+- definir ou limpar preferência não cria Atividade;
+- limpar preferência não remove Atividade;
 - Planejado é estado derivado externo;
-- não representa favorito global.
+- não representa favorito global;
+- Saved Place é termo legado de compatibilidade e equivale temporariamente a `WANT` sem prioridade.
+
+---
+
+### 49-A. PlanningRole
+
+`PlanningRole` é um objeto de valor derivado por política versionada. Ele orienta composição sem substituir a categoria factual do Place.
+
+```text
+EXPERIENCE | FOOD | NIGHTLIFE | OTHER
+```
+
+Política inicial:
+
+| Place Category | PlanningRole |
+| --- | --- |
+| `beach`, `nature`, `attraction`, `viewpoint`, `tour` | `EXPERIENCE` |
+| `gastronomy` | `FOOD` |
+| `nightlife` | `NIGHTLIFE` |
+| `shopping` | `OTHER` |
+
+`OTHER` permanece selecionável, mas não recebe regra especializada de composição sem nova decisão de domínio.
 
 ---
 
@@ -1550,40 +1591,45 @@ Não deve ser modelado como estado canônico independente sem necessidade.
 
 ---
 
-### 51. RB-DGM-DOM-005 — Lugar, Salvo, Planejado e Atividade
+### 51. RB-DGM-DOM-005 — Lugar, Preferência, Proposta e Atividade
 
 ```mermaid
 flowchart LR
     Place["Lugar"]
     Collection["Coleção da Viagem"]
-    Saved["Lugar Salvo"]
+    Preference["TripPlacePreference<br/>WANT / MAYBE / NOT_INTERESTED"]
+    Proposal["Itinerary Proposal"]
     Itinerary["Roteiro"]
     Activity["Atividade"]
     Planned["Lugar Planejado<br/>estado derivado"]
 
-    Collection --> Saved
-    Saved --> Place
+    Collection --> Preference
+    Preference --> Place
+    Preference -->|seleção explícita| Proposal
 
     Itinerary --> Activity
     Activity --> Place
     Activity --> Planned
     Planned --> Place
 
-    SaveAction["Salvar Lugar"] --> Saved
-    PlanAction["Adicionar ao Roteiro"] --> Activity
+    Apply["Aceitar Proposta"] --> Activity
+    Manual["Adicionar manualmente"] --> Activity
 
-    Saved -.->|não cria| Activity
-    Activity -.->|não exige| Saved
+    Preference -.->|não cria| Activity
+    Proposal -.->|não altera antes do aceite| Itinerary
+    Activity -.->|não exige| Preference
 ```
 
-#### Estados possíveis de Lugar Salvo e Planejado
+#### Estados possíveis de preferência e planejamento
 
-| Salvo | Planejado | Situação                          |
-| ----- | --------- | --------------------------------- |
-| Não   | Não       | Apenas disponível no Catálogo     |
-| Sim   | Não       | Preservado para avaliação         |
-| Não   | Sim       | Adicionado diretamente ao Roteiro |
-| Sim   | Sim       | Salvo e planejado                 |
+| Preferência | Planejado | Situação |
+| --- | --- | --- |
+| ausente | não | disponível no Catálogo e não avaliado |
+| `WANT` ou `MAYBE` | não | integra Minha seleção, sem compromisso no Roteiro |
+| `NOT_INTERESTED` | não | explicitamente excluído da geração |
+| ausente | sim | adicionado manualmente ao Roteiro |
+| `WANT` ou `MAYBE` | sim | selecionado e associado a Activity aceita ou manual |
+| `NOT_INTERESTED` | sim | estado excepcional; a Activity existente permanece independente |
 
 ---
 
@@ -1811,7 +1857,10 @@ ActivityId
 - Localização manual é permitida;
 - remoção não exclui Lugar;
 - mudança de Dia preserva identidade;
-- Atividade fixa não é movida automaticamente.
+- Atividade fixa não é movida automaticamente;
+- decorrer do tempo não altera automaticamente o estado;
+- passado e trecho transcorrido do Dia atual não são replanejados;
+- ausência de horário no Dia atual protege a Activity contra movimentação automática.
 
 ---
 
@@ -2238,7 +2287,14 @@ ItineraryProposal
 - Conflitos;
 - validade;
 - seleção;
+- escopo de geração inicial ou replanejamento;
+- snapshot da TripPlacePreference utilizada;
+- opção explícita de inclusão de `MAYBE`;
+- snapshot da ReplanningWindow;
+- resultados explicáveis de candidatos incluídos e excluídos;
 - estado.
+
+`ProposalCandidateOutcome` distingue `INCLUDED` e `EXCLUDED` e preserva um código de motivo verificável. Os códigos iniciais são `NO_CAPACITY`, `OUTSIDE_REPLANNING_WINDOW`, `FIXED_ACTIVITY_CONFLICT`, `TEMPORAL_CONFLICT`, `KNOWN_CLOSED`, `MISSING_REQUIRED_DATA`, `DUPLICATE_PLACE`, `UNSUPPORTED_PLANNING_ROLE` e `MAYBE_NOT_REQUESTED`.
 
 ---
 
@@ -2281,6 +2337,29 @@ ProposedActivity:
 7. Atividades fixas não são movidas automaticamente.
 8. Falha preserva Roteiro atual.
 9. Aplicação é idempotente.
+10. Candidatos automáticos possuem TripPlacePreference elegível.
+11. Lugar não avaliado ou `NOT_INTERESTED` não entra automaticamente.
+12. `MAYBE` exige solicitação explícita.
+13. Seleção vazia ou pequena é válida e não autoriza preenchimento artificial.
+14. Replanejamento preserva passado, trecho transcorrido e Activities protegidas.
+
+#### ReplanningWindow
+
+`ReplanningWindow` é um objeto de valor calculado a partir de relógio injetável, timezone IANA da Viagem, Trip Days e Activities atuais.
+
+```text
+ReplanningWindow
+- capturedAt
+- timeZone
+- localDate
+- localTime
+- eligibleDayIds
+- eligibleActivityIds
+- protectedActivityIds
+- reasonByActivityId
+```
+
+Ela protege Dias passados, Activities terminadas ou em andamento no Dia atual, Activities sem horário no Dia atual, estados terminais, flexibilidade `fixed` e Free Periods `protected`.
 
 ---
 
@@ -2883,7 +2962,7 @@ Nenhuma Recomendação ou Proposta pode alterar estado canônico sem decisão ex
 - Recommendation não é Decision.
 - Decision não é execução.
 - Place não é Activity.
-- SavedPlace não é PlannedPlace.
+- TripPlacePreference não é PlannedPlace.
 - ItineraryProposal não é Itinerary.
 - Estimate não é confirmação.
 - Alert não é PlanningConflict.
@@ -2899,7 +2978,7 @@ Falhas externas não devem apagar:
 - Viagem;
 - Roteiro;
 - Preferências;
-- Lugares Salvos;
+- preferências por Lugar;
 - alterações locais;
 - Proposta anterior válida;
 - histórico de Decisões.
@@ -3083,7 +3162,7 @@ Diagramas deste documento não devem ser utilizados diretamente para:
 | TravelerProfile   | TravelerProfileId   | Traveler Profile   |
 | Traveler          | TravelerId          | Traveler Profile   |
 | TripCollection    | TripCollectionId    | Trip Collection    |
-| SavedPlace        | SavedPlaceId        | Trip Collection    |
+| TripPlacePreference | TripPlacePreferenceId | Trip Collection |
 | Place             | PlaceId             | Place              |
 | Itinerary         | ItineraryId         | Itinerary          |
 | TripDay           | TripDayId           | Itinerary          |
@@ -3107,7 +3186,7 @@ Diagramas deste documento não devem ser utilizados diretamente para:
 | Traveler          | Criar Viagem e Configurações       |
 | Preference        | Configurações e personalização     |
 | Place             | Explorar e Detalhes                |
-| SavedPlace        | Salvos                             |
+| TripPlacePreference | Minha seleção                   |
 | Itinerary         | Roteiro                            |
 | Activity          | Roteiro                            |
 | FreePeriod        | Roteiro                            |
@@ -3259,7 +3338,60 @@ Antes de aprovar:
 
 ---
 
-### 142. Declaração final
+### 142. Seleção, candidatos e composição da Proposal
+
+`TripPlacePreference` representa intenção explícita do viajante sobre um Place no contexto de uma Trip. Ela continua pertencendo à Trip Collection e não representa planejamento aplicado.
+
+A composição da `ItineraryProposal` distingue semanticamente a origem de candidatos:
+
+```text
+USER_SELECTED
+ROUTEBOOK_RECOMMENDED
+```
+
+`USER_SELECTED` é derivado exclusivamente de TripPlacePreference elegível. `ROUTEBOOK_RECOMMENDED` representa um Place apresentado pelo RouteBook apenas dentro da Proposal para uma lacuna justificável.
+
+A segunda origem não cria uma nova preferência, não modifica a Trip Collection e não transfere ownership de Place para Proposal Management.
+
+#### Relação canônica
+
+```text
+Place
+  ↓ avaliação explícita
+TripPlacePreference
+  ↓
+Minha seleção
+  ↓
+USER_SELECTED ─────────┐
+                       ├→ ItineraryProposal → aceite → Activity
+Recommendation/context ─→ ROUTEBOOK_RECOMMENDED ┘
+```
+
+`NOT_INTERESTED` bloqueia participação automática em ambos os grupos. Place não avaliado somente pode aparecer como `ROUTEBOOK_RECOMMENDED` quando uma política explícita permitir complemento e houver Justificativa sustentada.
+
+#### Planning Role
+
+`PlanningRole` descreve a função de composição de um candidato e permanece distinto da categoria factual do Place:
+
+```text
+EXPERIENCE | FOOD | NIGHTLIFE | OTHER
+```
+
+O papel pode orientar janelas e contexto, mas não redefine o Place.
+
+#### Planejado é derivado
+
+O estado de um Place como planejado continua derivado da presença de Activity correspondente no Itinerary. Ele não é atributo de TripPlacePreference.
+
+Aceitar `ROUTEBOOK_RECOMMENDED` pode criar Activity por meio da Proposal aceita, mas não cria WANT implicitamente.
+
+#### Planejamento parcial
+
+Um Itinerary pode conter poucos itens e Free Periods. Ausência de atividade não é lacuna que deva obrigatoriamente ser preenchida.
+
+---
+
+### 143. Declaração final
 
 O Modelo de Domínio do RouteBook estabelece a representação conceitual oficial do produto.
 
@@ -3280,7 +3412,7 @@ Ele define como o RouteBook compreende:
 - Viajantes;
 - Preferências;
 - Lugares;
-- Lugares Salvos;
+- Preferências de Lugar;
 - Roteiros;
 - Dias;
 - Atividades;
@@ -3298,7 +3430,7 @@ Seu domínio não deverá transformar:
 - Recomendação em Decisão;
 - Decisão em execução automática;
 - estimativa em garantia;
-- Salvo em Planejado;
+- Preferência em Planejado;
 - Proposta em Roteiro;
 - confiança em certeza;
 - IA em autoridade;

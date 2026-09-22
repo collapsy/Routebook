@@ -9,10 +9,10 @@ document_type: product
 owner: Product
 
 status: Published
-version: "0.1.0"
+version: "0.2.0"
 
 created: "2026-07-15"
-last_updated: null
+last_updated: "2026-09-18"
 
 authors:
 
@@ -877,7 +877,7 @@ Orientativa.
 
 ### Regra
 
-O Mapa deve refletir os mesmos estados presentes em lista, Salvos e Roteiro.
+O Mapa deve refletir os mesmos estados presentes em lista, Minha seleção e Roteiro.
 
 ### Severidade
 
@@ -960,7 +960,7 @@ Obrigatória.
 A indisponibilidade do mapa não deve impedir:
 
 * consulta de Lugares em lista;
-* acesso a Salvos;
+* acesso a Minha seleção;
 * consulta do Roteiro;
 * edição de Atividades;
 * persistência dos dados.
@@ -1093,13 +1093,13 @@ Orientativa.
 
 ---
 
-# Parte VIII — Regras de Lugares salvos
+# Parte VIII — Regras de Minha seleção
 
 ## 64. RB-BR-059 — Salvar não equivale a planejar
 
 ### Regra
 
-Um Lugar salvo não deve ser automaticamente adicionado ao Roteiro.
+Uma TripPlacePreference não deve criar automaticamente uma Activity.
 
 ### Severidade
 
@@ -1111,7 +1111,7 @@ Obrigatória.
 
 ### Regra
 
-O usuário pode adicionar um Lugar diretamente ao Roteiro sem salvá-lo antes.
+O usuário pode adicionar um Place diretamente ao Roteiro sem preferência anterior, como fluxo manual secundário.
 
 ### Severidade
 
@@ -1119,11 +1119,11 @@ Obrigatória.
 
 ---
 
-## 66. RB-BR-061 — Não pode existir duplicidade de Salvo
+## 66. RB-BR-061 — Não pode existir duplicidade de preferência
 
 ### Regra
 
-O mesmo Lugar não deve possuir mais de uma associação de Salvo na mesma Viagem.
+O mesmo Place não deve possuir mais de uma TripPlacePreference na mesma Trip.
 
 ### Severidade
 
@@ -1131,11 +1131,11 @@ Bloqueante.
 
 ---
 
-## 67. RB-BR-062 — Remover dos Salvos não remove do Roteiro
+## 67. RB-BR-062 — Limpar preferência não remove do Roteiro
 
 ### Regra
 
-A remoção de um Lugar dos Salvos não deve remover Atividades relacionadas.
+A limpeza de uma TripPlacePreference não deve remover Activities relacionadas.
 
 ### Severidade
 
@@ -1143,11 +1143,11 @@ Obrigatória.
 
 ---
 
-## 68. RB-BR-063 — Remover do Roteiro não remove dos Salvos
+## 68. RB-BR-063 — Remover do Roteiro não limpa preferência
 
 ### Regra
 
-A remoção de uma Atividade não deve remover automaticamente o Lugar dos Salvos.
+A remoção de uma Activity não deve limpar automaticamente a TripPlacePreference.
 
 ### Severidade
 
@@ -1155,16 +1155,18 @@ Obrigatória.
 
 ---
 
-## 69. RB-BR-064 — Estado salvo deve ser consistente
+## 69. RB-BR-064 — Preferência deve ser consistente
 
 ### Regra
 
-O estado de Lugar salvo deve ser igual em:
+Intenção e prioridade devem ser iguais em:
 
 * lista;
 * mapa;
 * Detalhes;
-* área Salvos.
+* Minha seleção.
+
+Ausência de preferência significa Place não avaliado. `MUST_DO` exige `WANT`; `MAYBE` e `NOT_INTERESTED` não possuem prioridade.
 
 ### Severidade
 
@@ -1958,6 +1960,20 @@ Obrigatória.
 
 ---
 
+## 125-A. RB-BR-145 — Replanejamento deve preservar a janela temporal
+
+### Regra
+
+Replanejamento deve gerar Proposal explícita e limitar mudanças ao futuro elegível no timezone IANA da Trip.
+
+Dias passados, trecho transcorrido ou em andamento do Dia atual, Activity sem horário no Dia atual, Activity `fixed` ou terminal e Free Period `protected` devem permanecer protegidos.
+
+### Severidade
+
+Bloqueante.
+
+---
+
 # Parte XIV — Regras de uso durante a Viagem
 
 ## 126. RB-BR-121 — Dia atual depende do fuso da Viagem
@@ -2281,7 +2297,7 @@ Obrigatória.
 
 ---
 
-## 151. Salvos
+## 151. Minha seleção
 
 | Regras                | Requisitos relacionados |
 | --------------------- | ----------------------- |
@@ -2310,6 +2326,7 @@ Obrigatória.
 | Regras                | Requisitos relacionados          |
 | --------------------- | -------------------------------- |
 | RB-BR-115 a RB-BR-125 | RB-FR-104, RB-FR-113 a RB-FR-117 |
+| RB-BR-145             | RB-FR-146                         |
 
 ---
 

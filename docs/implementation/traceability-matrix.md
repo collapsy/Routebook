@@ -5,9 +5,9 @@ description: Mantém a ligação entre requisitos, decisões, incrementos, issue
 document_type: implementation-governance
 owner: Delivery
 status: Published
-version: "1.0.0"
+version: "1.1.0"
 created: "2026-07-28"
-last_updated: "2026-09-08"
+last_updated: "2026-09-21"
 authors:
   - RouteBook Team
 tags:
@@ -828,7 +828,6 @@ Ao concluir um incremento:
 | segurança | secrets somente server-side; nenhum secret em UI/log/relatório |
 | Provider | Google Places autorizado e provisionado somente em Preview em 01/09/2026; comparação live confirmou a integração e motivou correção de cobertura; Production continua gate humano separado |
 | validação | Documentation, Engineering/Playwright e Vercel Preview pendentes no HEAD final |
-\n
 
 ## Evidências previstas do RB-INC-173
 
@@ -883,7 +882,7 @@ Ao concluir um incremento:
 | Overture | PMTiles transitório em Preview/teste; GeoParquet + STAC como direção sustentável |
 | segunda cidade | Florianópolis zero seed/config |
 | observabilidade | source/raio/contagens/duração sem coordenadas precisas |
-| validação | Documentation/Engineering pendentes no SHA final |
+| validação | SHA `9ba25b31dd1c86aabf73bb49f7f4f921062f2391`: Documentation #2132, Engineering #2614 e Vercel verdes; consolidação documental posterior deve ser revalidada no HEAD final |
 
 
 ## Evidências previstas do RB-INC-176
@@ -1067,3 +1066,224 @@ Ao concluir um incremento:
 | validação técnica | SHA `42638e98fe159f720ad3bb1ccd4f9a0931aee4ed`; Documentation run `34233429696` e Engineering run `34233429804` verdes; 151/151 Playwright, 401 testes web e 198 testes database aprovados |
 | Preview | `dpl_7qqQQF33GLatVT45FvwZEfRGprmM` READY no mesmo SHA, `target=null`, raiz HTTP 200 e `x-robots-tag: noindex`; inspeção visual desktop/mobile não foi marcada como concluída porque o navegador automatizado do ambiente foi bloqueado pelo sandbox de rede |
 | governança | PR permanece Draft; `main` e Production intocados; merge e aceite visual continuam gates humanos explícitos |
+
+## Evidências previstas do RB-INC-199
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-199-selection-replanning-contract.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-199-selection-replanning-contract.md` |
+| ADR | RB-ADR-028 — TripPlacePreference e janela temporal de replanejamento |
+| issue/PR | [#481](https://github.com/collapsy/Routebook/issues/481); [PR #482](https://github.com/collapsy/Routebook/pull/482) |
+| branch | `codex/issue-481-selection-replanning-contract` |
+| base | `origin/main@3beceb737edfc390c9e56eecf90f006fac8342b0` |
+| decisão humana | pacote de linguagem, intenção, prioridade, Planning Role e janela temporal aprovado em `2026-09-18` |
+| domínio | `TripPlacePreference`; `WANT`, `MAYBE`, `NOT_INTERESTED`; `MUST_DO` somente sobre `WANT`; não avaliado por ausência |
+| experiência | Explore → Minha seleção → Proposal explícita → aceite → Activity; adição manual secundária |
+| compatibilidade | Saved Place existente futuramente mapeado para `WANT` sem prioridade, sem perda de ID, associação ou Activity |
+| temporalidade | timezone IANA da Trip; passado, trecho transcorrido, Activity em andamento/sem horário no Dia atual, terminal ou `fixed` protegidos |
+| código e dados | nenhuma alteração executável, migration, Preview ou Production autorizada |
+| validação | SHA `97ec0bea`; Documentation `35375543711`, Engineering `35375543692` e Vercel verdes; 158 Playwright aprovados, com 1 flaky mobile conhecido recuperado no retry |
+
+## Evidências do RB-INC-200
+
+- Incremento: `docs/implementation/increments/rb-inc-200-trip-place-preference-core.md`.
+- Context Pack: `docs/implementation/context-packs/rb-inc-200-trip-place-preference-core.md`.
+- Issue: [#483](https://github.com/collapsy/Routebook/issues/483).
+- Branch: `codex/issue-483-trip-place-preference-core`.
+- Base validada: `e7e8a3bee1ed774515f9e572cd2d0e23f67e4f48`.
+- Domínio: novo workspace `@routebook/trip-collection` com `TripCollection` e `TripPlacePreference`.
+- Invariantes cobertas: intents canônicos, `MUST_DO` somente sobre `WANT`, ausência como não avaliado, unicidade por Trip e Place, idempotência e preservação de identidade/`createdAt` em mudanças reais.
+- Pureza: identidade e instante são injetados; o núcleo não gera UUID nem lê relógio do sistema e não depende de framework, banco ou Provider.
+- Compatibilidade: Saved Places, banco, Activity, Proposal e UI permanecem intocados.
+- Validação local após auditoria: compilação isolada do código-fonte com TypeScript passou e a verificação funcional isolada das invariantes principais passou.
+- Evidência autoritativa de regressão integral no SHA `2e369e45964af17822b079a9a48fab02c928e71b`: Documentation Validation `35382464737`, Engineering Validation `35382464968` e Overture Place Discovery `35382465031` concluíram com sucesso. Engineering Validation aprovou formatação, docs, lint, typecheck, migrations, testes, smoke, build e Playwright/responsividade.
+
+## Evidências do RB-INC-201
+
+- Incremento: `docs/implementation/increments/rb-inc-201-trip-place-preference-persistence.md`.
+- Context Pack: `docs/implementation/context-packs/rb-inc-201-trip-place-preference-persistence.md`.
+- Issue: [#485](https://github.com/collapsy/Routebook/issues/485).
+- Branch: `codex/issue-485-trip-place-preference-persistence`.
+- Base: `57fdd501f38413ddd1f644ba25ef9ef05526acc8`.
+- Migration: `0034_persist_trip_place_preferences`, com backfill Saved Place → `WANT`, prioridade nula e `updated_at = created_at`.
+- Persistência: repository port em `@routebook/trip-collection` e adapter Drizzle em `@routebook/database`.
+- Compatibilidade: Saved Places permanece adapter transitório; Find/List representam somente `WANT`, Save converte para `WANT` e Unsave limpa a preferência.
+- Save de Recommendation foi alinhado ao mesmo estado canônico.
+- Risco: migration contém `UPDATE` e `SET NOT NULL`, portanto deve ser classificada como high risk pela política de release. Nenhuma execução em Production faz parte do incremento.
+- Evidência autoritativa no SHA `6655a401302020c374ec21046b68f8afa4e9bdc0`: Documentation Validation `35386173495`, Overture Place Discovery `35386173591`, Engineering Validation `35386173582` e Vercel concluíram com sucesso. A Engineering Validation aprovou migration policy, aplicação da 0034 em PostgreSQL, testes, smoke, build e Playwright. A política classifica a 0034 como `high` por `update-data` e `set-not-null`. Nenhuma ação em Production foi executada.
+
+## Evidências do RB-INC-202
+
+- Incremento: `docs/implementation/increments/rb-inc-202-trip-selection-ui.md`.
+- Context Pack: `docs/implementation/context-packs/rb-inc-202-trip-selection-ui.md`.
+- Issue: [#489](https://github.com/collapsy/Routebook/issues/489).
+- Branch: `codex/issue-489-trip-selection-ui`.
+- Base: `d2887427aa84834d8074c538f091fcb5898f86f6`.
+- Interface: Explorar, Detalhes e a rota legada `/lugares-salvos` passam a consumir `TripPlacePreference`.
+- Linguagem visível: Quero ir, Talvez, Não tenho interesse, Imperdível e Minha seleção.
+- Planejado: derivado de Activities ativas do Itinerary; não é persistido.
+- Compatibilidade: rota física e adapter Saved Places permanecem disponíveis, mas deixam de ser a linguagem principal nas superfícies migradas.
+- Proposal, Planning Role e ReplanningWindow permanecem fora deste incremento.
+- Evidência autoritativa de regressão: pendente do CI do pull request.
+
+
+## Evidências previstas do RB-INC-203
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-203-trip-selection-proposal-candidates.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-203-trip-selection-proposal-candidates.md` |
+| issue | [#492](https://github.com/collapsy/Routebook/issues/492) |
+| PR | [#493](https://github.com/collapsy/Routebook/pull/493) |
+| branch | `codex/issue-492-trip-selection-proposal-candidates` |
+| base | `main@8818b948d0d0de478ae16965d4681586ac4f7c8f` |
+| candidate set | WANT por padrão; MAYBE somente com opt-in; NOT_INTERESTED/não avaliado excluídos |
+| prioridade | MUST_DO precede WANT comum sem alterar restrições do compositor |
+| origem | Recommendation e Discovery deixam de alimentar automaticamente a Proposal |
+| UX | opção explícita para incluir MAYBE na geração |
+| auditoria | `contextSnapshotId` distingue `selection:want` e `selection:want-maybe` |
+| validação | Documentation/Engineering pendentes no SHA final |
+
+## Evidências previstas do RB-INC-204
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-204-activity-state-controls.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-204-activity-state-controls.md` |
+| issue | [#495](https://github.com/collapsy/Routebook/issues/495) |
+| PR | [#496](https://github.com/collapsy/Routebook/pull/496) |
+| branch | `codex/issue-495-activity-state-controls` |
+| base | `main@9de76487959adc3ebfa96bb2bbd4f7711af71115` |
+| lifecycle | `planned -> tentative`; `planned|tentative -> completed|skipped`; `planned|tentative|needs-review -> cancelled` |
+| pureza | transições em memória, sem banco, UI, Provider ou relógio implícito além do instante injetável existente |
+| concorrência | PR #480 toca Roteiro; RB-INC-204 evita essa superfície |
+| próximo passo | ReplanningWindow e delta permanecem para incremento posterior |
+| validação | Documentation/Engineering pendentes no SHA final |
+
+## Evidências previstas do RB-INC-205
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-205-replanning-window.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-205-replanning-window.md` |
+| issue | [#497](https://github.com/collapsy/Routebook/issues/497) |
+| PR | [#498](https://github.com/collapsy/Routebook/pull/498) |
+| branch | `codex/issue-497-replanning-window` |
+| base | `main@61169a75249744743df8b65081f5a4d4712f91cc` |
+| janela | data/hora local derivadas do timezone IANA da Trip; passado e trecho transcorrido do Dia atual protegidos |
+| Activities | future não-fixed elegível; fixed e estados terminais protegidos; unavailable/needs-review futuros podem permanecer elegíveis |
+| delta | add/move/update/remove validados contra Dias/Activities elegíveis sem aplicar a Proposal |
+| pureza | funções em memória, relógio explícito, sem banco, UI, Provider, migration ou status automático |
+| validação | Documentation/Engineering pendentes no SHA final |
+
+## Evidências previstas do RB-INC-206
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-206-proposal-replan-snapshot.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-206-proposal-replan-snapshot.md` |
+| issue | [#499](https://github.com/collapsy/Routebook/issues/499) |
+| branch | `codex/issue-499-proposal-replan-snapshot` |
+| base | `main@9a37084ca36da79e74c89328a57a4d2585c4d660` |
+| scope | Itinerary Proposal distingue INITIAL e REPLAN; caller legado permanece INITIAL |
+| snapshot | seleção, includeMaybe e ReplanningWindow persistidos em generation_context |
+| janela | adapter PostgreSQL calcula ReplanningWindow canônica usando timezone e Activities reais |
+| composição | REPLAN reutiliza o compositor existente, limitado a eligibleDayIds e sem move/update/remove automático |
+| migration | 0035 aditiva: generation_scope + generation_context, sem DROP/DELETE/UPDATE |
+| validação | Documentation/Engineering pendentes no SHA final |
+
+
+## Evidências previstas do RB-INC-207
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-207-planning-journey-redesign.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-207-planning-journey-redesign.md` |
+| decisão | RB-ADR-029 — candidatos complementares e proveniência na Itinerary Proposal |
+| issue | [#503](https://github.com/collapsy/Routebook/issues/503) |
+| PR | [#504](https://github.com/collapsy/Routebook/pull/504) |
+| branch | `codex/issue-503-planning-journey-redesign` |
+| base | `main@6b4833a5179b42fca9ddf882ae62da8ebb3946f7` |
+| jornada | Explorar → Escolher → Planejar → Proposal → Roteiro → Replanejamento |
+| seleção | TripPlacePreference permanece fonte autoritativa das escolhas do usuário; planejado continua derivado do Itinerary |
+| intenções | WANT padrão; MAYBE opt-in; NOT_INTERESTED excluído; MUST_DO não viola restrições |
+| Planning Roles | EXPERIENCE, FOOD, NIGHTLIFE e OTHER permanecem função de composição distinta da categoria factual |
+| proveniência | Proposal distingue USER_SELECTED de ROUTEBOOK_RECOMMENDED |
+| complementos | somente opcionais, justificáveis e não usados como meta de densidade |
+| pós-wizard | experiência muda de preparação para Trip planejada e, depois, Trip em andamento |
+| replanejamento | explícito, via Proposal REPLAN, limitado por ReplanningWindow |
+| implementação | nenhuma alteração executável, banco, migration, Provider, Preview ou Production |
+| validação | SHA `81644277819c6549f2106eeed41d8075dac7fcab`: Documentation Validation `35617897831` success; Engineering Validation `35617897561` success, incluindo format, docs, lint, typecheck, migrations, testes, smoke, build e testes responsivos |
+
+## Evidências previstas do RB-INC-208
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-208-proposal-candidate-provenance.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-208-proposal-candidate-provenance.md` |
+| issue | [#507](https://github.com/collapsy/Routebook/issues/507) |
+| branch | `codex/issue-507-proposal-candidate-provenance` |
+| base | `main@9d9f8b5c3e8315c0f2e40d94e9d8111e523928fc` |
+| contrato existente | `ItineraryProposalGenerationCandidate` evoluído; nenhuma abstração paralela criada |
+| origem | `USER_SELECTED | ROUTEBOOK_RECOMMENDED` |
+| proveniência | `sourceId` mínimo para USER_SELECTED e `reasonCode` mínimo para ROUTEBOOK_RECOMMENDED |
+| snapshot | `generationContext.candidates` opcional e backward-compatible, persistido no JSONB existente |
+| seleção | WANT padrão; MAYBE opt-in; NOT_INTERESTED excluído; MUST_DO preservado |
+| persistência | sem schema/migration; round-trip de candidate provenance coberto em teste PostgreSQL |
+| complementos | contrato representável, mas geração real de ROUTEBOOK_RECOMMENDED permanece fora do incremento |
+| wizard | nenhum estado ou UI de wizard criado |
+| validação | HEAD funcional `8e78b39688a6c64b06d6dc727431d29e1eefc36c`: Documentation Validation #2172 (`35636053786`) success; Engineering Validation #2654 (`35636053788`) success; Vercel Preview READY |
+
+
+## Evidências previstas do RB-INC-209
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-209-place-selection-wizard.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-209-place-selection-wizard.md` |
+| issue | [#509](https://github.com/collapsy/Routebook/issues/509) |
+| PR | [#510](https://github.com/collapsy/Routebook/pull/510) |
+| branch | `codex/issue-509-place-selection-wizard` |
+| base | `main@a961028491c06586af040d37f817f2d9c3c39ac5` |
+| auditoria | Explorar, Minha seleção, detalhe, TripPlacePreference e PR #502 auditados antes da implementação |
+| wizard | Etapa 1 Lugares orquestra Explorar e Minha seleção via contexto transitório `preparar=1`; Contexto/Revisão/Proposta aparecem apenas como progresso informativo |
+| preferência | WANT/MAYBE/NOT_INTERESTED atualizados inline; MUST_DO permanece prioridade sobre WANT |
+| progresso | contagens de intenção derivadas da persistência e atualizadas localmente após mutação bem-sucedida |
+| external places | promoção/reconciliação canônica preservada antes de TripPlacePreference |
+| Activity | no modo wizard, Minha seleção e Detalhe não expõem adição direta ao roteiro; E2E exige zero Activities após apenas selecionar Place |
+| compatibilidade | URLs, catálogo, filtros, ranking, imagens, mapa, distância e detalhe preservados; sem migration |
+| origem relacionada | correção funcional da issue #501 / PR #502 reconciliada nesta branch para evitar redirect e perda de scroll |
+| validação | pendente da PR e CI; não considerar verde até resultado real |
+
+
+## Evidências previstas do RB-INC-210
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-210-trip-context-wizard.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-210-trip-context-wizard.md` |
+| issue | [#511](https://github.com/collapsy/Routebook/issues/511) |
+| branch | `codex/issue-511-trip-context-wizard` |
+| base | `main@1267507c82f706c2cf812300e2552ebcff524947` |
+| auditoria | TravelerProfile, Trip, TripPlacePreference, contexto atual, RB-INC-005 e RB-INC/CTX 207–209 auditados antes da implementação |
+| wizard | Contexto integrado como Etapa 2 de 4; Lugares permanece navegável e `preparar=1` é preservado |
+| persistência | grupos progressivos reutilizam TravelerProfile e preservam campos de outros grupos |
+| dados conhecidos | destino, período, hospedagem e responsável são derivados da Trip, sem duplicação |
+| revisão | `TripPreparationReviewModel` é projeção derivada de Trip + TripPlacePreference[] + TravelerProfile |
+| Activity/Proposal | nenhuma alteração de Itinerary e nenhuma ItineraryProposal gerada pelo contexto |
+| migration | nenhuma; schema existente é suficiente |
+| validação | PR #512; Engineering Validation e Documentation Validation verdes no HEAD `b9ab80241038c49796121f31620846ce4968dcfb`; Vercel Preview verde em `2cb1db5158075a6a138e36c4b425154fcfa24996`; commits posteriores até `b9ab802` alteraram somente E2E, sem mudança no bundle funcional; check Vercel do HEAD bloqueado externamente por build-rate-limit |
+
+## Evidências previstas do RB-INC-211
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-211-trip-preparation-review.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-211-trip-preparation-review.md` |
+| issue | [#513](https://github.com/collapsy/Routebook/issues/513) |
+| branch | `codex/rb-inc-211-trip-preparation-review` |
+| base | `main@e56afb11a989efd867a640faa8da53ae3da760c2` |
+| revisão | Etapa 3 de 4; projeção derivada e não persistida; edição de Lugares e Contexto preserva `preparar=1` |
+| invariantes | nenhuma Activity, ItineraryProposal ou `ROUTEBOOK_RECOMMENDED` criada pela Revisão |
+| validação | pendente da PR, CI e Preview; preencher somente com resultados reais |

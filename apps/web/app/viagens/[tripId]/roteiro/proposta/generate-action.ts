@@ -9,7 +9,6 @@ import {
   DrizzleTripRepository,
 } from "@routebook/database";
 
-import { loadItineraryProposalDiscoveryCandidates } from "@/lib/itinerary-proposal-discovery-candidates";
 import {
   executeGenerateItineraryProposalAction,
   generateItineraryProposalActionError,
@@ -23,18 +22,18 @@ function proposalPath(tripId: string): string {
 
 export async function generateItineraryProposalAction(
   tripId: string,
+  includeMaybe = false,
 ): Promise<GenerateItineraryProposalActionState> {
   let state: GenerateItineraryProposalActionState;
 
   try {
     state = await executeGenerateItineraryProposalAction(
-      { tripId },
+      { tripId, includeMaybe },
       {
         resolveAccess: resolveTripRouteAccess,
         tripRepository: new DrizzleTripRepository(),
         itineraryRepository: new DrizzleItineraryRepository(),
         generationService: createPostgresAuthoritativeItineraryProposalGenerationService(),
-        loadAdditionalCandidates: loadItineraryProposalDiscoveryCandidates,
       },
     );
   } catch (error) {

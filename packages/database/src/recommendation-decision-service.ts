@@ -230,8 +230,16 @@ export async function saveRecommendedPlace(
         id: savedPlaceId,
         tripId: command.tripId,
         placeId: command.placeId,
+        intent: "WANT",
+        priority: null,
         createdAt: decidedAt,
+        updatedAt: decidedAt,
       });
+    } else if (existingSaved.intent !== "WANT" || existingSaved.priority !== null) {
+      await transaction
+        .update(savedPlaces)
+        .set({ intent: "WANT", priority: null, updatedAt: decidedAt })
+        .where(eq(savedPlaces.id, existingSaved.id));
     }
 
     const decision = createDecision({

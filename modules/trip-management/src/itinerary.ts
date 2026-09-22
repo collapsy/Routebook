@@ -102,6 +102,10 @@ export type RemoveActivityInput = {
   activityId: string;
 };
 
+export type TransitionActivityStatusInput = {
+  activityId: string;
+};
+
 export type ReorderActivitiesInput = {
   activityId: string;
   targetActivityId: string;
@@ -131,6 +135,7 @@ export type ItineraryFieldErrors = Partial<
     | "targetActivityId"
     | "freePeriodId"
     | "title"
+    | "status"
     | "mode"
     | "startTime"
     | "durationMinutes"
@@ -419,6 +424,92 @@ export function updateActivity(
     version: itinerary.version + 1,
     updatedAt: now,
   };
+}
+
+function transitionActivityStatus(
+  itinerary: Itinerary,
+  input: TransitionActivityStatusInput,
+  allowedSourceStatuses: readonly ActivityStatus[],
+  targetStatus: ActivityStatus,
+  now = new Date(),
+): Itinerary {
+  const activityId = input.activityId.trim();
+  const sourceDay = itinerary.days.find((day) =>
+    day.activities.some((activity) => activity.id === activityId),
+  );
+  const sourceActivity = sourceDay?.activities.find((activity) => activity.id === activityId);
+  const fieldErrors: ItineraryFieldErrors = {};
+
+  if (!activityId) fieldErrors.activityId = "Informe uma atividade válida.";
+  else if (!sourceDay || !sourceActivity) {
+    fieldErrors.activityId = "A atividade não pertence a este roteiro.";
+  } else if (!allowedSourceStatuses.includes(sourceActivity.status)) {
+    fieldErrors.status = `A atividade em estado ${sourceActivity.status} não pode ser alterada para ${targetStatus}.`;
+  }
+
+  if (Object.keys(fieldErrors).length > 0 || !sourceDay || !sourceActivity) {
+    throw new ItineraryValidationError(fieldErrors);
+  }
+
+  return {
+    ...itinerary,
+    days: itinerary.days.map((day) => {
+      if (day.id !== sourceDay.id) return day;
+
+      return {
+        ...day,
+        activities: day.activities.map((activity) =>
+          activity.id === activityId
+            ? {
+                ...activity,
+                status: targetStatus,
+                updatedAt: now,
+              }
+            : activity,
+        ),
+      };
+    }),
+    version: itinerary.version + 1,
+    updatedAt: now,
+  };
+}
+
+export function markActivityTentative(
+  itinerary: Itinerary,
+  input: TransitionActivityStatusInput,
+  now = new Date(),
+): Itinerary {
+  return transitionActivityStatus(itinerary, input, ["planned"], "tentative", now);
+}
+
+export function completeActivity(
+  itinerary: Itinerary,
+  input: TransitionActivityStatusInput,
+  now = new Date(),
+): Itinerary {
+  return transitionActivityStatus(itinerary, input, ["planned", "tentative"], "completed", now);
+}
+
+export function skipActivity(
+  itinerary: Itinerary,
+  input: TransitionActivityStatusInput,
+  now = new Date(),
+): Itinerary {
+  return transitionActivityStatus(itinerary, input, ["planned", "tentative"], "skipped", now);
+}
+
+export function cancelActivity(
+  itinerary: Itinerary,
+  input: TransitionActivityStatusInput,
+  now = new Date(),
+): Itinerary {
+  return transitionActivityStatus(
+    itinerary,
+    input,
+    ["planned", "tentative", "needs-review"],
+    "cancelled",
+    now,
+  );
 }
 
 export function reorderActivities(

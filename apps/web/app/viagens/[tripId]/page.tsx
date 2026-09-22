@@ -3,11 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
-  DrizzleSavedPlaceRepository,
+  DrizzleTripPlacePreferenceRepository,
   DrizzleTravelerProfileRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
-import { listSavedPlaces } from "@routebook/saved-places";
 import { findTravelerProfile } from "@routebook/traveler-profile";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
@@ -100,15 +99,19 @@ export default async function TripOverviewPage({
 
   if (!trip) notFound();
 
-  const savedPlacesPromise = listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId);
+  const preferencesPromise = new DrizzleTripPlacePreferenceRepository().listByTripId(tripId);
   const [profile, deleteAccess, recommendationExperience, overviewMap] = await Promise.all([
     findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
     resolveTripRouteAccess({ tripId, action: "trip:delete" }),
     loadRecommendationExperience(tripId, new Date(), { persist: false }),
-    savedPlacesPromise.then((savedPlaces) =>
+    preferencesPromise.then((preferences) =>
       loadTripOverviewDiscoveryMap(
         trip,
-        new Set(savedPlaces.map((selection) => selection.placeId)),
+        new Set(
+          preferences
+            .filter((selection) => selection.intent !== "NOT_INTERESTED")
+            .map((selection) => selection.placeId),
+        ),
       ),
     ),
   ]);
@@ -137,7 +140,10 @@ export default async function TripOverviewPage({
           <p>Veja os principais dados da viagem e continue de onde parou.</p>
         </div>
         <div className="section-heading-row">
-          <Link className="product-primary-action" href={`/viagens/${tripId}/lugares`}>
+          <Link className="product-primary-action" href={`/viagens/${tripId}/lugares?preparar=1`}>
+            Preparar viagem
+          </Link>
+          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
             Explorar lugares
           </Link>
         </div>
@@ -305,7 +311,7 @@ export default async function TripOverviewPage({
             Explorar lugares
           </Link>
           <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares-salvos`}>
-            Ver lugares salvos
+            Minha seleção
           </Link>
         </div>
       </section>

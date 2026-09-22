@@ -9,10 +9,10 @@ document_type: domain
 owner: Domain
 
 status: Published
-version: "0.2.0"
+version: "0.4.0"
 
 created: "2026-07-18"
-last_updated: "2026-07-18"
+last_updated: "2026-09-21"
 
 authors:
 
@@ -656,7 +656,7 @@ Não é permitido:
 | Visualizar Viagem            |   Sim |         Sim |    Sim |
 | Alterar Roteiro              |   Sim |         Sim |    Não |
 | Alterar Perfil dos Viajantes |   Sim |         Sim |    Não |
-| Salvar Lugar                 |   Sim |         Sim |    Não |
+| Alterar preferência de Lugar |   Sim |         Sim |    Não |
 | Aplicar Proposta             |   Sim |         Sim |    Não |
 | Ignorar Risco                |   Sim | Condicional |    Não |
 | Cancelar Viagem              |   Sim |         Não |    Não |
@@ -1202,11 +1202,11 @@ Ratings de escalas diferentes não devem ser combinados sem normalização expl�
 
 ---
 
-## Parte IX — Trip Collection e Lugares Salvos
+## Parte IX — Trip Collection e preferências por Lugar
 
-### 63. Unicidade de Saved Place
+### 63. Unicidade de TripPlacePreference
 
-#### RB-BR-COL-001 — Lugar é salvo uma vez por Viagem
+#### RB-BR-COL-001 — Existe no máximo uma preferência por Lugar e Viagem
 
 Para uma Trip Collection:
 
@@ -1218,11 +1218,11 @@ deve ser único.
 
 ---
 
-### 64. Salvamento idempotente
+### 64. Definição idempotente
 
-#### RB-BR-COL-002 — Save Place é idempotente
+#### RB-BR-COL-002 — Set Trip Place Preference é idempotente
 
-Salvar novamente o mesmo Place:
+Definir novamente a mesma intenção e prioridade:
 
 * não cria duplicidade;
 * não altera identidade;
@@ -1231,11 +1231,11 @@ Salvar novamente o mesmo Place:
 
 ---
 
-### 65. Salvar não planeja
+### 65. Preferência não planeja
 
-#### RB-BR-COL-003 — Saved Place não cria Activity
+#### RB-BR-COL-003 — TripPlacePreference não cria Activity
 
-Salvar um Place não deve:
+Definir intenção ou prioridade para um Place não deve:
 
 * criar Activity;
 * definir Trip Day;
@@ -1244,11 +1244,13 @@ Salvar um Place não deve:
 
 ---
 
-### 66. Remover dos Salvos
+### 66. Limpar preferência
 
-#### RB-BR-COL-004 — Unsave não remove do Roteiro
+#### RB-BR-COL-004 — Clear Trip Place Preference não remove do Roteiro
 
-Remover um Saved Place não deve remover Activities relacionadas.
+Limpar uma TripPlacePreference não deve remover Activities relacionadas.
+
+A limpeza retorna o Place ao estado não avaliado.
 
 ---
 
@@ -1259,6 +1261,30 @@ Remover um Saved Place não deve remover Activities relacionadas.
 Um Place é considerado planejado quando existe ao menos uma Activity ativa associada.
 
 Não deve existir estado canônico independente apenas para representar isso, salvo decisão arquitetural posterior devidamente documentada.
+
+---
+
+### 67-A. Intenção e prioridade
+
+#### RB-BR-COL-006 — Não avaliado é ausência de registro
+
+Um Place sem TripPlacePreference é não avaliado. O domínio não deve persistir `UNRATED`.
+
+#### RB-BR-COL-007 — MUST_DO exige WANT
+
+`MUST_DO` só é válido quando `intent = WANT`. `MAYBE` e `NOT_INTERESTED` devem possuir prioridade nula.
+
+#### RB-BR-COL-008 — NOT_INTERESTED é exclusão explícita
+
+Um Place com `NOT_INTERESTED` não deve entrar automaticamente em Recommendation de preenchimento ou Itinerary Proposal.
+
+#### RB-BR-COL-009 — MAYBE exige opt-in
+
+Um Place com `MAYBE` somente pode participar da geração quando a solicitação registrar `includeMaybe = true`.
+
+#### RB-BR-COL-010 — Compatibilidade de Saved Place
+
+Durante a transição, Saved Place existente equivale a `WANT` sem prioridade. A compatibilidade não pode criar Activity nem perder identidade, data ou associação.
 
 ---
 
@@ -1385,6 +1411,8 @@ Uma Activity `flexible` pode ser reorganizada por uma Itinerary Proposal.
 
 A alteração só se torna canônica após aceitação.
 
+Uma Activity flexible ainda deve estar dentro da ReplanningWindow. Flexibilidade não autoriza alterar passado ou trecho transcorrido do Dia atual.
+
 ---
 
 ### 78. Free Period protected
@@ -1414,7 +1442,7 @@ O Período não é removido até a aplicação dos itens aceitos.
 Remover uma Activity:
 
 * não remove Place;
-* não remove Saved Place;
+* não remove TripPlacePreference;
 * não remove Data Source;
 * pode invalidar Travel Estimates;
 * pode resolver Planning Conflicts relacionados.
@@ -1900,6 +1928,51 @@ Se a aplicação falhar:
 
 ---
 
+### 117-A. Origem da geração
+
+#### RB-BR-PRP-011 — Proposal usa seleção explícita
+
+Candidatos automáticos de uma Itinerary Proposal devem possuir TripPlacePreference `WANT` ou `MAYBE` incluído explicitamente.
+
+Recommendation, Discovery e Place não avaliado não entram automaticamente.
+
+#### RB-BR-PRP-012 — Seleção pequena é válida
+
+Não existe quantidade mínima de preferências para solicitar Proposal. Densidade é limite de capacidade, não meta de preenchimento.
+
+Uma Proposal vazia é válida quando explica por que nenhuma alteração adequada foi produzida.
+
+#### RB-BR-PRP-013 — MUST_DO não viola restrição
+
+`MUST_DO` aumenta prioridade, mas não supera conflito temporal, Activity `fixed`, Free Period `protected`, indisponibilidade conhecida ou restrição obrigatória.
+
+O candidato inviável deve ser excluído com motivo.
+
+#### RB-BR-PRP-014 — Inclusões e exclusões são explicáveis
+
+A Proposal deve registrar resultados estruturados para Places considerados, distinguindo incluído e excluído e informando motivo verificável.
+
+#### RB-BR-PRP-015 — Replanejamento respeita ReplanningWindow
+
+Uma Proposal de replanejamento não pode alterar:
+
+* Dia anterior à data local atual da Trip;
+* Activity terminada ou em andamento no Dia atual;
+* Activity sem horário no Dia atual;
+* Activity `fixed`;
+* Activity `completed`, `skipped` ou `cancelled`;
+* Free Period `protected`.
+
+No Dia atual, Activity com início futuro pode ser elegível. Sem duração, início já transcorrido protege a Activity. Dias futuros permanecem elegíveis conforme as demais invariantes.
+
+#### RB-BR-PRP-016 — ReplanningWindow usa timezone da Trip
+
+A classificação temporal deve usar relógio injetável e timezone IANA da Trip. Timezone do servidor não é fallback semântico.
+
+O decorrer do tempo não altera automaticamente o estado de Activity.
+
+---
+
 ### 118. Fluxo de validade da Proposta
 
 ```mermaid
@@ -2369,7 +2442,7 @@ Dados pessoais não devem ser mantidos indefinidamente sem finalidade, obrigaç�
 
 ---
 
-### 149. Save Place
+### 149. Set Trip Place Preference
 
 #### Pré-condições
 
@@ -2379,10 +2452,10 @@ Dados pessoais não devem ser mantidos indefinidamente sem finalidade, obrigaç�
 
 #### Pós-condições
 
-* Saved Place existente;
+* TripPlacePreference válida;
 * ausência de duplicidade;
 * Itinerary inalterado;
-* evento `PlaceSaved` produzido somente quando houver mudança real.
+* evento `TripPlacePreferenceSet` produzido somente quando houver mudança real.
 
 ---
 
@@ -2689,7 +2762,7 @@ RB-QA-001 deverá relacionar:
 * Recommendation não altera estado canônico;
 * Decision pertence ao Usuário;
 * Proposal não é Itinerary;
-* Saved Place não é Planned Place;
+* TripPlacePreference não é Planned Place;
 * Place não é Activity;
 * Estimate não é confirmação;
 * unknown não recebe valor falso;
@@ -2850,7 +2923,53 @@ Antes de aprovar:
 
 ## Parte XXVII — Declaração final
 
-### 176. Declaração normativa
+### 176. Invariantes da jornada guiada
+
+#### RB-BR-SEL-001 — Preferência não altera Itinerary
+
+Criar, alterar ou limpar `TripPlacePreference` não cria, move, remove ou atualiza Activity.
+
+#### RB-BR-SEL-002 — Origem da Proposal é explícita
+
+Todo candidato apresentado para composição deve ser distinguível como `USER_SELECTED` ou `ROUTEBOOK_RECOMMENDED`.
+
+`USER_SELECTED` exige preferência elegível. `ROUTEBOOK_RECOMMENDED` não pode ser apresentado como escolha do usuário.
+
+#### RB-BR-SEL-003 — NOT_INTERESTED exclui participação automática
+
+Place com `NOT_INTERESTED` não pode entrar automaticamente em Proposal, inclusive como complemento do RouteBook.
+
+#### RB-BR-SEL-004 — MAYBE exige opt-in
+
+`MAYBE` participa somente quando a geração autoriza explicitamente sua inclusão. O opt-in não altera a preferência persistida.
+
+#### RB-BR-SEL-005 — MUST_DO não supera invariantes
+
+`MUST_DO` só qualifica WANT e aumenta precedência. Não autoriza violar capacidade, restrição, horário conhecido, Planning Conflict ou ReplanningWindow.
+
+#### RB-BR-PRP-004 — Complemento exige benefício e Justificativa
+
+`ROUTEBOOK_RECOMMENDED` somente pode ser considerado quando houver benefício funcional justificável. Capacidade matemática ou tempo livre, isoladamente, não são justificativa suficiente.
+
+#### RB-BR-PRP-005 — Complemento não cria preferência
+
+Aceitar candidato `ROUTEBOOK_RECOMMENDED` pode aplicar a Activity aceita, mas não cria ou altera `TripPlacePreference`.
+
+#### RB-BR-PRP-006 — Período livre é resultado válido
+
+Densidade é limite/contexto e não meta. Proposal vazia, dia com poucos itens e Free Period são resultados válidos.
+
+#### RB-BR-PRP-007 — Explicação usa somente evidência conhecida
+
+Motivos de inclusão ou exclusão não podem converter ausência de dados em fechamento, indisponibilidade, conflito ou distância confirmados.
+
+#### RB-BR-RPL-001 — Nova seleção não reescreve passado
+
+Durante a Viagem, preferência nova só pode influenciar uma Proposal de replanejamento na parte futura elegível de `ReplanningWindow`.
+
+---
+
+### 177. Declaração normativa
 
 As Regras de Negócio e Invariantes do RouteBook estabelecem as condições obrigatórias que governam o comportamento do domínio.
 
@@ -2867,7 +2986,7 @@ Todo comportamento do produto deverá preservar:
 * separação entre Decision e execução;
 * separação entre Itinerary Proposal e Itinerary;
 * separação entre Place e Activity;
-* separação entre Saved Place e Planned Place;
+* separação entre TripPlacePreference e Planned Place;
 * caráter estimado de informações não confirmadas;
 * validade contextual;
 * consistência temporal;

@@ -3,8 +3,8 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   DrizzleItineraryProposalRepository,
   DrizzleItineraryRepository,
-  DrizzlePlaceRepository,
   DrizzleRecommendationRepository,
+  DrizzleTripPlacePreferenceRepository,
   getDatabase,
   places,
   recommendations,
@@ -21,15 +21,18 @@ const PROPOSAL_FIXTURE_CENTER = Object.freeze({
   longitude: 1,
 });
 
+type SelectionIntent = "WANT" | "MAYBE" | "NOT_INTERESTED";
+
 type GenerationFixture = Readonly<{
   tripId: string;
-  placeId?: string;
-  placeTitle?: string;
+  placeId: string;
+  placeTitle: string;
 }>;
 
-async function createGenerationFixture(
+async function createSelectionFixture(
   tripName: string,
-  withEligibleRecommendation: boolean,
+  intent: SelectionIntent = "WANT",
+  priority: "MUST_DO" | null = null,
   withPlaceAlreadyPlanned = false,
 ): Promise<GenerationFixture> {
   const now = new Date();
@@ -44,19 +47,17 @@ async function createGenerationFixture(
   const itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);
   await new DrizzleItineraryRepository().save(itinerary);
 
-  if (!withEligibleRecommendation) return Object.freeze({ tripId: trip.id });
-
   const database = getDatabase();
   const placeId = crypto.randomUUID();
-  const recommendationId = crypto.randomUUID();
-  const placeTitle = `Praia do Amor E2E ${placeId.slice(0, 8)}`;
+  const preferenceId = crypto.randomUUID();
+  const placeTitle = `Lugar selecionado E2E ${placeId.slice(0, 8)}`;
 
   await database.insert(places).values({
     id: placeId,
     destinationId: "pipa-rn",
-    slug: `praia-do-amor-e2e-${placeId}`,
+    slug: `selection-place-e2e-${placeId}`,
     name: placeTitle,
-    summary: "Praia com falésias e ondas para validar a geração integral.",
+    summary: "Lugar criado para validar a seleção autoritativa da Proposal.",
     category: "beach",
     latitude: PROPOSAL_FIXTURE_CENTER.latitude,
     longitude: PROPOSAL_FIXTURE_CENTER.longitude,
@@ -65,34 +66,13 @@ async function createGenerationFixture(
     createdAt: now,
     updatedAt: now,
   });
-  await database.insert(recommendations).values({
-    id: recommendationId,
+
+  await new DrizzleTripPlacePreferenceRepository().save({
+    id: preferenceId,
     tripId: trip.id,
     placeId,
-    status: "presented",
-    contextSnapshot: { schemaVersion: 1, tripId: trip.id },
-    contextFingerprint: "e".repeat(64),
-    reasons: [
-      {
-        code: "scenic",
-        message: "Boa opção para compor o roteiro gerado.",
-        evidence: {},
-      },
-    ],
-    limitations: [],
-    score: 0.9,
-    confidenceLevel: "high",
-    confidenceBasis: ["published-place"],
-    validFrom: new Date(now.getTime() - 60_000),
-    expiresAt: new Date(now.getTime() + 86_400_000),
-    generator: "deterministic",
-    policyVersion: "rb-inc-102",
-    generatedAt: new Date(now.getTime() - 120_000),
-    presentedAt: new Date(now.getTime() - 60_000),
-    resolvedAt: null,
-    linkedDecisionId: null,
-    statusReason: null,
-    supersededByRecommendationId: null,
+    intent,
+    priority,
     createdAt: now,
     updatedAt: now,
   });
@@ -113,6 +93,74 @@ async function createGenerationFixture(
   return Object.freeze({ tripId: trip.id, placeId, placeTitle });
 }
 
+async function createRecommendationOnlyFixture(tripName: string): Promise<GenerationFixture> {
+  const now = new Date();
+  const { trip } = await createAuthenticatedE2ETrip(
+    {
+      name: tripName,
+      startDate: "2026-08-22",
+      endDate: "2026-08-23",
+    },
+    now,
+  );
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }, now),
+  );
+
+  const database = getDatabase();
+  const placeId = crypto.randomUUID();
+  const recommendationId = crypto.randomUUID();
+  const placeTitle = `Recommendation sem seleção ${placeId.slice(0, 8)}`;
+
+  await database.insert(places).values({
+    id: placeId,
+    destinationId: "pipa-rn",
+    slug: `recommendation-only-${placeId}`,
+    name: placeTitle,
+    summary: "Recommendation que não recebeu intenção explícita do viajante.",
+    category: "nature",
+    latitude: PROPOSAL_FIXTURE_CENTER.latitude,
+    longitude: PROPOSAL_FIXTURE_CENTER.longitude,
+    addressLabel: "Pipa, Tibau do Sul - RN",
+    publicationStatus: "published",
+    createdAt: now,
+    updatedAt: now,
+  });
+  await database.insert(recommendations).values({
+    id: recommendationId,
+    tripId: trip.id,
+    placeId,
+    status: "presented",
+    contextSnapshot: {
+      schemaVersion: 1,
+      tripId: trip.id,
+      destinationId: "pipa-rn",
+      tripContextVersion: trip.contextVersion,
+      capturedAt: now.toISOString(),
+    },
+    contextFingerprint: "e".repeat(64),
+    reasons: [{ code: "scenic", message: "Recommendation sem preferência.", evidence: {} }],
+    limitations: [],
+    score: 0.99,
+    confidenceLevel: "high",
+    confidenceBasis: ["published-place"],
+    validFrom: new Date(now.getTime() - 60_000),
+    expiresAt: new Date(now.getTime() + 86_400_000),
+    generator: "deterministic",
+    policyVersion: "rb-inc-203-e2e",
+    generatedAt: new Date(now.getTime() - 60_000),
+    presentedAt: new Date(now.getTime() - 30_000),
+    resolvedAt: null,
+    linkedDecisionId: null,
+    statusReason: null,
+    supersededByRecommendationId: null,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return Object.freeze({ tripId: trip.id, placeId, placeTitle });
+}
+
 async function createDensityFixture(tripName: string, candidateCount: number): Promise<string> {
   const now = new Date();
   const { trip } = await createAuthenticatedE2ETrip(
@@ -123,20 +171,21 @@ async function createDensityFixture(tripName: string, candidateCount: number): P
     },
     now,
   );
-  const itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);
-  await new DrizzleItineraryRepository().save(itinerary);
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }, now),
+  );
 
   const database = getDatabase();
+  const preferenceRepository = new DrizzleTripPlacePreferenceRepository();
   for (let index = 0; index < candidateCount; index += 1) {
     const placeId = crypto.randomUUID();
-    const recommendationId = crypto.randomUUID();
     await database.insert(places).values({
       id: placeId,
       destinationId: "pipa-rn",
-      slug: `density-place-${index}-${placeId}`,
+      slug: `density-selection-${index}-${placeId}`,
       name: `Lugar de densidade ${index + 1}`,
-      summary: "Opção elegível para validar o teto diário da Proposal.",
-      category: "beach",
+      summary: "Opção escolhida para validar o teto diário da Proposal.",
+      category: index % 2 === 0 ? "beach" : "nature",
       latitude: PROPOSAL_FIXTURE_CENTER.latitude + index * 0.001,
       longitude: PROPOSAL_FIXTURE_CENTER.longitude + index * 0.001,
       addressLabel: "Pipa, Tibau do Sul - RN",
@@ -144,94 +193,24 @@ async function createDensityFixture(tripName: string, candidateCount: number): P
       createdAt: now,
       updatedAt: now,
     });
-    await database.insert(recommendations).values({
-      id: recommendationId,
+    await preferenceRepository.save({
+      id: crypto.randomUUID(),
       tripId: trip.id,
       placeId,
-      status: "presented",
-      contextSnapshot: { schemaVersion: 1, tripId: trip.id },
-      contextFingerprint: recommendationId.replaceAll("-", "").padEnd(64, "0").slice(0, 64),
-      reasons: [
-        {
-          code: "density-e2e",
-          message: `Candidato elegível ${index + 1}.`,
-          evidence: {},
-        },
-      ],
-      limitations: [],
-      score: candidateCount - index,
-      confidenceLevel: "high",
-      confidenceBasis: ["published-place"],
-      validFrom: new Date(now.getTime() - 60_000),
-      expiresAt: new Date(now.getTime() + 86_400_000),
-      generator: "deterministic",
-      policyVersion: "rb-inc-140-e2e",
-      generatedAt: new Date(now.getTime() - 120_000 - index),
-      presentedAt: new Date(now.getTime() - 60_000),
-      resolvedAt: null,
-      linkedDecisionId: null,
-      statusReason: null,
-      supersededByRecommendationId: null,
-      createdAt: now,
-      updatedAt: now,
+      intent: "WANT",
+      priority: index === candidateCount - 1 ? "MUST_DO" : null,
+      createdAt: new Date(now.getTime() + index),
+      updatedAt: new Date(now.getTime() + index),
     });
   }
 
   return trip.id;
 }
 
-async function createZeroSeedDiscoveryFixture(tripName: string): Promise<string> {
-  const now = new Date();
-  const { trip } = await createAuthenticatedE2ETrip(
-    {
-      name: tripName,
-      destination: {
-        name: "Florianópolis, SC",
-        type: "city",
-        countryCode: "BR",
-        latitude: -27.5949,
-        longitude: -48.5482,
-        timeZone: "America/Sao_Paulo",
-      },
-      startDate: "2026-11-10",
-      endDate: "2026-11-11",
-    },
-    now,
-  );
-  await new DrizzleItineraryRepository().save(
-    createItinerary({ tripId: trip.id, period: trip.period }, now),
-  );
-  return trip.id;
-}
-
-async function createFullDensityEmptyFixture(tripName: string): Promise<string> {
-  const now = new Date();
-  const { trip } = await createAuthenticatedE2ETrip(
-    {
-      name: tripName,
-      startDate: "2026-08-22",
-      endDate: "2026-08-22",
-    },
-    now,
-  );
-  let itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);
-  for (let index = 0; index < 3; index += 1) {
-    itinerary = addActivity(
-      itinerary,
-      {
-        dayDate: "2026-08-22",
-        title: `Atividade existente ${index + 1}`,
-      },
-      new Date(now.getTime() + index + 1),
-    );
-  }
-  await new DrizzleItineraryRepository().save(itinerary);
-  return trip.id;
-}
-
 async function generateProposalFromEmptyState(
   page: Page,
   tripId: string,
+  includeMaybe = false,
 ): Promise<ItineraryProposalId> {
   await page.goto(`/viagens/${tripId}/roteiro`);
   const proposalEntryPoint = page.getByRole("link", { name: "Gerar proposta" });
@@ -239,6 +218,16 @@ async function generateProposalFromEmptyState(
   await expect(proposalEntryPoint).toHaveAttribute("href", proposalPath);
   await page.goto(proposalPath);
   await expect(page.getByRole("heading", { name: "Nenhuma proposta disponível" })).toBeVisible();
+
+  const maybeCheckbox = page.getByRole("checkbox", {
+    name: "Incluir lugares marcados como Talvez",
+  });
+  await expect(maybeCheckbox).toBeEnabled();
+  await expect(maybeCheckbox).not.toBeChecked();
+  if (includeMaybe) {
+    await maybeCheckbox.check();
+    await expect(maybeCheckbox).toBeChecked();
+  }
 
   const generateButton = page.getByRole("button", { name: "Gerar proposta de roteiro" });
   await expect(generateButton).toBeEnabled();
@@ -260,12 +249,9 @@ async function generateProposalFromEmptyState(
   return proposalId as ItineraryProposalId;
 }
 
-test("gera uma Proposal ready da UI ao PostgreSQL sem alterar o Itinerary", async ({
-  page,
-}, testInfo) => {
-  const fixture = await createGenerationFixture(
-    `Geração integral ${testInfo.project.name} ${Date.now()}`,
-    true,
+test("gera Proposal a partir de WANT sem alterar o Itinerary", async ({ page }, testInfo) => {
+  const fixture = await createSelectionFixture(
+    `Geração por seleção ${testInfo.project.name} ${Date.now()}`,
   );
   const itineraryRepository = new DrizzleItineraryRepository();
   const itineraryBefore = await itineraryRepository.findByTripId(fixture.tripId);
@@ -273,10 +259,9 @@ test("gera uma Proposal ready da UI ao PostgreSQL sem alterar o Itinerary", asyn
 
   const proposalId = await generateProposalFromEmptyState(page, fixture.tripId);
 
-  await expect(page.getByRole("heading", { level: 1, name: "Proposta de Roteiro" })).toBeVisible();
   await expect(page.getByText("Proposta aguardando sua decisão").first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: fixture.placeTitle! })).toBeVisible();
-  await expect(page.getByText("Boa opção para compor o roteiro gerado.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: fixture.placeTitle })).toBeVisible();
+  await expect(page.getByText("Lugar escolhido como Quero ir na Minha seleção.")).toBeVisible();
 
   const proposal = await new DrizzleItineraryProposalRepository().findById(
     fixture.tripId,
@@ -299,63 +284,70 @@ test("gera uma Proposal ready da UI ao PostgreSQL sem alterar o Itinerary", asyn
     ]),
   );
   expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
-
-  await page.reload();
-  await expect(page.getByRole("heading", { name: fixture.placeTitle! })).toBeVisible();
-  expect(
-    await new DrizzleItineraryProposalRepository().findById(fixture.tripId, proposalId),
-  ).toEqual(proposal);
-  expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
 });
 
-test("destino zero-seed transforma Discovery segura em Proposal contextual sem criar Recommendation", async ({
+test("MAYBE fica fora por padrão", async ({ page }, testInfo) => {
+  const fixture = await createSelectionFixture(
+    `Talvez fora ${testInfo.project.name} ${Date.now()}`,
+    "MAYBE",
+  );
+
+  const proposalId = await generateProposalFromEmptyState(page, fixture.tripId);
+
+  await expect(page.getByText("Sem mudanças sugeridas").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: fixture.placeTitle })).toHaveCount(0);
+  const proposal = await new DrizzleItineraryProposalRepository().findById(
+    fixture.tripId,
+    proposalId,
+  );
+  expect(proposal).toMatchObject({ status: "ready", proposedActivities: [] });
+});
+
+test("MAYBE entra somente após opt-in explícito", async ({ page }, testInfo) => {
+  const fixture = await createSelectionFixture(
+    `Talvez incluído ${testInfo.project.name} ${Date.now()}`,
+    "MAYBE",
+  );
+
+  const proposalId = await generateProposalFromEmptyState(page, fixture.tripId, true);
+
+  await expect(page.getByRole("heading", { name: fixture.placeTitle })).toBeVisible();
+  await expect(
+    page.getByText("Lugar marcado como Talvez e incluído explicitamente nesta geração."),
+  ).toBeVisible();
+  const proposal = await new DrizzleItineraryProposalRepository().findById(
+    fixture.tripId,
+    proposalId,
+  );
+  expect(proposal?.proposedActivities).toEqual(
+    expect.arrayContaining([expect.objectContaining({ placeId: fixture.placeId })]),
+  );
+});
+
+test("Recommendation sem TripPlacePreference não alimenta a Proposal", async ({
   page,
 }, testInfo) => {
-  const tripId = await createZeroSeedDiscoveryFixture(
-    `Proposal Anywhere ${testInfo.project.name} ${Date.now()}`,
+  const fixture = await createRecommendationOnlyFixture(
+    `Recommendation isolada ${testInfo.project.name} ${Date.now()}`,
   );
-  const itineraryRepository = new DrizzleItineraryRepository();
   const recommendationRepository = new DrizzleRecommendationRepository();
-  const itineraryBefore = await itineraryRepository.findByTripId(tripId);
-  expect(itineraryBefore).not.toBeNull();
-  expect(await recommendationRepository.listByTripId(tripId)).toEqual([]);
+  expect(await recommendationRepository.listByTripId(fixture.tripId)).toHaveLength(1);
 
-  const proposalId = await generateProposalFromEmptyState(page, tripId);
+  const proposalId = await generateProposalFromEmptyState(page, fixture.tripId);
 
-  await expect(page.getByRole("heading", { name: "Café descoberto próximo" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Parque descoberto próximo" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Bar descoberto próximo" })).toBeVisible();
-
-  const proposal = await new DrizzleItineraryProposalRepository().findById(tripId, proposalId);
-  expect(proposal).toMatchObject({ status: "ready", generationVersion: "3" });
-  const proposedActivities = proposal?.proposedActivities ?? [];
-  expect(proposedActivities).toHaveLength(3);
-  const proposedCountByDay = new Map<string, number>();
-  for (const activity of proposedActivities) {
-    const targetTripDayId = activity.targetTripDayId;
-    expect(targetTripDayId).toBeDefined();
-    if (!targetTripDayId) {
-      throw new Error("Proposed Activity sem targetTripDayId.");
-    }
-    proposedCountByDay.set(targetTripDayId, (proposedCountByDay.get(targetTripDayId) ?? 0) + 1);
-  }
-  expect(Math.max(...proposedCountByDay.values())).toBeGreaterThan(1);
-
-  const proposedPlaceIds = proposedActivities.flatMap((activity) =>
-    activity.placeId ? [activity.placeId] : [],
+  await expect(page.getByText("Sem mudanças sugeridas").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: fixture.placeTitle })).toHaveCount(0);
+  const proposal = await new DrizzleItineraryProposalRepository().findById(
+    fixture.tripId,
+    proposalId,
   );
-  const proposalPlaces = await new DrizzlePlaceRepository().listByIds(proposedPlaceIds);
-  expect(proposalPlaces).toHaveLength(3);
-  expect(proposalPlaces.every((place) => place.publicationStatus === "draft")).toBe(true);
-  expect(await recommendationRepository.listByTripId(tripId)).toEqual([]);
-  expect(await itineraryRepository.findByTripId(tripId)).toEqual(itineraryBefore);
+  expect(proposal).toMatchObject({ status: "ready", proposedActivities: [] });
+  expect(await recommendationRepository.listByTripId(fixture.tripId)).toHaveLength(1);
 });
 
-test("limita a densidade diária sem alterar o Itinerary antes do aceite", async ({
-  page,
-}, testInfo) => {
+test("respeita densidade diária usando somente a seleção explícita", async ({ page }, testInfo) => {
   const tripId = await createDensityFixture(
-    `Densidade Proposal ${testInfo.project.name} ${Date.now()}`,
+    `Densidade seleção ${testInfo.project.name} ${Date.now()}`,
     5,
   );
   const itineraryRepository = new DrizzleItineraryRepository();
@@ -370,52 +362,14 @@ test("limita a densidade diária sem alterar o Itinerary antes do aceite", async
     generationVersion: "3",
   });
   expect(proposal?.proposedActivities).toHaveLength(3);
-  expect(proposal?.limitations).toContain(
-    "5 candidato(s) elegível(is) não foram propostos porque os Dias disponíveis atingiram a densidade desejada ou foram preservados como vazios intencionais.",
-  );
-  await expect(
-    page.getByText(
-      "5 candidato(s) elegível(is) não foram propostos porque os Dias disponíveis atingiram a densidade desejada ou foram preservados como vazios intencionais.",
-    ),
-  ).toBeVisible();
   expect(await itineraryRepository.findByTripId(tripId)).toEqual(itineraryBefore);
 });
 
-test("Proposal ready vazia continua auditável sem parecer uma decisão aplicável", async ({
-  page,
-}, testInfo) => {
-  const tripId = await createFullDensityEmptyFixture(
-    `Geração sem espaço ${testInfo.project.name} ${Date.now()}`,
-  );
-  const itineraryRepository = new DrizzleItineraryRepository();
-  const itineraryBefore = await itineraryRepository.findByTripId(tripId);
-  expect(itineraryBefore).not.toBeNull();
-
-  const proposalId = await generateProposalFromEmptyState(page, tripId);
-
-  await expect(page.getByText("Sem mudanças sugeridas").first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Nenhuma mudança para aplicar" })).toBeVisible();
-  await expect(page.getByText("Nenhuma mudança adequada foi proposta")).toBeVisible();
-  await expect(page.getByText("Aceitar proposta")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Descartar proposta" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Descartar e gerar outra" })).toBeVisible();
-
-  const proposal = await new DrizzleItineraryProposalRepository().findById(tripId, proposalId);
-  expect(proposal).toMatchObject({ status: "ready", proposedActivities: [] });
-  expect(proposal?.limitations).toContain(
-    "Nenhum candidato elegível foi recebido; a proposta não contém mudanças e o Roteiro atual permanece preservado.",
-  );
-  expect(await itineraryRepository.findByTripId(tripId)).toEqual(itineraryBefore);
-
-  await page.reload();
-  await expect(page.getByText("Sem mudanças sugeridas").first()).toBeVisible();
-  expect(await itineraryRepository.findByTripId(tripId)).toEqual(itineraryBefore);
-});
-
-test("não propõe novamente Place que já está no Roteiro", async ({ page }, testInfo) => {
-  const fixture = await createGenerationFixture(
-    `Geração sem duplicata ${testInfo.project.name} ${Date.now()}`,
-    true,
+test("não propõe novamente Place que já está em Activity ativa", async ({ page }, testInfo) => {
+  const fixture = await createSelectionFixture(
+    `Seleção sem duplicata ${testInfo.project.name} ${Date.now()}`,
+    "WANT",
+    null,
     true,
   );
   const itineraryRepository = new DrizzleItineraryRepository();
@@ -424,13 +378,14 @@ test("não propõe novamente Place que já está no Roteiro", async ({ page }, t
 
   const proposalId = await generateProposalFromEmptyState(page, fixture.tripId);
 
-  await expect(page.getByRole("heading", { name: fixture.placeTitle! })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: fixture.placeTitle })).toHaveCount(0);
   const proposal = await new DrizzleItineraryProposalRepository().findById(
     fixture.tripId,
     proposalId,
   );
   expect(proposal).toMatchObject({ status: "ready" });
-  const proposedActivities = proposal?.proposedActivities ?? [];
-  expect(proposedActivities.some((activity) => activity.placeId === fixture.placeId)).toBe(false);
+  expect(
+    proposal?.proposedActivities?.some((activity) => activity.placeId === fixture.placeId),
+  ).toBe(false);
   expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
 });

@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import {
   DrizzlePlaceExternalReferenceRepository,
   DrizzlePlaceRepository,
-  DrizzleSavedPlaceRepository,
+  DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
 import {
@@ -18,12 +18,15 @@ import {
   type PlaceQualitySignalMatch,
   type PlaceQualitySignals,
 } from "@routebook/place-catalog";
-import { listSavedPlaces } from "@routebook/saved-places";
+import type { TripPlacePreference } from "@routebook/trip-collection";
 import { findTripById } from "@routebook/trip-management";
 
 import { ExternalPlaceImagePreview } from "../../../../components/external-place-image-preview";
 import { PlacePrimaryImage } from "../../../../components/place-primary-image";
 import { PlaceRankingMeta } from "../../../../components/place-ranking-meta";
+import { TripPlanningWizard } from "../../../../components/trip-planning-wizard";
+import { TripPlacePreferenceControls } from "../../../../components/trip-place-preference-controls";
+import { TripPlaceSelectionProgress } from "../../../../components/trip-place-selection-progress";
 import { TripMap } from "../../../../components/trip-map";
 import {
   buildGoogleMapsDirectionsUrl,
@@ -54,9 +57,9 @@ import type { TripMapPoint } from "../../../../lib/trip-map";
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
 import { resolvePlaceDiscoveryRegion } from "../../../../lib/place-discovery-region";
 import {
-  removePublishedPlaceAction,
+  clearPublishedPlacePreferenceAction,
   saveExternalPlaceAction,
-  savePublishedPlaceAction,
+  setPublishedPlacePreferenceAction,
 } from "./actions";
 import {
   categoryLabels,
@@ -85,7 +88,9 @@ type DiscoverySearchParams = {
   preco?: string;
   ordem?: string;
   descoberta?: string | undefined;
+  promocao?: string;
   erroPromocao?: string;
+  preparar?: string;
 };
 
 const distanceOptions = [1, 3, 5, 10] as const;
@@ -150,14 +155,14 @@ function placeActionErrorMessage(value?: string): string | undefined {
     case "candidato-nao-encontrado":
       return "Este lugar não está mais disponível na busca atual. Atualize a busca e tente novamente.";
     case "candidato-rejeitado":
-      return "Não foi possível salvar este lugar. Atualize a busca ou escolha outra opção.";
+      return "Não foi possível atualizar sua seleção para este lugar. Atualize a busca ou escolha outra opção.";
     case "possivel-duplicata":
       return "Este lugar pode já estar disponível na viagem. Atualize a busca antes de tentar novamente.";
     case "fonte-indisponivel":
     case "destino-nao-suportado":
     case "consistencia":
     case "erro-tecnico":
-      return "Não foi possível salvar este lugar agora. Tente novamente.";
+      return "Não foi possível atualizar sua seleção para este lugar agora. Tente novamente.";
     default:
       return undefined;
   }
@@ -179,7 +184,8 @@ function CanonicalDiscoveryCard({
   destinationId,
   distanceReferenceLabel,
   accommodationCoordinate,
-  isSaved,
+  preference,
+  preparing,
   rankingPosition,
   rankingOrderLabel,
   quality,
@@ -194,7 +200,8 @@ function CanonicalDiscoveryCard({
   destinationId?: string;
   distanceReferenceLabel: string;
   accommodationCoordinate?: Readonly<{ latitude: number; longitude: number }>;
-  isSaved: boolean;
+  preference: TripPlacePreference | undefined;
+  preparing: boolean;
   rankingPosition: number;
   rankingOrderLabel: string;
   quality?: PlaceQualityScore;
@@ -246,7 +253,16 @@ function CanonicalDiscoveryCard({
 
       <div className={styles.cardIdentity}>
         <span>{categoryLabels[place.category]}</span>
-        {isSaved ? <span>Salvo</span> : null}
+        {preference ? (
+          <span>
+            {preference.intent === "WANT"
+              ? "Quero ir"
+              : preference.intent === "MAYBE"
+                ? "Talvez"
+                : "Não tenho interesse"}
+            {preference.priority === "MUST_DO" ? " · Imperdível" : ""}
+          </span>
+        ) : null}
       </div>
 
       <h3 className={styles.cardTitle}>{place.name}</h3>
@@ -264,17 +280,28 @@ function CanonicalDiscoveryCard({
       <div className={styles.cardActions}>
         <Link
           className="product-primary-action"
-          href={`/viagens/${tripId}/lugares/${place.slug}${selectedDayDate ? `?dia=${selectedDayDate}` : ""}`}
+          href={`/viagens/${tripId}/lugares/${place.slug}${
+            selectedDayDate || preparing
+              ? `?${[
+                  selectedDayDate ? `dia=${encodeURIComponent(selectedDayDate)}` : undefined,
+                  preparing ? "preparar=1" : undefined,
+                ]
+                  .filter(Boolean)
+                  .join("&")}`
+              : ""
+          }`}
         >
           Ver detalhes
         </Link>
-        <form action={isSaved ? removePublishedPlaceAction : savePublishedPlaceAction}>
-          <input name="tripId" type="hidden" value={tripId} />
-          <input name="placeSlug" type="hidden" value={place.slug} />
-          <button className="product-secondary-action" type="submit">
-            {isSaved ? "Remover dos salvos" : "Salvar lugar"}
-          </button>
-        </form>
+        <TripPlacePreferenceControls
+          className={styles.promotionForm}
+          clearAction={clearPublishedPlacePreferenceAction}
+          currentIntent={preference?.intent}
+          currentPriority={preference?.priority}
+          fields={{ tripId, placeSlug: place.slug }}
+          label={`Preferência para ${place.name}`}
+          setAction={setPublishedPlacePreferenceAction}
+        />
       </div>
 
       <details className={styles.cardDetails}>
@@ -421,20 +448,21 @@ function ExternalDiscoveryCard({
           Ver mapa e fotos
         </a>
         {candidate.category ? (
-          <form action={saveExternalPlaceAction} className={styles.promotionForm}>
-            <input name="tripId" type="hidden" value={tripId} />
-            <input name="externalId" type="hidden" value={candidate.externalId} />
-            {search ? <input name="busca" type="hidden" value={search} /> : null}
-            {category ? <input name="categoria" type="hidden" value={category} /> : null}
-            {maximumDistanceMeters ? (
-              <input name="distancia" type="hidden" value={String(maximumDistanceMeters / 1_000)} />
-            ) : null}
-            {priceRange ? <input name="preco" type="hidden" value={priceRange} /> : null}
-            {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
-            <button className="product-secondary-action" type="submit">
-              Salvar lugar
-            </button>
-          </form>
+          <TripPlacePreferenceControls
+            className={styles.promotionForm}
+            fields={{
+              tripId,
+              externalId: candidate.externalId,
+              busca: search,
+              categoria: category,
+              distancia: maximumDistanceMeters ? String(maximumDistanceMeters / 1_000) : undefined,
+              preco: priceRange,
+              descoberta: discoveryMode,
+            }}
+            label={`Preferência para ${candidate.name}`}
+            refreshOnSuccess={false}
+            setAction={saveExternalPlaceAction}
+          />
         ) : null}
       </div>
 
@@ -501,6 +529,7 @@ export default async function PlacesPage({
   if (!trip) notFound();
 
   const rawFilters = await searchParams;
+  const wizardMode = rawFilters.preparar === "1";
   const search = rawFilters.busca?.trim().slice(0, 120) || undefined;
   const category = parsePlaceCategory(rawFilters.categoria);
   const priceRange = parsePlacePriceRange(rawFilters.preco);
@@ -508,6 +537,7 @@ export default async function PlacesPage({
   const discoverExternal = rawFilters.descoberta !== "ocultar";
   const showAllExternal = rawFilters.descoberta === "todas";
   const discoveryMode = !discoverExternal ? "ocultar" : showAllExternal ? "todas" : undefined;
+  const preferenceSaved = rawFilters.promocao === "salva";
   const placeActionError = placeActionErrorMessage(rawFilters.erroPromocao);
   const accommodationCoordinate = trip.accommodation?.coordinate;
   const requestedMaximumDistanceMeters = parseMaximumDistance(rawFilters.distancia);
@@ -531,14 +561,14 @@ export default async function PlacesPage({
   });
   const maximumDistanceMeters = region ? requestedMaximumDistanceMeters : undefined;
   const placeRepository = new DrizzlePlaceRepository();
-  const [publishedPlaces, savedPlaces] = await Promise.all([
+  const [publishedPlaces, preferences] = await Promise.all([
     region
       ? placeRepository.listPublishedWithinRadius({
           center: region.center,
           radiusMeters: region.curatedRadiusMeters,
         })
       : [],
-    listSavedPlaces(new DrizzleSavedPlaceRepository(), tripId),
+    new DrizzleTripPlacePreferenceRepository().listByTripId(tripId),
   ]);
   const destinationId =
     resolveCuratedDestinationId(publishedPlaces) ??
@@ -547,7 +577,17 @@ export default async function PlacesPage({
       .replace(/[^\p{L}\p{N}\s._-]+/gu, " ")
       .replace(/\s+/g, " ")
       .trim();
-  const savedPlaceIds = new Set(savedPlaces.map((selection) => selection.placeId));
+  const preferencesByPlaceId = new Map(
+    preferences.map((selection) => [selection.placeId, selection]),
+  );
+  const selectionCounts = preferences.reduce(
+    (summary, selection) => {
+      summary[selection.intent] += 1;
+      if (selection.priority === "MUST_DO") summary.mustDo += 1;
+      return summary;
+    },
+    { WANT: 0, MAYBE: 0, NOT_INTERESTED: 0, mustDo: 0 },
+  );
   const filteredPlaces = filterPlaces(
     publishedPlaces,
     {
@@ -565,6 +605,7 @@ export default async function PlacesPage({
     ...(maximumDistanceMeters ? { distancia: String(maximumDistanceMeters / 1_000) } : {}),
     ...(priceRange ? { preco: priceRange } : {}),
     ...(discoveryMode ? { descoberta: discoveryMode } : {}),
+    ...(wizardMode ? { preparar: "1" } : {}),
   };
   const activeFilters = [
     ...(search
@@ -758,10 +799,23 @@ export default async function PlacesPage({
       return {
         id: item.id,
         label: item.place.name,
-        kind: savedPlaceIds.has(item.place.id) ? "saved-place" : "published-place",
+        kind:
+          preferencesByPlaceId.get(item.place.id)?.intent !== "NOT_INTERESTED" &&
+          preferencesByPlaceId.has(item.place.id)
+            ? "saved-place"
+            : "published-place",
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
-        href: `/viagens/${tripId}/lugares/${item.place.slug}${rawFilters.dia ? `?dia=${rawFilters.dia}` : ""}`,
+        href: `/viagens/${tripId}/lugares/${item.place.slug}${
+          rawFilters.dia || wizardMode
+            ? `?${[
+                rawFilters.dia ? `dia=${encodeURIComponent(rawFilters.dia)}` : undefined,
+                wizardMode ? "preparar=1" : undefined,
+              ]
+                .filter(Boolean)
+                .join("&")}`
+            : ""
+        }`,
       };
     }
 
@@ -818,9 +872,17 @@ export default async function PlacesPage({
         ← Voltar para a viagem
       </Link>
 
+      {preferenceSaved ? (
+        <p className="success-banner" role="status">
+          Preferência atualizada. O lugar entrou em Minha seleção.
+        </p>
+      ) : null}
+
+      {wizardMode ? <TripPlanningWizard currentView="explore" tripId={tripId} /> : null}
+
       <header className="trip-overview-hero">
         <div>
-          <p className="product-eyebrow">Guia de viagem</p>
+          <p className="product-eyebrow">{wizardMode ? "Escolher lugares" : "Guia de viagem"}</p>
           <h1>Lugares em {trip.destination.name}</h1>
           <p>
             Compare lugares para decidir o que vale visitar. As distâncias da lista são em linha
@@ -829,7 +891,15 @@ export default async function PlacesPage({
         </div>
       </header>
 
+      {wizardMode ? (
+        <TripPlaceSelectionProgress
+          initialCounts={selectionCounts}
+          reviewHref={`/viagens/${tripId}/lugares-salvos?preparar=1`}
+        />
+      ) : null}
+
       <form action={`/viagens/${tripId}/lugares`} className={styles.filters} method="get">
+        {wizardMode ? <input name="preparar" type="hidden" value="1" /> : null}
         {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
         {ranking.order !== "distance" ? (
           <input name="ordem" type="hidden" value={ranking.order} />
@@ -1100,7 +1170,8 @@ export default async function PlacesPage({
                   ? { categoryRank: categoryRankByItemId.get(item.id)! }
                   : {})}
                 distanceReferenceLabel={distanceReferenceLabel}
-                isSaved={savedPlaceIds.has(item.place.id)}
+                preference={preferencesByPlaceId.get(item.place.id)}
+                preparing={wizardMode}
                 item={item}
                 timeZone={trip.destination.timeZone}
                 tripId={tripId}

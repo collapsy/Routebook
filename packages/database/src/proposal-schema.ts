@@ -29,6 +29,8 @@ export const itineraryProposals = pgTable(
     baseTripContextVersion: integer("base_trip_context_version").notNull(),
     baseItineraryVersion: integer("base_itinerary_version").notNull(),
     contextSnapshotId: varchar("context_snapshot_id", { length: 160 }).notNull(),
+    generationScope: varchar("generation_scope", { length: 16 }).notNull().default("INITIAL"),
+    generationContext: jsonb("generation_context"),
     status: varchar("status", { length: 24 }).notNull(),
     requestedAt: timestamp("requested_at", { withTimezone: true, mode: "date" }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
@@ -50,6 +52,10 @@ export const itineraryProposals = pgTable(
     cancelledAt: timestamp("cancelled_at", { withTimezone: true, mode: "date" }),
   },
   (table) => [
+    check(
+      "itinerary_proposals_generation_scope_check",
+      sql`${table.generationScope} in ('INITIAL', 'REPLAN')`,
+    ),
     check(
       "itinerary_proposals_status_check",
       sql`${table.status} in ('requested', 'generating', 'ready', 'partially-accepted', 'accepted', 'rejected', 'expired', 'failed', 'cancelled')`,

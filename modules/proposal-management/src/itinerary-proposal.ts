@@ -25,6 +25,53 @@ export const proposedActivityOperationTypes = ["add", "move", "update", "remove"
 
 export type ProposedActivityOperationType = (typeof proposedActivityOperationTypes)[number];
 
+export const itineraryProposalGenerationScopes = ["INITIAL", "REPLAN"] as const;
+
+export type ItineraryProposalGenerationScope = (typeof itineraryProposalGenerationScopes)[number];
+
+export const proposalCandidateOrigins = ["USER_SELECTED", "ROUTEBOOK_RECOMMENDED"] as const;
+
+export type ProposalCandidateOrigin = (typeof proposalCandidateOrigins)[number];
+
+export type ProposalCandidateProvenance = Readonly<{
+  sourceId?: string;
+  reasonCode?: string;
+}>;
+
+export type ItineraryProposalCandidateSnapshotItem = Readonly<{
+  candidateId: string;
+  placeId: string;
+  origin: ProposalCandidateOrigin;
+  provenance: ProposalCandidateProvenance;
+}>;
+
+export type ItineraryProposalSelectionSnapshotItem = Readonly<{
+  preferenceId: string;
+  placeId: string;
+  intent: "WANT" | "MAYBE" | "NOT_INTERESTED";
+  priority: "MUST_DO" | null;
+}>;
+
+export type ItineraryProposalReplanningWindowSnapshot = Readonly<{
+  capturedAt: string;
+  timeZone: string;
+  localDate: string;
+  localTime: string;
+  eligibleDayIds: readonly string[];
+  eligibleActivityIds: readonly string[];
+  protectedActivityIds: readonly string[];
+  reasonByActivityId: Readonly<Record<string, string>>;
+}>;
+
+export type ItineraryProposalGenerationContext = Readonly<{
+  schemaVersion: 1;
+  includeMaybe: boolean;
+  selection: readonly ItineraryProposalSelectionSnapshotItem[];
+  /** Ausência preserva compatibilidade com snapshots anteriores ao RB-INC-208. */
+  candidates?: readonly ItineraryProposalCandidateSnapshotItem[];
+  replanningWindow?: ItineraryProposalReplanningWindowSnapshot;
+}>;
+
 export type ProposedActivity = Readonly<{
   proposedActivityId: string;
   targetTripDayId?: string;
@@ -63,6 +110,9 @@ export type ItineraryProposal = Readonly<{
   baseTripContextVersion: number;
   baseItineraryVersion: number;
   contextSnapshotId: string;
+  /** Ausência em objetos legados equivale a INITIAL. Novas Proposals sempre materializam o scope. */
+  generationScope?: ItineraryProposalGenerationScope;
+  generationContext?: ItineraryProposalGenerationContext;
   status: ItineraryProposalStatus;
   requestedAt: Date;
   updatedAt: Date;
@@ -91,6 +141,8 @@ export type RequestItineraryProposalInput = Readonly<{
   baseTripContextVersion: number;
   baseItineraryVersion: number;
   contextSnapshotId: string;
+  generationScope?: ItineraryProposalGenerationScope;
+  generationContext?: ItineraryProposalGenerationContext;
   requestedAt: Date;
 }>;
 
@@ -251,6 +303,296 @@ function normalizeProposedActivity(
   });
 }
 
+function normalizedGenerationScope(
+  value: ItineraryProposalGenerationScope | undefined,
+): ItineraryProposalGenerationScope {
+  const scope = value ?? "INITIAL";
+  if (!itineraryProposalGenerationScopes.includes(scope)) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      generationScope: "Use INITIAL ou REPLAN.",
+    });
+  }
+  return scope;
+}
+
+function normalizedUniqueTexts(values: readonly string[], field: string): readonly string[] {
+  if (!Array.isArray(values)) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      [field]: "Informe uma coleção válida.",
+    });
+  }
+  const normalized = values.map((value, index) => requiredText(value, `${field}.${index}`));
+  if (new Set(normalized).size !== normalized.length) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      [field]: "Não repita identidades no snapshot.",
+    });
+  }
+  return Object.freeze(normalized);
+}
+
+function normalizedSelectionSnapshot(
+  value: readonly ItineraryProposalSelectionSnapshotItem[],
+): readonly ItineraryProposalSelectionSnapshotItem[] {
+  if (!Array.isArray(value)) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.selection": "Informe uma coleção válida.",
+    });
+  }
+
+  const preferenceIds = new Set<string>();
+  const placeIds = new Set<string>();
+  return Object.freeze(
+    value.map((item, index) => {
+      const field = `generationContext.selection.${index}`;
+      if (!item || typeof item !== "object") {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [field]: "Informe uma preferência válida.",
+        });
+      }
+      const preferenceId = requiredText(item.preferenceId, `${field}.preferenceId`);
+      const placeId = requiredText(item.placeId, `${field}.placeId`);
+      if (preferenceIds.has(preferenceId) || placeIds.has(placeId)) {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [field]: "Cada preferência e Place devem aparecer uma única vez.",
+        });
+      }
+      preferenceIds.add(preferenceId);
+      placeIds.add(placeId);
+      if (!["WANT", "MAYBE", "NOT_INTERESTED"].includes(item.intent)) {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [`${field}.intent`]: "Use WANT, MAYBE ou NOT_INTERESTED.",
+        });
+      }
+      if (item.priority !== null && item.priority !== "MUST_DO") {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [`${field}.priority`]: "Use MUST_DO ou null.",
+        });
+      }
+      if (item.priority === "MUST_DO" && item.intent !== "WANT") {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [`${field}.priority`]: "MUST_DO só é válido para WANT.",
+        });
+      }
+      return Object.freeze({
+        preferenceId,
+        placeId,
+        intent: item.intent,
+        priority: item.priority,
+      });
+    }),
+  );
+}
+
+function normalizedCandidateSnapshot(
+  value: readonly ItineraryProposalCandidateSnapshotItem[] | undefined,
+  selection: readonly ItineraryProposalSelectionSnapshotItem[],
+  includeMaybe: boolean,
+): readonly ItineraryProposalCandidateSnapshotItem[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value)) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.candidates": "Informe uma coleção válida.",
+    });
+  }
+
+  const candidateIds = new Set<string>();
+  return Object.freeze(
+    value.map((item, index) => {
+      const field = `generationContext.candidates.${index}`;
+      if (!item || typeof item !== "object") {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [field]: "Informe um candidato válido.",
+        });
+      }
+      const candidateId = requiredText(item.candidateId, `${field}.candidateId`);
+      if (candidateIds.has(candidateId)) {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [field]: "Cada candidato deve possuir identidade única.",
+        });
+      }
+      candidateIds.add(candidateId);
+      const placeId = requiredText(item.placeId, `${field}.placeId`);
+      if (!proposalCandidateOrigins.includes(item.origin)) {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [`${field}.origin`]: "Use USER_SELECTED ou ROUTEBOOK_RECOMMENDED.",
+        });
+      }
+      if (!item.provenance || typeof item.provenance !== "object") {
+        throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+          [`${field}.provenance`]: "Informe proveniência estruturada.",
+        });
+      }
+      const sourceId = optionalText(item.provenance.sourceId, `${field}.provenance.sourceId`);
+      const reasonCode = optionalText(item.provenance.reasonCode, `${field}.provenance.reasonCode`);
+      if (item.origin === "USER_SELECTED") {
+        if (!sourceId) {
+          throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+            [`${field}.provenance.sourceId`]: "USER_SELECTED exige a origem da preferência.",
+          });
+        }
+        const preference = selection.find((item) => item.preferenceId === sourceId);
+        if (
+          !preference ||
+          preference.placeId !== placeId ||
+          preference.intent === "NOT_INTERESTED" ||
+          (preference.intent === "MAYBE" && !includeMaybe)
+        ) {
+          throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+            [field]: "USER_SELECTED deve referenciar uma preferência elegível do mesmo Place.",
+          });
+        }
+      }
+      if (item.origin === "ROUTEBOOK_RECOMMENDED") {
+        if (!reasonCode) {
+          throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+            [`${field}.provenance.reasonCode`]: "ROUTEBOOK_RECOMMENDED exige uma razão estrutural.",
+          });
+        }
+        if (selection.some((item) => item.placeId === placeId)) {
+          throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+            [field]: "ROUTEBOOK_RECOMMENDED não pode representar um Place com TripPlacePreference.",
+          });
+        }
+      }
+      return Object.freeze({
+        candidateId,
+        placeId,
+        origin: item.origin,
+        provenance: Object.freeze({
+          ...(sourceId ? { sourceId } : {}),
+          ...(reasonCode ? { reasonCode } : {}),
+        }),
+      });
+    }),
+  );
+}
+
+function normalizedReplanningWindowSnapshot(
+  value: ItineraryProposalReplanningWindowSnapshot,
+): ItineraryProposalReplanningWindowSnapshot {
+  if (!value || typeof value !== "object") {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.replanningWindow": "Informe uma ReplanningWindow válida.",
+    });
+  }
+  const capturedAtDate = new Date(value.capturedAt);
+  if (!Number.isFinite(capturedAtDate.getTime())) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.replanningWindow.capturedAt": "Informe um instante ISO válido.",
+    });
+  }
+  const timeZone = requiredText(value.timeZone, "generationContext.replanningWindow.timeZone");
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone }).format();
+  } catch {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.replanningWindow.timeZone": "Informe um timezone IANA válido.",
+    });
+  }
+  const localDate = requiredText(value.localDate, "generationContext.replanningWindow.localDate");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(localDate)) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.replanningWindow.localDate": "Use YYYY-MM-DD.",
+    });
+  }
+  const localTime = requiredText(value.localTime, "generationContext.replanningWindow.localTime");
+  if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(localTime)) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.replanningWindow.localTime": "Use HH:mm.",
+    });
+  }
+
+  const eligibleDayIds = normalizedUniqueTexts(
+    value.eligibleDayIds,
+    "generationContext.replanningWindow.eligibleDayIds",
+  );
+  const eligibleActivityIds = normalizedUniqueTexts(
+    value.eligibleActivityIds,
+    "generationContext.replanningWindow.eligibleActivityIds",
+  );
+  const protectedActivityIds = normalizedUniqueTexts(
+    value.protectedActivityIds,
+    "generationContext.replanningWindow.protectedActivityIds",
+  );
+  if (eligibleActivityIds.some((id) => protectedActivityIds.includes(id))) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.replanningWindow": "Uma Activity não pode ser elegível e protegida.",
+    });
+  }
+
+  if (!value.reasonByActivityId || typeof value.reasonByActivityId !== "object") {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.replanningWindow.reasonByActivityId": "Informe os motivos de proteção.",
+    });
+  }
+  const reasonByActivityId: Record<string, string> = {};
+  for (const activityId of protectedActivityIds) {
+    reasonByActivityId[activityId] = requiredText(
+      value.reasonByActivityId[activityId] ?? "",
+      `generationContext.replanningWindow.reasonByActivityId.${activityId}`,
+    );
+  }
+
+  return Object.freeze({
+    capturedAt: capturedAtDate.toISOString(),
+    timeZone,
+    localDate,
+    localTime,
+    eligibleDayIds,
+    eligibleActivityIds,
+    protectedActivityIds,
+    reasonByActivityId: Object.freeze(reasonByActivityId),
+  });
+}
+
+function normalizedGenerationContext(
+  value: ItineraryProposalGenerationContext | undefined,
+  scope: ItineraryProposalGenerationScope,
+): ItineraryProposalGenerationContext | undefined {
+  if (value === undefined) {
+    if (scope === "REPLAN") {
+      throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+        generationContext: "REPLAN exige snapshot de geração.",
+      });
+    }
+    return undefined;
+  }
+  if (!value || typeof value !== "object" || value.schemaVersion !== 1) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      generationContext: "Use schemaVersion 1.",
+    });
+  }
+  if (typeof value.includeMaybe !== "boolean") {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.includeMaybe": "Informe um booleano.",
+    });
+  }
+
+  const selection = normalizedSelectionSnapshot(value.selection);
+  const candidates = normalizedCandidateSnapshot(value.candidates, selection, value.includeMaybe);
+  const replanningWindow = value.replanningWindow
+    ? normalizedReplanningWindowSnapshot(value.replanningWindow)
+    : undefined;
+  if (scope === "REPLAN" && !replanningWindow) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.replanningWindow": "REPLAN exige ReplanningWindow.",
+    });
+  }
+  if (scope === "INITIAL" && replanningWindow) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.replanningWindow": "INITIAL não deve registrar ReplanningWindow.",
+    });
+  }
+
+  return Object.freeze({
+    schemaVersion: 1 as const,
+    includeMaybe: value.includeMaybe,
+    selection,
+    ...(candidates ? { candidates } : {}),
+    ...(replanningWindow ? { replanningWindow } : {}),
+  });
+}
+
 function positiveInteger(value: number, field: string): number {
   if (!Number.isInteger(value) || value < 1) {
     throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
@@ -299,6 +641,8 @@ export function createItineraryProposalId(value: string = randomUUID()): Itinera
 
 export function requestItineraryProposal(input: RequestItineraryProposalInput): ItineraryProposal {
   const requestedAt = validDate(input.requestedAt, "requestedAt");
+  const generationScope = normalizedGenerationScope(input.generationScope);
+  const generationContext = normalizedGenerationContext(input.generationContext, generationScope);
 
   return Object.freeze({
     id: createItineraryProposalId(input.id),
@@ -307,6 +651,8 @@ export function requestItineraryProposal(input: RequestItineraryProposalInput): 
     baseTripContextVersion: positiveInteger(input.baseTripContextVersion, "baseTripContextVersion"),
     baseItineraryVersion: positiveInteger(input.baseItineraryVersion, "baseItineraryVersion"),
     contextSnapshotId: requiredText(input.contextSnapshotId, "contextSnapshotId"),
+    generationScope,
+    ...(generationContext ? { generationContext } : {}),
     status: "requested",
     requestedAt,
     updatedAt: new Date(requestedAt.getTime()),

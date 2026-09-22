@@ -9,10 +9,10 @@ document_type: architecture
 owner: Architecture
 
 status: Published
-version: "0.2.0"
+version: "0.4.0"
 
 created: "2026-07-17"
-last_updated: "2026-07-18"
+last_updated: "2026-09-21"
 
 authors:
 
@@ -727,7 +727,7 @@ Não possui:
 * Travelers;
 * Interests;
 * Restrictions;
-* Saved Places;
+* TripPlacePreferences;
 * Activities;
 * Recommendations;
 * Decisions;
@@ -1050,7 +1050,7 @@ Possui:
 
 Não possui:
 
-* Saved Place;
+* TripPlacePreference;
 * Planned Place;
 * Activity;
 * Recommendation Score;
@@ -1157,10 +1157,12 @@ O nome `Trip Collections` não deverá ser utilizado como nome do Contexto.
 ### 51. Responsabilidades
 
 * Trip Collection;
-* Saved Place;
+* TripPlacePreference;
+* intenção `WANT`, `MAYBE` ou `NOT_INTERESTED`;
+* prioridade `MUST_DO` sobre `WANT`;
 * notas contextuais;
-* origem do salvamento;
-* organização futura de itens salvos;
+* origem da preferência;
+* organização da Minha seleção;
 * unicidade por Trip e Place.
 
 ---
@@ -1176,9 +1178,11 @@ TripCollection
 ### 53. Conceitos principais
 
 * TripCollection;
-* SavedPlace;
-* SavedPlaceNote;
-* SavedPlaceOrigin.
+* TripPlacePreference;
+* TripPlaceIntent;
+* TripPlacePriority;
+* TripPlacePreferenceNote;
+* TripPlacePreferenceOrigin.
 
 ---
 
@@ -1186,11 +1190,14 @@ TripCollection
 
 * uma Trip possui uma Trip Collection;
 * `TripId + PlaceId` é único;
-* Save Place é idempotente;
-* salvar não cria Activity;
-* remover dos Salvos não remove Activity;
+* ausência de preferência significa Place não avaliado;
+* definir a mesma preferência é idempotente;
+* `MUST_DO` exige `WANT`;
+* definir preferência não cria Activity;
+* limpar preferência não remove Activity;
 * Planned Place é derivado do Itinerary;
-* Saved Place não altera o Place canônico.
+* TripPlacePreference não altera o Place canônico;
+* Saved Place é contrato legado equivalente a `WANT` sem prioridade durante a transição.
 
 ---
 
@@ -1199,7 +1206,8 @@ TripCollection
 Possui:
 
 * associação entre Trip e Place;
-* data do salvamento;
+* intenção e prioridade;
+* datas de criação e atualização;
 * origem;
 * notas;
 * metadados contextuais.
@@ -1220,27 +1228,29 @@ Não possui:
 
 ```text
 InitializeTripCollection
-SavePlace
-UnsavePlace
-UpdateSavedPlaceNote
+SetTripPlacePreference
+ClearTripPlacePreference
+UpdateTripPlacePreferenceNote
 ```
+
+Durante a transição, `SavePlace` e `UnsavePlace` podem existir somente como adaptadores para os comandos canônicos.
 
 #### Consultas
 
 ```text
 GetTripCollection
-ListSavedPlaces
-ListSavedPlaceIds
-IsPlaceSaved
-GetSavedPlace
+ListTripPlacePreferences
+ListSelectedPlaceIds
+GetTripPlacePreference
+IsPlaceSelected
 ```
 
 #### Eventos
 
 ```text
-PlaceSaved
-PlaceUnsaved
-SavedPlaceNoteChanged
+TripPlacePreferenceSet
+TripPlacePreferenceCleared
+TripPlacePreferenceChanged
 ```
 
 ---
@@ -1673,7 +1683,7 @@ Não possui:
 * Trip;
 * Traveler Profile;
 * Place;
-* Saved Place;
+* TripPlacePreference;
 * Itinerary;
 * Activity;
 * Itinerary Proposal.
@@ -1814,6 +1824,10 @@ Proposal Management
 * justificativas;
 * limitações;
 * seleção;
+* origem autoritativa dos candidatos na TripPlacePreference;
+* escopo de geração inicial ou replanejamento;
+* snapshot da ReplanningWindow;
+* resultados de inclusão e exclusão de candidatos;
 * aceite integral;
 * aceite parcial;
 * rejeição;
@@ -1838,6 +1852,9 @@ ItineraryProposal
 * ItineraryProposal;
 * ProposedActivity;
 * ProposalSelection;
+* ProposalGenerationScope;
+* ProposalCandidateOutcome;
+* ReplanningWindowSnapshot;
 * ItineraryProposalStatus;
 * ItineraryVersion base;
 * TripContextVersion base;
@@ -1857,6 +1874,10 @@ ItineraryProposal
 * Proposta expirada não é aplicável;
 * Activity `fixed` deve ser preservada;
 * Free Period `protected` deve ser preservado;
+* candidatos automáticos exigem TripPlacePreference elegível;
+* `NOT_INTERESTED` e Place não avaliado são excluídos;
+* `MAYBE` exige opt-in da solicitação;
+* passado e trecho transcorrido do Dia atual são protegidos pelo timezone da Trip;
 * aplicação é idempotente;
 * falha de aplicação preserva o Itinerary anterior.
 
@@ -1874,6 +1895,10 @@ Possui:
 * limitações;
 * versões base;
 * seleção;
+* snapshot/versionamento da seleção de Places;
+* opção de inclusão de `MAYBE`;
+* snapshot de ReplanningWindow;
+* outcomes e motivos de inclusão/exclusão;
 * histórico de geração;
 * referência idempotente.
 
@@ -3177,7 +3202,7 @@ A interface não deverá precisar chamar todos os módulos individualmente para 
 * Explore Results;
 * Place Details View;
 * Map View;
-* Saved Places View;
+* My Selection View;
 * Itinerary Day View;
 * Recommendation View;
 * Itinerary Proposal Review View;
@@ -3931,7 +3956,7 @@ Exemplos proibidos:
 | Trip Management       | Trip, TripParticipant                    |
 | Traveler Profile      | TravelerProfile, Traveler                |
 | Place Catalog         | Place                                    |
-| Trip Collection       | TripCollection, SavedPlace               |
+| Trip Collection       | TripCollection, TripPlacePreference      |
 | Itinerary Planning    | Itinerary, TripDay, Activity, FreePeriod |
 | Mobility              | TravelEstimate                           |
 | Decision Intelligence | Recommendation, Decision                 |
@@ -3952,7 +3977,7 @@ Exemplos proibidos:
 | Explorar          | Place Catalog, Trip Collection, Decision Intelligence          |
 | Detalhes do Lugar | Place Catalog, Mobility                                        |
 | Mapa              | Place Catalog, Mobility                                        |
-| Salvos            | Trip Collection, Place Catalog                                 |
+| Minha seleção     | Trip Collection, Place Catalog                                 |
 | Roteiro           | Itinerary Planning, Mobility, Planning Assurance               |
 | Recomendação      | Decision Intelligence                                          |
 | Proposta          | Proposal Management, Decision Intelligence, Planning Assurance |
@@ -3970,7 +3995,7 @@ Exemplos proibidos:
 | TripAccommodationChanged           | Trip Management       | Mobility, Decision Intelligence, Proposal Management                               |
 | TravelerAdded                      | Traveler Profile      | Decision Intelligence, Proposal Management, Planning Assurance                     |
 | TripRestrictionAdded               | Traveler Profile      | Decision Intelligence, Proposal Management, Planning Assurance                     |
-| PlaceSaved                         | Trip Collection       | Decision Intelligence, projeções                                                   |
+| TripPlacePreferenceSet             | Trip Collection       | Proposal Management, Decision Intelligence, projeções                              |
 | PlaceMarkedPermanentlyClosed       | Place Catalog         | Itinerary Planning, Decision Intelligence, Planning Assurance                      |
 | ActivityAdded                      | Itinerary Planning    | Mobility, Decision Intelligence, Planning Assurance                                |
 | ActivityMovedToAnotherDay          | Itinerary Planning    | Mobility, Proposal Management, Planning Assurance                                  |
@@ -4280,7 +4305,65 @@ Antes de aprovar:
 
 ## Parte XXXVII — Declaração final
 
-### 224. Declaração arquitetural
+### 224. Fronteira arquitetural da jornada guiada
+
+A jornada guiada é uma orquestração de capacidades existentes e não cria novo Bounded Context.
+
+#### Ownership
+
+- **Trip Management** fornece Trip, período, timezone e contexto de hospedagem.
+- **Place Catalog** fornece Place e fatos catalogados.
+- **Trip Collection** é owner de `TripPlacePreference` e Minha seleção.
+- **Decision Intelligence** pode produzir Recommendation e Justificativa, sem registrar preferência.
+- **Proposal Management** é owner da `ItineraryProposal` e da proveniência dos candidatos apresentados nela.
+- **Itinerary Planning** é owner de Activity, Free Period, Itinerary e `ReplanningWindow`.
+- **Planning Assurance** continua responsável por conflitos de planejamento.
+
+#### Candidatos
+
+Proposal Management pode consumir duas origens semanticamente distintas:
+
+```text
+Trip Collection
+  → USER_SELECTED
+
+Decision Intelligence / políticas de composição
+  → ROUTEBOOK_RECOMMENDED
+```
+
+A segunda origem não pode escrever na Trip Collection.
+
+`ROUTEBOOK_RECOMMENDED` deve referenciar Place canônico e carregar proveniência/Justificativa suficientes para auditoria. A forma física do contrato pertence a incremento posterior.
+
+#### Fluxo inicial
+
+```text
+Trip Collection ─┐
+Place Catalog ───┼→ Proposal Management → Itinerary Proposal
+Trip Management ─┤                         ↓ aceite
+Mobility ────────┤                     Itinerary Planning
+Decision Intel. ─┘
+```
+
+#### Fluxo de replanejamento
+
+O mesmo pipeline é reutilizado com `generationScope = REPLAN`. Itinerary Planning fornece `ReplanningWindow`; Proposal Management não pode propor efeito fora da janela elegível.
+
+#### Proibição de estado duplicado
+
+O wizard não cria uma cópia canônica de:
+
+- TripPlacePreference;
+- Itinerary;
+- Activity;
+- Proposal;
+- estado “planejado”.
+
+Qualquer estado de progresso futuro do wizard deve representar somente progresso de interação/configuração, nunca duplicar esses agregados.
+
+---
+
+### 225. Declaração arquitetural
 
 A arquitetura modular do RouteBook deverá preservar limites explícitos entre as capacidades do produto.
 
@@ -4310,7 +4393,7 @@ A arquitetura deverá preservar especialmente:
 * Trip Management como owner de Trip;
 * Traveler Profile como owner dos Travelers e das Preferences;
 * Place Catalog como owner de Place;
-* Trip Collection como owner de Saved Place;
+* Trip Collection como owner de TripPlacePreference;
 * Itinerary Planning como owner do Itinerary;
 * Decision Intelligence como owner de Recommendation e Decision;
 * Proposal Management como owner de Itinerary Proposal;

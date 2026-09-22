@@ -5,16 +5,24 @@ import { notFound, redirect } from "next/navigation";
 
 import {
   DrizzlePlaceRepository,
-  DrizzleSavedPlaceRepository,
+  DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
   PlacePromotionServiceError,
   promoteExternalPlaceCandidate,
 } from "@routebook/database";
 import type { Place } from "@routebook/place-catalog";
-import { removePlaceFromTrip, savePlaceForTrip } from "@routebook/saved-places";
+import type { TripPlacePreference } from "@routebook/trip-collection";
 import { findTripById } from "@routebook/trip-management";
 
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
+import {
+  clearTripPlacePreference,
+  parseTripPlaceIntent,
+  setTripPlacePreference,
+  tripPlacePreferenceActionError,
+  tripPlacePreferenceActionSuccess,
+  type TripPlacePreferenceActionState,
+} from "../../../../lib/trip-place-preference";
 import { resolvePlaceDiscoveryRegion } from "../../../../lib/place-discovery-region";
 import { resolveTripRouteAccess } from "../../../../lib/trip-route-access";
 import { parseMaximumDistance, parsePlaceCategory, parsePlacePriceRange } from "./filters";
@@ -80,37 +88,47 @@ async function resolvePublishedPlaceForMutation(tripId: string, placeSlug: strin
   return matches[0]!;
 }
 
-function revalidatePublishedPlaceSurfaces(tripId: string, placeSlug: string): void {
-  revalidatePath(`/viagens/${tripId}`);
-  revalidatePath(`/viagens/${tripId}/lugares`);
-  revalidatePath(`/viagens/${tripId}/lugares/${placeSlug}`);
-  revalidatePath(`/viagens/${tripId}/lugares-salvos`);
+export async function setPublishedPlacePreferenceAction(
+  formData: FormData,
+): Promise<TripPlacePreferenceActionState> {
+  const tripId = String(formData.get("tripId") ?? "").trim();
+  const placeSlug = String(formData.get("placeSlug") ?? "").trim();
+  const rawIntent = String(formData.get("intent") ?? "").trim();
+  const intent = parseTripPlaceIntent(rawIntent);
+  const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
+  if (!intent) {
+    return tripPlacePreferenceActionError("Escolha uma preferência válida para este lugar.");
+  }
+
+  const preference = await setTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), {
+    tripId,
+    placeId: place.id,
+    intent,
+  });
+  return tripPlacePreferenceActionSuccess(preference);
 }
 
-export async function savePublishedPlaceAction(formData: FormData): Promise<void> {
+export async function clearPublishedPlacePreferenceAction(
+  formData: FormData,
+): Promise<TripPlacePreferenceActionState> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
   const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
 
-  await savePlaceForTrip(new DrizzleSavedPlaceRepository(), tripId, place.id);
-  revalidatePublishedPlaceSurfaces(tripId, placeSlug);
-}
-
-export async function removePublishedPlaceAction(formData: FormData): Promise<void> {
-  const tripId = String(formData.get("tripId") ?? "").trim();
-  const placeSlug = String(formData.get("placeSlug") ?? "").trim();
-  const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
-
-  await removePlaceFromTrip(new DrizzleSavedPlaceRepository(), tripId, place.id);
-  revalidatePublishedPlaceSurfaces(tripId, placeSlug);
+  await clearTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), tripId, place.id);
+  return tripPlacePreferenceActionSuccess(
+    null,
+    "Preferência removida. O que já estiver no roteiro continua lá.",
+  );
 }
 
 function promotionReturnPath(
   tripId: string,
   formData: FormData,
   feedback: PromotionFeedback,
+  discoveryMode: "externa" | "ocultar" = "externa",
 ): string {
-  const query = new URLSearchParams({ descoberta: "externa" });
+  const query = new URLSearchParams({ descoberta: discoveryMode });
   const search = String(formData.get("busca") ?? "")
     .trim()
     .slice(0, 120);
@@ -138,6 +156,25 @@ function promotionErrorFeedback(error: PlacePromotionServiceError): PromotionFee
     case "linked-place-not-found":
     case "destination-conflict":
       return { erroPromocao: "consistencia" };
+  }
+}
+
+function promotionFeedbackMessage(feedback: PromotionFeedback): string {
+  if ("promocao" in feedback) {
+    return "Preferência atualizada. O lugar entrou em Minha seleção.";
+  }
+
+  switch (feedback.erroPromocao) {
+    case "candidato-invalido":
+      return "Não foi possível usar este lugar. Atualize a busca e tente novamente.";
+    case "candidato-nao-encontrado":
+      return "Este lugar não está mais disponível na busca atual. Atualize a busca e tente novamente.";
+    case "candidato-rejeitado":
+      return "Não foi possível atualizar sua seleção para este lugar. Atualize a busca ou escolha outra opção.";
+    case "possivel-duplicata":
+      return "Este lugar pode já estar disponível na viagem. Atualize a busca antes de tentar novamente.";
+    default:
+      return "Não foi possível atualizar sua seleção para este lugar agora. Tente novamente.";
   }
 }
 
@@ -220,7 +257,9 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
   redirect(promotionReturnPath(tripId, formData, feedback));
 }
 
-export async function saveExternalPlaceAction(formData: FormData): Promise<never> {
+export async function saveExternalPlaceAction(
+  formData: FormData,
+): Promise<TripPlacePreferenceActionState> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const externalId = String(formData.get("externalId") ?? "").trim();
   const placesPath = `/viagens/${tripId}/lugares`;
@@ -235,7 +274,9 @@ export async function saveExternalPlaceAction(formData: FormData): Promise<never
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
   if (!externalId || externalId.length > 200) {
-    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "candidato-invalido" }));
+    return tripPlacePreferenceActionError(
+      promotionFeedbackMessage({ erroPromocao: "candidato-invalido" }),
+    );
   }
 
   const category = parsePlaceCategory(String(formData.get("categoria") ?? ""));
@@ -248,7 +289,9 @@ export async function saveExternalPlaceAction(formData: FormData): Promise<never
     ...(maximumDistanceMeters ? { requestedRadiusMeters: maximumDistanceMeters } : {}),
   });
   if (regionResolution.status !== "resolved") {
-    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "destino-nao-suportado" }));
+    return tripPlacePreferenceActionError(
+      promotionFeedbackMessage({ erroPromocao: "destino-nao-suportado" }),
+    );
   }
 
   let candidates;
@@ -264,24 +307,50 @@ export async function saveExternalPlaceAction(formData: FormData): Promise<never
       regionSource: regionResolution.region.source,
       error: error instanceof Error ? error.message : String(error),
     });
-    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "fonte-indisponivel" }));
+    return tripPlacePreferenceActionError(
+      promotionFeedbackMessage({ erroPromocao: "fonte-indisponivel" }),
+    );
   }
   const candidate = candidates.find((item) => item.externalId === externalId);
   if (!candidate) {
-    redirect(promotionReturnPath(tripId, formData, { erroPromocao: "candidato-nao-encontrado" }));
+    return tripPlacePreferenceActionError(
+      promotionFeedbackMessage({ erroPromocao: "candidato-nao-encontrado" }),
+    );
   }
 
+  let preference: TripPlacePreference;
   try {
+    const rawIntent = String(formData.get("intent") ?? "").trim();
+    const intent = rawIntent ? parseTripPlaceIntent(rawIntent) : "WANT";
+    if (!intent) {
+      return tripPlacePreferenceActionError(
+        promotionFeedbackMessage({ erroPromocao: "candidato-invalido" }),
+      );
+    }
     const result = await promoteExternalPlaceCandidate({ candidate });
-    await savePlaceForTrip(new DrizzleSavedPlaceRepository(), tripId, result.placeId);
+    preference = await setTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), {
+      tripId,
+      placeId: result.placeId,
+      intent,
+    });
   } catch (error) {
     if (error instanceof PlacePromotionServiceError) {
-      redirect(promotionReturnPath(tripId, formData, promotionErrorFeedback(error)));
+      return tripPlacePreferenceActionError(
+        promotionFeedbackMessage(promotionErrorFeedback(error)),
+      );
     }
-    throw error;
+    console.error("Falha técnica ao definir preferência para candidato externo", {
+      tripId,
+      externalId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return tripPlacePreferenceActionError(
+      promotionFeedbackMessage({ erroPromocao: "erro-tecnico" }),
+    );
   }
 
-  revalidatePath(placesPath);
-  revalidatePath(`/viagens/${tripId}/lugares-salvos`);
-  redirect(`/viagens/${tripId}/lugares-salvos?salvo=1`);
+  return tripPlacePreferenceActionSuccess(
+    preference,
+    promotionFeedbackMessage({ promocao: "salva" }),
+  );
 }

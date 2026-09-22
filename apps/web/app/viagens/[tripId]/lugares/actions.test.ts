@@ -25,8 +25,8 @@ const databaseMocks = vi.hoisted(() => {
   return {
     listPublishedWithinRadius: vi.fn(),
     promote: vi.fn(),
-    findSaved: vi.fn(),
-    saveSelection: vi.fn(),
+    findPreference: vi.fn(),
+    savePreference: vi.fn(),
     PlacePromotionServiceError,
   };
 });
@@ -43,9 +43,11 @@ vi.mock("@routebook/database", () => ({
   DrizzlePlaceRepository: class {
     listPublishedWithinRadius = databaseMocks.listPublishedWithinRadius;
   },
-  DrizzleSavedPlaceRepository: class {
-    find = databaseMocks.findSaved;
-    save = databaseMocks.saveSelection;
+  DrizzleTripPlacePreferenceRepository: class {
+    find = databaseMocks.findPreference;
+    save = databaseMocks.savePreference;
+    remove = vi.fn();
+    listByTripId = vi.fn();
   },
   DrizzleTripRepository: class {
     findById = vi.fn();
@@ -63,7 +65,11 @@ vi.mock("../../../../lib/overture-place-search", () => ({
   },
 }));
 
-import { promoteExternalPlaceAction, saveExternalPlaceAction } from "./actions";
+import {
+  promoteExternalPlaceAction,
+  saveExternalPlaceAction,
+  setPublishedPlacePreferenceAction,
+} from "./actions";
 
 const tripId = "11111111-1111-4111-8111-111111111111";
 const candidate = Object.freeze({
@@ -107,6 +113,73 @@ function promotionForm(): FormData {
   return formData;
 }
 
+describe("setPublishedPlacePreferenceAction", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    accessMocks.resolve.mockResolvedValue({ status: "authorized" });
+    tripMocks.findTripById.mockResolvedValue(trip);
+    databaseMocks.listPublishedWithinRadius.mockResolvedValue([
+      {
+        id: "place-1",
+        destinationId: "pipa-rn-br",
+        slug: "praia-do-amor",
+        name: "Praia do Amor",
+        summary: "Lugar publicado usado apenas como identidade editorial no teste.",
+        category: "beach",
+        latitude: -6.2386,
+        longitude: -35.0455,
+        publicationStatus: "published",
+        createdAt: new Date("2026-08-16T12:00:00Z"),
+        updatedAt: new Date("2026-08-16T12:00:00Z"),
+      },
+    ]);
+    databaseMocks.findPreference.mockResolvedValue(null);
+    databaseMocks.savePreference.mockImplementation(async (selection) => selection);
+  });
+
+  it("persiste a preferência sem navegar para preservar o contexto da tela", async () => {
+    const formData = new FormData();
+    formData.set("tripId", tripId);
+    formData.set("placeSlug", "praia-do-amor");
+    formData.set("intent", "WANT");
+    formData.set(
+      "returnTo",
+      `/viagens/${tripId}/lugares?descoberta=ocultar&busca=Praia+do+Amor&categoria=beach`,
+    );
+
+    await expect(setPublishedPlacePreferenceAction(formData)).resolves.toMatchObject({
+      status: "success",
+      preference: { intent: "WANT", priority: null },
+    });
+
+    expect(databaseMocks.savePreference).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tripId,
+        placeId: "place-1",
+        intent: "WANT",
+        priority: null,
+      }),
+    );
+    expect(cacheMocks.revalidatePath).not.toHaveBeenCalled();
+    expect(navigationMocks.redirect).not.toHaveBeenCalled();
+  });
+
+  it("ignora returnTo externo porque a atualização inline não navega", async () => {
+    const formData = new FormData();
+    formData.set("tripId", tripId);
+    formData.set("placeSlug", "praia-do-amor");
+    formData.set("intent", "MAYBE");
+    formData.set("returnTo", "https://example.invalid/phishing");
+
+    await expect(setPublishedPlacePreferenceAction(formData)).resolves.toMatchObject({
+      status: "success",
+      preference: { intent: "MAYBE", priority: null },
+    });
+
+    expect(navigationMocks.redirect).not.toHaveBeenCalled();
+  });
+});
+
 describe("promoteExternalPlaceAction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -144,8 +217,8 @@ describe("promoteExternalPlaceAction", () => {
       slug: "praia-externa-revalidada",
       publicationStatus: "draft",
     });
-    databaseMocks.findSaved.mockResolvedValue(null);
-    databaseMocks.saveSelection.mockImplementation(async (selection) => selection);
+    databaseMocks.findPreference.mockResolvedValue(null);
+    databaseMocks.savePreference.mockImplementation(async (selection) => selection);
   });
 
   it("exige trip:edit e bloqueia a promoção sem sessão", async () => {
@@ -301,19 +374,44 @@ describe("saveExternalPlaceAction", () => {
       slug: "praia-externa-revalidada",
       publicationStatus: "draft",
     });
-    databaseMocks.findSaved.mockResolvedValue(null);
-    databaseMocks.saveSelection.mockImplementation(async (selection) => selection);
+    databaseMocks.findPreference.mockResolvedValue(null);
+    databaseMocks.savePreference.mockImplementation(async (selection) => selection);
   });
 
   it("revalida, materializa como Place global e salva sem publicar", async () => {
-    await expect(saveExternalPlaceAction(promotionForm())).rejects.toThrow("NEXT_REDIRECT");
+    await expect(saveExternalPlaceAction(promotionForm())).resolves.toMatchObject({
+      status: "success",
+      preference: { intent: "WANT", priority: null },
+    });
 
     expect(databaseMocks.promote).toHaveBeenCalledWith({ candidate });
-    expect(databaseMocks.saveSelection).toHaveBeenCalledWith(
-      expect.objectContaining({ tripId, placeId: "global-place-1" }),
+    expect(databaseMocks.savePreference).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tripId,
+        placeId: "global-place-1",
+        intent: "WANT",
+        priority: null,
+      }),
     );
-    expect(navigationMocks.redirect).toHaveBeenCalledWith(
-      `/viagens/${tripId}/lugares-salvos?salvo=1`,
+    expect(navigationMocks.redirect).not.toHaveBeenCalled();
+  });
+
+  it("preserva a intenção escolhida ao materializar candidato externo", async () => {
+    const formData = promotionForm();
+    formData.set("intent", "MAYBE");
+
+    await expect(saveExternalPlaceAction(formData)).resolves.toMatchObject({
+      status: "success",
+      preference: { intent: "MAYBE", priority: null },
+    });
+
+    expect(databaseMocks.savePreference).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tripId,
+        placeId: "global-place-1",
+        intent: "MAYBE",
+        priority: null,
+      }),
     );
   });
 });

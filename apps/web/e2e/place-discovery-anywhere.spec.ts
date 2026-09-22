@@ -1,8 +1,37 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator } from "@playwright/test";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
 test.setTimeout(120_000);
+
+async function expectResponsiveCardActions(card: Locator) {
+  const primaryAction = card.getByRole("link", { name: "Ver mapa e fotos" });
+  const preferenceControls = card.locator('[data-trip-place-preference-controls="true"]');
+  const [cardBox, primaryBox, controlsBox] = await Promise.all([
+    card.boundingBox(),
+    primaryAction.boundingBox(),
+    preferenceControls.boundingBox(),
+  ]);
+
+  expect(cardBox).not.toBeNull();
+  expect(primaryBox).not.toBeNull();
+  expect(controlsBox).not.toBeNull();
+  if (!cardBox || !primaryBox || !controlsBox) return;
+
+  expect(primaryBox.width).toBeGreaterThan(primaryBox.height * 1.5);
+  expect(primaryBox.x).toBeGreaterThanOrEqual(cardBox.x);
+  expect(primaryBox.x + primaryBox.width).toBeLessThanOrEqual(cardBox.x + cardBox.width);
+
+  const actionsDoNotOverlap =
+    primaryBox.x + primaryBox.width <= controlsBox.x + 1 ||
+    primaryBox.y + primaryBox.height <= controlsBox.y + 1;
+  expect(actionsDoNotOverlap).toBe(true);
+
+  const hasHorizontalOverflow = await card.evaluate(
+    (element) => element.scrollWidth > element.clientWidth,
+  );
+  expect(hasHorizontalOverflow).toBe(false);
+}
 
 test("descobre lugares em Florianópolis com zero seed sem expor lifecycle editorial", async ({
   page,
@@ -40,7 +69,8 @@ test("descobre lugares em Florianópolis com zero seed sem expor lifecycle edito
   await expect(page.getByLabel("Distância máxima")).toBeEnabled();
   await expect(page.getByText(/referência aproximada do destino/)).toBeVisible();
   await expect(page.getByRole("link", { name: "Ver mapa e fotos" }).first()).toBeVisible();
-  await expect(page.getByRole("button", { name: "Salvar lugar" }).first()).toBeVisible();
+  await expect(external.first().getByRole("button", { name: "Quero ir" })).toBeVisible();
+  await expectResponsiveCardActions(external.first());
   await expect(page.getByRole("button", { name: "Enviar para curadoria" })).toHaveCount(0);
   await expect(page.getByText(/Descoberta atual/i)).toHaveCount(0);
   await expect(page.getByText(/Candidato externo/i)).toHaveCount(0);

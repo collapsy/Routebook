@@ -49,7 +49,7 @@ test("prioriza a timeline do dia vazio antes das ações secundárias", async ({
     "href",
     `/viagens/${trip.id}/lugares?dia=2026-08-22`,
   );
-  await expect(page.getByRole("link", { name: "Ver Lugares salvos" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Ver Minha seleção" })).toHaveAttribute(
     "href",
     `/viagens/${trip.id}/lugares-salvos`,
   );
@@ -265,8 +265,8 @@ test("move uma atividade para outro Dia e muda o foco para o destino", async ({
   ).toBeVisible();
 });
 
-test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ page }, testInfo) => {
-  const tripName = `Lugar no roteiro ${testInfo.project.name} ${Date.now()}`;
+test("mantém Minha seleção separada do roteiro durante o wizard", async ({ page }, testInfo) => {
+  const tripName = `Seleção sem Activity ${testInfo.project.name} ${Date.now()}`;
   const now = new Date();
   const { trip } = await createAuthenticatedE2ETrip(
     {
@@ -285,33 +285,16 @@ test("adiciona um lugar salvo ao roteiro sem removê-lo da seleção", async ({ 
   );
 
   const placeName = place!.name;
-  await page.goto(`/viagens/${trip.id}/lugares-salvos`);
+  await page.goto(`/viagens/${trip.id}/lugares-salvos?preparar=1`);
 
-  await page.getByLabel("Adicionar ao dia").selectOption("2026-08-23");
-  await page.getByLabel("Horário opcional").fill("14:15");
-  await page.getByLabel("Duração opcional").fill("120");
-  await submitAndExpectActionRedirect(
-    page,
-    () => page.getByRole("button", { name: "Adicionar ao roteiro" }).click(),
-    /adicionadoAoRoteiro=1$/,
-    "Lugar adicionado ao roteiro.",
-  );
-
-  await expect(page.getByRole("status")).toContainText("Lugar adicionado ao roteiro.");
   await expect(page.getByRole("heading", { name: placeName })).toBeVisible();
+  await expect(page.getByText("Preparar viagem · Etapa 1 de 4")).toBeVisible();
+  await expect(page.getByLabel("Adicionar ao dia")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Adicionar ao roteiro" })).toHaveCount(0);
 
-  await page.getByRole("link", { name: "Abrir roteiro" }).click();
-  await expect(page).toHaveURL(/\/roteiro$/);
-  await page.getByRole("link", { name: /Dia 2/ }).click();
-  await expect(page).toHaveURL(/dia=2026-08-23/);
-  const focusedDay = page.locator(".itinerary-day-card");
-  const savedPlaceActivity = focusedDay
-    .locator(".itinerary-activity-copy")
-    .filter({ hasText: placeName! });
-  await expect(savedPlaceActivity).toBeVisible();
-  await expect(focusedDay.getByText("14:15", { exact: true })).toBeVisible();
-  await expect(savedPlaceActivity.locator("small")).toContainText("2 h");
-
-  await page.reload();
-  await expect(focusedDay.getByText(placeName, { exact: true })).toBeVisible();
+  await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-08-22`);
+  await expect(page.getByText(/8 dias · 0 atividades/)).toBeVisible();
+  await expect(
+    page.locator(".itinerary-day-card").getByText(placeName, { exact: true }),
+  ).toHaveCount(0);
 });

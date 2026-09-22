@@ -1,5 +1,7 @@
 import type {
   CompleteItineraryProposalGenerationInput,
+  ProposalCandidateOrigin,
+  ProposalCandidateProvenance,
   ProposedActivityInput,
 } from "./itinerary-proposal";
 
@@ -30,6 +32,8 @@ export type ItineraryProposalGenerationCandidate = Readonly<{
   description?: string;
   durationMinutes?: number;
   reason?: string;
+  origin?: ProposalCandidateOrigin;
+  provenance?: ProposalCandidateProvenance;
   estimatedCostAmount?: number;
   estimatedCostCurrency?: string;
   category?: string;
@@ -223,6 +227,61 @@ function normalizeCandidate(
     "invalid-candidate",
     "Informe uma justificativa válida.",
   );
+  const origin = candidate.origin;
+  if (origin !== undefined && origin !== "USER_SELECTED" && origin !== "ROUTEBOOK_RECOMMENDED") {
+    throw new DeterministicItineraryProposalGenerationError(
+      "Informe uma origem válida para o candidato.",
+      "invalid-candidate",
+    );
+  }
+  if (origin !== undefined && !placeId) {
+    throw new DeterministicItineraryProposalGenerationError(
+      "Candidato com origem explícita exige PlaceId.",
+      "invalid-candidate",
+    );
+  }
+  if (candidate.provenance !== undefined && origin === undefined) {
+    throw new DeterministicItineraryProposalGenerationError(
+      "Proveniência exige origem explícita do candidato.",
+      "invalid-candidate",
+    );
+  }
+  let provenance: ProposalCandidateProvenance | undefined;
+  if (origin !== undefined) {
+    if (!candidate.provenance || typeof candidate.provenance !== "object") {
+      throw new DeterministicItineraryProposalGenerationError(
+        "Candidato com origem explícita exige proveniência estruturada.",
+        "invalid-candidate",
+      );
+    }
+    const sourceId = normalizedOptionalText(
+      candidate.provenance.sourceId,
+      "invalid-candidate",
+      "Informe um sourceId válido para a proveniência.",
+    );
+    const reasonCode = normalizedOptionalText(
+      candidate.provenance.reasonCode,
+      "invalid-candidate",
+      "Informe um reasonCode válido para a proveniência.",
+    );
+    if (origin === "USER_SELECTED" && !sourceId) {
+      throw new DeterministicItineraryProposalGenerationError(
+        "USER_SELECTED exige sourceId da TripPlacePreference.",
+        "invalid-candidate",
+      );
+    }
+    if (origin === "ROUTEBOOK_RECOMMENDED" && !reasonCode) {
+      throw new DeterministicItineraryProposalGenerationError(
+        "ROUTEBOOK_RECOMMENDED exige reasonCode estruturado.",
+        "invalid-candidate",
+      );
+    }
+    provenance = Object.freeze({
+      ...(sourceId ? { sourceId } : {}),
+      ...(reasonCode ? { reasonCode } : {}),
+    });
+  }
+
   const category = normalizedOptionalText(
     candidate.category,
     "invalid-candidate",
@@ -286,6 +345,8 @@ function normalizeCandidate(
       ? { durationMinutes: candidate.durationMinutes }
       : {}),
     ...(reason ? { reason } : {}),
+    ...(origin ? { origin } : {}),
+    ...(provenance ? { provenance } : {}),
     ...(candidate.estimatedCostAmount !== undefined
       ? { estimatedCostAmount: candidate.estimatedCostAmount }
       : {}),

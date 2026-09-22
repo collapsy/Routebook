@@ -9,10 +9,10 @@ document_type: product
 owner: Product
 
 status: Published
-version: "0.1.0"
+version: "0.2.0"
 
 created: "2026-07-15"
-last_updated: null
+last_updated: "2026-09-18"
 
 authors:
 
@@ -468,7 +468,7 @@ O sistema deve permitir que o usuário selecione uma Viagem e recupere seu estad
 * Hospedagem;
 * Preferências;
 * Restrições;
-* Lugares salvos;
+* TripPlacePreferences;
 * Roteiro;
 * Atividades;
 * Períodos livres.
@@ -1172,9 +1172,9 @@ Simplificado.
 
 Nos Detalhes do Lugar, o sistema deve disponibilizar:
 
-* salvar;
-* remover dos salvos;
-* adicionar ao Roteiro;
+* expressar intenção;
+* alterar ou limpar preferência;
+* adicionar manualmente ao Roteiro como ação secundária;
 * visualizar no mapa;
 * abrir rota.
 
@@ -1265,7 +1265,7 @@ Obrigatório.
 O sistema deve diferenciar, quando aplicável:
 
 * Lugar comum;
-* Lugar salvo;
+* Place com preferência;
 * Lugar planejado;
 * Hospedagem.
 
@@ -1351,7 +1351,7 @@ Quando o mapa estiver indisponível, o sistema deve:
 
 * informar o problema;
 * manter a Visualização em lista;
-* preservar Salvos e Roteiro;
+* preservar Minha seleção e Roteiro;
 * permitir nova tentativa;
 * permitir abertura em serviço externo quando possível.
 
@@ -1456,13 +1456,15 @@ Obrigatório.
 
 ---
 
-# Parte VI — Lugares salvos
+# Parte VI — Minha seleção
 
-## 67. RB-FR-060 — Salvar Lugar
+## 67. RB-FR-060 — Expressar intenção por Lugar
 
 ### Declaração
 
-O sistema deve permitir que o usuário associe um Lugar à Viagem como Lugar salvo.
+O sistema deve permitir que o usuário associe um Lugar à Viagem com intenção `WANT`, `MAYBE` ou `NOT_INTERESTED`.
+
+A ausência de associação deve representar Lugar não avaliado.
 
 ### Prioridade
 
@@ -1474,11 +1476,11 @@ Obrigatório.
 
 ---
 
-## 68. RB-FR-061 — Impedir duplicação de Lugar salvo
+## 68. RB-FR-061 — Impedir duplicação de preferência
 
 ### Declaração
 
-O sistema não deve criar associações duplicadas do mesmo Lugar salvo na mesma Viagem.
+O sistema não deve criar mais de uma TripPlacePreference para o mesmo Lugar na mesma Viagem.
 
 ### Prioridade
 
@@ -1490,16 +1492,18 @@ Obrigatório.
 
 ---
 
-## 69. RB-FR-062 — Atualizar estado salvo
+## 69. RB-FR-062 — Atualizar intenção e prioridade
 
 ### Declaração
 
-Após salvar um Lugar, o estado deve ser atualizado em:
+Após alterar intenção ou prioridade, o estado deve ser atualizado em:
 
 * lista;
 * mapa;
 * Detalhes;
-* área Salvos.
+* Minha seleção.
+
+`MUST_DO` deve estar disponível apenas sobre `WANT`.
 
 ### Prioridade
 
@@ -1511,11 +1515,11 @@ Obrigatório.
 
 ---
 
-## 70. RB-FR-063 — Remover Lugar dos salvos
+## 70. RB-FR-063 — Limpar preferência
 
 ### Declaração
 
-O sistema deve permitir que o usuário remova um Lugar dos salvos.
+O sistema deve permitir que o usuário limpe a TripPlacePreference e retorne o Lugar a não avaliado.
 
 ### Prioridade
 
@@ -1527,11 +1531,11 @@ Obrigatório.
 
 ---
 
-## 71. RB-FR-064 — Manter Atividade ao remover dos salvos
+## 71. RB-FR-064 — Manter Activity ao limpar preferência
 
 ### Declaração
 
-A remoção de um Lugar dos salvos não deve remover automaticamente uma Atividade existente no Roteiro.
+A limpeza de uma TripPlacePreference não deve remover automaticamente uma Activity existente no Roteiro.
 
 ### Prioridade
 
@@ -1543,11 +1547,11 @@ Obrigatório.
 
 ---
 
-## 72. RB-FR-065 — Consultar Lugares salvos
+## 72. RB-FR-065 — Consultar Minha seleção
 
 ### Declaração
 
-O sistema deve disponibilizar uma área que apresente todos os Lugares salvos da Viagem.
+O sistema deve disponibilizar Minha seleção com Places `WANT`, `MAYBE` e `NOT_INTERESTED`, prioridade, Planning Role e estado planejado derivado.
 
 ### Prioridade
 
@@ -1559,11 +1563,11 @@ Obrigatório.
 
 ---
 
-## 73. RB-FR-066 — Apresentar Estado vazio em Salvos
+## 73. RB-FR-066 — Apresentar estado vazio em Minha seleção
 
 ### Declaração
 
-Quando não existirem Lugares salvos, o sistema deve:
+Quando não existirem preferências, o sistema deve:
 
 * informar a situação;
 * explicar a função da área;
@@ -1805,11 +1809,11 @@ Obrigatório.
 
 ---
 
-## 86. RB-FR-079 — Preservar Lugar salvo ao remover Atividade
+## 86. RB-FR-079 — Preservar preferência ao remover Activity
 
 ### Declaração
 
-A remoção de uma Atividade não deve remover automaticamente o Lugar dos salvos.
+A remoção de uma Activity não deve limpar automaticamente a TripPlacePreference.
 
 ### Prioridade
 
@@ -1956,7 +1960,9 @@ Desejável.
 
 ### Declaração
 
-O sistema deve permitir que o usuário solicite uma proposta inicial de Roteiro.
+O sistema deve permitir que o usuário solicite uma proposta inicial ou de replanejamento.
+
+A solicitação deve ser explícita e não exige quantidade mínima de Places selecionados.
 
 ### Prioridade
 
@@ -1976,7 +1982,8 @@ A geração deve considerar, quando disponível:
 
 * Período;
 * Hospedagem;
-* Lugares selecionados;
+* TripPlacePreferences `WANT`;
+* TripPlacePreferences `MAYBE` somente quando solicitadas;
 * Preferências;
 * Restrições;
 * orçamento;
@@ -1985,6 +1992,8 @@ A geração deve considerar, quando disponível:
 * duração;
 * distância;
 * horário de funcionamento.
+
+Places não avaliados e `NOT_INTERESTED` não devem entrar automaticamente na Proposal.
 
 ### Prioridade
 
@@ -2032,7 +2041,9 @@ Simplificado.
 
 ### Declaração
 
-A geração deve priorizar Lugares marcados como obrigatórios, quando forem viáveis.
+A geração deve priorizar TripPlacePreferences `WANT` marcadas como `MUST_DO`, quando forem viáveis.
+
+Prioridade não deve violar Restrições, Activities `fixed`, Free Periods `protected` ou ReplanningWindow.
 
 ### Prioridade
 
@@ -2049,6 +2060,8 @@ Desejável.
 ### Declaração
 
 O sistema deve deixar claro que a proposta de Roteiro é editável e não representa decisão definitiva.
+
+A proposta deve distinguir candidatos incluídos e excluídos e explicar os motivos conhecidos.
 
 ### Prioridade
 
@@ -2105,6 +2118,30 @@ Alta.
 ### MVP
 
 Obrigatório.
+
+---
+
+## 102-A. RB-FR-146 — Restringir replanejamento à janela temporal elegível
+
+### Declaração
+
+O sistema deve calcular a ReplanningWindow com o timezone IANA da Viagem e impedir que uma Proposal altere:
+
+* Dias passados;
+* trecho transcorrido ou Activity em andamento no Dia atual;
+* Activity sem horário no Dia atual;
+* Activity `fixed`, `completed`, `skipped` ou `cancelled`;
+* Free Period `protected`.
+
+O decorrer do tempo não deve marcar Activity como concluída automaticamente.
+
+### Prioridade
+
+Crítica.
+
+### MVP
+
+Obrigatório para replanejamento.
 
 ---
 
@@ -2542,7 +2579,7 @@ O sistema deve persistir alterações realizadas em:
 
 * informações da Viagem;
 * Preferências;
-* Salvos;
+* Minha seleção;
 * Roteiro;
 * Atividades;
 * ordem;
@@ -2696,7 +2733,7 @@ Obrigatório.
 O sistema deve possuir Estados vazios para:
 
 * nenhuma Viagem;
-* nenhum Lugar salvo;
+* nenhuma TripPlacePreference;
 * Roteiro vazio;
 * Dia sem Atividades;
 * nenhum resultado.
@@ -3018,7 +3055,7 @@ Pós-MVP.
 
 ---
 
-## 158. Salvos
+## 158. Minha seleção
 
 | Requisitos            | Casos de Uso relacionados       |
 | --------------------- | ------------------------------- |
@@ -3039,6 +3076,7 @@ Pós-MVP.
 | Requisitos            | Casos de Uso relacionados                  |
 | --------------------- | ------------------------------------------ |
 | RB-FR-087 a RB-FR-104 | RB-UC-022, RB-UC-023, RB-UC-024, RB-UC-025 |
+| RB-FR-146             | RB-UC-022                                  |
 
 ---
 
@@ -3104,7 +3142,7 @@ Um requisito será considerado concluído quando:
 
 ## 166. Coerência de estado
 
-O mesmo dado não deve possuir estados conflitantes entre lista, mapa, Salvos e Roteiro.
+O mesmo dado não deve possuir estados conflitantes entre lista, mapa, Minha seleção e Roteiro.
 
 ---
 

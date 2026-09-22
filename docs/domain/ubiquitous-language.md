@@ -9,10 +9,10 @@ document_type: domain
 owner: Domain
 
 status: Published
-version: "0.2.0"
+version: "0.3.0"
 
 created: "2026-07-18"
-last_updated: "2026-07-18"
+last_updated: "2026-09-18"
 
 authors:
 
@@ -265,7 +265,7 @@ Explica os objetos utilizados para sustentar as decisões:
 * Accommodation;
 * Place;
 * Trip Collection;
-* Saved Place;
+* TripPlacePreference;
 * Itinerary;
 * Trip Day;
 * Activity;
@@ -370,7 +370,7 @@ mindmap
       Region
     Coleções
       Trip Collection
-      Saved Place
+      TripPlacePreference
       Planned Place
     Roteiro
       Itinerary
@@ -460,7 +460,7 @@ Usar `PascalCase`:
 Trip
 TravelerProfile
 TripCollection
-SavedPlace
+TripPlacePreference
 ItineraryProposal
 PlanningConflict
 RecommendationConfidence
@@ -1217,7 +1217,7 @@ flowchart TD
 | Categoria         | Agregado                                                            |
 | Definição         | Ponto de interesse com identidade global, potencialmente relevante para uma ou mais Viagens |
 | Não significa     | Activity, Destination, Recommendation ou Location                   |
-| Relaciona-se com  | Place Category, Location, Saved Place e Proveniência                 |
+| Relaciona-se com  | Place Category, Location, TripPlacePreference e Proveniência         |
 | Termos permitidos | Local, somente em textos informais de interface                     |
 | Termos a evitar   | Atração, estabelecimento ou ponto turístico como sinônimo universal |
 
@@ -1286,31 +1286,41 @@ Um vínculo editorial legado com Destination pode existir; ele é opcional e nã
 
 ### 52. Trip Collection
 
-| Campo             | Definição                                                 |
-| ----------------- | --------------------------------------------------------- |
-| Nome canônico     | Trip Collection                                           |
-| Português oficial | Coleção da Viagem                                         |
-| Categoria         | Agregado                                                  |
-| Definição         | Conjunto de Lugares preservados no contexto de uma Viagem |
-| Não significa     | Itinerary                                                 |
-| Relaciona-se com  | Saved Place, Trip                                         |
-| Termos permitidos | Salvos, na interface                                      |
-| Termos a evitar   | Favoritos, roteiro                                        |
+| Campo             | Definição                                                             |
+| ----------------- | --------------------------------------------------------------------- |
+| Nome canônico     | Trip Collection                                                       |
+| Português oficial | Coleção da Viagem                                                     |
+| Categoria         | Agregado                                                              |
+| Definição         | Conjunto de preferências explícitas por Lugar no contexto de uma Trip |
+| Não significa     | Itinerary                                                             |
+| Relaciona-se com  | TripPlacePreference, Trip                                             |
+| Termos permitidos | Minha seleção, na interface                                           |
+| Termos a evitar   | Favoritos, roteiro, lista de atividades                               |
 
 ---
 
-### 53. Saved Place
+### 53. TripPlacePreference
 
-| Campo             | Definição                                                               |
-| ----------------- | ----------------------------------------------------------------------- |
-| Nome canônico     | Saved Place                                                             |
-| Português oficial | Lugar Salvo                                                             |
-| Categoria         | Entidade                                                                |
-| Definição         | Associação entre uma Viagem e um Lugar preservado para avaliação futura |
-| Não significa     | Lugar Planejado                                                         |
-| Relaciona-se com  | Trip Collection, Place                                                  |
-| Termos permitidos | Salvo                                                                   |
-| Termos a evitar   | Favorito, atividade                                                     |
+| Campo             | Definição                                                                        |
+| ----------------- | -------------------------------------------------------------------------------- |
+| Nome canônico     | TripPlacePreference                                                              |
+| Português oficial | Preferência de Lugar na Viagem                                                  |
+| Categoria         | Entidade                                                                         |
+| Definição         | Associação explícita entre Trip e Place com intenção e prioridade contextual     |
+| Não significa     | Activity, Recommendation, favorito global ou compromisso confirmado              |
+| Relaciona-se com  | Trip Collection, Place, Itinerary Proposal                                       |
+| Termos permitidos | Quero ir, Talvez, Não tenho interesse e Imperdível, na interface                 |
+| Termos a evitar   | Place Interest como conceito paralelo, favorito, atividade, decisão automática   |
+
+Intenções oficiais:
+
+- `WANT` — o viajante quer considerar o Place na composição;
+- `MAYBE` — o viajante aceita considerar o Place somente quando solicitar essa inclusão;
+- `NOT_INTERESTED` — o viajante exclui explicitamente o Place de sugestões automáticas.
+
+`MUST_DO` é prioridade aplicável somente a `WANT`. Ausência de TripPlacePreference significa não avaliado.
+
+`Saved Place` e `Lugar Salvo` são termos legados de compatibilidade. Durante a transição, uma associação legada equivale a `WANT` sem prioridade.
 
 ---
 
@@ -1322,29 +1332,46 @@ Um vínculo editorial legado com Destination pode existir; ele é opcional e nã
 | Português oficial | Lugar Planejado                                             |
 | Categoria         | Conceito derivado                                           |
 | Definição         | Lugar associado a pelo menos uma Atividade ativa no Roteiro |
-| Não significa     | Saved Place                                                 |
+| Não significa     | TripPlacePreference                                         |
 | Relaciona-se com  | Place, Activity                                             |
 | Termos a evitar   | Estado persistido obrigatório                               |
 
 ---
 
-### 55. Diferença entre Place, Saved Place e Planned Place
+### 55. Diferença entre Place, TripPlacePreference e Planned Place
 
 ```mermaid
 flowchart LR
     Place["Place<br/>Lugar disponível"]
-    Saved["Saved Place<br/>Lugar preservado"]
+    Preference["TripPlacePreference<br/>intenção contextual"]
+    Proposal["Itinerary Proposal<br/>mudança revisável"]
     Activity["Activity<br/>compromisso planejado"]
     Planned["Planned Place<br/>estado derivado"]
 
-    Place --> Saved
+    Place --> Preference
+    Preference --> Proposal
     Place --> Activity
     Activity --> Planned
     Planned --> Place
 
-    Saved -.->|"não cria"| Activity
-    Activity -.->|"não exige"| Saved
+    Preference -.->|"não cria"| Activity
+    Proposal -.->|"não altera antes do aceite"| Activity
+    Activity -.->|"não exige"| Preference
 ```
+
+---
+
+### 55-A. Planning Role
+
+| Campo             | Definição |
+| ----------------- | --------- |
+| Nome canônico     | Planning Role |
+| Português oficial | Papel no planejamento |
+| Categoria         | Objeto de valor derivado por política versionada |
+| Definição         | Função usada para compor Places selecionados sem alterar sua categoria factual |
+| Valores iniciais  | `EXPERIENCE`, `FOOD`, `NIGHTLIFE`, `OTHER` |
+| Não significa     | Place Category ou horário garantido |
+| Relaciona-se com  | Place, TripPlacePreference, Itinerary Proposal |
 
 ---
 
@@ -1721,6 +1748,21 @@ Não significa substituir automaticamente todo o Roteiro.
 
 ---
 
+### 81-A. ReplanningWindow
+
+| Campo             | Definição |
+| ----------------- | --------- |
+| Nome canônico     | ReplanningWindow |
+| Português oficial | Janela de Replanejamento |
+| Categoria         | Objeto de valor |
+| Definição         | Recorte timezone-aware que separa estado protegido de futuro elegível em uma Proposal |
+| Não significa     | Alteração automática do Roteiro ou transição automática de Activity |
+| Relaciona-se com  | Trip, Itinerary, Activity, Free Period, Itinerary Proposal |
+
+O termo `replanejar` significa gerar e revisar nova Itinerary Proposal. Não significa aplicar mudanças silenciosamente.
+
+---
+
 ## Parte XIV — Glossário de Garantia do Planejamento
 
 ### 82. Planning Assurance
@@ -1970,7 +2012,7 @@ O termo `Item` é excessivamente genérico.
 Não deve substituir:
 
 * Activity;
-* Saved Place;
+* TripPlacePreference;
 * Recommendation;
 * Proposed Activity;
 * Planning Conflict.
@@ -2076,7 +2118,7 @@ No domínio, utilizar exclusivamente `ItineraryProposal`.
 
 `Favorite` não é termo oficial do MVP.
 
-Um Lugar preservado para uma Viagem é um `SavedPlace`.
+Uma escolha contextual por Lugar é uma `TripPlacePreference`. `Favorite` continua não sendo termo oficial do MVP.
 
 Favoritos globais poderão ser modelados futuramente como conceito diferente.
 
@@ -2122,7 +2164,7 @@ Não deve substituir:
 | Destination         | Place                     | Região principal versus ponto de interesse       |
 | Location            | Place                     | Referência geográfica versus objeto visitável    |
 | Place               | Activity                  | Ponto de interesse versus compromisso planejado  |
-| Saved Place         | Planned Place             | Preservado versus presente no Roteiro            |
+| TripPlacePreference | Planned Place             | Intenção contextual versus presente no Roteiro   |
 | Activity            | Proposed Activity         | Estado canônico versus item de Proposta          |
 | Itinerary           | Itinerary Proposal        | Planejamento atual versus alternativa sugerida   |
 | Recommendation      | Decision                  | Sugestão do sistema versus escolha do Usuário    |
@@ -2145,7 +2187,7 @@ flowchart TB
     Execution["Execution"]
 
     Place["Place"]
-    Saved["Saved Place"]
+    Preference["TripPlacePreference"]
     Activity["Activity"]
     Planned["Planned Place"]
 
@@ -2160,7 +2202,7 @@ flowchart TB
     Recommendation --> Decision
     Decision --> Execution
 
-    Place --> Saved
+    Place --> Preference
     Place --> Activity
     Activity --> Planned
 
@@ -2451,8 +2493,8 @@ A interface deverá:
 | ------------------------- | ------------------------------ |
 | Trip                      | Viagem                         |
 | Traveler Profile          | Viajantes e preferências       |
-| Trip Collection           | Salvos                         |
-| Saved Place               | Lugar salvo                    |
+| Trip Collection           | Minha seleção                  |
+| TripPlacePreference       | Preferência do Lugar           |
 | Itinerary                 | Roteiro                        |
 | Trip Day                  | Dia                            |
 | Activity                  | Atividade                      |
@@ -2583,7 +2625,7 @@ Exemplo futuro:
 | Termo depreciado | Substituto       |
 | ---------------- | ---------------- |
 | Conflict         | PlanningConflict |
-| FavoritePlace    | SavedPlace       |
+| FavoritePlace    | TripPlacePreference |
 
 ---
 
@@ -2633,7 +2675,7 @@ Os seguintes artefatos devem ser revisados contra este documento:
 * Trip está separada de Journey;
 * Trip está separada de Itinerary;
 * User está separado de Traveler;
-* Saved Place está separado de Planned Place;
+* TripPlacePreference está separada de Planned Place;
 * Itinerary Proposal está separada de Itinerary;
 * Confidence Level está separado de Recommendation Confidence;
 * Rating está separado de Recommendation Score.
@@ -2726,7 +2768,7 @@ Todos os artefatos do RouteBook deverão preservar as seguintes distinções:
 * Destination não é Place;
 * Location não é Place;
 * Place não é Activity;
-* Saved Place não é Planned Place;
+* TripPlacePreference não é Planned Place;
 * Activity não é Proposed Activity;
 * Recommendation não é Decision;
 * Decision não é Execution;

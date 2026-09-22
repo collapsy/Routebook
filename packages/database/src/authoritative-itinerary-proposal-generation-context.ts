@@ -4,9 +4,15 @@ import type {
   AuthoritativeItineraryProposalGenerationContext,
   AuthoritativeItineraryProposalGenerationContextPort,
   ItineraryProposalSourcePlace,
-  ItineraryProposalSourceRecommendation,
+  ItineraryProposalSourcePreference,
   LoadAuthoritativeItineraryProposalGenerationContextInput,
 } from "@routebook/proposal-management";
+import {
+  createReplanningWindow,
+  type Activity,
+  type FreePeriod,
+  type Itinerary,
+} from "@routebook/trip-management";
 
 import { getDatabase } from "./client";
 import {
@@ -15,17 +21,17 @@ import {
   itineraryDays,
   itineraryFreePeriods,
   places,
-  recommendations,
+  savedPlaces,
   trips,
 } from "./schema";
 
 type Database = ReturnType<typeof getDatabase>;
 type ReadExecutor = Pick<Database, "select">;
-type RecommendationRow = typeof recommendations.$inferSelect;
 
 export type PostgresAuthoritativeItineraryProposalGenerationContextErrorCode =
   | "invalid-trip-id"
   | "invalid-as-of"
+  | "invalid-generation-scope"
   | "trip-not-found"
   | "itinerary-not-found"
   | "itinerary-days-not-found"
@@ -64,16 +70,19 @@ function requireAsOf(value: Date): Date {
   return new Date(value.getTime());
 }
 
-function firstRecommendationReason(row: RecommendationRow): string | undefined {
-  if (!Array.isArray(row.reasons)) return undefined;
-
-  for (const value of row.reasons) {
-    if (!value || typeof value !== "object") continue;
-    const message = Reflect.get(value, "message");
-    if (typeof message === "string" && message.trim()) return message.trim();
+function requireGenerationScope(value: string | undefined): "INITIAL" | "REPLAN" {
+  const scope = value ?? "INITIAL";
+  if (scope !== "INITIAL" && scope !== "REPLAN") {
+    throw new PostgresAuthoritativeItineraryProposalGenerationContextError(
+      "Use INITIAL ou REPLAN.",
+      "invalid-generation-scope",
+    );
   }
+  return scope;
+}
 
-  return undefined;
+function isActivePlannedActivityStatus(status: string): boolean {
+  return status !== "removed" && status !== "cancelled";
 }
 
 async function loadContext(
@@ -81,7 +90,8 @@ async function loadContext(
   input: LoadAuthoritativeItineraryProposalGenerationContextInput,
 ): Promise<AuthoritativeItineraryProposalGenerationContext> {
   const tripId = requireTripId(input.tripId);
-  requireAsOf(input.asOf);
+  const asOf = requireAsOf(input.asOf);
+  const generationScope = requireGenerationScope(input.generationScope);
 
   const [trip] = await database
     .select({ id: trips.id })
@@ -96,7 +106,16 @@ async function loadContext(
   }
 
   const [itinerary] = await database
-    .select({ id: itineraries.id, tripId: itineraries.tripId })
+    .select({
+      id: itineraries.id,
+      tripId: itineraries.tripId,
+      startDate: itineraries.startDate,
+      endDate: itineraries.endDate,
+      timeZone: itineraries.timeZone,
+      version: itineraries.version,
+      createdAt: itineraries.createdAt,
+      updatedAt: itineraries.updatedAt,
+    })
     .from(itineraries)
     .where(eq(itineraries.tripId, tripId))
     .limit(1);
@@ -129,7 +148,15 @@ async function loadContext(
       id: itineraryActivities.id,
       itineraryDayId: itineraryActivities.itineraryDayId,
       order: itineraryActivities.order,
+      title: itineraryActivities.title,
+      type: itineraryActivities.type,
+      status: itineraryActivities.status,
+      flexibility: itineraryActivities.flexibility,
+      startTime: itineraryActivities.startTime,
+      durationMinutes: itineraryActivities.durationMinutes,
       placeId: itineraryActivities.placeId,
+      createdAt: itineraryActivities.createdAt,
+      updatedAt: itineraryActivities.updatedAt,
     })
     .from(itineraryActivities)
     .where(inArray(itineraryActivities.itineraryDayId, dayIds))
@@ -140,6 +167,7 @@ async function loadContext(
     );
   const activitiesByDay = new Map<string, readonly Readonly<{ activityId: string }>[]>();
   for (const row of activityRows) {
+    if (!isActivePlannedActivityStatus(row.status)) continue;
     const activities = [...(activitiesByDay.get(row.itineraryDayId) ?? [])];
     activities.push(Object.freeze({ activityId: row.id }));
     activitiesByDay.set(row.itineraryDayId, Object.freeze(activities));
@@ -150,7 +178,11 @@ async function loadContext(
       id: itineraryFreePeriods.id,
       itineraryDayId: itineraryFreePeriods.itineraryDayId,
       mode: itineraryFreePeriods.mode,
+      startTime: itineraryFreePeriods.startTime,
+      durationMinutes: itineraryFreePeriods.durationMinutes,
       order: itineraryFreePeriods.order,
+      createdAt: itineraryFreePeriods.createdAt,
+      updatedAt: itineraryFreePeriods.updatedAt,
     })
     .from(itineraryFreePeriods)
     .where(inArray(itineraryFreePeriods.itineraryDayId, dayIds))
@@ -170,18 +202,27 @@ async function loadContext(
   }
 
   const plannedPlaceIds = new Set(
-    activityRows.flatMap((activity) => (activity.placeId ? [activity.placeId] : [])),
+    activityRows.flatMap((activity) =>
+      activity.placeId && isActivePlannedActivityStatus(activity.status) ? [activity.placeId] : [],
+    ),
   );
 
-  const allRecommendationRows = await database
-    .select()
-    .from(recommendations)
-    .where(eq(recommendations.tripId, tripId))
-    .orderBy(asc(recommendations.generatedAt), asc(recommendations.id));
-  const recommendationRows = allRecommendationRows.filter(
-    (recommendation) => !plannedPlaceIds.has(recommendation.placeId),
+  const allPreferenceRows = await database
+    .select({
+      id: savedPlaces.id,
+      tripId: savedPlaces.tripId,
+      placeId: savedPlaces.placeId,
+      intent: savedPlaces.intent,
+      priority: savedPlaces.priority,
+      createdAt: savedPlaces.createdAt,
+    })
+    .from(savedPlaces)
+    .where(eq(savedPlaces.tripId, tripId))
+    .orderBy(asc(savedPlaces.createdAt), asc(savedPlaces.id));
+  const preferenceRows = allPreferenceRows.filter(
+    (preference) => !plannedPlaceIds.has(preference.placeId),
   );
-  const placeIds = [...new Set(recommendationRows.map((recommendation) => recommendation.placeId))];
+  const placeIds = [...new Set(preferenceRows.map((preference) => preference.placeId))];
   const placeRows =
     placeIds.length === 0
       ? []
@@ -200,25 +241,21 @@ async function loadContext(
 
   if (placeRows.length !== placeIds.length) {
     throw new PostgresAuthoritativeItineraryProposalGenerationContextError(
-      "O contexto autoritativo possui Recommendation sem Place correspondente.",
+      "O contexto autoritativo possui TripPlacePreference sem Place correspondente.",
       "context-inconsistent",
     );
   }
 
-  const sourceRecommendations: readonly ItineraryProposalSourceRecommendation[] = Object.freeze(
-    recommendationRows.map((row) => {
-      const reason = firstRecommendationReason(row);
-      return Object.freeze({
-        recommendationId: row.id,
+  const sourcePreferences: readonly ItineraryProposalSourcePreference[] = Object.freeze(
+    preferenceRows.map((row) =>
+      Object.freeze({
+        preferenceId: row.id,
         tripId: row.tripId,
         placeId: row.placeId,
-        status: row.status,
-        score: row.score,
-        validFrom: new Date(row.validFrom.getTime()),
-        ...(row.expiresAt ? { expiresAt: new Date(row.expiresAt.getTime()) } : {}),
-        ...(reason ? { reason } : {}),
-      });
-    }),
+        intent: row.intent as ItineraryProposalSourcePreference["intent"],
+        priority: row.priority as ItineraryProposalSourcePreference["priority"],
+      }),
+    ),
   );
   const sourcePlaces: readonly ItineraryProposalSourcePlace[] = Object.freeze(
     placeRows.map((row) =>
@@ -232,6 +269,60 @@ async function loadContext(
       }),
     ),
   );
+
+  const replanningWindow =
+    generationScope === "REPLAN"
+      ? createReplanningWindow(
+          {
+            id: itinerary.id,
+            tripId: itinerary.tripId,
+            period: {
+              startDate: itinerary.startDate,
+              endDate: itinerary.endDate,
+              timeZone: itinerary.timeZone,
+            },
+            version: itinerary.version,
+            createdAt: new Date(itinerary.createdAt.getTime()),
+            updatedAt: new Date(itinerary.updatedAt.getTime()),
+            days: dayRows.map((day) => ({
+              id: day.id,
+              date: day.date,
+              position: day.position,
+              activities: activityRows
+                .filter((activity) => activity.itineraryDayId === day.id)
+                .map((activity): Activity => ({
+                  id: activity.id,
+                  title: activity.title,
+                  type: activity.type as Activity["type"],
+                  status: activity.status as Activity["status"],
+                  flexibility: activity.flexibility as Activity["flexibility"],
+                  ...(activity.startTime ? { startTime: activity.startTime } : {}),
+                  ...(activity.durationMinutes !== null
+                    ? { durationMinutes: activity.durationMinutes }
+                    : {}),
+                  order: activity.order,
+                  ...(activity.placeId ? { placeId: activity.placeId } : {}),
+                  createdAt: new Date(activity.createdAt.getTime()),
+                  updatedAt: new Date(activity.updatedAt.getTime()),
+                })),
+              freePeriods: freePeriodRows
+                .filter((period) => period.itineraryDayId === day.id)
+                .map((period): FreePeriod => ({
+                  id: period.id,
+                  mode: period.mode as FreePeriod["mode"],
+                  ...(period.startTime ? { startTime: period.startTime } : {}),
+                  ...(period.durationMinutes !== null
+                    ? { durationMinutes: period.durationMinutes }
+                    : {}),
+                  order: period.order,
+                  createdAt: new Date(period.createdAt.getTime()),
+                  updatedAt: new Date(period.updatedAt.getTime()),
+                })),
+            })),
+          } satisfies Itinerary,
+          asOf,
+        )
+      : undefined;
 
   return Object.freeze({
     itinerary: Object.freeze({
@@ -247,8 +338,22 @@ async function loadContext(
         ),
       ),
     }),
-    recommendations: sourceRecommendations,
+    preferences: sourcePreferences,
     places: sourcePlaces,
+    ...(replanningWindow
+      ? {
+          replanningWindow: Object.freeze({
+            capturedAt: replanningWindow.capturedAt.toISOString(),
+            timeZone: replanningWindow.timeZone,
+            localDate: replanningWindow.localDate,
+            localTime: replanningWindow.localTime,
+            eligibleDayIds: replanningWindow.eligibleDayIds,
+            eligibleActivityIds: replanningWindow.eligibleActivityIds,
+            protectedActivityIds: replanningWindow.protectedActivityIds,
+            reasonByActivityId: replanningWindow.reasonByActivityId,
+          }),
+        }
+      : {}),
   });
 }
 
@@ -260,6 +365,7 @@ export class PostgresAuthoritativeItineraryProposalGenerationContextPort impleme
   ): Promise<AuthoritativeItineraryProposalGenerationContext> {
     requireTripId(input.tripId);
     requireAsOf(input.asOf);
+    requireGenerationScope(input.generationScope);
 
     return this.database.transaction((transaction) => loadContext(transaction, input), {
       isolationLevel: "repeatable read",

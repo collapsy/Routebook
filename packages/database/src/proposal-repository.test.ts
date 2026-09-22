@@ -142,6 +142,80 @@ describe("DrizzleItineraryProposalRepository", () => {
     }
   });
 
+  it("preserva generationScope e generationContext de REPLAN no round trip", async () => {
+    const fixture = await createFixture("Persistência de Proposal REPLAN");
+    const repository = new DrizzleItineraryProposalRepository();
+    const requestedAt = new Date("2026-08-23T15:00:00.000Z");
+    const preferenceId = randomUUID();
+    const placeId = randomUUID();
+    const protectedActivityId = randomUUID();
+    const requested = requestItineraryProposal({
+      id: randomUUID(),
+      tripId: fixture.trip.id,
+      itineraryId: fixture.itinerary.id,
+      baseTripContextVersion: fixture.trip.contextVersion,
+      baseItineraryVersion: fixture.itinerary.version,
+      contextSnapshotId: `snapshot-${randomUUID()}`,
+      generationScope: "REPLAN",
+      generationContext: {
+        schemaVersion: 1,
+        includeMaybe: false,
+        selection: [
+          {
+            preferenceId,
+            placeId,
+            intent: "WANT",
+            priority: null,
+          },
+        ],
+        candidates: [
+          {
+            candidateId: preferenceId,
+            placeId,
+            origin: "USER_SELECTED",
+            provenance: { sourceId: preferenceId },
+          },
+          {
+            candidateId: "recommended-round-trip",
+            placeId: randomUUID(),
+            origin: "ROUTEBOOK_RECOMMENDED",
+            provenance: { reasonCode: "NEAR_SELECTED_PLACES" },
+          },
+        ],
+        replanningWindow: {
+          capturedAt: requestedAt.toISOString(),
+          timeZone: fixture.itinerary.period.timeZone,
+          localDate: "2026-08-23",
+          localTime: "12:00",
+          eligibleDayIds: [fixture.itinerary.days[1]!.id, fixture.itinerary.days[2]!.id],
+          eligibleActivityIds: [],
+          protectedActivityIds: [protectedActivityId],
+          reasonByActivityId: { [protectedActivityId]: "PAST_DAY" },
+        },
+      },
+      requestedAt,
+    });
+
+    try {
+      await repository.create(requested);
+
+      expect(await repository.findById(fixture.trip.id, requested.id)).toEqual(requested);
+      const [persisted] = await getDatabase()
+        .select({
+          generationScope: itineraryProposals.generationScope,
+          generationContext: itineraryProposals.generationContext,
+        })
+        .from(itineraryProposals)
+        .where(eq(itineraryProposals.id, requested.id));
+      expect(persisted).toEqual({
+        generationScope: "REPLAN",
+        generationContext: requested.generationContext,
+      });
+    } finally {
+      await cleanup(fixture.trip.id);
+    }
+  });
+
   it("preserva Proposal ready vazia quando a justificativa é explícita", async () => {
     const fixture = await createFixture();
     const repository = new DrizzleItineraryProposalRepository();

@@ -21,7 +21,13 @@ export class DrizzleSavedPlaceRepository implements SavedPlaceRepository {
     const [row] = await getDatabase()
       .select()
       .from(savedPlaces)
-      .where(and(eq(savedPlaces.tripId, tripId), eq(savedPlaces.placeId, placeId)))
+      .where(
+        and(
+          eq(savedPlaces.tripId, tripId),
+          eq(savedPlaces.placeId, placeId),
+          eq(savedPlaces.intent, "WANT"),
+        ),
+      )
       .limit(1);
 
     return row ? mapSavedPlace(row) : null;
@@ -31,8 +37,8 @@ export class DrizzleSavedPlaceRepository implements SavedPlaceRepository {
     const rows = await getDatabase()
       .select()
       .from(savedPlaces)
-      .where(eq(savedPlaces.tripId, tripId))
-      .orderBy(asc(savedPlaces.createdAt));
+      .where(and(eq(savedPlaces.tripId, tripId), eq(savedPlaces.intent, "WANT")))
+      .orderBy(asc(savedPlaces.createdAt), asc(savedPlaces.id));
 
     return rows.map(mapSavedPlace);
   }
@@ -40,9 +46,19 @@ export class DrizzleSavedPlaceRepository implements SavedPlaceRepository {
   async save(selection: SavedPlace): Promise<SavedPlace> {
     await getDatabase()
       .insert(savedPlaces)
-      .values(selection)
-      .onConflictDoNothing({
+      .values({
+        ...selection,
+        intent: "WANT",
+        priority: null,
+        updatedAt: selection.createdAt,
+      })
+      .onConflictDoUpdate({
         target: [savedPlaces.tripId, savedPlaces.placeId],
+        set: {
+          intent: "WANT",
+          priority: null,
+          updatedAt: selection.createdAt,
+        },
       });
 
     return (await this.find(selection.tripId, selection.placeId)) ?? selection;

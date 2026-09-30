@@ -54,6 +54,7 @@ apps/web/app/viagens/[tripId]/roteiro/proposta/**
 apps/web/components/trip-planning-wizard.tsx
 apps/web/lib/itinerary-proposal-generation.*
 apps/web/e2e/trip-preparation-proposal.spec.ts
+apps/web/e2e/trip-context-wizard.spec.ts
 packages/database/src/authoritative-itinerary-proposal-generation-context.*
 docs/implementation/increments/rb-inc-213-preparation-proposal.md
 docs/implementation/context-packs/rb-inc-213-preparation-proposal.md

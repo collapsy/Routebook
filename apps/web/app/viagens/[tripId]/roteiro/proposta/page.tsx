@@ -11,6 +11,7 @@ import { findTripById } from "@routebook/trip-management";
 
 import { ItineraryProposalGenerationControl } from "../../../../../components/itinerary-proposal-generation-control";
 import { ItineraryProposalReview } from "../../../../../components/itinerary-proposal-review";
+import { TripPlanningWizard } from "../../../../../components/trip-planning-wizard";
 import {
   buildItineraryProposalReview,
   findLatestReviewableItineraryProposal,
@@ -30,10 +31,14 @@ export const metadata: Metadata = {
 
 export default async function ItineraryProposalReviewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tripId: string }>;
+  searchParams: Promise<{ preparar?: string }>;
 }) {
   const { tripId } = await params;
+  const { preparar } = await searchParams;
+  const preparing = preparar === "1";
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
@@ -51,6 +56,7 @@ export default async function ItineraryProposalReviewPage({
   if (!proposal) {
     return (
       <section className={`app-page ${styles.page}`}>
+        {preparing ? <TripPlanningWizard currentStep="proposal" tripId={trip.id} /> : null}
         <Link className="back-link" href={`/viagens/${trip.id}/roteiro`}>
           ← Voltar para o Roteiro
         </Link>
@@ -87,6 +93,7 @@ export default async function ItineraryProposalReviewPage({
 
   return (
     <section className={`app-page ${styles.page}`}>
+      {preparing ? <TripPlanningWizard currentStep="proposal" tripId={trip.id} /> : null}
       <Link className="back-link" href={itineraryHref}>
         ← Voltar para o Roteiro
       </Link>

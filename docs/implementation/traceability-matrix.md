@@ -1300,3 +1300,16 @@ Ao concluir um incremento:
 | jornada | criação válida entra diretamente em Lugares; Trip `draft` retoma o onboarding a partir das fontes canônicas mesmo sem parâmetro efêmero |
 | estado | nenhum WizardState/WizardSession/cookie/snapshot persistido; `Trip.status` determina se a introdução ainda se aplica |
 | validação | pendente da PR, CI e Preview; preencher somente com resultados reais |
+
+## Evidências previstas do RB-INC-213
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-213-preparation-proposal.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-213-preparation-proposal.md` |
+| issue | [#517](https://github.com/collapsy/Routebook/issues/517) |
+| branch | `codex/rb-inc-213-preparation-proposal` |
+| base | `main@53518e5ab7d99636db76d8d90edd240b62a5635a` |
+| contrato | `Trip + TripPlacePreference[] + TravelerProfile → Itinerary Proposal` |
+| invariantes | Proposal permanece separada do Itinerary; geração exige ação explícita; nenhum Activity é criado automaticamente |
+| validação | implementação local concluída; `node scripts/validate-docs.mjs` passou com 10 avisos preexistentes; `pnpm lint` e `pnpm typecheck` passaram com Node 24; 3 suítes web direcionadas passaram (11 testes); `pnpm format:check` permanece vermelho por arquivos preexistentes fora do incremento; `pnpm test`/`pnpm build` requerem `DATABASE_URL`; PR, CI e Preview pendentes |

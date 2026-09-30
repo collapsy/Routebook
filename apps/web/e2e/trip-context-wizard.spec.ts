@@ -103,7 +103,10 @@ test("revisa a preparação como Etapa 3 e retorna para editar sem criar Proposa
   await expect(page.getByText("Preparar viagem · Etapa 3 de 4")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Veja o que será considerado" })).toBeVisible();
   await expect(page.getByText("Tudo pronto para montar sua proposta")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Montar proposta de roteiro" })).toBeDisabled();
+  await expect(page.getByRole("link", { name: "Montar proposta de roteiro" })).toHaveAttribute(
+    "href",
+    `/viagens/${trip.id}/preparacao/proposta?preparar=1`,
+  );
 
   await page.getByRole("link", { name: "Editar Contexto" }).click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/contexto\\?preparar=1$`));

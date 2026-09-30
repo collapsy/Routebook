@@ -231,9 +231,18 @@ export default async function TripPreparationReviewPage({
             proposta separada do roteiro.
           </p>
         )}
-        <button className="product-primary-action" disabled type="button">
-          Montar proposta de roteiro
-        </button>
+        {missingRequired.length ? (
+          <button className="product-primary-action" disabled type="button">
+            Montar proposta de roteiro
+          </button>
+        ) : (
+          <Link
+            className="product-primary-action"
+            href={`/viagens/${tripId}/preparacao/proposta?preparar=1`}
+          >
+            Montar proposta de roteiro
+          </Link>
+        )}
         <p className="preparation-review-note">
           A montagem da Proposta pertence à próxima etapa. Nenhuma Activity, Proposal ou
           recomendação automática foi criada nesta revisão.

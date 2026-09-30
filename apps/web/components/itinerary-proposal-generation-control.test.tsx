@@ -53,4 +53,13 @@ describe("ItineraryProposalGenerationControl", () => {
       await screen.findByText("Não foi possível concluir a geração da proposta de roteiro."),
     ).toBeVisible();
   });
+
+  it("preserva o modo de preparação ao disparar a geração", async () => {
+    const action = vi.fn().mockResolvedValue({ status: "idle" });
+
+    render(<ItineraryProposalGenerationControl action={action} preparing />);
+    fireEvent.click(screen.getByRole("button", { name: "Gerar proposta de roteiro" }));
+
+    await waitFor(() => expect(action).toHaveBeenCalledWith(false, true));
+  });
 });

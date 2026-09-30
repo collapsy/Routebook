@@ -5,12 +5,16 @@ import { useState, useSyncExternalStore, useTransition } from "react";
 import type { GenerateItineraryProposalActionState } from "@/lib/itinerary-proposal-generation";
 
 type Props = Readonly<{
-  action: (includeMaybe: boolean) => Promise<GenerateItineraryProposalActionState>;
+  action: (
+    includeMaybe: boolean,
+    preparing?: boolean,
+  ) => Promise<GenerateItineraryProposalActionState>;
+  preparing?: boolean;
 }>;
 
 const subscribeToHydration = () => () => undefined;
 
-export function ItineraryProposalGenerationControl({ action }: Props) {
+export function ItineraryProposalGenerationControl({ action, preparing = false }: Props) {
   const [state, setState] = useState<GenerateItineraryProposalActionState>({ status: "idle" });
   const [includeMaybe, setIncludeMaybe] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -24,7 +28,7 @@ export function ItineraryProposalGenerationControl({ action }: Props) {
     if (isPending) return;
 
     startTransition(async () => {
-      const nextState = await action(includeMaybe);
+      const nextState = preparing ? await action(includeMaybe, true) : await action(includeMaybe);
       setState(nextState);
     });
   }

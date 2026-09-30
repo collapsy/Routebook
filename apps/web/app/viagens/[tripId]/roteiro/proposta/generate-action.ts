@@ -23,6 +23,7 @@ function proposalPath(tripId: string): string {
 export async function generateItineraryProposalAction(
   tripId: string,
   includeMaybe = false,
+  preparing = false,
 ): Promise<GenerateItineraryProposalActionState> {
   let state: GenerateItineraryProposalActionState;
 
@@ -46,7 +47,7 @@ export async function generateItineraryProposalAction(
     revalidatePath(`/viagens/${tripId}/roteiro`);
     revalidatePath(proposalPath(tripId));
     redirect(
-      `${proposalPath(tripId)}?propostaGerada=${encodeURIComponent(state.itineraryProposalId)}`,
+      `${proposalPath(tripId)}?${preparing ? "preparar=1&" : ""}propostaGerada=${encodeURIComponent(state.itineraryProposalId)}`,
     );
   }
 

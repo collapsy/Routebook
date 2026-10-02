@@ -16,6 +16,7 @@ import { PipaDailyExperiences } from "../../../../components/pipa-daily-experien
 import { DestinationTripGuide } from "../../../../components/destination-trip-guide";
 import { TripGuideModeNav } from "../../../../components/trip-guide-mode-nav";
 import { buildPipaDailyExperience } from "../../../../lib/pipa-daily-experiences";
+import { isPipaDestination } from "../../../../lib/pipa-destination";
 import { resolveTripTodayDate } from "../../../../lib/trip-active-day";
 import { loadTripCuratedCatalog } from "../../../../lib/trip-curated-catalog";
 
@@ -51,7 +52,7 @@ export default async function TripGuidePage({
     (dia && days.some((day) => day.date === dia) ? dia : undefined) ?? todayDate ?? days[0]?.date;
   const travelMode = profile?.transportPreference === "walking" ? "walking" : "driving";
   const dailyExperience =
-    selectedDate && curatedCatalog.destinationId === "pipa-rn-br"
+    selectedDate && isPipaDestination(trip.destination)
       ? buildPipaDailyExperience({
           tripId,
           date: selectedDate,

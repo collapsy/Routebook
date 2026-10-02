@@ -51,18 +51,17 @@ export default async function TripGuideDaysPage({
   const selectedDate =
     (dia && days.some((day) => day.date === dia) ? dia : undefined) ?? todayDate ?? days[0]?.date;
   const travelMode = profile?.transportPreference === "walking" ? "walking" : "driving";
-  const guide =
-    isPipaDestination(trip.destination)
-      ? buildPipaTripGuide({
-          tripId,
-          days,
-          places: publishedPlaces,
-          ...(trip.accommodation?.coordinate
-            ? { accommodationCoordinate: trip.accommodation.coordinate }
-            : {}),
-          travelMode,
-        })
-      : null;
+  const guide = isPipaDestination(trip.destination)
+    ? buildPipaTripGuide({
+        tripId,
+        days,
+        places: publishedPlaces,
+        ...(trip.accommodation?.coordinate
+          ? { accommodationCoordinate: trip.accommodation.coordinate }
+          : {}),
+        travelMode,
+      })
+    : null;
 
   return (
     <section className="app-page trip-overview-page">

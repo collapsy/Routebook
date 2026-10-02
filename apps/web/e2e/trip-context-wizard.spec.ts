@@ -66,9 +66,7 @@ test("preenche Contexto progressivamente sem criar Activity ou Proposal", async 
     transportPreference: "mixed",
     budget: { totalCents: 450000, currency: "BRL", kind: "estimate" },
   };
-  await expect
-    .poll(() => profileRepository.findByTripId(trip.id))
-    .toMatchObject(expectedProfile);
+  await expect.poll(() => profileRepository.findByTripId(trip.id)).toMatchObject(expectedProfile);
 
   await page.getByRole("link", { name: "← Voltar para Lugares" }).click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares-salvos\\?preparar=1$`));

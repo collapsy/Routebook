@@ -175,6 +175,38 @@ describe("generateAuthoritativeItineraryProposal", () => {
     ]);
   });
 
+  it("persiste MAYBE_NOT_REQUESTED mesmo quando a lista de candidatos enviada ao gerador está vazia", async () => {
+    const inputs: GenerateItineraryProposalInput[] = [];
+    const maybeOnlyContextPort: AuthoritativeItineraryProposalGenerationContextPort = {
+      load: vi.fn(async (loadInput) => {
+        const context = await contextPort().load(loadInput);
+        return {
+          ...context,
+          preferences: context.preferences.filter(({ intent }) => intent === "MAYBE"),
+          places: context.places.filter(({ placeId }) => placeId === "place-maybe"),
+        };
+      }),
+    };
+    const proposal = await generateAuthoritativeItineraryProposal(
+      repository(),
+      generationPort(inputs),
+      maybeOnlyContextPort,
+      command(),
+    );
+
+    expect(inputs[0]?.candidates).toEqual([]);
+    expect(proposal.generationContext?.outcomes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          candidateId: "preference-maybe",
+          placeId: "place-maybe",
+          status: "EXCLUDED",
+          reasonCode: "MAYBE_NOT_REQUESTED",
+        }),
+      ]),
+    );
+  });
+
   it("inclui MAYBE somente quando o comando possui opt-in explícito", async () => {
     const inputs: GenerateItineraryProposalInput[] = [];
 

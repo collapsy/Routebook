@@ -849,7 +849,7 @@ export function completeItineraryProposalGeneration(
     "planningConflictIds",
     false,
   );
-  const candidateOutcomes = proposal.generationContext?.candidates
+  const generatedCandidateOutcomes = proposal.generationContext?.candidates
     ? (input.candidateOutcomes ??
       proposal.generationContext.outcomes ??
       Object.freeze([
@@ -880,6 +880,27 @@ export function completeItineraryProposalGeneration(
               }))
           : []),
       ]))
+    : undefined;
+  const candidateOutcomes = generatedCandidateOutcomes
+    ? Object.freeze([
+        ...generatedCandidateOutcomes,
+        ...(!proposal.generationContext!.includeMaybe
+          ? proposal
+              .generationContext!.selection.filter(
+                (preference) =>
+                  preference.intent === "MAYBE" &&
+                  !generatedCandidateOutcomes.some(
+                    (outcome) => outcome.candidateId === preference.preferenceId,
+                  ),
+              )
+              .map((preference) => ({
+                candidateId: preference.preferenceId,
+                placeId: preference.placeId,
+                status: "EXCLUDED" as const,
+                reasonCode: "MAYBE_NOT_REQUESTED" as const,
+              }))
+          : []),
+      ])
     : undefined;
   const outcomes = normalizedCandidateOutcomes(
     candidateOutcomes,

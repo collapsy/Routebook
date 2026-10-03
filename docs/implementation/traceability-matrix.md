@@ -1325,4 +1325,4 @@ Ao concluir um incremento:
 | base | `main@c838b1156ea7725cc3d81f566e58c814b6a1571f` |
 | contrato | `ProposalCandidateOutcome` existente; reason codes canônicos; JSONB `generation_context` sem migration |
 | invariantes | Proposal ≠ Itinerary aplicado; recomendações complementares não são criadas; outcomes representam somente fatos da geração |
-| validação | pendente; registrar apenas resultados realmente executados |
+| validação | `pnpm --filter @routebook/proposal-management exec vitest run --pool=threads --maxWorkers=1`: 218 testes passaram; testes web direcionados: 17 passaram; `pnpm typecheck`, `pnpm lint`, Prettier check e `git diff --check` passaram; `node scripts/validate-docs.mjs` passou com 10 avisos preexistentes; Engineering Validation [run #37082546367](https://github.com/collapsy/Routebook/actions/runs/37082546367) passou com 169 E2Es; Documentation Validation e Vercel Preview passaram; PR #522 pronta para revisão, merge ainda depende de autorização humana |

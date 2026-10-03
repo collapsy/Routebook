@@ -128,6 +128,22 @@ export function ItineraryProposalReview({
         )}
       </section>
 
+      {(review.exclusions ?? []).length > 0 ? (
+        <section className={styles.limitations} aria-labelledby="proposal-review-exclusions-title">
+          <div>
+            <p className={styles.eyebrow}>Lugares considerados</p>
+            <h2 id="proposal-review-exclusions-title">Não incluídos na proposta</h2>
+          </div>
+          <ul>
+            {review.exclusions?.map((item) => (
+              <li key={item.placeId}>
+                <strong>{item.title}</strong> — {item.reason}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <section aria-labelledby="proposal-review-changes-title">
         <div className={styles.sectionHeading}>
           <div>
@@ -164,6 +180,7 @@ export function ItineraryProposalReview({
                             <small>Mudança proposta</small>
                           </div>
                           <h4 id={`proposed-activity-${activity.id}`}>{activity.title}</h4>
+                          {activity.originLabel ? <p>{activity.originLabel}</p> : null}
                           {activity.description ? <p>{activity.description}</p> : null}
                           <dl className={styles.activityFacts}>
                             <div>

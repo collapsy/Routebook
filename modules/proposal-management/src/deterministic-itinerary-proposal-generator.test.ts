@@ -216,6 +216,7 @@ describe("DeterministicItineraryProposalGenerator", () => {
     const generator = new DeterministicItineraryProposalGenerator();
     const candidates = Array.from({ length: 8 }, (_, index) => ({
       candidateId: `candidate-${index + 1}`,
+      placeId: `place-${index + 1}`,
       title: `Opção ${index + 1}`,
       durationMinutes: 60,
     }));
@@ -243,6 +244,12 @@ describe("DeterministicItineraryProposalGenerator", () => {
     );
 
     expect(result.proposedActivities).toHaveLength(5);
+    expect(result.candidateOutcomes?.filter(({ status }) => status === "EXCLUDED")).toHaveLength(3);
+    expect(
+      result.candidateOutcomes
+        ?.filter(({ status }) => status === "EXCLUDED")
+        .every(({ reasonCode }) => reasonCode === "NO_CAPACITY"),
+    ).toBe(true);
     const proposedForDayA = result.proposedActivities.filter(
       (activity) => activity.targetTripDayId === "day-a",
     );

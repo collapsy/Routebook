@@ -324,4 +324,87 @@ describe("itinerary proposal review experience", () => {
       expiredAtLabel: "2 de ago. de 2026, 12:30",
     });
   });
+
+  it("projects candidate origin and canonical exclusion reason from the captured snapshot", () => {
+    const itinerary = createReviewItinerary();
+    const requested = requestItineraryProposal({
+      id: "proposal-explainability",
+      tripId: itinerary.tripId,
+      itineraryId: itinerary.id,
+      baseTripContextVersion: 1,
+      baseItineraryVersion: itinerary.version,
+      contextSnapshotId: "context-explainability",
+      requestedAt,
+      generationContext: {
+        schemaVersion: 1,
+        includeMaybe: false,
+        selection: [
+          {
+            preferenceId: "pref-included",
+            placeId: "place-included",
+            intent: "WANT",
+            priority: null,
+          },
+        ],
+        candidates: [
+          {
+            candidateId: "pref-included",
+            placeId: "place-included",
+            title: "Museu",
+            origin: "USER_SELECTED",
+            provenance: { sourceId: "pref-included" },
+          },
+          {
+            candidateId: "rec-excluded",
+            placeId: "place-excluded",
+            title: "Jardim",
+            origin: "ROUTEBOOK_RECOMMENDED",
+            provenance: { reasonCode: "complementary" },
+          },
+        ],
+      },
+    });
+    const generating = startItineraryProposalGeneration(
+      requested,
+      new Date("2026-08-01T12:01:00.000Z"),
+    );
+    const proposal = completeItineraryProposalGeneration(generating, {
+      generationMethod: "test",
+      generationVersion: "1",
+      proposedActivities: [
+        {
+          proposedActivityId: "activity-museum",
+          placeId: "place-included",
+          targetTripDayId: itinerary.days[0]!.id,
+          title: "Museu",
+          operationType: "add",
+        },
+      ],
+      candidateOutcomes: [
+        { candidateId: "pref-included", placeId: "place-included", status: "INCLUDED" },
+        {
+          candidateId: "rec-excluded",
+          placeId: "place-excluded",
+          status: "EXCLUDED",
+          reasonCode: "NO_CAPACITY",
+        },
+      ],
+      criteria: ["Capacidade"],
+      justifications: ["Teste"],
+      limitations: [],
+      planningConflictIds: [],
+      generatedAt: new Date("2026-08-01T12:02:00.000Z"),
+      validUntil: new Date("2026-08-02T12:02:00.000Z"),
+    });
+
+    const review = buildItineraryProposalReview({ asOf: activeReviewAsOf, itinerary, proposal });
+    expect(review.days[0]?.activities[0]?.originLabel).toBe("Escolhido por você");
+    expect(review.exclusions).toEqual([
+      {
+        placeId: "place-excluded",
+        title: "Jardim",
+        reason: "Os Dias disponíveis atingiram a capacidade considerada pela proposta.",
+      },
+    ]);
+  });
 });

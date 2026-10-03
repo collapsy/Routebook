@@ -41,13 +41,38 @@ export type ProposalCandidateProvenance = Readonly<{
 export type ItineraryProposalCandidateSnapshotItem = Readonly<{
   candidateId: string;
   placeId: string;
+  title?: string;
   origin: ProposalCandidateOrigin;
   provenance: ProposalCandidateProvenance;
+}>;
+
+export const proposalCandidateOutcomeStatuses = ["INCLUDED", "EXCLUDED"] as const;
+export const proposalCandidateOutcomeReasonCodes = [
+  "NO_CAPACITY",
+  "OUTSIDE_REPLANNING_WINDOW",
+  "FIXED_ACTIVITY_CONFLICT",
+  "TEMPORAL_CONFLICT",
+  "KNOWN_CLOSED",
+  "MISSING_REQUIRED_DATA",
+  "DUPLICATE_PLACE",
+  "UNSUPPORTED_PLANNING_ROLE",
+  "MAYBE_NOT_REQUESTED",
+] as const;
+
+export type ProposalCandidateOutcomeReasonCode =
+  (typeof proposalCandidateOutcomeReasonCodes)[number];
+
+export type ProposalCandidateOutcome = Readonly<{
+  candidateId: string;
+  placeId: string;
+  status: (typeof proposalCandidateOutcomeStatuses)[number];
+  reasonCode?: ProposalCandidateOutcomeReasonCode;
 }>;
 
 export type ItineraryProposalSelectionSnapshotItem = Readonly<{
   preferenceId: string;
   placeId: string;
+  title?: string;
   intent: "WANT" | "MAYBE" | "NOT_INTERESTED";
   priority: "MUST_DO" | null;
 }>;
@@ -69,6 +94,7 @@ export type ItineraryProposalGenerationContext = Readonly<{
   selection: readonly ItineraryProposalSelectionSnapshotItem[];
   /** Ausência preserva compatibilidade com snapshots anteriores ao RB-INC-208. */
   candidates?: readonly ItineraryProposalCandidateSnapshotItem[];
+  outcomes?: readonly ProposalCandidateOutcome[];
   replanningWindow?: ItineraryProposalReplanningWindowSnapshot;
 }>;
 
@@ -95,6 +121,7 @@ export type CompleteItineraryProposalGenerationInput = Readonly<{
   generationMethod: string;
   generationVersion: string;
   proposedActivities: readonly ProposedActivityInput[];
+  candidateOutcomes?: readonly ProposalCandidateOutcome[];
   criteria: readonly string[];
   justifications: readonly string[];
   limitations: readonly string[];
@@ -376,6 +403,7 @@ function normalizedSelectionSnapshot(
       return Object.freeze({
         preferenceId,
         placeId,
+        ...(item.title ? { title: requiredText(item.title, `${field}.title`) } : {}),
         intent: item.intent,
         priority: item.priority,
       });
@@ -457,6 +485,7 @@ function normalizedCandidateSnapshot(
       return Object.freeze({
         candidateId,
         placeId,
+        ...(item.title ? { title: requiredText(item.title, `${field}.title`) } : {}),
         origin: item.origin,
         provenance: Object.freeze({
           ...(sourceId ? { sourceId } : {}),
@@ -465,6 +494,121 @@ function normalizedCandidateSnapshot(
       });
     }),
   );
+}
+
+function normalizedCandidateOutcomes(
+  value: readonly ProposalCandidateOutcome[] | undefined,
+  candidates: readonly ItineraryProposalCandidateSnapshotItem[] | undefined,
+  selection: readonly ItineraryProposalSelectionSnapshotItem[],
+  includeMaybe: boolean,
+  proposedActivities?: readonly ProposedActivity[],
+): readonly ProposalCandidateOutcome[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value)) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.outcomes": "Informe uma coleção válida.",
+    });
+  }
+  const candidateById = new Map(
+    (candidates ?? []).map((candidate) => [candidate.candidateId, candidate]),
+  );
+  const selectedPlaces = new Set(
+    proposedActivities?.flatMap((activity) => (activity.placeId ? [activity.placeId] : [])) ?? [],
+  );
+  const seen = new Set<string>();
+  const normalized = value.map((outcome, index) => {
+    const field = `generationContext.outcomes.${index}`;
+    if (!outcome || typeof outcome !== "object") {
+      throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+        [field]: "Informe um outcome válido.",
+      });
+    }
+    const candidateId = requiredText(outcome.candidateId, `${field}.candidateId`);
+    const placeId = requiredText(outcome.placeId, `${field}.placeId`);
+    if (seen.has(candidateId)) {
+      throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+        [field]: "Cada candidato deve possuir um único outcome.",
+      });
+    }
+    seen.add(candidateId);
+    if (!proposalCandidateOutcomeStatuses.includes(outcome.status)) {
+      throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+        [`${field}.status`]: "Use INCLUDED ou EXCLUDED.",
+      });
+    }
+    const candidate = candidateById.get(candidateId);
+    const maybePreference = selection.find(
+      (preference) =>
+        preference.preferenceId === candidateId && preference.intent === "MAYBE" && !includeMaybe,
+    );
+    if (
+      (!candidate || candidate.placeId !== placeId) &&
+      (!maybePreference || maybePreference.placeId !== placeId)
+    ) {
+      throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+        [field]: "O outcome deve referenciar um candidato ou MAYBE capturado no snapshot.",
+      });
+    }
+    if (
+      outcome.status === "INCLUDED" &&
+      (!candidate || (proposedActivities && !selectedPlaces.has(placeId)))
+    ) {
+      throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+        [field]: "INCLUDED deve corresponder a candidato com Proposed Activity.",
+      });
+    }
+    if (outcome.status === "EXCLUDED" && proposedActivities && selectedPlaces.has(placeId)) {
+      throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+        [field]: "EXCLUDED não pode corresponder a Place proposto.",
+      });
+    }
+    if (
+      outcome.status === "EXCLUDED" &&
+      (!outcome.reasonCode || !proposalCandidateOutcomeReasonCodes.includes(outcome.reasonCode))
+    ) {
+      throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+        [`${field}.reasonCode`]: "EXCLUDED exige um reason code canônico.",
+      });
+    }
+    if (
+      outcome.status === "INCLUDED" &&
+      outcome.reasonCode !== undefined &&
+      !proposalCandidateOutcomeReasonCodes.includes(outcome.reasonCode)
+    ) {
+      throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+        [`${field}.reasonCode`]: "Use um reason code canônico.",
+      });
+    }
+    if (
+      maybePreference &&
+      (outcome.status !== "EXCLUDED" || outcome.reasonCode !== "MAYBE_NOT_REQUESTED")
+    ) {
+      throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+        [field]: "MAYBE sem opt-in deve ser EXCLUDED por MAYBE_NOT_REQUESTED.",
+      });
+    }
+    return Object.freeze({
+      candidateId,
+      placeId,
+      status: outcome.status,
+      ...(outcome.reasonCode ? { reasonCode: outcome.reasonCode } : {}),
+    });
+  });
+  const requiredCandidateIds = [
+    ...(candidates ?? []).map((candidate) => candidate.candidateId),
+    ...(!includeMaybe
+      ? selection
+          .filter((preference) => preference.intent === "MAYBE")
+          .map((preference) => preference.preferenceId)
+      : []),
+  ];
+  if (requiredCandidateIds.some((candidateId) => !seen.has(candidateId))) {
+    throw new ItineraryProposalValidationError("Itinerary Proposal inválida.", {
+      "generationContext.outcomes":
+        "Registre um outcome para cada candidato e MAYBE não autorizado.",
+    });
+  }
+  return Object.freeze(normalized);
 }
 
 function normalizedReplanningWindowSnapshot(
@@ -570,6 +714,12 @@ function normalizedGenerationContext(
 
   const selection = normalizedSelectionSnapshot(value.selection);
   const candidates = normalizedCandidateSnapshot(value.candidates, selection, value.includeMaybe);
+  const outcomes = normalizedCandidateOutcomes(
+    value.outcomes,
+    candidates,
+    selection,
+    value.includeMaybe,
+  );
   const replanningWindow = value.replanningWindow
     ? normalizedReplanningWindowSnapshot(value.replanningWindow)
     : undefined;
@@ -589,6 +739,7 @@ function normalizedGenerationContext(
     includeMaybe: value.includeMaybe,
     selection,
     ...(candidates ? { candidates } : {}),
+    ...(outcomes ? { outcomes } : {}),
     ...(replanningWindow ? { replanningWindow } : {}),
   });
 }
@@ -698,6 +849,70 @@ export function completeItineraryProposalGeneration(
     "planningConflictIds",
     false,
   );
+  const generatedCandidateOutcomes = proposal.generationContext?.candidates
+    ? (input.candidateOutcomes ??
+      proposal.generationContext.outcomes ??
+      Object.freeze([
+        ...proposal.generationContext.candidates.map((candidate) => ({
+          candidateId: candidate.candidateId,
+          placeId: candidate.placeId,
+          status: proposedActivities.some((activity) => activity.placeId === candidate.placeId)
+            ? ("INCLUDED" as const)
+            : ("EXCLUDED" as const),
+          ...(!proposedActivities.some((activity) => activity.placeId === candidate.placeId)
+            ? { reasonCode: "NO_CAPACITY" as const }
+            : {}),
+        })),
+        ...(!proposal.generationContext.includeMaybe
+          ? proposal.generationContext.selection
+              .filter(
+                (preference) =>
+                  preference.intent === "MAYBE" &&
+                  !proposal.generationContext!.candidates?.some(
+                    (candidate) => candidate.placeId === preference.placeId,
+                  ),
+              )
+              .map((preference) => ({
+                candidateId: preference.preferenceId,
+                placeId: preference.placeId,
+                status: "EXCLUDED" as const,
+                reasonCode: "MAYBE_NOT_REQUESTED" as const,
+              }))
+          : []),
+      ]))
+    : undefined;
+  const candidateOutcomes = generatedCandidateOutcomes
+    ? Object.freeze([
+        ...generatedCandidateOutcomes,
+        ...(!proposal.generationContext!.includeMaybe
+          ? proposal
+              .generationContext!.selection.filter(
+                (preference) =>
+                  preference.intent === "MAYBE" &&
+                  !generatedCandidateOutcomes.some(
+                    (outcome) => outcome.candidateId === preference.preferenceId,
+                  ),
+              )
+              .map((preference) => ({
+                candidateId: preference.preferenceId,
+                placeId: preference.placeId,
+                status: "EXCLUDED" as const,
+                reasonCode: "MAYBE_NOT_REQUESTED" as const,
+              }))
+          : []),
+      ])
+    : undefined;
+  const outcomes = normalizedCandidateOutcomes(
+    candidateOutcomes,
+    proposal.generationContext?.candidates,
+    proposal.generationContext?.selection ?? [],
+    proposal.generationContext?.includeMaybe ?? false,
+    proposedActivities,
+  );
+  const generationContext =
+    proposal.generationContext && outcomes
+      ? Object.freeze({ ...proposal.generationContext, outcomes })
+      : proposal.generationContext;
 
   return Object.freeze({
     ...proposal,
@@ -705,6 +920,7 @@ export function completeItineraryProposalGeneration(
     generationMethod,
     generationVersion,
     proposedActivities,
+    ...(generationContext ? { generationContext } : {}),
     criteria,
     justifications,
     limitations,

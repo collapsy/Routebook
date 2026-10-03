@@ -699,6 +699,7 @@ export class DeterministicItineraryProposalGenerator implements ItineraryProposa
     );
     const proposedActivityIds = new Set<string>();
     const proposedActivities: ProposedActivityInput[] = [];
+    const includedCandidateIds = new Set<string>();
     const hasContextualSignals =
       anchorCoordinate !== undefined ||
       candidates.some(
@@ -731,6 +732,7 @@ export class DeterministicItineraryProposalGenerator implements ItineraryProposa
       }
       proposedActivityIds.add(proposedActivityId);
       proposedActivities.push(proposedActivity(candidate, proposedActivityId, day, proposedOrder));
+      includedCandidateIds.add(candidate.candidateId);
       activityCounts.set(day.tripDayId, proposedOrder + 1);
     };
 
@@ -829,6 +831,20 @@ export class DeterministicItineraryProposalGenerator implements ItineraryProposa
       generationMethod: DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_METHOD,
       generationVersion: DETERMINISTIC_ITINERARY_PROPOSAL_GENERATION_VERSION,
       proposedActivities: Object.freeze(proposedActivities),
+      candidateOutcomes: Object.freeze(
+        candidates.flatMap((candidate) => {
+          if (!candidate.placeId) return [];
+          const included = includedCandidateIds.has(candidate.candidateId);
+          return [
+            Object.freeze({
+              candidateId: candidate.candidateId,
+              placeId: candidate.placeId,
+              status: included ? ("INCLUDED" as const) : ("EXCLUDED" as const),
+              ...(!included ? { reasonCode: "NO_CAPACITY" as const } : {}),
+            }),
+          ];
+        }),
+      ),
       criteria: Object.freeze(
         freePeriodContextKnown
           ? [

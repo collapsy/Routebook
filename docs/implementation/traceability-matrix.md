@@ -1313,3 +1313,16 @@ Ao concluir um incremento:
 | contrato | `Trip + TripPlacePreference[] + TravelerProfile → Itinerary Proposal` |
 | invariantes | Proposal permanece separada do Itinerary; geração exige ação explícita; nenhum Activity é criado automaticamente |
 | validação | implementação local concluída; `node scripts/validate-docs.mjs` passou com 10 avisos preexistentes; `pnpm lint` e `pnpm typecheck` passaram com Node 24; 3 suítes web direcionadas passaram (11 testes); `pnpm format:check` permanece vermelho por arquivos preexistentes fora do incremento; `pnpm test`/`pnpm build` requerem `DATABASE_URL`; PR, CI e Preview pendentes |
+
+## Evidências previstas do RB-INC-214
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-214-proposal-explainability.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-214-proposal-explainability.md` |
+| issue | [#521](https://github.com/collapsy/Routebook/issues/521) |
+| branch | `codex/rb-inc-214-proposal-explainability` |
+| base | `main@c838b1156ea7725cc3d81f566e58c814b6a1571f` |
+| contrato | `ProposalCandidateOutcome` existente; reason codes canônicos; JSONB `generation_context` sem migration |
+| invariantes | Proposal ≠ Itinerary aplicado; recomendações complementares não são criadas; outcomes representam somente fatos da geração |
+| validação | `pnpm --filter @routebook/proposal-management exec vitest run --pool=threads --maxWorkers=1`: 218 testes passaram; testes web direcionados: 17 passaram; `pnpm typecheck`, `pnpm lint`, Prettier check e `git diff --check` passaram; `node scripts/validate-docs.mjs` passou com 10 avisos preexistentes; Engineering Validation [run #37082546367](https://github.com/collapsy/Routebook/actions/runs/37082546367) passou com 169 E2Es; Documentation Validation e Vercel Preview passaram; PR #522 pronta para revisão, merge ainda depende de autorização humana |

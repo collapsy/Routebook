@@ -58,14 +58,15 @@ test("preenche Contexto progressivamente sem criar Activity ou Proposal", async 
   );
   await expect(page.getByRole("status")).toContainText("Contexto salvo");
 
-  const profile = await new DrizzleTravelerProfileRepository().findByTripId(trip.id);
-  expect(profile).toMatchObject({
+  const profileRepository = new DrizzleTravelerProfileRepository();
+  const expectedProfile = {
     travelerCount: 3,
     interests: ["beaches", "gastronomy"],
     pace: "balanced",
     transportPreference: "mixed",
     budget: { totalCents: 450000, currency: "BRL", kind: "estimate" },
-  });
+  };
+  await expect.poll(() => profileRepository.findByTripId(trip.id)).toMatchObject(expectedProfile);
 
   await page.getByRole("link", { name: "← Voltar para Lugares" }).click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares-salvos\\?preparar=1$`));

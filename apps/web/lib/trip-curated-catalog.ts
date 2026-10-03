@@ -2,6 +2,7 @@ import { DrizzlePlaceRepository } from "@routebook/database";
 import type { Place } from "@routebook/place-catalog";
 import type { Trip } from "@routebook/trip-management";
 
+import { resolveCuratedDestinationId } from "./curated-destination-id";
 import { resolvePlaceDiscoveryRegion } from "./place-discovery-region";
 
 export type TripCuratedCatalog = Readonly<{
@@ -22,12 +23,13 @@ export async function loadTripCuratedCatalog(trip: Trip): Promise<TripCuratedCat
     center: regionResolution.region.center,
     radiusMeters: regionResolution.region.curatedRadiusMeters,
   });
-  const destinationIds = [
-    ...new Set(places.flatMap((place) => (place.destinationId ? [place.destinationId] : []))),
-  ];
+  const destinationId = resolveCuratedDestinationId({
+    destinationName: trip.destination.name,
+    placeDestinationIds: places.map((place) => place.destinationId ?? null),
+  });
 
   return {
     places,
-    ...(destinationIds.length === 1 ? { destinationId: destinationIds[0] } : {}),
+    ...(destinationId ? { destinationId } : {}),
   };
 }

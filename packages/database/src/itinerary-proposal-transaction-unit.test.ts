@@ -25,9 +25,10 @@ function createFragments(executor: Executor, calls: string[] = []) {
   } as const;
   const itinerary = { name: "itinerary", executor } as const;
   const decision = { name: "decision", executor } as const;
+  const tripStatus = { name: "tripStatus", executor } as const;
 
   return {
-    values: { proposalApplication, itineraryProposal, itinerary, decision },
+    values: { proposalApplication, itineraryProposal, itinerary, decision, tripStatus },
     factories: {
       proposalApplication(value: Executor) {
         calls.push("proposalApplication");
@@ -48,6 +49,11 @@ function createFragments(executor: Executor, calls: string[] = []) {
         calls.push("decision");
         expect(value).toBe(executor);
         return decision;
+      },
+      tripStatus(value: Executor) {
+        calls.push("tripStatus");
+        expect(value).toBe(executor);
+        return tripStatus;
       },
     },
   };
@@ -75,6 +81,7 @@ describe("ItineraryProposalTransactionUnit", () => {
       "itineraryProposal",
       "itinerary",
       "decision",
+      "tripStatus",
       "operation",
     ]);
   });
@@ -90,6 +97,7 @@ describe("ItineraryProposalTransactionUnit", () => {
       expect(fragments.itineraryProposal).toBe(values.itineraryProposal);
       expect(fragments.itinerary).toBe(values.itinerary);
       expect(fragments.decision).toBe(values.decision);
+      expect(fragments.tripStatus).toBe(values.tripStatus);
     });
   });
 
@@ -122,6 +130,10 @@ describe("ItineraryProposalTransactionUnit", () => {
       },
       decision() {
         calls.push("decision");
+        return {};
+      },
+      tripStatus() {
+        calls.push("tripStatus");
         return {};
       },
     });
@@ -161,21 +173,24 @@ describe("ItineraryProposalTransactionUnit", () => {
     );
   });
 
-  it.each(["proposalApplication", "itineraryProposal", "itinerary", "decision"] as const)(
-    "rejeita factory ausente: %s",
-    (name) => {
-      const executor = { scope: "transaction" } as const;
-      const { factories } = createFragments(executor);
+  it.each([
+    "proposalApplication",
+    "itineraryProposal",
+    "itinerary",
+    "decision",
+    "tripStatus",
+  ] as const)("rejeita factory ausente: %s", (name) => {
+    const executor = { scope: "transaction" } as const;
+    const { factories } = createFragments(executor);
 
-      expect(
-        () =>
-          new ItineraryProposalTransactionUnit(createRunner(executor), {
-            ...factories,
-            [name]: undefined,
-          } as never),
-      ).toThrowError(TypeError);
-    },
-  );
+    expect(
+      () =>
+        new ItineraryProposalTransactionUnit(createRunner(executor), {
+          ...factories,
+          [name]: undefined,
+        } as never),
+    ).toThrowError(TypeError);
+  });
 
   it("rejeita operação ausente antes de abrir transação", async () => {
     const executor = { scope: "transaction" } as const;

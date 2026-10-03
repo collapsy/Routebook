@@ -7,7 +7,7 @@ afterEach(cleanup);
 
 describe("TripPlanningWizard", () => {
   it("identifica Lugares como primeiro passo sem criar links falsos para etapas futuras", () => {
-    render(<TripPlanningWizard currentView="explore" tripId="trip-1" />);
+    render(<TripPlanningWizard currentView="explore" tripId="trip-1" tripStatus="draft" />);
 
     expect(
       screen.getByRole("heading", { name: "Escolha os lugares que fazem sentido para você" }),
@@ -31,7 +31,7 @@ describe("TripPlanningWizard", () => {
   });
 
   it("marca Contexto como etapa 2 e permite voltar a Lugares sem inventar Revisão ou Proposta", () => {
-    render(<TripPlanningWizard currentStep="context" tripId="trip-1" />);
+    render(<TripPlanningWizard currentStep="context" tripId="trip-1" tripStatus="draft" />);
 
     expect(
       screen.getByRole("heading", { name: "Conte o que ajuda a planejar esta viagem" }),
@@ -50,7 +50,7 @@ describe("TripPlanningWizard", () => {
   });
 
   it("marca Proposta como etapa 4 e permite voltar à revisão", () => {
-    render(<TripPlanningWizard currentStep="proposal" tripId="trip-1" />);
+    render(<TripPlanningWizard currentStep="proposal" tripId="trip-1" tripStatus="draft" />);
 
     expect(
       screen.getByRole("heading", { name: "Revise a proposta antes de decidir o que aplicar" }),
@@ -61,5 +61,13 @@ describe("TripPlanningWizard", () => {
       "href",
       "/viagens/trip-1/preparacao/revisao?preparar=1",
     );
+  });
+
+  it("não reapresenta a preparação inicial quando a Trip está planejada", () => {
+    const { container } = render(
+      <TripPlanningWizard currentStep="proposal" tripId="trip-1" tripStatus="planned" />,
+    );
+
+    expect(container).toBeEmptyDOMElement();
   });
 });

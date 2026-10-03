@@ -38,9 +38,9 @@ export default async function ItineraryProposalReviewPage({
 }) {
   const { tripId } = await params;
   const { preparar } = await searchParams;
-  const preparing = preparar === "1";
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
+  const preparing = preparar === "1" && trip.status === "draft";
 
   const [itinerary, proposals, acceptanceAccess, editAccess] = await Promise.all([
     new DrizzleItineraryRepository().findByTripId(trip.id),
@@ -56,7 +56,9 @@ export default async function ItineraryProposalReviewPage({
   if (!proposal) {
     return (
       <section className={`app-page ${styles.page}`}>
-        {preparing ? <TripPlanningWizard currentStep="proposal" tripId={trip.id} /> : null}
+        {preparing ? (
+          <TripPlanningWizard currentStep="proposal" tripId={trip.id} tripStatus={trip.status} />
+        ) : null}
         <Link className="back-link" href={`/viagens/${trip.id}/roteiro`}>
           ← Voltar para o Roteiro
         </Link>
@@ -93,7 +95,9 @@ export default async function ItineraryProposalReviewPage({
 
   return (
     <section className={`app-page ${styles.page}`}>
-      {preparing ? <TripPlanningWizard currentStep="proposal" tripId={trip.id} /> : null}
+      {preparing ? (
+        <TripPlanningWizard currentStep="proposal" tripId={trip.id} tripStatus={trip.status} />
+      ) : null}
       <Link className="back-link" href={itineraryHref}>
         ← Voltar para o Roteiro
       </Link>

@@ -266,3 +266,13 @@ export function updateTripAccommodation(
   delete updatedTrip.accommodation;
   return updatedTrip;
 }
+
+export function markTripAsPlanned(trip: Trip, now = new Date()): Trip {
+  if (trip.status !== "draft") return trip;
+
+  return {
+    ...trip,
+    status: "planned",
+    updatedAt: new Date(now.getTime()),
+  };
+}

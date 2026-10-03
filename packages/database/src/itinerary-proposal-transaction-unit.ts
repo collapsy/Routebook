@@ -5,11 +5,13 @@ export type ItineraryProposalTransactionFragments<
   TItineraryProposal,
   TItinerary,
   TDecision,
+  TTripStatus,
 > = Readonly<{
   proposalApplication: TProposalApplication;
   itineraryProposal: TItineraryProposal;
   itinerary: TItinerary;
   decision: TDecision;
+  tripStatus: TTripStatus;
 }>;
 
 export type ItineraryProposalTransactionFragmentFactories<
@@ -18,11 +20,13 @@ export type ItineraryProposalTransactionFragmentFactories<
   TItineraryProposal,
   TItinerary,
   TDecision,
+  TTripStatus,
 > = Readonly<{
   proposalApplication(executor: TExecutor): TProposalApplication;
   itineraryProposal(executor: TExecutor): TItineraryProposal;
   itinerary(executor: TExecutor): TItinerary;
   decision(executor: TExecutor): TDecision;
+  tripStatus(executor: TExecutor): TTripStatus;
 }>;
 
 export type ItineraryProposalTransactionOperation<
@@ -30,13 +34,15 @@ export type ItineraryProposalTransactionOperation<
   TItineraryProposal,
   TItinerary,
   TDecision,
+  TTripStatus,
   TResult,
 > = (
   fragments: ItineraryProposalTransactionFragments<
     TProposalApplication,
     TItineraryProposal,
     TItinerary,
-    TDecision
+    TDecision,
+    TTripStatus
   >,
 ) => Promise<TResult>;
 
@@ -46,6 +52,7 @@ export class ItineraryProposalTransactionUnit<
   TItineraryProposal,
   TItinerary,
   TDecision,
+  TTripStatus,
 > {
   constructor(
     private readonly runner: Pick<PostgresTransactionRunner<TExecutor>, "execute">,
@@ -54,7 +61,8 @@ export class ItineraryProposalTransactionUnit<
       TProposalApplication,
       TItineraryProposal,
       TItinerary,
-      TDecision
+      TDecision,
+      TTripStatus
     >,
   ) {
     if (!runner || typeof runner.execute !== "function") {
@@ -69,6 +77,7 @@ export class ItineraryProposalTransactionUnit<
       "itineraryProposal",
       "itinerary",
       "decision",
+      "tripStatus",
     ] as const) {
       if (typeof factories[name] !== "function") {
         throw new TypeError(`Informe a factory transacional ${name}.`);
@@ -82,6 +91,7 @@ export class ItineraryProposalTransactionUnit<
       TItineraryProposal,
       TItinerary,
       TDecision,
+      TTripStatus,
       TResult
     >,
   ): Promise<TResult> {
@@ -95,6 +105,7 @@ export class ItineraryProposalTransactionUnit<
         itineraryProposal: this.factories.itineraryProposal(executor),
         itinerary: this.factories.itinerary(executor),
         decision: this.factories.decision(executor),
+        tripStatus: this.factories.tripStatus(executor),
       });
 
       return operation(fragments);

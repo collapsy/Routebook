@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { createTrip, TripValidationError, updateTripAccommodation } from "./trip";
+import {
+  createTrip,
+  markTripAsPlanned,
+  TripValidationError,
+  updateTripAccommodation,
+} from "./trip";
 
 const validInput = {
   name: "Pipa em agosto",
@@ -181,4 +186,26 @@ describe("updateTripAccommodation", () => {
       }),
     ).toThrow(TripValidationError);
   });
+});
+
+describe("markTripAsPlanned", () => {
+  it("transiciona uma Trip draft para planned e registra a atualização", () => {
+    const trip = createTrip(validInput, new Date("2026-07-28T12:00:00Z"));
+    const now = new Date("2026-10-03T12:00:00Z");
+
+    expect(markTripAsPlanned(trip, now)).toMatchObject({
+      status: "planned",
+      updatedAt: now,
+    });
+    expect(trip.status).toBe("draft");
+  });
+
+  it.each(["planned", "in-progress", "completed", "cancelled", "archived"] as const)(
+    "preserva status %s sem regressão",
+    (status) => {
+      const trip = { ...createTrip(validInput), status };
+
+      expect(markTripAsPlanned(trip)).toBe(trip);
+    },
+  );
 });

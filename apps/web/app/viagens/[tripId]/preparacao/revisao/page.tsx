@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import {
   DrizzlePlaceRepository,
@@ -48,6 +48,7 @@ export default async function TripPreparationReviewPage({
 
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
+  if (trip.status !== "draft") redirect(`/viagens/${tripId}/roteiro`);
 
   const [profile, preferences] = await Promise.all([
     findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
@@ -73,7 +74,7 @@ export default async function TripPreparationReviewPage({
         ← Voltar para Contexto
       </Link>
 
-      <TripPlanningWizard currentStep="review" tripId={tripId} />
+      <TripPlanningWizard currentStep="review" tripId={tripId} tripStatus={trip.status} />
 
       <header className="app-page-heading">
         <p className="product-eyebrow">Revisão da preparação</p>

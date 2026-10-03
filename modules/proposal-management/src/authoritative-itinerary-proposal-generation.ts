@@ -99,6 +99,9 @@ function generationContextFrom(
         Object.freeze({
           preferenceId: preference.preferenceId,
           placeId: preference.placeId,
+          ...(context.places.find((place) => place.placeId === preference.placeId)?.title
+            ? { title: context.places.find((place) => place.placeId === preference.placeId)!.title }
+            : {}),
           intent: preference.intent,
           priority: preference.priority,
         }),
@@ -116,6 +119,7 @@ function generationContextFrom(
         return Object.freeze({
           candidateId: candidate.candidateId,
           placeId,
+          title: candidate.title,
           origin: candidate.origin,
           provenance: candidate.provenance,
         });

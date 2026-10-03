@@ -154,8 +154,23 @@ describe("generateAuthoritativeItineraryProposal", () => {
       {
         candidateId: "preference-want",
         placeId: "place-want",
+        title: "Praia escolhida",
         origin: "USER_SELECTED",
         provenance: { sourceId: "preference-want" },
+      },
+    ]);
+    expect(proposal.generationContext?.outcomes).toEqual([
+      {
+        candidateId: "preference-want",
+        placeId: "place-want",
+        status: "EXCLUDED",
+        reasonCode: "NO_CAPACITY",
+      },
+      {
+        candidateId: "preference-maybe",
+        placeId: "place-maybe",
+        status: "EXCLUDED",
+        reasonCode: "MAYBE_NOT_REQUESTED",
       },
     ]);
   });

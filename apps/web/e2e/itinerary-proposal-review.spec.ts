@@ -89,6 +89,20 @@ async function createProposalFixture(
     baseTripContextVersion: 1,
     baseItineraryVersion: itinerary.version,
     contextSnapshotId: `e2e-${trip.id}`,
+    generationContext: {
+      schemaVersion: 1,
+      includeMaybe: false,
+      selection: [],
+      candidates: [
+        {
+          candidateId: "e2e-excluded-candidate",
+          placeId: crypto.randomUUID(),
+          title: "Jardim fora da capacidade",
+          origin: "ROUTEBOOK_RECOMMENDED",
+          provenance: { reasonCode: "e2e-fixture" },
+        },
+      ],
+    },
     requestedAt,
   });
   const generationStartedAt = new Date(requestedAt.getTime() + 1_000);
@@ -130,6 +144,14 @@ async function createProposalFixture(
             },
           ]
         : []),
+    ],
+    candidateOutcomes: [
+      {
+        candidateId: "e2e-excluded-candidate",
+        placeId: requested.generationContext!.candidates![0]!.placeId,
+        status: "EXCLUDED",
+        reasonCode: "NO_CAPACITY",
+      },
     ],
     criteria: ["Ritmo leve", "Proximidade entre lugares"],
     justifications: ["A organização reduz deslocamentos no fim da tarde."],
@@ -572,6 +594,8 @@ test("revisa uma Proposal ready sem aplicá-la ao Roteiro", async ({ page }, tes
   );
 
   await expect(page.getByRole("heading", { level: 1, name: "Proposta de Roteiro" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Não incluídos na proposta" })).toBeVisible();
+  await expect(page.getByText("Jardim fora da capacidade")).toBeVisible();
   await expect(page.getByText("Proposta aguardando sua decisão")).toBeVisible();
   await expect(page.getByRole("heading", { name: proposedActivity })).toBeVisible();
   await expect(page.getByText("Proximidade entre lugares")).toBeVisible();
@@ -761,7 +785,6 @@ test("não oferece nova geração a participante sem permissão de edição", as
   await database.update(trips).set({ accountId }).where(eq(trips.id, fixture.tripId));
 
   await page.goto(`/viagens/${fixture.tripId}/roteiro/proposta`);
-
   await expect(page.getByText("Proposta expirada", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: proposedActivity })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Continue com uma nova proposta" })).toHaveCount(

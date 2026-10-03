@@ -33,6 +33,7 @@ export type ItineraryProposalReviewActivity = Readonly<{
   estimatedCostLabel?: string;
   flexibility?: string;
   reason?: string;
+  originLabel?: "Escolhido por você" | "Recomendação do RouteBook";
   sourceActivityTitle?: string;
 }>;
 
@@ -54,6 +55,7 @@ type ItineraryProposalReviewBase = Readonly<{
   criteria: readonly string[];
   justifications: readonly string[];
   limitations: readonly string[];
+  exclusions?: readonly Readonly<{ placeId: string; title: string; reason: string }>[];
   dayOptions: readonly ItineraryProposalReviewDayOption[];
   days: readonly ItineraryProposalReviewDay[];
 }>;
@@ -84,6 +86,19 @@ const operationLabels: Readonly<
   update: "Atualizar",
   remove: "Remover",
 };
+
+const outcomeReasonLabels = {
+  NO_CAPACITY: "Os Dias disponíveis atingiram a capacidade considerada pela proposta.",
+  OUTSIDE_REPLANNING_WINDOW: "O Lugar está fora da janela de replanejamento.",
+  FIXED_ACTIVITY_CONFLICT: "Há conflito com uma atividade fixa.",
+  TEMPORAL_CONFLICT: "Foi identificado um conflito de horário.",
+  KNOWN_CLOSED: "O local está marcado como fechado no período.",
+  MISSING_REQUIRED_DATA: "Faltam dados necessários para avaliar este Lugar.",
+  DUPLICATE_PLACE: "Este Lugar já aparece na proposta.",
+  UNSUPPORTED_PLANNING_ROLE: "O papel de planejamento deste Lugar não é compatível.",
+  MAYBE_NOT_REQUESTED:
+    "Você marcou este Lugar como Talvez, mas não autorizou sua inclusão nesta geração.",
+} as const;
 
 function isValidDate(value: Date | undefined): value is Date {
   return value instanceof Date && !Number.isNaN(value.getTime());
@@ -293,6 +308,12 @@ export function buildItineraryProposalReview({
       day.activities.map((activity) => [activity.id, { activity, day }] as const),
     ),
   );
+  const candidateByPlaceId = new Map(
+    (proposal.generationContext?.candidates ?? []).map((candidate) => [
+      candidate.placeId,
+      candidate,
+    ]),
+  );
   const unknownGroupId = "unavailable-day-reference";
   const groups = new Map<string, { day?: ItineraryDay; activities: ProposedActivity[] }>();
 
@@ -350,6 +371,14 @@ export function buildItineraryProposalReview({
           ...(estimatedCostLabel ? { estimatedCostLabel } : {}),
           ...(activity.flexibility ? { flexibility: activity.flexibility } : {}),
           ...(activity.reason ? { reason: activity.reason } : {}),
+          ...(activity.placeId && candidateByPlaceId.has(activity.placeId)
+            ? {
+                originLabel:
+                  candidateByPlaceId.get(activity.placeId)!.origin === "USER_SELECTED"
+                    ? ("Escolhido por você" as const)
+                    : ("Recomendação do RouteBook" as const),
+              }
+            : {}),
           ...(sourceActivity ? { sourceActivityTitle: sourceActivity.title } : {}),
         };
       }),
@@ -365,6 +394,21 @@ export function buildItineraryProposalReview({
     criteria: content.criteria,
     justifications: content.justifications,
     limitations: content.limitations,
+    exclusions: Object.freeze(
+      (proposal.generationContext?.outcomes ?? [])
+        .filter((outcome) => outcome.status === "EXCLUDED")
+        .map((outcome) => ({
+          placeId: outcome.placeId,
+          title:
+            candidateByPlaceId.get(outcome.placeId)?.title ??
+            proposal.generationContext?.selection.find((item) => item.placeId === outcome.placeId)
+              ?.title ??
+            "Lugar indisponível",
+          reason: outcome.reasonCode
+            ? outcomeReasonLabels[outcome.reasonCode]
+            : "Motivo não informado.",
+        })),
+    ),
     dayOptions,
     days,
   };

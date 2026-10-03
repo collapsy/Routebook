@@ -496,6 +496,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-212 | Context Pack do RB-INC-212 — Onboarding da preparação | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-212-preparation-onboarding.md](./implementation/context-packs/rb-inc-212-preparation-onboarding.md) |
 | RB-INC-213 | Wizard de preparação — proposta de roteiro | Implementation | Draft | 0.1.0 | [rb-inc-213-preparation-proposal.md](./implementation/increments/rb-inc-213-preparation-proposal.md) |
 | RB-CTX-213 | Context Pack do RB-INC-213 — Proposta da preparação | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-213-preparation-proposal.md](./implementation/context-packs/rb-inc-213-preparation-proposal.md) |
+| RB-INC-214 | Explicabilidade dos resultados da Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-214-proposal-explainability.md](./implementation/increments/rb-inc-214-proposal-explainability.md) |
+| RB-CTX-214 | Context Pack do RB-INC-214 — Explicabilidade da Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-214-proposal-explainability.md](./implementation/context-packs/rb-inc-214-proposal-explainability.md) |
 
 ## Status possíveis
 

@@ -1,9 +1,11 @@
 import Link from "next/link";
+import type { TripStatus } from "@routebook/trip-management";
 
 import styles from "./trip-planning-wizard.module.css";
 
 type TripPlanningWizardProps = Readonly<{
   tripId: string;
+  tripStatus: TripStatus;
   currentStep?: "places" | "context" | "review" | "proposal";
   currentView?: "explore" | "selection";
   onboarding?: boolean;
@@ -11,10 +13,13 @@ type TripPlanningWizardProps = Readonly<{
 
 export function TripPlanningWizard({
   tripId,
+  tripStatus,
   currentStep = "places",
   currentView = "explore",
   onboarding = false,
 }: TripPlanningWizardProps) {
+  if (tripStatus !== "draft") return null;
+
   const contextStep = currentStep === "context";
   const reviewStep = currentStep === "review";
   const proposalStep = currentStep === "proposal";

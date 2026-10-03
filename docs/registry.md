@@ -498,6 +498,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-213 | Context Pack do RB-INC-213 — Proposta da preparação | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-213-preparation-proposal.md](./implementation/context-packs/rb-inc-213-preparation-proposal.md) |
 | RB-INC-214 | Explicabilidade dos resultados da Itinerary Proposal | Implementation | Draft | 0.1.0 | [rb-inc-214-proposal-explainability.md](./implementation/increments/rb-inc-214-proposal-explainability.md) |
 | RB-CTX-214 | Context Pack do RB-INC-214 — Explicabilidade da Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-214-proposal-explainability.md](./implementation/context-packs/rb-inc-214-proposal-explainability.md) |
+| RB-INC-215 | Etapa 7 — transição da preparação para operação | Implementation | Draft | 0.1.0 | [rb-inc-215-post-generation-experience.md](./implementation/increments/rb-inc-215-post-generation-experience.md) |
+| RB-CTX-215 | Context Pack do RB-INC-215 — Experiência pós-geração | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-215-post-generation-experience.md](./implementation/context-packs/rb-inc-215-post-generation-experience.md) |
 
 ## Status possíveis
 

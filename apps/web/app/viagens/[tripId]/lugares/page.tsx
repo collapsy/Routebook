@@ -530,8 +530,8 @@ export default async function PlacesPage({
   if (!trip) notFound();
 
   const rawFilters = await searchParams;
-  const wizardMode = rawFilters.preparar === "1";
-  const onboarding = wizardMode && trip.status === "draft";
+  const wizardMode = rawFilters.preparar === "1" && trip.status === "draft";
+  const onboarding = wizardMode;
   const search = rawFilters.busca?.trim().slice(0, 120) || undefined;
   const category = parsePlaceCategory(rawFilters.categoria);
   const priceRange = parsePlacePriceRange(rawFilters.preco);
@@ -881,7 +881,12 @@ export default async function PlacesPage({
       ) : null}
 
       {wizardMode ? (
-        <TripPlanningWizard currentView="explore" onboarding={onboarding} tripId={tripId} />
+        <TripPlanningWizard
+          currentView="explore"
+          onboarding={onboarding}
+          tripId={tripId}
+          tripStatus={trip.status}
+        />
       ) : null}
 
       <header className="trip-overview-hero">

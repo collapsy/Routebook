@@ -28,6 +28,7 @@ import { createPostgresProposalApplicationRepository } from "./proposal-applicat
 import { DrizzleItineraryProposalRepository } from "./proposal-repository";
 import { trips } from "./schema";
 import { DrizzleTripRepository } from "./trip-repository";
+import { createTripStatusTransactionFragment } from "./trip-status-transaction-fragment";
 
 const requestedAt = new Date("2026-08-09T18:00:00.000Z");
 const generationStartedAt = new Date("2026-08-09T18:01:00.000Z");
@@ -187,6 +188,10 @@ describe("ApplyPartialItineraryProposalTransaction with PostgreSQL", () => {
         status: "partially-accepted",
         acceptedAt: decidedAt,
       });
+      expect(await new DrizzleTripRepository().findById(fixture.trip.id)).toMatchObject({
+        status: "planned",
+        updatedAt: decidedAt,
+      });
       expect(
         persistedProposal?.proposedActivities?.map(({ proposedActivityId }) => proposedActivityId),
       ).toEqual([fixture.remainingProposedActivityId]);
@@ -226,24 +231,25 @@ describe("ApplyPartialItineraryProposalTransaction with PostgreSQL", () => {
     }
   });
 
-  it("reverte Application, Itinerary e Decision quando a finalização parcial falha", async () => {
+  it("reverte Trip, Application, Itinerary, Proposal e Decision se o aceite parcial falhar", async () => {
     const fixture = await createFixture("Rollback integral do aceite parcial");
     const database = getDatabase();
     const rollback = new Error("falha intencional ao finalizar parcialmente a Proposal");
     const runner = new PostgresTransactionRunner(database);
     const unit = new ItineraryProposalTransactionUnit(runner, {
-      proposalApplication: createProposalApplicationTransactionFragment,
-      itineraryProposal: (executor) => {
-        const fragment = createItineraryProposalTransactionFragment(executor);
+      proposalApplication: (executor) => {
+        const fragment = createProposalApplicationTransactionFragment(executor);
         return Object.freeze({
           ...fragment,
-          async acceptPartially() {
+          async succeed() {
             throw rollback;
           },
         });
       },
+      itineraryProposal: createItineraryProposalTransactionFragment,
       itinerary: createItineraryTransactionFragment,
       decision: createDecisionTransactionFragment,
+      tripStatus: createTripStatusTransactionFragment,
     });
     const transaction = createApplyPartialItineraryProposalTransaction(unit);
 
@@ -253,6 +259,9 @@ describe("ApplyPartialItineraryProposalTransaction with PostgreSQL", () => {
       expect(await new DrizzleItineraryRepository().findByTripId(fixture.trip.id)).toEqual(
         fixture.itinerary,
       );
+      expect(await new DrizzleTripRepository().findById(fixture.trip.id)).toMatchObject({
+        status: "draft",
+      });
       expect(
         await new DrizzleItineraryProposalRepository().findById(fixture.trip.id, fixture.ready.id),
       ).toEqual(fixture.ready);

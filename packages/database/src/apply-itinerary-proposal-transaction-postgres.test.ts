@@ -28,6 +28,7 @@ import { createPostgresProposalApplicationRepository } from "./proposal-applicat
 import { DrizzleItineraryProposalRepository } from "./proposal-repository";
 import { trips } from "./schema";
 import { DrizzleTripRepository } from "./trip-repository";
+import { createTripStatusTransactionFragment } from "./trip-status-transaction-fragment";
 
 const requestedAt = new Date("2026-08-02T18:00:00.000Z");
 const generationStartedAt = new Date("2026-08-02T18:01:00.000Z");
@@ -167,6 +168,10 @@ describe("ApplyItineraryProposalTransaction with PostgreSQL", () => {
         fixture.ready.id,
       );
       expect(persistedProposal).toMatchObject({ status: "accepted", acceptedAt: decidedAt });
+      expect(await new DrizzleTripRepository().findById(fixture.trip.id)).toMatchObject({
+        status: "planned",
+        updatedAt: decidedAt,
+      });
 
       const application = await createPostgresProposalApplicationRepository(
         database,
@@ -196,24 +201,44 @@ describe("ApplyItineraryProposalTransaction with PostgreSQL", () => {
     }
   });
 
-  it("reverte Application, Itinerary e Decision quando a finalização da Proposal falha", async () => {
+  it("não regride uma Trip in-progress ao aplicar uma Proposal", async () => {
+    const fixture = await createFixture("Trip em andamento preservada");
+    const database = getDatabase();
+    await database
+      .update(trips)
+      .set({ status: "in-progress" })
+      .where(eq(trips.id, fixture.trip.id));
+
+    try {
+      await createPostgresApplyItineraryProposalTransaction().execute(fixture.command);
+
+      expect(await new DrizzleTripRepository().findById(fixture.trip.id)).toMatchObject({
+        status: "in-progress",
+      });
+    } finally {
+      await cleanup(fixture.trip.id);
+    }
+  });
+
+  it("reverte Trip, Application, Itinerary, Proposal e Decision se a aplicação falhar", async () => {
     const fixture = await createFixture("Rollback integral do aceite");
     const database = getDatabase();
     const rollback = new Error("falha intencional ao finalizar a Proposal");
     const runner = new PostgresTransactionRunner(database);
     const unit = new ItineraryProposalTransactionUnit(runner, {
-      proposalApplication: createProposalApplicationTransactionFragment,
-      itineraryProposal: (executor) => {
-        const fragment = createItineraryProposalTransactionFragment(executor);
+      proposalApplication: (executor) => {
+        const fragment = createProposalApplicationTransactionFragment(executor);
         return Object.freeze({
           ...fragment,
-          async accept() {
+          async succeed() {
             throw rollback;
           },
         });
       },
+      itineraryProposal: createItineraryProposalTransactionFragment,
       itinerary: createItineraryTransactionFragment,
       decision: createDecisionTransactionFragment,
+      tripStatus: createTripStatusTransactionFragment,
     });
     const transaction = createApplyItineraryProposalTransaction(unit);
 
@@ -223,6 +248,9 @@ describe("ApplyItineraryProposalTransaction with PostgreSQL", () => {
       expect(await new DrizzleItineraryRepository().findByTripId(fixture.trip.id)).toEqual(
         fixture.itinerary,
       );
+      expect(await new DrizzleTripRepository().findById(fixture.trip.id)).toMatchObject({
+        status: "draft",
+      });
       expect(
         await new DrizzleItineraryProposalRepository().findById(fixture.trip.id, fixture.ready.id),
       ).toEqual(fixture.ready);

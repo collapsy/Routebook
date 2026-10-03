@@ -1326,3 +1326,19 @@ Ao concluir um incremento:
 | contrato | `ProposalCandidateOutcome` existente; reason codes canônicos; JSONB `generation_context` sem migration |
 | invariantes | Proposal ≠ Itinerary aplicado; recomendações complementares não são criadas; outcomes representam somente fatos da geração |
 | validação | `pnpm --filter @routebook/proposal-management exec vitest run --pool=threads --maxWorkers=1`: 218 testes passaram; testes web direcionados: 17 passaram; `pnpm typecheck`, `pnpm lint`, Prettier check e `git diff --check` passaram; `node scripts/validate-docs.mjs` passou com 10 avisos preexistentes; Engineering Validation [run #37082546367](https://github.com/collapsy/Routebook/actions/runs/37082546367) passou com 169 E2Es; Documentation Validation e Vercel Preview passaram; PR #522 pronta para revisão, merge ainda depende de autorização humana |
+
+## Evidências previstas do RB-INC-215
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-215-post-generation-experience.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-215-post-generation-experience.md` |
+| issue | [#523](https://github.com/collapsy/Routebook/issues/523) |
+| branch | `codex/rb-inc-215-post-generation` |
+| base | `main@18f8d9a390371695231416a8fa9891c848c3bbca` |
+| gap auditado | RB-INC-212 requer encerrar onboarding após aplicação; os atuais fluxos de aceite integral/parcial não atualizam Trip status, que permanece `draft` |
+| contrato | somente `draft → planned`, dentro da transação de aplicação de Proposal existente; status posterior/terminal não regride |
+| experiência | após aplicação, a visão da Trip prioriza Roteiro; preparação inicial não reaparece; fluxos normais continuam disponíveis |
+| validação local | `node scripts/validate-docs.mjs` passou (462 documentos; 10 avisos legados); typecheck e lint do monorepo passaram (12/12); `@routebook/trip-management` passou (104 testes); testes transacionais Database passaram (31); teste do wizard Web passou (4); Prettier nos arquivos desta etapa passou; `git diff --check` passou |
+| limitações locais | suíte Web completa: 488 testes passaram, mas 5 suítes falharam na inicialização por `DATABASE_URL` ausente; build compilou e passou TypeScript, mas falhou na coleta de dados de `/api/auth/[...all]` pela mesma ausência; integração PostgreSQL e E2E dependem de banco e serão validados na CI/Preview; `pnpm format:check` global sinalizou 515 arquivos e um arquivo-base não alterado (`modules/trip-management/src/trip-days.ts`) também falha isoladamente, enquanto todos os arquivos desta etapa passam na checagem focada |
+| CI/Preview | pendentes da PR; preencher com resultados reais |

@@ -21,6 +21,10 @@ import {
 import { ItineraryProposalTransactionUnit } from "./itinerary-proposal-transaction-unit";
 import { PostgresTransactionRunner } from "./postgres-transaction-runner";
 import {
+  createTripStatusTransactionFragment,
+  type TripStatusTransactionFragment,
+} from "./trip-status-transaction-fragment";
+import {
   createProposalApplicationTransactionFragment,
   type ProposalApplicationTransactionFragment,
   type ReplayedProposalApplication,
@@ -32,6 +36,7 @@ export type ApplyItineraryProposalTransactionFragments = Readonly<{
   itineraryProposal: ItineraryProposalTransactionFragment;
   itinerary: ItineraryTransactionFragment;
   decision: DecisionTransactionFragment;
+  tripStatus: TripStatusTransactionFragment;
 }>;
 
 export type ApplyItineraryProposalTransactionUnit = Readonly<{
@@ -86,6 +91,9 @@ async function replayAcceptance(
     resultingItineraryVersion: application.resultingItineraryVersion,
     appliedProposedActivityIds: replay.record.request.proposedActivityIds,
   });
+  if (replay.record.request.proposedActivityIds.length > 0) {
+    await fragments.tripStatus.markPlannedIfDraft(command.tripId, command.decidedAt);
+  }
 
   return Object.freeze({
     kind: "replay",
@@ -117,6 +125,9 @@ async function applyReservedAcceptance(
   });
 
   await fragments.itineraryProposal.accept(proposal, command.decidedAt);
+  if (applied.result.appliedProposedActivityIds.length > 0) {
+    await fragments.tripStatus.markPlannedIfDraft(command.tripId, command.decidedAt);
+  }
   const succeeded = await fragments.proposalApplication.succeed(reservation.record, {
     resultingItineraryVersion: applied.result.resultingItineraryVersion,
     completedAt: command.decidedAt,
@@ -186,6 +197,7 @@ export function createPostgresApplyItineraryProposalTransaction(): ApplyItinerar
     itineraryProposal: createItineraryProposalTransactionFragment,
     itinerary: createItineraryTransactionFragment,
     decision: createDecisionTransactionFragment,
+    tripStatus: createTripStatusTransactionFragment,
   });
 
   return createApplyItineraryProposalTransaction(unit);

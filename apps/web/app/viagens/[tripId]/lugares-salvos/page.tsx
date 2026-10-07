@@ -79,9 +79,9 @@ export default async function TripSelectionPage({
 }) {
   const { tripId } = await params;
   const { categoria, preferencia, adicionadoAoRoteiro, erro, preparar } = await searchParams;
-  const wizardMode = preparar === "1";
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
+  const wizardMode = preparar === "1" && trip.status === "draft";
 
   const preferenceRepository = new DrizzleTripPlacePreferenceRepository();
   const [preferences, itinerary] = await Promise.all([
@@ -168,6 +168,7 @@ export default async function TripSelectionPage({
           currentView="selection"
           onboarding={trip.status === "draft"}
           tripId={tripId}
+          tripStatus={trip.status}
         />
       ) : null}
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { DrizzleTravelerProfileRepository, DrizzleTripRepository } from "@routebook/database";
 import { findTravelerProfile } from "@routebook/traveler-profile";
@@ -30,6 +30,7 @@ export default async function TripPreparationProposalPage({
 
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
+  if (trip.status !== "draft") redirect(`/viagens/${tripId}/roteiro/proposta`);
 
   const profile = await findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId);
   const canGenerate = profile?.travelerCount !== undefined;
@@ -40,7 +41,7 @@ export default async function TripPreparationProposalPage({
       <Link className="back-link" href={`/viagens/${tripId}/preparacao/revisao?preparar=1`}>
         ← Voltar para Revisão
       </Link>
-      <TripPlanningWizard currentStep="proposal" tripId={tripId} />
+      <TripPlanningWizard currentStep="proposal" tripId={tripId} tripStatus={trip.status} />
       <header className="app-page-heading">
         <p className="product-eyebrow">Proposta de roteiro</p>
         <h1>Monte uma proposta para {trip.name}</h1>

@@ -72,10 +72,11 @@ export default async function PlaceDetailsPage({
   const { tripId, placeSlug } = await params;
   const { preferencia, erroPreferencia, adicionadoAoRoteiro, dia, erroRoteiro, preparar } =
     await searchParams;
-  const wizardMode = preparar === "1";
+  const requestedWizardMode = preparar === "1";
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
 
   if (!trip) notFound();
+  const wizardMode = requestedWizardMode && trip.status === "draft";
 
   const regionResolution = resolvePlaceDiscoveryRegion({
     destination: trip.destination,
@@ -129,6 +130,7 @@ export default async function PlaceDetailsPage({
           currentView="explore"
           onboarding={trip.status === "draft"}
           tripId={tripId}
+          tripStatus={trip.status}
         />
       ) : null}
 

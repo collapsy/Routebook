@@ -205,11 +205,17 @@ function harness(
       return decision;
     }),
   };
+  const tripStatus: ApplyPartialItineraryProposalTransactionFragments["tripStatus"] = {
+    markPlannedIfDraft: vi.fn(async () => {
+      events.push("mark-trip-planned");
+    }),
+  };
   const fragments = Object.freeze({
     proposalApplication,
     itineraryProposal,
     itinerary,
     decision: decisionFragment,
+    tripStatus,
   });
   let transactions = 0;
   const unit: ApplyPartialItineraryProposalTransactionUnit = {
@@ -253,6 +259,7 @@ describe("ApplyPartialItineraryProposalTransaction", () => {
       "apply-itinerary",
       "persist-decision",
       "accept-partially",
+      "mark-trip-planned",
       "succeed-application",
     ]);
   });
@@ -268,11 +275,32 @@ describe("ApplyPartialItineraryProposalTransaction", () => {
       appliedProposedActivityIds: ["proposed-1"],
       remainingProposedActivityIds: ["proposed-2"],
     });
-    expect(context.events).toEqual(["reserve", "persist-decision"]);
+    expect(context.events).toEqual(["reserve", "persist-decision", "mark-trip-planned"]);
     expect(context.fragments.itinerary.apply).not.toHaveBeenCalled();
     expect(context.fragments.itineraryProposal.loadForPartialAcceptance).not.toHaveBeenCalled();
     expect(context.fragments.itineraryProposal.acceptPartially).not.toHaveBeenCalled();
     expect(context.fragments.proposalApplication.succeed).not.toHaveBeenCalled();
+    expect(context.fragments.tripStatus.markPlannedIfDraft).toHaveBeenCalledWith(
+      context.currentCommand.tripId,
+      context.currentCommand.decidedAt,
+    );
+  });
+
+  it("não encerra a preparação quando nenhum item foi aplicado", async () => {
+    const context = harness();
+    const noAppliedItems: AppliedProposalItemsToItinerary = {
+      itinerary: {} as AppliedProposalItemsToItinerary["itinerary"],
+      result: {
+        itineraryId: context.currentCommand.itineraryId,
+        resultingItineraryVersion: 8,
+        appliedProposedActivityIds: [],
+      },
+    };
+    vi.mocked(context.fragments.itinerary.apply).mockResolvedValueOnce(noAppliedItems);
+
+    await context.transaction.execute(context.currentCommand);
+
+    expect(context.fragments.tripStatus.markPlannedIfDraft).not.toHaveBeenCalled();
   });
 
   it.each([

@@ -46,9 +46,9 @@ export default async function TravelerContextPage({
 }) {
   const { tripId } = await params;
   const { preparar, grupo, salvo } = await searchParams;
-  const preparing = preparar === "1";
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
+  const preparing = preparar === "1" && trip.status === "draft";
 
   const [profile, preferences] = await Promise.all([
     findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
@@ -68,7 +68,9 @@ export default async function TravelerContextPage({
         {preparing ? "← Voltar para Lugares" : "← Voltar para a visão da viagem"}
       </Link>
 
-      {preparing ? <TripPlanningWizard currentStep="context" tripId={tripId} /> : null}
+      {preparing ? (
+        <TripPlanningWizard currentStep="context" tripId={tripId} tripStatus={trip.status} />
+      ) : null}
 
       {salvo === "1" ? (
         <p className="success-banner" role="status">

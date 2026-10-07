@@ -381,6 +381,18 @@ test("aceita uma Proposal ready da UI ao PostgreSQL e preserva o resultado após
     "href",
     `/viagens/${fixture.tripId}/roteiro/proposta`,
   );
+  const [plannedTrip] = await getDatabase()
+    .select({ status: trips.status })
+    .from(trips)
+    .where(eq(trips.id, fixture.tripId))
+    .limit(1);
+  expect(plannedTrip?.status).toBe("planned");
+
+  await page.goto(`/viagens/${fixture.tripId}`);
+  await expect(page.getByRole("link", { name: "Abrir roteiro" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Preparar viagem" })).toHaveCount(0);
+  await page.goto(`/viagens/${fixture.tripId}/lugares?preparar=1`);
+  await expect(page.getByText("Preparar viagem · Etapa 1 de 4")).toHaveCount(0);
 });
 
 test("aceita parcialmente da UI ao PostgreSQL e reproduz sem reaplicar efeitos", async ({
@@ -408,6 +420,12 @@ test("aceita parcialmente da UI ao PostgreSQL e reproduz sem reaplicar efeitos",
     );
     await expect(page.getByText(proposedActivity, { exact: true })).toBeVisible();
     await expect(page.getByText(remainingProposedActivity, { exact: true })).toHaveCount(0);
+    const [plannedTrip] = await getDatabase()
+      .select({ status: trips.status })
+      .from(trips)
+      .where(eq(trips.id, fixture.tripId))
+      .limit(1);
+    expect(plannedTrip?.status).toBe("planned");
 
     await submitPartialAcceptance(
       replayPage,

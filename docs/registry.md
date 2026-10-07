@@ -500,6 +500,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-214 | Context Pack do RB-INC-214 — Explicabilidade da Proposal | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-214-proposal-explainability.md](./implementation/context-packs/rb-inc-214-proposal-explainability.md) |
 | RB-INC-215 | Etapa 7 — transição da preparação para operação | Implementation | Draft | 0.1.0 | [rb-inc-215-post-generation-experience.md](./implementation/increments/rb-inc-215-post-generation-experience.md) |
 | RB-CTX-215 | Context Pack do RB-INC-215 — Experiência pós-geração | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-215-post-generation-experience.md](./implementation/context-packs/rb-inc-215-post-generation-experience.md) |
+| RB-INC-216 | Etapa 8 — replanejamento explícito durante a viagem | Implementation | Draft | 0.1.0 | [rb-inc-216-replanning-experience.md](./implementation/increments/rb-inc-216-replanning-experience.md) |
+| RB-CTX-216 | Context Pack do RB-INC-216 — Replanejamento durante a viagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-216-replanning-experience.md](./implementation/context-packs/rb-inc-216-replanning-experience.md) |
 
 ## Status possíveis
 

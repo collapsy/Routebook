@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import type {
   GenerateAuthoritativeItineraryProposalCommand,
   ItineraryProposal,
+  ItineraryProposalGenerationScope,
 } from "@routebook/proposal-management";
 import type { ItineraryRepository, TripRepository } from "@routebook/trip-management";
 
@@ -13,6 +14,7 @@ export const generateItineraryProposalActionErrorCodes = [
   "not-found",
   "invalid-request",
   "itinerary-not-found",
+  "replanning-unavailable",
   "generation-failed",
   "technical-error",
 ] as const;
@@ -43,6 +45,7 @@ export const initialGenerateItineraryProposalActionState: GenerateItineraryPropo
 export type GenerateItineraryProposalActionInput = Readonly<{
   tripId: string;
   includeMaybe?: boolean;
+  generationScope?: ItineraryProposalGenerationScope;
 }>;
 
 type TripAccessResolver = (input: {
@@ -71,6 +74,8 @@ const messages: Readonly<Record<GenerateItineraryProposalActionErrorCode, string
   "not-found": "A viagem não está disponível para este usuário.",
   "invalid-request": "Os dados enviados para gerar a proposta são inválidos.",
   "itinerary-not-found": "O roteiro da viagem ainda não está disponível para gerar uma proposta.",
+  "replanning-unavailable":
+    "O replanejamento está disponível somente para viagens planejadas ou em andamento.",
   "generation-failed": "Não foi possível concluir a geração da proposta de roteiro.",
   "technical-error": "Não foi possível gerar a proposta agora. Tente novamente.",
 };
@@ -99,6 +104,10 @@ export async function executeGenerateItineraryProposalAction(
   if (!uuidPattern.test(tripId)) {
     return generateItineraryProposalActionError("invalid-request");
   }
+  const generationScope = input.generationScope ?? "INITIAL";
+  if (generationScope !== "INITIAL" && generationScope !== "REPLAN") {
+    return generateItineraryProposalActionError("invalid-request");
+  }
 
   const access = await dependencies.resolveAccess({ tripId, action: "trip:edit" });
   if (access.status === "unauthenticated") {
@@ -110,6 +119,9 @@ export async function executeGenerateItineraryProposalAction(
 
   const trip = await dependencies.tripRepository.findById(tripId);
   if (!trip) return generateItineraryProposalActionError("not-found");
+  if (generationScope === "REPLAN" && trip.status !== "planned" && trip.status !== "in-progress") {
+    return generateItineraryProposalActionError("replanning-unavailable");
+  }
 
   const itinerary = await dependencies.itineraryRepository.findByTripId(tripId);
   if (!itinerary || itinerary.tripId !== tripId) {
@@ -137,8 +149,9 @@ export async function executeGenerateItineraryProposalAction(
       itineraryId: itinerary.id,
       baseTripContextVersion: trip.contextVersion,
       baseItineraryVersion: itinerary.version,
-      contextSnapshotId: `authoritative:${tripId}:${trip.contextVersion}:${itinerary.version}:selection:${includeMaybe ? "want-maybe" : "want"}`,
+      contextSnapshotId: `authoritative:${tripId}:${trip.contextVersion}:${itinerary.version}:selection:${includeMaybe ? "want-maybe" : "want"}${generationScope === "REPLAN" ? ":replan" : ""}`,
       requestedAt: cloneInstant(now),
+      generationScope,
     },
     startedAt: cloneInstant(now),
     failedAt: cloneInstant(now),

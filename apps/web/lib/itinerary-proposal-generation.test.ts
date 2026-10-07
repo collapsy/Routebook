@@ -175,6 +175,55 @@ describe("executeGenerateItineraryProposalAction", () => {
     );
   });
 
+  it("encaminha REPLAN explicitamente e não altera o comportamento padrão INITIAL", async () => {
+    const dependencies = deps();
+
+    await executeGenerateItineraryProposalAction(
+      { tripId, generationScope: "REPLAN" },
+      dependencies,
+    );
+
+    expect(dependencies.generationService.generate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        request: expect.objectContaining({
+          generationScope: "REPLAN",
+          contextSnapshotId: `authoritative:${tripId}:8:12:selection:want:replan`,
+        }),
+      }),
+    );
+  });
+
+  it.each(["draft", "completed", "cancelled", "archived"] as const)(
+    "não permite REPLAN para Trip %s",
+    async (status) => {
+      const dependencies = deps();
+      dependencies.tripRepository.findById.mockResolvedValue({ ...trip, status });
+
+      await expect(
+        executeGenerateItineraryProposalAction({ tripId, generationScope: "REPLAN" }, dependencies),
+      ).resolves.toMatchObject({ status: "error", code: "replanning-unavailable" });
+      expect(dependencies.itineraryRepository.findByTripId).not.toHaveBeenCalled();
+      expect(dependencies.generationService.generate).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(["planned", "in-progress"] as const)(
+    "permite REPLAN para Trip %s com solicitação explícita",
+    async (status) => {
+      const dependencies = deps();
+      dependencies.tripRepository.findById.mockResolvedValue({ ...trip, status });
+
+      await expect(
+        executeGenerateItineraryProposalAction({ tripId, generationScope: "REPLAN" }, dependencies),
+      ).resolves.toMatchObject({ status: "success" });
+      expect(dependencies.generationService.generate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request: expect.objectContaining({ generationScope: "REPLAN" }),
+        }),
+      );
+    },
+  );
+
   it("não executa geração sem Itinerary autoritativo", async () => {
     const dependencies = deps();
     dependencies.itineraryRepository.findByTripId.mockResolvedValue(null);

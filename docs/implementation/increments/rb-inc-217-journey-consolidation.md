@@ -101,15 +101,15 @@ Se outro caminho for indispensável, interrompa antes de alterá-lo e atualize e
 
 ## Critérios de aceite
 
-- [ ] Um cenário atravessa Lugares → Contexto → Revisão → geração/revisão da Proposal → aceite explícito → Roteiro aplicado na mesma Trip.
-- [ ] A preferência persiste entre navegação e reload sem criar Activity.
-- [ ] A Proposal pode ser revisada sem alterar o Itinerary; somente o aceite explícito aplica a mudança.
-- [ ] Após aceite, Trip planejada e Activity resultante persistem após reload.
-- [ ] O teste passa em `desktop-chromium` e `mobile-chromium` sem viewport fixo que contorne o projeto correspondente.
-- [ ] As ações primárias da jornada são localizáveis semanticamente e operáveis por teclado/toque; não há regressão na navegação contextual.
-- [ ] Specs existentes de REPLAN e dos passos individuais permanecem intactos.
-- [ ] Sem mudança de comportamento fora da cobertura E2E autorizada.
-- [ ] `node scripts/validate-docs.mjs`, formatação, lint, typecheck, E2E direcionado e gates de CI são registrados com resultados reais.
+- [x] Um cenário atravessa Lugares → Contexto → Revisão → geração/revisão da Proposal → aceite explícito → Roteiro aplicado na mesma Trip.
+- [x] A preferência persiste entre navegação e reload sem criar Activity.
+- [x] A Proposal pode ser revisada sem alterar o Itinerary; somente o aceite explícito aplica a mudança.
+- [x] Após aceite, Trip planejada e Activity resultante persistem após reload.
+- [x] O teste passa em `desktop-chromium` e `mobile-chromium` sem viewport fixo que contorne o projeto correspondente.
+- [x] As ações primárias da jornada são localizáveis semanticamente e operáveis por teclado/toque; não há regressão na navegação contextual.
+- [x] Specs existentes de REPLAN e dos passos individuais permanecem intactos.
+- [x] Sem mudança de comportamento fora da cobertura E2E autorizada.
+- [x] `node scripts/validate-docs.mjs`, formatação, lint, typecheck, E2E direcionado e gates de CI são registrados com resultados reais.
 
 ## Validação obrigatória
 
@@ -123,6 +123,13 @@ pnpm test:e2e
 ```
 
 O E2E requer o banco de teste e setup Playwright fornecidos pela CI quando indisponíveis localmente.
+
+## Resultados da PR #529
+
+- CI de documentação: passou.
+- CI de engenharia: passou, incluindo formatação, lint, typecheck, build e 173 testes E2E responsivos; os projetos configurados incluem desktop e mobile.
+- Preview Vercel: passou.
+- Validações locais e limitações: registradas na matriz de rastreabilidade.
 
 ## Gate humano
 

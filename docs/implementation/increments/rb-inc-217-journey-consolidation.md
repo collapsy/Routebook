@@ -44,7 +44,7 @@ ai_context:
 - Issue: [#527](https://github.com/collapsy/Routebook/issues/527).
 - Branch: `codex/rb-inc-217-integrated-e2e`.
 - Base: `main@0de3ac7e8d806bf4d58ae7d1da0b4d596494ca42`.
-- Pull Request: implementação E2E a criar; preparação documental em [#528](https://github.com/collapsy/Routebook/pull/528).
+- Pull Request: implementação E2E [#529](https://github.com/collapsy/Routebook/pull/529); preparação documental em [#528](https://github.com/collapsy/Routebook/pull/528).
 - Merge: gate humano; não integrar sem autorização explícita para esta PR.
 
 ## Base canônica

@@ -46,25 +46,13 @@ test("consolida a preparação até o Roteiro aplicado na mesma Trip", async ({ 
     },
     now,
   );
-  const placeId = crypto.randomUUID();
-  const placeTitle = `Praia da jornada ${placeId.slice(0, 8)}`;
-
-  await getDatabase()
-    .insert(places)
-    .values({
-      id: placeId,
-      destinationId: "pipa-rn",
-      slug: `journey-consolidation-${placeId}`,
-      name: placeTitle,
-      summary: "Lugar sintético para validar a jornada integrada de preparação.",
-      category: "beach",
-      latitude: trip.destination.latitude,
-      longitude: trip.destination.longitude,
-      addressLabel: trip.destination.name,
-      publicationStatus: "published",
-      createdAt: now,
-      updatedAt: now,
-    });
+  const [place] = await getDatabase()
+    .select({ id: places.id, name: places.name })
+    .from(places)
+    .where(eq(places.slug, "praia-do-amor"))
+    .limit(1);
+  if (!place) throw new Error("Fixture publicada Praia do Amor não encontrada.");
+  const { id: placeId, name: placeTitle } = place;
 
   const itineraryRepository = new DrizzleItineraryRepository();
   const proposalRepository = new DrizzleItineraryProposalRepository();
@@ -187,7 +175,9 @@ test("consolida a preparação até o Roteiro aplicado na mesma Trip", async ({ 
   await page.goto(acceptedUrl!);
 
   await expect(page.getByRole("status")).toHaveText("Proposta aplicada ao Roteiro.");
-  await expect(page.getByText(placeTitle, { exact: true })).toBeVisible();
+  await expect(
+    page.getByLabel("Timeline do Dia").getByText(placeTitle, { exact: true }),
+  ).toBeVisible();
   const appliedItinerary = await itineraryRepository.findByTripId(trip.id);
   expect(appliedItinerary).toMatchObject({ id: itinerary.id, version: itinerary.version + 1 });
   expect(
@@ -203,7 +193,9 @@ test("consolida a preparação até o Roteiro aplicado na mesma Trip", async ({ 
   expect(plannedTrip?.status).toBe("planned");
 
   await page.reload();
-  await expect(page.getByText(placeTitle, { exact: true })).toBeVisible();
+  await expect(
+    page.getByLabel("Timeline do Dia").getByText(placeTitle, { exact: true }),
+  ).toBeVisible();
   expect(await itineraryRepository.findByTripId(trip.id)).toEqual(appliedItinerary);
   expect(await proposalRepository.findById(trip.id, typedProposalId)).toMatchObject({
     status: "accepted",

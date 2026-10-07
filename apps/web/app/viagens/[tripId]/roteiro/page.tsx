@@ -298,6 +298,14 @@ export default async function ItineraryPage({
                 ? "Ver proposta"
                 : "Gerar proposta"}
           </Link>
+          {trip.status === "planned" || trip.status === "in-progress" ? (
+            <Link
+              className="product-secondary-action"
+              href={`/viagens/${tripId}/roteiro/proposta?scope=REPLAN`}
+            >
+              Replanejar dias futuros
+            </Link>
+          ) : null}
         </div>
       </div>
 

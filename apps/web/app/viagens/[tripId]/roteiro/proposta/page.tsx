@@ -10,6 +10,7 @@ import {
 import { findTripById } from "@routebook/trip-management";
 
 import { ItineraryProposalGenerationControl } from "../../../../../components/itinerary-proposal-generation-control";
+import { ItineraryProposalReplanningWindow } from "../../../../../components/itinerary-proposal-replanning-window";
 import { ItineraryProposalReview } from "../../../../../components/itinerary-proposal-review";
 import { TripPlanningWizard } from "../../../../../components/trip-planning-wizard";
 import {
@@ -34,13 +35,16 @@ export default async function ItineraryProposalReviewPage({
   searchParams,
 }: {
   params: Promise<{ tripId: string }>;
-  searchParams: Promise<{ preparar?: string }>;
+  searchParams: Promise<{ preparar?: string; scope?: string }>;
 }) {
   const { tripId } = await params;
-  const { preparar } = await searchParams;
+  const { preparar, scope } = await searchParams;
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
   const preparing = preparar === "1" && trip.status === "draft";
+  const generationScope = scope === "REPLAN" ? "REPLAN" : "INITIAL";
+  const replanningUnavailable =
+    generationScope === "REPLAN" && trip.status !== "planned" && trip.status !== "in-progress";
 
   const [itinerary, proposals, acceptanceAccess, editAccess] = await Promise.all([
     new DrizzleItineraryRepository().findByTripId(trip.id),
@@ -50,7 +54,7 @@ export default async function ItineraryProposalReviewPage({
   ]);
   const asOf = new Date();
   const proposal = findLatestReviewableItineraryProposal(proposals, asOf);
-  const canGenerate = editAccess.status === "authorized";
+  const canGenerate = editAccess.status === "authorized" && !replanningUnavailable;
   const generateAction = generateItineraryProposalAction.bind(null, trip.id);
 
   if (!proposal) {
@@ -64,9 +68,27 @@ export default async function ItineraryProposalReviewPage({
         </Link>
         <div className={styles.emptyState}>
           <p className="product-eyebrow">Proposta de Roteiro</p>
-          <h1>Nenhuma proposta disponível</h1>
-          <p>Gere uma nova proposta ou continue montando o Roteiro manualmente.</p>
-          {canGenerate ? <ItineraryProposalGenerationControl action={generateAction} /> : null}
+          <h1>
+            {generationScope === "REPLAN"
+              ? "Nenhuma proposta de replanejamento disponível"
+              : "Nenhuma proposta disponível"}
+          </h1>
+          {replanningUnavailable ? (
+            <p>O replanejamento está disponível somente para viagens planejadas ou em andamento.</p>
+          ) : generationScope === "REPLAN" ? (
+            <p>
+              A janela temporal será calculada no momento da geração. A proposta mostrará quais Dias
+              podem receber mudanças e preservará o trecho protegido.
+            </p>
+          ) : (
+            <p>Gere uma nova proposta ou continue montando o Roteiro manualmente.</p>
+          )}
+          {canGenerate ? (
+            <ItineraryProposalGenerationControl
+              action={generateAction}
+              generationScope={generationScope}
+            />
+          ) : null}
           <Link className="product-secondary-action" href={`/viagens/${trip.id}/roteiro`}>
             Continuar no Roteiro
           </Link>
@@ -81,6 +103,16 @@ export default async function ItineraryProposalReviewPage({
     );
   }
 
+  const replanningWindow =
+    proposal.generationScope === "REPLAN"
+      ? proposal.generationContext?.replanningWindow
+      : undefined;
+  if (proposal.generationScope === "REPLAN" && !replanningWindow) {
+    throw new ItineraryProposalReviewIntegrityError(
+      "A Proposal REPLAN não possui o snapshot temporal necessário para revisão.",
+    );
+  }
+
   const review = buildItineraryProposalReview({ asOf, itinerary, proposal });
   const discardAction = discardItineraryProposalAction.bind(null, trip.id);
   const canDecide = acceptanceAccess.status === "authorized";
@@ -92,6 +124,8 @@ export default async function ItineraryProposalReviewPage({
     review.isBasedOnCurrentItinerary;
   const idempotencyKey = `accept-itinerary-proposal:${proposal.id}:${proposal.baseItineraryVersion}`;
   const itineraryHref = `/viagens/${trip.id}/roteiro`;
+  const nextGenerationScope =
+    generationScope === "REPLAN" || proposal.generationScope === "REPLAN" ? "REPLAN" : "INITIAL";
 
   return (
     <section className={`app-page ${styles.page}`}>
@@ -105,7 +139,11 @@ export default async function ItineraryProposalReviewPage({
       <header className={styles.hero}>
         <div>
           <p className="product-eyebrow">{trip.name}</p>
-          <h1>Proposta de Roteiro</h1>
+          <h1>
+            {proposal.generationScope === "REPLAN"
+              ? "Proposta de replanejamento"
+              : "Proposta de Roteiro"}
+          </h1>
           <p>
             {review.status === "expired"
               ? "Esta proposta expirou. Consulte as sugestões como referência para planejar o Roteiro atual."
@@ -123,6 +161,17 @@ export default async function ItineraryProposalReviewPage({
         </span>
       </header>
 
+      {generationScope === "REPLAN" && proposal.generationScope !== "REPLAN" ? (
+        <p role="status">
+          Esta viagem já tem uma proposta de planejamento inicial aguardando decisão. Resolva essa
+          proposta antes de iniciar um replanejamento.
+        </p>
+      ) : null}
+
+      {proposal.generationScope === "REPLAN" && replanningWindow ? (
+        <ItineraryProposalReplanningWindow days={itinerary.days} window={replanningWindow} />
+      ) : null}
+
       {review.status === "expired" && canGenerate ? (
         <section className={styles.expiredNextStep} aria-labelledby="expired-proposal-next-step">
           <div>
@@ -133,7 +182,10 @@ export default async function ItineraryProposalReviewPage({
               disponíveis agora.
             </p>
           </div>
-          <ItineraryProposalGenerationControl action={generateAction} />
+          <ItineraryProposalGenerationControl
+            action={generateAction}
+            generationScope={nextGenerationScope}
+          />
         </section>
       ) : null}
 

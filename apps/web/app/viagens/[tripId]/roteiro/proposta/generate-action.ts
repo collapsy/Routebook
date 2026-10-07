@@ -14,6 +14,7 @@ import {
   generateItineraryProposalActionError,
   type GenerateItineraryProposalActionState,
 } from "@/lib/itinerary-proposal-generation";
+import type { ItineraryProposalGenerationScope } from "@routebook/proposal-management";
 import { resolveTripRouteAccess } from "@/lib/trip-route-access";
 
 function proposalPath(tripId: string): string {
@@ -24,12 +25,24 @@ export async function generateItineraryProposalAction(
   tripId: string,
   includeMaybe = false,
   preparing = false,
+  generationScope: ItineraryProposalGenerationScope = "INITIAL",
 ): Promise<GenerateItineraryProposalActionState> {
+  if (
+    (generationScope !== "INITIAL" && generationScope !== "REPLAN") ||
+    (preparing && generationScope === "REPLAN")
+  ) {
+    return generateItineraryProposalActionError("invalid-request");
+  }
+
   let state: GenerateItineraryProposalActionState;
 
   try {
     state = await executeGenerateItineraryProposalAction(
-      { tripId, includeMaybe },
+      {
+        tripId,
+        includeMaybe,
+        ...(generationScope === "REPLAN" ? { generationScope } : {}),
+      },
       {
         resolveAccess: resolveTripRouteAccess,
         tripRepository: new DrizzleTripRepository(),
@@ -46,9 +59,11 @@ export async function generateItineraryProposalAction(
     revalidatePath(`/viagens/${tripId}`);
     revalidatePath(`/viagens/${tripId}/roteiro`);
     revalidatePath(proposalPath(tripId));
-    redirect(
-      `${proposalPath(tripId)}?${preparing ? "preparar=1&" : ""}propostaGerada=${encodeURIComponent(state.itineraryProposalId)}`,
-    );
+    const searchParams = new URLSearchParams();
+    if (preparing) searchParams.set("preparar", "1");
+    if (generationScope === "REPLAN") searchParams.set("scope", "REPLAN");
+    searchParams.set("propostaGerada", state.itineraryProposalId);
+    redirect(`${proposalPath(tripId)}?${searchParams.toString()}`);
   }
 
   return state;

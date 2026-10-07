@@ -87,6 +87,29 @@ describe("generateItineraryProposalAction", () => {
     );
   });
 
+  it("preserva REPLAN no redirect para identificar a revisão iniciada", async () => {
+    generationMocks.execute.mockResolvedValue(success);
+
+    await expect(generateItineraryProposalAction(tripId, false, false, "REPLAN")).rejects.toThrow(
+      "NEXT_REDIRECT",
+    );
+
+    expect(generationMocks.execute).toHaveBeenCalledWith(
+      { tripId, includeMaybe: false, generationScope: "REPLAN" },
+      expect.any(Object),
+    );
+    expect(navigationMocks.redirect).toHaveBeenCalledWith(
+      `/viagens/${tripId}/roteiro/proposta?scope=REPLAN&propostaGerada=${proposalId}`,
+    );
+  });
+
+  it("rejeita scope inválido antes de executar o serviço", async () => {
+    await expect(
+      generateItineraryProposalAction(tripId, false, false, "OTHER" as never),
+    ).resolves.toMatchObject({ status: "error", code: "invalid-request" });
+    expect(generationMocks.execute).not.toHaveBeenCalled();
+  });
+
   it("preserva erro recuperável sem invalidar caches ou navegar", async () => {
     const error = { status: "error", code: "not-found", message: "not-found" } as const;
     generationMocks.execute.mockResolvedValue(error);

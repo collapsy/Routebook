@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { eq } from "drizzle-orm";
 
 import {
   DrizzleItineraryProposalRepository,
@@ -8,6 +9,7 @@ import {
   getDatabase,
   places,
   recommendations,
+  trips,
 } from "@routebook/database";
 import type { ItineraryProposalId } from "@routebook/proposal-management";
 import { addActivity, createItinerary } from "@routebook/trip-management";
@@ -28,6 +30,75 @@ type GenerationFixture = Readonly<{
   placeId: string;
   placeTitle: string;
 }>;
+
+function dateInTimeZone(now: Date, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const values = new Map(parts.map((part) => [part.type, part.value]));
+  return `${values.get("year")}-${values.get("month")}-${values.get("day")}`;
+}
+
+function addCalendarDays(value: string, days: number): string {
+  const date = new Date(`${value}T12:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+async function createReplanningFixture(tripName: string) {
+  const now = new Date();
+  const timeZone = "America/Fortaleza";
+  const startDate = dateInTimeZone(now, timeZone);
+  const endDate = addCalendarDays(startDate, 2);
+  const { trip } = await createAuthenticatedE2ETrip({ name: tripName, startDate, endDate }, now);
+  const itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);
+  const itineraryWithProtectedActivity = addActivity(
+    itinerary,
+    {
+      dayDate: startDate,
+      title: "Compromisso protegido do replanejamento",
+      startTime: "09:00",
+      durationMinutes: 60,
+      flexibility: "fixed",
+    },
+    now,
+  );
+  const itineraryRepository = new DrizzleItineraryRepository();
+  await itineraryRepository.save(itineraryWithProtectedActivity);
+
+  const database = getDatabase();
+  const placeId = crypto.randomUUID();
+  const placeTitle = `Lugar para replanejar ${placeId.slice(0, 8)}`;
+  await database.update(trips).set({ status: "in-progress" }).where(eq(trips.id, trip.id));
+  await database.insert(places).values({
+    id: placeId,
+    destinationId: "pipa-rn",
+    slug: `replanning-place-e2e-${placeId}`,
+    name: placeTitle,
+    summary: "Lugar selecionado para testar replanejamento explícito.",
+    category: "beach",
+    latitude: PROPOSAL_FIXTURE_CENTER.latitude,
+    longitude: PROPOSAL_FIXTURE_CENTER.longitude,
+    addressLabel: "Pipa, Tibau do Sul - RN",
+    publicationStatus: "published",
+    createdAt: now,
+    updatedAt: now,
+  });
+  await new DrizzleTripPlacePreferenceRepository().save({
+    id: crypto.randomUUID(),
+    tripId: trip.id,
+    placeId,
+    intent: "WANT",
+    priority: null,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return { tripId: trip.id, placeTitle, itinerary: itineraryWithProtectedActivity };
+}
 
 async function createSelectionFixture(
   tripName: string,
@@ -284,6 +355,70 @@ test("gera Proposal a partir de WANT sem alterar o Itinerary", async ({ page }, 
     ]),
   );
   expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(itineraryBefore);
+});
+
+test("replaneja somente após escolha explícita e revisa o snapshot temporal antes do aceite", async ({
+  page,
+}, testInfo) => {
+  const fixture = await createReplanningFixture(
+    `Replanejamento explícito ${testInfo.project.name} ${Date.now()}`,
+  );
+  const itineraryRepository = new DrizzleItineraryRepository();
+
+  await page.goto(`/viagens/${fixture.tripId}/roteiro`);
+  const replanLink = page.getByRole("link", { name: "Replanejar dias futuros" });
+  await expect(replanLink).toHaveAttribute(
+    "href",
+    `/viagens/${fixture.tripId}/roteiro/proposta?scope=REPLAN`,
+  );
+  await replanLink.click();
+
+  await expect(
+    page.getByRole("heading", { name: "Nenhuma proposta de replanejamento disponível" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Gerar proposta de replanejamento" }),
+  ).toBeEnabled();
+  await page.getByRole("button", { name: "Gerar proposta de replanejamento" }).click();
+  await expect(page).toHaveURL(/scope=REPLAN&propostaGerada=[0-9a-f-]+$/i);
+  await expect(
+    page.getByRole("heading", { name: "Recorte temporal desta proposta" }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: fixture.placeTitle })).toBeVisible();
+  await expect(page.getByText(/atividade\(s\) protegida\(s\)/)).toBeVisible();
+
+  const proposalId = new URL(page.url()).searchParams.get("propostaGerada");
+  expect(proposalId).toMatch(/^[0-9a-f-]{36}$/i);
+  const proposal = await new DrizzleItineraryProposalRepository().findById(
+    fixture.tripId,
+    proposalId as ItineraryProposalId,
+  );
+  expect(proposal).toMatchObject({
+    status: "ready",
+    generationScope: "REPLAN",
+    generationContext: {
+      replanningWindow: {
+        timeZone: "America/Fortaleza",
+        eligibleDayIds: expect.arrayContaining([fixture.itinerary.days[0]!.id]),
+        protectedActivityIds: expect.arrayContaining([
+          fixture.itinerary.days[0]!.activities[0]!.id,
+        ]),
+      },
+    },
+  });
+  expect(await itineraryRepository.findByTripId(fixture.tripId)).toEqual(fixture.itinerary);
+
+  await page.getByText("Aceitar proposta", { exact: true }).click();
+  await page.getByRole("checkbox", { name: /atualizará o Roteiro/i }).check();
+  await page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
+  await expect(page).toHaveURL(new RegExp(`/viagens/${fixture.tripId}/roteiro\\?propostaAceita=1`));
+  const appliedItinerary = await itineraryRepository.findByTripId(fixture.tripId);
+  expect(appliedItinerary?.days.flatMap((day) => day.activities)).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ title: "Compromisso protegido do replanejamento" }),
+      expect.objectContaining({ title: fixture.placeTitle }),
+    ]),
+  );
 });
 
 test("MAYBE fica fora por padrão", async ({ page }, testInfo) => {

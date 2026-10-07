@@ -62,4 +62,15 @@ describe("ItineraryProposalGenerationControl", () => {
 
     await waitFor(() => expect(action).toHaveBeenCalledWith(false, true));
   });
+
+  it("encaminha REPLAN como escopo explícito sem alterar o opt-in de MAYBE", async () => {
+    const action = vi.fn().mockResolvedValue({ status: "idle" });
+
+    render(<ItineraryProposalGenerationControl action={action} generationScope="REPLAN" />);
+
+    expect(screen.getByText(/somente o trecho elegível do Roteiro/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Gerar proposta de replanejamento" }));
+
+    await waitFor(() => expect(action).toHaveBeenCalledWith(false, false, "REPLAN"));
+  });
 });

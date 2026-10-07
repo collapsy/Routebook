@@ -1342,3 +1342,18 @@ Ao concluir um incremento:
 | validação local | `node scripts/validate-docs.mjs` passou (462 documentos; 10 avisos legados); typecheck e lint do monorepo passaram (12/12); `@routebook/trip-management` passou (104 testes); testes transacionais Database passaram (31); teste do wizard Web passou (4); Prettier nos arquivos desta etapa passou; `git diff --check` passou |
 | limitações locais | suíte Web completa: 488 testes passaram, mas 5 suítes falharam na inicialização por `DATABASE_URL` ausente; build compilou e passou TypeScript, mas falhou na coleta de dados de `/api/auth/[...all]` pela mesma ausência; integração PostgreSQL e E2E dependem de banco e serão validados na CI/Preview; `pnpm format:check` global sinalizou 515 arquivos e um arquivo-base não alterado (`modules/trip-management/src/trip-days.ts`) também falha isoladamente, enquanto todos os arquivos desta etapa passam na checagem focada |
 | CI/Preview | pendentes da PR; preencher com resultados reais |
+
+## Evidências previstas do RB-INC-216
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-216-replanning-experience.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-216-replanning-experience.md` |
+| issue | [#525](https://github.com/collapsy/Routebook/issues/525) |
+| branch/base | `codex/rb-inc-216-replanning-experience`, `main@a09bf9f2b45366f7374b9e82108800c19408e901` |
+| contrato | escolha explícita `INITIAL`/`REPLAN`; REPLAN reusa `ReplanningWindow` e snapshot persistido de RB-INC-206 |
+| disponibilidade | REPLAN somente para Trips `planned`/`in-progress`; sem inferência de scope e sem transição de lifecycle |
+| decisão | aceite/rejeição/descartar continuam nas ações existentes; geração não altera Itinerary |
+| validação local | 27 testes focados passaram em 4 suítes; lint e typecheck Web passaram; lint e typecheck do monorepo passaram (12/12); `node scripts/validate-docs.mjs` registrou 464/464 documentos e 10 avisos preexistentes; Prettier passou nos 11 arquivos de código e nos 2 novos documentos; `git diff --check` passou |
+| limitações locais | `pnpm test` e `pnpm build` não completaram por ausência de `DATABASE_URL` (build compilou e passou TypeScript antes da coleta de páginas); E2E requer banco; matrizes e registro documental preservam o estilo Markdown preexistente; `pnpm format:check` global acusa 528 arquivos, inclusive arquivos-base fora deste incremento |
+| CI/Preview | pendentes da PR; atualizar somente com resultados observados |

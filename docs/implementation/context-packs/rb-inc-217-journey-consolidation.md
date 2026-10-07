@@ -28,8 +28,8 @@ Adicionar a evidência integrada ausente entre a seleção explícita, a prepara
 
 - Incremento: `RB-INC-217`.
 - Issue: [#527](https://github.com/collapsy/Routebook/issues/527).
-- Branch: `codex/rb-inc-217-journey-consolidation`.
-- Base: `main@cfd8c460df9677a1618dc63c64c2cb60f04268ca`.
+- Branch: `codex/rb-inc-217-integrated-e2e`.
+- Base: `main@0de3ac7e8d806bf4d58ae7d1da0b4d596494ca42`.
 
 ## 3. Leitura e fontes aplicáveis
 

@@ -1357,3 +1357,17 @@ Ao concluir um incremento:
 | validação local | 27 testes focados passaram em 4 suítes; lint e typecheck Web passaram; lint e typecheck do monorepo passaram (12/12); `node scripts/validate-docs.mjs` registrou 464/464 documentos e 10 avisos preexistentes; Prettier passou nos 11 arquivos de código e nos 2 novos documentos; `git diff --check` passou |
 | limitações locais | `pnpm test` e `pnpm build` não completaram por ausência de `DATABASE_URL` (build compilou e passou TypeScript antes da coleta de páginas); E2E requer banco; matrizes e registro documental preservam o estilo Markdown preexistente; `pnpm format:check` global acusa 528 arquivos, inclusive arquivos-base fora deste incremento |
 | CI/Preview | segunda execução no SHA `24d436c0`: validação documental passou; validação do monorepo passou em 9m11s, incluindo E2E responsivo; Vercel Preview passou |
+
+## Evidências previstas do RB-INC-217
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-217-journey-consolidation.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-217-journey-consolidation.md` |
+| issue | [#527](https://github.com/collapsy/Routebook/issues/527) |
+| branch/base | `codex/rb-inc-217-journey-consolidation`, `main@cfd8c460df9677a1618dc63c64c2cb60f04268ca` |
+| lacuna | specs individuais cobrem as fronteiras; falta continuidade de seleção até Itinerary aplicado na mesma Trip |
+| escopo | um E2E integrado nos projetos desktop/mobile existentes; sem redesign ou mudança de comportamento |
+| validação documental | `node scripts/validate-docs.mjs` passou (466/466 documentos; 10 avisos legados); Prettier passou nos 2 novos documentos; `git diff --check` passou |
+| limitações locais | `pnpm format:check` global reportou 527 arquivos; os 2 documentos novos passam na checagem focada; lint, typecheck e E2E não foram executados nesta preparação documental |
+| CI/PR | PR e CI pendentes; registrar resultados observados após abertura |

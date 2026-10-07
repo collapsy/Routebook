@@ -411,7 +411,9 @@ test("replaneja somente após escolha explícita e revisa o snapshot temporal an
   await page.getByText("Aceitar proposta", { exact: true }).click();
   await page.getByRole("checkbox", { name: /atualizará o Roteiro/i }).check();
   await page.getByRole("button", { name: "Confirmar e aceitar proposta" }).click();
-  await expect(page).toHaveURL(new RegExp(`/viagens/${fixture.tripId}/roteiro\\?propostaAceita=1`));
+  await expect(page).toHaveURL(
+    new RegExp(`/viagens/${fixture.tripId}/roteiro\\?propostaAceita=applied`),
+  );
   const appliedItinerary = await itineraryRepository.findByTripId(fixture.tripId);
   expect(appliedItinerary?.days.flatMap((day) => day.activities)).toEqual(
     expect.arrayContaining([

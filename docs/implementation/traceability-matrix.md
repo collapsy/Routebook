@@ -1356,4 +1356,4 @@ Ao concluir um incremento:
 | decisão | aceite/rejeição/descartar continuam nas ações existentes; geração não altera Itinerary |
 | validação local | 27 testes focados passaram em 4 suítes; lint e typecheck Web passaram; lint e typecheck do monorepo passaram (12/12); `node scripts/validate-docs.mjs` registrou 464/464 documentos e 10 avisos preexistentes; Prettier passou nos 11 arquivos de código e nos 2 novos documentos; `git diff --check` passou |
 | limitações locais | `pnpm test` e `pnpm build` não completaram por ausência de `DATABASE_URL` (build compilou e passou TypeScript antes da coleta de páginas); E2E requer banco; matrizes e registro documental preservam o estilo Markdown preexistente; `pnpm format:check` global acusa 528 arquivos, inclusive arquivos-base fora deste incremento |
-| CI/Preview | pendentes da PR; atualizar somente com resultados observados |
+| CI/Preview | primeira execução: documentação e Preview passaram; monorepo encontrou expectativa desatualizada na URL final do E2E REPLAN (`propostaAceita=1` vs contrato existente `propostaAceita=applied`); teste corrigido, aguardando nova execução |

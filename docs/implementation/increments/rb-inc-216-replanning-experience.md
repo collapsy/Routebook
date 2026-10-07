@@ -112,18 +112,18 @@ Se outro caminho for indispensável, interrompa antes de alterá-lo e atualize f
 
 ## Critérios de aceite
 
-- [ ] Roteiro oferece escolha distinta e explícita entre proposta inicial já existente e REPLAN.
-- [ ] Somente Trips `planned`/`in-progress` podem solicitar REPLAN, com validação também no servidor.
-- [ ] Geração `INITIAL` mantém exatamente o comportamento vigente; não há inferência automática de scope.
-- [ ] Geração REPLAN encaminha `generationScope: REPLAN` ao serviço canônico, respeita autorização e opt-in de MAYBE.
-- [ ] A revisão identifica REPLAN e mostra `capturedAt`, timezone e os Dias elegíveis lidos do snapshot persistido.
-- [ ] A UI comunica que passado/trecho transcorrido e Activities protegidas não são replanejados; não contradiz o snapshot.
-- [ ] Ausência de Dias elegíveis e erros não alteram Itinerary nem bypassam a revisão/decisão.
-- [ ] Aceite integral/parcial, descarte e rejeição continuam usando as ações existentes e mantêm a semântica explícita.
-- [ ] Cobertura de componente/lib testa seleção de scope, autorização/status, estado de janela e regressão INITIAL.
-- [ ] E2E cobre entrada explícita, geração REPLAN, revisão do snapshot e uma decisão explícita; validar viewport desktop e mobile.
-- [ ] Sem mudança de domínio, schema, migration, Provider ou estado de lifecycle.
-- [ ] `node scripts/validate-docs.mjs`, formatação, lint, typecheck e gates de CI são registrados com resultados reais.
+- [x] Roteiro oferece escolha distinta e explícita entre proposta inicial já existente e REPLAN.
+- [x] Somente Trips `planned`/`in-progress` podem solicitar REPLAN, com validação também no servidor.
+- [x] Geração `INITIAL` mantém exatamente o comportamento vigente; não há inferência automática de scope.
+- [x] Geração REPLAN encaminha `generationScope: REPLAN` ao serviço canônico, respeita autorização e opt-in de MAYBE.
+- [x] A revisão identifica REPLAN e mostra `capturedAt`, timezone e os Dias elegíveis lidos do snapshot persistido.
+- [x] A UI comunica que passado/trecho transcorrido e Activities protegidas não são replanejados; não contradiz o snapshot.
+- [x] Ausência de Dias elegíveis e erros não alteram Itinerary nem bypassam a revisão/decisão.
+- [x] Aceite integral/parcial, descarte e rejeição continuam usando as ações existentes e mantêm a semântica explícita.
+- [x] Cobertura de componente/lib testa seleção de scope, autorização/status, estado de janela e regressão INITIAL.
+- [x] E2E cobre entrada explícita, geração REPLAN, revisão do snapshot e uma decisão explícita; validado nos projetos responsivos da CI.
+- [x] Sem mudança de domínio, schema, migration, Provider ou estado de lifecycle.
+- [x] `node scripts/validate-docs.mjs`, formatação, lint, typecheck e gates de CI registrados com resultados reais.
 
 ## Validação obrigatória
 

@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 
 import {
   DrizzlePlaceRepository,
+  DrizzleItineraryProposalRepository,
   DrizzleTravelerProfileRepository,
   DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
@@ -12,6 +13,7 @@ import { findTravelerProfile } from "@routebook/traveler-profile";
 import { findTripById } from "@routebook/trip-management";
 
 import { TripPlanningWizard } from "../../../../../components/trip-planning-wizard";
+import { hasReadyItineraryProposal } from "../../../../../lib/itinerary-proposal-experience";
 import { deriveTripPreparationReviewModel } from "../../../../../lib/trip-preparation-review";
 
 export const dynamic = "force-dynamic";
@@ -50,10 +52,13 @@ export default async function TripPreparationReviewPage({
   if (!trip) notFound();
   if (trip.status !== "draft") redirect(`/viagens/${tripId}/roteiro`);
 
-  const [profile, preferences] = await Promise.all([
+  const asOf = new Date();
+  const [profile, preferences, proposals] = await Promise.all([
     findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
     new DrizzleTripPlacePreferenceRepository().listByTripId(tripId),
+    new DrizzleItineraryProposalRepository().listByTripId(tripId),
   ]);
+  const hasPendingProposal = hasReadyItineraryProposal(proposals, asOf);
   const model = deriveTripPreparationReviewModel({ trip, profile, preferences });
   const places = await new DrizzlePlaceRepository().listByIds(
     model.selection.items.map((item) => item.placeId),
@@ -222,9 +227,18 @@ export default async function TripPreparationReviewPage({
       >
         <p className="product-eyebrow">Próxima etapa</p>
         <h2 id="review-readiness-title">
-          {missingRequired.length ? "Antes de continuar" : "Tudo pronto para montar sua proposta"}
+          {hasPendingProposal
+            ? "Sua proposta aguarda decisão"
+            : missingRequired.length
+              ? "Antes de continuar"
+              : "Tudo pronto para montar sua proposta"}
         </h2>
-        {missingRequired.length ? (
+        {hasPendingProposal ? (
+          <p>
+            Você já tem uma proposta válida para revisar. Retome a decisão existente ou continue
+            editando os dados da viagem antes de voltar a ela.
+          </p>
+        ) : missingRequired.length ? (
           <p>Informe: {missingRequired.join(", ")}.</p>
         ) : (
           <p>
@@ -232,7 +246,14 @@ export default async function TripPreparationReviewPage({
             e você decidirá o que aplicar depois de revisá-la.
           </p>
         )}
-        {missingRequired.length ? (
+        {hasPendingProposal ? (
+          <Link
+            className="product-primary-action"
+            href={`/viagens/${tripId}/roteiro/proposta?preparar=1`}
+          >
+            Revisar proposta pendente
+          </Link>
+        ) : missingRequired.length ? (
           <button className="product-primary-action" disabled type="button">
             Montar proposta de roteiro
           </button>
@@ -245,8 +266,9 @@ export default async function TripPreparationReviewPage({
           </Link>
         )}
         <p className="preparation-review-note">
-          A montagem da Proposta pertence à próxima etapa. Nenhuma Activity, Proposal ou
-          recomendação automática foi criada nesta revisão.
+          {hasPendingProposal
+            ? "Retomar a revisão não altera o Roteiro. Nenhuma mudança será aplicada sem seu aceite explícito."
+            : "A montagem da Proposta pertence à próxima etapa. Nenhuma Activity, Proposal ou recomendação automática foi criada nesta revisão."}
         </p>
       </section>
     </section>

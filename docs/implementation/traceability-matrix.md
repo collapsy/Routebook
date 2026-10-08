@@ -1377,3 +1377,17 @@ Ao concluir um incremento:
 | validação documental | `node scripts/validate-docs.mjs` passou na preparação documental (466/466; 10 avisos legados); reexecutar após a atualização desta evidência |
 | CI/PR | [PR #529](https://github.com/collapsy/Routebook/pull/529), SHA `936a4bc509b4ac3b6b766a7b7f36622a86187cbf`: documentação, monorepo e Vercel passaram. Suíte responsiva completa: 173 testes passaram em 5m12s. A primeira execução encontrou locator ambíguo e fixture publicado contaminando a contagem compartilhada; correção reutilizou `Praia do Amor` seedada e escopou assertivas ao timeline. |
 | validação corretiva da PR #530 | SHA `3d7348e6e733e4d2ac8c56dc4e256644ad4ca03f`: expectativa de CTA no Explore alinhada ao link Minha seleção; fixtures existentes agora criam Itinerary vazio explicitamente; lugar aguarda sucesso antes de navegar; REPLAN usa atividade futura; shell valida marcador da etapa; multi-destino semeia o Itinerary esperado. CI documental e Preview passaram; CI de engenharia passou com 516 testes unitários e 173 E2Es responsivos. Sem merge. |
+
+## Evidências previstas do RB-INC-218
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-218-resume-pending-proposal.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-218-resume-pending-proposal.md` |
+| issue | [#531](https://github.com/collapsy/Routebook/issues/531) |
+| branch/base | `codex/issue-531-resume-proposal`, branch `codex/fix-preparation-without-itinerary` (PR #530) |
+| lacuna | retornar a uma Trip draft com Proposal válida leva a gerar/montar outra, em vez de destacar a decisão pendente |
+| escopo | overview, Revisão e etapa Proposta da preparação, com E2E integrado de saída/retomada em desktop e mobile |
+| validação local | Prettier focado passou; ESLint da aplicação passou; `tsc --noEmit` passou; `git diff --check` passou; `node scripts/validate-docs.mjs` passou (468/468; 10 avisos legados). Suíte unitária: 502 testes passaram e 5 suites de autenticação falharam na inicialização por `DATABASE_URL` ausente. Node 18 inicialmente incompatível com Vitest/Rolldown; com runtime Node 24 a suíte iniciou. |
+| E2E/CI | E2E não executado localmente: precisa de banco PostgreSQL; execução de desktop/mobile e CI pendentes após abrir PR. |
+| Preview/PR | pendente |

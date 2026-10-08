@@ -155,6 +155,14 @@ O E2E requer o banco de teste e setup Playwright fornecidos pela CI quando indis
 - Preview Vercel: passou.
 - Validações locais e limitações: registradas na matriz de rastreabilidade.
 
+## Validação corretiva da PR #530
+
+- SHA validado: `3d7348e6e733e4d2ac8c56dc4e256644ad4ca03f`.
+- CI documental: passou.
+- CI de engenharia: passou; formatação, documentação, lint, typecheck, 516 testes unitários e 173 testes E2E responsivos passaram.
+- Preview Vercel: passou.
+- Nenhum merge foi realizado; o gate humano permanece.
+
 ## Gate humano
 
 Após abrir a PR, informar SHA, CI, Preview, testes e limitações. Não fazer merge desta PR sem autorização humana explícita.

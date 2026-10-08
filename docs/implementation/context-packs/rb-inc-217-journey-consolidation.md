@@ -68,7 +68,7 @@ Adicionar a evidência integrada ausente entre a seleção explícita, a prepara
 
 ## 7. Caminhos e limites
 
-Alterar somente os caminhos listados em RB-INC-217. O ajuste corretivo inclui a geração, sua página de preparação, o CTA de Minha seleção, o E2E integrado e os setups locais dos specs de Trip ativa, Roteiro, recomendações e Guia para semear explicitamente o Itinerary vazio que cada teste pressupõe. O teste de ações de lugar deve esperar a confirmação da mutação antes de navegar ao detalhe; o teste REPLAN usa atividade futura e o shell valida a etapa atual ao reabrir uma Trip existente. Não alterar setup global de Playwright, helpers compartilhados ou CSS. Se outro caminho for necessário, atualizar formalmente o incremento antes.
+Alterar somente os caminhos listados em RB-INC-217. O ajuste corretivo inclui a geração, sua página de preparação, o CTA de Minha seleção, o E2E integrado e os setups locais dos specs de Trip ativa, Roteiro, recomendações, Guia e validação multi-destino para semear explicitamente o Itinerary vazio que cada teste pressupõe. O teste de ações de lugar deve esperar a confirmação da mutação antes de navegar ao detalhe; o teste REPLAN usa atividade futura e o shell valida apenas o marcador de etapa ao reabrir uma Trip existente. Não alterar setup global de Playwright, helpers compartilhados ou CSS. Se outro caminho for necessário, atualizar formalmente o incremento antes.
 
 ## 8. Critérios verificáveis
 

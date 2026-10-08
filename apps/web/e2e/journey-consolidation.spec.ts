@@ -72,7 +72,9 @@ test("consolida a preparação até o Roteiro aplicado na mesma Trip", async ({ 
     `/viagens/${trip.id}/lugares?preparar=1&descoberta=ocultar&busca=${encodeURIComponent(placeTitle)}&categoria=beach`,
   );
   await expect(page.locator('[data-planning-wizard-step="places"]')).toBeVisible();
-  await expect(page.getByRole("link", { name: "Continuar para Contexto" })).toBeInViewport();
+  await expect(
+    page.getByLabel("Lugares da preparação").getByRole("link", { name: "Minha seleção" }),
+  ).toHaveAttribute("href", `/viagens/${trip.id}/lugares-salvos?preparar=1`);
 
   const placeCard = page
     .getByRole("list", { name: "Opções de lugares" })

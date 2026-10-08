@@ -35,8 +35,8 @@ test("valida São Paulo sem seed e preserva Discovery, Minha seleção, Roteiro,
   await expect(
     page.getByRole("definition").filter({ hasText: "Hospedagem na Avenida Paulista" }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Hoje", exact: true })).toBeVisible();
-  await expect(page.getByText(/Hoje em São Paulo, SP/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ver primeiro dia", exact: true })).toBeVisible();
+  await expect(page.getByText("Próxima viagem · São Paulo, SP")).toBeVisible();
 
   await page.goto(`/viagens/${trip.id}/lugares`);
   await expect(page.getByRole("heading", { name: /Lugares em São Paulo/ })).toBeVisible({
@@ -98,6 +98,7 @@ test("valida São Paulo sem seed e preserva Discovery, Minha seleção, Roteiro,
 
   await page.goto(`/viagens/${trip.id}/guia?dia=2026-11-11`);
   await expect(page.getByRole("heading", { name: /Dia 2/ })).toBeVisible();
+  await expect(page.getByText("Próxima viagem · São Paulo, SP")).toBeVisible();
   await expect(page.getByText(selectedName, { exact: true })).toBeVisible();
 
   await page.goto(`/viagens/${trip.id}/guia/dias?dia=2026-11-11`);

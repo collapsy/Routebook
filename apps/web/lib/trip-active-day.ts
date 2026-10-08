@@ -2,6 +2,8 @@ export type TripDayReference = Readonly<{
   date: string;
 }>;
 
+export type TripDatePosition = "upcoming" | "active" | "past";
+
 function datePart(parts: Intl.DateTimeFormatPart[], type: "year" | "month" | "day"): string {
   return parts.find((part) => part.type === type)?.value ?? "";
 }
@@ -24,6 +26,21 @@ export function resolveTripTodayDate(
 ): string | null {
   const today = formatDateInTimeZone(now, timeZone);
   return days.some((day) => day.date === today) ? today : null;
+}
+
+export function resolveTripDatePosition(
+  days: readonly TripDayReference[],
+  now: Date,
+  timeZone: string,
+): TripDatePosition {
+  const firstDay = days[0];
+  const lastDay = days.at(-1);
+  if (!firstDay || !lastDay) return "upcoming";
+
+  const today = formatDateInTimeZone(now, timeZone);
+  if (today < firstDay.date) return "upcoming";
+  if (today > lastDay.date) return "past";
+  return "active";
 }
 
 export function resolvePreferredTripDay<T extends TripDayReference>(

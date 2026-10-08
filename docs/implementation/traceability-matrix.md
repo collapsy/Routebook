@@ -1391,3 +1391,17 @@ Ao concluir um incremento:
 | validação local | Prettier focado passou; ESLint da aplicação passou; `tsc --noEmit` passou; `git diff --check` passou; `node scripts/validate-docs.mjs` passou (468/468; 10 avisos legados). Suíte unitária: 502 testes passaram e 5 suites de autenticação falharam na inicialização por `DATABASE_URL` ausente. Node 18 inicialmente incompatível com Vitest/Rolldown; com runtime Node 24 a suíte iniciou. |
 | E2E/CI | E2E não executado localmente: precisa de banco PostgreSQL; execução de desktop/mobile e CI pendentes após abrir PR. |
 | Preview/PR | pendente |
+
+## Evidências previstas do RB-INC-219
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-219-trip-guide-date-context.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-219-trip-guide-date-context.md` |
+| issue | [#532](https://github.com/collapsy/Routebook/issues/532) |
+| branch/base | `codex/issue-532-trip-guide-date-context`, branch `codex/issue-531-resume-proposal` (PR #533, dependente da PR #530) |
+| lacuna | O fallback para o primeiro Dia fora do Período ainda era rotulado como “Hoje” |
+| escopo | Visão Geral, Guia, experiências específicas e testes para Trip futura/encerrada; nenhuma mudança de domínio |
+| validação local | Prettier focado passou; ESLint da aplicação passou; typecheck passou; testes unitários focados passaram (10/10); validação documental passou (470/470; 10 avisos legados); `git diff --check` passou; Playwright `--list` descobriu 15 testes nos projetos desktop/mobile. |
+| E2E/CI | E2E real pendente: `DATABASE_URL` não configurada neste ambiente. CI com PostgreSQL necessária para executar a jornada e multi-destino. |
+| Preview/PR | pendente |

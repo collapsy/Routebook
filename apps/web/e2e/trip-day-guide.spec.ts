@@ -21,10 +21,23 @@ function currentPipaDate(): string {
   return `${part("year")}-${part("month")}-${part("day")}`;
 }
 
+function shiftDate(value: string, offsetDays: number): string {
+  const [year, month, day] = value.split("-").map(Number);
+  const shifted = new Date(Date.UTC(year!, month! - 1, day! + offsetDays));
+  return shifted.toISOString().slice(0, 10);
+}
+
 function canonicalOpenDayIndex(): number {
   const today = currentPipaDate();
   if (today < "2026-08-22" || today > "2026-08-29") return 1;
   return Number(today.slice(-2)) - 21;
+}
+
+function overviewGuideActionName(): string {
+  const today = currentPipaDate();
+  if (today < "2026-08-22") return "Ver primeiro dia";
+  if (today > "2026-08-29") return "Rever Dia 1";
+  return "Ver Hoje";
 }
 
 test("abre o Guia da viagem e cobre os oito Dias reais de Pipa", async ({ page }) => {
@@ -39,7 +52,7 @@ test("abre o Guia da viagem e cobre os oito Dias reais de Pipa", async ({ page }
   });
 
   await page.goto(`/viagens/${trip.id}`);
-  const guideEntry = page.getByRole("link", { name: "Ver Hoje" });
+  const guideEntry = page.getByRole("link", { name: overviewGuideActionName() });
   await expect(guideEntry).toBeVisible();
   await guideEntry.click();
 
@@ -158,6 +171,54 @@ test("mantém a ação principal utilizável em viewport mobile", async ({ page 
   const firstDay = page.locator("#guia-dia-1");
   if ((await firstDay.getAttribute("open")) === null) await firstDay.locator("summary").click();
   await expect(firstDay.getByRole("link", { name: "Planejar neste Dia" }).first()).toBeVisible();
+});
+
+test("distingue o primeiro Dia de hoje antes e depois do Período", async ({ page }) => {
+  const today = currentPipaDate();
+  const destination = {
+    name: "Panajachel, Guatemala",
+    type: "city" as const,
+    countryCode: "GT",
+    latitude: 14.741,
+    longitude: -91.156,
+    timeZone: "America/Guatemala",
+  };
+  const future = await createAuthenticatedE2ETrip({
+    name: pipaTripName("Guia viagem futura"),
+    destination,
+    startDate: shiftDate(today, 4),
+    endDate: shiftDate(today, 6),
+  });
+
+  await page.goto(`/viagens/${future.trip.id}`);
+  await expect(page.getByText("Próxima viagem · Panajachel, Guatemala")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Prepare o primeiro dia da viagem" }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Ver primeiro dia" }).click();
+  await expect(page.getByText("Próxima viagem · Panajachel, Guatemala")).toBeVisible();
+  await expect(
+    page
+      .getByRole("navigation", { name: "Modo do Guia" })
+      .getByRole("link", { name: "Dia em foco" }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Dia 1/ })).toBeVisible();
+  await expect(page.getByText("Hoje em Panajachel, Guatemala")).toHaveCount(0);
+
+  const past = await createAuthenticatedE2ETrip({
+    name: pipaTripName("Guia viagem encerrada"),
+    destination,
+    startDate: shiftDate(today, -6),
+    endDate: shiftDate(today, -4),
+  });
+
+  await page.goto(`/viagens/${past.trip.id}`);
+  await expect(page.getByText("Viagem encerrada · Panajachel, Guatemala")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Revisite um dia da viagem" })).toBeVisible();
+  await page.getByRole("link", { name: "Rever Dia 1" }).click();
+  await expect(page.getByText("Viagem encerrada · Panajachel, Guatemala")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Dia 1/ })).toBeVisible();
+  await expect(page.getByText("Hoje em Panajachel, Guatemala")).toHaveCount(0);
 });
 
 test("separa observação natural de rolês confirmados no Guia", async ({ page }) => {

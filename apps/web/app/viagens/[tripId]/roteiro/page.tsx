@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import {
@@ -14,7 +14,6 @@ import {
   findTripById,
   type Activity,
   type Itinerary,
-  type Trip,
 } from "@routebook/trip-management";
 
 import { buildExternalDirectionsUrl } from "../../../../lib/external-directions";
@@ -92,14 +91,6 @@ function formatDaySummary(activityCount: number, freePeriodCount: number): strin
   const activityLabel = activityCount === 1 ? "atividade" : "atividades";
   const freePeriodLabel = freePeriodCount === 1 ? "período livre" : "períodos livres";
   return `${activityCount} ${activityLabel} · ${freePeriodCount} ${freePeriodLabel}`;
-}
-
-async function loadOrCreateItinerary(trip: Trip): Promise<Itinerary> {
-  const repository = new DrizzleItineraryRepository();
-  const existing = await repository.findByTripId(trip.id);
-  if (existing) return existing;
-
-  return repository.save(createItinerary({ tripId: trip.id, period: trip.period }));
 }
 
 function ReorderActivityForm({
@@ -187,10 +178,17 @@ export default async function ItineraryPage({
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const [itinerary, proposals] = await Promise.all([
-    loadOrCreateItinerary(trip),
+  const itineraryRepository = new DrizzleItineraryRepository();
+  const [existingItinerary, proposals] = await Promise.all([
+    itineraryRepository.findByTripId(trip.id),
     new DrizzleItineraryProposalRepository().listByTripId(trip.id),
   ]);
+  if (!existingItinerary && trip.status === "draft") {
+    redirect(`/viagens/${trip.id}/lugares?preparar=1`);
+  }
+  const itinerary: Itinerary =
+    existingItinerary ??
+    (await itineraryRepository.save(createItinerary({ tripId: trip.id, period: trip.period })));
   const proposalReviewStatus = getItineraryProposalReviewStatus(proposals, new Date());
   const {
     dia,

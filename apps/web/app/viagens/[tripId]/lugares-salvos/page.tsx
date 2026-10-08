@@ -209,6 +209,24 @@ export default async function TripSelectionPage({
         <span className="trip-context-version">{preferences.length} avaliados</span>
       </header>
 
+      {wizardMode ? (
+        <section
+          className="traveler-context-summary"
+          aria-labelledby="wizard-places-boundary-title"
+        >
+          <p className="product-eyebrow">Próxima etapa</p>
+          <h2 id="wizard-places-boundary-title">Contexto da viagem</h2>
+          <p>
+            {planningCandidateCount > 0
+              ? "Sua seleção está salva. Continue para informar quem viaja e o ritmo da viagem; nada será adicionado ao roteiro automaticamente."
+              : "Uma seleção vazia também é válida. Você pode continuar para informar quem viaja e o ritmo da viagem."}
+          </p>
+          <Link className="product-primary-action" href={`/viagens/${tripId}/contexto?preparar=1`}>
+            Continuar para Contexto
+          </Link>
+        </section>
+      ) : null}
+
       <TripPlaceSelectionProgress initialCounts={counts} />
 
       <section className="traveler-context-summary" aria-labelledby="selection-filter-title">
@@ -375,24 +393,6 @@ export default async function TripSelectionPage({
           })}
         </ul>
       )}
-
-      {wizardMode ? (
-        <section
-          className="traveler-context-summary"
-          aria-labelledby="wizard-places-boundary-title"
-        >
-          <p className="product-eyebrow">Fim do passo Lugares</p>
-          <h2 id="wizard-places-boundary-title">Continue para Contexto quando quiser</h2>
-          <p>
-            {planningCandidateCount > 0
-              ? "Sua seleção está salva. O próximo passo usa o contexto da viagem sem adicionar nenhuma escolha ao roteiro."
-              : "Você ainda não marcou lugares como Quero ir ou Talvez. Uma seleção vazia também é válida e não bloqueia o contexto da viagem."}
-          </p>
-          <Link className="product-primary-action" href={`/viagens/${tripId}/contexto?preparar=1`}>
-            Continuar para Contexto
-          </Link>
-        </section>
-      ) : null}
     </section>
   );
 }

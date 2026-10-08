@@ -56,7 +56,8 @@ A lacuna observada é a continuidade entre esses passos para a mesma Trip: os sp
 ## Resultado esperado
 
 ```text
-Trip de teste
+Trip `draft` reaberta sem Itinerary
+→ abrir preparação pela visão da viagem
 → expressar WANT em Lugares
 → completar Contexto
 → revisar Minha seleção
@@ -73,7 +74,8 @@ O cenário deve passar nos projetos desktop e mobile já configurados. A cobertu
 - Criar um cenário E2E integrado em uma única Trip usando navegação e ações reais da UI para os passos cobertos.
 - Reutilizar fixtures e fronteiras determinísticas existentes; não depender de Places, Providers ou serviços externos.
 - Verificar persistência entre telas e após reload nos pontos necessários para provar continuidade.
-- Verificar que preferência e Proposal não alteram o Itinerary antes da confirmação explícita.
+- Começar sem Itinerary; abrir `/roteiro` não deve persistir scaffold e deve retomar a preparação; verificar que Lugares, Contexto e Proposal não criam Activities.
+- Na geração explícita, permitir somente o scaffold vazio de Dias exigido para a Proposal; confirmar que nenhum conteúdo proposto foi aplicado antes do aceite.
 - Após aceite, verificar resultado planejado persistido sem reaplicar a decisão.
 - Validar que as ações primárias necessárias permanecem operáveis nos projetos desktop e mobile existentes.
 - Usar a jornada/UX canônica para assertivas; não transformar o incremento em redesign ou auditoria visual subjetiva.
@@ -91,6 +93,9 @@ O cenário deve passar nos projetos desktop e mobile já configurados. A cobertu
 
 ```text
 apps/web/e2e/journey-consolidation.spec.ts
+apps/web/app/viagens/[tripId]/preparacao/proposta/page.tsx
+apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx
+apps/web/app/viagens/[tripId]/roteiro/page.tsx
 docs/implementation/increments/rb-inc-217-journey-consolidation.md
 docs/implementation/context-packs/rb-inc-217-journey-consolidation.md
 docs/implementation/traceability-matrix.md
@@ -104,6 +109,7 @@ Se outro caminho for indispensável, interrompa antes de alterá-lo e atualize e
 - [x] Um cenário atravessa Lugares → Contexto → Revisão → geração/revisão da Proposal → aceite explícito → Roteiro aplicado na mesma Trip.
 - [x] A preferência persiste entre navegação e reload sem criar Activity.
 - [x] A Proposal pode ser revisada sem alterar o Itinerary; somente o aceite explícito aplica a mudança.
+- [ ] A jornada parte da visão de uma Trip `draft` sem Itinerary e alcança a geração sem bloqueio; o scaffold inicial permanece sem Activities até o aceite.
 - [x] Após aceite, Trip planejada e Activity resultante persistem após reload.
 - [x] O teste passa em `desktop-chromium` e `mobile-chromium` sem viewport fixo que contorne o projeto correspondente.
 - [x] As ações primárias da jornada são localizáveis semanticamente e operáveis por teclado/toque; não há regressão na navegação contextual.

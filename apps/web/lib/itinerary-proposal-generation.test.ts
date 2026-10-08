@@ -71,7 +71,10 @@ function deps() {
       },
     }),
     tripRepository: { findById: vi.fn().mockResolvedValue(trip) },
-    itineraryRepository: { findByTripId: vi.fn().mockResolvedValue(itinerary) },
+    itineraryRepository: {
+      findByTripId: vi.fn().mockResolvedValue(itinerary),
+      save: vi.fn(async (value: Itinerary) => value),
+    },
     generationService: { generate: vi.fn().mockResolvedValue(readyProposal()) },
     now: () => instant,
     createItineraryProposalId: () => proposalId,
@@ -224,15 +227,43 @@ describe("executeGenerateItineraryProposalAction", () => {
     },
   );
 
-  it("não executa geração sem Itinerary autoritativo", async () => {
+  it("inicializa somente a estrutura vazia para geração inicial de Trip draft", async () => {
     const dependencies = deps();
+    dependencies.tripRepository.findById.mockResolvedValue({ ...trip, status: "draft" });
     dependencies.itineraryRepository.findByTripId.mockResolvedValue(null);
     await expect(
       executeGenerateItineraryProposalAction({ tripId }, dependencies),
+    ).resolves.toMatchObject({ status: "success" });
+    expect(dependencies.itineraryRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tripId,
+        version: 1,
+        days: expect.arrayContaining([
+          expect.objectContaining({ activities: [], freePeriods: [] }),
+        ]),
+      }),
+    );
+    expect(dependencies.generationService.generate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        request: expect.objectContaining({
+          itineraryId: expect.any(String),
+          baseItineraryVersion: 1,
+        }),
+      }),
+    );
+  });
+
+  it("não inicializa Itinerary automaticamente para REPLAN", async () => {
+    const dependencies = deps();
+    dependencies.tripRepository.findById.mockResolvedValue({ ...trip, status: "planned" });
+    dependencies.itineraryRepository.findByTripId.mockResolvedValue(null);
+    await expect(
+      executeGenerateItineraryProposalAction({ tripId, generationScope: "REPLAN" }, dependencies),
     ).resolves.toMatchObject({
       status: "error",
       code: "itinerary-not-found",
     });
+    expect(dependencies.itineraryRepository.save).not.toHaveBeenCalled();
     expect(dependencies.generationService.generate).not.toHaveBeenCalled();
   });
 });

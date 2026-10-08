@@ -1313,6 +1313,9 @@ Ao concluir um incremento:
 | contrato | `Trip + TripPlacePreference[] + TravelerProfile → Itinerary Proposal` |
 | invariantes | Proposal permanece separada do Itinerary; geração exige ação explícita; nenhum Activity é criado automaticamente |
 | validação | implementação local concluída; `node scripts/validate-docs.mjs` passou com 10 avisos preexistentes; `pnpm lint` e `pnpm typecheck` passaram com Node 24; 3 suítes web direcionadas passaram (11 testes); `pnpm format:check` permanece vermelho por arquivos preexistentes fora do incremento; `pnpm test`/`pnpm build` requerem `DATABASE_URL`; PR, CI e Preview pendentes |
+| correção da jornada sem roteiro | issue #517, branch `codex/fix-preparation-without-itinerary`; geração INITIAL explícita para Trip `draft` sem Itinerary cria somente Dias vazios; REPLAN continua exigindo Itinerary existente; CTA de Contexto antecipado; Revisão orienta corretamente a próxima etapa; abrir `/roteiro` sem Itinerary não persiste scaffold e retorna à preparação; E2E integrado atualizado para cobrir esse caminho |
+| observação manual do Preview | Preview visitado em 2026-10-08: seleção e perfil persistidos; geração bloqueada pela ausência de Itinerary; CTA Contexto somente no fim da Minha seleção; abrir `/roteiro` gravou scaffold vazio via GET. A leitura alterou a Trip de QA e o scaffold foi preservado; nenhum dado foi apagado. |
+| validação local da correção | Vitest direcionado: 19 testes passaram; `pnpm lint` e `pnpm typecheck` passaram; Prettier focado passou; `node scripts/validate-docs.mjs` passou com 10 avisos existentes. `pnpm format:check` global segue vermelho no baseline (528 arquivos). E2E não iniciou: build ausente; `DATABASE_URL` e estado autenticado do Playwright não estão configurados neste worktree. |
 
 ## Evidências previstas do RB-INC-214
 

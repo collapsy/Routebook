@@ -41,7 +41,9 @@ Conectar a Revisão à geração explícita de uma Itinerary Proposal revisável
 - TravelerProfile continua dono do contexto adicional da viagem.
 - TripPlacePreference continua dona de intenção e prioridade.
 - O Itinerary continua sendo o estado canônico aplicado.
-- A Itinerary Proposal é uma sugestão separada e não altera o Itinerary ao ser gerada.
+- A Itinerary Proposal é uma sugestão separada e não aplica mudanças ao Itinerary ao ser gerada.
+- Exceção operacional: ao gerar INITIAL por ação explícita numa Trip `draft` sem Itinerary, criar somente a estrutura vazia de Dias exigida pelo contrato atual. Não criar Activities; se a geração falhar, a estrutura vazia pode permanecer.
+- Abrir a página Roteiro de uma Trip `draft` sem Itinerary é somente leitura e deve retomar a preparação, sem criar/persistir esse scaffold.
 - `WANT` é elegível por padrão; `MAYBE` exige opt-in; `NOT_INTERESTED` é excluído.
 - `MUST_DO` somente qualifica `WANT` e não supera restrições ou conflitos.
 - Proveniência distingue `USER_SELECTED` de `ROUTEBOOK_RECOMMENDED`.
@@ -50,11 +52,15 @@ Conectar a Revisão à geração explícita de uma Itinerary Proposal revisável
 
 ```text
 apps/web/app/viagens/[tripId]/preparacao/revisao/**
+apps/web/app/viagens/[tripId]/preparacao/proposta/page.tsx
+apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx
+apps/web/app/viagens/[tripId]/roteiro/page.tsx
 apps/web/app/viagens/[tripId]/roteiro/proposta/**
 apps/web/components/trip-planning-wizard.tsx
 apps/web/lib/itinerary-proposal-generation.*
 apps/web/e2e/trip-preparation-proposal.spec.ts
 apps/web/e2e/trip-context-wizard.spec.ts
+apps/web/e2e/journey-consolidation.spec.ts
 packages/database/src/authoritative-itinerary-proposal-generation-context.*
 docs/implementation/increments/rb-inc-213-preparation-proposal.md
 docs/implementation/context-packs/rb-inc-213-preparation-proposal.md
@@ -76,7 +82,7 @@ Se um contrato desses caminhos for insuficiente, interrompa e registre a diverg�
 ## Proibições
 
 - não criar WizardState, WizardSession, snapshot duplicado ou tabela nova;
-- não criar Activity canônica na geração;
+- não criar Activity canônica na geração nem aplicar sugestões antes do aceite;
 - não aplicar, aceitar ou rejeitar Proposal nesta etapa;
 - não inventar `ROUTEBOOK_RECOMMENDED`;
 - não tornar opcionais do TravelerProfile obrigatórios por conveniência;
@@ -88,10 +94,13 @@ Se um contrato desses caminhos for insuficiente, interrompa e registre a diverg�
 - [ ] CTA e navegação da Etapa 3 conduzem à Etapa 4 sem geração silenciosa.
 - [ ] O contexto de geração lê as fontes canônicas atuais e inclui TravelerProfile quando suportado pelo contrato.
 - [ ] A geração é autorizada, validada, limitada e tem tratamento de erro.
-- [ ] Proposal gerada não altera TripPlacePreference, TravelerProfile ou Itinerary.
+- [ ] Proposal gerada não altera TripPlacePreference, TravelerProfile nem aplica sugestões/Activities ao Itinerary; a única inicialização permitida é o scaffold vazio numa Trip `draft` sem roteiro, após ação explícita.
 - [ ] A revisão existente da Proposal permanece acessível e compatível.
 - [ ] Alterações feitas antes da geração são refletidas; nenhum snapshot antigo da Revisão prevalece.
 - [ ] Testes comprovam a ausência de Activity e aplicação automática.
+- [ ] E2E parte da visão de uma Trip `draft` existente sem Itinerary, conclui a jornada e verifica aplicação somente após aceite.
+- [ ] CTA para Contexto fica visível no início da Minha seleção.
+- [ ] Navegar a Roteiro sem Itinerary em Trip `draft` não causa gravação e volta ao onboarding.
 - [ ] Mobile, teclado, loading, vazio e erro permanecem cobertos.
 
 ## Comandos

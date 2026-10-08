@@ -53,7 +53,7 @@ Adicionar a evidência integrada ausente entre a seleção explícita, a prepara
 
 - `TripPlacePreference` é intenção; não cria Activity.
 - Proposal é sugestão não aplicada.
-- Itinerary muda somente após ação explícita de aceite.
+- Nenhuma Activity proposta é aplicada antes do aceite explícito. Se uma Trip `draft` não possuir Itinerary, a geração explícita pode criar apenas o scaffold vazio de Dias necessário para a Proposal.
 - O estado e a persistência observados devem vir do sistema real de teste, não de mocks tratados como integração concluída.
 - Trip, selection, Proposal e Itinerary permanecem nos contratos já existentes.
 
@@ -68,11 +68,13 @@ Adicionar a evidência integrada ausente entre a seleção explícita, a prepara
 
 ## 7. Caminhos e limites
 
-Alterar somente os caminhos listados em RB-INC-217. Não alterar setup global de Playwright, helpers compartilhados, componentes, páginas ou CSS neste corte. Se o cenário precisar disso, parar e propor mudança de escopo antes.
+Alterar somente os caminhos listados em RB-INC-217. O ajuste corretivo inclui a geração, sua página de preparação, o CTA de Minha seleção e o E2E integrado. Não alterar setup global de Playwright, helpers compartilhados ou CSS. Se outro caminho for necessário, atualizar formalmente o incremento antes.
 
 ## 8. Critérios verificáveis
 
 - Mesma Trip percorre seleção → Contexto → Revisão → Proposal → aceite → Roteiro.
+- A Trip começa `draft` e sem Itinerary; `/roteiro` não persiste dados e encaminha à preparação; o cenário verifica scaffold sem Activities antes do aceite.
+- O CTA para Contexto fica localizável no topo da Minha seleção.
 - Persistência e ausência de aplicação prévia são verificadas na fronteira correta.
 - Cenário executa em `desktop-chromium` e `mobile-chromium`.
 - E2Es existentes permanecem, sem cobertura removida.

@@ -25,7 +25,7 @@ ai_context:
 - Issue: [#532](https://github.com/collapsy/Routebook/issues/532).
 - Branch: `codex/issue-532-trip-guide-date-context`.
 - Base: branch `codex/issue-531-resume-proposal` (PR #533, dependente da PR #530).
-- Pull Request: a criar.
+- Pull Request: [#534](https://github.com/collapsy/Routebook/pull/534), empilhada sobre [#533](https://github.com/collapsy/Routebook/pull/533).
 - Merge: gate humano; não integrar sem autorização explícita.
 
 ## Problema observado
@@ -70,13 +70,13 @@ Se outro caminho for indispensável, interrompa antes de alterá-lo e atualize e
 
 ## Critérios de aceite
 
-- [ ] Trip futura e encerrada não identificam o Dia fallback como “Hoje” na Visão Geral nem no Guia.
-- [ ] Um Dia atual continua identificado como “Hoje”; um Dia não atual escolhido dentro do Período é identificado como selecionado.
-- [ ] O Guia mantém a data real e a navegação para o Dia em foco.
-- [ ] Testes E2E cobrem Trips futuras e encerradas com datas relativas ao relógio do teste.
-- [ ] Testes unitários cobrem classificação antes/durante/depois do Período e respeitam o fuso do Destino.
-- [ ] Nenhum estado novo de domínio ou mudança de persistência é introduzido.
-- [x] Formatação focada, lint, typecheck, testes unitários focados e validação documental são registrados; E2E/CI ainda pendente.
+- [x] Trip futura e encerrada não identificam o Dia fallback como “Hoje” na Visão Geral nem no Guia.
+- [x] Um Dia atual continua identificado como “Hoje”; um Dia não atual escolhido dentro do Período é identificado como selecionado.
+- [x] O Guia mantém a data real e a navegação para o Dia em foco.
+- [x] Testes E2E cobrem Trips futuras e encerradas com datas relativas ao relógio do teste, em desktop e mobile.
+- [x] Testes unitários cobrem classificação antes/durante/depois do Período e respeitam o fuso do Destino.
+- [x] Nenhum estado novo de domínio ou mudança de persistência é introduzido.
+- [x] Formatação, lint, typecheck, testes unitários, E2E desktop/mobile e validação documental estão registrados.
 
 ## Validação obrigatória
 
@@ -97,7 +97,9 @@ pnpm test:e2e
 - `pnpm --filter @routebook/web exec vitest run lib/trip-active-day.test.ts components/destination-trip-guide.test.tsx`: 10 testes passaram.
 - `node scripts/validate-docs.mjs`: passou, 470/470 documentos registrados; 10 avisos legados de IDs/referências não resolvidos.
 - Playwright `--list` para os dois projetos: listou os cenários, mas não executou navegador.
-- E2E e build com dados: não executados localmente porque `DATABASE_URL` está ausente; aguardam CI com PostgreSQL.
+- E2E local: não executado porque `DATABASE_URL` está ausente. Na CI da PR #534, build passou e 174 E2Es passaram em 6m06s; houve uma tentativa flaky no spec multi-destino mobile ao esperar sucesso da inclusão no Roteiro, resolvida pelo retry.
+- Vercel Preview da PR #534: deployment pronto. Página pública carregou; ao abrir uma Trip, o Preview redirecionou para login. Não automatizei autenticação; o fluxo foi exercitado pelo Playwright autenticado em desktop e mobile na CI.
+- CI documental e engenharia da PR #534: passaram. SHA `eee9771c3c330250b6da82837c52a26830c37042`.
 - `git diff --check`: passou.
 
 ## Gate humano

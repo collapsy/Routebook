@@ -1403,5 +1403,6 @@ Ao concluir um incremento:
 | lacuna | O fallback para o primeiro Dia fora do Período ainda era rotulado como “Hoje” |
 | escopo | Visão Geral, Guia, experiências específicas e testes para Trip futura/encerrada; nenhuma mudança de domínio |
 | validação local | Prettier focado passou; ESLint da aplicação passou; typecheck passou; testes unitários focados passaram (10/10); validação documental passou (470/470; 10 avisos legados); `git diff --check` passou; Playwright `--list` descobriu 15 testes nos projetos desktop/mobile. |
-| E2E/CI | E2E real pendente: `DATABASE_URL` não configurada neste ambiente. CI com PostgreSQL necessária para executar a jornada e multi-destino. |
-| Preview/PR | pendente |
+| E2E/CI | PR #534, SHA `eee9771c3c330250b6da82837c52a26830c37042`: Engineering Validation passou; 174 E2Es responsivos passaram em 6m06s. Uma tentativa mobile do spec multi-destino oscilou esperando “Lugar adicionado ao roteiro” e passou no retry. Documentação e Vercel Preview também passaram. |
+| Preview autenticado | Preview público carregou; detalhe da Trip redirecionou para login. Não automatizei autenticação; inspeção visual da jornada autenticada ficou coberta pelo E2E desktop/mobile da CI. |
+| PR | [#534](https://github.com/collapsy/Routebook/pull/534), empilhada sobre [#533](https://github.com/collapsy/Routebook/pull/533), que passou em documentação, engenharia e Vercel. Sem merge. |

@@ -17,13 +17,13 @@ import { DestinationTripGuide } from "../../../../components/destination-trip-gu
 import { TripGuideModeNav } from "../../../../components/trip-guide-mode-nav";
 import { buildPipaDailyExperience } from "../../../../lib/pipa-daily-experiences";
 import { isPipaDestination } from "../../../../lib/pipa-destination";
-import { resolveTripTodayDate } from "../../../../lib/trip-active-day";
+import { resolveTripDatePosition, resolveTripTodayDate } from "../../../../lib/trip-active-day";
 import { loadTripCuratedCatalog } from "../../../../lib/trip-curated-catalog";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Hoje na viagem — RouteBook",
+  title: "Guia da viagem — RouteBook",
   description: "Consulte decisões úteis para o Dia sem carregar o guia completo.",
 };
 
@@ -46,7 +46,9 @@ export default async function TripGuidePage({
   ]);
   const publishedPlaces = curatedCatalog.places;
   const days = deriveTripDays(trip.period);
-  const todayDate = resolveTripTodayDate(days, new Date(), trip.destination.timeZone);
+  const asOf = new Date();
+  const todayDate = resolveTripTodayDate(days, asOf, trip.destination.timeZone);
+  const datePosition = resolveTripDatePosition(days, asOf, trip.destination.timeZone);
   const { dia } = await searchParams;
   const selectedDate =
     (dia && days.some((day) => day.date === dia) ? dia : undefined) ?? todayDate ?? days[0]?.date;
@@ -78,6 +80,7 @@ export default async function TripGuidePage({
       <TripGuideModeNav
         active="today"
         {...(selectedDate ? { selectedDate } : {})}
+        todayDate={todayDate}
         tripId={tripId}
       />
 
@@ -85,12 +88,14 @@ export default async function TripGuidePage({
         <PipaDailyExperiences
           availableDates={days.map((day) => day.date)}
           experience={dailyExperience}
+          datePosition={datePosition}
           todayDate={todayDate}
           tripId={tripId}
         />
       ) : (
         <DestinationTripGuide
           days={days}
+          datePosition={datePosition}
           destinationName={trip.destination.name}
           itinerary={itinerary}
           mode="today"

@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import type { Itinerary, TripDay } from "@routebook/trip-management";
 
+import type { TripDatePosition } from "../lib/trip-active-day";
+
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("pt-BR", {
     timeZone: "UTC",
@@ -16,6 +18,7 @@ export function DestinationTripGuide({
   tripId,
   destinationName,
   days,
+  datePosition,
   selectedDate,
   todayDate,
   itinerary,
@@ -25,6 +28,7 @@ export function DestinationTripGuide({
   tripId: string;
   destinationName: string;
   days: readonly TripDay[];
+  datePosition: TripDatePosition;
   selectedDate?: string;
   todayDate?: string;
   itinerary: Itinerary | null;
@@ -76,7 +80,15 @@ export function DestinationTripGuide({
 
   return (
     <section className="traveler-context-summary" aria-labelledby="destination-today-title">
-      <p className="product-eyebrow">Hoje em {destinationName}</p>
+      <p className="product-eyebrow">
+        {selectedDate && selectedDate === todayDate
+          ? `Hoje em ${destinationName}`
+          : datePosition === "upcoming"
+            ? `Próxima viagem · ${destinationName}`
+            : datePosition === "past"
+              ? `Viagem encerrada · ${destinationName}`
+              : `Dia selecionado · ${destinationName}`}
+      </p>
       <h1 id="destination-today-title">
         {selectedTripDay
           ? `Dia ${selectedTripDay.index} — ${formatDate(selectedTripDay.date)}`

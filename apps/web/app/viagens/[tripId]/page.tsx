@@ -17,6 +17,7 @@ import { hasReadyItineraryProposal } from "../../../lib/itinerary-proposal-exper
 import { loadRecommendationExperience } from "../../../lib/recommendation-experience";
 import { loadTripOverviewDiscoveryMap } from "../../../lib/trip-overview-discovery-map";
 import { resolveTripRouteAccess } from "../../../lib/trip-route-access";
+import { resolveTripDatePosition } from "../../../lib/trip-active-day";
 import { DeleteTripControl } from "./delete-trip-control";
 
 export const dynamic = "force-dynamic";
@@ -124,6 +125,7 @@ export default async function TripOverviewPage({
   const { contextUpdated } = await searchParams;
   const owner = trip.participants.find((participant) => participant.role === "owner");
   const days = deriveTripDays(trip.period);
+  const datePosition = resolveTripDatePosition(days, asOf, trip.destination.timeZone);
 
   return (
     <section className="app-page trip-overview-page">
@@ -197,15 +199,34 @@ export default async function TripOverviewPage({
         <section className="traveler-context-summary" aria-labelledby="trip-guide-entry-title">
           <div className="section-heading-row">
             <div>
-              <p className="product-eyebrow">Hoje em {trip.destination.name}</p>
-              <h2 id="trip-guide-entry-title">Comece pelo que importa neste Dia</h2>
+              <p className="product-eyebrow">
+                {datePosition === "active"
+                  ? `Hoje em ${trip.destination.name}`
+                  : datePosition === "upcoming"
+                    ? `Próxima viagem · ${trip.destination.name}`
+                    : `Viagem encerrada · ${trip.destination.name}`}
+              </p>
+              <h2 id="trip-guide-entry-title">
+                {datePosition === "active"
+                  ? "Comece pelo que importa neste Dia"
+                  : datePosition === "upcoming"
+                    ? "Prepare o primeiro dia da viagem"
+                    : "Revisite um dia da viagem"}
+              </h2>
               <p>
-                Veja o que já está disponível para a data em foco e abra o Guia para continuar
-                planejando o dia.
+                {datePosition === "active"
+                  ? "Veja o que já está disponível para hoje e abra o Guia para continuar planejando o dia."
+                  : datePosition === "upcoming"
+                    ? `A viagem começa em ${formatDate(trip.period.startDate)}. Consulte o primeiro dia e continue planejando.`
+                    : `A viagem terminou em ${formatDate(trip.period.endDate)}. Consulte novamente os dias e o roteiro.`}
               </p>
             </div>
             <Link className="product-primary-action" href={`/viagens/${tripId}/guia`}>
-              Ver Hoje
+              {datePosition === "active"
+                ? "Ver Hoje"
+                : datePosition === "upcoming"
+                  ? "Ver primeiro dia"
+                  : "Rever Dia 1"}
             </Link>
           </div>
         </section>

@@ -5,13 +5,16 @@ import styles from "./trip-guide-mode-nav.module.css";
 export function TripGuideModeNav({
   tripId,
   selectedDate,
+  todayDate,
   active,
 }: Readonly<{
   tripId: string;
   selectedDate?: string;
+  todayDate?: string | null;
   active: "today" | "days";
 }>) {
   const dateQuery = selectedDate ? `?dia=${selectedDate}` : "";
+  const focusLabel = selectedDate && selectedDate === todayDate ? "Hoje" : "Dia em foco";
 
   return (
     <nav aria-label="Modo do Guia" className={styles.nav}>
@@ -20,7 +23,7 @@ export function TripGuideModeNav({
         className={active === "today" ? styles.active : styles.link}
         href={`/viagens/${tripId}/guia${dateQuery}`}
       >
-        Hoje
+        {focusLabel}
       </Link>
       <Link
         aria-current={active === "days" ? "page" : undefined}

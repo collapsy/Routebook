@@ -17,7 +17,7 @@ import { DestinationTripGuide } from "../../../../../components/destination-trip
 import { TripGuideModeNav } from "../../../../../components/trip-guide-mode-nav";
 import { buildPipaTripGuide } from "../../../../../lib/pipa-day-guide";
 import { isPipaDestination } from "../../../../../lib/pipa-destination";
-import { resolveTripTodayDate } from "../../../../../lib/trip-active-day";
+import { resolveTripDatePosition, resolveTripTodayDate } from "../../../../../lib/trip-active-day";
 import { loadTripCuratedCatalog } from "../../../../../lib/trip-curated-catalog";
 
 export const dynamic = "force-dynamic";
@@ -46,7 +46,9 @@ export default async function TripGuideDaysPage({
   ]);
   const publishedPlaces = curatedCatalog.places;
   const days = deriveTripDays(trip.period);
-  const todayDate = resolveTripTodayDate(days, new Date(), trip.destination.timeZone);
+  const asOf = new Date();
+  const todayDate = resolveTripTodayDate(days, asOf, trip.destination.timeZone);
+  const datePosition = resolveTripDatePosition(days, asOf, trip.destination.timeZone);
   const { dia } = await searchParams;
   const selectedDate =
     (dia && days.some((day) => day.date === dia) ? dia : undefined) ?? todayDate ?? days[0]?.date;
@@ -74,7 +76,12 @@ export default async function TripGuideDaysPage({
         </Link>
       </div>
 
-      <TripGuideModeNav active="days" {...(selectedDate ? { selectedDate } : {})} tripId={tripId} />
+      <TripGuideModeNav
+        active="days"
+        {...(selectedDate ? { selectedDate } : {})}
+        todayDate={todayDate}
+        tripId={tripId}
+      />
 
       {guide ? (
         <TripDayGuide
@@ -96,6 +103,7 @@ export default async function TripGuideDaysPage({
       ) : (
         <DestinationTripGuide
           days={days}
+          datePosition={datePosition}
           destinationName={trip.destination.name}
           itinerary={itinerary}
           mode="days"

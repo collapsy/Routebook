@@ -506,6 +506,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-217 | Context Pack do RB-INC-217 — Consolidação da jornada | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-217-journey-consolidation.md](./implementation/context-packs/rb-inc-217-journey-consolidation.md) |
 | RB-INC-218 | Retomada da Proposal pendente na preparação | Implementation | Draft | 0.1.0 | [rb-inc-218-resume-pending-proposal.md](./implementation/increments/rb-inc-218-resume-pending-proposal.md) |
 | RB-CTX-218 | Context Pack do RB-INC-218 — Retomada de Proposal pendente | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-218-resume-pending-proposal.md](./implementation/context-packs/rb-inc-218-resume-pending-proposal.md) |
+| RB-INC-219 | Contexto temporal honesto no Guia da viagem | Implementation | Draft | 0.1.0 | [rb-inc-219-trip-guide-date-context.md](./implementation/increments/rb-inc-219-trip-guide-date-context.md) |
+| RB-CTX-219 | Context Pack do RB-INC-219 — Contexto temporal do Guia | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-219-trip-guide-date-context.md](./implementation/context-packs/rb-inc-219-trip-guide-date-context.md) |
 
 ## Status possíveis
 

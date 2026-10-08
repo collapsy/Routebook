@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   formatDateInTimeZone,
   resolvePreferredTripDay,
+  resolveTripDatePosition,
   resolveTripTodayDate,
 } from "./trip-active-day";
 
@@ -30,6 +31,18 @@ describe("active trip day", () => {
     expect(
       resolveTripTodayDate(days, new Date("2026-08-25T12:00:00.000Z"), "America/Fortaleza"),
     ).toBeNull();
+  });
+
+  it("classifica a posição do Período usando a data local do Destino", () => {
+    expect(
+      resolveTripDatePosition(days, new Date("2026-08-21T12:00:00.000Z"), "America/Fortaleza"),
+    ).toBe("upcoming");
+    expect(
+      resolveTripDatePosition(days, new Date("2026-08-23T12:00:00.000Z"), "America/Fortaleza"),
+    ).toBe("active");
+    expect(
+      resolveTripDatePosition(days, new Date("2026-08-25T12:00:00.000Z"), "America/Fortaleza"),
+    ).toBe("past");
   });
 
   it("prioriza seleção explícita válida sobre o Dia atual", () => {

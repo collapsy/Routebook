@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import type { PipaDailyExperience } from "../lib/pipa-daily-experiences";
 import type { TripMapPoint } from "../lib/trip-map";
+import type { TripDatePosition } from "../lib/trip-active-day";
 import { CategoryIllustration } from "./category-illustration";
 import { TripMap } from "./trip-map";
 
@@ -29,11 +30,13 @@ export function PipaDailyExperiences({
   tripId,
   experience,
   availableDates,
+  datePosition,
   todayDate,
 }: {
   tripId: string;
   experience: PipaDailyExperience;
   availableDates: readonly string[];
+  datePosition: TripDatePosition;
   todayDate?: string | null;
 }) {
   const mapPointsById = new Map<string, TripMapPoint>();
@@ -70,7 +73,15 @@ export function PipaDailyExperiences({
     >
       <header className={styles.hero}>
         <div>
-          <p className="product-eyebrow">{isToday ? "Hoje em Pipa" : "Experiências do Dia"}</p>
+          <p className="product-eyebrow">
+            {isToday
+              ? "Hoje em Pipa"
+              : datePosition === "upcoming"
+                ? "Próxima viagem · Pipa"
+                : datePosition === "past"
+                  ? "Viagem encerrada · Pipa"
+                  : "Experiências do Dia"}
+          </p>
           <h2 id="daily-experiences-title">O que vale encaixar em {formatDate(experience.date)}</h2>
           <p>
             Sol e Lua usam horário e direção para sugerir pontos de observação. Eventos só aparecem

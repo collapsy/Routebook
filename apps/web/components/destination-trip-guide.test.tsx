@@ -30,7 +30,7 @@ const period = {
 } as const;
 
 describe("DestinationTripGuide", () => {
-  it("apresenta no Hoje somente a atividade persistida", () => {
+  it("apresenta no Dia em foco somente a atividade persistida", () => {
     const itinerary = addActivity(
       createItinerary({ tripId: "trip-sp", period }, new Date("2026-09-03T12:00:00Z")),
       {
@@ -45,24 +45,65 @@ describe("DestinationTripGuide", () => {
     render(
       <DestinationTripGuide
         days={deriveTripDays(period)}
+        datePosition="active"
         destinationName="São Paulo, SP"
         itinerary={itinerary}
         mode="today"
         savedPlaceCount={1}
         selectedDate="2026-11-11"
+        todayDate="2026-11-10"
         tripId="trip-sp"
       />,
     );
 
     expect(screen.getByRole("heading", { name: /Dia 2/ })).toBeInTheDocument();
+    expect(screen.getByText("Dia selecionado · São Paulo, SP")).toBeInTheDocument();
     expect(screen.getByText("Museu confirmado")).toBeInTheDocument();
     expect(screen.getByText(/10:30/)).toBeInTheDocument();
+  });
+
+  it("identifica a Próxima viagem quando o primeiro Dia é apenas um foco", () => {
+    render(
+      <DestinationTripGuide
+        days={deriveTripDays(period)}
+        datePosition="upcoming"
+        destinationName="São Paulo, SP"
+        itinerary={null}
+        mode="today"
+        savedPlaceCount={0}
+        selectedDate="2026-11-10"
+        tripId="trip-sp"
+      />,
+    );
+
+    expect(screen.getByText("Próxima viagem · São Paulo, SP")).toBeInTheDocument();
+    expect(screen.queryByText("Hoje em São Paulo, SP")).not.toBeInTheDocument();
+  });
+
+  it("distingue hoje de outro Dia escolhido durante a viagem", () => {
+    render(
+      <DestinationTripGuide
+        days={deriveTripDays(period)}
+        datePosition="active"
+        destinationName="São Paulo, SP"
+        itinerary={null}
+        mode="today"
+        savedPlaceCount={0}
+        selectedDate="2026-11-11"
+        todayDate="2026-11-10"
+        tripId="trip-sp"
+      />,
+    );
+
+    expect(screen.getAllByText("Dia selecionado · São Paulo, SP")).toHaveLength(2);
+    expect(screen.queryByText("Hoje em São Paulo, SP")).not.toBeInTheDocument();
   });
 
   it("mantém todos os Dias disponíveis sem exigir guia editorial", () => {
     render(
       <DestinationTripGuide
         days={deriveTripDays(period)}
+        datePosition="upcoming"
         destinationName="São Paulo, SP"
         itinerary={null}
         mode="days"

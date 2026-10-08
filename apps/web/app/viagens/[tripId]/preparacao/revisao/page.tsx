@@ -228,8 +228,8 @@ export default async function TripPreparationReviewPage({
           <p>Informe: {missingRequired.join(", ")}.</p>
         ) : (
           <p>
-            Quando a Etapa 4 estiver disponível, ela poderá usar esta revisão para montar uma
-            proposta separada do roteiro.
+            Confira suas escolhas e avance quando quiser. A proposta continuará separada do roteiro,
+            e você decidirá o que aplicar depois de revisá-la.
           </p>
         )}
         {missingRequired.length ? (

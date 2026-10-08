@@ -50,6 +50,9 @@ test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lug
     { timeout: 15_000 },
   );
   await expect(card.getByRole("button", { name: "Limpar" })).toBeVisible();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Preferência atualizada" }),
+  ).toBeVisible();
   await expect
     .poll(async () => Math.abs((await page.evaluate(() => window.scrollY)) - initialScrollY))
     .toBeLessThanOrEqual(2);

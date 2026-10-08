@@ -11,7 +11,6 @@ import {
   trips,
 } from "@routebook/database";
 import type { ItineraryProposalId } from "@routebook/proposal-management";
-import { createItinerary } from "@routebook/trip-management";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
@@ -57,16 +56,25 @@ test("consolida a preparação até o Roteiro aplicado na mesma Trip", async ({ 
   const itineraryRepository = new DrizzleItineraryRepository();
   const proposalRepository = new DrizzleItineraryProposalRepository();
   const preferenceRepository = new DrizzleTripPlacePreferenceRepository();
-  const itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);
-  await itineraryRepository.save(itinerary);
   const itineraryBeforePreparation = await itineraryRepository.findByTripId(trip.id);
-  expect(itineraryBeforePreparation).not.toBeNull();
+  expect(itineraryBeforePreparation).toBeNull();
   expect(await proposalRepository.listByTripId(trip.id)).toHaveLength(0);
 
+  await page.goto(`/viagens/${trip.id}/roteiro`);
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares\\?preparar=1$`));
+  expect(await itineraryRepository.findByTripId(trip.id)).toBeNull();
+
+  await page.goto(`/viagens/${trip.id}`);
+  await expect(page.getByRole("link", { name: "Preparar viagem" })).toBeVisible();
+  await page.getByRole("link", { name: "Preparar viagem" }).click();
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares(?:\\?|$)`));
   await page.goto(
     `/viagens/${trip.id}/lugares?preparar=1&descoberta=ocultar&busca=${encodeURIComponent(placeTitle)}&categoria=beach`,
   );
   await expect(page.locator('[data-planning-wizard-step="places"]')).toBeVisible();
+  await expect(
+    page.getByLabel("Lugares da preparação").getByRole("link", { name: "Minha seleção" }),
+  ).toHaveAttribute("href", `/viagens/${trip.id}/lugares-salvos?preparar=1`);
 
   const placeCard = page
     .getByRole("list", { name: "Opções de lugares" })
@@ -124,6 +132,7 @@ test("consolida a preparação até o Roteiro aplicado na mesma Trip", async ({ 
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/preparacao/revisao\\?preparar=1$`));
   await expect(page.getByText("Preparar viagem · Etapa 3 de 4")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Veja o que será considerado" })).toBeVisible();
+  await expect(page.getByText(/A proposta continuará separada do roteiro/)).toBeVisible();
   await expect(page.getByRole("link", { name: "Montar proposta de roteiro" })).toHaveAttribute(
     "href",
     `/viagens/${trip.id}/preparacao/proposta?preparar=1`,
@@ -147,6 +156,9 @@ test("consolida a preparação até o Roteiro aplicado na mesma Trip", async ({ 
   await expect(page.getByRole("heading", { level: 1, name: "Proposta de Roteiro" })).toBeVisible();
   await expect(page.getByText("Proposta aguardando sua decisão").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: placeTitle })).toBeVisible();
+  const itineraryBeforeAcceptance = await itineraryRepository.findByTripId(trip.id);
+  expect(itineraryBeforeAcceptance).not.toBeNull();
+  expect(itineraryBeforeAcceptance?.days.flatMap(({ activities }) => activities)).toHaveLength(0);
 
   const proposalId = new URL(page.url()).searchParams.get("propostaGerada");
   expect(proposalId).toMatch(/^[0-9a-f-]{36}$/i);
@@ -156,7 +168,7 @@ test("consolida a preparação até o Roteiro aplicado na mesma Trip", async ({ 
   expect(proposal?.proposedActivities).toEqual(
     expect.arrayContaining([expect.objectContaining({ placeId, title: placeTitle })]),
   );
-  expect(await itineraryRepository.findByTripId(trip.id)).toEqual(itineraryBeforePreparation);
+  expect(await itineraryRepository.findByTripId(trip.id)).toEqual(itineraryBeforeAcceptance);
   await expect(page.getByRole("button", { name: "Confirmar e aceitar proposta" })).toHaveCount(0);
 
   await page.getByText("Aceitar proposta", { exact: true }).click();
@@ -179,7 +191,10 @@ test("consolida a preparação até o Roteiro aplicado na mesma Trip", async ({ 
     page.getByLabel("Timeline do Dia").getByText(placeTitle, { exact: true }),
   ).toBeVisible();
   const appliedItinerary = await itineraryRepository.findByTripId(trip.id);
-  expect(appliedItinerary).toMatchObject({ id: itinerary.id, version: itinerary.version + 1 });
+  expect(appliedItinerary).toMatchObject({
+    id: itineraryBeforeAcceptance?.id,
+    version: (itineraryBeforeAcceptance?.version ?? 0) + 1,
+  });
   expect(
     appliedItinerary?.days
       .flatMap(({ activities }) => activities)

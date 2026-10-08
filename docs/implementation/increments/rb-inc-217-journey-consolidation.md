@@ -56,7 +56,8 @@ A lacuna observada é a continuidade entre esses passos para a mesma Trip: os sp
 ## Resultado esperado
 
 ```text
-Trip de teste
+Trip `draft` reaberta sem Itinerary
+→ abrir preparação pela visão da viagem
 → expressar WANT em Lugares
 → completar Contexto
 → revisar Minha seleção
@@ -73,7 +74,8 @@ O cenário deve passar nos projetos desktop e mobile já configurados. A cobertu
 - Criar um cenário E2E integrado em uma única Trip usando navegação e ações reais da UI para os passos cobertos.
 - Reutilizar fixtures e fronteiras determinísticas existentes; não depender de Places, Providers ou serviços externos.
 - Verificar persistência entre telas e após reload nos pontos necessários para provar continuidade.
-- Verificar que preferência e Proposal não alteram o Itinerary antes da confirmação explícita.
+- Começar sem Itinerary; abrir `/roteiro` não deve persistir scaffold e deve retomar a preparação; verificar que Lugares, Contexto e Proposal não criam Activities.
+- Na geração explícita, permitir somente o scaffold vazio de Dias exigido para a Proposal; confirmar que nenhum conteúdo proposto foi aplicado antes do aceite.
 - Após aceite, verificar resultado planejado persistido sem reaplicar a decisão.
 - Validar que as ações primárias necessárias permanecem operáveis nos projetos desktop e mobile existentes.
 - Usar a jornada/UX canônica para assertivas; não transformar o incremento em redesign ou auditoria visual subjetiva.
@@ -91,11 +93,32 @@ O cenário deve passar nos projetos desktop e mobile já configurados. A cobertu
 
 ```text
 apps/web/e2e/journey-consolidation.spec.ts
+apps/web/e2e/active-trip-experience.spec.ts
+apps/web/e2e/itinerary.spec.ts
+apps/web/e2e/recommendations-experience.spec.ts
+apps/web/e2e/place-actions.spec.ts
+apps/web/e2e/trip-day-guide.spec.ts
+apps/web/e2e/itinerary-proposal-generation.spec.ts
+apps/web/e2e/product-shell.spec.ts
+apps/web/e2e/multi-destination-validation.spec.ts
+apps/web/app/viagens/[tripId]/preparacao/proposta/page.tsx
+apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx
+apps/web/app/viagens/[tripId]/roteiro/page.tsx
 docs/implementation/increments/rb-inc-217-journey-consolidation.md
 docs/implementation/context-packs/rb-inc-217-journey-consolidation.md
 docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
+
+Engineering Validation found that `active-trip-experience.spec.ts` and `itinerary.spec.ts` relied on opening `/roteiro` to create an empty Itinerary as a GET side effect. Since draft Trips without an Itinerary now correctly return to preparation, these existing itinerary E2Es must explicitly seed an empty Itinerary in test setup. This is a fixture-only correction; the specs continue to verify active itinerary behavior, empty timeline, and the separation between selection and itinerary.
+
+The full E2E run also found that `recommendations-experience.spec.ts` expects the empty itinerary summary after visiting `/roteiro`. That test must explicitly seed the empty Itinerary it expects, rather than relying on route access to create it.
+
+The same E2E run exposed a race in `place-actions.spec.ts`: the test navigated away after observing the optimistic preference state but before the server action's success feedback. Wait for the action's success status before opening the detail page so the persistence assertion observes the completed mutation.
+
+The next full-suite run exposed three more test-only assumptions: the day-guide detail action needs its empty Itinerary fixture; the REPLAN fixture must place its protected activity in the future relative to CI's clock; and the product-shell assertion must identify the current preparation step instead of requiring onboarding-only copy when reopening an existing Trip. These changes remain fixtures/assertions only; no product rules, UI text, or navigation are changed.
+
+The following E2E run identified the same missing empty-Itinerary fixture in the multi-destination route-validation scenario. The product-shell test also asserted a specific heading variant despite already confirming the preparation step; it now asserts the wizard step marker only. Both remain test-only corrections.
 
 Se outro caminho for indispensável, interrompa antes de alterá-lo e atualize este incremento e o Context Pack.
 
@@ -104,6 +127,7 @@ Se outro caminho for indispensável, interrompa antes de alterá-lo e atualize e
 - [x] Um cenário atravessa Lugares → Contexto → Revisão → geração/revisão da Proposal → aceite explícito → Roteiro aplicado na mesma Trip.
 - [x] A preferência persiste entre navegação e reload sem criar Activity.
 - [x] A Proposal pode ser revisada sem alterar o Itinerary; somente o aceite explícito aplica a mudança.
+- [ ] A jornada parte da visão de uma Trip `draft` sem Itinerary e alcança a geração sem bloqueio; o scaffold inicial permanece sem Activities até o aceite.
 - [x] Após aceite, Trip planejada e Activity resultante persistem após reload.
 - [x] O teste passa em `desktop-chromium` e `mobile-chromium` sem viewport fixo que contorne o projeto correspondente.
 - [x] As ações primárias da jornada são localizáveis semanticamente e operáveis por teclado/toque; não há regressão na navegação contextual.
@@ -130,6 +154,14 @@ O E2E requer o banco de teste e setup Playwright fornecidos pela CI quando indis
 - CI de engenharia: passou, incluindo formatação, lint, typecheck, build e 173 testes E2E responsivos; os projetos configurados incluem desktop e mobile.
 - Preview Vercel: passou.
 - Validações locais e limitações: registradas na matriz de rastreabilidade.
+
+## Validação corretiva da PR #530
+
+- SHA validado: `3d7348e6e733e4d2ac8c56dc4e256644ad4ca03f`.
+- CI documental: passou.
+- CI de engenharia: passou; formatação, documentação, lint, typecheck, 516 testes unitários e 173 testes E2E responsivos passaram.
+- Preview Vercel: passou.
+- Nenhum merge foi realizado; o gate humano permanece.
 
 ## Gate humano
 

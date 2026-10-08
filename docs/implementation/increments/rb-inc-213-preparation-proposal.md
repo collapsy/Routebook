@@ -57,6 +57,9 @@ As regras de seleção permanecem:
 - Revisão exibe CTA para a Etapa 4, preservando `preparar=1` quando o fluxo permanecer no wizard.
 - A Etapa 4 comunica geração, sucesso, erro e indisponibilidade sem afirmar que o Roteiro foi alterado.
 - A Proposal pode ser revisada pela experiência existente, mas aceite, rejeição, edição e aplicação permanecem ações distintas e explícitas.
+- Ao gerar explicitamente a proposta INITIAL para uma Trip `draft` sem Itinerary, inicializar somente a estrutura vazia de Dias necessária. Não criar Activities; a proposta continua sem aplicação até o aceite.
+- Manter a passagem Lugares → Contexto visível sem depender de chegar ao fim da página Minha seleção.
+- Ao abrir Roteiro numa Trip `draft` sem Itinerary, encaminhar para a preparação sem persistir um roteiro como efeito colateral da navegação.
 - A navegação mostra Lugares e Contexto concluídos, Revisão concluída e Proposta ativa.
 
 ## Invariantes
@@ -64,14 +67,14 @@ As regras de seleção permanecem:
 - `TripPlacePreference ≠ Activity`.
 - `Proposal ≠ Roteiro aplicado`.
 - Nenhuma Activity canônica é criada pela geração.
-- Nenhuma alteração no Itinerary ocorre antes de aceite explícito.
+- Nenhuma mudança proposta ou Activity é aplicada ao Itinerary antes de aceite explícito. A geração explícita pode inicializar apenas um Itinerary vazio para Trip `draft` sem roteiro; se a geração falhar, essa estrutura vazia pode permanecer.
 - Falha de geração não altera Trip, preferências, TravelerProfile ou Itinerary.
 - O contexto enviado ao gerador é mínimo, validado e derivado das fontes autorizadas.
 
 ## Fora de escopo
 
 - aceite, rejeição, edição ou aplicação novos;
-- montagem automática de dias fora do gerador já contratado;
+- montagem de Activities ou aplicação de mudanças fora do aceite explícito;
 - criação automática de `ROUTEBOOK_RECOMMENDED`;
 - nova tabela, snapshot persistido ou estado paralelo do wizard;
 - mudança de autenticação, Provider ou Production;
@@ -81,11 +84,15 @@ As regras de seleção permanecem:
 
 ```text
 apps/web/app/viagens/[tripId]/preparacao/revisao/**
+apps/web/app/viagens/[tripId]/preparacao/proposta/page.tsx
+apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx
+apps/web/app/viagens/[tripId]/roteiro/page.tsx
 apps/web/app/viagens/[tripId]/roteiro/proposta/**
 apps/web/components/trip-planning-wizard.tsx
 apps/web/lib/itinerary-proposal-generation.*
 apps/web/e2e/trip-preparation-proposal.spec.ts
 apps/web/e2e/trip-context-wizard.spec.ts
+apps/web/e2e/journey-consolidation.spec.ts
 packages/database/src/authoritative-itinerary-proposal-generation-context.*
 docs/implementation/increments/rb-inc-213-preparation-proposal.md
 docs/implementation/context-packs/rb-inc-213-preparation-proposal.md
@@ -102,6 +109,9 @@ docs/implementation/traceability-matrix.md
 - [ ] A ação de geração exige autorização e não ocorre ao abrir a página.
 - [ ] A Proposal é persistida/reidratada sem alterar o Itinerary.
 - [ ] Erros, ausência de Itinerary e indisponibilidade são comunicados sem perda de dados.
+- [ ] Trip `draft` reaberta sem roteiro conclui geração da proposta; somente Dias vazios são inicializados e nenhuma Activity é aplicada antes do aceite.
+- [ ] A ação para avançar de Minha seleção a Contexto fica disponível no início da página.
+- [ ] Abrir Roteiro de uma Trip `draft` sem Itinerary não grava dados e encaminha à preparação.
 - [ ] Rota normal existente de Proposal permanece compatível.
 - [ ] Nenhuma Activity ou `ROUTEBOOK_RECOMMENDED` é criada indevidamente.
 - [ ] Cobertura unitária, integração, interface e E2E responsivo comprova a jornada crítica.

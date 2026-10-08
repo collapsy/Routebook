@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-import { DrizzleTravelerProfileRepository, DrizzleTripRepository } from "@routebook/database";
+import {
+  DrizzleItineraryRepository,
+  DrizzleTravelerProfileRepository,
+  DrizzleTripRepository,
+} from "@routebook/database";
 import { findTravelerProfile } from "@routebook/traveler-profile";
 import { findTripById } from "@routebook/trip-management";
 
@@ -32,7 +36,10 @@ export default async function TripPreparationProposalPage({
   if (!trip) notFound();
   if (trip.status !== "draft") redirect(`/viagens/${tripId}/roteiro/proposta`);
 
-  const profile = await findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId);
+  const [profile, itinerary] = await Promise.all([
+    findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
+    new DrizzleItineraryRepository().findByTripId(tripId),
+  ]);
   const canGenerate = profile?.travelerCount !== undefined;
   const action = generateItineraryProposalAction.bind(null, tripId);
 
@@ -46,8 +53,8 @@ export default async function TripPreparationProposalPage({
         <p className="product-eyebrow">Proposta de roteiro</p>
         <h1>Monte uma proposta para {trip.name}</h1>
         <p>
-          A proposta será uma sugestão revisável. Gerá-la não altera o Roteiro nem cria Activities
-          aplicadas.
+          A proposta será uma sugestão revisável. Gerá-la não aplica as sugestões ao Roteiro nem
+          cria Atividades planejadas.
         </p>
       </header>
       <section className="traveler-context-summary" aria-labelledby="preparation-proposal-title">
@@ -58,6 +65,12 @@ export default async function TripPreparationProposalPage({
               O RouteBook usará a Trip, suas seleções e o contexto informado para preparar a
               sugestão.
             </p>
+            {!itinerary ? (
+              <p role="note">
+                Esta viagem ainda não tem roteiro. Ao gerar a proposta, criaremos apenas os Dias
+                vazios necessários; nenhuma Atividade será adicionada antes do seu aceite.
+              </p>
+            ) : null}
             <ItineraryProposalGenerationControl action={action} preparing />
           </>
         ) : (

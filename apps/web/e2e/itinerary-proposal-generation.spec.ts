@@ -51,7 +51,7 @@ function addCalendarDays(value: string, days: number): string {
 async function createReplanningFixture(tripName: string) {
   const now = new Date();
   const timeZone = "America/Fortaleza";
-  const startDate = dateInTimeZone(now, timeZone);
+  const startDate = addCalendarDays(dateInTimeZone(now, timeZone), 1);
   const endDate = addCalendarDays(startDate, 2);
   const { trip } = await createAuthenticatedE2ETrip({ name: tripName, startDate, endDate }, now);
   const itinerary = createItinerary({ tripId: trip.id, period: trip.period }, now);

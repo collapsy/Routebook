@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { DrizzleItineraryRepository } from "@routebook/database";
+import { createItinerary } from "@routebook/trip-management";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
@@ -24,6 +26,9 @@ test("valida São Paulo sem seed e preserva Discovery, Minha seleção, Roteiro,
     accommodationLatitude: -23.5615,
     accommodationLongitude: -46.6559,
   });
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }),
+  );
 
   await page.goto(`/viagens/${trip.id}`);
   await expect(page.getByText("São Paulo, SP", { exact: true })).toBeVisible();

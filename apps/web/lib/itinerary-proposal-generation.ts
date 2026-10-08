@@ -5,7 +5,11 @@ import type {
   ItineraryProposal,
   ItineraryProposalGenerationScope,
 } from "@routebook/proposal-management";
-import type { ItineraryRepository, TripRepository } from "@routebook/trip-management";
+import {
+  createItinerary,
+  type ItineraryRepository,
+  type TripRepository,
+} from "@routebook/trip-management";
 
 import type { TripRouteAccessResult } from "./trip-route-access";
 
@@ -60,7 +64,7 @@ type GenerationService = Readonly<{
 export type GenerateItineraryProposalActionDependencies = Readonly<{
   resolveAccess: TripAccessResolver;
   tripRepository: Pick<TripRepository, "findById">;
-  itineraryRepository: Pick<ItineraryRepository, "findByTripId">;
+  itineraryRepository: Pick<ItineraryRepository, "findByTripId" | "save">;
   generationService: GenerationService;
   now?: () => Date;
   createItineraryProposalId?: () => string;
@@ -123,14 +127,24 @@ export async function executeGenerateItineraryProposalAction(
     return generateItineraryProposalActionError("replanning-unavailable");
   }
 
-  const itinerary = await dependencies.itineraryRepository.findByTripId(tripId);
-  if (!itinerary || itinerary.tripId !== tripId) {
-    return generateItineraryProposalActionError("itinerary-not-found");
-  }
-
   const now = dependencies.now?.() ?? new Date();
   if (Number.isNaN(now.getTime())) {
     throw new Error("GenerateItineraryProposalAction received an invalid clock value.");
+  }
+
+  let itinerary = await dependencies.itineraryRepository.findByTripId(tripId);
+  if (!itinerary && generationScope === "INITIAL" && trip.status === "draft") {
+    const emptyItinerary = createItinerary({ tripId, period: trip.period }, now);
+    try {
+      itinerary = await dependencies.itineraryRepository.save(emptyItinerary);
+    } catch (error) {
+      // Another explicit generation request may have initialized this draft concurrently.
+      itinerary = await dependencies.itineraryRepository.findByTripId(tripId);
+      if (!itinerary) throw error;
+    }
+  }
+  if (!itinerary || itinerary.tripId !== tripId) {
+    return generateItineraryProposalActionError("itinerary-not-found");
   }
 
   const includeMaybe = input.includeMaybe === true;

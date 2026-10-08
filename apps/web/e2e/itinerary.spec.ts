@@ -4,6 +4,7 @@ import {
   DrizzleItineraryRepository,
   DrizzlePlaceRepository,
   DrizzleSavedPlaceRepository,
+  DrizzleTripRepository,
 } from "@routebook/database";
 import { createSavedPlace } from "@routebook/saved-places";
 import { addActivity, createItinerary } from "@routebook/trip-management";
@@ -19,6 +20,13 @@ async function createTripThroughUi(page: Page, tripName: string) {
   await page.getByLabel("Quando termina?").fill("2026-08-29");
   await page.getByRole("button", { name: "Criar meu guia" }).click();
   await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\/lugares\?preparar=1&onboarding=1$/);
+  const tripId = new URL(page.url()).pathname.split("/")[2];
+  if (!tripId) throw new Error("Trip criada sem identificador na rota de onboarding.");
+  const trip = await new DrizzleTripRepository().findById(tripId);
+  if (!trip) throw new Error("Trip criada pela UI não foi encontrada no banco de teste.");
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }),
+  );
   await page.goto("/viagens");
 }
 
@@ -41,6 +49,9 @@ test("prioriza a timeline do dia vazio antes das ações secundárias", async ({
     startDate: "2026-08-22",
     endDate: "2026-08-29",
   });
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }),
+  );
 
   await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-08-22`);
 
@@ -282,6 +293,9 @@ test("mantém Minha seleção separada do roteiro durante o wizard", async ({ pa
       endDate: "2026-08-29",
     },
     now,
+  );
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }, now),
   );
   const [place] = await new DrizzlePlaceRepository().listPublished({
     destinationId: "pipa-rn-br",

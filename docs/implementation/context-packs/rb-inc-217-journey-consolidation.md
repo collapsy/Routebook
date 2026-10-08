@@ -68,7 +68,7 @@ Adicionar a evidência integrada ausente entre a seleção explícita, a prepara
 
 ## 7. Caminhos e limites
 
-Alterar somente os caminhos listados em RB-INC-217. O ajuste corretivo inclui a geração, sua página de preparação, o CTA de Minha seleção, o E2E integrado e os setups locais dos specs de Trip ativa e Roteiro para semear explicitamente o Itinerary vazio que cada teste pressupõe. Não alterar setup global de Playwright, helpers compartilhados ou CSS. Se outro caminho for necessário, atualizar formalmente o incremento antes.
+Alterar somente os caminhos listados em RB-INC-217. O ajuste corretivo inclui a geração, sua página de preparação, o CTA de Minha seleção, o E2E integrado e os setups locais dos specs de Trip ativa, Roteiro e recomendações para semear explicitamente o Itinerary vazio que cada teste pressupõe. O teste de ações de lugar deve esperar a confirmação da mutação antes de navegar ao detalhe. Não alterar setup global de Playwright, helpers compartilhados ou CSS. Se outro caminho for necessário, atualizar formalmente o incremento antes.
 
 ## 8. Critérios verificáveis
 

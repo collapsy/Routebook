@@ -1,4 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
+import { DrizzleItineraryRepository, DrizzleTripRepository } from "@routebook/database";
+import { createItinerary } from "@routebook/trip-management";
 
 test.setTimeout(120_000);
 
@@ -83,6 +85,14 @@ async function createTripWithRecommendationContext(page: Page) {
     page.waitForURL(/\/hospedagem\?saved=1&located=1$/),
     page.getByRole("button", { name: "Salvar hospedagem" }).click(),
   ]);
+
+  const tripId = new URL(tripUrl, page.url()).pathname.split("/")[2];
+  if (!tripId) throw new Error("Trip de recomendações criada sem identificador.");
+  const trip = await new DrizzleTripRepository().findById(tripId);
+  if (!trip) throw new Error("Trip de recomendações não foi encontrada no banco de teste.");
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }),
+  );
 
   return { tripName, tripUrl };
 }

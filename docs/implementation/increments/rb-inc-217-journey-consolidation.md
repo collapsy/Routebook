@@ -95,6 +95,8 @@ O cenário deve passar nos projetos desktop e mobile já configurados. A cobertu
 apps/web/e2e/journey-consolidation.spec.ts
 apps/web/e2e/active-trip-experience.spec.ts
 apps/web/e2e/itinerary.spec.ts
+apps/web/e2e/recommendations-experience.spec.ts
+apps/web/e2e/place-actions.spec.ts
 apps/web/app/viagens/[tripId]/preparacao/proposta/page.tsx
 apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx
 apps/web/app/viagens/[tripId]/roteiro/page.tsx
@@ -105,6 +107,10 @@ docs/registry.md
 ```
 
 Engineering Validation found that `active-trip-experience.spec.ts` and `itinerary.spec.ts` relied on opening `/roteiro` to create an empty Itinerary as a GET side effect. Since draft Trips without an Itinerary now correctly return to preparation, these existing itinerary E2Es must explicitly seed an empty Itinerary in test setup. This is a fixture-only correction; the specs continue to verify active itinerary behavior, empty timeline, and the separation between selection and itinerary.
+
+The full E2E run also found that `recommendations-experience.spec.ts` expects the empty itinerary summary after visiting `/roteiro`. That test must explicitly seed the empty Itinerary it expects, rather than relying on route access to create it.
+
+The same E2E run exposed a race in `place-actions.spec.ts`: the test navigated away after observing the optimistic preference state but before the server action's success feedback. Wait for the action's success status before opening the detail page so the persistence assertion observes the completed mutation.
 
 Se outro caminho for indispensável, interrompa antes de alterá-lo e atualize este incremento e o Context Pack.
 

@@ -171,6 +171,26 @@ test("consolida a preparação até o Roteiro aplicado na mesma Trip", async ({ 
   expect(await itineraryRepository.findByTripId(trip.id)).toEqual(itineraryBeforeAcceptance);
   await expect(page.getByRole("button", { name: "Confirmar e aceitar proposta" })).toHaveCount(0);
 
+  await page.goto(`/viagens/${trip.id}`);
+  const resumeProposalLink = page.getByRole("link", { name: "Revisar proposta pendente" });
+  await expect(resumeProposalLink).toHaveAttribute(
+    "href",
+    `/viagens/${trip.id}/roteiro/proposta?preparar=1`,
+  );
+  await resumeProposalLink.click();
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/roteiro/proposta\\?preparar=1$`));
+  await expect(page.getByText("Proposta aguardando sua decisão").first()).toBeVisible();
+  await expect(proposalRepository.listByTripId(trip.id)).resolves.toHaveLength(1);
+
+  await page.goto(`/viagens/${trip.id}/preparacao/revisao?preparar=1`);
+  await expect(page.getByRole("heading", { name: "Sua proposta aguarda decisão" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Revisar proposta pendente" })).toBeVisible();
+  await page.goto(`/viagens/${trip.id}/preparacao/proposta?preparar=1`);
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/roteiro/proposta\\?preparar=1$`));
+  await expect(page.getByText("Proposta aguardando sua decisão").first()).toBeVisible();
+  await expect(proposalRepository.listByTripId(trip.id)).resolves.toHaveLength(1);
+  expect(await itineraryRepository.findByTripId(trip.id)).toEqual(itineraryBeforeAcceptance);
+
   await page.getByText("Aceitar proposta", { exact: true }).click();
   await page.getByRole("checkbox", { name: /atualizará o Roteiro/i }).check();
   const acceptancePathname = new URL(page.url()).pathname;

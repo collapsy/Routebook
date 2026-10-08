@@ -504,6 +504,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-216 | Context Pack do RB-INC-216 — Replanejamento durante a viagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-216-replanning-experience.md](./implementation/context-packs/rb-inc-216-replanning-experience.md) |
 | RB-INC-217 | Etapa 9 — consolidação da jornada, responsividade e E2E | Implementation | Draft | 0.1.0 | [rb-inc-217-journey-consolidation.md](./implementation/increments/rb-inc-217-journey-consolidation.md) |
 | RB-CTX-217 | Context Pack do RB-INC-217 — Consolidação da jornada | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-217-journey-consolidation.md](./implementation/context-packs/rb-inc-217-journey-consolidation.md) |
+| RB-INC-218 | Retomada da Proposal pendente na preparação | Implementation | Draft | 0.1.0 | [rb-inc-218-resume-pending-proposal.md](./implementation/increments/rb-inc-218-resume-pending-proposal.md) |
+| RB-CTX-218 | Context Pack do RB-INC-218 — Retomada de Proposal pendente | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-218-resume-pending-proposal.md](./implementation/context-packs/rb-inc-218-resume-pending-proposal.md) |
 
 ## Status possíveis
 

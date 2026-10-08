@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import {
+  DrizzleItineraryProposalRepository,
   DrizzleItineraryRepository,
   DrizzleTravelerProfileRepository,
   DrizzleTripRepository,
@@ -12,6 +13,7 @@ import { findTripById } from "@routebook/trip-management";
 
 import { ItineraryProposalGenerationControl } from "../../../../../components/itinerary-proposal-generation-control";
 import { TripPlanningWizard } from "../../../../../components/trip-planning-wizard";
+import { hasReadyItineraryProposal } from "../../../../../lib/itinerary-proposal-experience";
 import { generateItineraryProposalAction } from "../../roteiro/proposta/generate-action";
 
 export const dynamic = "force-dynamic";
@@ -36,10 +38,14 @@ export default async function TripPreparationProposalPage({
   if (!trip) notFound();
   if (trip.status !== "draft") redirect(`/viagens/${tripId}/roteiro/proposta`);
 
-  const [profile, itinerary] = await Promise.all([
+  const [profile, itinerary, proposals] = await Promise.all([
     findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
     new DrizzleItineraryRepository().findByTripId(tripId),
+    new DrizzleItineraryProposalRepository().listByTripId(tripId),
   ]);
+  if (hasReadyItineraryProposal(proposals, new Date())) {
+    redirect(`/viagens/${tripId}/roteiro/proposta?preparar=1`);
+  }
   const canGenerate = profile?.travelerCount !== undefined;
   const action = generateItineraryProposalAction.bind(null, tripId);
 

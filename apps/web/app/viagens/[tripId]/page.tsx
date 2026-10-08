@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
+  DrizzleItineraryProposalRepository,
   DrizzleTripPlacePreferenceRepository,
   DrizzleTravelerProfileRepository,
   DrizzleTripRepository,
@@ -12,6 +13,7 @@ import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
 import { ContextualRecommendationStrip } from "../../../components/contextual-recommendation-strip";
 import { TripMap } from "../../../components/trip-map";
+import { hasReadyItineraryProposal } from "../../../lib/itinerary-proposal-experience";
 import { loadRecommendationExperience } from "../../../lib/recommendation-experience";
 import { loadTripOverviewDiscoveryMap } from "../../../lib/trip-overview-discovery-map";
 import { resolveTripRouteAccess } from "../../../lib/trip-route-access";
@@ -100,21 +102,25 @@ export default async function TripOverviewPage({
   if (!trip) notFound();
 
   const preferencesPromise = new DrizzleTripPlacePreferenceRepository().listByTripId(tripId);
-  const [profile, deleteAccess, recommendationExperience, overviewMap] = await Promise.all([
-    findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
-    resolveTripRouteAccess({ tripId, action: "trip:delete" }),
-    loadRecommendationExperience(tripId, new Date(), { persist: false }),
-    preferencesPromise.then((preferences) =>
-      loadTripOverviewDiscoveryMap(
-        trip,
-        new Set(
-          preferences
-            .filter((selection) => selection.intent !== "NOT_INTERESTED")
-            .map((selection) => selection.placeId),
+  const asOf = new Date();
+  const [profile, deleteAccess, recommendationExperience, overviewMap, proposals] =
+    await Promise.all([
+      findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
+      resolveTripRouteAccess({ tripId, action: "trip:delete" }),
+      loadRecommendationExperience(tripId, asOf, { persist: false }),
+      preferencesPromise.then((preferences) =>
+        loadTripOverviewDiscoveryMap(
+          trip,
+          new Set(
+            preferences
+              .filter((selection) => selection.intent !== "NOT_INTERESTED")
+              .map((selection) => selection.placeId),
+          ),
         ),
       ),
-    ),
-  ]);
+      new DrizzleItineraryProposalRepository().listByTripId(tripId),
+    ]);
+  const hasPendingProposal = hasReadyItineraryProposal(proposals, asOf);
   const { contextUpdated } = await searchParams;
   const owner = trip.participants.find((participant) => participant.role === "owner");
   const days = deriveTripDays(trip.period);
@@ -140,7 +146,14 @@ export default async function TripOverviewPage({
           <p>Veja os principais dados da viagem e continue de onde parou.</p>
         </div>
         <div className="section-heading-row">
-          {trip.status === "draft" ? (
+          {trip.status === "draft" && hasPendingProposal ? (
+            <Link
+              className="product-primary-action"
+              href={`/viagens/${tripId}/roteiro/proposta?preparar=1`}
+            >
+              Revisar proposta pendente
+            </Link>
+          ) : trip.status === "draft" ? (
             <Link className="product-primary-action" href={`/viagens/${tripId}/lugares?preparar=1`}>
               Preparar viagem
             </Link>

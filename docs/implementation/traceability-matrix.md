@@ -1370,7 +1370,7 @@ Ao concluir um incremento:
 | issue | [#527](https://github.com/collapsy/Routebook/issues/527) |
 | branch/base | `codex/rb-inc-217-integrated-e2e`, `main@0de3ac7e8d806bf4d58ae7d1da0b4d596494ca42` |
 | lacuna | specs individuais cobrem as fronteiras; falta continuidade de seleção até Itinerary aplicado na mesma Trip |
-| escopo | `apps/web/e2e/journey-consolidation.spec.ts`: jornada integrada pela UI nos projetos desktop/mobile; `apps/web/e2e/active-trip-experience.spec.ts`: fixture semeia explicitamente Itinerary vazio, removendo dependência do antigo GET com efeito colateral; sem redesign ou mudança de comportamento |
+| escopo | `apps/web/e2e/journey-consolidation.spec.ts`: jornada integrada pela UI nos projetos desktop/mobile; `active-trip-experience.spec.ts` e `itinerary.spec.ts`: fixtures semeiam explicitamente Itinerary vazio, removendo dependência do antigo GET com efeito colateral; sem redesign ou mudança de comportamento |
 | validação local | Prettier focado passou; ESLint focado passou; `pnpm lint` passou; `pnpm typecheck` passou; Playwright `--list` reconheceu o cenário nos dois projetos |
 | formatação global | `pnpm format:check` falhou em 527 arquivos do baseline; o arquivo novo e os documentos alterados passaram no Prettier focado |
 | E2E/build local | Playwright não iniciou: Node 18 do terminal é incompatível; repetido com Node 24, mas o servidor não iniciou sem build. Build compilou e passou TypeScript, depois falhou na coleta de páginas por `DATABASE_URL` ausente. Docker daemon indisponível e porta local 5432 fechada; E2E desktop/mobile depende do PostgreSQL configurado no CI |

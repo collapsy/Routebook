@@ -1365,9 +1365,11 @@ Ao concluir um incremento:
 | incremento | `docs/implementation/increments/rb-inc-217-journey-consolidation.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-217-journey-consolidation.md` |
 | issue | [#527](https://github.com/collapsy/Routebook/issues/527) |
-| branch/base | `codex/rb-inc-217-journey-consolidation`, `main@cfd8c460df9677a1618dc63c64c2cb60f04268ca` |
+| branch/base | `codex/rb-inc-217-integrated-e2e`, `main@0de3ac7e8d806bf4d58ae7d1da0b4d596494ca42` |
 | lacuna | specs individuais cobrem as fronteiras; falta continuidade de seleção até Itinerary aplicado na mesma Trip |
-| escopo | um E2E integrado nos projetos desktop/mobile existentes; sem redesign ou mudança de comportamento |
-| validação documental | `node scripts/validate-docs.mjs` passou (466/466 documentos; 10 avisos legados); Prettier passou nos 2 novos documentos; `git diff --check` passou |
-| limitações locais | `pnpm format:check` global reportou 527 arquivos; os 2 documentos novos passam na checagem focada; lint, typecheck e E2E não foram executados nesta preparação documental |
-| CI/PR | PR e CI pendentes; registrar resultados observados após abertura |
+| escopo | `apps/web/e2e/journey-consolidation.spec.ts`: uma jornada pela UI com fixtures determinísticas, executada nos projetos desktop/mobile existentes; sem redesign ou mudança de comportamento |
+| validação local | Prettier focado passou; ESLint focado passou; `pnpm lint` passou; `pnpm typecheck` passou; Playwright `--list` reconheceu o cenário nos dois projetos |
+| formatação global | `pnpm format:check` falhou em 527 arquivos do baseline; o arquivo novo e os documentos alterados passaram no Prettier focado |
+| E2E/build local | Playwright não iniciou: Node 18 do terminal é incompatível; repetido com Node 24, mas o servidor não iniciou sem build. Build compilou e passou TypeScript, depois falhou na coleta de páginas por `DATABASE_URL` ausente. Docker daemon indisponível e porta local 5432 fechada; E2E desktop/mobile depende do PostgreSQL configurado no CI |
+| validação documental | `node scripts/validate-docs.mjs` passou na preparação documental (466/466; 10 avisos legados); reexecutar após a atualização desta evidência |
+| CI/PR | [PR #529](https://github.com/collapsy/Routebook/pull/529), SHA `936a4bc509b4ac3b6b766a7b7f36622a86187cbf`: documentação, monorepo e Vercel passaram. Suíte responsiva completa: 173 testes passaram em 5m12s. A primeira execução encontrou locator ambíguo e fixture publicado contaminando a contagem compartilhada; correção reutilizou `Praia do Amor` seedada e escopou assertivas ao timeline. |

@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { DrizzleItineraryRepository } from "@routebook/database";
+import { createItinerary } from "@routebook/trip-management";
 
 import { submitAndExpectActionRedirect } from "./support/action-redirect";
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
@@ -39,6 +41,9 @@ async function createTripAroundToday() {
     accommodationLatitude: -6.2302,
     accommodationLongitude: -35.0503,
   });
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: result.trip.id, period: result.trip.period }),
+  );
 
   return { ...result, today, startDate, endDate };
 }

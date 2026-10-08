@@ -93,6 +93,7 @@ O cenário deve passar nos projetos desktop e mobile já configurados. A cobertu
 
 ```text
 apps/web/e2e/journey-consolidation.spec.ts
+apps/web/e2e/active-trip-experience.spec.ts
 apps/web/app/viagens/[tripId]/preparacao/proposta/page.tsx
 apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx
 apps/web/app/viagens/[tripId]/roteiro/page.tsx
@@ -101,6 +102,8 @@ docs/implementation/context-packs/rb-inc-217-journey-consolidation.md
 docs/implementation/traceability-matrix.md
 docs/registry.md
 ```
+
+Engineering Validation found that `active-trip-experience.spec.ts` relied on opening `/roteiro` to create an empty Itinerary as a GET side effect. Since draft Trips without an Itinerary now correctly return to preparation, this existing active-route E2E must explicitly seed an empty Itinerary in its test setup. This is a fixture-only correction; the spec continues to verify active itinerary navigation and behavior.
 
 Se outro caminho for indispensável, interrompa antes de alterá-lo e atualize este incremento e o Context Pack.
 

@@ -43,7 +43,10 @@ test("cria, abre e mantém uma viagem persistida", async ({ page }, testInfo) =>
 
   await page.getByRole("link", { name: "Preparar viagem" }).click();
   await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\/lugares\?preparar=1$/);
-  await expect(page.getByRole("heading", { name: "Vamos preparar sua viagem" })).toBeVisible();
+  await expect(page.getByText("Preparar viagem · Etapa 1 de 4")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Escolha os lugares que fazem sentido para você" }),
+  ).toBeVisible();
 });
 
 test("configura e mantém o contexto progressivo da viagem", async ({ page }, testInfo) => {

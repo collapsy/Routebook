@@ -97,6 +97,9 @@ apps/web/e2e/active-trip-experience.spec.ts
 apps/web/e2e/itinerary.spec.ts
 apps/web/e2e/recommendations-experience.spec.ts
 apps/web/e2e/place-actions.spec.ts
+apps/web/e2e/trip-day-guide.spec.ts
+apps/web/e2e/itinerary-proposal-generation.spec.ts
+apps/web/e2e/product-shell.spec.ts
 apps/web/app/viagens/[tripId]/preparacao/proposta/page.tsx
 apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx
 apps/web/app/viagens/[tripId]/roteiro/page.tsx
@@ -111,6 +114,8 @@ Engineering Validation found that `active-trip-experience.spec.ts` and `itinerar
 The full E2E run also found that `recommendations-experience.spec.ts` expects the empty itinerary summary after visiting `/roteiro`. That test must explicitly seed the empty Itinerary it expects, rather than relying on route access to create it.
 
 The same E2E run exposed a race in `place-actions.spec.ts`: the test navigated away after observing the optimistic preference state but before the server action's success feedback. Wait for the action's success status before opening the detail page so the persistence assertion observes the completed mutation.
+
+The next full-suite run exposed three more test-only assumptions: the day-guide detail action needs its empty Itinerary fixture; the REPLAN fixture must place its protected activity in the future relative to CI's clock; and the product-shell assertion must identify the current preparation step instead of requiring onboarding-only copy when reopening an existing Trip. These changes remain fixtures/assertions only; no product rules, UI text, or navigation are changed.
 
 Se outro caminho for indispensável, interrompa antes de alterá-lo e atualize este incremento e o Context Pack.
 

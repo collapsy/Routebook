@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 
+import { DrizzleItineraryRepository } from "@routebook/database";
+import { createItinerary } from "@routebook/trip-management";
+
 import { submitAndExpectActionRedirect } from "./support/action-redirect";
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
@@ -43,10 +46,17 @@ async function createTripAroundToday() {
   return { ...result, today, startDate, endDate };
 }
 
+async function seedEmptyItinerary(trip: Awaited<ReturnType<typeof createTripAroundToday>>["trip"]) {
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }),
+  );
+}
+
 test("preserva contexto entre áreas e prioriza Hoje sem sobrescrever seleção explícita", async ({
   page,
 }) => {
   const { trip, today, startDate } = await createTripAroundToday();
+  await seedEmptyItinerary(trip);
 
   await page.goto(`/viagens/${trip.id}/guia`);
 
@@ -107,6 +117,7 @@ test("preserva contexto entre áreas e prioriza Hoje sem sobrescrever seleção 
 test("mantém navegação e ações secundárias operáveis em viewport mobile", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const { trip, today } = await createTripAroundToday();
+  await seedEmptyItinerary(trip);
 
   await page.goto(`/viagens/${trip.id}/roteiro`);
 

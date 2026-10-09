@@ -49,14 +49,35 @@ describe("TripPlanningWizard", () => {
     expect(screen.queryByRole("link", { name: "Proposta" })).not.toBeInTheDocument();
   });
 
-  it("marca Proposta como etapa 4 e permite voltar à revisão", () => {
+  it("identifica a geração como etapa 4 antes de existir uma Proposal", () => {
     render(<TripPlanningWizard currentStep="proposal" tripId="trip-1" tripStatus="draft" />);
+
+    expect(screen.getByRole("heading", { name: "Gere uma proposta para revisar" })).toBeVisible();
+    expect(screen.getByText("Preparar viagem · Etapa 4 de 4")).toBeInTheDocument();
+    expect(screen.getByText("Gerar proposta").closest("li")).toHaveAttribute(
+      "aria-current",
+      "step",
+    );
+    expect(screen.getByText(/Depois de gerada, você poderá revisar/)).toBeVisible();
+  });
+
+  it("identifica a revisão somente depois que a Proposal existe", () => {
+    render(
+      <TripPlanningWizard
+        currentStep="proposal"
+        proposalState="review"
+        tripId="trip-1"
+        tripStatus="draft"
+      />,
+    );
 
     expect(
       screen.getByRole("heading", { name: "Revise a proposta antes de decidir o que aplicar" }),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Preparar viagem · Etapa 4 de 4")).toBeInTheDocument();
-    expect(screen.getByText("Proposta").closest("li")).toHaveAttribute("aria-current", "step");
+    ).toBeVisible();
+    expect(screen.getByText("Revisar proposta").closest("li")).toHaveAttribute(
+      "aria-current",
+      "step",
+    );
     expect(screen.getByRole("link", { name: /Revisão/ })).toHaveAttribute(
       "href",
       "/viagens/trip-1/preparacao/revisao?preparar=1",

@@ -4,6 +4,7 @@ import {
   DrizzleItineraryRepository,
   DrizzlePlaceRepository,
   DrizzleSavedPlaceRepository,
+  DrizzleTripRepository,
 } from "@routebook/database";
 import { createSavedPlace } from "@routebook/saved-places";
 import { addActivity, createItinerary } from "@routebook/trip-management";
@@ -19,6 +20,10 @@ async function createTripThroughUi(page: Page, tripName: string) {
   await page.getByLabel("Quando termina?").fill("2026-08-29");
   await page.getByRole("button", { name: "Criar meu guia" }).click();
   await expect(page).toHaveURL(/\/viagens\/[0-9a-f-]+\/lugares\?preparar=1&onboarding=1$/);
+  const tripId = new URL(page.url()).pathname.split("/")[2]!;
+  const trip = await new DrizzleTripRepository().findById(tripId);
+  if (!trip) throw new Error("Trip recém-criada não encontrada para preparar a fixture.");
+  await new DrizzleItineraryRepository().save(createItinerary({ tripId, period: trip.period }));
   await page.goto("/viagens");
 }
 
@@ -41,6 +46,9 @@ test("prioriza a timeline do dia vazio antes das ações secundárias", async ({
     startDate: "2026-08-22",
     endDate: "2026-08-29",
   });
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }),
+  );
 
   await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-08-22`);
 
@@ -289,6 +297,9 @@ test("mantém Minha seleção separada do roteiro durante o wizard", async ({ pa
   expect(place).toBeDefined();
   await new DrizzleSavedPlaceRepository().save(
     createSavedPlace({ tripId: trip.id, placeId: place!.id }, now),
+  );
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }, now),
   );
 
   const placeName = place!.name;

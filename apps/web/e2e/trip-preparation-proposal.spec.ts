@@ -7,8 +7,32 @@ import {
   getDatabase,
   places,
 } from "@routebook/database";
+import { createItinerary } from "@routebook/trip-management";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
+
+test("explica e inicia o Roteiro antes de gerar uma proposta", async ({ page }) => {
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: `Pré-condição da proposta ${test.info().project.name} ${Date.now()}`,
+    startDate: "2027-08-22",
+    endDate: "2027-08-23",
+  });
+  const itineraryRepository = new DrizzleItineraryRepository();
+  const proposalRepository = new DrizzleItineraryProposalRepository();
+  expect(await itineraryRepository.findByTripId(trip.id)).toBeNull();
+
+  await page.goto(`/viagens/${trip.id}/preparacao/proposta?preparar=1`);
+  await expect(page.getByText(/primeiro inicie o roteiro/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Começar roteiro" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Gerar proposta de roteiro" })).toHaveCount(0);
+  expect(await proposalRepository.listByTripId(trip.id)).toHaveLength(0);
+  expect(await itineraryRepository.findByTripId(trip.id)).toBeNull();
+
+  await page.getByRole("button", { name: "Começar roteiro" }).click();
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/preparacao/proposta\\?preparar=1$`));
+  await expect.poll(() => itineraryRepository.findByTripId(trip.id)).not.toBeNull();
+  expect(await proposalRepository.listByTripId(trip.id)).toHaveLength(0);
+});
 
 test("leva a Revisão até a Proposta sem aplicar mudanças ao Roteiro", async ({ page }) => {
   const now = new Date();
@@ -17,6 +41,8 @@ test("leva a Revisão até a Proposta sem aplicar mudanças ao Roteiro", async (
     startDate: "2026-08-22",
     endDate: "2026-08-23",
   });
+  const itineraryRepository = new DrizzleItineraryRepository();
+  await itineraryRepository.save(createItinerary({ tripId: trip.id, period: trip.period }, now));
   const placeId = crypto.randomUUID();
   const preferenceId = crypto.randomUUID();
 
@@ -46,7 +72,6 @@ test("leva a Revisão até a Proposta sem aplicar mudanças ao Roteiro", async (
     updatedAt: now,
   });
 
-  const itineraryRepository = new DrizzleItineraryRepository();
   const proposalRepository = new DrizzleItineraryProposalRepository();
   const itineraryBefore = await itineraryRepository.findByTripId(trip.id);
 
@@ -65,6 +90,10 @@ test("leva a Revisão até a Proposta sem aplicar mudanças ao Roteiro", async (
 
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/preparacao/proposta\\?preparar=1$`));
   await expect(page.getByText("Preparar viagem · Etapa 4 de 4")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Gere uma proposta para revisar" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Gerar proposta de roteiro" }),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Gerar proposta de roteiro" })).toBeVisible();
   expect(await proposalRepository.listByTripId(trip.id)).toHaveLength(0);
   expect(await itineraryRepository.findByTripId(trip.id)).toEqual(itineraryBefore);

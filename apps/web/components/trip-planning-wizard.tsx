@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { TripStatus } from "@routebook/trip-management";
 
+import { TripPreparationStageFocus } from "./trip-preparation-stage-focus";
 import styles from "./trip-planning-wizard.module.css";
 
 type TripPlanningWizardProps = Readonly<{
@@ -9,6 +10,7 @@ type TripPlanningWizardProps = Readonly<{
   currentStep?: "places" | "context" | "review" | "proposal";
   currentView?: "explore" | "selection";
   onboarding?: boolean;
+  proposalState?: "generate" | "review";
 }>;
 
 export function TripPlanningWizard({
@@ -17,6 +19,7 @@ export function TripPlanningWizard({
   currentStep = "places",
   currentView = "explore",
   onboarding = false,
+  proposalState = "generate",
 }: TripPlanningWizardProps) {
   if (tripStatus !== "draft") return null;
 
@@ -24,6 +27,7 @@ export function TripPlanningWizard({
   const reviewStep = currentStep === "review";
   const proposalStep = currentStep === "proposal";
   const stepNumber = proposalStep ? "4" : reviewStep ? "3" : contextStep ? "2" : "1";
+  const proposalLabel = proposalState === "review" ? "Revisar proposta" : "Gerar proposta";
 
   return (
     <section
@@ -31,12 +35,19 @@ export function TripPlanningWizard({
       className={styles.wizard}
       data-planning-wizard-step={currentStep}
     >
+      <TripPreparationStageFocus
+        active={currentStep !== "places" || onboarding}
+        stage={`${currentStep}:${proposalStep ? proposalState : ""}`}
+        targetId="trip-planning-wizard-title"
+      />
       <div className={styles.intro}>
         <div>
           <p className="product-eyebrow">Preparar viagem · Etapa {stepNumber} de 4</p>
-          <h2 id="trip-planning-wizard-title">
+          <h2 id="trip-planning-wizard-title" tabIndex={-1}>
             {proposalStep
-              ? "Revise a proposta antes de decidir o que aplicar"
+              ? proposalState === "review"
+                ? "Revise a proposta antes de decidir o que aplicar"
+                : "Gere uma proposta para revisar"
               : reviewStep
                 ? "Confira as escolhas para a futura proposta"
                 : contextStep
@@ -47,7 +58,9 @@ export function TripPlanningWizard({
           </h2>
           <p>
             {proposalStep
-              ? "Esta proposta é uma sugestão separada do Roteiro. Nenhuma mudança foi aplicada automaticamente."
+              ? proposalState === "review"
+                ? "Esta proposta é uma sugestão separada do Roteiro. Nenhuma mudança foi aplicada automaticamente."
+                : "A proposta será uma sugestão separada do Roteiro. Depois de gerada, você poderá revisar e decidir o que aplicar."
               : reviewStep
                 ? "Revise os dados conhecidos e as suas intenções antes da próxima etapa. Esta revisão não cria atividades nem proposta automaticamente."
                 : contextStep
@@ -131,7 +144,7 @@ export function TripPlanningWizard({
           className={proposalStep ? styles.activeStep : styles.futureStep}
         >
           <span>4</span>
-          {proposalStep ? <strong>Proposta</strong> : <span>Proposta</span>}
+          {proposalStep ? <strong>{proposalLabel}</strong> : <span>Proposta</span>}
         </li>
       </ol>
 

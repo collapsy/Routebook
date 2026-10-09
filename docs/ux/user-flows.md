@@ -9,10 +9,10 @@ document_type: ux
 owner: Experience
 
 status: Published
-version: "0.3.0"
+version: "0.4.0"
 
 created: "2026-07-17"
-last_updated: "2026-09-21"
+last_updated: "2026-10-09"
 
 authors:
 
@@ -966,6 +966,12 @@ Visualizar os Dias e Atividades da Viagem.
    ↓
 {Abrir Roteiro}
    ↓
+<Existe Itinerary?>
+   ├── Não + Trip draft → [Explicar que o roteiro ainda não foi iniciado]
+   │                        ├── Continuar preparação → [Lugares]
+   │                        └── Voltar para a viagem → [Visão Geral]
+   └── Sim → [Roteiro]
+                 ↓
 [Roteiro]
    ↓
 <Existe planejamento?>
@@ -985,7 +991,17 @@ Visualizar os Dias e Atividades da Viagem.
 
 ### Estado vazio
 
-Ações sugeridas:
+A ausência de Itinerary não cria um Itinerary vazio só por abrir esta rota. Se já existir Itinerary sem Atividades ou Períodos livres, exibir o Dia vazio normal; não confundir com ausência de planejamento inicial.
+
+No estado sem Itinerary, oferecer:
+
+* iniciar explicitamente o roteiro, criando apenas sua estrutura de Dias vazios;
+* continuar a preparação em Lugares;
+* voltar para a Visão Geral da Viagem.
+
+Apenas a submissão da ação “Começar roteiro” cria o Itinerary. Ao iniciar pela etapa de geração, retornar à mesma etapa sem gerar a Proposal automaticamente.
+
+No Dia vazio de um Itinerary existente, as ações sugeridas são:
 
 * Explorar Lugares;
 * adicionar Lugar;
@@ -1362,6 +1378,8 @@ Receber uma organização inicial editável.
    ↓
 {Selecionar Gerar proposta}
    ↓
+[Preparação · Etapa 4: Gerar proposta]
+   ↓
 [Snapshot de Minha seleção]
    ↓
 {Decidir se inclui MAYBE}
@@ -1374,7 +1392,9 @@ Receber uma organização inicial editável.
    ↓
 <Sucesso?>
    ├── Não → [Erro + tentar novamente]
-   └── Sim → [Incluídos + excluídos + motivos]
+   └── Sim → [Revisar proposta]
+                   ↓
+           [Incluídos + excluídos + motivos]
                    ↓
            <Qual ação?>
               ├── Aceitar
@@ -1392,6 +1412,8 @@ Receber uma organização inicial editável.
 * Não existe mínimo de preferências.
 * Place não avaliado e `NOT_INTERESTED` não entram automaticamente.
 * Replanejamento deve apresentar e respeitar ReplanningWindow.
+* Antes da geração, identificar a Etapa 4 como “Gerar proposta”; após a geração, identificar a superfície como “Revisar proposta”.
+* Navegar entre etapas da preparação deve apresentar o título da nova etapa no viewport e mover o foco de forma visível e previsível.
 
 ---
 

@@ -25,10 +25,10 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-PRD-007 | Regras de Negócio | Product | Published | 0.2.0 | [business-rules.md](./product/business-rules.md) |
 | RB-PRD-008 | Requisitos Não Funcionais | Product | Published | 0.1.0 | [non-functional-requirements.md](./product/non-functional-requirements.md) |
 | RB-UX-001 | Arquitetura da Informação | Experience | Published | 0.3.0 | [information-architecture.md](./ux/information-architecture.md) |
-| RB-UX-002 | Fluxos do Usuário | Experience | Published | 0.3.0 | [user-flows.md](./ux/user-flows.md) |
+| RB-UX-002 | Fluxos do Usuário | Experience | Published | 0.4.0 | [user-flows.md](./ux/user-flows.md) |
 | RB-UX-003 | Inventário de Telas | Experience | Published | 0.2.0 | [screen-inventory.md](./ux/screen-inventory.md) |
 | RB-UX-004 | Wireframes | Experience | Published | 0.3.0 | [wireframes.md](./ux/wireframes.md) |
-| RB-UX-005 | Especificações de Interação | Experience | Published | 0.2.0 | [interaction-specifications.md](./ux/interaction-specifications.md) |
+| RB-UX-005 | Especificações de Interação | Experience | Published | 0.3.0 | [interaction-specifications.md](./ux/interaction-specifications.md) |
 | RB-UX-006 | Diretrizes de Conteúdo e Microcopy | Experience | Published | 0.1.0 | [content-guidelines.md](./ux/content-guidelines.md) |
 | RB-DS-001 | Design System Foundations | Experience | Published | 0.1.0 | [foundations.md](./design-system/foundations.md) |
 | RB-DS-002 | Component Library | Experience | Published | 0.1.0 | [component-library.md](./design-system/component-library.md) |
@@ -504,6 +504,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-216 | Context Pack do RB-INC-216 — Replanejamento durante a viagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-216-replanning-experience.md](./implementation/context-packs/rb-inc-216-replanning-experience.md) |
 | RB-INC-217 | Etapa 9 — consolidação da jornada, responsividade e E2E | Implementation | Draft | 0.1.0 | [rb-inc-217-journey-consolidation.md](./implementation/increments/rb-inc-217-journey-consolidation.md) |
 | RB-CTX-217 | Context Pack do RB-INC-217 — Consolidação da jornada | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-217-journey-consolidation.md](./implementation/context-packs/rb-inc-217-journey-consolidation.md) |
+| RB-INC-218 | Clareza e continuidade no wizard de preparação | Implementation | Draft | 0.2.0 | [rb-inc-218-preparation-ux-polish.md](./implementation/increments/rb-inc-218-preparation-ux-polish.md) |
+| RB-CTX-218 | Context Pack do RB-INC-218 — Clareza e continuidade no wizard | Implementation Context Pack | Draft | 0.2.0 | [rb-inc-218-preparation-ux-polish.md](./implementation/context-packs/rb-inc-218-preparation-ux-polish.md) |
 
 ## Status possíveis
 

@@ -110,7 +110,7 @@ test("mantém navegação e ações secundárias operáveis em viewport mobile",
   const { trip, today } = await createTripAroundToday();
 
   await page.goto(`/viagens/${trip.id}/roteiro`);
-  await page.getByRole("button", { name: "Começar roteiro" }).tap();
+  await page.getByRole("button", { name: "Começar roteiro" }).click();
 
   const tripNav = page.getByRole("navigation", { name: "Navegação da viagem" });
   await expect(tripNav).toBeVisible();

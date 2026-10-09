@@ -7,6 +7,7 @@ import {
   getDatabase,
   places,
 } from "@routebook/database";
+import { createItinerary } from "@routebook/trip-management";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
@@ -40,6 +41,8 @@ test("leva a Revisão até a Proposta sem aplicar mudanças ao Roteiro", async (
     startDate: "2026-08-22",
     endDate: "2026-08-23",
   });
+  const itineraryRepository = new DrizzleItineraryRepository();
+  await itineraryRepository.save(createItinerary({ tripId: trip.id, period: trip.period }, now));
   const placeId = crypto.randomUUID();
   const preferenceId = crypto.randomUUID();
 
@@ -69,7 +72,6 @@ test("leva a Revisão até a Proposta sem aplicar mudanças ao Roteiro", async (
     updatedAt: now,
   });
 
-  const itineraryRepository = new DrizzleItineraryRepository();
   const proposalRepository = new DrizzleItineraryProposalRepository();
   const itineraryBefore = await itineraryRepository.findByTripId(trip.id);
 

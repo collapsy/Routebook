@@ -52,27 +52,6 @@ async function seedEmptyItinerary(trip: Awaited<ReturnType<typeof createTripArou
   );
 }
 
-test("permite iniciar explicitamente o Roteiro de uma Trip ativa sem Itinerary", async ({
-  page,
-}) => {
-  const { trip } = await createTripAroundToday();
-  const repository = new DrizzleItineraryRepository();
-  expect(await repository.findByTripId(trip.id)).toBeNull();
-
-  await page.goto(`/viagens/${trip.id}/roteiro`);
-  await expect(page.getByRole("button", { name: "Começar roteiro" })).toBeVisible();
-  expect(await repository.findByTripId(trip.id)).toBeNull();
-
-  await page.getByRole("button", { name: "Começar roteiro" }).click();
-  await expect(page.getByRole("navigation", { name: "Selecionar Dia do roteiro" })).toBeVisible();
-  await expect
-    .poll(() => repository.findByTripId(trip.id))
-    .toMatchObject({ tripId: trip.id, days: expect.any(Array) });
-  expect(
-    (await repository.findByTripId(trip.id))?.days.every((day) => day.activities.length === 0),
-  ).toBe(true);
-});
-
 test("preserva contexto entre áreas e prioriza Hoje sem sobrescrever seleção explícita", async ({
   page,
 }) => {

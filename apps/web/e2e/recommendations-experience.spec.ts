@@ -84,6 +84,10 @@ async function createTripWithRecommendationContext(page: Page) {
     page.getByRole("button", { name: "Salvar hospedagem" }).click(),
   ]);
 
+  await page.goto(`${tripUrl}/roteiro`);
+  await page.getByRole("button", { name: "Começar roteiro" }).click();
+  await expect(page.getByText(/3 dias · 0 atividades/)).toBeVisible();
+
   return { tripName, tripUrl };
 }
 

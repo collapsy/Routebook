@@ -67,7 +67,7 @@ Corrigir três fricções verificadas ao navegar na preparação: entrada inexpl
 
 ## 6. Caminhos permitidos
 
-Somente os caminhos listados em RB-INC-218. O componente opcional de foco/scroll requer justificativa no diff. Não alterar helpers globais do Playwright, setup, fixtures compartilhadas, rotas de autenticação ou módulos de domínio.
+Somente os caminhos listados em RB-INC-218. O componente opcional de foco/scroll requer justificativa no diff. O spec de recomendações pode ser ajustado apenas para iniciar explicitamente o Itinerary vazio que seu cenário consulta, pois a rota `/roteiro` não cria mais Itinerary por GET. Não alterar helpers globais do Playwright, setup, fixtures compartilhadas, rotas de autenticação ou módulos de domínio.
 
 ## 7. Testes mínimos
 

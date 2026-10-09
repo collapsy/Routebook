@@ -20,6 +20,8 @@ import {
   type Itinerary,
 } from "@routebook/trip-management";
 
+import { resolveTripRouteAccess } from "../../../../lib/trip-route-access";
+
 function optionalText(value: FormDataEntryValue | null): string | undefined {
   const normalized = typeof value === "string" ? value.trim() : "";
   return normalized || undefined;
@@ -66,6 +68,36 @@ function redirectWithItineraryError(
   dayDate?: string,
 ): never {
   redirectToItinerary(tripId, { erro: itineraryErrorMessage(error) }, dayDate);
+}
+
+export async function startItineraryAction(formData: FormData): Promise<never> {
+  const tripId = String(formData.get("tripId") ?? "").trim();
+  const returnTo = formData.get("returnTo") === "proposal" ? "proposal" : "itinerary";
+  const destination =
+    returnTo === "proposal"
+      ? `/viagens/${tripId}/preparacao/proposta?preparar=1`
+      : `/viagens/${tripId}/roteiro`;
+
+  if (!tripId) redirect("/viagens");
+
+  const access = await resolveTripRouteAccess({ tripId, action: "trip:edit" });
+  if (access.status === "unauthenticated") {
+    redirect(`/entrar?next=${encodeURIComponent(destination)}`);
+  }
+  if (access.status === "not-found") notFound();
+
+  const trip = await findTripById(new DrizzleTripRepository(), tripId);
+  if (!trip) notFound();
+
+  const repository = new DrizzleItineraryRepository();
+  const existing = await repository.findByTripId(tripId);
+  if (!existing) {
+    await repository.save(createItinerary({ tripId, period: trip.period }));
+  }
+
+  revalidatePath(`/viagens/${tripId}`);
+  revalidatePath(`/viagens/${tripId}/roteiro`);
+  redirect(destination);
 }
 
 export async function addManualActivityAction(formData: FormData): Promise<never> {

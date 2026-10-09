@@ -9,13 +9,7 @@ import {
   DrizzlePlaceRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
-import {
-  createItinerary,
-  findTripById,
-  type Activity,
-  type Itinerary,
-  type Trip,
-} from "@routebook/trip-management";
+import { findTripById, type Activity } from "@routebook/trip-management";
 
 import { buildExternalDirectionsUrl } from "../../../../lib/external-directions";
 import { getItineraryProposalReviewStatus } from "../../../../lib/itinerary-proposal-experience";
@@ -31,6 +25,7 @@ import {
   moveItineraryActivityAction,
   removeItineraryActivityAction,
   reorderItineraryActivitiesAction,
+  startItineraryAction,
   updateItineraryActivityAction,
 } from "./actions";
 import { FreePeriodComposer, FreePeriodList } from "./free-periods";
@@ -92,14 +87,6 @@ function formatDaySummary(activityCount: number, freePeriodCount: number): strin
   const activityLabel = activityCount === 1 ? "atividade" : "atividades";
   const freePeriodLabel = freePeriodCount === 1 ? "período livre" : "períodos livres";
   return `${activityCount} ${activityLabel} · ${freePeriodCount} ${freePeriodLabel}`;
-}
-
-async function loadOrCreateItinerary(trip: Trip): Promise<Itinerary> {
-  const repository = new DrizzleItineraryRepository();
-  const existing = await repository.findByTripId(trip.id);
-  if (existing) return existing;
-
-  return repository.save(createItinerary({ tripId: trip.id, period: trip.period }));
 }
 
 function ReorderActivityForm({
@@ -187,8 +174,39 @@ export default async function ItineraryPage({
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
+  const itineraryRepository = new DrizzleItineraryRepository();
+  const existingItinerary = await itineraryRepository.findByTripId(trip.id);
+  if (!existingItinerary) {
+    return (
+      <section className="app-page itinerary-page">
+        <header className="app-page-heading">
+          <p className="product-eyebrow">Roteiro da viagem</p>
+          <h1>Seu roteiro ainda não foi iniciado</h1>
+          <p>
+            Esta viagem ainda não tem um roteiro aplicado. Continue a preparação para explorar
+            lugares, revisar suas escolhas e, se quiser, gerar uma proposta.
+          </p>
+        </header>
+        <nav aria-label="Próximos passos" className={journeyStyles.emptyActions}>
+          <form action={startItineraryAction}>
+            <input name="tripId" type="hidden" value={tripId} />
+            <button className="product-primary-action" type="submit">
+              Começar roteiro
+            </button>
+          </form>
+          <Link className="product-primary-action" href={`/viagens/${tripId}/lugares?preparar=1`}>
+            Continuar preparação
+          </Link>
+          <Link className="product-secondary-action" href={`/viagens/${tripId}`}>
+            Voltar para a viagem
+          </Link>
+        </nav>
+      </section>
+    );
+  }
+
   const [itinerary, proposals] = await Promise.all([
-    loadOrCreateItinerary(trip),
+    existingItinerary,
     new DrizzleItineraryProposalRepository().listByTripId(trip.id),
   ]);
   const proposalReviewStatus = getItineraryProposalReviewStatus(proposals, new Date());

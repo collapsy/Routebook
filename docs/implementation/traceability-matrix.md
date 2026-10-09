@@ -1373,3 +1373,15 @@ Ao concluir um incremento:
 | E2E/build local | Playwright não iniciou: Node 18 do terminal é incompatível; repetido com Node 24, mas o servidor não iniciou sem build. Build compilou e passou TypeScript, depois falhou na coleta de páginas por `DATABASE_URL` ausente. Docker daemon indisponível e porta local 5432 fechada; E2E desktop/mobile depende do PostgreSQL configurado no CI |
 | validação documental | `node scripts/validate-docs.mjs` passou na preparação documental (466/466; 10 avisos legados); reexecutar após a atualização desta evidência |
 | CI/PR | [PR #529](https://github.com/collapsy/Routebook/pull/529), SHA `936a4bc509b4ac3b6b766a7b7f36622a86187cbf`: documentação, monorepo e Vercel passaram. Suíte responsiva completa: 173 testes passaram em 5m12s. A primeira execução encontrou locator ambíguo e fixture publicado contaminando a contagem compartilhada; correção reutilizou `Praia do Amor` seedada e escopou assertivas ao timeline. |
+
+## Evidências previstas do RB-INC-218
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-218-preparation-ux-polish.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-218-preparation-ux-polish.md` |
+| issue | ainda não vinculada; o incremento é a unidade de trabalho documental e deve receber issue antes da execução de implementação, se exigido pelo fluxo de entrega |
+| branch/base | `codex/rb-inc-218-preparation-ux-polish`; base da worktree criada a partir da branch padrão remota |
+| gaps auditados | entrada inexplicada no wizard de Trip sem Itinerary; etapa de geração descrita como revisão; scroll/foco e título precisam de validação responsiva |
+| escopo planejado | orientação de continuação, linguagem coerente pré/pós-geração, heading/foco/rolagem responsivos e testes E2E desktop/mobile; sem mudança de domínio, estado ou dados de Preview |
+| validação | pendente; preencher somente após executar comandos e revisar Preview |

@@ -9,10 +9,10 @@ document_type: ux
 owner: Experience
 
 status: Published
-version: "0.2.0"
+version: "0.3.0"
 
 created: "2026-07-17"
-last_updated: "2026-09-18"
+last_updated: "2026-10-09"
 
 authors:
 
@@ -485,6 +485,8 @@ Ao abrir uma página:
 2. o foco inicial deverá ser previsível;
 3. o carregamento deverá ser apresentado no nível correto;
 4. o contexto da Viagem deverá permanecer visível.
+
+Ao abrir o Roteiro de uma Trip `draft` sem Itinerary, explicar que o planejamento ainda não foi iniciado e oferecer a ação explícita “Começar roteiro”, continuação pela preparação e retorno à Visão Geral. A navegação não deverá criar um Itinerary vazio. “Começar roteiro” cria somente o Itinerary e seus Dias vazios, após autorização server-side. Na etapa de geração sem Itinerary, explicar essa pré-condição e oferecer a mesma ação; após iniciar, permanecer na geração sem executar geração automaticamente. Um Itinerary existente com Dias sem conteúdo usa o estado vazio normal do Dia.
 
 ---
 
@@ -1831,6 +1833,13 @@ Não deverão ser apenas decorativas.
 Deverá ser discreta e rápida.
 
 O conteúdo principal deverá receber prioridade sobre animações.
+
+Ao avançar ou retornar entre etapas do wizard de preparação:
+
+* o título da etapa de destino deverá ficar visível sob o cabeçalho fixo;
+* o foco deverá ir para o título da nova etapa, com indicador visível;
+* o deslocamento deverá respeitar a redução de movimento do sistema;
+* entrar na etapa de geração deverá dizer “Gerar proposta”; “Revisar proposta” só deverá aparecer após a Proposal existir.
 
 ---
 

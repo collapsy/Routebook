@@ -61,7 +61,12 @@ export default async function ItineraryProposalReviewPage({
     return (
       <section className={`app-page ${styles.page}`}>
         {preparing ? (
-          <TripPlanningWizard currentStep="proposal" tripId={trip.id} tripStatus={trip.status} />
+          <TripPlanningWizard
+            currentStep="proposal"
+            proposalState="generate"
+            tripId={trip.id}
+            tripStatus={trip.status}
+          />
         ) : null}
         <Link className="back-link" href={`/viagens/${trip.id}/roteiro`}>
           ← Voltar para o Roteiro
@@ -130,7 +135,12 @@ export default async function ItineraryProposalReviewPage({
   return (
     <section className={`app-page ${styles.page}`}>
       {preparing ? (
-        <TripPlanningWizard currentStep="proposal" tripId={trip.id} tripStatus={trip.status} />
+        <TripPlanningWizard
+          currentStep="proposal"
+          proposalState="review"
+          tripId={trip.id}
+          tripStatus={trip.status}
+        />
       ) : null}
       <Link className="back-link" href={itineraryHref}>
         ← Voltar para o Roteiro

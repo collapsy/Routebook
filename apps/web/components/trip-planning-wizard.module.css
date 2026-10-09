@@ -12,6 +12,16 @@
   margin-top: 0;
 }
 
+.intro h2 {
+  scroll-margin-block-start: 5.5rem;
+}
+
+.intro h2:focus {
+  border-radius: 0.2rem;
+  outline: 2px solid var(--primary-strong, currentColor);
+  outline-offset: 4px;
+}
+
 .intro p:last-child {
   margin-bottom: 0;
   max-width: 68ch;
@@ -99,5 +109,11 @@
 @media (max-width: 420px) {
   .steps {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 38rem) {
+  .intro h2 {
+    scroll-margin-block-start: 9rem;
   }
 }

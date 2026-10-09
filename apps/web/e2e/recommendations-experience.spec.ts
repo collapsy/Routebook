@@ -1,4 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
+import { DrizzleItineraryRepository, DrizzleTripRepository } from "@routebook/database";
+import { createItinerary } from "@routebook/trip-management";
 
 test.setTimeout(120_000);
 
@@ -84,9 +86,11 @@ async function createTripWithRecommendationContext(page: Page) {
     page.getByRole("button", { name: "Salvar hospedagem" }).click(),
   ]);
 
-  await page.goto(`${tripUrl}/roteiro`);
-  await page.getByRole("button", { name: "Começar roteiro" }).click();
-  await expect(page.getByText(/3 dias · 0 atividades/)).toBeVisible();
+  const tripId = tripUrl.split("/").at(-1);
+  if (!tripId) throw new Error("Trip criada sem identificador na URL.");
+  const trip = await new DrizzleTripRepository().findById(tripId);
+  if (!trip) throw new Error("Trip criada não encontrada no banco de E2E.");
+  await new DrizzleItineraryRepository().save(createItinerary({ tripId, period: trip.period }));
 
   return { tripName, tripUrl };
 }

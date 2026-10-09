@@ -34,6 +34,11 @@ async function openManualComposer(page: Page) {
   await expect(page.getByRole("heading", { name: "Adicionar uma atividade" })).toBeVisible();
 }
 
+async function startItineraryIfNeeded(page: Page) {
+  const startButton = page.getByRole("button", { name: "Começar roteiro" });
+  if (await startButton.isVisible()) await startButton.click();
+}
+
 test("prioriza a timeline do dia vazio antes das ações secundárias", async ({ page }, testInfo) => {
   const tripName = `Jornada vazia ${testInfo.project.name} ${Date.now()}`;
   const { trip } = await createAuthenticatedE2ETrip({
@@ -43,6 +48,7 @@ test("prioriza a timeline do dia vazio antes das ações secundárias", async ({
   });
 
   await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-08-22`);
+  await startItineraryIfNeeded(page);
 
   await expect(page.getByRole("heading", { level: 1, name: tripName })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Jornada de planejamento" })).toHaveCount(0);
@@ -70,6 +76,7 @@ test("cria e preserva uma atividade no Dia em foco", async ({ page }, testInfo) 
   await createTripThroughUi(page, tripName);
   await page.getByRole("link", { name: tripName }).click();
   await page.getByRole("link", { name: "Abrir roteiro" }).click();
+  await startItineraryIfNeeded(page);
 
   await expect(page.getByRole("heading", { level: 1, name: tripName })).toBeVisible();
   await expect(page.getByText(/8 dias · 0 atividades/)).toBeVisible();
@@ -102,6 +109,7 @@ test("remove uma atividade e mantém o mesmo Dia em foco", async ({ page }, test
 
   await page.getByRole("link", { name: tripName }).click();
   await page.getByRole("link", { name: "Abrir roteiro" }).click();
+  await startItineraryIfNeeded(page);
   await openManualComposer(page);
   await page.getByLabel("Título").fill(activityTitle);
   await submitAndExpectActionRedirect(
@@ -136,6 +144,7 @@ test("edita uma atividade preservando sua identidade e Dia", async ({ page }, te
 
   await page.getByRole("link", { name: tripName }).click();
   await page.getByRole("link", { name: "Abrir roteiro" }).click();
+  await startItineraryIfNeeded(page);
   await openManualComposer(page);
   await page.getByLabel("Título").fill(activityTitle);
   await page.getByLabel("Horário opcional").fill("10:00");
@@ -187,6 +196,7 @@ test("reordena atividades dentro do mesmo período preservando Dia e sequência"
   itinerary = addActivity(itinerary, { dayDate: "2026-08-22", title: secondTitle }, now);
   await new DrizzleItineraryRepository().save(itinerary);
   await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-08-22`);
+  await startItineraryIfNeeded(page);
 
   const focusedDay = page.locator(".itinerary-day-card");
   const activityTitles = focusedDay.locator(".itinerary-activity-copy strong");
@@ -218,6 +228,7 @@ test("move uma atividade para outro Dia e muda o foco para o destino", async ({
 
   await page.getByRole("link", { name: tripName }).click();
   await page.getByRole("link", { name: "Abrir roteiro" }).click();
+  await startItineraryIfNeeded(page);
   await openManualComposer(page);
 
   const composer = page.locator(".itinerary-form");
@@ -300,6 +311,7 @@ test("mantém Minha seleção separada do roteiro durante o wizard", async ({ pa
   await expect(page.getByRole("button", { name: "Adicionar ao roteiro" })).toHaveCount(0);
 
   await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-08-22`);
+  await startItineraryIfNeeded(page);
   await expect(page.getByText(/8 dias · 0 atividades/)).toBeVisible();
   await expect(
     page.locator(".itinerary-day-card").getByText(placeName, { exact: true }),

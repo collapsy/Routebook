@@ -90,6 +90,7 @@ apps/web/components/trip-preparation-stage-focus.tsx
 apps/web/components/trip-preparation-stage-focus.test.tsx
 apps/web/e2e/journey-consolidation.spec.ts
 apps/web/e2e/active-trip-experience.spec.ts
+apps/web/e2e/itinerary.spec.ts
 apps/web/e2e/trip-preparation-proposal.spec.ts
 docs/ux/user-flows.md
 docs/ux/interaction-specifications.md

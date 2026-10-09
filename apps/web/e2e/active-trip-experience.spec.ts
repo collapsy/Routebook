@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 
+import { DrizzleItineraryRepository } from "@routebook/database";
+import { createItinerary } from "@routebook/trip-management";
+
 import { submitAndExpectActionRedirect } from "./support/action-redirect";
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
@@ -43,10 +46,38 @@ async function createTripAroundToday() {
   return { ...result, today, startDate, endDate };
 }
 
+async function seedEmptyItinerary(trip: Awaited<ReturnType<typeof createTripAroundToday>>["trip"]) {
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }),
+  );
+}
+
+test("permite iniciar explicitamente o Roteiro de uma Trip ativa sem Itinerary", async ({
+  page,
+}) => {
+  const { trip } = await createTripAroundToday();
+  const repository = new DrizzleItineraryRepository();
+  expect(await repository.findByTripId(trip.id)).toBeNull();
+
+  await page.goto(`/viagens/${trip.id}/roteiro`);
+  await expect(page.getByRole("button", { name: "Começar roteiro" })).toBeVisible();
+  expect(await repository.findByTripId(trip.id)).toBeNull();
+
+  await page.getByRole("button", { name: "Começar roteiro" }).click();
+  await expect(page.getByRole("navigation", { name: "Selecionar Dia do roteiro" })).toBeVisible();
+  await expect
+    .poll(() => repository.findByTripId(trip.id))
+    .toMatchObject({ tripId: trip.id, days: expect.any(Array) });
+  expect(
+    (await repository.findByTripId(trip.id))?.days.every((day) => day.activities.length === 0),
+  ).toBe(true);
+});
+
 test("preserva contexto entre áreas e prioriza Hoje sem sobrescrever seleção explícita", async ({
   page,
 }) => {
   const { trip, today, startDate } = await createTripAroundToday();
+  await seedEmptyItinerary(trip);
 
   await page.goto(`/viagens/${trip.id}/guia`);
 
@@ -83,8 +114,6 @@ test("preserva contexto entre áreas e prioriza Hoje sem sobrescrever seleção 
     .getByRole("link", { name: "Roteiro" })
     .click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/roteiro$`));
-  await page.getByRole("button", { name: "Começar roteiro" }).click();
-  await page.goto(`/viagens/${trip.id}/roteiro?dia=${today}`);
 
   const daySelector = page.getByRole("navigation", { name: "Selecionar Dia do roteiro" });
   const selectedDay = daySelector.locator('[aria-current="page"]');
@@ -109,10 +138,9 @@ test("preserva contexto entre áreas e prioriza Hoje sem sobrescrever seleção 
 test("mantém navegação e ações secundárias operáveis em viewport mobile", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const { trip, today } = await createTripAroundToday();
+  await seedEmptyItinerary(trip);
 
   await page.goto(`/viagens/${trip.id}/roteiro`);
-  await page.getByRole("button", { name: "Começar roteiro" }).click();
-  await page.goto(`/viagens/${trip.id}/roteiro?dia=${today}`);
 
   const tripNav = page.getByRole("navigation", { name: "Navegação da viagem" });
   await expect(tripNav).toBeVisible();

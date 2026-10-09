@@ -35,7 +35,7 @@ function addCalendarDays(value: string, days: number): string {
 }
 
 async function expectHeadingBelowStickyHeader(page: Page, headingName: string | RegExp) {
-  const heading = page.getByRole("heading", { name: headingName, level: 2 });
+  const heading = page.getByRole("heading", { name: headingName });
   await expect(heading).toBeVisible();
   await expect
     .poll(async () => {

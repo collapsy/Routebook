@@ -83,6 +83,7 @@ test("preserva contexto entre áreas e prioriza Hoje sem sobrescrever seleção 
     .getByRole("link", { name: "Roteiro" })
     .click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/roteiro$`));
+  await page.getByRole("button", { name: "Começar roteiro" }).click();
 
   const daySelector = page.getByRole("navigation", { name: "Selecionar Dia do roteiro" });
   const selectedDay = daySelector.locator('[aria-current="page"]');
@@ -109,6 +110,7 @@ test("mantém navegação e ações secundárias operáveis em viewport mobile",
   const { trip, today } = await createTripAroundToday();
 
   await page.goto(`/viagens/${trip.id}/roteiro`);
+  await page.getByRole("button", { name: "Começar roteiro" }).tap();
 
   const tripNav = page.getByRole("navigation", { name: "Navegação da viagem" });
   await expect(tripNav).toBeVisible();

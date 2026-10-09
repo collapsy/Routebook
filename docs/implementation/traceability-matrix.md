@@ -1383,5 +1383,5 @@ Ao concluir um incremento:
 | issue | ainda não vinculada; o incremento é a unidade de trabalho documental e deve receber issue antes da execução de implementação, se exigido pelo fluxo de entrega |
 | branch/base | `codex/rb-inc-218-preparation-ux-polish`; base da worktree criada a partir da branch padrão remota |
 | gaps auditados | entrada inexplicada no wizard de Trip sem Itinerary; etapa de geração descrita como revisão; scroll/foco e título precisam de validação responsiva |
-| escopo planejado | orientação de continuação, linguagem coerente pré/pós-geração, heading/foco/rolagem responsivos e testes E2E desktop/mobile; sem mudança de domínio, estado ou dados de Preview |
+| escopo planejado | orientação de continuação, início explícito e autorizado, linguagem coerente pré/pós-geração, heading/foco/rolagem responsivos e testes E2E desktop/mobile, inclusive Trip planejada sem Itinerary; sem mudança de domínio ou dados de Preview |
 | validação | pendente; preencher somente após executar comandos e revisar Preview |

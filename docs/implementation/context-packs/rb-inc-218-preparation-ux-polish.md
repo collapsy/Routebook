@@ -50,6 +50,7 @@ Corrigir três fricções verificadas ao navegar na preparação: entrada inexpl
 - Uma Proposal é uma sugestão não aplicada. Gerar ou navegar não aceita a Proposal nem cria Activity.
 - Abrir Roteiro é read-only quando não há Itinerary. A ação explicitamente submetida “Começar roteiro” cria o Itinerary vazio com os Dias do período da Trip; é idempotente e exige `trip:edit` no servidor.
 - Na etapa de geração sem Itinerary, explicar a pré-condição e oferecer “Começar roteiro”; depois do POST, retornar à etapa de geração, sem disparar geração de Proposal.
+- A Trip planejada/em andamento sem Itinerary também deve usar o início explícito; os E2Es de navegação ativa devem seguir essa ação antes de validar controles por Dia.
 - Só se apresenta “sem Roteiro” quando não existe Itinerary; não inferir essa condição apenas de uma lista de Dias vazia.
 - `Trip.status`, período da Trip e elegibilidade não são recalculados nem alterados pela camada UX.
 - Não persistir progresso do wizard, estado derivado ou cópia do Contexto.

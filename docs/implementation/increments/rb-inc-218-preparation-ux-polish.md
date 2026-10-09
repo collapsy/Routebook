@@ -70,6 +70,7 @@ Etapa de geração da preparação
 - [ ] Nenhuma navegação por si só gera Proposal ou altera Trip, seleção ou Itinerary.
 - [ ] “Começar roteiro” cria apenas um Itinerary vazio, apenas após submissão explícita, com autorização server-side e sem duplicar um Itinerary existente.
 - [ ] Na etapa de geração sem Itinerary, a pré-condição é explicada e a mesma ação permite continuar para gerar, sem gerar automaticamente.
+- [ ] A experiência de uma Trip planejada/em andamento sem Itinerary mantém acesso explícito ao início do roteiro; a suíte de navegação ativa inicia essa estrutura antes de validar seleção de Dia.
 - [ ] Testes de componente cobrem rótulos/etapas; E2E valida a entrada sem Itinerary e as transições nas configurações desktop e mobile existentes.
 - [ ] A jornada é revisada manualmente no Preview nos cenários “nova Trip sem roteiro” e “Trip existente sem roteiro”; registrar evidência sem aceitar/aplicar Proposal.
 - [ ] UX canônica afetada, rastreabilidade e registro documental permanecem sincronizados.
@@ -88,6 +89,7 @@ apps/web/components/trip-planning-wizard.test.tsx
 apps/web/components/trip-preparation-stage-focus.tsx
 apps/web/components/trip-preparation-stage-focus.test.tsx
 apps/web/e2e/journey-consolidation.spec.ts
+apps/web/e2e/active-trip-experience.spec.ts
 apps/web/e2e/trip-preparation-proposal.spec.ts
 docs/ux/user-flows.md
 docs/ux/interaction-specifications.md

@@ -29,7 +29,7 @@ test("explica e inicia o Roteiro antes de gerar uma proposta", async ({ page }) 
 
   await page.getByRole("button", { name: "Começar roteiro" }).click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/preparacao/proposta\\?preparar=1$`));
-  expect(await itineraryRepository.findByTripId(trip.id)).not.toBeNull();
+  await expect.poll(() => itineraryRepository.findByTripId(trip.id)).not.toBeNull();
   expect(await proposalRepository.listByTripId(trip.id)).toHaveLength(0);
 });
 

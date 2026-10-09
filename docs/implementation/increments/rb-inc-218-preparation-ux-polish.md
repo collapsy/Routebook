@@ -93,6 +93,7 @@ apps/web/e2e/itinerary.spec.ts
 apps/web/e2e/trip-preparation-proposal.spec.ts
 apps/web/e2e/recommendations-experience.spec.ts
 apps/web/e2e/multi-destination-validation.spec.ts
+apps/web/e2e/trip-day-guide.spec.ts
 docs/ux/user-flows.md
 docs/ux/interaction-specifications.md
 docs/implementation/increments/rb-inc-218-preparation-ux-polish.md

@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { DrizzleItineraryRepository } from "@routebook/database";
+import { createItinerary } from "@routebook/trip-management";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
@@ -168,6 +170,9 @@ test("separa observação natural de rolês confirmados no Guia", async ({ page 
     accommodationLatitude: -6.2302,
     accommodationLongitude: -35.0503,
   });
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }),
+  );
 
   await page.goto(`/viagens/${trip.id}/guia?dia=2026-08-27`);
   await expect(page.locator('[id^="guia-dia-"]')).toHaveCount(0);

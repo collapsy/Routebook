@@ -36,7 +36,14 @@ async function openManualComposer(page: Page) {
 
 async function startItineraryIfNeeded(page: Page) {
   const startButton = page.getByRole("button", { name: "Começar roteiro" });
-  if (await startButton.isVisible()) await startButton.click();
+  if (await startButton.isVisible()) {
+    const requestedDay = new URL(page.url()).searchParams.get("dia");
+    await startButton.click();
+    if (requestedDay) {
+      const tripId = new URL(page.url()).pathname.split("/")[2];
+      await page.goto(`/viagens/${tripId}/roteiro?dia=${encodeURIComponent(requestedDay)}`);
+    }
+  }
 }
 
 test("prioriza a timeline do dia vazio antes das ações secundárias", async ({ page }, testInfo) => {

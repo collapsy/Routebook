@@ -87,8 +87,19 @@ test("orienta uma Trip sem Itinerary sem criá-lo ao abrir o Roteiro", async ({
   expect(await itineraryRepository.findByTripId(trip.id)).toBeNull();
 
   await page.goto(`/viagens/${trip.id}/roteiro`);
-  await page.getByRole("button", { name: "Começar roteiro" }).click();
-  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/roteiro$`));
+  const actionPathname = new URL(page.url()).pathname;
+  const actionResponse = page.waitForResponse((response) => {
+    const request = response.request();
+    return request.method() === "POST" && new URL(request.url()).pathname === actionPathname;
+  });
+  const [response] = await Promise.all([
+    actionResponse,
+    page.getByRole("button", { name: "Começar roteiro" }).click(),
+  ]);
+  expect(response.headers()["x-action-redirect"]?.split(";")[0]).toBe(
+    `/viagens/${trip.id}/roteiro`,
+  );
+  await expect.poll(() => itineraryRepository.findByTripId(trip.id)).not.toBeNull();
   const startedItinerary = await itineraryRepository.findByTripId(trip.id);
   expect(startedItinerary).not.toBeNull();
   expect(startedItinerary?.days.every((day) => day.activities.length === 0)).toBe(true);

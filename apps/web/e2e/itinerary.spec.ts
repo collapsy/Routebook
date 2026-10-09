@@ -298,6 +298,9 @@ test("mantém Minha seleção separada do roteiro durante o wizard", async ({ pa
   await new DrizzleSavedPlaceRepository().save(
     createSavedPlace({ tripId: trip.id, placeId: place!.id }, now),
   );
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }, now),
+  );
 
   const placeName = place!.name;
   await page.goto(`/viagens/${trip.id}/lugares-salvos?preparar=1`);

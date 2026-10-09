@@ -37,14 +37,15 @@ function addCalendarDays(value: string, days: number): string {
 async function expectHeadingBelowStickyHeader(page: Page, headingName: string | RegExp) {
   const heading = page.getByRole("heading", { name: headingName, level: 2 });
   await expect(heading).toBeVisible();
-  const [headingBox, headerBox] = await Promise.all([
-    heading.boundingBox(),
-    page.locator(".app-header").boundingBox(),
-  ]);
-
-  expect(headingBox).not.toBeNull();
-  expect(headerBox).not.toBeNull();
-  expect(headingBox!.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height);
+  await expect
+    .poll(async () => {
+      const [headingBox, headerBox] = await Promise.all([
+        heading.boundingBox(),
+        page.locator(".app-header").boundingBox(),
+      ]);
+      return Boolean(headingBox && headerBox && headingBox.y >= headerBox.y + headerBox.height);
+    })
+    .toBe(true);
 }
 
 test("orienta uma Trip sem Itinerary sem criá-lo ao abrir o Roteiro", async ({

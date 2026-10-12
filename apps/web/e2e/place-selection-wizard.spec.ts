@@ -2,6 +2,68 @@ import { expect, test } from "@playwright/test";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
+test("reflete em Explorar a preferência atualizada nos Detalhes", async ({ page }) => {
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: `Preferência entre superfícies ${test.info().project.name} ${Date.now()}`,
+    startDate: "2026-08-22",
+    endDate: "2026-08-29",
+    accommodationName: "Hospedagem central",
+    accommodationAddress: "Pipa, Tibau do Sul — RN",
+    accommodationLatitude: -6.2302,
+    accommodationLongitude: -35.0503,
+  });
+
+  await page.goto(
+    `/viagens/${trip.id}/lugares?preparar=1&descoberta=ocultar&busca=Praia%20do%20Amor&categoria=beach`,
+  );
+  const card = page
+    .getByRole("list", { name: "Opções de lugares" })
+    .locator('[data-place-source="published"]')
+    .filter({ hasText: "Praia do Amor" })
+    .first();
+  await expect(card.getByRole("button", { name: "Quero ir" })).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
+
+  await card.getByRole("link", { name: "Ver detalhes" }).click();
+  const detailsPreference = page
+    .getByLabel("Preferência para Praia do Amor")
+    .getByRole("button", { name: "Quero ir" });
+  await detailsPreference.click();
+  await expect(detailsPreference).toHaveAttribute("aria-pressed", "true");
+
+  await page.goBack();
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares\\?`));
+  const returnedCard = page
+    .getByRole("list", { name: "Opções de lugares" })
+    .locator('[data-place-source="published"]')
+    .filter({ hasText: "Praia do Amor" })
+    .first();
+  await expect(returnedCard.getByRole("button", { name: "Quero ir" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+
+  await page
+    .getByLabel("Lugares da preparação")
+    .getByRole("link", { name: "Minha seleção" })
+    .click();
+  await expect(page.locator(".place-card").filter({ hasText: "Praia do Amor" })).toContainText(
+    "Preferência: Quero ir",
+  );
+  await page.getByLabel("Lugares da preparação").getByRole("link", { name: "Explorar" }).click();
+  const revisitedCard = page
+    .getByRole("list", { name: "Opções de lugares" })
+    .locator('[data-place-source="published"]')
+    .filter({ hasText: "Praia do Amor" })
+    .first();
+  await expect(revisitedCard.getByRole("button", { name: "Quero ir" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+});
+
 test("prepara a viagem escolhendo lugares sem criar Activity", async ({ page }) => {
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Wizard de lugares ${test.info().project.name} ${Date.now()}`,
@@ -68,8 +130,23 @@ test("prepara a viagem escolhendo lugares sem criar Activity", async ({ page }) 
     page.getByRole("heading", { name: "Escolher não é adicionar ao roteiro", level: 2 }),
   ).toBeVisible();
   await expect(
+    page.getByLabel("Preferência para Praia do Amor").getByRole("button", { name: "Quero ir" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
     page.getByRole("heading", { name: "Adicionar ao roteiro", level: 2, exact: true }),
   ).toHaveCount(0);
+
+  await page.getByRole("link", { name: "Revisar seleção" }).click();
+  await page.getByLabel("Lugares da preparação").getByRole("link", { name: "Explorar" }).click();
+  const revisitedCard = page
+    .getByRole("list", { name: "Opções de lugares" })
+    .locator('[data-place-source="published"]')
+    .filter({ hasText: "Praia do Amor" })
+    .first();
+  await expect(revisitedCard.getByRole("button", { name: "Quero ir" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
 
   await page.goto(`/viagens/${trip.id}/roteiro`);
   await expect(

@@ -79,6 +79,9 @@ export async function setPlacePreferenceAction(
     intent,
   });
 
+  revalidatePath(`/viagens/${tripId}/lugares`);
+  revalidatePath(`/viagens/${tripId}/lugares-salvos`);
+  revalidatePath(`/viagens/${tripId}/lugares/${placeSlug}`);
   return tripPlacePreferenceActionSuccess(preference);
 }
 
@@ -91,6 +94,9 @@ export async function clearPlacePreferenceAction(
 
   await clearTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), tripId, place.id);
 
+  revalidatePath(`/viagens/${tripId}/lugares`);
+  revalidatePath(`/viagens/${tripId}/lugares-salvos`);
+  revalidatePath(`/viagens/${tripId}/lugares/${placeSlug}`);
   return tripPlacePreferenceActionSuccess(
     null,
     "Preferência removida. O que já estiver no roteiro continua lá.",
@@ -111,6 +117,9 @@ export async function setPlaceMustDoAction(
     enabled,
   });
 
+  revalidatePath(`/viagens/${tripId}/lugares`);
+  revalidatePath(`/viagens/${tripId}/lugares-salvos`);
+  revalidatePath(`/viagens/${tripId}/lugares/${placeSlug}`);
   return tripPlacePreferenceActionSuccess(preference);
 }
 

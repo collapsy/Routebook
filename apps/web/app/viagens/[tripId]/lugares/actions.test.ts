@@ -160,7 +160,15 @@ describe("setPublishedPlacePreferenceAction", () => {
         priority: null,
       }),
     );
-    expect(cacheMocks.revalidatePath).not.toHaveBeenCalled();
+    expect(cacheMocks.revalidatePath).toHaveBeenNthCalledWith(1, `/viagens/${tripId}/lugares`);
+    expect(cacheMocks.revalidatePath).toHaveBeenNthCalledWith(
+      2,
+      `/viagens/${tripId}/lugares-salvos`,
+    );
+    expect(cacheMocks.revalidatePath).toHaveBeenNthCalledWith(
+      3,
+      `/viagens/${tripId}/lugares/praia-do-amor`,
+    );
     expect(navigationMocks.redirect).not.toHaveBeenCalled();
   });
 

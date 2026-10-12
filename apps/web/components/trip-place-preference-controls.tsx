@@ -143,8 +143,24 @@ export function TripPlacePreferenceControls({
     () => true,
     () => false,
   );
-  const [intent, setIntent] = useState<TripPlaceIntent | undefined>(currentIntent);
-  const [priority, setPriority] = useState<TripPlacePriority | null>(currentPriority);
+  const [preferenceState, setPreferenceState] = useState(() => ({
+    observedIntent: currentIntent,
+    observedPriority: currentPriority ?? null,
+    intent: currentIntent,
+    priority: currentPriority ?? null,
+  }));
+  if (
+    preferenceState.observedIntent !== currentIntent ||
+    preferenceState.observedPriority !== (currentPriority ?? null)
+  ) {
+    setPreferenceState({
+      observedIntent: currentIntent,
+      observedPriority: currentPriority ?? null,
+      intent: currentIntent,
+      priority: currentPriority ?? null,
+    });
+  }
+  const { intent, priority } = preferenceState;
   const [feedback, setFeedback] = useState<TripPlacePreferenceActionState | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -162,14 +178,19 @@ export function TripPlacePreferenceControls({
       ? () => undefined
       : guardInlineMutationScroll(window.scrollX, window.scrollY);
     if (operation === "clear") {
-      setIntent(undefined);
-      setPriority(null);
+      setPreferenceState((state) => ({ ...state, intent: undefined, priority: null }));
     } else if (operation === "must-do") {
-      setPriority(values.enabled === "1" ? "MUST_DO" : null);
+      setPreferenceState((state) => ({
+        ...state,
+        priority: values.enabled === "1" ? "MUST_DO" : null,
+      }));
     } else {
       const nextIntent = values.intent as TripPlaceIntent;
-      setIntent(nextIntent);
-      if (nextIntent !== "WANT") setPriority(null);
+      setPreferenceState((state) => ({
+        ...state,
+        intent: nextIntent,
+        priority: nextIntent === "WANT" ? state.priority : null,
+      }));
     }
     setFeedback(null);
     startTransition(async () => {
@@ -177,15 +198,21 @@ export function TripPlacePreferenceControls({
         const result = await action(createFormData(fields, values));
         setFeedback(result);
         if (result.status === "error") {
-          setIntent(previousIntent);
-          setPriority(previousPriority);
+          setPreferenceState((state) => ({
+            ...state,
+            intent: previousIntent,
+            priority: previousPriority,
+          }));
           return;
         }
 
         const nextIntent = result.preference?.intent;
         const nextPriority = result.preference?.priority ?? null;
-        setIntent(nextIntent);
-        setPriority(nextPriority);
+        setPreferenceState((state) => ({
+          ...state,
+          intent: nextIntent,
+          priority: nextPriority,
+        }));
 
         const detail: TripPlacePreferenceChangedDetail = {
           ...(previousIntent ? { previousIntent } : {}),
@@ -199,8 +226,11 @@ export function TripPlacePreferenceControls({
           router.refresh();
         }
       } catch {
-        setIntent(previousIntent);
-        setPriority(previousPriority);
+        setPreferenceState((state) => ({
+          ...state,
+          intent: previousIntent,
+          priority: previousPriority,
+        }));
         setFeedback({
           status: "error",
           message: "Não foi possível atualizar sua preferência agora. Tente novamente.",

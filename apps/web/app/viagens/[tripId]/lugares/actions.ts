@@ -105,6 +105,9 @@ export async function setPublishedPlacePreferenceAction(
     placeId: place.id,
     intent,
   });
+  revalidatePath(`/viagens/${tripId}/lugares`);
+  revalidatePath(`/viagens/${tripId}/lugares-salvos`);
+  revalidatePath(`/viagens/${tripId}/lugares/${placeSlug}`);
   return tripPlacePreferenceActionSuccess(preference);
 }
 
@@ -116,6 +119,9 @@ export async function clearPublishedPlacePreferenceAction(
   const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
 
   await clearTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), tripId, place.id);
+  revalidatePath(`/viagens/${tripId}/lugares`);
+  revalidatePath(`/viagens/${tripId}/lugares-salvos`);
+  revalidatePath(`/viagens/${tripId}/lugares/${placeSlug}`);
   return tripPlacePreferenceActionSuccess(
     null,
     "Preferência removida. O que já estiver no roteiro continua lá.",

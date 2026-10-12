@@ -78,6 +78,41 @@ describe("TripPlacePreferenceControls", () => {
     );
   });
 
+  it("sincroniza a preferência quando a página recebe estado canônico atualizado", async () => {
+    const action = vi.fn(async () => ({
+      status: "success" as const,
+      message: "Preferência atualizada.",
+      preference: { intent: "WANT" as const, priority: "MUST_DO" as const },
+    }));
+    const props = {
+      fields: { tripId: "trip-1", placeSlug: "mini-mundo" },
+      label: "Preferência para Mini Mundo",
+      setAction: action,
+      mustDoAction: action,
+    };
+    const view = render(<TripPlacePreferenceControls {...props} />);
+
+    expect(screen.getByRole("button", { name: "Quero ir" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+
+    view.rerender(
+      <TripPlacePreferenceControls {...props} currentIntent="WANT" currentPriority="MUST_DO" />,
+    );
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Quero ir" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      ),
+    );
+    expect(screen.getByRole("button", { name: "Remover de Imperdíveis" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
   it("restaura o scroll quando o patch da Server Action salta ao topo", async () => {
     let scrollY = 640;
     let resolveAction: ((value: TripPlacePreferenceActionState) => void) | undefined;

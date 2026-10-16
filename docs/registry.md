@@ -110,7 +110,7 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-IMP-001 | Operação de Implementação por Incrementos | Implementation | Published | 1.0.0 | [README.md](./implementation/README.md) |
 | RB-IMP-002 | Template de Incremento Vertical | Implementation | Published | 1.0.0 | [increment-template.md](./implementation/increment-template.md) |
 | RB-IMP-003 | Template de Context Pack | Implementation | Published | 1.0.0 | [context-pack-template.md](./implementation/context-pack-template.md) |
-| RB-IMP-004 | Matriz de Rastreabilidade da Implementação | Implementation | Published | 1.1.0 | [traceability-matrix.md](./implementation/traceability-matrix.md) |
+| RB-IMP-004 | Matriz de Rastreabilidade da Implementação | Implementation | Published | 1.2.0 | [traceability-matrix.md](./implementation/traceability-matrix.md) |
 | RB-INC-000 | Implementation Readiness | Implementation Increment | Published | 1.0.0 | [rb-inc-000-implementation-readiness.md](./implementation/increments/rb-inc-000-implementation-readiness.md) |
 | RB-INC-001 | Bootstrap do Monorepo | Implementation Increment | Published | 1.0.0 | [rb-inc-001-monorepo-bootstrap.md](./implementation/increments/rb-inc-001-monorepo-bootstrap.md) |
 | RB-INC-002 | Product Shell e Minhas Viagens | Implementation Increment | Published | 1.0.0 | [rb-inc-002-product-shell.md](./implementation/increments/rb-inc-002-product-shell.md) |
@@ -504,8 +504,8 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-216 | Context Pack do RB-INC-216 — Replanejamento durante a viagem | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-216-replanning-experience.md](./implementation/context-packs/rb-inc-216-replanning-experience.md) |
 | RB-INC-217 | Etapa 9 — consolidação da jornada, responsividade e E2E | Implementation | Draft | 0.1.0 | [rb-inc-217-journey-consolidation.md](./implementation/increments/rb-inc-217-journey-consolidation.md) |
 | RB-CTX-217 | Context Pack do RB-INC-217 — Consolidação da jornada | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-217-journey-consolidation.md](./implementation/context-packs/rb-inc-217-journey-consolidation.md) |
-| RB-INC-218 | Clareza e continuidade no wizard de preparação | Implementation | Draft | 0.2.0 | [rb-inc-218-preparation-ux-polish.md](./implementation/increments/rb-inc-218-preparation-ux-polish.md) |
-| RB-CTX-218 | Context Pack do RB-INC-218 — Clareza e continuidade no wizard | Implementation Context Pack | Draft | 0.2.0 | [rb-inc-218-preparation-ux-polish.md](./implementation/context-packs/rb-inc-218-preparation-ux-polish.md) |
+| RB-INC-218 | Clareza e continuidade no wizard de preparação | Implementation | Draft | 0.3.0 | [rb-inc-218-preparation-ux-polish.md](./implementation/increments/rb-inc-218-preparation-ux-polish.md) |
+| RB-CTX-218 | Context Pack do RB-INC-218 — Clareza e continuidade no wizard | Implementation Context Pack | Draft | 0.3.0 | [rb-inc-218-preparation-ux-polish.md](./implementation/context-packs/rb-inc-218-preparation-ux-polish.md) |
 
 ## Status possíveis
 

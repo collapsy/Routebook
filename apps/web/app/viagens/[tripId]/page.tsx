@@ -15,6 +15,7 @@ import { TripMap } from "../../../components/trip-map";
 import { loadRecommendationExperience } from "../../../lib/recommendation-experience";
 import { loadTripOverviewDiscoveryMap } from "../../../lib/trip-overview-discovery-map";
 import { resolveTripRouteAccess } from "../../../lib/trip-route-access";
+import { resolveTripPeriodPhase } from "../../../lib/trip-active-day";
 import { DeleteTripControl } from "./delete-trip-control";
 
 export const dynamic = "force-dynamic";
@@ -118,6 +119,13 @@ export default async function TripOverviewPage({
   const { contextUpdated } = await searchParams;
   const owner = trip.participants.find((participant) => participant.role === "owner");
   const days = deriveTripDays(trip.period);
+  const periodPhase = resolveTripPeriodPhase(
+    trip.period.startDate,
+    trip.period.endDate,
+    new Date(),
+    trip.destination.timeZone,
+  );
+  const periodEnded = periodPhase === "ended";
 
   return (
     <section className="app-page trip-overview-page">
@@ -134,13 +142,21 @@ export default async function TripOverviewPage({
       <header className="trip-overview-hero">
         <div>
           <p className="product-eyebrow">
-            {trip.status === "draft" ? "Viagem em rascunho" : trip.status}
+            {periodEnded
+              ? "Viagem encerrada"
+              : trip.status === "draft"
+                ? "Viagem em rascunho"
+                : trip.status}
           </p>
           <h1>{trip.name}</h1>
           <p>Veja os principais dados da viagem e continue de onde parou.</p>
         </div>
         <div className="section-heading-row">
-          {trip.status === "draft" ? (
+          {periodEnded ? (
+            <Link className="product-primary-action" href={`/viagens/${tripId}/guia/dias`}>
+              Ver dias da viagem
+            </Link>
+          ) : trip.status === "draft" ? (
             <Link className="product-primary-action" href={`/viagens/${tripId}/lugares?preparar=1`}>
               Preparar viagem
             </Link>
@@ -184,15 +200,37 @@ export default async function TripOverviewPage({
         <section className="traveler-context-summary" aria-labelledby="trip-guide-entry-title">
           <div className="section-heading-row">
             <div>
-              <p className="product-eyebrow">Hoje em {trip.destination.name}</p>
-              <h2 id="trip-guide-entry-title">Comece pelo que importa neste Dia</h2>
+              <p className="product-eyebrow">
+                {periodEnded
+                  ? "Período encerrado"
+                  : periodPhase === "upcoming"
+                    ? "Viagem futura"
+                    : `Hoje em ${trip.destination.name}`}
+              </p>
+              <h2 id="trip-guide-entry-title">
+                {periodEnded
+                  ? "Consulte os dias da viagem"
+                  : periodPhase === "upcoming"
+                    ? "Prepare-se para a viagem"
+                    : "Comece pelo que importa neste Dia"}
+              </h2>
               <p>
-                Veja o que já está disponível para a data em foco e abra o Guia para continuar
-                planejando o dia.
+                {periodEnded
+                  ? "O período da viagem terminou. Seu roteiro e as propostas continuam acessíveis."
+                  : periodPhase === "upcoming"
+                    ? "Veja o roteiro e continue organizando os dias antes de viajar."
+                    : "Veja o que já está disponível para a data em foco e abra o Guia para continuar planejando o dia."}
               </p>
             </div>
-            <Link className="product-primary-action" href={`/viagens/${tripId}/guia`}>
-              Ver Hoje
+            <Link
+              className="product-primary-action"
+              href={
+                periodPhase === "active"
+                  ? `/viagens/${tripId}/guia`
+                  : `/viagens/${tripId}/guia/dias`
+              }
+            >
+              {periodPhase === "active" ? "Ver Hoje" : "Ver dias da viagem"}
             </Link>
           </div>
         </section>

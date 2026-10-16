@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { addActivity, createItinerary, deriveTripDays } from "@routebook/trip-management";
@@ -76,5 +76,28 @@ describe("DestinationTripGuide", () => {
     ).toBeInTheDocument();
     expect(screen.getAllByText("Nenhuma atividade confirmada")).toHaveLength(3);
     expect(screen.getAllByRole("link", { name: "Abrir Dia no Roteiro" })).toHaveLength(3);
+  });
+
+  it("sinaliza período encerrado sem remover o acesso ao roteiro", () => {
+    const { container } = render(
+      <DestinationTripGuide
+        days={deriveTripDays(period)}
+        destinationName="São Paulo, SP"
+        itinerary={null}
+        mode="today"
+        periodEnded
+        savedPlaceCount={0}
+        selectedDate="2026-11-12"
+        tripId="trip-sp"
+      />,
+    );
+
+    expect(screen.getByText("Período encerrado")).toBeInTheDocument();
+    expect(within(container).queryByText("Hoje em São Paulo, SP")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Dia 3/ })).toBeInTheDocument();
+    expect(within(container).getByRole("link", { name: "Abrir Roteiro" })).toHaveAttribute(
+      "href",
+      "/viagens/trip-sp/roteiro?dia=2026-11-12",
+    );
   });
 });

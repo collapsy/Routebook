@@ -21,7 +21,7 @@ export function TripContextNav({ tripId }: TripContextNavProps) {
   const items: NavItem[] = [
     {
       href: `${basePath}/guia`,
-      label: "Hoje",
+      label: "Guia",
       match: (value: string) => value.startsWith(`${basePath}/guia`),
     },
     {

@@ -63,7 +63,7 @@ test("preserva contexto entre áreas e prioriza Hoje sem sobrescrever seleção 
   const tripNav = page.getByRole("navigation", { name: "Navegação da viagem" });
   await expect(tripNav).toBeVisible();
   await expect(tripNav.getByRole("link")).toHaveCount(5);
-  await expect(tripNav.getByRole("link", { name: "Hoje" })).toHaveAttribute("aria-current", "page");
+  await expect(tripNav.getByRole("link", { name: "Guia" })).toHaveAttribute("aria-current", "page");
   await expect(page.locator('[id^="guia-dia-"]')).toHaveCount(0);
   const guideMode = page.getByRole("navigation", { name: "Modo do Guia" });
   await expect(guideMode.getByRole("link", { name: "Hoje" })).toHaveAttribute(
@@ -114,6 +114,42 @@ test("preserva contexto entre áreas e prioriza Hoje sem sobrescrever seleção 
   ).toHaveAttribute("aria-current", "page");
 });
 
+test("sinaliza viagem encerrada sem CTA Hoje/Preparar e mantém Guia e Roteiro acessíveis", async ({
+  page,
+}) => {
+  const today = dateInPipa();
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: activeTripName("Viagem encerrada Pipa"),
+    startDate: shiftDate(today, -4),
+    endDate: shiftDate(today, -2),
+    accommodationName: "Hospedagem central",
+    accommodationAddress: "Pipa, Tibau do Sul — RN",
+    accommodationLatitude: -6.2302,
+    accommodationLongitude: -35.0503,
+  });
+
+  await page.goto("/viagens");
+  const endedTripCard = page.locator(".trip-card").filter({ hasText: trip.name });
+  await expect(endedTripCard).toContainText("Viagem encerrada");
+
+  await page.goto(`/viagens/${trip.id}`);
+  await expect(page.getByText("Viagem encerrada")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Preparar viagem" })).toHaveCount(0);
+  await expect(page.getByText("Hoje em Pipa", { exact: true })).toHaveCount(0);
+  await page.getByRole("link", { name: "Ver dias da viagem" }).first().click();
+
+  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/guia/dias$`));
+  await expect(page.getByRole("link", { name: "Abrir Roteiro" }).first()).toBeVisible();
+  await page.goto(`/viagens/${trip.id}/guia`);
+  await expect(page.getByText("Período encerrado")).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Modo do Guia" }).getByRole("link", {
+      name: "Resumo do dia",
+    }),
+  ).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("link", { name: "Abrir Roteiro" }).first()).toBeVisible();
+});
+
 test("mantém navegação e ações secundárias operáveis em viewport mobile", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const { trip, today } = await createTripAroundToday();
@@ -154,7 +190,7 @@ test("mantém navegação e ações secundárias operáveis em viewport mobile",
   await expect(tripNav.getByRole("link")).toHaveCount(5);
   await expect(tripNav.getByRole("link", { name: "Viagem" })).toBeVisible();
 
-  await tripNav.getByRole("link", { name: "Hoje" }).click();
+  await tripNav.getByRole("link", { name: "Guia" }).click();
   await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/guia$`));
   await expect(page.getByText("Hoje", { exact: true }).first()).toBeVisible();
 });

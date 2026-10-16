@@ -5,9 +5,9 @@ description: Delimita as correções de compreensão e navegação encontradas n
 document_type: implementation-context-pack
 owner: Experience and Quality
 status: Draft
-version: "0.2.0"
+version: "0.3.0"
 created: "2026-10-09"
-last_updated: "2026-10-09"
+last_updated: "2026-10-12"
 authors: [RouteBook Team]
 tags: [implementation, context-pack, ux, wizard, preparation, responsive]
 related_documents: [RB-INC-218, RB-INC-207, RB-INC-211, RB-INC-212, RB-INC-213, RB-INC-217, RB-CORE-0004, RB-PRD-004, RB-UX-001, RB-UX-002, RB-UX-005, RB-QA-001, RB-QA-002]
@@ -22,7 +22,7 @@ ai_context:
 
 ## 1. Missão
 
-Corrigir três fricções verificadas ao navegar na preparação: entrada inexplicada no wizard para Trip sem Itinerary, linguagem que confunde geração com revisão de Proposal, e posição/foco do conteúdo após mudar de etapa em mobile e desktop.
+Corrigir fricções verificadas ao navegar na preparação e na experiência de Trips: entrada inexplicada no wizard sem Itinerary, linguagem que confunde geração com revisão, posição/foco após mudar de etapa, e apresentação incorreta de uma Trip após o fim de seu período.
 
 ## 2. Leitura obrigatória
 
@@ -51,9 +51,9 @@ Corrigir três fricções verificadas ao navegar na preparação: entrada inexpl
 - Abrir Roteiro é read-only quando não há Itinerary. A ação explicitamente submetida “Começar roteiro” cria o Itinerary vazio com os Dias do período da Trip; é idempotente e exige `trip:edit` no servidor.
 - Na etapa de geração sem Itinerary, explicar a pré-condição e oferecer “Começar roteiro”; depois do POST, retornar à etapa de geração, sem disparar geração de Proposal.
 - Só se apresenta “sem Roteiro” quando não existe Itinerary; não inferir essa condição apenas de uma lista de Dias vazia.
-- `Trip.status`, período da Trip e elegibilidade não são recalculados nem alterados pela camada UX.
+- `Trip.status`, período da Trip e elegibilidade não são recalculados nem alterados pela camada UX. Conforme issue #538, a UX pode derivar a indicação “Viagem encerrada” pela data corrente no fuso da Trip e pelo período inclusivo.
 - Não persistir progresso do wizard, estado derivado ou cópia do Contexto.
-- Não reinterpretar datas passadas como encerramento nem bloquear uma ação atual sem contrato de produto.
+- Não converter a indicação visual de período encerrado em estado canônico ou bloquear geração, acesso a propostas ou aceite.
 
 ## 5. Regras de UX/QA
 
@@ -64,10 +64,12 @@ Corrigir três fricções verificadas ao navegar na preparação: entrada inexpl
 5. Na navegação de etapa, deixar heading e indicador no viewport; respeitar reduced motion e manter visibilidade do foco.
 6. Layout responsivo não deve causar corte, sobreposição ou overflow horizontal.
 7. Manter navegação por teclado e semântica; leitores de tela recebem mudança de etapa sem duplicação de anúncios.
+8. Se o período da Trip terminou no fuso da própria Trip, indicar “Viagem encerrada”, remover CTA “Preparar viagem” e rótulos “Hoje”; manter dias, roteiro e proposta acessíveis.
+9. Comparar datas inclusivamente: antes do início é futura, entre início e fim inclusive está em andamento, e somente depois do fim está encerrada. Dia explicitamente selecionado permanece acessível.
 
 ## 6. Caminhos permitidos
 
-Somente os caminhos listados em RB-INC-218. O componente opcional de foco/scroll requer justificativa no diff. Os specs de recomendações, validação multi-destino e Guia podem ser ajustados apenas para preparar explicitamente o Itinerary vazio que seus cenários consultam, pois a rota `/roteiro` não cria mais Itinerary por GET; os testes não devem depender dessa escrita implícita. Não alterar helpers globais do Playwright, setup, fixtures compartilhadas, rotas de autenticação ou módulos de domínio.
+Somente os caminhos listados em RB-INC-218 v0.3.0. O componente opcional de foco/scroll requer justificativa no diff. Os specs de recomendações, validação multi-destino e Guia podem ser ajustados apenas para preparar explicitamente o Itinerary vazio que seus cenários consultam, pois a rota `/roteiro` não cria mais Itinerary por GET; os testes não devem depender dessa escrita implícita. Não alterar helpers globais do Playwright, setup, fixtures compartilhadas, rotas de autenticação ou módulos de domínio.
 
 ## 7. Testes mínimos
 
@@ -85,7 +87,7 @@ Executar os comandos definidos na seção de validação do RB-INC-218, além do
 
 ## 9. Fora de escopo e escalonamento
 
-Datas passadas, lifecycle/status, cópias gerais do produto, redesign, analytics, alteração de regras de negócio e limpeza de dados estão fora de escopo. Se a correção exigir uma decisão dessas, parar, registrar a evidência e solicitar revisão do incremento antes de editar.
+Mudança do lifecycle/status canônico, bloqueio de ações de Proposal, cópias gerais do produto, redesign, analytics, alteração de regras de negócio e limpeza de dados estão fora de escopo. A derivação visual “período encerrado” foi decidida na issue #538. Se a correção exigir outras decisões de domínio, parar, registrar a evidência e solicitar revisão do incremento antes de editar.
 
 ## 10. Gate
 

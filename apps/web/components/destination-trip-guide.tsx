@@ -20,6 +20,7 @@ export function DestinationTripGuide({
   todayDate,
   itinerary,
   savedPlaceCount,
+  periodEnded = false,
 }: Readonly<{
   mode: "today" | "days";
   tripId: string;
@@ -29,6 +30,7 @@ export function DestinationTripGuide({
   todayDate?: string;
   itinerary: Itinerary | null;
   savedPlaceCount: number;
+  periodEnded?: boolean;
 }>) {
   const selectedDay = itinerary?.days.find((day) => day.date === selectedDate);
   const selectedTripDay = days.find((day) => day.date === selectedDate);
@@ -76,13 +78,19 @@ export function DestinationTripGuide({
 
   return (
     <section className="traveler-context-summary" aria-labelledby="destination-today-title">
-      <p className="product-eyebrow">Hoje em {destinationName}</p>
+      <p className="product-eyebrow">
+        {periodEnded ? "Período encerrado" : `Hoje em ${destinationName}`}
+      </p>
       <h1 id="destination-today-title">
         {selectedTripDay
           ? `Dia ${selectedTripDay.index} — ${formatDate(selectedTripDay.date)}`
           : "Dia em foco"}
       </h1>
-      {selectedDate && selectedDate === todayDate ? <p>Este é o Dia atual da viagem.</p> : null}
+      {periodEnded ? (
+        <p>O período da viagem terminou. Consulte os dias e o roteiro quando quiser.</p>
+      ) : selectedDate && selectedDate === todayDate ? (
+        <p>Este é o Dia atual da viagem.</p>
+      ) : null}
       {selectedDay && selectedDay.activities.length > 0 ? (
         <>
           <p>Atividades confirmadas no seu Roteiro:</p>
@@ -97,8 +105,9 @@ export function DestinationTripGuide({
         </>
       ) : (
         <p>
-          Ainda não há atividades confirmadas para este Dia. Explore lugares ou abra seus salvos
-          para escolher o próximo passo.
+          {periodEnded
+            ? "Não há atividades confirmadas para este Dia. O roteiro e as propostas continuam disponíveis."
+            : "Ainda não há atividades confirmadas para este Dia. Explore lugares ou abra seus salvos para escolher o próximo passo."}
         </p>
       )}
       <div className="section-heading-row">

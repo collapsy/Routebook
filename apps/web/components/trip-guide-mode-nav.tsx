@@ -6,10 +6,12 @@ export function TripGuideModeNav({
   tripId,
   selectedDate,
   active,
+  todayLabel = "Hoje",
 }: Readonly<{
   tripId: string;
   selectedDate?: string;
   active: "today" | "days";
+  todayLabel?: string;
 }>) {
   const dateQuery = selectedDate ? `?dia=${selectedDate}` : "";
 
@@ -20,7 +22,7 @@ export function TripGuideModeNav({
         className={active === "today" ? styles.active : styles.link}
         href={`/viagens/${tripId}/guia${dateQuery}`}
       >
-        Hoje
+        {todayLabel}
       </Link>
       <Link
         aria-current={active === "days" ? "page" : undefined}

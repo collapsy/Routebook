@@ -35,7 +35,7 @@ test("valida São Paulo sem seed e preserva Discovery, Minha seleção, Roteiro,
   await expect(
     page.getByRole("definition").filter({ hasText: "Hospedagem na Avenida Paulista" }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Hoje", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Guia", exact: true })).toBeVisible();
   await expect(page.getByText(/Hoje em São Paulo, SP/)).toBeVisible();
 
   await page.goto(`/viagens/${trip.id}/lugares`);

@@ -456,6 +456,10 @@ Priorizar:
 * Distância;
 * rota.
 
+#### Viagem com período encerrado
+
+Indicar claramente que o período terminou, sem alterar o estado canônico da Trip. Remover ações e rótulos de “Hoje” e “Preparar viagem”; manter acesso ao Guia por dia, Roteiro e Propostas. A indicação é derivada comparando a data no fuso da Trip com o período inclusivo.
+
 #### Viagem sem planejamento
 
 Priorizar:
@@ -1559,11 +1563,12 @@ Acessar rapidamente o planejamento do dia em andamento.
 ```text
 [Abrir Viagem]
    ↓
-<Data atual dentro do Período?>
-   ├── Não → [Visão Geral padrão]
-   └── Sim → [Resumo do Dia atual]
+<Data atual no fuso da Trip?>
+   ├── Antes do Período → [Visão Geral de Viagem futura]
+   ├── Dentro do Período inclusivo → [Resumo do Dia atual]
+   └── Depois do Período → [Viagem encerrada; Guia por dia]
                   ↓
-          <Existe próxima Atividade?>
+          <Período em andamento e existe próxima Atividade?>
              ├── Não → [Dia livre ou sem horário]
              └── Sim → [Próxima Atividade]
                             ↓

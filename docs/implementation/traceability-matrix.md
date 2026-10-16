@@ -5,9 +5,9 @@ description: Mantém a ligação entre requisitos, decisões, incrementos, issue
 document_type: implementation-governance
 owner: Delivery
 status: Published
-version: "1.1.0"
+version: "1.2.0"
 created: "2026-07-28"
-last_updated: "2026-09-21"
+last_updated: "2026-10-12"
 authors:
   - RouteBook Team
 tags:
@@ -1380,8 +1380,9 @@ Ao concluir um incremento:
 | --- | --- |
 | incremento | `docs/implementation/increments/rb-inc-218-preparation-ux-polish.md` |
 | Context Pack | `docs/implementation/context-packs/rb-inc-218-preparation-ux-polish.md` |
-| issue | ainda não vinculada; o incremento é a unidade de trabalho documental e deve receber issue antes da execução de implementação, se exigido pelo fluxo de entrega |
-| branch/base | `codex/rb-inc-218-preparation-ux-polish`; base da worktree criada a partir da branch padrão remota |
-| gaps auditados | entrada inexplicada no wizard de Trip sem Itinerary; etapa de geração descrita como revisão; scroll/foco e título precisam de validação responsiva |
-| escopo planejado | orientação de continuação, início explícito e autorizado, linguagem coerente pré/pós-geração, heading/foco/rolagem responsivos e testes E2E desktop/mobile, inclusive Trip planejada sem Itinerary; sem mudança de domínio ou dados de Preview |
-| validação | pendente; preencher somente após executar comandos e revisar Preview |
+| issue | [#538](https://github.com/collapsy/Routebook/issues/538) |
+| branch/base | `codex/issue-538-ended-trip`; `main` vigente no início do trabalho |
+| gaps auditados | preparação sem Itinerary e pós-período indevidamente apresentado como Rascunho/Hoje, com CTA Preparar viagem |
+| escopo implementado | status visual derivado de período/fuso, navegação Guia, fallback no último Dia e acesso contínuo a dias/Roteiro/Propostas; sem alteração de domínio ou regras de Proposal |
+| validação | docs, Prettier focado, lint e typecheck passaram; testes unitários focados 9/9; E2E listado para desktop/mobile. Build interrompido por `DATABASE_URL` ausente; por consequência E2E não iniciou sem build. Revisão manual de Preview pendente |
+| decisão #538 | sinalizar período encerrado sem bloquear acesso, geração ou aceite de Proposal; sem alteração de `Trip.status` |

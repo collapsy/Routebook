@@ -17,7 +17,7 @@ import { DestinationTripGuide } from "../../../../../components/destination-trip
 import { TripGuideModeNav } from "../../../../../components/trip-guide-mode-nav";
 import { buildPipaTripGuide } from "../../../../../lib/pipa-day-guide";
 import { isPipaDestination } from "../../../../../lib/pipa-destination";
-import { resolveTripTodayDate } from "../../../../../lib/trip-active-day";
+import { resolvePreferredTripDay, resolveTripTodayDate } from "../../../../../lib/trip-active-day";
 import { loadTripCuratedCatalog } from "../../../../../lib/trip-curated-catalog";
 
 export const dynamic = "force-dynamic";
@@ -46,10 +46,10 @@ export default async function TripGuideDaysPage({
   ]);
   const publishedPlaces = curatedCatalog.places;
   const days = deriveTripDays(trip.period);
-  const todayDate = resolveTripTodayDate(days, new Date(), trip.destination.timeZone);
+  const now = new Date();
+  const todayDate = resolveTripTodayDate(days, now, trip.destination.timeZone);
   const { dia } = await searchParams;
-  const selectedDate =
-    (dia && days.some((day) => day.date === dia) ? dia : undefined) ?? todayDate ?? days[0]?.date;
+  const selectedDate = resolvePreferredTripDay(days, dia, now, trip.destination.timeZone)?.date;
   const travelMode = profile?.transportPreference === "walking" ? "walking" : "driving";
   const guide = isPipaDestination(trip.destination)
     ? buildPipaTripGuide({

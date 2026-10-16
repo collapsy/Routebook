@@ -17,13 +17,17 @@ import { DestinationTripGuide } from "../../../../components/destination-trip-gu
 import { TripGuideModeNav } from "../../../../components/trip-guide-mode-nav";
 import { buildPipaDailyExperience } from "../../../../lib/pipa-daily-experiences";
 import { isPipaDestination } from "../../../../lib/pipa-destination";
-import { resolveTripTodayDate } from "../../../../lib/trip-active-day";
+import {
+  resolvePreferredTripDay,
+  resolveTripPeriodPhase,
+  resolveTripTodayDate,
+} from "../../../../lib/trip-active-day";
 import { loadTripCuratedCatalog } from "../../../../lib/trip-curated-catalog";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Hoje na viagem — RouteBook",
+  title: "Guia da viagem — RouteBook",
   description: "Consulte decisões úteis para o Dia sem carregar o guia completo.",
 };
 
@@ -46,13 +50,20 @@ export default async function TripGuidePage({
   ]);
   const publishedPlaces = curatedCatalog.places;
   const days = deriveTripDays(trip.period);
-  const todayDate = resolveTripTodayDate(days, new Date(), trip.destination.timeZone);
+  const now = new Date();
+  const periodPhase = resolveTripPeriodPhase(
+    trip.period.startDate,
+    trip.period.endDate,
+    now,
+    trip.destination.timeZone,
+  );
+  const periodEnded = periodPhase === "ended";
+  const todayDate = resolveTripTodayDate(days, now, trip.destination.timeZone);
   const { dia } = await searchParams;
-  const selectedDate =
-    (dia && days.some((day) => day.date === dia) ? dia : undefined) ?? todayDate ?? days[0]?.date;
+  const selectedDate = resolvePreferredTripDay(days, dia, now, trip.destination.timeZone)?.date;
   const travelMode = profile?.transportPreference === "walking" ? "walking" : "driving";
   const dailyExperience =
-    selectedDate && isPipaDestination(trip.destination)
+    selectedDate && !periodEnded && isPipaDestination(trip.destination)
       ? buildPipaDailyExperience({
           tripId,
           date: selectedDate,
@@ -79,6 +90,9 @@ export default async function TripGuidePage({
         active="today"
         {...(selectedDate ? { selectedDate } : {})}
         tripId={tripId}
+        todayLabel={
+          periodEnded ? "Resumo do dia" : periodPhase === "upcoming" ? "Primeiro dia" : "Hoje"
+        }
       />
 
       {dailyExperience ? (
@@ -94,6 +108,7 @@ export default async function TripGuidePage({
           destinationName={trip.destination.name}
           itinerary={itinerary}
           mode="today"
+          periodEnded={periodEnded}
           savedPlaceCount={savedPlaces.length}
           {...(selectedDate ? { selectedDate } : {})}
           {...(todayDate ? { todayDate } : {})}

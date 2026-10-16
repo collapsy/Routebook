@@ -1199,6 +1199,8 @@ O Dia poderá estar:
 
 Esses estados poderão coexistir.
 
+“Atual”, “passado” e “futuro” descrevem a relação de um Dia com a data corrente no fuso da Trip. Quando a data corrente ultrapassar o fim inclusivo do período, a interface poderá sinalizar a Trip como encerrada, sem alterar `Trip.status`, esconder Dias ou restringir acesso a Roteiro/Proposal. Não apresentar conteúdo como “Hoje” fora do período.
+
 ---
 
 ## 66. RB-INT-052 — Abrir Atividade

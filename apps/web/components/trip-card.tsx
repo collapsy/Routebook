@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import type { Trip } from "@routebook/trip-management";
 
+import { resolveTripPeriodPhase } from "../lib/trip-active-day";
+
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(
     new Date(`${value}T00:00:00Z`),
@@ -10,12 +12,21 @@ function formatDate(value: string): string {
 
 export function TripCard({ trip }: { trip: Trip }) {
   const owner = trip.participants.find((participant) => participant.role === "owner");
+  const periodEnded =
+    resolveTripPeriodPhase(
+      trip.period.startDate,
+      trip.period.endDate,
+      new Date(),
+      trip.destination.timeZone,
+    ) === "ended";
 
   return (
     <article className="trip-card">
       <div className="trip-card-heading">
         <div>
-          <p className="product-eyebrow">{trip.status === "draft" ? "Rascunho" : trip.status}</p>
+          <p className="product-eyebrow">
+            {periodEnded ? "Viagem encerrada" : trip.status === "draft" ? "Rascunho" : trip.status}
+          </p>
           <h2>
             <Link className="trip-card-link" href={`/viagens/${trip.id}`}>
               {trip.name}

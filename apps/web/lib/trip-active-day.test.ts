@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   formatDateInTimeZone,
   resolvePreferredTripDay,
+  resolveTripPeriodPhase,
   resolveTripTodayDate,
 } from "./trip-active-day";
 
@@ -32,6 +33,41 @@ describe("active trip day", () => {
     ).toBeNull();
   });
 
+  it("classifica o período com limites inclusivos no fuso da viagem", () => {
+    expect(
+      resolveTripPeriodPhase(
+        "2026-08-22",
+        "2026-08-24",
+        new Date("2026-08-22T03:00:00Z"),
+        "America/Fortaleza",
+      ),
+    ).toBe("active");
+    expect(
+      resolveTripPeriodPhase(
+        "2026-08-22",
+        "2026-08-24",
+        new Date("2026-08-25T02:59:00Z"),
+        "America/Fortaleza",
+      ),
+    ).toBe("active");
+    expect(
+      resolveTripPeriodPhase(
+        "2026-08-22",
+        "2026-08-24",
+        new Date("2026-08-25T03:00:00Z"),
+        "America/Fortaleza",
+      ),
+    ).toBe("ended");
+    expect(
+      resolveTripPeriodPhase(
+        "2026-08-22",
+        "2026-08-24",
+        new Date("2026-08-21T12:00:00Z"),
+        "America/Fortaleza",
+      ),
+    ).toBe("upcoming");
+  });
+
   it("prioriza seleção explícita válida sobre o Dia atual", () => {
     const selected = resolvePreferredTripDay(
       days,
@@ -54,7 +90,16 @@ describe("active trip day", () => {
     expect(selected?.position).toBe(2);
   });
 
-  it("mantém o primeiro Dia como fallback fora do Período ou com seleção inválida", () => {
+  it("usa o último Dia após o Período e o primeiro Dia antes dele", () => {
+    expect(
+      resolvePreferredTripDay(
+        days,
+        undefined,
+        new Date("2026-08-25T12:00:00.000Z"),
+        "America/Fortaleza",
+      )?.position,
+    ).toBe(3);
+
     expect(
       resolvePreferredTripDay(
         days,

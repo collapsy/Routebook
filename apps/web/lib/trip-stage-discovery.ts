@@ -25,7 +25,9 @@ export function selectTripDiscoveryScope(
   if (requestedStageId && !stage) return null;
 
   const destination = stage?.destination ?? trip.destination;
-  const accommodationCoordinate = stage ? undefined : trip.accommodation?.coordinate;
+  const accommodationCoordinate = stage
+    ? stage.accommodation?.coordinate
+    : trip.accommodation?.coordinate;
   return {
     ...(stage ? { stageId: stage.id } : {}),
     destinationName: destination.name,

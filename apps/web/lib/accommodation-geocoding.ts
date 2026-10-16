@@ -6,7 +6,7 @@ export type AccommodationLocationStatus =
   "removed" | "manual" | "preserved" | "resolved" | "not-found" | "unavailable";
 
 type PrepareAccommodationInput = Readonly<{
-  trip: Trip;
+  trip: Pick<Trip, "destination" | "accommodation">;
   accommodationName: string;
   accommodationAddress?: string;
   manualLatitude?: number;
@@ -111,7 +111,7 @@ function geocodingContext(
 }
 
 function sameLocation(
-  trip: Trip,
+  trip: Pick<Trip, "accommodation">,
   accommodationName: string,
   accommodationAddress: string | undefined,
 ): boolean {

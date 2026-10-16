@@ -969,7 +969,7 @@ Toda Recomendação personalizada deve possuir:
 | Termos permitidos | Etapa                                                    |
 | Termos a evitar   | Parada ou localidade como sinônimos canônicos sem definição |
 
-Uma Etapa de um dia pode não ter Hospedagem. O Destino principal da Viagem continua existindo fora das Etapas adicionais.
+Uma Etapa pode ter uma Hospedagem opcional própria. Uma Etapa de um dia pode não ter Hospedagem. O Destino principal e a Hospedagem principal da Viagem continuam existindo fora das Etapas adicionais.
 
 ---
 
@@ -997,7 +997,7 @@ Uma Etapa de um dia pode não ter Hospedagem. O Destino principal da Viagem cont
 | Categoria         | Entidade                                             |
 | Definição         | Referência de permanência utilizada durante a Viagem |
 | Não significa     | Categoria de Place automaticamente                   |
-| Relaciona-se com  | Trip, Location, Travel Estimate                      |
+| Relaciona-se com  | Trip, Trip Stage, Location, Travel Estimate          |
 | Termos permitidos | Local de hospedagem                                  |
 | Termos a evitar   | Hotel, quando o tipo não for conhecido               |
 

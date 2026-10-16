@@ -2505,6 +2505,8 @@ Quando múltiplos Destinos forem incorporados, deverão existir regras para:
 
 Na primeira entrega, o Destino principal permanece definido. Uma Etapa adicional informa Destino e datas dentro da Viagem, inclusive bate-volta sem nova Hospedagem. A exploração usa apenas o Destino escolhido; Lugares de outra cidade não são apresentados como se pertencessem ao mesmo entorno. Salvar Lugar preserva a Viagem única e não cria Atividade.
 
+Uma Etapa adicional pode ter Hospedagem própria opcional. A referência de proximidade dessa Etapa usa a Hospedagem somente quando sua localização está confirmada; caso contrário, usa o Destino da Etapa e identifica a estimativa. A Hospedagem principal não é modificada por essa operação.
+
 ---
 
 ## 172. Uso offline

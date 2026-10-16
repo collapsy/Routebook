@@ -1931,12 +1931,12 @@ Na primeira entrega, a Viagem mantém um Destino principal e pode incluir Etapas
 ```text
 Viagem
 ├── Destino principal e Hospedagem principal opcional
-├── Etapas adicionais com Destino e datas
+├── Etapas adicionais com Destino, datas e Hospedagem opcional
 ├── Roteiro
 └── Explorar Lugares por Destino selecionado
 ```
 
-Na visão da Viagem, cada Etapa mostra Destino e datas. No Dia do Roteiro, a Etapa correspondente aparece antes das Atividades e abre Explorar com esse Destino selecionado. Em Explorar, o seletor informa claramente qual Destino define a Região usada por lista, mapa, filtros e distâncias. A seleção de Lugares continua pertencendo à Viagem e identifica a localização de cada Lugar. A Hospedagem principal não é apresentada como âncora de distância no Destino de uma Etapa sem hospedagem própria.
+Na visão da Viagem, cada Etapa mostra Destino, datas e sua Hospedagem, quando informada. No Dia do Roteiro, a Etapa correspondente aparece antes das Atividades e abre Explorar com esse Destino selecionado. Em Explorar, o seletor informa claramente qual Destino define a Região usada por lista, mapa, filtros e distâncias. Uma Hospedagem de Etapa localizada vira a referência espacial apenas dessa Etapa; sem localização, a Região usa seu Destino. A seleção de Lugares continua pertencendo à Viagem e identifica a localização de cada Lugar. A Hospedagem principal não é apresentada como âncora de distância no Destino de outra Etapa.
 
 ---
 

@@ -1,6 +1,10 @@
 import { afterAll, describe, expect, it } from "vitest";
 
-import { createTrip, createTripStage } from "@routebook/trip-management";
+import {
+  createTrip,
+  createTripStage,
+  updateTripStageAccommodation,
+} from "@routebook/trip-management";
 
 import { closeDatabase } from "./client";
 import { DrizzleTripRepository } from "./trip-repository";
@@ -55,9 +59,44 @@ describe("DrizzleTripStageRepository", () => {
         { id: stage.id, destination: { name: "Itapema, SC" }, startDate: "2026-11-07" },
       ]);
       expect((await tripRepository.findById(trip.id))?.contextVersion).toBe(2);
+      const withAccommodation = updateTripStageAccommodation(stage, {
+        accommodationName: "Pousada Itapema",
+        accommodationAddress: "Centro, Itapema",
+        accommodationLatitude: -27.0905,
+        accommodationLongitude: -48.6112,
+      });
+      expect(
+        await stageRepository.updateAccommodation(
+          trip.id,
+          stage.id,
+          withAccommodation.accommodation,
+        ),
+      ).toBe(true);
+      expect((await stageRepository.findById(trip.id, stage.id))?.accommodation).toEqual(
+        withAccommodation.accommodation,
+      );
+      expect((await tripRepository.findById(trip.id))?.accommodation).toBeUndefined();
+      expect((await tripRepository.findById(trip.id))?.contextVersion).toBe(3);
+      expect(
+        await stageRepository.updateAccommodation(
+          "00000000-0000-4000-8000-000000000009",
+          stage.id,
+          undefined,
+        ),
+      ).toBe(false);
+      expect(
+        await stageRepository.updateAccommodation(
+          trip.id,
+          "00000000-0000-4000-8000-000000000009",
+          undefined,
+        ),
+      ).toBe(false);
+      expect(await stageRepository.updateAccommodation(trip.id, stage.id, undefined)).toBe(true);
+      expect((await stageRepository.findById(trip.id, stage.id))?.accommodation).toBeUndefined();
+      expect((await tripRepository.findById(trip.id))?.contextVersion).toBe(4);
       expect(await stageRepository.remove(trip.id, stage.id)).toBe(true);
       expect(await stageRepository.listByTripId(trip.id)).toEqual([]);
-      expect((await tripRepository.findById(trip.id))?.contextVersion).toBe(3);
+      expect((await tripRepository.findById(trip.id))?.contextVersion).toBe(5);
     } finally {
       await tripRepository.deleteById(trip.id);
     }

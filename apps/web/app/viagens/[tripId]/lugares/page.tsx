@@ -558,6 +558,10 @@ export default async function PlacesPage({
     requestedMaximumDistanceMeters,
   );
   if (!scope) notFound();
+  const selectedStage = scope.stageId
+    ? stages.find((candidate) => candidate.id === scope.stageId)
+    : undefined;
+  const scopeAccommodation = selectedStage ? selectedStage.accommodation : trip.accommodation;
   const accommodationCoordinate = scope.accommodationCoordinate;
   const regionResolution = scope.regionResolution;
   const region = regionResolution.status === "resolved" ? regionResolution.region : undefined;
@@ -820,10 +824,11 @@ export default async function PlacesPage({
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
         href: `/viagens/${tripId}/lugares/${item.place.slug}${
-          rawFilters.dia || wizardMode
+          rawFilters.dia || wizardMode || scope.stageId
             ? `?${[
                 rawFilters.dia ? `dia=${encodeURIComponent(rawFilters.dia)}` : undefined,
                 wizardMode ? "preparar=1" : undefined,
+                scope.stageId ? `etapa=${encodeURIComponent(scope.stageId)}` : undefined,
               ]
                 .filter(Boolean)
                 .join("&")}`
@@ -841,16 +846,19 @@ export default async function PlacesPage({
     };
   });
 
-  if (accommodationCoordinate && trip.accommodation) {
+  if (accommodationCoordinate && scopeAccommodation) {
     mapPoints.unshift({
       id: "accommodation",
-      label: trip.accommodation.name,
+      label: scopeAccommodation.name,
       kind: "accommodation",
       latitude: accommodationCoordinate.latitude,
       longitude: accommodationCoordinate.longitude,
     });
   }
-  const distanceReferenceLabel = region?.distanceReferenceLabel ?? "da referência espacial";
+  const distanceReferenceLabel =
+    scope.stageId && region?.source === "accommodation"
+      ? "da hospedagem da etapa"
+      : (region?.distanceReferenceLabel ?? "da referência espacial");
 
   console.info("[place-bootstrap] completed", {
     destinationResolved: true,
@@ -1025,8 +1033,7 @@ export default async function PlacesPage({
         </p>
       ) : region.source === "accommodation" ? (
         <p className={styles.notice}>
-          Distâncias estimadas em linha reta a partir da hospedagem; não representam rota ou tempo
-          de deslocamento.
+          Distâncias estimadas em linha reta a partir da {scope.stageId ? "hospedagem desta etapa" : "hospedagem principal"}; não representam rota ou tempo de deslocamento.
         </p>
       ) : (
         <p className={styles.notice} role="status">

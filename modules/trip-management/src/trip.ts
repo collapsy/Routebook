@@ -138,7 +138,7 @@ function isLocalDate(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
 }
 
-function createAccommodation(input: UpdateAccommodationInput): Accommodation | undefined {
+export function createAccommodation(input: UpdateAccommodationInput): Accommodation | undefined {
   const accommodationName = input.accommodationName.trim();
   const accommodationAddress = input.accommodationAddress?.trim();
   const hasAccommodationLatitude = input.accommodationLatitude !== undefined;

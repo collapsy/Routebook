@@ -81,17 +81,33 @@ export default async function TripStagesPage({
           <li>
             <strong>{trip.destination.name}</strong> · Destino principal ·{" "}
             {formatDate(trip.period.startDate)} a {formatDate(trip.period.endDate)}
+            <div>Hospedagem principal: {trip.accommodation?.name ?? "Não informada"}</div>
+            <Link className="product-inline-link" href={`/viagens/${tripId}/hospedagem`}>
+              Editar hospedagem principal
+            </Link>
           </li>
           {stages.map((stage) => (
             <li key={stage.id}>
               <strong>{stage.destination.name}</strong> · {formatDate(stage.startDate)}
               {stage.endDate !== stage.startDate ? ` a ${formatDate(stage.endDate)}` : ""}
+              <div>
+                Hospedagem desta etapa: {stage.accommodation?.name ?? "Não informada (bate-volta possível)"}
+                {stage.accommodation && !stage.accommodation.coordinate
+                  ? " · localização não confirmada"
+                  : ""}
+              </div>
               <div className="section-heading-row">
                 <Link
                   className="product-inline-link"
                   href={`/viagens/${tripId}/lugares?etapa=${stage.id}`}
                 >
                   Explorar lugares em {stage.destination.name}
+                </Link>
+                <Link
+                  className="product-inline-link"
+                  href={`/viagens/${tripId}/etapas/${stage.id}/hospedagem`}
+                >
+                  {stage.accommodation ? "Editar hospedagem da etapa" : "Adicionar hospedagem à etapa"}
                 </Link>
                 <form action={removeTripStageAction}>
                   <input name="tripId" type="hidden" value={tripId} />

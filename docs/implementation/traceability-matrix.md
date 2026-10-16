@@ -1395,4 +1395,15 @@ Ao concluir um incremento:
 | requisito | RB-FR-144; caso RB-UC-043; regras de Trip, Place e Roteiro |
 | branch/base | `codex/rb-inc-219-multi-destination-trip`, `origin/main@3d42b704` |
 | escopo | Etapa datada para visita a outro Destino, descoberta isolada por Region, vínculo visual ao Dia; Hospedagem adicional permanece posterior |
-| validação | pendente; registrar somente comandos executados e resultados reais |
+| validação | 108 testes de domínio e 25 testes web focados passaram; lint, typecheck e documentação passaram; integração, build e E2E locais dependeram de `DATABASE_URL` ausente; Prettier global acusou 546 arquivos do baseline |
+
+## Evidências previstas do RB-INC-220
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-220-stage-accommodation.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-220-stage-accommodation.md` |
+| requisito | RB-FR-144; RB-BR-TRIP-013; Hospedagem opcional de Etapa |
+| branch/base | `codex/rb-inc-220-stage-accommodation`, RB-INC-219 no commit `9ed8934e` |
+| escopo | Hospedagem própria opcional por Etapa, com referência espacial, validação, autorização e isolamento da Hospedagem principal |
+| validação | 110 testes de domínio e 24 testes web focados passaram; lint, typecheck e documentação passaram; integração, build e E2E locais dependeram de `DATABASE_URL` ausente; Prettier global acusou 542 arquivos do baseline |

@@ -56,6 +56,10 @@ export const tripStages = pgTable(
       .notNull(),
     startDate: date("start_date", { mode: "string" }).notNull(),
     endDate: date("end_date", { mode: "string" }).notNull(),
+    accommodationName: varchar("accommodation_name", { length: 180 }),
+    accommodationAddress: text("accommodation_address"),
+    accommodationLatitude: doublePrecision("accommodation_latitude"),
+    accommodationLongitude: doublePrecision("accommodation_longitude"),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
   },
   (table) => [
@@ -63,6 +67,22 @@ export const tripStages = pgTable(
     check("trip_stages_date_order", sql`${table.endDate} >= ${table.startDate}`),
     check("trip_stages_latitude_range", sql`${table.latitude} BETWEEN -90 AND 90`),
     check("trip_stages_longitude_range", sql`${table.longitude} BETWEEN -180 AND 180`),
+    check(
+      "trip_stages_accommodation_requires_name",
+      sql`${table.accommodationName} IS NOT NULL OR (${table.accommodationAddress} IS NULL AND ${table.accommodationLatitude} IS NULL AND ${table.accommodationLongitude} IS NULL)`,
+    ),
+    check(
+      "trip_stages_accommodation_coordinates_pair",
+      sql`(${table.accommodationLatitude} IS NULL) = (${table.accommodationLongitude} IS NULL)`,
+    ),
+    check(
+      "trip_stages_accommodation_latitude_range",
+      sql`${table.accommodationLatitude} IS NULL OR ${table.accommodationLatitude} BETWEEN -90 AND 90`,
+    ),
+    check(
+      "trip_stages_accommodation_longitude_range",
+      sql`${table.accommodationLongitude} IS NULL OR ${table.accommodationLongitude} BETWEEN -180 AND 180`,
+    ),
   ],
 );
 

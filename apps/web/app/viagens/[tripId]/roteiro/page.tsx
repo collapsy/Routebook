@@ -484,12 +484,12 @@ export default async function ItineraryPage({
                   {selectedDayStages.map((stage) => stage.destination.name).join(", ")}
                 </p>
                 {selectedDayStages.map((stage) => (
-                  <Link
-                    href={`/viagens/${tripId}/lugares?dia=${selectedDay.date}&etapa=${stage.id}`}
-                    key={stage.id}
-                  >
-                    Explorar lugares em {stage.destination.name}
-                  </Link>
+                  <div key={stage.id}>
+                    <span>Hospedagem em {stage.destination.name}: {stage.accommodation?.name ?? "não informada"}. </span>
+                    <Link href={`/viagens/${tripId}/lugares?dia=${selectedDay.date}&etapa=${stage.id}`}>
+                      Explorar lugares em {stage.destination.name}
+                    </Link>
+                  </div>
                 ))}
               </div>
             ) : null}

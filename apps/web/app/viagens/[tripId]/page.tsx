@@ -203,6 +203,7 @@ export default async function TripOverviewPage({
               <li key={stage.id}>
                 <strong>{stage.destination.name}</strong> · {formatDate(stage.startDate)}
                 {stage.endDate !== stage.startDate ? ` a ${formatDate(stage.endDate)}` : ""} ·{" "}
+                Hospedagem: {stage.accommodation?.name ?? "não informada"} ·{" "}
                 <Link href={`/viagens/${tripId}/lugares?etapa=${stage.id}`}>
                   Explorar lugares
                 </Link>

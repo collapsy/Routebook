@@ -50,4 +50,20 @@ describe("Trip discovery scope", () => {
   it("rejects a stage outside this trip", () => {
     expect(selectTripDiscoveryScope(trip, [stage], "other-stage")).toBeNull();
   });
+
+  it("uses the stage accommodation when its location is confirmed", () => {
+    const locatedStage = {
+      ...stage,
+      accommodation: {
+        name: "Pousada Itapema",
+        coordinate: { latitude: -27.091, longitude: -48.612 },
+      },
+    };
+    const visit = selectTripDiscoveryScope(trip, [locatedStage], stage.id);
+    expect(visit?.regionResolution).toMatchObject({
+      status: "resolved",
+      region: { source: "accommodation", center: locatedStage.accommodation.coordinate },
+    });
+    expect(visit?.accommodationCoordinate).toEqual(locatedStage.accommodation.coordinate);
+  });
 });

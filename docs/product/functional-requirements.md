@@ -3000,7 +3000,16 @@ O sistema poderá permitir que uma Viagem possua múltiplos Destinos e Hospedage
 * explorar Lugares por Destino selecionado, com lista e mapa coerentes e rótulo geográfico explícito;
 * preservar a seleção de Lugares na mesma Viagem sem adicioná-los automaticamente ao Roteiro.
 
-Hospedagens adicionais, pernoites e deslocamentos entre Destinos seguem em incrementos posteriores.
+A Hospedagem de Etapa é tratada na segunda entrega. Pernoites e deslocamentos entre Destinos seguem em incrementos posteriores.
+
+### Segunda entrega pós-MVP
+
+* informar, alterar ou remover uma Hospedagem opcional em cada Etapa adicional;
+* mostrar separadamente a Hospedagem principal e a Hospedagem da Etapa;
+* usar a localização confirmada da Hospedagem da Etapa para lista, mapa, distâncias e rotas de Lugares dessa Etapa;
+* manter o Destino da Etapa como referência quando a Hospedagem não tiver localização confirmada.
+
+Check-in/check-out, mais de uma Hospedagem na mesma Etapa e deslocamentos entre Destinos continuam posteriores.
 
 ### MVP
 

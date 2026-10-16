@@ -134,6 +134,39 @@ test("separa Joinville e Itapema na mesma viagem e planeja um lugar no dia da vi
   await expect(page.getByText(/foi adicionado ao Dia 2/)).toBeVisible();
   await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-11-14`);
   await expect(page.locator(".itinerary-day-card").getByText(itapemaPlace)).toBeVisible();
+
+  await page.goto(`/viagens/${trip.id}/etapas`);
+  await page.getByRole("link", { name: "Adicionar hospedagem à etapa" }).click();
+  await page.getByLabel("Nome da hospedagem").fill("Pousada em Itapema");
+  await page.getByLabel("Endereço").fill("Centro, Itapema — SC");
+  await page.getByText("Opções avançadas de localização").click();
+  await page.getByLabel("Latitude").fill("-27.0905");
+  await page.getByLabel("Longitude").fill("-48.6112");
+  await page.getByRole("button", { name: "Salvar hospedagem" }).click();
+  await expect(page.getByText(/Hospedagem da etapa salva/)).toBeVisible();
+  await page.goto(`/viagens/${trip.id}/etapas`);
+  await expect(page.getByText("Hospedagem principal: Base em Joinville")).toBeVisible();
+  await expect(page.getByText("Hospedagem desta etapa: Pousada em Itapema")).toBeVisible();
+
+  await page.goto(`${stageHref}&descoberta=ocultar&busca=${encodeURIComponent(itapemaPlace)}`);
+  await expect(page.getByText(/hospedagem desta etapa/).first()).toBeVisible();
+  await expect(page.locator('[data-routebook-map="true"]')).toHaveAttribute(
+    "data-map-point-count",
+    "2",
+  );
+  await page.goto(`/viagens/${trip.id}/etapas`);
+  await page.getByRole("link", { name: "Editar hospedagem da etapa" }).click();
+  await page.getByLabel("Nome da hospedagem").fill("");
+  await page.getByLabel("Endereço").fill("");
+  await page.getByRole("button", { name: "Salvar hospedagem" }).click();
+  await page.goto(`/viagens/${trip.id}/etapas`);
+  await expect(page.getByText("Hospedagem principal: Base em Joinville")).toBeVisible();
+  await expect(page.getByText(/Hospedagem desta etapa: Não informada/)).toBeVisible();
+  await page.goto(`${stageHref}&descoberta=ocultar&busca=${encodeURIComponent(itapemaPlace)}`);
+  await expect(page.locator('[data-routebook-map="true"]')).toHaveAttribute(
+    "data-map-point-count",
+    "1",
+  );
 });
 
 test("valida São Paulo sem seed e preserva Discovery, Minha seleção, Roteiro, mapa e Guia", async ({

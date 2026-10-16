@@ -39,6 +39,7 @@
     { "idx": 34, "version": "7", "when": 1789759200000, "tag": "0034_persist_trip_place_preferences", "breakpoints": true },
     { "idx": 35, "version": "7", "when": 1789831800000, "tag": "0035_persist_itinerary_proposal_generation_context", "breakpoints": true },
     { "idx": 36, "version": "7", "when": 1790966400000, "tag": "0036_align_place_categories", "breakpoints": true },
-    { "idx": 37, "version": "7", "when": 1792108800000, "tag": "0037_create_trip_stages", "breakpoints": true }
+    { "idx": 37, "version": "7", "when": 1792108800000, "tag": "0037_create_trip_stages", "breakpoints": true },
+    { "idx": 38, "version": "7", "when": 1792112400000, "tag": "0038_stage_accommodation", "breakpoints": true }
   ]
 }

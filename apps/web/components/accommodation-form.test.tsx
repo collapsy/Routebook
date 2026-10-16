@@ -27,4 +27,26 @@ describe("AccommodationForm", () => {
     expect(screen.getByLabelText("Latitude")).toHaveValue("");
     expect(screen.getByLabelText("Longitude")).toHaveValue("");
   });
+
+  it("identifica a hospedagem de uma etapa e envia seus IDs sem confundir a base", () => {
+    const { container } = render(
+      <AccommodationForm
+        tripId="11111111-1111-4111-8111-111111111111"
+        stageId="22222222-2222-4222-8222-222222222222"
+        destinationName="Itapema, SC"
+        accommodation={{ name: "Pousada em Itapema" }}
+        saveAction={async () => ({ fieldErrors: {} })}
+      />,
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Onde você vai ficar em Itapema, SC?" }),
+    ).toBeVisible();
+    expect(container.querySelector('input[name="accommodationName"]')).toHaveValue(
+      "Pousada em Itapema",
+    );
+    expect(container.querySelector('input[name="stageId"]')).toHaveValue(
+      "22222222-2222-4222-8222-222222222222",
+    );
+  });
 });

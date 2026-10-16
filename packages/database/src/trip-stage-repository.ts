@@ -1,6 +1,7 @@
 import { and, asc, eq, sql } from "drizzle-orm";
 
-import type { DestinationType, TripStage } from "@routebook/trip-management";
+import { createGeoCoordinate } from "@routebook/geo-distance";
+import type { Accommodation, DestinationType, TripStage } from "@routebook/trip-management";
 
 import type { DestinationResolutionProvenanceInput } from "./authenticated-trip-service";
 import { getDatabase } from "./client";
@@ -9,6 +10,13 @@ import { trips, tripStages } from "./schema";
 type TripStageRow = typeof tripStages.$inferSelect;
 
 export function mapTripStageRow(row: TripStageRow): TripStage {
+  const accommodationCoordinate =
+    row.accommodationLatitude !== null && row.accommodationLongitude !== null
+      ? createGeoCoordinate({
+          latitude: row.accommodationLatitude,
+          longitude: row.accommodationLongitude,
+        })
+      : undefined;
   return {
     id: row.id,
     tripId: row.tripId,
@@ -20,6 +28,15 @@ export function mapTripStageRow(row: TripStageRow): TripStage {
       longitude: row.longitude,
       timeZone: row.timeZone,
     },
+    ...(row.accommodationName
+      ? {
+          accommodation: {
+            name: row.accommodationName,
+            ...(row.accommodationAddress ? { address: row.accommodationAddress } : {}),
+            ...(accommodationCoordinate ? { coordinate: accommodationCoordinate } : {}),
+          },
+        }
+      : {}),
     startDate: row.startDate,
     endDate: row.endDate,
     createdAt: row.createdAt,
@@ -97,6 +114,31 @@ export class DrizzleTripStageRepository {
         .where(and(eq(tripStages.tripId, tripId), eq(tripStages.id, stageId)))
         .returning({ id: tripStages.id });
       if (deleted.length === 0) return false;
+      await transaction
+        .update(trips)
+        .set({ contextVersion: sql`${trips.contextVersion} + 1`, updatedAt: new Date() })
+        .where(eq(trips.id, tripId));
+      return true;
+    });
+  }
+
+  async updateAccommodation(
+    tripId: string,
+    stageId: string,
+    accommodation: Accommodation | undefined,
+  ): Promise<boolean> {
+    return getDatabase().transaction(async (transaction) => {
+      const updated = await transaction
+        .update(tripStages)
+        .set({
+          accommodationName: accommodation?.name ?? null,
+          accommodationAddress: accommodation?.address ?? null,
+          accommodationLatitude: accommodation?.coordinate?.latitude ?? null,
+          accommodationLongitude: accommodation?.coordinate?.longitude ?? null,
+        })
+        .where(and(eq(tripStages.tripId, tripId), eq(tripStages.id, stageId)))
+        .returning({ id: tripStages.id });
+      if (updated.length === 0) return false;
       await transaction
         .update(trips)
         .set({ contextVersion: sql`${trips.contextVersion} + 1`, updatedAt: new Date() })

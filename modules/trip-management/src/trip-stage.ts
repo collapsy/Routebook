@@ -2,12 +2,20 @@ import { randomUUID } from "node:crypto";
 
 import { createGeoCoordinate } from "@routebook/geo-distance";
 
-import { DESTINATION_TYPES, type Destination, type Trip } from "./trip";
+import {
+  createAccommodation,
+  DESTINATION_TYPES,
+  type Accommodation,
+  type Destination,
+  type Trip,
+  type UpdateAccommodationInput,
+} from "./trip";
 
 export type TripStage = Readonly<{
   id: string;
   tripId: string;
   destination: Destination;
+  accommodation?: Accommodation;
   startDate: string;
   endDate: string;
   createdAt: Date;
@@ -95,4 +103,22 @@ export function createTripStage(
 
 export function stagesForDate(stages: readonly TripStage[], date: string): TripStage[] {
   return stages.filter((stage) => stage.startDate <= date && date <= stage.endDate);
+}
+
+export function updateTripStageAccommodation(
+  stage: TripStage,
+  input: UpdateAccommodationInput,
+): TripStage {
+  const accommodation = createAccommodation(input);
+  if (!accommodation) {
+    return {
+      id: stage.id,
+      tripId: stage.tripId,
+      destination: stage.destination,
+      startDate: stage.startDate,
+      endDate: stage.endDate,
+      createdAt: stage.createdAt,
+    };
+  }
+  return { ...stage, accommodation };
 }

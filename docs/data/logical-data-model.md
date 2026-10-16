@@ -704,13 +704,13 @@ updatedAt
 
 #### Trip Stage adicional
 
-Uma Trip pode possuir zero ou mais Etapas da Viagem. Cada Etapa tem `stageId`, `tripId`, Destination confirmado, proveniência da resolução do Destination, `startDate`, `endDate` e `createdAt`. A chave externa para Trip usa exclusão em cascata; a leitura é ordenada por data inicial. O período inclusivo deve estar contido no Trip Period, validado na fronteira de domínio e na escrita transacional. A Etapa não cria uma cópia do Place Catalog. Adição e remoção incrementam `tripContextVersion` da Trip na mesma transação.
+Uma Trip pode possuir zero ou mais Etapas da Viagem. Cada Etapa tem `stageId`, `tripId`, Destination confirmado, proveniência da resolução do Destination, `startDate`, `endDate` e `createdAt`. Opcionalmente contém nome, endereço e par de coordenadas da Hospedagem da Etapa; uma coordenada não pode existir sem a outra. A chave externa para Trip usa exclusão em cascata; a leitura é ordenada por data inicial. O período inclusivo deve estar contido no Trip Period, validado na fronteira de domínio e na escrita transacional. A Etapa não cria uma cópia do Place Catalog. Adição, remoção e alteração de Hospedagem da Etapa incrementam `tripContextVersion` da Trip na mesma transação.
 
 ---
 
 ### 28. Accommodation
 
-Representa a hospedagem contextual da Trip.
+Representa a hospedagem contextual da Trip ou de uma Etapa adicional, sem substituir a Hospedagem principal.
 
 #### Atributos
 

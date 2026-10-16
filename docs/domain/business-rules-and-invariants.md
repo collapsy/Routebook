@@ -786,6 +786,7 @@ As seguintes mudanças devem incrementar `TripContextVersion`:
 * Trip Period;
 * Accommodation;
 * adição ou remoção de Etapa da Viagem;
+* alteração de Hospedagem de uma Etapa da Viagem;
 * composição dos Viajantes;
 * Restrição obrigatória;
 * alteração estrutural de Budget;
@@ -812,6 +813,10 @@ A invalidação não deve apagar os objetos.
 #### RB-BR-TRIP-012 — Etapa adicional pertence à Viagem
 
 Uma Etapa da Viagem possui Destination confirmado e período inclusivo contido no Trip Period. Uma visita de um dia é válida e não requer Hospedagem adicional. Nesta primeira entrega, o fuso da Etapa coincide com o da Viagem. Adicionar ou remover Etapa incrementa a Trip Context Version. A Etapa não substitui o Destino principal nem cria Activity no Roteiro.
+
+#### RB-BR-TRIP-013 — Hospedagem de Etapa é opcional e isolada
+
+Uma Etapa pode possuir uma Hospedagem própria opcional. Sua adição, alteração ou remoção não muda a Hospedagem principal, não remove a Etapa e incrementa a Trip Context Version. Se a Hospedagem da Etapa tem localização confirmada, Discovery a usa como referência espacial apenas no contexto dessa Etapa. Sem coordenadas, Discovery usa o Destination da Etapa e informa a limitação.
 
 ---
 

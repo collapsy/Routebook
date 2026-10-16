@@ -84,6 +84,7 @@ export default async function PlaceDetailsPage({
   const stage = etapa ? stages.find((candidate) => candidate.id === etapa) : undefined;
   const scope = selectTripDiscoveryScope(trip, stages, etapa);
   if (!scope) notFound();
+  const scopeAccommodation = stage ? stage.accommodation : trip.accommodation;
   const regionResolution = scope.regionResolution;
   if (regionResolution.status !== "resolved") notFound();
   const place = await new DrizzlePlaceRepository().findBySlugWithinRadius(placeSlug, {
@@ -93,10 +94,15 @@ export default async function PlaceDetailsPage({
   if (!place) notFound();
 
   const placePreference = await new DrizzleTripPlacePreferenceRepository().find(tripId, place.id);
-  const accommodationDistance = presentAccommodationDistance(scope.accommodationCoordinate, {
-    latitude: place.latitude,
-    longitude: place.longitude,
-  });
+  const accommodationDistance = presentAccommodationDistance(
+    scope.accommodationCoordinate ?? (stage ? regionResolution.region.center : undefined),
+    { latitude: place.latitude, longitude: place.longitude },
+    stage
+      ? stage.accommodation?.coordinate
+        ? "da hospedagem da etapa"
+        : "do destino da etapa"
+      : "da hospedagem",
+  );
   const placeCoordinate = { latitude: place.latitude, longitude: place.longitude };
   const mapsSearchUrl = buildGoogleMapsSearchUrl({
     name: place.name,
@@ -371,8 +377,8 @@ export default async function PlaceDetailsPage({
             <h2 id="place-route-title">Mapa, fotos e rota</h2>
             <p>
               Abra o local no Google Maps para consultar fotos e informações atuais.
-              {!stage && trip.accommodation?.coordinate
-                ? " Você também pode abrir a rota a partir da hospedagem principal."
+              {scopeAccommodation?.coordinate
+                ? ` Você também pode abrir a rota a partir da ${stage ? "hospedagem desta etapa" : "hospedagem principal"}.`
                 : null}
             </p>
           </div>
@@ -385,12 +391,12 @@ export default async function PlaceDetailsPage({
             >
               Ver mapa e fotos
             </a>
-            {!stage && trip.accommodation?.coordinate ? (
+            {scopeAccommodation?.coordinate ? (
               <>
                 <a
                   className="product-secondary-action"
                   href={buildGoogleMapsDirectionsUrl({
-                    origin: trip.accommodation.coordinate,
+                    origin: scopeAccommodation.coordinate,
                     destination: placeCoordinate,
                     destinationLabel,
                     travelMode: "walking",
@@ -403,7 +409,7 @@ export default async function PlaceDetailsPage({
                 <a
                   className="product-secondary-action"
                   href={buildGoogleMapsDirectionsUrl({
-                    origin: trip.accommodation.coordinate,
+                    origin: scopeAccommodation.coordinate,
                     destination: placeCoordinate,
                     destinationLabel,
                     travelMode: "driving",
@@ -433,7 +439,13 @@ export default async function PlaceDetailsPage({
           <dd>{place.addressLabel ?? "Ainda não informado"}</dd>
         </div>
         <div>
-          <dt>{stage ? "Distância do destino da etapa" : "Distância da hospedagem"}</dt>
+          <dt>
+            {stage && !stage.accommodation?.coordinate
+              ? "Distância do destino da etapa"
+              : stage
+                ? "Distância da hospedagem da etapa"
+                : "Distância da hospedagem"}
+          </dt>
           <dd>
             {accommodationDistance ? (
               <>
@@ -441,9 +453,7 @@ export default async function PlaceDetailsPage({
                 <span>{accommodationDistance.description}</span>
               </>
             ) : (
-              stage
-                ? "A distância deste lugar ao destino da etapa está indisponível."
-                : "Informe a localização da hospedagem para calcular esta distância."
+              "Informe a localização da hospedagem para calcular esta distância."
             )}
           </dd>
         </div>

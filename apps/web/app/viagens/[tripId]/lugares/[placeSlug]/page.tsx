@@ -6,6 +6,7 @@ import {
   DrizzlePlaceRepository,
   DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
+  DrizzleTripStageRepository,
 } from "@routebook/database";
 import type { PlaceCategory } from "@routebook/place-catalog";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
@@ -19,7 +20,7 @@ import {
   buildGoogleMapsSearchUrl,
 } from "../../../../../lib/google-maps-links";
 import { findPipaPlacePracticalGuide } from "../../../../../lib/pipa-place-guide";
-import { resolvePlaceDiscoveryRegion } from "../../../../../lib/place-discovery-region";
+import { selectTripDiscoveryScope } from "../../../../../lib/trip-stage-discovery";
 import { presentAccommodationDistance } from "../distance";
 import {
   addPlaceToItineraryAction,
@@ -67,10 +68,11 @@ export default async function PlaceDetailsPage({
     dia?: string;
     erroRoteiro?: string;
     preparar?: string;
+    etapa?: string;
   }>;
 }) {
   const { tripId, placeSlug } = await params;
-  const { preferencia, erroPreferencia, adicionadoAoRoteiro, dia, erroRoteiro, preparar } =
+  const { preferencia, erroPreferencia, adicionadoAoRoteiro, dia, erroRoteiro, preparar, etapa } =
     await searchParams;
   const requestedWizardMode = preparar === "1";
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
@@ -78,12 +80,11 @@ export default async function PlaceDetailsPage({
   if (!trip) notFound();
   const wizardMode = requestedWizardMode && trip.status === "draft";
 
-  const regionResolution = resolvePlaceDiscoveryRegion({
-    destination: trip.destination,
-    ...(trip.accommodation?.coordinate
-      ? { accommodationCoordinate: trip.accommodation.coordinate }
-      : {}),
-  });
+  const stages = await new DrizzleTripStageRepository().listByTripId(tripId);
+  const stage = etapa ? stages.find((candidate) => candidate.id === etapa) : undefined;
+  const scope = selectTripDiscoveryScope(trip, stages, etapa);
+  if (!scope) notFound();
+  const regionResolution = scope.regionResolution;
   if (regionResolution.status !== "resolved") notFound();
   const place = await new DrizzlePlaceRepository().findBySlugWithinRadius(placeSlug, {
     center: regionResolution.region.center,
@@ -92,7 +93,7 @@ export default async function PlaceDetailsPage({
   if (!place) notFound();
 
   const placePreference = await new DrizzleTripPlacePreferenceRepository().find(tripId, place.id);
-  const accommodationDistance = presentAccommodationDistance(trip.accommodation?.coordinate, {
+  const accommodationDistance = presentAccommodationDistance(scope.accommodationCoordinate, {
     latitude: place.latitude,
     longitude: place.longitude,
   });
@@ -108,7 +109,9 @@ export default async function PlaceDetailsPage({
   });
   const practicalGuide =
     place.destinationId === "pipa-rn-br" ? findPipaPlacePracticalGuide(place.slug) : undefined;
-  const tripDays = deriveTripDays(trip.period);
+  const tripDays = deriveTripDays(trip.period).filter(
+    (day) => !stage || (stage.startDate <= day.date && day.date <= stage.endDate),
+  );
   const selectedDay = tripDays.find((day) => day.date === dia) ?? tripDays[0];
 
   return (
@@ -116,7 +119,14 @@ export default async function PlaceDetailsPage({
       <div className="section-heading-row">
         <Link
           className="back-link"
-          href={`/viagens/${tripId}/lugares${wizardMode ? "?preparar=1" : ""}`}
+          href={`/viagens/${tripId}/lugares${
+            etapa || wizardMode
+              ? `?${new URLSearchParams({
+                  ...(etapa ? { etapa } : {}),
+                  ...(wizardMode ? { preparar: "1" } : {}),
+                })}`
+              : ""
+          }`}
         >
           ← Voltar para lugares
         </Link>
@@ -246,7 +256,7 @@ export default async function PlaceDetailsPage({
           clearAction={clearPlacePreferenceAction}
           currentIntent={placePreference?.intent}
           currentPriority={placePreference?.priority}
-          fields={{ tripId, placeSlug }}
+          fields={{ tripId, placeSlug, stageId: etapa }}
           label={`Preferência para ${place.name}`}
           mustDoAction={setPlaceMustDoAction}
           setAction={setPlacePreferenceAction}
@@ -294,6 +304,7 @@ export default async function PlaceDetailsPage({
           <form action={addPlaceToItineraryAction} className="saved-place-itinerary-form">
             <input name="tripId" type="hidden" value={tripId} />
             <input name="placeSlug" type="hidden" value={placeSlug} />
+            {etapa ? <input name="stageId" type="hidden" value={etapa} /> : null}
 
             <div className="form-field saved-place-itinerary-day">
               <label htmlFor="place-itinerary-day">Adicionar ao dia</label>
@@ -359,8 +370,10 @@ export default async function PlaceDetailsPage({
             <p className="product-eyebrow">Antes de sair</p>
             <h2 id="place-route-title">Mapa, fotos e rota</h2>
             <p>
-              Abra o local no Google Maps para consultar fotos e informações atuais. Se a hospedagem
-              tiver localização, você também pode abrir a rota a pé ou de carro.
+              Abra o local no Google Maps para consultar fotos e informações atuais.
+              {!stage && trip.accommodation?.coordinate
+                ? " Você também pode abrir a rota a partir da hospedagem principal."
+                : null}
             </p>
           </div>
           <div className="section-heading-row">
@@ -372,7 +385,7 @@ export default async function PlaceDetailsPage({
             >
               Ver mapa e fotos
             </a>
-            {trip.accommodation?.coordinate ? (
+            {!stage && trip.accommodation?.coordinate ? (
               <>
                 <a
                   className="product-secondary-action"
@@ -409,7 +422,7 @@ export default async function PlaceDetailsPage({
       <dl className="trip-overview-summary">
         <div>
           <dt>Destino</dt>
-          <dd>{trip.destination.name}</dd>
+          <dd>{scope.destinationName}</dd>
         </div>
         <div>
           <dt>Categoria</dt>
@@ -420,7 +433,7 @@ export default async function PlaceDetailsPage({
           <dd>{place.addressLabel ?? "Ainda não informado"}</dd>
         </div>
         <div>
-          <dt>Distância da hospedagem</dt>
+          <dt>{stage ? "Distância do destino da etapa" : "Distância da hospedagem"}</dt>
           <dd>
             {accommodationDistance ? (
               <>
@@ -428,7 +441,9 @@ export default async function PlaceDetailsPage({
                 <span>{accommodationDistance.description}</span>
               </>
             ) : (
-              "Informe a localização da hospedagem para calcular esta distância."
+              stage
+                ? "A distância deste lugar ao destino da etapa está indisponível."
+                : "Informe a localização da hospedagem para calcular esta distância."
             )}
           </dd>
         </div>

@@ -1926,18 +1926,17 @@ Não deverão substituir o modelo central de Lugar e Atividade.
 
 ## 103. Múltiplos Destinos
 
-Quando suportados, a estrutura poderá evoluir para:
+Na primeira entrega, a Viagem mantém um Destino principal e pode incluir Etapas adicionais com datas. Uma Etapa de um dia pode ser um bate-volta sem outra Hospedagem.
 
 ```text
 Viagem
-├── Destinos
-│   ├── Destino A
-│   └── Destino B
+├── Destino principal e Hospedagem principal opcional
+├── Etapas adicionais com Destino e datas
 ├── Roteiro
-└── Mapa geral
+└── Explorar Lugares por Destino selecionado
 ```
 
-No MVP, a navegação assume um Destino principal.
+Na visão da Viagem, cada Etapa mostra Destino e datas. No Dia do Roteiro, a Etapa correspondente aparece antes das Atividades e abre Explorar com esse Destino selecionado. Em Explorar, o seletor informa claramente qual Destino define a Região usada por lista, mapa, filtros e distâncias. A seleção de Lugares continua pertencendo à Viagem e identifica a localização de cada Lugar. A Hospedagem principal não é apresentada como âncora de distância no Destino de uma Etapa sem hospedagem própria.
 
 ---
 

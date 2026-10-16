@@ -1385,3 +1385,14 @@ Ao concluir um incremento:
 | gaps auditados | entrada inexplicada no wizard de Trip sem Itinerary; etapa de geração descrita como revisão; scroll/foco e título precisam de validação responsiva |
 | escopo planejado | orientação de continuação, início explícito e autorizado, linguagem coerente pré/pós-geração, heading/foco/rolagem responsivos e testes E2E desktop/mobile, inclusive Trip planejada sem Itinerary; sem mudança de domínio ou dados de Preview |
 | validação | pendente; preencher somente após executar comandos e revisar Preview |
+
+## Evidências previstas do RB-INC-219
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-219-trip-stages-discovery.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-219-trip-stages-discovery.md` |
+| requisito | RB-FR-144; caso RB-UC-043; regras de Trip, Place e Roteiro |
+| branch/base | `codex/rb-inc-219-multi-destination-trip`, `origin/main@3d42b704` |
+| escopo | Etapa datada para visita a outro Destino, descoberta isolada por Region, vínculo visual ao Dia; Hospedagem adicional permanece posterior |
+| validação | pendente; registrar somente comandos executados e resultados reais |

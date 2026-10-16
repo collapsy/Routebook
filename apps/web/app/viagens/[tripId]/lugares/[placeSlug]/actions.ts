@@ -8,6 +8,7 @@ import {
   DrizzlePlaceRepository,
   DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
+  DrizzleTripStageRepository,
 } from "@routebook/database";
 import {
   addActivity,
@@ -26,14 +27,14 @@ import {
   tripPlacePreferenceActionSuccess,
   type TripPlacePreferenceActionState,
 } from "../../../../../lib/trip-place-preference";
-import { resolvePlaceDiscoveryRegion } from "../../../../../lib/place-discovery-region";
+import { selectTripDiscoveryScope } from "../../../../../lib/trip-stage-discovery";
 
 function optionalText(value: FormDataEntryValue | null): string | undefined {
   const normalized = typeof value === "string" ? value.trim() : "";
   return normalized || undefined;
 }
 
-async function resolvePlaceForTrip(tripId: string, placeSlug: string) {
+async function resolvePlaceForTrip(tripId: string, placeSlug: string, stageId?: string) {
   const placePath = `/viagens/${tripId}/lugares/${placeSlug}`;
   if (!tripId || !placeSlug) redirect("/viagens?erro=viagem-invalida");
 
@@ -46,12 +47,11 @@ async function resolvePlaceForTrip(tripId: string, placeSlug: string) {
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const regionResolution = resolvePlaceDiscoveryRegion({
-    destination: trip.destination,
-    ...(trip.accommodation?.coordinate
-      ? { accommodationCoordinate: trip.accommodation.coordinate }
-      : {}),
-  });
+  const stages = await new DrizzleTripStageRepository().listByTripId(tripId);
+  const stage = stageId ? stages.find((candidate) => candidate.id === stageId) : undefined;
+  const scope = selectTripDiscoveryScope(trip, stages, stageId);
+  if (!scope) notFound();
+  const regionResolution = scope.regionResolution;
   if (regionResolution.status !== "resolved") notFound();
   const place = await new DrizzlePlaceRepository().findBySlugWithinRadius(placeSlug, {
     center: regionResolution.region.center,
@@ -59,7 +59,7 @@ async function resolvePlaceForTrip(tripId: string, placeSlug: string) {
   });
   if (!place) notFound();
 
-  return { trip, place };
+  return { trip, place, stage };
 }
 
 export async function setPlacePreferenceAction(
@@ -67,8 +67,9 @@ export async function setPlacePreferenceAction(
 ): Promise<TripPlacePreferenceActionState> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
+  const stageId = String(formData.get("stageId") ?? "").trim() || undefined;
   const intent = parseTripPlaceIntent(String(formData.get("intent") ?? ""));
-  const { place } = await resolvePlaceForTrip(tripId, placeSlug);
+  const { place } = await resolvePlaceForTrip(tripId, placeSlug, stageId);
   if (!intent) {
     return tripPlacePreferenceActionError("Escolha uma preferência válida para este lugar.");
   }
@@ -90,7 +91,8 @@ export async function clearPlacePreferenceAction(
 ): Promise<TripPlacePreferenceActionState> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
-  const { place } = await resolvePlaceForTrip(tripId, placeSlug);
+  const stageId = String(formData.get("stageId") ?? "").trim() || undefined;
+  const { place } = await resolvePlaceForTrip(tripId, placeSlug, stageId);
 
   await clearTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), tripId, place.id);
 
@@ -108,8 +110,9 @@ export async function setPlaceMustDoAction(
 ): Promise<TripPlacePreferenceActionState> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
+  const stageId = String(formData.get("stageId") ?? "").trim() || undefined;
   const enabled = String(formData.get("enabled") ?? "") === "1";
-  const { place } = await resolvePlaceForTrip(tripId, placeSlug);
+  const { place } = await resolvePlaceForTrip(tripId, placeSlug, stageId);
 
   const preference = await setTripPlaceMustDo(new DrizzleTripPlacePreferenceRepository(), {
     tripId,
@@ -126,11 +129,20 @@ export async function setPlaceMustDoAction(
 export async function addPlaceToItineraryAction(formData: FormData): Promise<never> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
+  const stageId = String(formData.get("stageId") ?? "").trim() || undefined;
   const dayDate = String(formData.get("dayDate") ?? "").trim();
   const startTime = optionalText(formData.get("startTime"));
   const durationValue = optionalText(formData.get("durationMinutes"));
   const durationMinutes = durationValue === undefined ? undefined : Number(durationValue);
-  const { trip, place } = await resolvePlaceForTrip(tripId, placeSlug);
+  const { trip, place, stage } = await resolvePlaceForTrip(tripId, placeSlug, stageId);
+  const stageQuery = stageId ? `&etapa=${encodeURIComponent(stageId)}` : "";
+  if (stage && (dayDate < stage.startDate || dayDate > stage.endDate)) {
+    redirect(
+      `/viagens/${tripId}/lugares/${placeSlug}?erroRoteiro=${encodeURIComponent(
+        "Escolha um dia da visita a este destino.",
+      )}${stageQuery}#adicionar-ao-roteiro`,
+    );
+  }
   const itineraryRepository = new DrizzleItineraryRepository();
   const itinerary =
     (await itineraryRepository.findByTripId(tripId)) ??
@@ -153,7 +165,7 @@ export async function addPlaceToItineraryAction(formData: FormData): Promise<nev
       redirect(
         `/viagens/${tripId}/lugares/${placeSlug}?erroRoteiro=${encodeURIComponent(
           message,
-        )}#adicionar-ao-roteiro`,
+        )}${stageQuery}#adicionar-ao-roteiro`,
       );
     }
 
@@ -167,6 +179,6 @@ export async function addPlaceToItineraryAction(formData: FormData): Promise<nev
   redirect(
     `/viagens/${tripId}/lugares/${placeSlug}?adicionadoAoRoteiro=1&dia=${encodeURIComponent(
       dayDate,
-    )}#adicionar-ao-roteiro`,
+    )}${stageQuery}#adicionar-ao-roteiro`,
   );
 }

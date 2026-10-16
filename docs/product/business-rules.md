@@ -2503,6 +2503,8 @@ Quando múltiplos Destinos forem incorporados, deverão existir regras para:
 * fusos;
 * divisão geográfica.
 
+Na primeira entrega, o Destino principal permanece definido. Uma Etapa adicional informa Destino e datas dentro da Viagem, inclusive bate-volta sem nova Hospedagem. A exploração usa apenas o Destino escolhido; Lugares de outra cidade não são apresentados como se pertencessem ao mesmo entorno. Salvar Lugar preserva a Viagem única e não cria Atividade.
+
 ---
 
 ## 172. Uso offline

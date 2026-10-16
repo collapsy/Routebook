@@ -24,6 +24,7 @@ const databaseMocks = vi.hoisted(() => {
 
   return {
     listPublishedWithinRadius: vi.fn(),
+    listStages: vi.fn().mockResolvedValue([]),
     promote: vi.fn(),
     findPreference: vi.fn(),
     savePreference: vi.fn(),
@@ -51,6 +52,9 @@ vi.mock("@routebook/database", () => ({
   },
   DrizzleTripRepository: class {
     findById = vi.fn();
+  },
+  DrizzleTripStageRepository: class {
+    listByTripId = databaseMocks.listStages;
   },
   PlacePromotionServiceError: databaseMocks.PlacePromotionServiceError,
   promoteExternalPlaceCandidate: databaseMocks.promote,
@@ -185,6 +189,43 @@ describe("setPublishedPlacePreferenceAction", () => {
     });
 
     expect(navigationMocks.redirect).not.toHaveBeenCalled();
+  });
+
+  it("revalida Lugar publicado na região da Etapa selecionada", async () => {
+    const stageId = "22222222-2222-4222-8222-222222222222";
+    databaseMocks.listStages.mockResolvedValueOnce([
+      {
+        id: stageId,
+        tripId,
+        destination: {
+          name: "Itapema, SC",
+          type: "city",
+          countryCode: "BR",
+          latitude: -27.09,
+          longitude: -48.61,
+          timeZone: "America/Sao_Paulo",
+        },
+      },
+    ]);
+    databaseMocks.listPublishedWithinRadius.mockResolvedValueOnce([
+      { id: "itapema-place", slug: "praia-itapema", publicationStatus: "published" },
+    ]);
+    const formData = new FormData();
+    formData.set("tripId", tripId);
+    formData.set("stageId", stageId);
+    formData.set("placeSlug", "praia-itapema");
+    formData.set("intent", "WANT");
+
+    await expect(setPublishedPlacePreferenceAction(formData)).resolves.toMatchObject({
+      status: "success",
+    });
+    expect(databaseMocks.listPublishedWithinRadius).toHaveBeenCalledWith({
+      center: { latitude: -27.09, longitude: -48.61 },
+      radiusMeters: 25_000,
+    });
+    expect(databaseMocks.savePreference).toHaveBeenCalledWith(
+      expect.objectContaining({ tripId, placeId: "itapema-place" }),
+    );
   });
 });
 

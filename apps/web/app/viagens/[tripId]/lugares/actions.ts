@@ -7,6 +7,7 @@ import {
   DrizzlePlaceRepository,
   DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
+  DrizzleTripStageRepository,
   PlacePromotionServiceError,
   promoteExternalPlaceCandidate,
 } from "@routebook/database";
@@ -23,7 +24,7 @@ import {
   tripPlacePreferenceActionSuccess,
   type TripPlacePreferenceActionState,
 } from "../../../../lib/trip-place-preference";
-import { resolvePlaceDiscoveryRegion } from "../../../../lib/place-discovery-region";
+import { selectTripDiscoveryScope } from "../../../../lib/trip-stage-discovery";
 import { resolveTripRouteAccess } from "../../../../lib/trip-route-access";
 import { parseMaximumDistance, parsePlaceCategory, parsePlacePriceRange } from "./filters";
 
@@ -52,13 +53,10 @@ function resolveCuratedDestinationId(places: readonly Place[]): string | undefin
 
 async function listPublishedPlacesForTrip(
   trip: NonNullable<Awaited<ReturnType<typeof findTripById>>>,
+  stageId?: string,
 ): Promise<Place[]> {
-  const regionResolution = resolvePlaceDiscoveryRegion({
-    destination: trip.destination,
-    ...(trip.accommodation?.coordinate
-      ? { accommodationCoordinate: trip.accommodation.coordinate }
-      : {}),
-  });
+  const scope = await resolveActionScope(trip, stageId);
+  const regionResolution = scope.regionResolution;
   if (regionResolution.status !== "resolved") return [];
 
   return new DrizzlePlaceRepository().listPublishedWithinRadius({
@@ -67,7 +65,18 @@ async function listPublishedPlacesForTrip(
   });
 }
 
-async function resolvePublishedPlaceForMutation(tripId: string, placeSlug: string) {
+async function resolveActionScope(
+  trip: NonNullable<Awaited<ReturnType<typeof findTripById>>>,
+  stageId?: string,
+  requestedRadiusMeters?: number,
+) {
+  const stages = await new DrizzleTripStageRepository().listByTripId(trip.id);
+  const scope = selectTripDiscoveryScope(trip, stages, stageId, requestedRadiusMeters);
+  if (!scope) notFound();
+  return scope;
+}
+
+async function resolvePublishedPlaceForMutation(tripId: string, placeSlug: string, stageId?: string) {
   const placesPath = `/viagens/${tripId}/lugares`;
   if (!tripId) redirect("/viagens?erro=viagem-invalida");
 
@@ -80,7 +89,7 @@ async function resolvePublishedPlaceForMutation(tripId: string, placeSlug: strin
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
 
-  const matches = (await listPublishedPlacesForTrip(trip)).filter(
+  const matches = (await listPublishedPlacesForTrip(trip, stageId)).filter(
     (place) => place.slug === placeSlug,
   );
   if (matches.length !== 1) notFound();
@@ -93,9 +102,10 @@ export async function setPublishedPlacePreferenceAction(
 ): Promise<TripPlacePreferenceActionState> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
+  const stageId = String(formData.get("stageId") ?? "").trim() || undefined;
   const rawIntent = String(formData.get("intent") ?? "").trim();
   const intent = parseTripPlaceIntent(rawIntent);
-  const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
+  const place = await resolvePublishedPlaceForMutation(tripId, placeSlug, stageId);
   if (!intent) {
     return tripPlacePreferenceActionError("Escolha uma preferência válida para este lugar.");
   }
@@ -116,7 +126,8 @@ export async function clearPublishedPlacePreferenceAction(
 ): Promise<TripPlacePreferenceActionState> {
   const tripId = String(formData.get("tripId") ?? "").trim();
   const placeSlug = String(formData.get("placeSlug") ?? "").trim();
-  const place = await resolvePublishedPlaceForMutation(tripId, placeSlug);
+  const stageId = String(formData.get("stageId") ?? "").trim() || undefined;
+  const place = await resolvePublishedPlaceForMutation(tripId, placeSlug, stageId);
 
   await clearTripPlacePreference(new DrizzleTripPlacePreferenceRepository(), tripId, place.id);
   revalidatePath(`/viagens/${tripId}/lugares`);
@@ -141,7 +152,9 @@ function promotionReturnPath(
   const category = parsePlaceCategory(String(formData.get("categoria") ?? ""));
   const priceRange = parsePlacePriceRange(String(formData.get("preco") ?? ""));
   const maximumDistanceMeters = parseMaximumDistance(String(formData.get("distancia") ?? ""));
+  const stageId = String(formData.get("stageId") ?? "").trim();
 
+  if (stageId) query.set("etapa", stageId);
   if (search) query.set("busca", search);
   if (category) query.set("categoria", category);
   if (maximumDistanceMeters) query.set("distancia", String(maximumDistanceMeters / 1_000));
@@ -199,6 +212,7 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
 
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
+  const stageId = String(formData.get("stageId") ?? "").trim() || undefined;
 
   if (!externalId || externalId.length > 200) {
     redirect(promotionReturnPath(tripId, formData, { erroPromocao: "candidato-invalido" }));
@@ -206,13 +220,8 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
 
   const category = parsePlaceCategory(String(formData.get("categoria") ?? ""));
   const maximumDistanceMeters = parseMaximumDistance(String(formData.get("distancia") ?? ""));
-  const regionResolution = resolvePlaceDiscoveryRegion({
-    destination: trip.destination,
-    ...(trip.accommodation?.coordinate
-      ? { accommodationCoordinate: trip.accommodation.coordinate }
-      : {}),
-    ...(maximumDistanceMeters ? { requestedRadiusMeters: maximumDistanceMeters } : {}),
-  });
+  const scope = await resolveActionScope(trip, stageId, maximumDistanceMeters);
+  const regionResolution = scope.regionResolution;
   if (regionResolution.status !== "resolved") {
     redirect(promotionReturnPath(tripId, formData, { erroPromocao: "destino-nao-suportado" }));
   }
@@ -279,6 +288,7 @@ export async function saveExternalPlaceAction(
 
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
   if (!trip) notFound();
+  const stageId = String(formData.get("stageId") ?? "").trim() || undefined;
   if (!externalId || externalId.length > 200) {
     return tripPlacePreferenceActionError(
       promotionFeedbackMessage({ erroPromocao: "candidato-invalido" }),
@@ -287,13 +297,8 @@ export async function saveExternalPlaceAction(
 
   const category = parsePlaceCategory(String(formData.get("categoria") ?? ""));
   const maximumDistanceMeters = parseMaximumDistance(String(formData.get("distancia") ?? ""));
-  const regionResolution = resolvePlaceDiscoveryRegion({
-    destination: trip.destination,
-    ...(trip.accommodation?.coordinate
-      ? { accommodationCoordinate: trip.accommodation.coordinate }
-      : {}),
-    ...(maximumDistanceMeters ? { requestedRadiusMeters: maximumDistanceMeters } : {}),
-  });
+  const scope = await resolveActionScope(trip, stageId, maximumDistanceMeters);
+  const regionResolution = scope.regionResolution;
   if (regionResolution.status !== "resolved") {
     return tripPlacePreferenceActionError(
       promotionFeedbackMessage({ erroPromocao: "destino-nao-suportado" }),

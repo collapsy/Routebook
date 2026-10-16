@@ -702,6 +702,10 @@ updatedAt
 * PlaceId é opcional;
 * fuso deverá ser coerente quando conhecido.
 
+#### Trip Stage adicional
+
+Uma Trip pode possuir zero ou mais Etapas da Viagem. Cada Etapa tem `stageId`, `tripId`, Destination confirmado, proveniência da resolução do Destination, `startDate`, `endDate` e `createdAt`. A chave externa para Trip usa exclusão em cascata; a leitura é ordenada por data inicial. O período inclusivo deve estar contido no Trip Period, validado na fronteira de domínio e na escrita transacional. A Etapa não cria uma cópia do Place Catalog. Adição e remoção incrementam `tripContextVersion` da Trip na mesma transação.
+
 ---
 
 ### 28. Accommodation

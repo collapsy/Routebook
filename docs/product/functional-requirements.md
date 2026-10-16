@@ -2992,6 +2992,16 @@ Pós-MVP.
 
 O sistema poderá permitir que uma Viagem possua múltiplos Destinos e Hospedagens.
 
+### Primeira entrega pós-MVP
+
+* manter um Destino principal e adicionar Etapas datadas para visitas a outros Destinos;
+* permitir uma Etapa de um dia sem outra Hospedagem;
+* mostrar o Destino de cada Etapa nos Dias correspondentes;
+* explorar Lugares por Destino selecionado, com lista e mapa coerentes e rótulo geográfico explícito;
+* preservar a seleção de Lugares na mesma Viagem sem adicioná-los automaticamente ao Roteiro.
+
+Hospedagens adicionais, pernoites e deslocamentos entre Destinos seguem em incrementos posteriores.
+
 ### MVP
 
 Pós-MVP.

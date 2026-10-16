@@ -785,6 +785,7 @@ As seguintes mudanças devem incrementar `TripContextVersion`:
 * Destination;
 * Trip Period;
 * Accommodation;
+* adição ou remoção de Etapa da Viagem;
 * composição dos Viajantes;
 * Restrição obrigatória;
 * alteração estrutural de Budget;
@@ -807,6 +808,10 @@ Alterações estruturais podem invalidar:
 * dados derivados.
 
 A invalidação não deve apagar os objetos.
+
+#### RB-BR-TRIP-012 — Etapa adicional pertence à Viagem
+
+Uma Etapa da Viagem possui Destination confirmado e período inclusivo contido no Trip Period. Uma visita de um dia é válida e não requer Hospedagem adicional. Nesta primeira entrega, o fuso da Etapa coincide com o da Viagem. Adicionar ou remover Etapa incrementa a Trip Context Version. A Etapa não substitui o Destino principal nem cria Activity no Roteiro.
 
 ---
 

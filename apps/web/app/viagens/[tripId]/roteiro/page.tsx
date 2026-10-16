@@ -8,8 +8,9 @@ import {
   DrizzleItineraryRepository,
   DrizzlePlaceRepository,
   DrizzleTripRepository,
+  DrizzleTripStageRepository,
 } from "@routebook/database";
-import { findTripById, type Activity } from "@routebook/trip-management";
+import { findTripById, stagesForDate, type Activity } from "@routebook/trip-management";
 
 import { buildExternalDirectionsUrl } from "../../../../lib/external-directions";
 import { getItineraryProposalReviewStatus } from "../../../../lib/itinerary-proposal-experience";
@@ -205,9 +206,10 @@ export default async function ItineraryPage({
     );
   }
 
-  const [itinerary, proposals] = await Promise.all([
+  const [itinerary, proposals, stages] = await Promise.all([
     existingItinerary,
     new DrizzleItineraryProposalRepository().listByTripId(trip.id),
+    new DrizzleTripStageRepository().listByTripId(trip.id),
   ]);
   const proposalReviewStatus = getItineraryProposalReviewStatus(proposals, new Date());
   const {
@@ -242,6 +244,10 @@ export default async function ItineraryPage({
   const todayDate = resolveTripTodayDate(itinerary.days, now, activeTimeZone);
   const selectedDay = resolvePreferredTripDay(itinerary.days, dia, now, activeTimeZone);
   if (!selectedDay) notFound();
+  const selectedDayStages = stagesForDate(stages, selectedDay.date);
+  const selectedDayDiscoveryHref = `/viagens/${tripId}/lugares?dia=${selectedDay.date}${
+    selectedDayStages[0] ? `&etapa=${selectedDayStages[0].id}` : ""
+  }`;
 
   const activityCount = itinerary.days.reduce((total, day) => total + day.activities.length, 0);
   const freePeriodCount = itinerary.days.reduce((total, day) => total + day.freePeriods.length, 0);
@@ -256,7 +262,7 @@ export default async function ItineraryPage({
   const nextStep =
     selectedItemCount === 0
       ? {
-          href: `/viagens/${tripId}/lugares?dia=${selectedDay.date}`,
+          href: selectedDayDiscoveryHref,
           label: `Adicionar lugar ao Dia ${selectedDay.position}`,
         }
       : nextOpenDay
@@ -471,6 +477,22 @@ export default async function ItineraryPage({
               ) : null}
             </div>
             <p>{selectedItemCount === 0 ? "Dia livre por enquanto" : selectedDaySummary}</p>
+            {selectedDayStages.length > 0 ? (
+              <div>
+                <p>
+                  {selectedDayStages.length === 1 ? "Destino deste Dia:" : "Destinos deste Dia:"}{" "}
+                  {selectedDayStages.map((stage) => stage.destination.name).join(", ")}
+                </p>
+                {selectedDayStages.map((stage) => (
+                  <Link
+                    href={`/viagens/${tripId}/lugares?dia=${selectedDay.date}&etapa=${stage.id}`}
+                    key={stage.id}
+                  >
+                    Explorar lugares em {stage.destination.name}
+                  </Link>
+                ))}
+              </div>
+            ) : null}
           </div>
           <a className={journeyStyles.quickAddLink} href="#planejar-dia">
             + Planejar este Dia
@@ -496,7 +518,7 @@ export default async function ItineraryPage({
                   <div className={journeyStyles.emptyActions}>
                     <Link
                       className="product-primary-action"
-                      href={`/viagens/${tripId}/lugares?dia=${selectedDay.date}`}
+                      href={selectedDayDiscoveryHref}
                     >
                       Adicionar um lugar
                     </Link>

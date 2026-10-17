@@ -1,3 +1,4 @@
+import { calculateGeodesicDistance, createGeoCoordinate } from "@routebook/geo-distance";
 import type { Trip, TripStage } from "@routebook/trip-management";
 
 import {
@@ -39,4 +40,29 @@ export function selectTripDiscoveryScope(
       ...(requestedRadiusMeters ? { requestedRadiusMeters } : {}),
     }),
   };
+}
+
+export function resolveSelectedPlaceScope(
+  trip: Trip,
+  stages: readonly TripStage[],
+  placeCoordinate: Readonly<{ latitude: number; longitude: number }>,
+): TripDiscoveryScope | null {
+  const scopes = [
+    selectTripDiscoveryScope(trip, stages),
+    ...stages
+      .filter((stage) => stage.tripId === trip.id)
+      .map((stage) => selectTripDiscoveryScope(trip, stages, stage.id)),
+  ];
+  let closest: { scope: TripDiscoveryScope; distanceMeters: number } | undefined;
+  for (const scope of scopes) {
+    if (scope?.regionResolution.status !== "resolved") continue;
+    const region = scope.regionResolution.region;
+    const distanceMeters = calculateGeodesicDistance(
+      createGeoCoordinate(region.center),
+      createGeoCoordinate(placeCoordinate),
+    ).meters;
+    if (distanceMeters > region.curatedRadiusMeters) continue;
+    if (!closest || distanceMeters < closest.distanceMeters) closest = { scope, distanceMeters };
+  }
+  return closest?.scope ?? null;
 }

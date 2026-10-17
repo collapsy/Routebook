@@ -64,10 +64,12 @@ apps/web/app/viagens/[tripId]/etapas/[stageId]/hospedagem/actions.test.ts
 apps/web/app/viagens/[tripId]/page.tsx
 apps/web/app/viagens/[tripId]/roteiro/page.tsx
 apps/web/app/viagens/[tripId]/lugares/page.tsx
+apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx
 apps/web/app/viagens/[tripId]/lugares/distance.ts
 apps/web/app/viagens/[tripId]/lugares/distance.test.ts
 apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx
 apps/web/e2e/multi-destination-validation.spec.ts
+apps/web/e2e/auth.setup.ts
 docs/domain/domain-model.md
 docs/domain/ubiquitous-language.md
 docs/domain/business-rules-and-invariants.md
@@ -89,6 +91,7 @@ docs/registry.md
 - [ ] O servidor rejeita edição de Etapa de outra Viagem e exige `trip:edit`.
 - [ ] Coordenadas inválidas são rejeitadas; falha de geocoding não finge localização confirmada.
 - [ ] Discovery da Etapa usa sua Hospedagem localizada; sem ela, usa o Destination da Etapa. Lista, mapa e detalhe preservam o contexto.
+- [ ] Minha seleção identifica a referência estimada dos Lugares de cada Etapa e usa a Hospedagem correspondente para distâncias e links de detalhe.
 - [ ] A mudança incrementa a Trip Context Version e não aplica Proposal automaticamente.
 - [ ] Testes unitários, integração, interface e E2E passam; validação documental passa.
 
@@ -111,7 +114,9 @@ pnpm build
 - Não representa check-in/check-out, troca de Hospedagem dentro da mesma Etapa, transporte entre cidades nem fusos distintos.
 - Sem coordenada, a Hospedagem é informativa e o Destination da Etapa continua sendo a referência espacial.
 - Migração aditiva; não aplicar em Production sem aprovação e teste em ambiente isolado.
-- RB-INC-219 depende de Postgres configurado para concluir integração e E2E; registrar essa limitação separadamente.
+- O Postgres de teste foi um branch isolado do projeto Neon de preview (`rb-inc-220-validation-20261017`); nenhuma migração foi aplicada aos branches principais de Preview ou Production.
+- O setup E2E compartilhado precisa aguardar a conclusão do cadastro no Postgres remoto; o tempo de espera foi ajustado sem alterar autenticação ou autorização.
+- A referência de Destino em Minha seleção é estimada pela região geográfica atualmente configurada. Quando nenhuma Region da Viagem contém o Lugar, o cartão permanece visível sem link de detalhe ou distância indevida.
 
 ## Validação desta implementação
 
@@ -119,9 +124,10 @@ pnpm build
 - `pnpm lint` e `pnpm typecheck`: passaram em 12 tarefas cada.
 - `pnpm --filter @routebook/trip-management test`: 110 testes passaram.
 - Testes web focados em formulário, geocoding, escopo de Discovery, ação da Etapa e distância: 24 testes passaram.
-- `pnpm --filter @routebook/web test`: 522 testes passaram; cinco suítes de Auth falharam ao importar por ausência de `DATABASE_URL`.
-- `pnpm --filter @routebook/database test`: 118 testes passaram; 51 testes dependentes de Postgres falharam por ausência de `DATABASE_URL`.
-- `pnpm build`: compilação e TypeScript passaram; coleta de dados de `/api/auth/[...all]` falhou por ausência de `DATABASE_URL`.
-- Playwright: especificações carregadas com `--list`; execução impedida porque `next start` exige build completo.
-- `pnpm format:check`: falhou em 542 arquivos do baseline; arquivos novos de código do incremento foram formatados isoladamente.
+- Migração `0038_stage_accommodation.sql` aplicada com sucesso ao branch Neon isolado.
+- `pnpm --filter @routebook/database exec vitest run --testTimeout 60000 --hookTimeout 60000 --maxWorkers 2`: 215 testes passaram em 39 arquivos.
+- `pnpm --filter @routebook/web exec vitest run --testTimeout 60000 --hookTimeout 60000 --maxWorkers 4`: 539 testes passaram em 87 arquivos; a verificação focada de escopo também passou (quatro testes).
+- `pnpm build`: passou, inclusive a rota da Hospedagem da Etapa e a página Minha seleção.
+- Playwright, cenário Joinville–Itapema em desktop e mobile: três testes passaram, incluindo o setup de autenticação. A outra jornada da especificação, de São Paulo com busca externa, não foi executada neste incremento.
+- `pnpm format:check`: falhou em 539 arquivos preexistentes do baseline; arquivos de código alterados nesta revisão foram formatados isoladamente.
 - `git diff --check`: passou.

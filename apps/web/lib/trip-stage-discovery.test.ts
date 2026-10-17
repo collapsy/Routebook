@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Trip, TripStage } from "@routebook/trip-management";
 
-import { selectTripDiscoveryScope } from "./trip-stage-discovery";
+import { resolveSelectedPlaceScope, selectTripDiscoveryScope } from "./trip-stage-discovery";
 
 const trip = {
   id: "trip-1",
@@ -65,5 +65,17 @@ describe("Trip discovery scope", () => {
       region: { source: "accommodation", center: locatedStage.accommodation.coordinate },
     });
     expect(visit?.accommodationCoordinate).toEqual(locatedStage.accommodation.coordinate);
+  });
+
+  it("identifies the closest registered region for a place in the trip-wide selection", () => {
+    expect(
+      resolveSelectedPlaceScope(trip, [stage], { latitude: -27.09, longitude: -48.61 })?.stageId,
+    ).toBe(stage.id);
+    expect(
+      resolveSelectedPlaceScope(trip, [stage], { latitude: -26.304, longitude: -48.846 })?.stageId,
+    ).toBeUndefined();
+    expect(
+      resolveSelectedPlaceScope(trip, [stage], { latitude: -23.55, longitude: -46.63 }),
+    ).toBeNull();
   });
 });

@@ -1002,6 +1002,8 @@ No MVP, deverá existir pelo menos:
 * filtro por categoria;
 * identificação de intenção, prioridade e planejado ou não planejado.
 
+Em Viagens com Etapas, cada cartão deve indicar se a referência geográfica estimada é o Destino principal ou uma Etapa. Minha seleção continua reunindo as preferências da Viagem; o catálogo de Explorar permanece separado pelo Destino selecionado.
+
 ---
 
 ## 42. Estados na área Minha seleção

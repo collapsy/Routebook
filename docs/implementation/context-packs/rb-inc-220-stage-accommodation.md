@@ -41,3 +41,5 @@ O pedido original inclui mais de uma Hospedagem ou lugar na mesma Viagem. Após 
 - `trip:edit` e vínculo StageId/TripId são verificados antes da escrita.
 - Nenhum Provider novo é ativado e nenhuma Proposal é aplicada automaticamente.
 - Somente caminhos do RB-INC-220 podem ser alterados. Arquivo indispensável adicional exige justificativa e atualização prévia do incremento e Context Pack.
+- `apps/web/e2e/auth.setup.ts` foi incluído após o teste real revelar que o cadastro ainda processava no Postgres isolado ao atingir o timeout padrão de cinco segundos. O ajuste limita-se à espera da navegação E2E.
+- `apps/web/app/viagens/[tripId]/lugares-salvos/page.tsx` foi incluído após a jornada E2E mostrar que Minha seleção ainda descrevia todos os Lugares como pertencentes ao Destino principal e usava sua Hospedagem nas distâncias. A coleção segue única por Viagem, com referência geográfica da Etapa identificada na apresentação.

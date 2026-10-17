@@ -1553,6 +1553,8 @@ Obrigatório.
 
 O sistema deve disponibilizar Minha seleção com Places `WANT`, `MAYBE` e `NOT_INTERESTED`, prioridade, Planning Role e estado planejado derivado.
 
+Quando a Viagem tiver Etapas, Minha seleção permanece única para a Viagem e deve indicar a referência geográfica estimada de cada Lugar. Links de detalhe e distâncias devem usar a Etapa correspondente quando identificável; a interface não deve apresentar todos os Lugares como se pertencessem ao Destino principal.
+
 ### Prioridade
 
 Alta.

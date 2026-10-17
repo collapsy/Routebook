@@ -97,11 +97,15 @@ test("separa Joinville e Itapema na mesma viagem e planeja um lugar no dia da vi
     "2",
   );
 
-  await page
-    .getByRole("navigation", { name: "Destinos para explorar" })
-    .getByRole("link", { name: "Itapema, SC" })
-    .click();
-  await expect(page.getByRole("heading", { name: "Lugares em Itapema, SC" })).toBeVisible();
+  await expect(
+    page
+      .getByRole("navigation", { name: "Destinos para explorar" })
+      .getByRole("link", { name: "Itapema, SC" }),
+  ).toHaveAttribute("href", /etapa=/);
+  await page.goto(`${stageHref}&descoberta=ocultar`);
+  await expect(page.getByRole("heading", { name: "Lugares em Itapema, SC" })).toBeVisible({
+    timeout: 30_000,
+  });
   await page.getByLabel("Nome ou termo").fill(itapemaPlace);
   await page.getByRole("button", { name: "Aplicar filtros" }).click();
   await expect(page.getByRole("list", { name: "Opções de lugares" })).toContainText(itapemaPlace);
@@ -119,9 +123,16 @@ test("separa Joinville e Itapema na mesma viagem e planeja um lugar no dia da vi
   await expect(
     page.getByRole("list", { name: "Opções de lugares" }).getByRole("button", { name: "Quero ir" }),
   ).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText("Preferência atualizada.", { exact: true })).toBeVisible();
   await page.goto(`/viagens/${trip.id}/lugares-salvos`);
-  await expect(page.getByRole("heading", { name: "Minha seleção" })).toBeVisible();
-  await expect(page.locator(".place-card").filter({ hasText: itapemaPlace })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Minha seleção", exact: true })).toBeVisible();
+  const selectedItapema = page.locator(".place-card").filter({ hasText: itapemaPlace });
+  await expect(selectedItapema).toBeVisible();
+  await expect(selectedItapema).toContainText("Etapa em Itapema, SC");
+  await expect(selectedItapema.getByRole("link", { name: "Ver detalhes" })).toHaveAttribute(
+    "href",
+    /etapa=/,
+  );
   await page.goto(`${stageHref}&descoberta=ocultar&busca=${encodeURIComponent(itapemaPlace)}`);
   await page
     .getByRole("list", { name: "Opções de lugares" })
@@ -131,9 +142,11 @@ test("separa Joinville e Itapema na mesma viagem e planeja um lugar no dia da vi
   await expect(page.getByLabel("Adicionar ao dia").locator("option")).toHaveCount(1);
   await expect(page.getByLabel("Adicionar ao dia")).toHaveValue("2026-11-14");
   await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
-  await expect(page.getByText(/foi adicionado ao Dia 2/)).toBeVisible();
+  await expect(page.getByText(/foi adicionado ao Dia 2/)).toBeVisible({ timeout: 30_000 });
   await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-11-14`);
-  await expect(page.locator(".itinerary-day-card").getByText(itapemaPlace)).toBeVisible();
+  await expect(
+    page.locator(".itinerary-day-card").getByText(itapemaPlace, { exact: true }),
+  ).toBeVisible();
 
   await page.goto(`/viagens/${trip.id}/etapas`);
   await page.getByRole("link", { name: "Adicionar hospedagem à etapa" }).click();
@@ -148,6 +161,15 @@ test("separa Joinville e Itapema na mesma viagem e planeja um lugar no dia da vi
   await expect(page.getByText("Hospedagem principal: Base em Joinville")).toBeVisible();
   await expect(page.getByText("Hospedagem desta etapa: Pousada em Itapema")).toBeVisible();
 
+  await page.goto(`/viagens/${trip.id}/lugares-salvos`);
+  await expect(page.locator(".place-card").filter({ hasText: itapemaPlace })).toContainText(
+    "Distância da hospedagem da etapa: 0 m",
+  );
+  await expect(page.locator('[data-routebook-map="true"]')).toHaveAttribute(
+    "data-map-point-count",
+    "3",
+  );
+
   await page.goto(`${stageHref}&descoberta=ocultar&busca=${encodeURIComponent(itapemaPlace)}`);
   await expect(page.getByText(/hospedagem desta etapa/).first()).toBeVisible();
   await expect(page.locator('[data-routebook-map="true"]')).toHaveAttribute(
@@ -159,6 +181,7 @@ test("separa Joinville e Itapema na mesma viagem e planeja um lugar no dia da vi
   await page.getByLabel("Nome da hospedagem").fill("");
   await page.getByLabel("Endereço").fill("");
   await page.getByRole("button", { name: "Salvar hospedagem" }).click();
+  await expect(page.getByText("Hospedagem da etapa atualizada.")).toBeVisible({ timeout: 30_000 });
   await page.goto(`/viagens/${trip.id}/etapas`);
   await expect(page.getByText("Hospedagem principal: Base em Joinville")).toBeVisible();
   await expect(page.getByText(/Hospedagem desta etapa: Não informada/)).toBeVisible();

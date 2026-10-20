@@ -282,6 +282,7 @@ Pode incluir:
 - Destino;
 - Período;
 - Hospedagem;
+- Etapas da Viagem vinculadas a Destinos e datas;
 - localização atual;
 - horário;
 - Viajantes;
@@ -3035,24 +3036,25 @@ IA não pode:
 
 ### 121. Múltiplos Destinos
 
-O modelo atual considera um Destino principal.
+Uma Viagem preserva seu Destino principal e pode possuir Etapas da Viagem adicionais. Cada Etapa tem identidade, Destino e período inclusivo contido no Período da Viagem. Uma Etapa de um dia representa um bate-volta e não exige Hospedagem adicional. A Etapa organiza contexto geográfico e temporal; não é um Dia, Lugar, Atividade ou segunda Viagem.
 
-Evolução futura:
+Uma Etapa pode ter uma Hospedagem opcional, distinta da Hospedagem principal. Quando sua localização está confirmada, ela é a referência espacial da Descoberta naquela Etapa; sem localização, o Destino da Etapa continua como referência. A alteração dessa Hospedagem incrementa a Trip Context Version. Check-in/check-out, troca de hospedagem dentro da mesma Etapa, fusos distintos e deslocamentos entre cidades exigem incrementos próprios. A seleção de uma Etapa para Discovery não altera o Destino principal, não duplica Places e não aplica Proposta ao Roteiro.
+
+Relação estrutural:
 
 ```mermaid
 flowchart LR
-    CurrentTrip["Viagem atual"]
-    CurrentDestination["Destino principal"]
-
-    FutureTrip["Viagem futura"]
-    Stage["Etapa da Viagem"]
+    Trip["Viagem"]
+    PrimaryDestination["Destino principal"]
+    PrimaryAccommodation["Hospedagem principal opcional"]
+    Stage["Etapa da Viagem adicional"]
     StageDestination["Destino da Etapa"]
     StagePeriod["Período da Etapa"]
-    StageAccommodation["Hospedagem da Etapa"]
+    StageAccommodation["Hospedagem opcional da Etapa"]
 
-    CurrentTrip --> CurrentDestination
-
-    FutureTrip --> Stage
+    Trip --> PrimaryDestination
+    Trip --> PrimaryAccommodation
+    Trip --> Stage
     Stage --> StageDestination
     Stage --> StagePeriod
     Stage --> StageAccommodation

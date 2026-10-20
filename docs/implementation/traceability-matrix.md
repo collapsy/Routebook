@@ -1385,3 +1385,25 @@ Ao concluir um incremento:
 | gaps auditados | entrada inexplicada no wizard de Trip sem Itinerary; etapa de geração descrita como revisão; scroll/foco e título precisam de validação responsiva |
 | escopo planejado | orientação de continuação, início explícito e autorizado, linguagem coerente pré/pós-geração, heading/foco/rolagem responsivos e testes E2E desktop/mobile, inclusive Trip planejada sem Itinerary; sem mudança de domínio ou dados de Preview |
 | validação | pendente; preencher somente após executar comandos e revisar Preview |
+
+## Evidências previstas do RB-INC-219
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-219-trip-stages-discovery.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-219-trip-stages-discovery.md` |
+| requisito | RB-FR-144; caso RB-UC-043; regras de Trip, Place e Roteiro |
+| branch/base | `codex/rb-inc-219-multi-destination-trip`, `origin/main@3d42b704` |
+| escopo | Etapa datada para visita a outro Destino, descoberta isolada por Region, vínculo visual ao Dia; Hospedagem adicional permanece posterior |
+| validação | 108 testes de domínio e 25 testes web focados passaram no incremento; posteriormente, no branch filho RB-INC-220, Postgres isolado permitiu migração, 215 testes de banco, build e cenário Joinville–Itapema em desktop/mobile. Prettier global acusou arquivos preexistentes do baseline |
+
+## Evidências previstas do RB-INC-220
+
+| Evidência | Localização/resultado |
+| --- | --- |
+| incremento | `docs/implementation/increments/rb-inc-220-stage-accommodation.md` |
+| Context Pack | `docs/implementation/context-packs/rb-inc-220-stage-accommodation.md` |
+| requisito | RB-FR-144; RB-BR-TRIP-013; Hospedagem opcional de Etapa |
+| branch/base | `codex/rb-inc-220-stage-accommodation`, RB-INC-219 no commit `9ed8934e` |
+| escopo | Hospedagem própria opcional por Etapa, com referência espacial, validação, autorização e isolamento da Hospedagem principal; Minha seleção identifica a referência estimada de cada Lugar |
+| validação | Migração aplicada apenas em branch Neon isolado; 110 testes de domínio, 215 de banco, 539 web e cenário Joinville–Itapema E2E desktop/mobile passaram; lint, typecheck, build e documentação passaram. Prettier global acusou 539 arquivos preexistentes do baseline |

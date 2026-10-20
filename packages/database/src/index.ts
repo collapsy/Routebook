@@ -48,8 +48,10 @@ export {
   savedPlaces,
   travelerProfiles,
   tripDestinationProvenance,
+  tripStages,
   trips,
 } from "./schema";
+export { DrizzleTripStageRepository, mapTripStageRow } from "./trip-stage-repository";
 export {
   createPostgresAcceptItineraryProposal,
   type ApplyItineraryProposalTransactionFactory,

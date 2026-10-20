@@ -1553,6 +1553,8 @@ Obrigatório.
 
 O sistema deve disponibilizar Minha seleção com Places `WANT`, `MAYBE` e `NOT_INTERESTED`, prioridade, Planning Role e estado planejado derivado.
 
+Quando a Viagem tiver Etapas, Minha seleção permanece única para a Viagem e deve indicar a referência geográfica estimada de cada Lugar. Links de detalhe e distâncias devem usar a Etapa correspondente quando identificável; a interface não deve apresentar todos os Lugares como se pertencessem ao Destino principal.
+
 ### Prioridade
 
 Alta.
@@ -2991,6 +2993,25 @@ Pós-MVP.
 ## 151. RB-FR-144 — Suportar múltiplos Destinos
 
 O sistema poderá permitir que uma Viagem possua múltiplos Destinos e Hospedagens.
+
+### Primeira entrega pós-MVP
+
+* manter um Destino principal e adicionar Etapas datadas para visitas a outros Destinos;
+* permitir uma Etapa de um dia sem outra Hospedagem;
+* mostrar o Destino de cada Etapa nos Dias correspondentes;
+* explorar Lugares por Destino selecionado, com lista e mapa coerentes e rótulo geográfico explícito;
+* preservar a seleção de Lugares na mesma Viagem sem adicioná-los automaticamente ao Roteiro.
+
+A Hospedagem de Etapa é tratada na segunda entrega. Pernoites e deslocamentos entre Destinos seguem em incrementos posteriores.
+
+### Segunda entrega pós-MVP
+
+* informar, alterar ou remover uma Hospedagem opcional em cada Etapa adicional;
+* mostrar separadamente a Hospedagem principal e a Hospedagem da Etapa;
+* usar a localização confirmada da Hospedagem da Etapa para lista, mapa, distâncias e rotas de Lugares dessa Etapa;
+* manter o Destino da Etapa como referência quando a Hospedagem não tiver localização confirmada.
+
+Check-in/check-out, mais de uma Hospedagem na mesma Etapa e deslocamentos entre Destinos continuam posteriores.
 
 ### MVP
 

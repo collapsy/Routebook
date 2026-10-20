@@ -7,6 +7,7 @@ import {
   DrizzlePlaceRepository,
   DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
+  DrizzleTripStageRepository,
 } from "@routebook/database";
 import {
   PLACE_CATEGORIES,
@@ -55,7 +56,7 @@ import {
 import { resolveConfiguredPlaceQualityProvider } from "../../../../lib/place-quality-provider";
 import type { TripMapPoint } from "../../../../lib/trip-map";
 import { OverturePmtilesPlaceSearchAdapter } from "../../../../lib/overture-place-search";
-import { resolvePlaceDiscoveryRegion } from "../../../../lib/place-discovery-region";
+import { selectTripDiscoveryScope } from "../../../../lib/trip-stage-discovery";
 import {
   clearPublishedPlacePreferenceAction,
   saveExternalPlaceAction,
@@ -81,6 +82,7 @@ export const metadata: Metadata = {
 };
 
 type DiscoverySearchParams = {
+  etapa?: string;
   dia?: string;
   busca?: string;
   categoria?: string;
@@ -195,6 +197,7 @@ function CanonicalDiscoveryCard({
   externalMediaEnabled,
   timeZone,
   selectedDayDate,
+  stageId,
 }: Readonly<{
   item: CanonicalDiscoveryItem;
   tripId: string;
@@ -211,6 +214,7 @@ function CanonicalDiscoveryCard({
   externalMediaEnabled: boolean;
   timeZone: string;
   selectedDayDate?: string;
+  stageId?: string;
 }>) {
   const { place, distanceMeters } = item;
   const candidate = item.kind === "enriched" ? item.candidate : undefined;
@@ -282,10 +286,11 @@ function CanonicalDiscoveryCard({
         <Link
           className="product-primary-action"
           href={`/viagens/${tripId}/lugares/${place.slug}${
-            selectedDayDate || preparing
+            selectedDayDate || preparing || stageId
               ? `?${[
                   selectedDayDate ? `dia=${encodeURIComponent(selectedDayDate)}` : undefined,
                   preparing ? "preparar=1" : undefined,
+                  stageId ? `etapa=${encodeURIComponent(stageId)}` : undefined,
                 ]
                   .filter(Boolean)
                   .join("&")}`
@@ -299,7 +304,7 @@ function CanonicalDiscoveryCard({
           clearAction={clearPublishedPlacePreferenceAction}
           currentIntent={preference?.intent}
           currentPriority={preference?.priority}
-          fields={{ tripId, placeSlug: place.slug }}
+          fields={{ tripId, placeSlug: place.slug, stageId }}
           label={`Preferência para ${place.name}`}
           setAction={setPublishedPlacePreferenceAction}
         />
@@ -382,6 +387,7 @@ function ExternalDiscoveryCard({
   categoryRank,
   externalMediaEnabled,
   timeZone,
+  stageId,
 }: Readonly<{
   item: ExternalPlaceDiscoveryItem;
   tripId: string;
@@ -400,6 +406,7 @@ function ExternalDiscoveryCard({
   categoryRank?: number;
   externalMediaEnabled: boolean;
   timeZone: string;
+  stageId?: string;
 }>) {
   const { candidate, distanceMeters } = item;
   const coordinate = { latitude: candidate.latitude, longitude: candidate.longitude };
@@ -453,6 +460,7 @@ function ExternalDiscoveryCard({
             className={styles.promotionForm}
             fields={{
               tripId,
+              stageId,
               externalId: candidate.externalId,
               busca: search,
               categoria: category,
@@ -530,6 +538,7 @@ export default async function PlacesPage({
   if (!trip) notFound();
 
   const rawFilters = await searchParams;
+  const stages = await new DrizzleTripStageRepository().listByTripId(tripId);
   const wizardMode = rawFilters.preparar === "1" && trip.status === "draft";
   const onboarding = wizardMode;
   const search = rawFilters.busca?.trim().slice(0, 120) || undefined;
@@ -541,15 +550,20 @@ export default async function PlacesPage({
   const discoveryMode = !discoverExternal ? "ocultar" : showAllExternal ? "todas" : undefined;
   const preferenceSaved = rawFilters.promocao === "salva";
   const placeActionError = placeActionErrorMessage(rawFilters.erroPromocao);
-  const accommodationCoordinate = trip.accommodation?.coordinate;
   const requestedMaximumDistanceMeters = parseMaximumDistance(rawFilters.distancia);
-  const regionResolution = resolvePlaceDiscoveryRegion({
-    destination: trip.destination,
-    ...(accommodationCoordinate ? { accommodationCoordinate } : {}),
-    ...(requestedMaximumDistanceMeters
-      ? { requestedRadiusMeters: requestedMaximumDistanceMeters }
-      : {}),
-  });
+  const scope = selectTripDiscoveryScope(
+    trip,
+    stages,
+    rawFilters.etapa,
+    requestedMaximumDistanceMeters,
+  );
+  if (!scope) notFound();
+  const selectedStage = scope.stageId
+    ? stages.find((candidate) => candidate.id === scope.stageId)
+    : undefined;
+  const scopeAccommodation = selectedStage ? selectedStage.accommodation : trip.accommodation;
+  const accommodationCoordinate = scope.accommodationCoordinate;
+  const regionResolution = scope.regionResolution;
   const region = regionResolution.status === "resolved" ? regionResolution.region : undefined;
   const bootstrapPolicy = resolvePlaceBootstrapPolicy();
   const bootstrapStartedAt = process.hrtime.bigint();
@@ -574,7 +588,7 @@ export default async function PlacesPage({
   ]);
   const destinationId =
     resolveCuratedDestinationId(publishedPlaces) ??
-    trip.destination.name
+    scope.destinationName
       .normalize("NFKC")
       .replace(/[^\p{L}\p{N}\s._-]+/gu, " ")
       .replace(/\s+/g, " ")
@@ -601,6 +615,7 @@ export default async function PlacesPage({
     region?.center,
   );
   const baseParams: DiscoverySearchParams = {
+    ...(scope.stageId ? { etapa: scope.stageId } : {}),
     ...(rawFilters.dia ? { dia: rawFilters.dia } : {}),
     ...(search ? { busca: search } : {}),
     ...(category ? { categoria: category } : {}),
@@ -809,10 +824,11 @@ export default async function PlacesPage({
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
         href: `/viagens/${tripId}/lugares/${item.place.slug}${
-          rawFilters.dia || wizardMode
+          rawFilters.dia || wizardMode || scope.stageId
             ? `?${[
                 rawFilters.dia ? `dia=${encodeURIComponent(rawFilters.dia)}` : undefined,
                 wizardMode ? "preparar=1" : undefined,
+                scope.stageId ? `etapa=${encodeURIComponent(scope.stageId)}` : undefined,
               ]
                 .filter(Boolean)
                 .join("&")}`
@@ -830,16 +846,19 @@ export default async function PlacesPage({
     };
   });
 
-  if (accommodationCoordinate && trip.accommodation) {
+  if (accommodationCoordinate && scopeAccommodation) {
     mapPoints.unshift({
       id: "accommodation",
-      label: trip.accommodation.name,
+      label: scopeAccommodation.name,
       kind: "accommodation",
       latitude: accommodationCoordinate.latitude,
       longitude: accommodationCoordinate.longitude,
     });
   }
-  const distanceReferenceLabel = region?.distanceReferenceLabel ?? "da referência espacial";
+  const distanceReferenceLabel =
+    scope.stageId && region?.source === "accommodation"
+      ? "da hospedagem da etapa"
+      : (region?.distanceReferenceLabel ?? "da referência espacial");
 
   console.info("[place-bootstrap] completed", {
     destinationResolved: true,
@@ -892,13 +911,53 @@ export default async function PlacesPage({
       <header className="trip-overview-hero">
         <div>
           <p className="product-eyebrow">{wizardMode ? "Escolher lugares" : "Guia de viagem"}</p>
-          <h1>Lugares em {trip.destination.name}</h1>
+          <h1>Lugares em {scope.destinationName}</h1>
           <p>
             Compare lugares para decidir o que vale visitar. As distâncias da lista são em linha
             reta; use as ações de rota para trajetos e tempo de deslocamento.
           </p>
         </div>
       </header>
+
+      {stages.length > 0 ? (
+        <nav aria-label="Destinos para explorar" className={styles.rankingControls}>
+          <Link
+            aria-current={!scope.stageId ? "page" : undefined}
+            className={!scope.stageId ? styles.rankingActive : styles.rankingControl}
+            href={discoveryHref(tripId, {
+              ...(wizardMode ? { preparar: "1" } : {}),
+              ...(discoveryMode ? { descoberta: discoveryMode } : {}),
+            })}
+          >
+            {trip.destination.name} · principal
+          </Link>
+          {stages.map((stage) => (
+            <Link
+              aria-current={scope.stageId === stage.id ? "page" : undefined}
+              className={scope.stageId === stage.id ? styles.rankingActive : styles.rankingControl}
+              href={discoveryHref(tripId, {
+                etapa: stage.id,
+                ...(wizardMode ? { preparar: "1" } : {}),
+                ...(discoveryMode ? { descoberta: discoveryMode } : {}),
+              })}
+              key={stage.id}
+            >
+              {stage.destination.name}
+            </Link>
+          ))}
+          <Link className="product-inline-link" href={`/viagens/${tripId}/etapas`}>
+            Gerenciar destinos
+          </Link>
+        </nav>
+      ) : null}
+
+      {scope.stageId ? (
+        <p className={styles.notice}>
+          Você está explorando {scope.destinationName}. Para incluir um lugar desta visita no
+          roteiro, escolha um dos dias da etapa. A proposta automática ainda usa o Destino principal
+          da viagem.
+        </p>
+      ) : null}
 
       {wizardMode ? (
         <TripPlaceSelectionProgress
@@ -908,6 +967,7 @@ export default async function PlacesPage({
       ) : null}
 
       <form action={`/viagens/${tripId}/lugares`} className={styles.filters} method="get">
+        {scope.stageId ? <input name="etapa" type="hidden" value={scope.stageId} /> : null}
         {wizardMode ? <input name="preparar" type="hidden" value="1" /> : null}
         {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
         {ranking.order !== "distance" ? (
@@ -973,12 +1033,15 @@ export default async function PlacesPage({
         </p>
       ) : region.source === "accommodation" ? (
         <p className={styles.notice}>
-          Distâncias estimadas em linha reta a partir da hospedagem; não representam rota ou tempo
-          de deslocamento.
+          Distâncias estimadas em linha reta a partir da{" "}
+          {scope.stageId ? "hospedagem desta etapa" : "hospedagem principal"}; não representam rota
+          ou tempo de deslocamento.
         </p>
       ) : (
         <p className={styles.notice} role="status">
-          Sem a localização da hospedagem, as distâncias usam uma referência aproximada do destino.
+          {scope.stageId
+            ? "Nesta etapa, as distâncias usam o destino da visita como referência aproximada."
+            : "Sem a localização da hospedagem, as distâncias usam uma referência aproximada do destino."}{" "}
           São estimativas em linha reta e não representam rota ou tempo de deslocamento.
         </p>
       )}
@@ -1003,6 +1066,7 @@ export default async function PlacesPage({
           <Link
             className="product-secondary-action"
             href={discoveryHref(tripId, {
+              ...(scope.stageId ? { etapa: scope.stageId } : {}),
               ...(discoveryMode ? { descoberta: discoveryMode } : {}),
               ...(ranking.order === "distance" ? {} : { ordem: ranking.order }),
             })}
@@ -1157,8 +1221,9 @@ export default async function PlacesPage({
                   : {})}
                 distanceReferenceLabel={distanceReferenceLabel}
                 item={item}
-                timeZone={trip.destination.timeZone}
+                timeZone={scope.timeZone}
                 tripId={tripId}
+                {...(scope.stageId ? { stageId: scope.stageId } : {})}
                 {...(destinationId ? { destinationId } : {})}
                 {...(accommodationCoordinate ? { accommodationCoordinate } : {})}
                 {...(search ? { search } : {})}
@@ -1182,8 +1247,9 @@ export default async function PlacesPage({
                 preference={preferencesByPlaceId.get(item.place.id)}
                 preparing={wizardMode}
                 item={item}
-                timeZone={trip.destination.timeZone}
+                timeZone={scope.timeZone}
                 tripId={tripId}
+                {...(scope.stageId ? { stageId: scope.stageId } : {})}
                 {...(destinationId ? { destinationId } : {})}
                 {...(accommodationCoordinate ? { accommodationCoordinate } : {})}
                 {...(rawFilters.dia ? { selectedDayDate: rawFilters.dia } : {})}
@@ -1196,7 +1262,13 @@ export default async function PlacesPage({
           <p className="product-eyebrow">Nenhum resultado</p>
           <h2>Nenhum lugar corresponde aos filtros</h2>
           <p>Remova um filtro, amplie a distância ou limpe todos para voltar à descoberta.</p>
-          <Link className="product-secondary-action" href={`/viagens/${tripId}/lugares`}>
+          <Link
+            className="product-secondary-action"
+            href={discoveryHref(tripId, {
+              ...(scope.stageId ? { etapa: scope.stageId } : {}),
+              ...(wizardMode ? { preparar: "1" } : {}),
+            })}
+          >
             Limpar filtros
           </Link>
         </section>

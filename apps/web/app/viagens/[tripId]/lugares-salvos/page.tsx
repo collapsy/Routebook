@@ -7,6 +7,7 @@ import {
   DrizzlePlaceRepository,
   DrizzleTripPlacePreferenceRepository,
   DrizzleTripRepository,
+  DrizzleTripStageRepository,
 } from "@routebook/database";
 import { PLACE_CATEGORIES, type PlaceCategory } from "@routebook/place-catalog";
 import type { TripPlacePreference } from "@routebook/trip-collection";
@@ -18,6 +19,7 @@ import { TripPlacePreferenceControls } from "../../../../components/trip-place-p
 import { TripPlaceSelectionProgress } from "../../../../components/trip-place-selection-progress";
 import { TripMap } from "../../../../components/trip-map";
 import type { TripMapPoint } from "../../../../lib/trip-map";
+import { resolveSelectedPlaceScope } from "../../../../lib/trip-stage-discovery";
 import { presentAccommodationDistance } from "../lugares/distance";
 import {
   addSelectionPlaceToItineraryAction,
@@ -53,6 +55,13 @@ function formatDate(value: string): string {
   }).format(new Date(`${value}T00:00:00Z`));
 }
 
+function placeDetailsHref(tripId: string, slug: string, stageId?: string, wizardMode = false) {
+  const query = new URLSearchParams();
+  if (wizardMode) query.set("preparar", "1");
+  if (stageId) query.set("etapa", stageId);
+  return `/viagens/${tripId}/lugares/${slug}${query.size ? `?${query}` : ""}`;
+}
+
 function parseCategory(value?: string): PlaceCategory | undefined {
   return PLACE_CATEGORIES.includes(value as PlaceCategory) ? (value as PlaceCategory) : undefined;
 }
@@ -84,14 +93,25 @@ export default async function TripSelectionPage({
   const wizardMode = preparar === "1" && trip.status === "draft";
 
   const preferenceRepository = new DrizzleTripPlacePreferenceRepository();
-  const [preferences, itinerary] = await Promise.all([
+  const [preferences, itinerary, stages] = await Promise.all([
     preferenceRepository.listByTripId(tripId),
     new DrizzleItineraryRepository().findByTripId(tripId),
+    new DrizzleTripStageRepository().listByTripId(tripId),
   ]);
   const places = await new DrizzlePlaceRepository().listByIds(
     preferences.map((selection) => selection.placeId),
   );
   const placesById = new Map(places.map((place) => [place.id, place]));
+  const stagesById = new Map(stages.map((stage) => [stage.id, stage]));
+  const scopesByPlaceId = new Map(
+    places.map((place) => [
+      place.id,
+      resolveSelectedPlaceScope(trip, stages, {
+        latitude: place.latitude,
+        longitude: place.longitude,
+      }),
+    ]),
+  );
   const selectedCategory = parseCategory(categoria);
   const filteredPreferences = preferences.filter((selection) => {
     const place = placesById.get(selection.placeId);
@@ -120,6 +140,7 @@ export default async function TripSelectionPage({
   const mapPoints: TripMapPoint[] = filteredPreferences.flatMap((selection) => {
     const place = placesById.get(selection.placeId);
     if (!place) return [];
+    const scope = scopesByPlaceId.get(place.id);
     return [
       {
         id: place.id,
@@ -127,10 +148,27 @@ export default async function TripSelectionPage({
         kind: "saved-place" as const,
         latitude: place.latitude,
         longitude: place.longitude,
-        href: `/viagens/${tripId}/lugares/${place.slug}${wizardMode ? "?preparar=1" : ""}`,
+        ...(scope ? { href: placeDetailsHref(tripId, place.slug, scope.stageId, wizardMode) } : {}),
       },
     ];
   });
+
+  for (const stage of stages) {
+    if (
+      !stage.accommodation?.coordinate ||
+      !filteredPreferences.some(
+        (selection) => scopesByPlaceId.get(selection.placeId)?.stageId === stage.id,
+      )
+    )
+      continue;
+    mapPoints.unshift({
+      id: `accommodation-${stage.id}`,
+      label: `${stage.accommodation.name} · ${stage.destination.name}`,
+      kind: "accommodation",
+      latitude: stage.accommodation.coordinate.latitude,
+      longitude: stage.accommodation.coordinate.longitude,
+    });
+  }
 
   if (trip.accommodation?.coordinate) {
     mapPoints.unshift({
@@ -198,12 +236,12 @@ export default async function TripSelectionPage({
           <p className="product-eyebrow">Coleção da viagem</p>
           <h1>Minha seleção</h1>
           <p>
-            Revise o que você quer considerar em {trip.destination.name}. Sua preferência não
-            adiciona nem remove lugares do roteiro automaticamente.
+            Revise os lugares que você quer considerar nesta viagem. Cada lugar indica o Destino
+            principal ou a Etapa mais próxima; sua preferência não altera o roteiro automaticamente.
           </p>
           <p>
-            As distâncias exibidas são estimativas em linha reta a partir da hospedagem e não
-            representam rota, trânsito ou tempo de deslocamento.
+            As distâncias são estimativas em linha reta a partir da hospedagem correspondente. Sem
+            hospedagem localizada na Etapa, usamos o Destino dela como referência.
           </p>
         </div>
         <span className="trip-context-version">{preferences.length} avaliados</span>
@@ -246,7 +284,10 @@ export default async function TripSelectionPage({
         <section className="traveler-context-summary" aria-labelledby="selection-empty-title">
           <p className="product-eyebrow">Seleção vazia</p>
           <h2 id="selection-empty-title">Você ainda não avaliou nenhum lugar</h2>
-          <p>Explore o destino e marque lugares como Quero ir, Talvez ou Não tenho interesse.</p>
+          <p>
+            Explore os destinos da viagem e marque lugares como Quero ir, Talvez ou Não tenho
+            interesse.
+          </p>
           <Link
             className="product-secondary-action"
             href={`/viagens/${tripId}/lugares${wizardMode ? "?preparar=1" : ""}`}
@@ -270,12 +311,30 @@ export default async function TripSelectionPage({
           {filteredPreferences.map((selection) => {
             const place = placesById.get(selection.placeId);
             if (!place) return null;
+            const scope = scopesByPlaceId.get(place.id);
+            const stage = scope?.stageId ? stagesById.get(scope.stageId) : undefined;
+            const referenceCoordinate = !scope
+              ? undefined
+              : stage
+                ? (stage.accommodation?.coordinate ??
+                  (scope.regionResolution.status === "resolved"
+                    ? scope.regionResolution.region.center
+                    : undefined))
+                : trip.accommodation?.coordinate;
+            const referenceLabel = !scope
+              ? "da referência espacial"
+              : stage
+                ? stage.accommodation?.coordinate
+                  ? "da hospedagem da etapa"
+                  : "do destino da etapa"
+                : "da hospedagem principal";
             const accommodationDistance = presentAccommodationDistance(
-              trip.accommodation?.coordinate,
+              referenceCoordinate,
               {
                 latitude: place.latitude,
                 longitude: place.longitude,
               },
+              referenceLabel,
             );
             const titleId = `selection-place-${place.id}`;
             const planned = isPlannedPreference(selection, plannedPlaceIds);
@@ -289,16 +348,22 @@ export default async function TripSelectionPage({
                 />
                 <p className="product-eyebrow">{categoryLabels[place.category]}</p>
                 <h2 id={titleId}>{place.name}</h2>
+                <p>
+                  <strong>Destino na viagem: </strong>
+                  {scope
+                    ? `${stage ? "Etapa" : "Principal"} em ${scope.destinationName} (estimado pela localização do lugar)`
+                    : "referência geográfica indisponível"}
+                </p>
                 <p>{place.summary}</p>
                 <p>
                   <strong>Roteiro: </strong>
                   {planned ? "Planejado" : "Ainda não planejado"}
                 </p>
                 <p>
-                  <strong>Distância da hospedagem: </strong>
+                  <strong>Distância {referenceLabel}: </strong>
                   {accommodationDistance
                     ? `${accommodationDistance.label} — ${accommodationDistance.description}`
-                    : "informe a localização da hospedagem para calcular esta distância."}
+                    : "referência espacial indisponível para calcular esta distância."}
                 </p>
 
                 <TripPlacePreferenceControls
@@ -363,12 +428,14 @@ export default async function TripSelectionPage({
                 ) : null}
 
                 <div className="section-heading-row saved-place-card-actions">
-                  <Link
-                    className="product-secondary-action"
-                    href={`/viagens/${tripId}/lugares/${place.slug}${wizardMode ? "?preparar=1" : ""}`}
-                  >
-                    Ver detalhes
-                  </Link>
+                  {scope ? (
+                    <Link
+                      className="product-secondary-action"
+                      href={placeDetailsHref(tripId, place.slug, scope.stageId, wizardMode)}
+                    >
+                      Ver detalhes
+                    </Link>
+                  ) : null}
                 </div>
               </li>
             );

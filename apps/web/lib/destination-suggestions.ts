@@ -89,6 +89,40 @@ const FIXTURES = [
     },
   },
   {
+    reference: "fixture:joinville-sc-br",
+    aliases: ["joinville", "joinville sc"],
+    suggestion: {
+      label: "Joinville, SC, Brasil",
+      primaryText: "Joinville",
+      secondaryText: "SC, Brasil",
+    },
+    destination: {
+      name: "Joinville, SC",
+      type: "city" as const,
+      countryCode: "BR",
+      latitude: -26.3044,
+      longitude: -48.8464,
+      timeZone: "America/Sao_Paulo",
+    },
+  },
+  {
+    reference: "fixture:itapema-sc-br",
+    aliases: ["itapema", "itapema sc"],
+    suggestion: {
+      label: "Itapema, SC, Brasil",
+      primaryText: "Itapema",
+      secondaryText: "SC, Brasil",
+    },
+    destination: {
+      name: "Itapema, SC",
+      type: "city" as const,
+      countryCode: "BR",
+      latitude: -27.0905,
+      longitude: -48.6112,
+      timeZone: "America/Sao_Paulo",
+    },
+  },
+  {
     reference: "fixture:sao-paulo-sp-br",
     aliases: ["sao paulo", "sao paulo sp"],
     suggestion: {

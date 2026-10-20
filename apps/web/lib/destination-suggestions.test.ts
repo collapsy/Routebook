@@ -145,6 +145,36 @@ describe("GoogleDestinationSuggestionProvider", () => {
 });
 
 describe("configuração de Destination suggestions", () => {
+  it("oferece Joinville e Itapema como destinos distintos apenas no modo E2E", async () => {
+    process.env.ROUTEBOOK_E2E_DESTINATION_RESOLVER = "1";
+    process.env.ROUTEBOOK_DESTINATION_RESOLVER = "fixture";
+    delete process.env.VERCEL_ENV;
+
+    const joinville = await suggestConfiguredDestinations("joinville", "fixture-session");
+    const itapema = await suggestConfiguredDestinations("itapema", "fixture-session");
+    expect(joinville.status).toBe("ready");
+    expect(itapema.status).toBe("ready");
+    if (joinville.status !== "ready" || itapema.status !== "ready") {
+      throw new Error("Expected fixture suggestions.");
+    }
+    expect(joinville.suggestions.map((suggestion) => suggestion.reference)).toContain(
+      "fixture:joinville-sc-br",
+    );
+    expect(itapema.suggestions.map((suggestion) => suggestion.reference)).toContain(
+      "fixture:itapema-sc-br",
+    );
+
+    const resolved = await resolveSelectedDestination({
+      provider: "fixture",
+      reference: "fixture:itapema-sc-br",
+      sessionToken: "fixture-session",
+    });
+    expect(resolved.status).toBe("resolved");
+    if (resolved.status !== "resolved") throw new Error("Expected resolved fixture.");
+    expect(resolved.value.destination.name).toBe("Itapema, SC");
+    expect(resolved.value.destination.timeZone).toBe("America/Sao_Paulo");
+  });
+
   it("reutiliza fixture determinística no E2E e resolve São Paulo por referência", async () => {
     process.env.ROUTEBOOK_E2E_DESTINATION_RESOLVER = "1";
     process.env.ROUTEBOOK_DESTINATION_RESOLVER = "fixture";

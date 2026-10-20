@@ -506,6 +506,10 @@ Ele deve ser atualizado sempre que um documento for criado, renomeado, movido, v
 | RB-CTX-217 | Context Pack do RB-INC-217 — Consolidação da jornada | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-217-journey-consolidation.md](./implementation/context-packs/rb-inc-217-journey-consolidation.md) |
 | RB-INC-218 | Clareza e continuidade no wizard de preparação | Implementation | Draft | 0.2.0 | [rb-inc-218-preparation-ux-polish.md](./implementation/increments/rb-inc-218-preparation-ux-polish.md) |
 | RB-CTX-218 | Context Pack do RB-INC-218 — Clareza e continuidade no wizard | Implementation Context Pack | Draft | 0.2.0 | [rb-inc-218-preparation-ux-polish.md](./implementation/context-packs/rb-inc-218-preparation-ux-polish.md) |
+| RB-INC-219 | Etapas geográficas da Viagem e descoberta por Destino | Implementation | Draft | 0.1.0 | [rb-inc-219-trip-stages-discovery.md](./implementation/increments/rb-inc-219-trip-stages-discovery.md) |
+| RB-CTX-219 | Context Pack do RB-INC-219 — Etapas e Discovery por Destino | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-219-trip-stages-discovery.md](./implementation/context-packs/rb-inc-219-trip-stages-discovery.md) |
+| RB-INC-220 | Hospedagem opcional por Etapa da Viagem | Implementation | Draft | 0.1.0 | [rb-inc-220-stage-accommodation.md](./implementation/increments/rb-inc-220-stage-accommodation.md) |
+| RB-CTX-220 | Context Pack do RB-INC-220 — Hospedagem da Etapa | Implementation Context Pack | Draft | 0.1.0 | [rb-inc-220-stage-accommodation.md](./implementation/context-packs/rb-inc-220-stage-accommodation.md) |
 
 ## Status possíveis
 

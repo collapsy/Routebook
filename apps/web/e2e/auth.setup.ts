@@ -20,7 +20,7 @@ setup("autentica o workspace legado", async ({ page }) => {
   await page.getByLabel("Senha").fill("routebook-e2e-password");
   await page.getByRole("button", { name: "Criar conta" }).click();
 
-  await expect(page).toHaveURL(/\/viagens$/);
+  await expect(page).toHaveURL(/\/viagens$/, { timeout: 30_000 });
   await page.context().storageState({ path: authFile });
 
   const [user] = await getDatabase()

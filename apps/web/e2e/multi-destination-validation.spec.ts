@@ -1,10 +1,196 @@
 import { expect, test } from "@playwright/test";
-import { DrizzleItineraryRepository } from "@routebook/database";
+import { DrizzleItineraryRepository, getDatabase, places } from "@routebook/database";
 import { createItinerary } from "@routebook/trip-management";
 
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
 test.setTimeout(180_000);
+
+test("separa Joinville e Itapema na mesma viagem e planeja um lugar no dia da visita", async ({
+  page,
+}) => {
+  const { trip } = await createAuthenticatedE2ETrip({
+    name: `Joinville e Itapema ${test.info().project.name} ${Date.now()}`,
+    destination: {
+      name: "Joinville, SC",
+      type: "city",
+      countryCode: "BR",
+      latitude: -26.3044,
+      longitude: -48.8464,
+      timeZone: "America/Sao_Paulo",
+    },
+    startDate: "2026-11-13",
+    endDate: "2026-11-16",
+    accommodationName: "Base em Joinville",
+    accommodationAddress: "Centro, Joinville — SC",
+    accommodationLatitude: -26.3044,
+    accommodationLongitude: -48.8464,
+  });
+  await new DrizzleItineraryRepository().save(
+    createItinerary({ tripId: trip.id, period: trip.period }),
+  );
+
+  const joinvillePlace = `Passeio Joinville ${crypto.randomUUID().slice(0, 8)}`;
+  const itapemaPlace = `Praia Itapema ${crypto.randomUUID().slice(0, 8)}`;
+  const now = new Date();
+  await getDatabase()
+    .insert(places)
+    .values([
+      {
+        id: crypto.randomUUID(),
+        destinationId: "joinville-sc-br",
+        slug: `joinville-stage-e2e-${crypto.randomUUID()}`,
+        name: joinvillePlace,
+        summary: "Passeio publicado em Joinville para validar o contexto da viagem.",
+        category: "attraction",
+        latitude: -26.3044,
+        longitude: -48.8464,
+        addressLabel: "Joinville, SC",
+        publicationStatus: "published",
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        id: crypto.randomUUID(),
+        destinationId: "itapema-sc-br",
+        slug: `itapema-stage-e2e-${crypto.randomUUID()}`,
+        name: itapemaPlace,
+        summary: "Praia publicada em Itapema para validar o contexto da visita.",
+        category: "beach",
+        latitude: -27.0905,
+        longitude: -48.6112,
+        addressLabel: "Itapema, SC",
+        publicationStatus: "published",
+        createdAt: now,
+        updatedAt: now,
+      },
+    ]);
+
+  await page.goto(`/viagens/${trip.id}/etapas`);
+  await expect(
+    page.getByRole("heading", { name: "Planeje visitas a outros lugares" }),
+  ).toBeVisible();
+  await page.getByRole("combobox", { name: "Destino da visita" }).fill("Itapema");
+  await page.getByRole("option", { name: /Itapema.*SC, Brasil/ }).click();
+  await page.getByLabel("Primeiro dia da visita").fill("2026-11-14");
+  await page.getByLabel("Último dia da visita").fill("2026-11-14");
+  await page.getByRole("button", { name: "Adicionar destino à viagem" }).click();
+  await expect(page.getByText("Etapa adicionada à viagem.")).toBeVisible();
+  const stageLink = page.getByRole("link", { name: "Explorar lugares em Itapema, SC" });
+  await expect(stageLink).toBeVisible();
+  const stageHref = await stageLink.getAttribute("href");
+  expect(stageHref).toMatch(/etapa=/);
+
+  await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-11-14`);
+  await expect(page.getByText(/Destino deste Dia: Itapema, SC/)).toBeVisible();
+
+  await page.goto(
+    `/viagens/${trip.id}/lugares?descoberta=ocultar&busca=${encodeURIComponent(joinvillePlace)}`,
+  );
+  await expect(page.getByRole("heading", { name: "Lugares em Joinville, SC" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Opções de lugares" })).toContainText(joinvillePlace);
+  await expect(page.getByRole("list", { name: "Opções de lugares" })).not.toContainText(
+    itapemaPlace,
+  );
+  await expect(page.locator('[data-routebook-map="true"]')).toHaveAttribute(
+    "data-map-point-count",
+    "2",
+  );
+
+  await expect(
+    page
+      .getByRole("navigation", { name: "Destinos para explorar" })
+      .getByRole("link", { name: "Itapema, SC" }),
+  ).toHaveAttribute("href", /etapa=/);
+  await page.goto(`${stageHref}&descoberta=ocultar`);
+  await expect(page.getByRole("heading", { name: "Lugares em Itapema, SC" })).toBeVisible({
+    timeout: 30_000,
+  });
+  await page.getByLabel("Nome ou termo").fill(itapemaPlace);
+  await page.getByRole("button", { name: "Aplicar filtros" }).click();
+  await expect(page.getByRole("list", { name: "Opções de lugares" })).toContainText(itapemaPlace);
+  await expect(page.getByRole("list", { name: "Opções de lugares" })).not.toContainText(
+    joinvillePlace,
+  );
+  await expect(page.locator('[data-routebook-map="true"]')).toHaveAttribute(
+    "data-map-point-count",
+    "1",
+  );
+  await page
+    .getByRole("list", { name: "Opções de lugares" })
+    .getByRole("button", { name: "Quero ir" })
+    .click();
+  await expect(
+    page.getByRole("list", { name: "Opções de lugares" }).getByRole("button", { name: "Quero ir" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText("Preferência atualizada.", { exact: true })).toBeVisible();
+  await page.goto(`/viagens/${trip.id}/lugares-salvos`);
+  await expect(page.getByRole("heading", { name: "Minha seleção", exact: true })).toBeVisible();
+  const selectedItapema = page.locator(".place-card").filter({ hasText: itapemaPlace });
+  await expect(selectedItapema).toBeVisible();
+  await expect(selectedItapema).toContainText("Etapa em Itapema, SC");
+  await expect(selectedItapema.getByRole("link", { name: "Ver detalhes" })).toHaveAttribute(
+    "href",
+    /etapa=/,
+  );
+  await page.goto(`${stageHref}&descoberta=ocultar&busca=${encodeURIComponent(itapemaPlace)}`);
+  await page
+    .getByRole("list", { name: "Opções de lugares" })
+    .getByRole("link", { name: "Ver detalhes" })
+    .click();
+  await expect(page.getByRole("heading", { name: itapemaPlace })).toBeVisible();
+  await expect(page.getByLabel("Adicionar ao dia").locator("option")).toHaveCount(1);
+  await expect(page.getByLabel("Adicionar ao dia")).toHaveValue("2026-11-14");
+  await page.getByRole("button", { name: "Adicionar ao roteiro" }).click();
+  await expect(page.getByText(/foi adicionado ao Dia 2/)).toBeVisible({ timeout: 30_000 });
+  await page.goto(`/viagens/${trip.id}/roteiro?dia=2026-11-14`);
+  await expect(
+    page.locator(".itinerary-day-card").getByText(itapemaPlace, { exact: true }),
+  ).toBeVisible();
+
+  await page.goto(`/viagens/${trip.id}/etapas`);
+  await page.getByRole("link", { name: "Adicionar hospedagem à etapa" }).click();
+  await page.getByLabel("Nome da hospedagem").fill("Pousada em Itapema");
+  await page.getByLabel("Endereço").fill("Centro, Itapema — SC");
+  await page.getByText("Opções avançadas de localização").click();
+  await page.getByLabel("Latitude").fill("-27.0905");
+  await page.getByLabel("Longitude").fill("-48.6112");
+  await page.getByRole("button", { name: "Salvar hospedagem" }).click();
+  await expect(page.getByText(/Hospedagem da etapa salva/)).toBeVisible();
+  await page.goto(`/viagens/${trip.id}/etapas`);
+  await expect(page.getByText("Hospedagem principal: Base em Joinville")).toBeVisible();
+  await expect(page.getByText("Hospedagem desta etapa: Pousada em Itapema")).toBeVisible();
+
+  await page.goto(`/viagens/${trip.id}/lugares-salvos`);
+  await expect(page.locator(".place-card").filter({ hasText: itapemaPlace })).toContainText(
+    "Distância da hospedagem da etapa: 0 m",
+  );
+  await expect(page.locator('[data-routebook-map="true"]')).toHaveAttribute(
+    "data-map-point-count",
+    "3",
+  );
+
+  await page.goto(`${stageHref}&descoberta=ocultar&busca=${encodeURIComponent(itapemaPlace)}`);
+  await expect(page.getByText(/hospedagem desta etapa/).first()).toBeVisible();
+  await expect(page.locator('[data-routebook-map="true"]')).toHaveAttribute(
+    "data-map-point-count",
+    "2",
+  );
+  await page.goto(`/viagens/${trip.id}/etapas`);
+  await page.getByRole("link", { name: "Editar hospedagem da etapa" }).click();
+  await page.getByLabel("Nome da hospedagem").fill("");
+  await page.getByLabel("Endereço").fill("");
+  await page.getByRole("button", { name: "Salvar hospedagem" }).click();
+  await expect(page.getByText("Hospedagem da etapa atualizada.")).toBeVisible({ timeout: 30_000 });
+  await page.goto(`/viagens/${trip.id}/etapas`);
+  await expect(page.getByText("Hospedagem principal: Base em Joinville")).toBeVisible();
+  await expect(page.getByText(/Hospedagem desta etapa: Não informada/)).toBeVisible();
+  await page.goto(`${stageHref}&descoberta=ocultar&busca=${encodeURIComponent(itapemaPlace)}`);
+  await expect(page.locator('[data-routebook-map="true"]')).toHaveAttribute(
+    "data-map-point-count",
+    "1",
+  );
+});
 
 test("valida São Paulo sem seed e preserva Discovery, Minha seleção, Roteiro, mapa e Guia", async ({
   page,

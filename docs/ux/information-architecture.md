@@ -1002,6 +1002,8 @@ No MVP, deverá existir pelo menos:
 * filtro por categoria;
 * identificação de intenção, prioridade e planejado ou não planejado.
 
+Em Viagens com Etapas, cada cartão deve indicar se a referência geográfica estimada é o Destino principal ou uma Etapa. Minha seleção continua reunindo as preferências da Viagem; o catálogo de Explorar permanece separado pelo Destino selecionado.
+
 ---
 
 ## 42. Estados na área Minha seleção
@@ -1926,18 +1928,17 @@ Não deverão substituir o modelo central de Lugar e Atividade.
 
 ## 103. Múltiplos Destinos
 
-Quando suportados, a estrutura poderá evoluir para:
+Na primeira entrega, a Viagem mantém um Destino principal e pode incluir Etapas adicionais com datas. Uma Etapa de um dia pode ser um bate-volta sem outra Hospedagem.
 
 ```text
 Viagem
-├── Destinos
-│   ├── Destino A
-│   └── Destino B
+├── Destino principal e Hospedagem principal opcional
+├── Etapas adicionais com Destino, datas e Hospedagem opcional
 ├── Roteiro
-└── Mapa geral
+└── Explorar Lugares por Destino selecionado
 ```
 
-No MVP, a navegação assume um Destino principal.
+Na visão da Viagem, cada Etapa mostra Destino, datas e sua Hospedagem, quando informada. No Dia do Roteiro, a Etapa correspondente aparece antes das Atividades e abre Explorar com esse Destino selecionado. Em Explorar, o seletor informa claramente qual Destino define a Região usada por lista, mapa, filtros e distâncias. Uma Hospedagem de Etapa localizada vira a referência espacial apenas dessa Etapa; sem localização, a Região usa seu Destino. A seleção de Lugares continua pertencendo à Viagem e identifica a localização de cada Lugar. A Hospedagem principal não é apresentada como âncora de distância no Destino de outra Etapa.
 
 ---
 

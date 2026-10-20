@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import {
   DrizzleTripPlacePreferenceRepository,
+  DrizzleTripStageRepository,
   DrizzleTravelerProfileRepository,
   DrizzleTripRepository,
 } from "@routebook/database";
@@ -100,7 +101,7 @@ export default async function TripOverviewPage({
   if (!trip) notFound();
 
   const preferencesPromise = new DrizzleTripPlacePreferenceRepository().listByTripId(tripId);
-  const [profile, deleteAccess, recommendationExperience, overviewMap] = await Promise.all([
+  const [profile, deleteAccess, recommendationExperience, overviewMap, stages] = await Promise.all([
     findTravelerProfile(new DrizzleTravelerProfileRepository(), tripId),
     resolveTripRouteAccess({ tripId, action: "trip:delete" }),
     loadRecommendationExperience(tripId, new Date(), { persist: false }),
@@ -114,6 +115,7 @@ export default async function TripOverviewPage({
         ),
       ),
     ),
+    new DrizzleTripStageRepository().listByTripId(tripId),
   ]);
   const { contextUpdated } = await searchParams;
   const owner = trip.participants.find((participant) => participant.role === "owner");
@@ -179,6 +181,35 @@ export default async function TripOverviewPage({
           <dd>{owner?.displayName ?? "Responsável não informado"}</dd>
         </div>
       </dl>
+
+      <section className="traveler-context-summary" aria-labelledby="trip-stages-title">
+        <div className="section-heading-row">
+          <div>
+            <p className="product-eyebrow">Destinos da viagem</p>
+            <h2 id="trip-stages-title">Além de {trip.destination.name}</h2>
+            <p>
+              {stages.length === 0
+                ? "Vai visitar outra cidade durante a viagem? Adicione o destino e os dias da visita."
+                : `${stages.length} ${stages.length === 1 ? "visita planejada" : "visitas planejadas"} a outros destinos.`}
+            </p>
+          </div>
+          <Link className="product-secondary-action" href={`/viagens/${tripId}/etapas`}>
+            {stages.length === 0 ? "Adicionar outro destino" : "Gerenciar destinos"}
+          </Link>
+        </div>
+        {stages.length > 0 ? (
+          <ul>
+            {stages.map((stage) => (
+              <li key={stage.id}>
+                <strong>{stage.destination.name}</strong> · {formatDate(stage.startDate)}
+                {stage.endDate !== stage.startDate ? ` a ${formatDate(stage.endDate)}` : ""} ·{" "}
+                Hospedagem: {stage.accommodation?.name ?? "não informada"} ·{" "}
+                <Link href={`/viagens/${tripId}/lugares?etapa=${stage.id}`}>Explorar lugares</Link>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
 
       {days.length > 0 ? (
         <section className="traveler-context-summary" aria-labelledby="trip-guide-entry-title">

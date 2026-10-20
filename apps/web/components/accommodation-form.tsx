@@ -6,6 +6,7 @@ import type { Accommodation } from "@routebook/trip-management";
 
 import { updateAccommodationAction } from "@/app/viagens/[tripId]/hospedagem/actions";
 import { initialAccommodationState } from "@/app/viagens/[tripId]/hospedagem/state";
+import type { AccommodationActionState } from "@/app/viagens/[tripId]/hospedagem/state";
 
 function FieldError({ id, message }: { id: string; message: string | undefined }) {
   return message ? (
@@ -18,18 +19,25 @@ function FieldError({ id, message }: { id: string; message: string | undefined }
 export function AccommodationForm({
   tripId,
   accommodation,
+  stageId,
+  destinationName,
+  saveAction = updateAccommodationAction,
 }: {
   tripId: string;
   accommodation: Accommodation | undefined;
+  stageId?: string;
+  destinationName?: string;
+  saveAction?: (
+    state: AccommodationActionState,
+    formData: FormData,
+  ) => Promise<AccommodationActionState>;
 }) {
-  const [state, action, pending] = useActionState(
-    updateAccommodationAction,
-    initialAccommodationState,
-  );
+  const [state, action, pending] = useActionState(saveAction, initialAccommodationState);
 
   return (
     <form action={action} className="trip-form accommodation-form" noValidate>
       <input name="tripId" type="hidden" value={tripId} />
+      {stageId ? <input name="stageId" type="hidden" value={stageId} /> : null}
 
       {state.formError ? (
         <div className="form-error" role="alert">
@@ -38,7 +46,9 @@ export function AccommodationForm({
       ) : null}
 
       <div className="form-field form-field-wide">
-        <h2>Onde você vai ficar?</h2>
+        <h2>
+          {destinationName ? `Onde você vai ficar em ${destinationName}?` : "Onde você vai ficar?"}
+        </h2>
         <p className="field-hint">
           Informe a hospedagem para usar o local como referência em mapas e distâncias.
         </p>

@@ -7,4 +7,5 @@ export * from "./replanning-window";
 export * from "./repository";
 export * from "./service";
 export * from "./trip";
+export * from "./trip-stage";
 export * from "./trip-days";

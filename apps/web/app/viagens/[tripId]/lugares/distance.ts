@@ -8,6 +8,7 @@ export type AccommodationDistancePresentation = {
 export function presentAccommodationDistance(
   accommodationCoordinate: { latitude: number; longitude: number } | undefined,
   placeCoordinate: { latitude: number; longitude: number },
+  reference = "da hospedagem",
 ): AccommodationDistancePresentation | null {
   if (!accommodationCoordinate) return null;
 
@@ -26,6 +27,6 @@ export function presentAccommodationDistance(
 
   return {
     label,
-    description: "Distância estimada em linha reta a partir da hospedagem.",
+    description: `Distância estimada em linha reta a partir ${reference}.`,
   };
 }

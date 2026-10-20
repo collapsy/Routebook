@@ -349,6 +349,7 @@ mindmap
     Viagem
       Trip
       Destination
+      Trip Stage
       Trip Period
       Accommodation
       Trip Context Version
@@ -949,11 +950,26 @@ Toda Recomendação personalizada deve possuir:
 | Nome canônico     | Destination                                    |
 | Português oficial | Destino                                        |
 | Categoria         | Objeto de valor                                |
-| Definição         | Região geográfica principal associada à Viagem |
+| Definição         | Região geográfica associada à Viagem ou a uma Etapa da Viagem |
 | Não significa     | Lugar ou destino de um deslocamento            |
-| Relaciona-se com  | Trip, Region, Location                         |
+| Relaciona-se com  | Trip, Trip Stage, Region, Location             |
 | Termos permitidos | Destino da Viagem                              |
 | Termos a evitar   | Local, ponto, endereço                         |
+
+#### Trip Stage — Etapa da Viagem
+
+| Campo             | Definição                                                     |
+| ----------------- | ------------------------------------------------------------ |
+| Nome canônico     | Trip Stage                                                   |
+| Português oficial | Etapa da Viagem                                              |
+| Categoria         | Entidade da Viagem                                           |
+| Definição         | Visita datada a outro Destino dentro da mesma Viagem         |
+| Não significa     | Trip Day, Activity, Place ou segunda Trip                    |
+| Relaciona-se com  | Trip, Destination, Trip Period, Accommodation                |
+| Termos permitidos | Etapa                                                    |
+| Termos a evitar   | Parada ou localidade como sinônimos canônicos sem definição |
+
+Uma Etapa pode ter uma Hospedagem opcional própria. Uma Etapa de um dia pode não ter Hospedagem. O Destino principal e a Hospedagem principal da Viagem continuam existindo fora das Etapas adicionais.
 
 ---
 
@@ -981,7 +997,7 @@ Toda Recomendação personalizada deve possuir:
 | Categoria         | Entidade                                             |
 | Definição         | Referência de permanência utilizada durante a Viagem |
 | Não significa     | Categoria de Place automaticamente                   |
-| Relaciona-se com  | Trip, Location, Travel Estimate                      |
+| Relaciona-se com  | Trip, Trip Stage, Location, Travel Estimate          |
 | Termos permitidos | Local de hospedagem                                  |
 | Termos a evitar   | Hotel, quando o tipo não for conhecido               |
 

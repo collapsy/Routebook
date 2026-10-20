@@ -91,7 +91,8 @@ export default async function TripStagesPage({
               <strong>{stage.destination.name}</strong> · {formatDate(stage.startDate)}
               {stage.endDate !== stage.startDate ? ` a ${formatDate(stage.endDate)}` : ""}
               <div>
-                Hospedagem desta etapa: {stage.accommodation?.name ?? "Não informada (bate-volta possível)"}
+                Hospedagem desta etapa:{" "}
+                {stage.accommodation?.name ?? "Não informada (bate-volta possível)"}
                 {stage.accommodation && !stage.accommodation.coordinate
                   ? " · localização não confirmada"
                   : ""}
@@ -107,7 +108,9 @@ export default async function TripStagesPage({
                   className="product-inline-link"
                   href={`/viagens/${tripId}/etapas/${stage.id}/hospedagem`}
                 >
-                  {stage.accommodation ? "Editar hospedagem da etapa" : "Adicionar hospedagem à etapa"}
+                  {stage.accommodation
+                    ? "Editar hospedagem da etapa"
+                    : "Adicionar hospedagem à etapa"}
                 </Link>
                 <form action={removeTripStageAction}>
                   <input name="tripId" type="hidden" value={tripId} />

@@ -76,7 +76,11 @@ async function resolveActionScope(
   return scope;
 }
 
-async function resolvePublishedPlaceForMutation(tripId: string, placeSlug: string, stageId?: string) {
+async function resolvePublishedPlaceForMutation(
+  tripId: string,
+  placeSlug: string,
+  stageId?: string,
+) {
   const placesPath = `/viagens/${tripId}/lugares`;
   if (!tripId) redirect("/viagens?erro=viagem-invalida");
 

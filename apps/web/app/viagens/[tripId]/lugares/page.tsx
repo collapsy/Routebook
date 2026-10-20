@@ -954,8 +954,8 @@ export default async function PlacesPage({
       {scope.stageId ? (
         <p className={styles.notice}>
           Você está explorando {scope.destinationName}. Para incluir um lugar desta visita no
-          roteiro, escolha um dos dias da etapa. A proposta automática ainda usa o Destino
-          principal da viagem.
+          roteiro, escolha um dos dias da etapa. A proposta automática ainda usa o Destino principal
+          da viagem.
         </p>
       ) : null}
 
@@ -1033,7 +1033,9 @@ export default async function PlacesPage({
         </p>
       ) : region.source === "accommodation" ? (
         <p className={styles.notice}>
-          Distâncias estimadas em linha reta a partir da {scope.stageId ? "hospedagem desta etapa" : "hospedagem principal"}; não representam rota ou tempo de deslocamento.
+          Distâncias estimadas em linha reta a partir da{" "}
+          {scope.stageId ? "hospedagem desta etapa" : "hospedagem principal"}; não representam rota
+          ou tempo de deslocamento.
         </p>
       ) : (
         <p className={styles.notice} role="status">
@@ -1260,10 +1262,13 @@ export default async function PlacesPage({
           <p className="product-eyebrow">Nenhum resultado</p>
           <h2>Nenhum lugar corresponde aos filtros</h2>
           <p>Remova um filtro, amplie a distância ou limpe todos para voltar à descoberta.</p>
-          <Link className="product-secondary-action" href={discoveryHref(tripId, {
-            ...(scope.stageId ? { etapa: scope.stageId } : {}),
-            ...(wizardMode ? { preparar: "1" } : {}),
-          })}>
+          <Link
+            className="product-secondary-action"
+            href={discoveryHref(tripId, {
+              ...(scope.stageId ? { etapa: scope.stageId } : {}),
+              ...(wizardMode ? { preparar: "1" } : {}),
+            })}
+          >
             Limpar filtros
           </Link>
         </section>

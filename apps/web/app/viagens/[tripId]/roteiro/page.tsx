@@ -485,8 +485,13 @@ export default async function ItineraryPage({
                 </p>
                 {selectedDayStages.map((stage) => (
                   <div key={stage.id}>
-                    <span>Hospedagem em {stage.destination.name}: {stage.accommodation?.name ?? "não informada"}. </span>
-                    <Link href={`/viagens/${tripId}/lugares?dia=${selectedDay.date}&etapa=${stage.id}`}>
+                    <span>
+                      Hospedagem em {stage.destination.name}:{" "}
+                      {stage.accommodation?.name ?? "não informada"}.{" "}
+                    </span>
+                    <Link
+                      href={`/viagens/${tripId}/lugares?dia=${selectedDay.date}&etapa=${stage.id}`}
+                    >
                       Explorar lugares em {stage.destination.name}
                     </Link>
                   </div>
@@ -516,10 +521,7 @@ export default async function ItineraryPage({
                     <strong>Adicionar ao roteiro</strong>.
                   </p>
                   <div className={journeyStyles.emptyActions}>
-                    <Link
-                      className="product-primary-action"
-                      href={selectedDayDiscoveryHref}
-                    >
+                    <Link className="product-primary-action" href={selectedDayDiscoveryHref}>
                       Adicionar um lugar
                     </Link>
                     <Link

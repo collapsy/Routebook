@@ -46,7 +46,9 @@ export function AccommodationForm({
       ) : null}
 
       <div className="form-field form-field-wide">
-        <h2>{destinationName ? `Onde você vai ficar em ${destinationName}?` : "Onde você vai ficar?"}</h2>
+        <h2>
+          {destinationName ? `Onde você vai ficar em ${destinationName}?` : "Onde você vai ficar?"}
+        </h2>
         <p className="field-hint">
           Informe a hospedagem para usar o local como referência em mapas e distâncias.
         </p>

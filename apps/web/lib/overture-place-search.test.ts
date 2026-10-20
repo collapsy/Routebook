@@ -1,11 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { ExternalPlaceCandidate } from "@routebook/place-catalog";
+
 import {
   isPlausibleOvertureBeachName,
   isUsefulOverturePlaceName,
   OverturePmtilesPlaceSearchAdapter,
   parseLatestOvertureTileRelease,
   resolveOvertureTileSourceLicense,
+  selectOvertureCandidates,
   tileCoordinatesForRadius,
 } from "./overture-place-search";
 
@@ -69,6 +72,43 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
     expect(new Set(tiles.map((tile) => `${tile.zoom}/${tile.x}/${tile.y}`)).size).toBe(
       tiles.length,
     );
+  });
+
+  it("aplica o termo antes do limite de candidatos, preservando um restaurante menos pontuado", () => {
+    const center = { latitude: -27.0965505, longitude: -48.6164234 };
+    const base: ExternalPlaceCandidate = {
+      provider: "overture",
+      externalId: "hard-rock-itapema",
+      name: "Hard Rock Cafe Itapema",
+      latitude: -27.1446101,
+      longitude: -48.5880017,
+      providerCategory: "restaurant",
+      category: "gastronomy",
+      sourceLicense: "CDLA-Permissive-2.0",
+      collectedAt: new Date("2026-10-20T00:00:00Z"),
+      confidence: 0.716,
+    };
+    const crowdedRegion: ExternalPlaceCandidate[] = [
+      ...Array.from({ length: 200 }, (_, index) => ({
+        ...base,
+        externalId: `restaurant-${index}`,
+        name: `Restaurante ${index}`,
+        confidence: 0.9,
+      })),
+      base,
+    ];
+
+    expect(
+      selectOvertureCandidates(crowdedRegion, { center, radiusMeters: 8_000, limit: 200 }),
+    ).not.toContain(base);
+    expect(
+      selectOvertureCandidates(crowdedRegion, {
+        center,
+        radiusMeters: 8_000,
+        searchText: "  HARD Rock  ",
+        limit: 200,
+      }).map((candidate) => candidate.name),
+    ).toEqual(["Hard Rock Cafe Itapema"]);
   });
 
   it("monta o PMTiles da release resolvida e retorna vazio quando nenhum tile possui Place", async () => {

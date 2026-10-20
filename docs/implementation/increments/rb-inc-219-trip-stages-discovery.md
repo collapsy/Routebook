@@ -7,7 +7,7 @@ owner: Trip Management and Traveler Experience
 status: Draft
 version: "0.1.0"
 created: "2026-10-16"
-last_updated: "2026-10-16"
+last_updated: "2026-10-20"
 authors: [RouteBook Team]
 tags: [implementation, trip, destination, itinerary, discovery]
 related_documents: [RB-CORE-0004, RB-DOM-001, RB-DOM-002, RB-DOM-003, RB-PRD-006, RB-PRD-007, RB-UX-001, RB-DATA-001, RB-ARC-001, RB-ADR-012, RB-CTX-219]
@@ -141,3 +141,9 @@ pnpm build
 - `pnpm build`: compilação e TypeScript passaram; coleta de dados de `/api/auth/[...all]` falhou por ausência de `DATABASE_URL`.
 - Playwright da jornada: especificações carregadas com `--list`; execução impedida porque `next start` exige o build completo.
 - `pnpm format:check`: falhou em 546 arquivos no baseline do repositório. Os arquivos novos de código deste incremento foram formatados isoladamente.
+
+## Correção de busca textual — issue #540
+
+Na etapa Itapema, um Place existente na fonte Overture podia ficar fora dos 200 candidatos gerais antes de a busca por nome ser aplicada. A busca textual agora seleciona candidatos dentro da mesma Region antes do limite, e a ação de salvar revalida o termo e a Region no servidor. Sem termo, o limite e o comportamento anteriores são preservados. A Categoria continua independente do texto: Hard Rock Cafe Itapema é classificado como Gastronomia pela fonte.
+
+Validação da correção: 46 testes de Place Catalog, 22 testes web focados e 110 testes de Trip Management passaram; `pnpm lint`, `pnpm typecheck` e `node scripts/validate-docs.mjs` passaram. A consulta ao Overture público retornou Hard Rock Cafe Itapema em Gastronomia. A suíte web teve 527 testes aprovados e cinco suítes de Auth impedidas por ausência de `DATABASE_URL`; a suíte de banco teve 118 aprovados e 51 testes dependentes do banco impedidos pelo mesmo motivo. O build compilou e passou pelo TypeScript, mas parou na coleta de páginas sem `DATABASE_URL`. O Playwright listou a jornada desktop e mobile; sua execução exige build e banco de teste. `pnpm format:check` ainda falha no baseline (549 arquivos); os sete arquivos de código alterados passaram no Prettier isolado.

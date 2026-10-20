@@ -192,6 +192,41 @@ function normalizedNameTokens(value: string): string[] {
     .filter(Boolean);
 }
 
+function normalizeSearchText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function matchesSearchText(candidate: ExternalPlaceCandidate, searchText: string): boolean {
+  const needle = normalizeSearchText(searchText);
+  return [candidate.name, candidate.addressLabel, candidate.providerCategory, candidate.category]
+    .filter((value): value is string => Boolean(value))
+    .some((value) => normalizeSearchText(value).includes(needle));
+}
+
+export function selectOvertureCandidates(
+  candidates: readonly ExternalPlaceCandidate[],
+  query: PlaceSearchQuery,
+): readonly ExternalPlaceCandidate[] {
+  const searchText = query.searchText;
+  const matches = searchText
+    ? candidates.filter((candidate) => matchesSearchText(candidate, searchText))
+    : candidates;
+  return [...matches]
+    .sort((left, right) => {
+      const byConfidence = (right.confidence ?? -1) - (left.confidence ?? -1);
+      if (byConfidence) return byConfidence;
+      const byDistance =
+        placeDistanceMeters(left, query.center) - placeDistanceMeters(right, query.center);
+      return byDistance || left.name.localeCompare(right.name, "pt-BR");
+    })
+    .slice(0, query.limit ?? 40);
+}
+
 export function isUsefulOverturePlaceName(name: string): boolean {
   const identityTokens = normalizedNameTokens(name).filter(
     (token) => !PLACE_NAME_STOPWORDS.has(token),
@@ -511,15 +546,6 @@ export class OverturePmtilesPlaceSearchAdapter implements PlaceSearchPort {
       }
     }
 
-    const limit = query.limit ?? 40;
-    return [...candidatesById.values()]
-      .sort((left, right) => {
-        const byConfidence = (right.confidence ?? -1) - (left.confidence ?? -1);
-        if (byConfidence) return byConfidence;
-        const byDistance =
-          placeDistanceMeters(left, query.center) - placeDistanceMeters(right, query.center);
-        return byDistance || left.name.localeCompare(right.name, "pt-BR");
-      })
-      .slice(0, limit);
+    return selectOvertureCandidates([...candidatesById.values()], query);
   }
 }

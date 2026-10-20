@@ -223,6 +223,9 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
   }
 
   const category = parsePlaceCategory(String(formData.get("categoria") ?? ""));
+  const search = String(formData.get("busca") ?? "")
+    .trim()
+    .slice(0, 120);
   const maximumDistanceMeters = parseMaximumDistance(String(formData.get("distancia") ?? ""));
   const scope = await resolveActionScope(trip, stageId, maximumDistanceMeters);
   const regionResolution = scope.regionResolution;
@@ -241,6 +244,7 @@ export async function promoteExternalPlaceAction(formData: FormData): Promise<ne
       center: regionResolution.region.center,
       radiusMeters: regionResolution.region.externalRadiusMeters,
       ...(category ? { categories: [category] } : {}),
+      ...(search ? { searchText: search } : {}),
       limit: externalDiscoveryScanLimit,
     });
   } catch (error) {
@@ -300,6 +304,9 @@ export async function saveExternalPlaceAction(
   }
 
   const category = parsePlaceCategory(String(formData.get("categoria") ?? ""));
+  const search = String(formData.get("busca") ?? "")
+    .trim()
+    .slice(0, 120);
   const maximumDistanceMeters = parseMaximumDistance(String(formData.get("distancia") ?? ""));
   const scope = await resolveActionScope(trip, stageId, maximumDistanceMeters);
   const regionResolution = scope.regionResolution;
@@ -315,6 +322,7 @@ export async function saveExternalPlaceAction(
       center: regionResolution.region.center,
       radiusMeters: regionResolution.region.externalRadiusMeters,
       ...(category ? { categories: [category] } : {}),
+      ...(search ? { searchText: search } : {}),
       limit: externalDiscoveryScanLimit,
     });
   } catch (error) {

@@ -670,6 +670,7 @@ export default async function PlacesPage({
         new OverturePmtilesPlaceSearchAdapter().search({
           center: region.center,
           radiusMeters: region.externalRadiusMeters,
+          ...(search ? { searchText: search } : {}),
           limit: bootstrapPolicy.discovery.candidateLimit,
         }),
     });
@@ -709,11 +710,12 @@ export default async function PlacesPage({
         reference: region.center,
       })
     : [];
-  const availableCategories = listAvailablePlaceCategories(
-    facetDiscoveryItems.map((item) =>
+  const availableCategories = listAvailablePlaceCategories([
+    ...facetDiscoveryItems.map((item) =>
       item.kind === "external" ? item.candidate.category : item.place.category,
     ),
-  );
+    category,
+  ]);
   const filteredPublishedPlaces = filteredPlaces.map(({ place }) => place);
   const allDiscoveryItems = region
     ? buildPlaceDiscoveryFeed({

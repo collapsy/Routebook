@@ -141,6 +141,17 @@ describe("validatePlaceSearchQuery", () => {
       }),
     ).toThrow("entre 1 e 50000 metros");
   });
+
+  it("limita o termo textual recebido pela busca externa", () => {
+    const base = { center: { latitude: -27.09, longitude: -48.61 }, radiusMeters: 8_000 };
+    expect(() => validatePlaceSearchQuery({ ...base, searchText: "Hard Rock" })).not.toThrow();
+    expect(() => validatePlaceSearchQuery({ ...base, searchText: "   " })).toThrow(
+      "entre 1 e 120 caracteres",
+    );
+    expect(() => validatePlaceSearchQuery({ ...base, searchText: "x".repeat(121) })).toThrow(
+      "entre 1 e 120 caracteres",
+    );
+  });
 });
 
 describe("isStrongExternalPlaceIdentityMatch", () => {

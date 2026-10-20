@@ -302,6 +302,7 @@ describe("promoteExternalPlaceAction", () => {
       center: { latitude: -6.2302, longitude: -35.0503 },
       radiusMeters: 3_000,
       categories: ["beach"],
+      searchText: "praia externa",
       limit: 200,
     });
     expect(databaseMocks.promote).toHaveBeenCalledWith({
@@ -434,6 +435,13 @@ describe("saveExternalPlaceAction", () => {
     });
 
     expect(databaseMocks.promote).toHaveBeenCalledWith({ candidate });
+    expect(overtureMocks.search).toHaveBeenCalledWith({
+      center: { latitude: -6.2302, longitude: -35.0503 },
+      radiusMeters: 3_000,
+      categories: ["beach"],
+      searchText: "praia externa",
+      limit: 200,
+    });
     expect(databaseMocks.savePreference).toHaveBeenCalledWith(
       expect.objectContaining({
         tripId,
@@ -443,6 +451,51 @@ describe("saveExternalPlaceAction", () => {
       }),
     );
     expect(navigationMocks.redirect).not.toHaveBeenCalled();
+  });
+
+  it("revalida a busca textual na Region da etapa antes de salvar", async () => {
+    const stageId = "22222222-2222-4222-8222-222222222222";
+    databaseMocks.listStages.mockResolvedValueOnce([
+      {
+        id: stageId,
+        tripId,
+        destination: {
+          name: "Itapema, SC",
+          type: "city",
+          countryCode: "BR",
+          latitude: -27.0965505,
+          longitude: -48.6164234,
+          timeZone: "America/Sao_Paulo",
+        },
+      },
+    ]);
+    const hardRock = {
+      ...candidate,
+      externalId: "hard-rock-itapema",
+      name: "Hard Rock Cafe Itapema",
+      latitude: -27.1446101,
+      longitude: -48.5880017,
+      providerCategory: "restaurant",
+      category: "gastronomy" as const,
+    };
+    overtureMocks.search.mockResolvedValueOnce([hardRock]);
+    const formData = promotionForm();
+    formData.set("stageId", stageId);
+    formData.set("externalId", hardRock.externalId);
+    formData.set("busca", "Hard Rock");
+    formData.set("categoria", "gastronomy");
+    formData.delete("distancia");
+
+    await expect(saveExternalPlaceAction(formData)).resolves.toMatchObject({ status: "success" });
+
+    expect(overtureMocks.search).toHaveBeenCalledWith({
+      center: { latitude: -27.0965505, longitude: -48.6164234 },
+      radiusMeters: 8_000,
+      categories: ["gastronomy"],
+      searchText: "Hard Rock",
+      limit: 200,
+    });
+    expect(databaseMocks.promote).toHaveBeenCalledWith({ candidate: hardRock });
   });
 
   it("preserva a intenção escolhida ao materializar candidato externo", async () => {

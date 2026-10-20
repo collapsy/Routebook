@@ -4,6 +4,7 @@ export type PlaceSearchQuery = Readonly<{
   center: Readonly<{ latitude: number; longitude: number }>;
   radiusMeters: number;
   categories?: readonly PlaceCategory[];
+  searchText?: string;
   limit?: number;
 }>;
 
@@ -206,6 +207,14 @@ export function validatePlaceSearchQuery(query: PlaceSearchQuery): void {
     (!Number.isInteger(query.limit) || query.limit < 1 || query.limit > 200)
   ) {
     throw new Error("O limite da busca externa deve estar entre 1 e 200.");
+  }
+  if (
+    query.searchText !== undefined &&
+    (typeof query.searchText !== "string" ||
+      !query.searchText.trim() ||
+      query.searchText.length > 120)
+  ) {
+    throw new Error("O termo da busca externa deve ter entre 1 e 120 caracteres.");
   }
 }
 

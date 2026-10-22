@@ -20,6 +20,7 @@ const DEFAULT_MINIMUM_CONFIDENCE = 0.7;
 const MAX_RUNTIME_RADIUS_METERS = 8_000;
 const MAX_RUNTIME_TILES = 100;
 const RELEASE_CACHE_TTL_MS = 60 * 60 * 1_000;
+const MISLOCATED_HARD_ROCK_ITAPEMA_ID = "6233d430-160f-4ab3-9542-d0d0b6a373e3";
 
 const KNOWN_SOURCE_LICENSES: Readonly<Record<string, string>> = Object.freeze({
   meta: "CDLA-Permissive-2.0",
@@ -190,6 +191,52 @@ function normalizedNameTokens(value: string): string[] {
     .trim()
     .split(/\s+/)
     .filter(Boolean);
+}
+
+function normalizeSearchText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function matchesSearchText(candidate: ExternalPlaceCandidate, searchText: string): boolean {
+  const needle = normalizeSearchText(searchText);
+  return [candidate.name, candidate.addressLabel, candidate.providerCategory, candidate.category]
+    .filter((value): value is string => Boolean(value))
+    .some((value) => normalizeSearchText(value).includes(needle));
+}
+
+function isKnownMislocatedOvertureRecord(candidate: ExternalPlaceCandidate): boolean {
+  // Issue #540: the official Itapema location is at Píer Oporto, via Rua 323.
+  // This specific Overture record instead points to Porto Belo; do not suppress homonyms.
+  return (
+    candidate.externalId === MISLOCATED_HARD_ROCK_ITAPEMA_ID &&
+    normalizeSearchText(candidate.name) === "hard rock cafe itapema" &&
+    normalizeSearchText(candidate.addressLabel ?? "").includes("porto belo")
+  );
+}
+
+export function selectOvertureCandidates(
+  candidates: readonly ExternalPlaceCandidate[],
+  query: PlaceSearchQuery,
+): readonly ExternalPlaceCandidate[] {
+  const searchText = query.searchText;
+  const eligible = candidates.filter((candidate) => !isKnownMislocatedOvertureRecord(candidate));
+  const matches = searchText
+    ? eligible.filter((candidate) => matchesSearchText(candidate, searchText))
+    : eligible;
+  return [...matches]
+    .sort((left, right) => {
+      const byConfidence = (right.confidence ?? -1) - (left.confidence ?? -1);
+      if (byConfidence) return byConfidence;
+      const byDistance =
+        placeDistanceMeters(left, query.center) - placeDistanceMeters(right, query.center);
+      return byDistance || left.name.localeCompare(right.name, "pt-BR");
+    })
+    .slice(0, query.limit ?? 40);
 }
 
 export function isUsefulOverturePlaceName(name: string): boolean {
@@ -511,15 +558,6 @@ export class OverturePmtilesPlaceSearchAdapter implements PlaceSearchPort {
       }
     }
 
-    const limit = query.limit ?? 40;
-    return [...candidatesById.values()]
-      .sort((left, right) => {
-        const byConfidence = (right.confidence ?? -1) - (left.confidence ?? -1);
-        if (byConfidence) return byConfidence;
-        const byDistance =
-          placeDistanceMeters(left, query.center) - placeDistanceMeters(right, query.center);
-        return byDistance || left.name.localeCompare(right.name, "pt-BR");
-      })
-      .slice(0, limit);
+    return selectOvertureCandidates([...candidatesById.values()], query);
   }
 }

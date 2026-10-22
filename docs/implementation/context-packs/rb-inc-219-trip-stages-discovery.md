@@ -7,7 +7,7 @@ owner: Trip Management and Traveler Experience
 status: Draft
 version: "0.1.0"
 created: "2026-10-16"
-last_updated: "2026-10-20"
+last_updated: "2026-10-22"
 authors: [RouteBook Team]
 tags: [implementation, context-pack, trip, destination, discovery]
 related_documents: [RB-INC-219, RB-CORE-0004, RB-DOM-001, RB-DOM-002, RB-DOM-003, RB-PRD-006, RB-PRD-007, RB-UX-001, RB-DATA-001, RB-ARC-001, RB-ADR-012]
@@ -51,3 +51,5 @@ Somente os caminhos e comandos do RB-INC-219. As fixtures determinísticas de Jo
 ## Correção vinculada à issue #540
 
 A pesquisa de Place por texto no Destino da Etapa deve filtrar candidatos Overture antes do limite de 200. O termo é validado e reaplicado na busca de revalidação antes de salvar; a Categoria e a Region selecionadas continuam obrigatórias. Os caminhos adicionais permitidos pela issue são `modules/place-catalog/src/external-place.ts`, `modules/place-catalog/src/external-place.test.ts`, `apps/web/lib/overture-place-search.ts`, `apps/web/lib/overture-place-search.test.ts` e os testes de ação em `apps/web/app/viagens/[tripId]/lugares/actions.test.ts`. Não mudar a classificação da fonte nem ativar outro Provider.
+
+Na mesma busca, o Overture retornou dois IDs com nome Hard Rock Cafe Itapema. Um aponta para Porto Belo, embora a [fonte oficial](https://cafe.hardrock.com/itapema/) localize a unidade no Píer Oporto em Itapema, com acesso pela Rua 323. A correção adicional da issue #540 pode descartar somente esse ID com endereço divergente no adaptador externo. Não deduplicar por nome: filiais homônimas e outros candidatos permanecem distintos.

@@ -498,6 +498,19 @@ describe("saveExternalPlaceAction", () => {
     expect(databaseMocks.promote).toHaveBeenCalledWith({ candidate: hardRock });
   });
 
+  it("não salva um registro que o adaptador excluiu da busca revalidada", async () => {
+    overtureMocks.search.mockResolvedValueOnce([]);
+    const formData = promotionForm();
+    formData.set("externalId", "6233d430-160f-4ab3-9542-d0d0b6a373e3");
+    formData.set("busca", "Hard Rock");
+    formData.set("categoria", "gastronomy");
+
+    await expect(saveExternalPlaceAction(formData)).resolves.toMatchObject({ status: "error" });
+
+    expect(databaseMocks.promote).not.toHaveBeenCalled();
+    expect(databaseMocks.savePreference).not.toHaveBeenCalled();
+  });
+
   it("preserva a intenção escolhida ao materializar candidato externo", async () => {
     const formData = promotionForm();
     formData.set("intent", "MAYBE");

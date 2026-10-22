@@ -111,6 +111,56 @@ describe("OverturePmtilesPlaceSearchAdapter", () => {
     ).toEqual(["Hard Rock Cafe Itapema"]);
   });
 
+  it("omite somente o registro Hard Rock Itapema identificado em Porto Belo", () => {
+    const center = { latitude: -27.0965505, longitude: -48.6164234 };
+    const base: ExternalPlaceCandidate = {
+      provider: "overture",
+      externalId: "a0380a45-9653-4640-aef5-b7450f65e63b",
+      name: "Hard Rock Cafe Itapema",
+      latitude: -27.1446101,
+      longitude: -48.5880017,
+      providerCategory: "restaurant",
+      category: "gastronomy",
+      addressLabel: "Rua Trezentos e Vinte e Três, 113",
+      sourceLicense: "CDLA-Permissive-2.0",
+      collectedAt: new Date("2026-10-22T00:00:00Z"),
+      confidence: 0.716,
+    };
+    const mislocated: ExternalPlaceCandidate = {
+      ...base,
+      externalId: "6233d430-160f-4ab3-9542-d0d0b6a373e3",
+      latitude: -27.159999,
+      longitude: -48.579998,
+      addressLabel: "Rua Arnoldo Tomé dos Santos, 357, Porto Belo, SC",
+      confidence: 0.8,
+    };
+    const distinctHomonym = {
+      ...mislocated,
+      externalId: "different-hard-rock-record",
+    };
+    const correctedRecord = {
+      ...mislocated,
+      addressLabel: "Orla, 7111, Itapema, SC",
+    };
+    const query = { center, radiusMeters: 8_000, searchText: "Hard Rock", limit: 1 };
+
+    expect(selectOvertureCandidates([mislocated, base], query)).toEqual([base]);
+    expect(
+      selectOvertureCandidates([mislocated, base], {
+        center,
+        radiusMeters: 8_000,
+        limit: 10,
+      }),
+    ).toEqual([base]);
+    expect(
+      selectOvertureCandidates([distinctHomonym, correctedRecord], {
+        center,
+        radiusMeters: 8_000,
+        limit: 10,
+      }),
+    ).toEqual([distinctHomonym, correctedRecord]);
+  });
+
   it("monta o PMTiles da release resolvida e retorna vazio quando nenhum tile possui Place", async () => {
     const getZxy = vi.fn().mockResolvedValue(undefined);
     const createArchive = vi.fn(() => ({ getZxy }));

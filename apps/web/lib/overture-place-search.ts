@@ -20,6 +20,7 @@ const DEFAULT_MINIMUM_CONFIDENCE = 0.7;
 const MAX_RUNTIME_RADIUS_METERS = 8_000;
 const MAX_RUNTIME_TILES = 100;
 const RELEASE_CACHE_TTL_MS = 60 * 60 * 1_000;
+const MISLOCATED_HARD_ROCK_ITAPEMA_ID = "6233d430-160f-4ab3-9542-d0d0b6a373e3";
 
 const KNOWN_SOURCE_LICENSES: Readonly<Record<string, string>> = Object.freeze({
   meta: "CDLA-Permissive-2.0",
@@ -208,14 +209,25 @@ function matchesSearchText(candidate: ExternalPlaceCandidate, searchText: string
     .some((value) => normalizeSearchText(value).includes(needle));
 }
 
+function isKnownMislocatedOvertureRecord(candidate: ExternalPlaceCandidate): boolean {
+  // Issue #540: the official Itapema location is at Píer Oporto, via Rua 323.
+  // This specific Overture record instead points to Porto Belo; do not suppress homonyms.
+  return (
+    candidate.externalId === MISLOCATED_HARD_ROCK_ITAPEMA_ID &&
+    normalizeSearchText(candidate.name) === "hard rock cafe itapema" &&
+    normalizeSearchText(candidate.addressLabel ?? "").includes("porto belo")
+  );
+}
+
 export function selectOvertureCandidates(
   candidates: readonly ExternalPlaceCandidate[],
   query: PlaceSearchQuery,
 ): readonly ExternalPlaceCandidate[] {
   const searchText = query.searchText;
+  const eligible = candidates.filter((candidate) => !isKnownMislocatedOvertureRecord(candidate));
   const matches = searchText
-    ? candidates.filter((candidate) => matchesSearchText(candidate, searchText))
-    : candidates;
+    ? eligible.filter((candidate) => matchesSearchText(candidate, searchText))
+    : eligible;
   return [...matches]
     .sort((left, right) => {
       const byConfidence = (right.confidence ?? -1) - (left.confidence ?? -1);

@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
 
+async function revealSignOut(page: import("@playwright/test").Page, projectName: string) {
+  if (projectName.startsWith("mobile")) {
+    await page.getByLabel("Abrir menu da conta").click();
+  }
+}
+
 test("cadastra, encerra e recria a sessão pelo servidor", async ({ page }, testInfo) => {
   const email = `rb-inc-089-${testInfo.project.name}-${Date.now()}@example.com`;
   const password = "routebook-e2e-password";
@@ -11,6 +17,7 @@ test("cadastra, encerra e recria a sessão pelo servidor", async ({ page }, test
   await page.getByRole("button", { name: "Criar conta" }).click();
 
   await expect(page).toHaveURL(/\/viagens$/);
+  await revealSignOut(page, testInfo.project.name);
   await expect(page.getByRole("button", { name: "Sair" })).toBeVisible();
   await page.getByRole("button", { name: "Sair" }).click();
   await expect(page).toHaveURL(/\/$/);
@@ -21,6 +28,7 @@ test("cadastra, encerra e recria a sessão pelo servidor", async ({ page }, test
   await page.getByRole("button", { name: "Entrar" }).click();
 
   await expect(page).toHaveURL(/\/viagens$/);
+  await revealSignOut(page, testInfo.project.name);
   await expect(page.getByRole("button", { name: "Sair" })).toBeVisible();
 });
 

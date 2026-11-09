@@ -7,6 +7,9 @@ const uniqueOptionsHeading = /\d+ de \d+ lugares? exibidos/;
 test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sincronizados", async ({
   page,
 }) => {
+  await page.route("**/api/place-image-preview?**", (route) =>
+    route.fulfill({ status: 404, json: { error: "not-found" } }),
+  );
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Descoberta ${test.info().project.name} ${Date.now()}`,
     startDate: "2026-08-22",
@@ -126,6 +129,7 @@ test("pesquisa e combina filtros mantendo identidades únicas, lista e mapa sinc
     .locator('[data-place-source="published"]')
     .filter({ hasText: "Praia das Minas" })
     .first();
+  await praiaDasMinasCard.scrollIntoViewIfNeeded();
   const praiaDasMinasFallback = praiaDasMinasCard.locator('[data-place-image-fallback="true"]');
   await expect(praiaDasMinasFallback).toHaveAttribute("data-place-category", "beach");
   await expect(praiaDasMinasFallback).toHaveAttribute("data-place-initial", "P");

@@ -53,6 +53,9 @@ apps/web/app/viagens/[tripId]/lugares/error.tsx
 apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx
 apps/web/app/viagens/[tripId]/roteiro/page.tsx
 apps/web/e2e/navigation-feedback.spec.ts
+apps/web/e2e/accommodation-proximity.spec.ts
+apps/web/e2e/place-actions.spec.ts
+apps/web/e2e/place-discovery-filters.spec.ts
 docs/implementation/increments/rb-inc-221-navigation-feedback.md
 docs/implementation/context-packs/rb-inc-221-navigation-feedback.md
 docs/implementation/traceability-matrix.md
@@ -81,3 +84,5 @@ Sem migração, novo Provider, armazenamento persistente de histórico, alteraç
 - `pnpm format:check` local reportou 542 arquivos: verificação em memória confirmou que todos passam ao normalizar CRLF para LF. Nenhum desses arquivos foi reformatado em massa; arquivos alterados passam no Prettier.
 - Não executada medição live da cobertura de fotos: requer amostra de lugares reais no Preview autenticado. Produção permanece bloqueada para Google Photos.
 - Revisão React: sem dependências novas, memória isolada no componente da Viagem, efeitos canceláveis, identidade do Lugar como chave, tempo e tentativas limitados, navegação sem mutação.
+
+- A primeira execução completa no GitHub expôs seletores antigos que exigiam links sem query de retorno. Os testes de proximidade/ações foram ajustados ao contrato de navegação; os casos de ausência de foto passaram a interceptar 404 e aguardar o viewport lazy. Estes três arquivos E2E adicionais são necessários para preservar a regressão existente sem dependência de cobertura externa.

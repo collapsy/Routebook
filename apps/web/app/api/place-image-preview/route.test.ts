@@ -514,3 +514,31 @@ describe("GET /api/place-image-preview", () => {
     expect(fetcher).toHaveBeenCalledTimes(2);
   });
 });
+
+it("fallback explícito consulta apenas Wikimedia e mantém cache privado", async () => {
+  vi.stubEnv("ROUTEBOOK_PLACE_PHOTO_PROVIDER", "google");
+  vi.stubEnv("ROUTEBOOK_PLACE_QUALITY_PROVIDER", "google");
+  vi.stubEnv("GOOGLE_PLACES_API_KEY", "fixture-secret");
+  vi.stubEnv("VERCEL_ENV", "preview");
+  const fetcher = vi.fn<(input: string | URL | Request) => Promise<Response>>(async () =>
+    commonsResponse(),
+  );
+  vi.stubGlobal("fetch", fetcher);
+  const response = await GET(
+    new Request(
+      requestUrl({ source: "wikimedia", category: "beach", googlePlaceId: "ChIJfixture" }),
+    ),
+  );
+  expect(response.status).toBe(200);
+  expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+  for (const call of fetcher.mock.calls)
+    expect(String(call[0])).not.toContain("places.googleapis.com");
+});
+
+it("rejeita fonte de fallback arbitrária antes de chamar Provider", async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal("fetch", fetcher);
+  const response = await GET(new Request(requestUrl({ source: "https://example.com" })));
+  expect(response.status).toBe(400);
+  expect(fetcher).not.toHaveBeenCalled();
+});

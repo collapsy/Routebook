@@ -530,3 +530,11 @@ O status do frontmatter representa o ciclo de publicação do arquivo. Em ADRs, 
 - O status e a versão devem permanecer sincronizados com o frontmatter.
 - Documentos removidos não devem desaparecer sem histórico; devem ser marcados como `Deprecated` ou `Archived` quando necessário.
 - Alterações no registro devem passar por `node scripts/validate-docs.mjs`.
+
+| RB-INC-221 | Feedback e continuidade da navegação | Implementation | Draft | 0.1.0 | [rb-inc-221-navigation-feedback.md](./implementation/increments/rb-inc-221-navigation-feedback.md) |
+
+| RB-CTX-221 | Feedback e continuidade da navegação | Implementation | Draft | 0.1.0 | [rb-inc-221-navigation-feedback.md](./implementation/context-packs/rb-inc-221-navigation-feedback.md) |
+
+| RB-INC-222 | Fotos consistentes e recuperação de falhas | Implementation | Draft | 0.1.0 | [rb-inc-222-photo-recovery.md](./implementation/increments/rb-inc-222-photo-recovery.md) |
+
+| RB-CTX-222 | Fotos consistentes e recuperação de falhas | Implementation | Draft | 0.1.0 | [rb-inc-222-photo-recovery.md](./implementation/context-packs/rb-inc-222-photo-recovery.md) |

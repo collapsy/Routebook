@@ -229,6 +229,8 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
+  const source = url.searchParams.get("source");
+  const fallbackOnly = source === "wikimedia";
   const rawDestinationContext = url.searchParams.get("destinationId");
   const destinationContext = parseDestinationContext(rawDestinationContext);
   const name = url.searchParams.get("name")?.trim() ?? "";
@@ -240,6 +242,7 @@ export async function GET(request: Request) {
   const category = parseCategory(rawCategory);
 
   if (
+    (source !== null && source !== "wikimedia") ||
     name.length < 2 ||
     name.length > 180 ||
     latitude === undefined ||
@@ -258,8 +261,9 @@ export async function GET(request: Request) {
 
   const google = resolveConfiguredGooglePlacePhotoProvider();
   const onDemandGoogleEligible =
-    !googlePlaceId && Boolean(category) && google.status === "configured";
-  let effectiveGooglePlaceId = googlePlaceId;
+    !fallbackOnly && !googlePlaceId && Boolean(category) && google.status === "configured";
+  const privateResponse = onDemandGoogleEligible || fallbackOnly;
+  let effectiveGooglePlaceId = fallbackOnly ? undefined : googlePlaceId;
   let googleFailed = false;
 
   if (onDemandGoogleEligible && category) {
@@ -362,7 +366,7 @@ export async function GET(request: Request) {
       {
         status: googleFailed ? 503 : 404,
         headers: {
-          "Cache-Control": googleFailed || onDemandGoogleEligible ? "no-store" : MISS_CACHE_CONTROL,
+          "Cache-Control": googleFailed || privateResponse ? "no-store" : MISS_CACHE_CONTROL,
         },
       },
     );
@@ -377,7 +381,7 @@ export async function GET(request: Request) {
   });
   return NextResponse.json(result.value, {
     headers: {
-      "Cache-Control": onDemandGoogleEligible ? GOOGLE_CACHE_CONTROL : SUCCESS_CACHE_CONTROL,
+      "Cache-Control": privateResponse ? GOOGLE_CACHE_CONTROL : SUCCESS_CACHE_CONTROL,
     },
   });
 }

@@ -1,0 +1,55 @@
+.indicator {
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  margin-inline-start: 0.35em;
+  flex-shrink: 0;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.indicator[data-pending="true"] {
+  opacity: 1;
+  animation: spin 0.8s linear infinite;
+}
+
+.message {
+  position: fixed;
+  bottom: calc(6rem + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  background: var(--surface);
+  color: var(--foreground);
+  box-shadow: 0 0.25rem 1rem rgb(15 23 42 / 15%);
+  font-size: 0.9rem;
+  white-space: normal;
+  pointer-events: none;
+}
+
+.silent {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indicator[data-pending="true"] {
+    animation: none;
+  }
+}

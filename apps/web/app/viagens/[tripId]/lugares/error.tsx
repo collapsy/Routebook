@@ -1,12 +1,11 @@
 "use client";
 
-export default function PlaceCatalogError({ reset }: { reset: () => void }) {
+export default function PlacesError({ reset }: { reset: () => void }) {
   return (
     <section className="app-page" role="alert">
-      <p className="product-eyebrow">Lugares indisponíveis</p>
       <h1>Não foi possível carregar os lugares</h1>
-      <p>Tente novamente.</p>
-      <button className="product-secondary-action" type="button" onClick={reset}>
+      <p>Tente novamente. Sua seleção de lugares continua salva.</p>
+      <button className="product-primary-action" onClick={reset} type="button">
         Tentar novamente
       </button>
     </section>

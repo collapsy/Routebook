@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 
-import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ExternalPlaceImagePreview } from "./external-place-image-preview";
@@ -89,10 +89,11 @@ describe("ExternalPlaceImagePreview", () => {
     renderPreview();
 
     expect(fetcher).not.toHaveBeenCalled();
-    expect(screen.getByText("Sem foto")).toBeInTheDocument();
+    expect(screen.queryByText("Sem foto")).not.toBeInTheDocument();
+    expect(screen.getByText("Foto ainda não carregada")).toBeInTheDocument();
     expect(screen.queryByText("Imagem ilustrativa")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("img", { name: "Foto não disponível para Praia do Amor" }),
+      screen.getByRole("status", { name: "Carregando foto para Praia do Amor" }),
     ).toHaveAttribute("data-presentation", "compact");
   });
 
@@ -230,5 +231,91 @@ describe("ExternalPlaceImagePreview", () => {
         }),
       ).toHaveAttribute("data-presentation", "compact");
     });
+  });
+});
+
+describe("recuperação de mídia", () => {
+  it("distingue indisponibilidade de ausência e permite duas novas tentativas", async () => {
+    const fetcher = vi.fn(async () => Response.json({}, { status: 503 }));
+    vi.stubGlobal("fetch", fetcher);
+    vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
+    renderPreview();
+    enterViewport();
+    for (let retry = 0; retry < 2; retry++) {
+      fireEvent.click(
+        await screen.findByRole("button", { name: "Tentar carregar foto novamente" }),
+      );
+    }
+    await screen.findByText("Tente novamente quando voltar a esta página.");
+    expect(fetcher).toHaveBeenCalledTimes(3);
+    expect(screen.queryByText("Sem foto")).not.toBeInTheDocument();
+  });
+
+  it("tenta Wikimedia uma única vez após erro dos bytes Google", async () => {
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json(googlePreview))
+      .mockResolvedValueOnce(Response.json(preview));
+    vi.stubGlobal("fetch", fetcher);
+    vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
+    const { container } = renderPreview();
+    enterViewport();
+    const google = await screen.findByRole("img", { name: googlePreview.altText });
+    expect(container.querySelector('[data-external-place-image-state="ready"]')).toBeNull();
+    fireEvent.error(google);
+    const commons = await screen.findByRole("img", { name: preview.altText });
+    expect(String(fetcher.mock.calls[1]?.[0])).toContain("source=wikimedia");
+    fireEvent.load(commons);
+    expect(container.querySelector('[data-external-place-image-state="ready"]')).not.toBeNull();
+    expect(screen.queryByText("Carregando foto…")).not.toBeInTheDocument();
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+
+  it("não transforma falha Google seguida de miss Wikimedia em ausência confirmada", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(Response.json(googlePreview))
+        .mockResolvedValueOnce(Response.json({}, { status: 404 })),
+    );
+    vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
+    renderPreview();
+    enterViewport();
+    fireEvent.error(await screen.findByRole("img", { name: googlePreview.altText }));
+    await screen.findByRole("button", { name: "Tentar carregar foto novamente" });
+    expect(screen.queryByText("Sem foto")).not.toBeInTheDocument();
+  });
+
+  it("cancela a requisição antiga ao mudar Lugar e ignora sua resposta tardia", async () => {
+    let resolveOld!: (response: Response) => void;
+    const fetcher = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<Response>((resolve) => {
+            resolveOld = resolve;
+          }),
+      )
+      .mockResolvedValueOnce(Response.json({}, { status: 404 }));
+    vi.stubGlobal("fetch", fetcher);
+    vi.stubGlobal("IntersectionObserver", ControlledIntersectionObserver);
+    const { rerender } = renderPreview();
+    enterViewport();
+    const signal = fetcher.mock.calls[0]?.[1].signal as AbortSignal;
+    rerender(
+      <ExternalPlaceImagePreview
+        placeName="Outro lugar"
+        latitude={1}
+        longitude={2}
+        category="nature"
+      />,
+    );
+    expect(signal.aborted).toBe(true);
+    expect(screen.getByText("Foto ainda não carregada")).toBeInTheDocument();
+    enterViewport();
+    await screen.findByText("Sem foto");
+    await act(async () => resolveOld(Response.json(googlePreview)));
+    expect(screen.queryByRole("img", { name: googlePreview.altText })).not.toBeInTheDocument();
   });
 });

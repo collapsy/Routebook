@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { NavigationLink as Link } from "./navigation-link";
 
 import styles from "./trip-guide-mode-nav.module.css";
 

@@ -1,5 +1,6 @@
+import { discoveryReturnHref } from "../../../../../lib/discovery-navigation";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { NavigationLink as Link } from "../../../../../components/navigation-link";
 import { notFound } from "next/navigation";
 
 import {
@@ -11,7 +12,7 @@ import {
 import type { PlaceCategory } from "@routebook/place-catalog";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
-import { PlacePrimaryImage } from "../../../../../components/place-primary-image";
+import { PlacePhoto } from "../../../../../components/place-photo";
 import { TripPlanningWizard } from "../../../../../components/trip-planning-wizard";
 import { TripPlacePreferenceControls } from "../../../../../components/trip-place-preference-controls";
 import {
@@ -69,11 +70,20 @@ export default async function PlaceDetailsPage({
     erroRoteiro?: string;
     preparar?: string;
     etapa?: string;
+    retorno?: string;
   }>;
 }) {
   const { tripId, placeSlug } = await params;
-  const { preferencia, erroPreferencia, adicionadoAoRoteiro, dia, erroRoteiro, preparar, etapa } =
-    await searchParams;
+  const {
+    preferencia,
+    erroPreferencia,
+    adicionadoAoRoteiro,
+    dia,
+    erroRoteiro,
+    preparar,
+    etapa,
+    retorno,
+  } = await searchParams;
   const requestedWizardMode = preparar === "1";
   const trip = await findTripById(new DrizzleTripRepository(), tripId);
 
@@ -125,14 +135,15 @@ export default async function PlaceDetailsPage({
       <div className="section-heading-row">
         <Link
           className="back-link"
-          href={`/viagens/${tripId}/lugares${
-            etapa || wizardMode
-              ? `?${new URLSearchParams({
-                  ...(etapa ? { etapa } : {}),
-                  ...(wizardMode ? { preparar: "1" } : {}),
-                })}`
-              : ""
-          }`}
+          href={discoveryReturnHref(
+            tripId,
+            retorno ??
+              new URLSearchParams({
+                ...(etapa ? { etapa } : {}),
+                ...(wizardMode ? { preparar: "1" } : {}),
+                ...(dia ? { dia } : {}),
+              }).toString(),
+          )}
         >
           ← Voltar para lugares
         </Link>
@@ -176,7 +187,10 @@ export default async function PlaceDetailsPage({
         </div>
       </header>
 
-      <PlacePrimaryImage
+      <PlacePhoto
+        latitude={place.latitude}
+        longitude={place.longitude}
+        destinationId={scope.destinationName}
         category={place.category}
         placeName={place.name}
         primaryImage={place.primaryImage}

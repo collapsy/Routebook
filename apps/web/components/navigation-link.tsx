@@ -8,16 +8,13 @@ import styles from "./navigation-link.module.css";
 function NavigationFeedback({ label }: { label: string }) {
   const { pending } = useLinkStatus();
   return (
-    <>
-      <span aria-hidden="true" className={styles.indicator} data-pending={pending} />
-      <span
-        role={pending ? "status" : undefined}
-        aria-live="polite"
-        className={pending ? styles.message : styles.silent}
-      >
-        {pending ? label : ""}
-      </span>
-    </>
+    <span
+      role={pending ? "status" : undefined}
+      aria-live="polite"
+      className={pending ? styles.message : styles.silent}
+    >
+      {pending ? label : ""}
+    </span>
   );
 }
 

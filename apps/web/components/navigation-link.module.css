@@ -1,21 +1,7 @@
-.indicator {
-  display: inline-block;
-  width: 0.8em;
-  height: 0.8em;
-  margin-inline-start: 0.35em;
-  flex-shrink: 0;
-  border: 2px solid currentColor;
-  border-right-color: transparent;
-  border-radius: 50%;
-  opacity: 0;
-}
-
-.indicator[data-pending="true"] {
-  opacity: 1;
-  animation: spin 0.8s linear infinite;
-}
-
 .message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   position: fixed;
   bottom: calc(6rem + env(safe-area-inset-bottom));
   left: 50%;
@@ -34,6 +20,17 @@
   pointer-events: none;
 }
 
+.message::before {
+  content: "";
+  width: 0.8em;
+  height: 0.8em;
+  flex-shrink: 0;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
 .silent {
   position: absolute;
   width: 1px;
@@ -49,7 +46,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .indicator[data-pending="true"] {
+  .message::before {
     animation: none;
   }
 }

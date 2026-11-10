@@ -54,7 +54,7 @@ test("recupera falha de foto e mantém resolução no detalhe e Minha seleção"
   );
   await list.getByRole("link", { name: "Ver detalhes", exact: true }).click();
   const detailTitle = page.getByRole("heading", { name, exact: true, level: 1 });
-  await expect(detailTitle).toBeVisible();
+  await expect(detailTitle).toBeVisible({ timeout: 15_000 });
   await detailTitle.scrollIntoViewIfNeeded();
   await expect(page.locator('[data-external-place-image-state="ready"]')).toBeVisible();
   await page

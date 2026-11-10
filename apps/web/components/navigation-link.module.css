@@ -32,7 +32,8 @@
 }
 
 .silent {
-  position: absolute;
+  position: fixed;
+  inset: 0 auto auto 0;
   width: 1px;
   height: 1px;
   overflow: hidden;

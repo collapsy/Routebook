@@ -94,6 +94,15 @@ test("cria e preserva um período livre protegido no Dia selecionado", async ({
   const tripId = await createFreePeriodFixture(tripName);
   await page.goto(`/viagens/${tripId}/roteiro?dia=2026-08-23`);
 
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const { clientWidth, scrollWidth } = document.documentElement;
+        return scrollWidth <= clientWidth;
+      }),
+    )
+    .toBe(true);
+
   await submitFreePeriod(page, {
     dayDate: "2026-08-23",
     mode: "protected",

@@ -53,6 +53,7 @@ apps/web/app/viagens/[tripId]/lugares/error.tsx
 apps/web/app/viagens/[tripId]/lugares/[placeSlug]/page.tsx
 apps/web/app/viagens/[tripId]/roteiro/page.tsx
 apps/web/e2e/navigation-feedback.spec.ts
+apps/web/e2e/free-period.spec.ts
 apps/web/e2e/accommodation-proximity.spec.ts
 apps/web/e2e/place-actions.spec.ts
 apps/web/e2e/place-discovery-filters.spec.ts
@@ -90,3 +91,5 @@ Sem migração, novo Provider, armazenamento persistente de histórico, alteraç
 - A segunda execução chegou às recomendações. Os novos testes passaram a usar lugares já semeados nas migrações para não alterar o catálogo compartilhado de Pipa entre cenários.
 
 - A terceira execução apontou uma corrida no teste de foto durante a troca de página e uma sobreposição ao tocar no período livre no Roteiro mobile. O teste aguarda o título do detalhe. O indicador de navegação ficou no aviso fixo, sem ocupar espaço nos links.
+
+- A inspeção no Pixel 7 mostrou largura de 824 px para uma janela de 412 px. Os avisos vazios dos links fora da faixa de dias estavam posicionados em relação à página. Fixá-los dentro da janela eliminou o overflow e permitiu clicar no controle de período livre. O E2E existente passou a verificar a largura do documento antes de criar e persistir o período.

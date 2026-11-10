@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { getDatabase, places } from "@routebook/database";
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
 test("recupera falha de foto e mantém resolução no detalhe e Minha seleção", async ({ page }) => {
@@ -8,23 +7,7 @@ test("recupera falha de foto e mantém resolução no detalhe e Minha seleção"
     startDate: "2026-11-13",
     endDate: "2026-11-16",
   });
-  const name = `Foto teste ${crypto.randomUUID()}`;
-  await getDatabase()
-    .insert(places)
-    .values({
-      id: crypto.randomUUID(),
-      destinationId: "pipa-rn-br",
-      slug: `photo-${crypto.randomUUID()}`,
-      name,
-      summary: "Fixture de fotografia",
-      category: "nature",
-      latitude: -6.2302,
-      longitude: -35.0503,
-      addressLabel: "Pipa",
-      publicationStatus: "published",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+  const name = "Praia das Minas";
   let requests = 0;
   await page.route("**/api/place-image-preview**", (route) => {
     if (new URL(route.request().url()).pathname === "/api/place-image-preview/file") {
@@ -54,7 +37,10 @@ test("recupera falha de foto e mantém resolução no detalhe e Minha seleção"
   await page.goto(
     `/viagens/${trip.id}/lugares?descoberta=ocultar&busca=${encodeURIComponent(name)}`,
   );
-  const list = page.getByRole("list", { name: "Opções de lugares" });
+  const list = page
+    .getByRole("list", { name: "Opções de lugares" })
+    .getByRole("listitem")
+    .filter({ has: page.getByRole("heading", { name, exact: true }) });
   await list.scrollIntoViewIfNeeded();
   await expect(list.getByText("Não foi possível carregar a foto agora.")).toBeVisible();
   await page.screenshot({ path: test.info().outputPath("photo-error.png") });

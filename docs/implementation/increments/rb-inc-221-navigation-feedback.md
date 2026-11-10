@@ -86,3 +86,5 @@ Sem migração, novo Provider, armazenamento persistente de histórico, alteraç
 - Revisão React: sem dependências novas, memória isolada no componente da Viagem, efeitos canceláveis, identidade do Lugar como chave, tempo e tentativas limitados, navegação sem mutação.
 
 - A primeira execução completa no GitHub expôs seletores antigos que exigiam links sem query de retorno. Os testes de proximidade/ações foram ajustados ao contrato de navegação; os casos de ausência de foto passaram a interceptar 404 e aguardar o viewport lazy. Estes três arquivos E2E adicionais são necessários para preservar a regressão existente sem dependência de cobertura externa.
+
+- A segunda execução chegou às recomendações. Os novos testes passaram a usar lugares já semeados nas migrações para não alterar o catálogo compartilhado de Pipa entre cenários.

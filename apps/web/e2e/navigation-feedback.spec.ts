@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { DrizzleTripStageRepository, getDatabase, places } from "@routebook/database";
+import { DrizzleTripStageRepository } from "@routebook/database";
 import { createTripStage } from "@routebook/trip-management";
 import { createAuthenticatedE2ETrip } from "./support/authenticated-trip";
 
@@ -29,23 +29,7 @@ test("mostra espera ao trocar destino e preserva exploração nos retornos", asy
     method: "test",
     confidenceLevel: "confirmed",
   });
-  const name = `Lugar navegação ${crypto.randomUUID()}`;
-  await getDatabase()
-    .insert(places)
-    .values({
-      id: crypto.randomUUID(),
-      destinationId: "pipa-rn-br",
-      slug: `navigation-${crypto.randomUUID()}`,
-      name,
-      summary: "Fixture de navegação",
-      category: "nature",
-      latitude: -6.27,
-      longitude: -35.04,
-      addressLabel: "Destino de teste",
-      publicationStatus: "published",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+  const name = "Chapadão de Pipa";
   await page.route("**/api/place-image-preview?**", (route) =>
     route.fulfill({ status: 404, json: { error: "fixture-miss" } }),
   );

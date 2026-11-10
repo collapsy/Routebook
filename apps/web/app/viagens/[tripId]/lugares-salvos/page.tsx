@@ -13,7 +13,7 @@ import { PLACE_CATEGORIES, type PlaceCategory } from "@routebook/place-catalog";
 import type { TripPlacePreference } from "@routebook/trip-collection";
 import { deriveTripDays, findTripById } from "@routebook/trip-management";
 
-import { PlacePrimaryImage } from "../../../../components/place-primary-image";
+import { PlacePhoto } from "../../../../components/place-photo";
 import { TripPlanningWizard } from "../../../../components/trip-planning-wizard";
 import { TripPlacePreferenceControls } from "../../../../components/trip-place-preference-controls";
 import { TripPlaceSelectionProgress } from "../../../../components/trip-place-selection-progress";
@@ -341,7 +341,10 @@ export default async function TripSelectionPage({
 
             return (
               <li className="place-card" key={place.id}>
-                <PlacePrimaryImage
+                <PlacePhoto
+                  latitude={place.latitude}
+                  longitude={place.longitude}
+                  destinationId={scope?.destinationName ?? place.destinationId}
                   category={place.category}
                   placeName={place.name}
                   primaryImage={place.primaryImage}

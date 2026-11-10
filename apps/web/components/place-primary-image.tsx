@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import type {
   PlaceCategory,
@@ -17,6 +17,7 @@ export function PlacePrimaryImage({
   showProvenance = false,
   priority = false,
   compactFallback = true,
+  fallback,
 }: {
   placeName: string;
   primaryImage?: PlacePrimaryImageContract | undefined;
@@ -24,11 +25,13 @@ export function PlacePrimaryImage({
   showProvenance?: boolean;
   priority?: boolean;
   compactFallback?: boolean;
+  fallback?: ReactNode;
 }) {
   const [failed, setFailed] = useState(false);
   const placeInitial = placeName.trim().charAt(0).toLocaleUpperCase("pt-BR") || "?";
 
   if (!primaryImage || failed) {
+    if (fallback) return fallback;
     return (
       <figure className={styles.figure}>
         <div

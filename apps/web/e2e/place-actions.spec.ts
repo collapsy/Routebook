@@ -19,7 +19,13 @@ test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lug
     `/viagens/${trip.id}/lugares?descoberta=ocultar&busca=Praia%20do%20Amor&categoria=beach`,
   );
 
-  const detailsHref = `/viagens/${trip.id}/lugares/praia-do-amor`;
+  const detailsHref = `/viagens/${trip.id}/lugares/praia-do-amor?${new URLSearchParams({
+    retorno: new URLSearchParams({
+      busca: "Praia do Amor",
+      categoria: "beach",
+      descoberta: "ocultar",
+    }).toString(),
+  })}`;
   const card = page
     .getByRole("list", { name: "Opções de lugares" })
     .locator('[data-place-source="published"]')
@@ -55,7 +61,7 @@ test("marca Quero ir no catálogo preservando filtros e abre o compositor do Lug
     .toBeLessThanOrEqual(2);
 
   await card.getByRole("link", { name: "Ver detalhes" }).click();
-  await expect(page).toHaveURL(new RegExp(`/viagens/${trip.id}/lugares/praia-do-amor$`));
+  await expect(page).toHaveURL(new URL(detailsHref, page.url()).toString());
   await expect(page.getByRole("heading", { name: "Praia do Amor", level: 1 })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Adicionar ao roteiro", level: 2 })).toBeVisible();
   await expect(page.getByRole("button", { name: "Adicionar ao roteiro" })).toBeVisible();
@@ -121,6 +127,9 @@ test("adiciona Place ao Roteiro manualmente sem sobrescrever Não tenho interess
 });
 
 test("mantém fallback compacto em Lugar de Minha seleção sem fotografia real", async ({ page }) => {
+  await page.route("**/api/place-image-preview?**", (route) =>
+    route.fulfill({ status: 404, json: { error: "not-found" } }),
+  );
   const { trip } = await createAuthenticatedE2ETrip({
     name: `Seleção com fallback visual ${test.info().project.name} ${Date.now()}`,
     startDate: "2026-08-22",
@@ -139,6 +148,7 @@ test("mantém fallback compacto em Lugar de Minha seleção sem fotografia real"
     .locator('[data-place-source="published"]')
     .filter({ hasText: "Praia das Minas" })
     .first();
+  await discoveryCard.scrollIntoViewIfNeeded();
   const discoveryFallback = discoveryCard.locator('[data-place-image-fallback="true"]');
   await expect(discoveryFallback).toHaveAttribute("data-presentation", "compact");
   await expect(discoveryFallback.locator("strong")).toHaveText("Sem foto");
@@ -152,6 +162,7 @@ test("mantém fallback compacto em Lugar de Minha seleção sem fotografia real"
 
   await page.goto(`/viagens/${trip.id}/lugares-salvos`);
   const selectedCard = page.locator(".place-card").filter({ hasText: "Praia das Minas" }).first();
+  await selectedCard.scrollIntoViewIfNeeded();
   const fallback = selectedCard.locator('[data-place-image-fallback="true"]');
   await expect(fallback).toBeVisible();
   await expect(fallback).toHaveAttribute("data-presentation", "compact");

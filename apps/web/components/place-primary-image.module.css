@@ -5,6 +5,19 @@
   min-width: 0;
 }
 
+.photoLoading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--surface-soft);
+  color: var(--foreground-muted);
+  text-align: center;
+}
+
 .frame {
   aspect-ratio: 16 / 9;
   background: var(--surface-soft);

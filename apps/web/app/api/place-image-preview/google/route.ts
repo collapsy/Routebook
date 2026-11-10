@@ -25,12 +25,20 @@ export async function GET(request: Request) {
   try {
     const media = await configured.adapter.fetchMedia(token);
     if (!media) {
+      console.info("[place-image-preview] media outcome", {
+        provider: "google-places",
+        outcome: "expired-or-invalid",
+      });
       return Response.json(
         { error: "A referência de mídia expirou ou não é válida." },
         { status: 404, headers: { "Cache-Control": NO_STORE } },
       );
     }
 
+    console.info("[place-image-preview] media outcome", {
+      provider: "google-places",
+      outcome: "available",
+    });
     return new Response(media.bytes, {
       status: 200,
       headers: {
@@ -40,9 +48,10 @@ export async function GET(request: Request) {
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (error) {
+  } catch {
     console.warn("[place-image-preview] Google Place Photo indisponível", {
-      message: error instanceof Error ? error.message : "erro desconhecido",
+      provider: "google-places",
+      outcome: "unavailable",
     });
     return Response.json(
       { error: "A fotografia do Google Places está indisponível no momento." },

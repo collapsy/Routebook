@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { NavigationLink as Link } from "../../../../components/navigation-link";
+import { DiscoveryFilterForm } from "../../../../components/discovery-filter-form";
+import { discoveryQuery } from "../../../../lib/discovery-navigation";
 import { notFound } from "next/navigation";
 
 import {
@@ -23,7 +25,7 @@ import type { TripPlacePreference } from "@routebook/trip-collection";
 import { findTripById } from "@routebook/trip-management";
 
 import { ExternalPlaceImagePreview } from "../../../../components/external-place-image-preview";
-import { PlacePrimaryImage } from "../../../../components/place-primary-image";
+import { PlacePhoto } from "../../../../components/place-photo";
 import { PlaceRankingMeta } from "../../../../components/place-ranking-meta";
 import { TripPlanningWizard } from "../../../../components/trip-planning-wizard";
 import { TripPlacePreferenceControls } from "../../../../components/trip-place-preference-controls";
@@ -82,8 +84,8 @@ export const metadata: Metadata = {
 };
 
 type DiscoverySearchParams = {
-  etapa?: string;
-  dia?: string;
+  etapa?: string | undefined;
+  dia?: string | undefined;
   busca?: string;
   categoria?: string;
   distancia?: string;
@@ -194,9 +196,9 @@ function CanonicalDiscoveryCard({
   quality,
   qualitySignals,
   categoryRank,
-  externalMediaEnabled,
   timeZone,
   selectedDayDate,
+  returnQuery,
   stageId,
 }: Readonly<{
   item: CanonicalDiscoveryItem;
@@ -214,6 +216,7 @@ function CanonicalDiscoveryCard({
   externalMediaEnabled: boolean;
   timeZone: string;
   selectedDayDate?: string;
+  returnQuery: string;
   stageId?: string;
 }>) {
   const { place, distanceMeters } = item;
@@ -238,23 +241,15 @@ function CanonicalDiscoveryCard({
       data-place-source="published"
       data-place-state={candidate ? "enriched" : "published"}
     >
-      {place.primaryImage || !candidate ? (
-        <PlacePrimaryImage
-          category={place.category}
-          placeName={place.name}
-          primaryImage={place.primaryImage}
-        />
-      ) : (
-        <ExternalPlaceImagePreview
-          category={place.category}
-          destinationId={destinationId}
-          enabled={externalMediaEnabled}
-          googlePlaceId={googlePlaceIdFromSignals(qualitySignals)}
-          latitude={candidate.latitude}
-          longitude={candidate.longitude}
-          placeName={place.name}
-        />
-      )}
+      <PlacePhoto
+        category={place.category}
+        destinationId={destinationId}
+        googlePlaceId={googlePlaceIdFromSignals(qualitySignals)}
+        latitude={coordinate.latitude}
+        longitude={coordinate.longitude}
+        placeName={place.name}
+        primaryImage={place.primaryImage}
+      />
 
       <div className={styles.cardIdentity}>
         <span>{categoryLabels[place.category]}</span>
@@ -285,17 +280,12 @@ function CanonicalDiscoveryCard({
       <div className={styles.cardActions}>
         <Link
           className="product-primary-action"
-          href={`/viagens/${tripId}/lugares/${place.slug}${
-            selectedDayDate || preparing || stageId
-              ? `?${[
-                  selectedDayDate ? `dia=${encodeURIComponent(selectedDayDate)}` : undefined,
-                  preparing ? "preparar=1" : undefined,
-                  stageId ? `etapa=${encodeURIComponent(stageId)}` : undefined,
-                ]
-                  .filter(Boolean)
-                  .join("&")}`
-              : ""
-          }`}
+          href={`/viagens/${tripId}/lugares/${place.slug}?${new URLSearchParams({
+            ...(selectedDayDate ? { dia: selectedDayDate } : {}),
+            ...(preparing ? { preparar: "1" } : {}),
+            ...(stageId ? { etapa: stageId } : {}),
+            retorno: returnQuery,
+          })}`}
         >
           Ver detalhes
         </Link>
@@ -924,23 +914,28 @@ export default async function PlacesPage({
       {stages.length > 0 ? (
         <nav aria-label="Destinos para explorar" className={styles.rankingControls}>
           <Link
+            prefetch={false}
+            pendingLabel={`Carregando lugares de ${trip.destination.name}…`}
             aria-current={!scope.stageId ? "page" : undefined}
             className={!scope.stageId ? styles.rankingActive : styles.rankingControl}
             href={discoveryHref(tripId, {
-              ...(wizardMode ? { preparar: "1" } : {}),
-              ...(discoveryMode ? { descoberta: discoveryMode } : {}),
+              ...canonicalParams,
+              etapa: undefined,
+              dia: undefined,
             })}
           >
             {trip.destination.name} · principal
           </Link>
           {stages.map((stage) => (
             <Link
+              prefetch={false}
+              pendingLabel={`Carregando lugares de ${stage.destination.name}…`}
               aria-current={scope.stageId === stage.id ? "page" : undefined}
               className={scope.stageId === stage.id ? styles.rankingActive : styles.rankingControl}
               href={discoveryHref(tripId, {
+                ...canonicalParams,
                 etapa: stage.id,
-                ...(wizardMode ? { preparar: "1" } : {}),
-                ...(discoveryMode ? { descoberta: discoveryMode } : {}),
+                dia: undefined,
               })}
               key={stage.id}
             >
@@ -968,8 +963,9 @@ export default async function PlacesPage({
         />
       ) : null}
 
-      <form action={`/viagens/${tripId}/lugares`} className={styles.filters} method="get">
+      <DiscoveryFilterForm action={`/viagens/${tripId}/lugares`} className={styles.filters}>
         {scope.stageId ? <input name="etapa" type="hidden" value={scope.stageId} /> : null}
+        {rawFilters.dia ? <input name="dia" type="hidden" value={rawFilters.dia} /> : null}
         {wizardMode ? <input name="preparar" type="hidden" value="1" /> : null}
         {discoveryMode ? <input name="descoberta" type="hidden" value={discoveryMode} /> : null}
         {ranking.order !== "distance" ? (
@@ -1024,10 +1020,7 @@ export default async function PlacesPage({
             ))}
           </select>
         </div>
-        <button className="product-primary-action" type="submit">
-          Aplicar filtros
-        </button>
-      </form>
+      </DiscoveryFilterForm>
 
       {!region ? (
         <p className={styles.notice} role="status">
@@ -1236,6 +1229,13 @@ export default async function PlacesPage({
               />
             ) : (
               <CanonicalDiscoveryCard
+                returnQuery={discoveryQuery(
+                  new URLSearchParams(
+                    Object.entries(canonicalParams).filter(
+                      (entry): entry is [string, string] => typeof entry[1] === "string",
+                    ),
+                  ).toString(),
+                )}
                 key={item.id}
                 rankingOrderLabel={orderLabels[ranking.order]}
                 rankingPosition={position}

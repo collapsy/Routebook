@@ -1407,3 +1407,11 @@ Ao concluir um incremento:
 | branch/base | `codex/rb-inc-220-stage-accommodation`, RB-INC-219 no commit `9ed8934e` |
 | escopo | Hospedagem própria opcional por Etapa, com referência espacial, validação, autorização e isolamento da Hospedagem principal; Minha seleção identifica a referência estimada de cada Lugar |
 | validação | Migração aplicada apenas em branch Neon isolado; 110 testes de domínio, 215 de banco, 539 web e cenário Joinville–Itapema E2E desktop/mobile passaram; lint, typecheck, build e documentação passaram. Prettier global acusou 539 arquivos preexistentes do baseline |
+
+## RB-INC-221 — Feedback e continuidade da navegação
+
+Issue #543. Feedback contextual e continuidade da exploração implementados. Testes web, build e E2E desktop/mobile passaram; evidências e limitações no RB-INC-221. Merge depende de revisão humana.
+
+## RB-INC-222 — Fotos consistentes e recuperação de falhas
+
+Issue #544. Resolução de fotos compartilhada e recuperação limitada implementadas. Testes de endpoint/componente e E2E desktop/mobile passaram; cobertura live não medida. Evidências no RB-INC-222.

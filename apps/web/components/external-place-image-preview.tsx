@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { PlaceCategory } from "@routebook/place-catalog";
 
@@ -38,8 +38,8 @@ type ExternalPlaceImagePreviewData = WikimediaPreviewData | GooglePreviewData;
 
 type PreviewState =
   | Readonly<{ status: "idle" | "loading" }>
-  | Readonly<{ status: "ready"; preview: ExternalPlaceImagePreviewData }>
-  | Readonly<{ status: "fallback" }>;
+  | Readonly<{ status: "ready"; preview: ExternalPlaceImagePreviewData; loaded: boolean }>
+  | Readonly<{ status: "fallback" | "error" }>;
 
 function isAllowedWikimediaPreviewUrl(value: string): boolean {
   try {
@@ -164,7 +164,7 @@ function buildWikimediaImageProxyEndpoint(previewUrl: string): string {
   return `/api/place-image-preview/file?${query}`;
 }
 
-export function ExternalPlaceImagePreview({
+function ExternalPlaceImagePreviewContent({
   destinationId,
   placeName,
   latitude,
@@ -184,6 +184,8 @@ export function ExternalPlaceImagePreview({
   enabled?: boolean | undefined;
   compactFallback?: boolean | undefined;
 }>) {
+  const [fallbackOnly, setFallbackOnly] = useState(false);
+  const [retries, setRetries] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<PreviewState>({ status: "idle" });
 
@@ -213,6 +215,8 @@ export function ExternalPlaceImagePreview({
     if (state.status !== "loading") return;
 
     const controller = new AbortController();
+    let disposed = false;
+    const timeout = setTimeout(() => controller.abort(), 60_000);
 
     void fetch(
       buildPreviewEndpoint({
@@ -222,7 +226,7 @@ export function ExternalPlaceImagePreview({
         longitude,
         ...(category ? { category } : {}),
         ...(googlePlaceId ? { googlePlaceId } : {}),
-      }),
+      }) + (fallbackOnly ? "&source=wikimedia" : ""),
       { signal: controller.signal },
     )
       .then(async (response) => {
@@ -231,19 +235,52 @@ export function ExternalPlaceImagePreview({
         return (await response.json()) as unknown;
       })
       .then((payload) => {
+        if (disposed) return;
         if (payload && isPreviewData(payload)) {
-          setState({ status: "ready", preview: payload });
+          setState({ status: "ready", preview: payload, loaded: false });
           return;
         }
-        setState({ status: "fallback" });
+        setState({ status: fallbackOnly || payload !== undefined ? "error" : "fallback" });
       })
-      .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        setState({ status: "fallback" });
-      });
+      .catch(() => {
+        if (!disposed) setState({ status: "error" });
+      })
+      .finally(() => clearTimeout(timeout));
 
-    return () => controller.abort();
-  }, [category, destinationId, googlePlaceId, latitude, longitude, placeName, state.status]);
+    return () => {
+      disposed = true;
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [
+    category,
+    destinationId,
+    googlePlaceId,
+    latitude,
+    longitude,
+    placeName,
+    state.status,
+    fallbackOnly,
+    retries,
+  ]);
+
+  const imageFailed = useCallback((provider: "google-places" | "wikimedia-commons") => {
+    if (provider === "google-places") {
+      setFallbackOnly(true);
+      setState({ status: "loading" });
+    } else {
+      setState({ status: "error" });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (state.status !== "ready" || state.loaded) return;
+    const timeout = setTimeout(
+      () => imageFailed(state.preview.provider ?? "wikimedia-commons"),
+      15_000,
+    );
+    return () => clearTimeout(timeout);
+  }, [state, imageFailed]);
 
   if (state.status === "ready") {
     const { preview } = state;
@@ -252,19 +289,25 @@ export function ExternalPlaceImagePreview({
       return (
         <div
           data-external-place-image-provider="google-places"
-          data-external-place-image-state="ready"
+          data-external-place-image-state={state.loaded ? "ready" : "loading"}
           ref={containerRef}
         >
-          <figure className={styles.figure}>
+          <figure className={styles.figure} aria-busy={!state.loaded}>
             <div className={styles.frame}>
+              {!state.loaded ? (
+                <span role="status" className={styles.photoLoading}>
+                  Carregando foto…
+                </span>
+              ) : null}
               {/* A URL é interna ao RouteBook; API key e photo name permanecem server-side. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt={preview.altText}
                 className={styles.image}
                 decoding="async"
-                loading="lazy"
-                onError={() => setState({ status: "fallback" })}
+                loading="eager"
+                onError={() => imageFailed("google-places")}
+                onLoad={() => setState({ ...state, loaded: true })}
                 src={preview.mediaUrl}
               />
             </div>
@@ -298,19 +341,25 @@ export function ExternalPlaceImagePreview({
     return (
       <div
         data-external-place-image-provider="wikimedia-commons"
-        data-external-place-image-state="ready"
+        data-external-place-image-state={state.loaded ? "ready" : "loading"}
         ref={containerRef}
       >
-        <figure className={styles.figure}>
+        <figure className={styles.figure} aria-busy={!state.loaded}>
           <div className={styles.frame}>
+            {!state.loaded ? (
+              <span role="status" className={styles.photoLoading}>
+                Carregando foto…
+              </span>
+            ) : null}
             {/* The browser receives a RouteBook URL; the server proxy validates the Wikimedia thumbnail. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt={preview.altText}
               className={styles.image}
               decoding="async"
-              loading="lazy"
-              onError={() => setState({ status: "fallback" })}
+              loading="eager"
+              onError={() => imageFailed("wikimedia-commons")}
+              onLoad={() => setState({ ...state, loaded: true })}
               src={buildWikimediaImageProxyEndpoint(preview.previewUrl)}
             />
           </div>
@@ -327,31 +376,66 @@ export function ExternalPlaceImagePreview({
     );
   }
 
-  if (state.status === "loading") {
+  if (state.status === "loading" || state.status === "idle") {
     return (
-      <div data-external-place-image-state="loading" ref={containerRef}>
+      <div data-external-place-image-state={state.status} ref={containerRef}>
         <div
           aria-label={`Carregando foto para ${placeName}`}
           className={styles.noPhoto}
           data-presentation="compact"
-          role="img"
+          role="status"
+          aria-busy={state.status === "loading"}
         >
-          <span>Carregando foto…</span>
+          <span>{state.status === "idle" ? "Foto ainda não carregada" : "Carregando foto…"}</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div
-      ref={containerRef}
-      data-external-place-image-state={state.status === "idle" ? "idle" : "fallback"}
-    >
-      <PlacePrimaryImage
-        category={category}
-        compactFallback={compactFallback}
-        placeName={placeName}
-      />
+    <div ref={containerRef} data-external-place-image-state={state.status}>
+      {state.status === "error" ? (
+        <div className={styles.frame}>
+          <div className={styles.photoLoading}>
+            <p role="status">Não foi possível carregar a foto agora.</p>
+            {retries < 2 ? (
+              <button
+                type="button"
+                className="product-secondary-action"
+                onClick={() => {
+                  setRetries((value) => value + 1);
+                  setFallbackOnly(false);
+                  setState({ status: "loading" });
+                }}
+              >
+                Tentar carregar foto novamente
+              </button>
+            ) : (
+              <p>Tente novamente quando voltar a esta página.</p>
+            )}
+          </div>
+        </div>
+      ) : (
+        <PlacePrimaryImage
+          category={category}
+          compactFallback={compactFallback}
+          placeName={placeName}
+        />
+      )}
     </div>
   );
+}
+
+export function ExternalPlaceImagePreview(
+  props: Parameters<typeof ExternalPlaceImagePreviewContent>[0],
+) {
+  const identity = JSON.stringify([
+    props.destinationId,
+    props.placeName,
+    props.latitude,
+    props.longitude,
+    props.category,
+    props.googlePlaceId,
+  ]);
+  return <ExternalPlaceImagePreviewContent key={identity} {...props} />;
 }
